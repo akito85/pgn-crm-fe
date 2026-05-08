@@ -1,107 +1,25 @@
-import React, { useEffect, useRef, useState, useMemo, useCallback } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { Tooltip, Tabs, Dropdown } from "antd";
+import { Dropdown, Tabs, Tooltip } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../routes/Receipt&Collection/rc_routes";
 import SVGIcon from "../../../../assets/Icon/index";
 import ModalHistory from "../../../../components/Modal/ModalHistory";
 import {
-  getMutationSummaryPaginate,
-  getApprovalHistory,
-  setGasDepositFilters,
-} from "../../../../redux/slices/rating_billing_invoice/gasDeposit";
+  getPayGasDepositApprovalHistory,
+  getPayGasDepositExpiredHistory,
+  getPayGasDepositPaginate,
+  getPayGasDepositSummaryBalancePaginate,
+  setPayGasDepositFilters,
+} from "../../../../redux/slices/receipt_collection/gasDepositPayment";
 import { columnsGasDeposit } from "../../RatingBillingInvoice/GasDeposit/Table/TableViewGasDeposit";
 import { columnsSummaryBalance } from "../../RatingBillingInvoice/GasDeposit/Table/TableSummaryBalance";
 import PayGasDepositeDetail from "./PayGasDepositeDetail";
 import TableRBI from "../../../../components/TableRBI";
-import Toolbar from "../../../../components/Toolbar";
 import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 import CardContainer from "../../../../components/CardContainer";
-
-const DUMMY_GAS_DEPOSIT_DATA = [
-  {
-    key: 1, gasDepositId: 1,
-    customerNumber: "100001", customerName: "PT Industri Gas Nusantara",
-    accountNumber: "1000001", accountName: "Gas Deposit - Industri Gas Nusantara",
-    accountGroupType: "Industrial", sor: "011 - PGN Surabaya",
-    costCenter: "CC-011", accountSegment: "I", meterReadingCode: "MR-0001",
-    currency: "IDR", uom: "MMBTU",
-    termsEarn: 12, termsRedeem: 6, periodEarn: "Jan-26",
-    periodRedeemStart: "01-Jul-25", periodRedeemEnd: "31-Dec-25",
-    period: "Jan-26", timeUnit: "Month",
-    amount: 500000000, cashBalance: 500000000, type: "Gas",
-    accountType: "GAS", classificationType: "Type A", source: "Billing",
-    description: "Gas deposit pembayaran bulan Januari 2026",
-    status: "Active", statusApproval: "Approved",
-    mutationStatus: "Active", mutationApprovalStatus: "Approved",
-  },
-  {
-    key: 2, gasDepositId: 2,
-    customerNumber: "100002", customerName: "PT Energi Sentosa",
-    accountNumber: "1000002", accountName: "Gas Deposit - Energi Sentosa",
-    accountGroupType: "Commercial", sor: "012 - PGN Jakarta",
-    costCenter: "CC-012", accountSegment: "C", meterReadingCode: "MR-0002",
-    currency: "IDR", uom: "MMBTU",
-    termsEarn: 6, termsRedeem: 3, periodEarn: "Feb-26",
-    periodRedeemStart: "01-Aug-25", periodRedeemEnd: "28-Feb-26",
-    period: "Feb-26", timeUnit: "Month",
-    amount: 300000000, cashBalance: 250000000, type: "Gas",
-    accountType: "GAS", classificationType: "Type B", source: "Adjustment",
-    description: "Gas deposit pembayaran bulan Februari 2026",
-    status: "Active", statusApproval: "Waiting Approval",
-    mutationStatus: "Active", mutationApprovalStatus: "Waiting Approval",
-  },
-  {
-    key: 3, gasDepositId: 3,
-    customerNumber: "100003", customerName: "PT Maju Jaya Mandiri",
-    accountNumber: "1000003", accountName: "Gas Deposit - Maju Jaya Mandiri",
-    accountGroupType: "Industrial", sor: "013 - PGN Bandung",
-    costCenter: "CC-013", accountSegment: "I", meterReadingCode: "MR-0003",
-    currency: "IDR", uom: "MMBTU",
-    termsEarn: 24, termsRedeem: 12, periodEarn: "Mar-26",
-    periodRedeemStart: "01-Jan-26", periodRedeemEnd: "31-Mar-26",
-    period: "Mar-26", timeUnit: "Month",
-    amount: 750000000, cashBalance: 600000000, type: "Gas",
-    accountType: "GAS", classificationType: "Type A", source: "Billing",
-    description: "Gas deposit pembayaran bulan Maret 2026",
-    status: "Expired", statusApproval: "Approved",
-    mutationStatus: "Expired", mutationApprovalStatus: "Approved",
-  },
-  {
-    key: 4, gasDepositId: 4,
-    customerNumber: "100004", customerName: "CV Sumber Energi Baru",
-    accountNumber: "1000004", accountName: "Gas Deposit - Sumber Energi Baru",
-    accountGroupType: "Small Business", sor: "014 - PGN Medan",
-    costCenter: "CC-014", accountSegment: "S", meterReadingCode: "MR-0004",
-    currency: "IDR", uom: "MMBTU",
-    termsEarn: 12, termsRedeem: 6, periodEarn: "Apr-26",
-    periodRedeemStart: "01-Oct-25", periodRedeemEnd: "30-Apr-26",
-    period: "Apr-26", timeUnit: "Month",
-    amount: 150000000, cashBalance: 150000000, type: "Gas",
-    accountType: "GAS", classificationType: "Type C", source: "Billing",
-    description: "Gas deposit pembayaran bulan April 2026",
-    status: "Active", statusApproval: "Rejected",
-    mutationStatus: "Active", mutationApprovalStatus: "Rejected",
-  },
-  {
-    key: 5, gasDepositId: 5,
-    customerNumber: "100005", customerName: "PT Gas Bumi Perkasa",
-    accountNumber: "1000005", accountName: "Gas Deposit - Gas Bumi Perkasa",
-    accountGroupType: "Industrial", sor: "015 - PGN Semarang",
-    costCenter: "CC-015", accountSegment: "I", meterReadingCode: "MR-0005",
-    currency: "IDR", uom: "MMBTU",
-    termsEarn: 18, termsRedeem: 9, periodEarn: "May-26",
-    periodRedeemStart: "01-Nov-25", periodRedeemEnd: "31-May-26",
-    period: "May-26", timeUnit: "Month",
-    amount: 900000000, cashBalance: 850000000, type: "Gas",
-    accountType: "GAS", classificationType: "Type A", source: "Billing",
-    description: "Gas deposit pembayaran bulan Mei 2026",
-    status: "Expired", statusApproval: "Approved",
-    mutationStatus: "Expired", mutationApprovalStatus: "Approved",
-  },
-];
 
 const formatApprovalHistoryLabel = (key) => {
   const normalizedKey = key.toUpperCase();
@@ -156,9 +74,17 @@ const mapApprovalHistoryData = (approvalHistory, preferredKeys = []) => {
 };
 
 const PayGasDepositePage = () => {
-  const { loading_history, data_approval_history, filters, data_mutation_summary, loading_mutation_summary } = useSelector(
-    (state) => state.gasDepositRbi,
-  );
+  const {
+    loading_list,
+    loading_summary_balance,
+    loading_history,
+    loading_expired_history,
+    data_list,
+    data_summary_balance,
+    data_approval_history,
+    data_expired_history,
+    filters,
+  } = useSelector((state) => state.gasDepositPayment);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -171,7 +97,6 @@ const PayGasDepositePage = () => {
   const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState(filters?.sort || "");
   const [search, setSearch] = useState(filters?.search || {});
-
   const [pageDetail, setPageDetail] = useState(false);
   const [activeRowKey, setActiveRowKey] = useState(null);
   const [selectedGasDepositData, setSelectedGasDepositData] = useState(null);
@@ -189,23 +114,51 @@ const PayGasDepositePage = () => {
     right: ["status", "statusApproval", "mutationStatus", "mutationApprovalStatus"],
   }));
 
-  // Simpan filters ke Redux
-  useEffect(() => {
-    dispatch(setGasDepositFilters({ search, sort, page }));
-  }, [search, sort, page, dispatch]);
+  const [fixedColumnsExpiredHistory, setFixedColumnsExpiredHistory] = useState(() => ({
+    left: ["no"],
+    right: ["statusApproval", "status"],
+  }));
 
-  // Reset filters saat unmount
   useEffect(() => {
-    return () => {
-      dispatch(setGasDepositFilters({ search: {}, sort: "", page: 1 }));
-    };
-  }, [dispatch]);
+    dispatch(setPayGasDepositFilters({ search, sort, page }));
+  }, [dispatch, page, search, sort]);
 
-  // Scroll ke detail saat row dipilih
+  useEffect(() => {
+    if (activeTab === "gasDeposit") {
+      dispatch(
+        getPayGasDepositPaginate({
+          page,
+          pageSize: 100,
+          search: encodeURIComponent(JSON.stringify(search)),
+          sort: sort || "accountNumber~asc",
+        }),
+      );
+    }
+  }, [activeTab, dispatch, page, search, sort]);
+
+  useEffect(() => {
+    if (activeTab === "summaryBalance") {
+      dispatch(
+        getPayGasDepositSummaryBalancePaginate({
+          page,
+          pageSize: 100,
+          search: encodeURIComponent(JSON.stringify(search)),
+          sort: sort || "mutationDate~desc",
+        }),
+      );
+    }
+  }, [activeTab, dispatch, page, search, sort]);
+
+  useEffect(() => {
+    if (activeTab === "historyExpired") {
+      dispatch(getPayGasDepositExpiredHistory());
+    }
+  }, [activeTab, dispatch]);
+
   useEffect(() => {
     if (pageDetail && activeRowKey && detailRef.current) {
       setTimeout(() => {
-        detailRef.current.scrollIntoView({
+        detailRef.current?.scrollIntoView({
           behavior: "smooth",
           block: "start",
           inline: "nearest",
@@ -213,22 +166,6 @@ const PayGasDepositePage = () => {
       }, 100);
     }
   }, [activeRowKey, pageDetail]);
-
-  // API not ready — using dummy data
-
-  // Fetch summary balance when tab is active
-  useEffect(() => {
-    if (activeTab === "summaryBalance") {
-      dispatch(
-        getMutationSummaryPaginate({
-          page: 1,
-          pageSize: 100,
-          search: encodeURIComponent(JSON.stringify(search)),
-          sort: sort || "accountNumber~asc",
-        }),
-      );
-    }
-  }, [dispatch, activeTab, search, sort]);
 
   useEffect(() => {
     if (data_approval_history?.dataApprover) {
@@ -239,6 +176,14 @@ const PayGasDepositePage = () => {
       setDataApprovalHistoryFix({});
     }
   }, [data_approval_history]);
+
+  useEffect(() => {
+    if (activeTab !== "gasDeposit" && pageDetail) {
+      setPageDetail(false);
+      setActiveRowKey(null);
+      setSelectedGasDepositData(null);
+    }
+  }, [activeTab, pageDetail]);
 
   const routes = [
     { path: "", breadcrumbName: "Payment & Collection" },
@@ -256,26 +201,45 @@ const PayGasDepositePage = () => {
     });
   }, []);
 
-  const handleLoadMore = async () => {};
-
-  const hasMore = false;
-
   const onSort = (_, __, sorter) => {
     let dataSort = "";
-
     if (sorter.order) {
       const direction = sorter.order === "ascend" ? "asc" : "desc";
       dataSort = `${sorter.field}~${direction}`;
     }
-
     setSort(dataSort);
   };
 
-  const handleRefresh = () => {};
+  const handleRefresh = useCallback(() => {
+    if (activeTab === "summaryBalance") {
+      dispatch(
+        getPayGasDepositSummaryBalancePaginate({
+          page,
+          pageSize: 100,
+          search: encodeURIComponent(JSON.stringify(search)),
+          sort: sort || "mutationDate~desc",
+        }),
+      );
+      return;
+    }
+
+    if (activeTab === "historyExpired") {
+      dispatch(getPayGasDepositExpiredHistory());
+      return;
+    }
+
+    dispatch(
+      getPayGasDepositPaginate({
+        page,
+        pageSize: 100,
+        search: encodeURIComponent(JSON.stringify(search)),
+        sort: sort || "accountNumber~asc",
+      }),
+    );
+  }, [activeTab, dispatch, page, search, sort]);
 
   const suppressNextRowClick = useCallback(() => {
     suppressNextRowClickRef.current = true;
-
     setTimeout(() => {
       suppressNextRowClickRef.current = false;
     }, 0);
@@ -283,7 +247,7 @@ const PayGasDepositePage = () => {
 
   const toggleDetail = useCallback(
     (record) => {
-      const recordKey = record.gasDepositId;
+      const recordKey = record.accountId;
 
       if (activeRowKey === recordKey && pageDetail) {
         setPageDetail(false);
@@ -303,122 +267,85 @@ const PayGasDepositePage = () => {
       suppressNextRowClickRef.current = false;
       return;
     }
-
     toggleDetail(record);
   };
 
   const handleApprovalHistory = useCallback(
     (record) => {
       suppressNextRowClick();
-      dispatch(getApprovalHistory(record.gasDepositId));
+      dispatch(
+        getPayGasDepositApprovalHistory({
+          accountId: record.accountId,
+          summaryRefId: record.pendingStgSumId,
+        }),
+      );
       setModalApprovalHistory(true);
     },
     [dispatch, suppressNextRowClick],
   );
 
-  const itemGrantAccess = useMemo(
-    () => [
+  const actionRenderer = useCallback((record) => {
+    const menuItems = [
       {
-        action: "View",
-        type: "table",
-        render: (record) => {
-          const menuItems = [
-            {
-              key: "update",
-              label: (
-                <div className="flex items-center gap-2">
-                  <SVGIcon name="IconUpdateAction" width={16} />
-                  <span>Update</span>
-                </div>
-              ),
-              onClick: () =>
-                navigate(RECEIPT_AND_COLLECTION_ROUTES.GAS_DEPOSITE_UPDATE, {
-                  state: {
-                    mode: "update",
-                    selectedData: record,
-                  },
-                }),
-            },
-            {
-              key: "approvalHistory",
-              label: (
-                <div className="flex items-center gap-2">
-                  <SVGIcon name="IconLogHistory" width={16} />
-                  <span>Approval History</span>
-                </div>
-              ),
-              onClick: () => handleApprovalHistory(record),
-            },
-            {
-              key: "viewAccountDetail",
-              label: (
-                <div className="flex items-center gap-2">
-                  <SVGIcon name="IconDetail" width={16} />
-                  <span>View Account Detail</span>
-                </div>
-              ),
-              onClick: () => {
-                suppressNextRowClick();
-                toggleDetail(record);
-              },
-            },
-            {
-              type: "divider",
-            },
-            {
-              key: "cancel",
-              label: (
-                <div className="flex items-center gap-2">
-                  <SVGIcon name="IconSquareX" color="#ef4444" width={16} />
-                  <span className="text-red-500">Cancel</span>
-                </div>
-              ),
-              onClick: () => {},
-            },
-          ];
-          return (
-            <div className="flex items-center justify-center gap-2">
-              <Dropdown
-                menu={{ items: menuItems }}
-                trigger={["click"]}
-                placement="bottomRight"
-              >
-                <button
-                  type="button"
-                  data-stop-row-click="true"
-                  className="inline-flex items-center justify-center rounded border-0 bg-transparent p-0"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    suppressNextRowClick();
-                  }}
-                >
-                  <SVGIcon name="IconTripleDot" color="#0075bf" width={20} />
-                </button>
-              </Dropdown>
-              <Tooltip title="View Detail">
-                <button
-                  type="button"
-                  data-stop-row-click="true"
-                  className="inline-flex items-center justify-center rounded border-0 bg-transparent p-0"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    suppressNextRowClick();
-                    toggleDetail(record);
-                  }}
-                >
-                  <SVGIcon name="IconDetail" color="#0075bf" width={20} />
-                </button>
-              </Tooltip>
-            </div>
-          );
+        key: "approvalHistory",
+        label: (
+          <div className="flex items-center gap-2">
+            <SVGIcon name="IconLogHistory" width={16} />
+            <span>Approval History</span>
+          </div>
+        ),
+        onClick: () => handleApprovalHistory(record),
+      },
+      {
+        key: "viewAccountDetail",
+        label: (
+          <div className="flex items-center gap-2">
+            <SVGIcon name="IconDetail" width={16} />
+            <span>View Account Detail</span>
+          </div>
+        ),
+        onClick: () => {
+          suppressNextRowClick();
+          toggleDetail(record);
         },
       },
-    ],
-    [handleApprovalHistory, navigate, suppressNextRowClick, toggleDetail],
-  );
+    ];
 
-  const baseColumns = useMemo(() => {
-    return columnsGasDeposit(
+    return (
+      <div className="flex items-center justify-center gap-2">
+        <Dropdown menu={{ items: menuItems }} trigger={["click"]} placement="bottomRight">
+          <button
+            type="button"
+            data-stop-row-click="true"
+            className="inline-flex items-center justify-center rounded border-0 bg-transparent p-0"
+            onClick={(e) => {
+              e.stopPropagation();
+              suppressNextRowClick();
+            }}
+          >
+            <SVGIcon name="IconTripleDot" color="#0075bf" width={20} />
+          </button>
+        </Dropdown>
+        <Tooltip title="View Detail">
+          <button
+            type="button"
+            data-stop-row-click="true"
+            className="inline-flex items-center justify-center rounded border-0 bg-transparent p-0"
+            onClick={(e) => {
+              e.stopPropagation();
+              suppressNextRowClick();
+              toggleDetail(record);
+            }}
+          >
+            <SVGIcon name="IconDetail" color="#0075bf" width={20} />
+          </button>
+        </Tooltip>
+      </div>
+    );
+  }, [handleApprovalHistory, suppressNextRowClick, toggleDetail]);
+
+  const baseColumns = useMemo(() => (
+    columnsGasDeposit(
       0,
       0,
       searchInput,
@@ -426,8 +353,8 @@ const PayGasDepositePage = () => {
       searchText,
       handleSearch,
       search,
-    );
-  }, [searchInput, searchedColumn, searchText, handleSearch, search]);
+    )
+  ), [searchedColumn, search, searchText, handleSearch]);
 
   const allColumns = useMemo(() => {
     const actionColumn = {
@@ -436,14 +363,14 @@ const PayGasDepositePage = () => {
       dataIndex: "action",
       width: 60,
       align: "center",
-      render: (text, record) => itemGrantAccess[0].render(record),
+      render: (text, record) => actionRenderer(record),
     };
 
     return [...baseColumns, actionColumn].map((col) => ({
       ...col,
       key: col.key || col.dataIndex || col.title,
     }));
-  }, [baseColumns, itemGrantAccess]);
+  }, [actionRenderer, baseColumns]);
 
   const processedColumns = useMemo(
     () => applyFixedColumns(allColumns, fixedColumns),
@@ -451,33 +378,66 @@ const PayGasDepositePage = () => {
   );
 
   const columnDefinitions = useMemo(
-    () =>
-      allColumns.map((col) => ({
-        key: col.key || col.dataIndex || col.title,
-        title: col.title,
-      })),
+    () => allColumns.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    })),
     [allColumns],
   );
 
-  const dataSourceWithKeys = DUMMY_GAS_DEPOSIT_DATA;
-
-  const summaryDataSourceWithKeys = useMemo(
-    () =>
-      data_mutation_summary?.result?.map((item) => ({
+  const dataSourceWithKeys = useMemo(
+    () => (
+      data_list?.result?.map((item) => ({
         ...item,
         key: item.accountId,
-        quantity: item.balanceVolume ?? null,
+        gasDepositId: item.masterGasDepositId || item.accountId,
+        status: item.statusMaster ?? "-",
         amount: item.balanceAmount ?? null,
-        status: item.statusMaster ?? null,
-        redeemStartDate: item.redeemStartDate ?? null,
-        redeemEndDate: item.redeemEndDate ?? null,
-        earnPeriod: item.earnStartDate ?? null,
-      })) ?? [],
-    [data_mutation_summary],
+        cashBalance: item.balanceAmount ?? null,
+      })) ?? []
+    ),
+    [data_list],
   );
 
-  const baseSummaryColumns = useMemo(() => {
-    return columnsSummaryBalance(
+  const summaryDataSourceWithKeys = useMemo(
+    () => (
+      data_summary_balance?.result?.map((item, index) => ({
+        ...item,
+        key: `${item.accountNumber}-${item.period}-${item.mutationType}-${index}`,
+        quantity: item.quantity ?? null,
+        balanceAmount: item.balanceAmount ?? null,
+        redeemStartDate: item.periodRedeemStart ?? null,
+        redeemEndDate: item.periodRedeemEnd ?? null,
+        earnPeriod: item.earnStartDate ?? null,
+      })) ?? []
+    ),
+    [data_summary_balance],
+  );
+
+  const expiredHistoryDataSource = useMemo(
+    () => (
+      (data_expired_history || []).map((item, index) => ({
+        ...item,
+        key: item.payExpId,
+        no: index + 1,
+      }))
+    ),
+    [data_expired_history],
+  );
+
+  useEffect(() => {
+    if (!activeRowKey || !dataSourceWithKeys.length) {
+      return;
+    }
+
+    const matchedRecord = dataSourceWithKeys.find((item) => item.accountId === activeRowKey);
+    if (matchedRecord) {
+      setSelectedGasDepositData(matchedRecord);
+    }
+  }, [activeRowKey, dataSourceWithKeys]);
+
+  const baseSummaryColumns = useMemo(() => (
+    columnsSummaryBalance(
       0,
       0,
       searchInput,
@@ -485,15 +445,35 @@ const PayGasDepositePage = () => {
       searchText,
       handleSearch,
       search,
-    );
-  }, [searchInput, searchedColumn, searchText, handleSearch, search]);
+    )
+  ), [searchedColumn, search, searchText, handleSearch]);
 
-  const allSummaryColumns = useMemo(() => {
-    return baseSummaryColumns.map((col) => ({
-      ...col,
-      key: col.key || col.dataIndex || col.title,
-    }));
-  }, [baseSummaryColumns]);
+  const allSummaryColumns = useMemo(
+    () => baseSummaryColumns.map((col) => {
+      const columnKey = col.key || col.dataIndex || col.title;
+      const compactStatusWidths = {
+        status: 80,
+        statusApproval: 110,
+        mutationStatus: 100,
+        mutationApprovalStatus: 120,
+      };
+      const compactStatusTitles = {
+        status: "STATUS",
+        statusApproval: "APPROVAL",
+        mutationStatus: "MUT. STATUS",
+        mutationApprovalStatus: "MUT. APPROVAL",
+      };
+
+      return {
+        ...col,
+        key: columnKey,
+        width: compactStatusWidths[columnKey] ?? col.width,
+        title: compactStatusTitles[columnKey] ?? col.title,
+        ellipsis: columnKey in compactStatusWidths ? true : col.ellipsis,
+      };
+    }),
+    [baseSummaryColumns],
+  );
 
   const processedSummaryColumns = useMemo(
     () => applyFixedColumns(allSummaryColumns, fixedColumnsSummary),
@@ -501,25 +481,91 @@ const PayGasDepositePage = () => {
   );
 
   const summaryColumnDefinitions = useMemo(
-    () =>
-      allSummaryColumns.map((col) => ({
-        key: col.key || col.dataIndex || col.title,
-        title: col.title,
-      })),
+    () => allSummaryColumns.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    })),
     [allSummaryColumns],
+  );
+
+  const expiredHistoryColumns = useMemo(() => [
+    { key: "no", title: "NO", dataIndex: "no", width: 60, align: "center" },
+    { key: "payExpId", title: "PAY EXP ID", dataIndex: "payExpId", width: 120 },
+    { key: "rbiLedgerId", title: "RBI LEDGER ID", dataIndex: "rbiLedgerId", width: 140 },
+    {
+      key: "expiredBalance",
+      title: "EXPIRED BALANCE",
+      dataIndex: "expiredBalance",
+      width: 160,
+      align: "right",
+      render: (value) => (value === null || value === undefined || value === "" ? "-" : new Intl.NumberFormat("id-ID", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }).format(Number(value))),
+    },
+    { key: "currency", title: "CURRENCY", dataIndex: "currency", width: 100, render: (value) => value || "-" },
+    { key: "rateType", title: "RATE TYPE", dataIndex: "rateType", width: 140, render: (value) => value || "-" },
+    {
+      key: "rate",
+      title: "RATE",
+      dataIndex: "rate",
+      width: 120,
+      align: "right",
+      render: (value) => (value === null || value === undefined || value === "" ? "-" : new Intl.NumberFormat("id-ID", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }).format(Number(value))),
+    },
+    {
+      key: "eqvExpiredBalance",
+      title: "EQV EXPIRED BALANCE",
+      dataIndex: "eqvExpiredBalance",
+      width: 190,
+      align: "right",
+      render: (value) => (value === null || value === undefined || value === "" ? "-" : new Intl.NumberFormat("id-ID", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }).format(Number(value))),
+    },
+    { key: "statusApproval", title: "STATUS APPROVAL", dataIndex: "statusApproval", width: 160, align: "center" },
+    { key: "status", title: "STATUS", dataIndex: "status", width: 120, align: "center", render: (value) => value || "-" },
+    { key: "createdBy", title: "CREATED BY", dataIndex: "createdBy", width: 140, render: (value) => value || "-" },
+    { key: "createdDtm", title: "CREATED DATE", dataIndex: "createdDtm", width: 180, render: (value) => value || "-" },
+    { key: "updatedBy", title: "UPDATED BY", dataIndex: "updatedBy", width: 140, render: (value) => value || "-" },
+    { key: "updatedDtm", title: "UPDATED DATE", dataIndex: "updatedDtm", width: 180, render: (value) => value || "-" },
+  ], []);
+
+  const processedExpiredHistoryColumns = useMemo(
+    () => applyFixedColumns(expiredHistoryColumns, fixedColumnsExpiredHistory),
+    [expiredHistoryColumns, fixedColumnsExpiredHistory],
+  );
+
+  const expiredHistoryColumnDefinitions = useMemo(
+    () => expiredHistoryColumns.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title,
+    })),
+    [expiredHistoryColumns],
   );
 
   const tabItems = [
     { key: "gasDeposit", label: "Gas Deposit", children: null },
     { key: "summaryBalance", label: "Summary Balance", children: null },
+    { key: "historyExpired", label: "History", children: null },
   ];
+
+  const renderShowingRows = (rowCount) => (
+    <div className="flex justify-end mt-2 text-sm text-gray-600">
+      Showing {rowCount} rows | <span className="text-green-600 ml-1">All data showed</span>
+    </div>
+  );
 
   return (
     <>
       <BreadCrumb routes={routes} />
 
       <CardContainer
-        header={
+        header={(
           <div className="flex -my-4 justify-between items-center">
             <p className="w-full mt-[15px] text-primary">GAS DEPOSIT LIST</p>
             <div className="flex items-center gap-2">
@@ -527,7 +573,7 @@ const PayGasDepositePage = () => {
                 icon={<SVGIcon name="IconRequestApproval" width={16} color="#FFF" />}
                 type="submit"
                 border={false}
-                onClick={() => {}}
+                onClick={() => navigate(RECEIPT_AND_COLLECTION_ROUTES.GAS_DEPOSITE_EXPIRED_APPROVAL)}
               >
                 Approval Expired
               </ButtonComponent>
@@ -555,10 +601,9 @@ const PayGasDepositePage = () => {
               >
                 Create
               </ButtonComponent>
-              <Toolbar items={itemGrantAccess} />
             </div>
           </div>
-        }
+        )}
       >
         <Tabs
           items={tabItems}
@@ -568,55 +613,75 @@ const PayGasDepositePage = () => {
         />
 
         {activeTab === "gasDeposit" && (
-          <TableRBI
-            idTable="rc-gas-deposite-table"
-            dataSource={dataSourceWithKeys}
-            columns={processedColumns}
-            totalData={DUMMY_GAS_DEPOSIT_DATA.length}
-            tableScrolled={{ x: 5000, y: 525 }}
-            onSort={onSort}
-            columnDefinitions={columnDefinitions}
-            fixedColumns={fixedColumns}
-            setFixedColumns={setFixedColumns}
-            loading={false}
-            showExport={false}
-            usePagination={false}
-            useInfiniteScroll={false}
-            showRefresh={true}
-            onRefresh={handleRefresh}
-            enableRowClick={true}
-            selectedRowKey={activeRowKey}
-            onRowClick={handleDetail}
-          />
+          <>
+            <TableRBI
+              idTable="rc-gas-deposite-table"
+              dataSource={dataSourceWithKeys}
+              columns={processedColumns}
+              totalData={data_list?.page?.totalElements || 0}
+              tableScrolled={{ x: 5000, y: 525 }}
+              onSort={onSort}
+              columnDefinitions={columnDefinitions}
+              fixedColumns={fixedColumns}
+              setFixedColumns={setFixedColumns}
+              loading={loading_list}
+              showExport={false}
+              usePagination={false}
+              useInfiniteScroll={false}
+              showRefresh={true}
+              onRefresh={handleRefresh}
+              enableRowClick={true}
+              selectedRowKey={activeRowKey}
+              onRowClick={handleDetail}
+            />
+            {renderShowingRows(dataSourceWithKeys.length)}
+          </>
         )}
 
         {activeTab === "summaryBalance" && (
-          <TableRBI
-            idTable="rc-gas-deposite-summary-table"
-            dataSource={summaryDataSourceWithKeys}
-            columns={processedSummaryColumns}
-            totalData={data_mutation_summary?.page?.totalElements || 0}
-            tableScrolled={{ x: 10000, y: 525 }}
-            onSort={onSort}
-            columnDefinitions={summaryColumnDefinitions}
-            fixedColumns={fixedColumnsSummary}
-            setFixedColumns={setFixedColumnsSummary}
-            loading={loading_mutation_summary}
-            showExport={false}
-            usePagination={false}
-            useInfiniteScroll={false}
-            showRefresh={true}
-            onRefresh={() =>
-              dispatch(
-                getMutationSummaryPaginate({
-                  page: 1,
-                  pageSize: 100,
-                  search: encodeURIComponent(JSON.stringify(search)),
-                  sort: sort || "accountNumber~asc",
-                }),
-              )
-            }
-          />
+          <>
+            <TableRBI
+              idTable="rc-gas-deposite-summary-table"
+              dataSource={summaryDataSourceWithKeys}
+              columns={processedSummaryColumns}
+              totalData={data_summary_balance?.page?.totalElements || 0}
+              tableScrolled={{ x: 10000, y: 525 }}
+              onSort={onSort}
+              columnDefinitions={summaryColumnDefinitions}
+              fixedColumns={fixedColumnsSummary}
+              setFixedColumns={setFixedColumnsSummary}
+              loading={loading_summary_balance}
+              showExport={false}
+              usePagination={false}
+              useInfiniteScroll={false}
+              showRefresh={true}
+              onRefresh={handleRefresh}
+            />
+            {renderShowingRows(summaryDataSourceWithKeys.length)}
+          </>
+        )}
+
+        {activeTab === "historyExpired" && (
+          <>
+            <TableRBI
+              idTable="rc-gas-deposite-expired-history-table"
+              dataSource={expiredHistoryDataSource}
+              columns={processedExpiredHistoryColumns}
+              totalData={expiredHistoryDataSource.length}
+              tableScrolled={{ x: 2400, y: 525 }}
+              onSort={onSort}
+              columnDefinitions={expiredHistoryColumnDefinitions}
+              fixedColumns={fixedColumnsExpiredHistory}
+              setFixedColumns={setFixedColumnsExpiredHistory}
+              loading={loading_expired_history}
+              showExport={false}
+              usePagination={false}
+              useInfiniteScroll={false}
+              showRefresh={true}
+              onRefresh={handleRefresh}
+            />
+            {renderShowingRows(expiredHistoryDataSource.length)}
+          </>
         )}
       </CardContainer>
 

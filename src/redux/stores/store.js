@@ -142,6 +142,7 @@ import caCiMappingReducer from "../slices/receipt_collection/caCiMapping";
 import serviceRequestReducer from "../slices/account_management/detailAccount/ServiceRequestSlice";
 import paymentCycleReducer from "../slices/receipt_collection/paymentCycle";
 import paymentPeriodReducer from "../slices/receipt_collection/paymentPeriod";
+import gasDepositPaymentReducer from "../slices/receipt_collection/gasDepositPayment";
 import billingItemCategoryReducer from "../slices/system_setup/master_data/billingItemCategory";
 import calendarReducer from "../slices/system_setup/master_data/calendar";
 import jobManagementReducer from "../slices/job_management/jobSlice";
@@ -304,6 +305,7 @@ const reducer = combineReducers({
   liborRate: liborRateReducer,
   paymentCycle: paymentCycleReducer,
   paymentPeriod: paymentPeriodReducer,
+  gasDepositPayment: gasDepositPaymentReducer,
   billingItemCategory: billingItemCategoryReducer,
   calendar: calendarReducer,
   caCiMapping: caCiMappingReducer,

@@ -1,129 +1,52 @@
-import React, { useMemo, useState } from "react";
-import { Form, Tabs } from "antd";
-import PropTypes from "prop-types";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { Form, message } from "antd";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import NxBreadCrumb from "../../../../components/Nx/NxBreadCrumb";
 import { NxFormFooter, NxFormStepper } from "../../../../components/Nx/NxFormStepNavigation";
 import CardContainer from "../../../../components/CardContainer";
-import ButtonComponent from "../../../../components/ButtonComponent";
 import TableRBI from "../../../../components/TableRBI";
+import ButtonComponent from "../../../../components/ButtonComponent";
+import ModalCustom from "../../../../components/Modal/ModalCustom";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../routes/Receipt&Collection/rc_routes";
 import DateComponent from "../../../../components/DateComponent";
 import SelectComponent from "../../../../components/SelectComponent";
 import InputComponent from "../../../../components/InputComponent";
-import ModalCustom from "../../../../components/Modal/ModalCustom";
+import { getCurrencyDDL } from "../../../../redux/slices/receipt_collection/receipt";
+import {
+  getPayGasDepositExpiredSourceList,
+} from "../../../../redux/slices/receipt_collection/gasDepositPayment";
 
-const CURRENCY_OPTIONS = [
-  { label: "IDR", value: "IDR" },
-  { label: "USD", value: "USD" },
-];
-
-const INITIAL_SEARCH_ROWS = [
-  { key: 1, no: 1, customerNumber: "CUS001", customerName: "PLN (PERSERO), PT", accountNumber: "130252597", accountName: "PLN (PERSERO), PT", accountGroupType: "Industrial", expiredAmount: "5.000.000,00" },
-  { key: 2, no: 2, customerNumber: "CUS002", customerName: "PLN (PERSERO), PT", accountNumber: "130252597", accountName: "PLN (PERSERO), PT", accountGroupType: "Industrial", expiredAmount: "5.000.000,00" },
-  { key: 3, no: 3, customerNumber: "CUS003", customerName: "PT. JAYA MOTOR", accountNumber: "31668828", accountName: "PATIMURA (RESTAURAN SEDERHANA), CV", accountGroupType: "Commercial", expiredAmount: "5.000.000,00" },
-  { key: 4, no: 4, customerNumber: "CUS004", customerName: "PT. JAYA MOTOR", accountNumber: "31668828", accountName: "PATIMURA (RESTAURAN SEDERHANA), CV", accountGroupType: "Commercial", expiredAmount: "5.000.000,00" },
-  { key: 5, no: 5, customerNumber: "CUS005", customerName: "KAO INDONESIA, PT", accountNumber: "206971", accountName: "BLESSING INDONESIA JAYA PT", accountGroupType: "Industrial", expiredAmount: "5.000.000,00" },
-  { key: 6, no: 6, customerNumber: "CUS006", customerName: "KAO INDONESIA, PT", accountNumber: "11009950", accountName: "PT. JAYA MOTOR", accountGroupType: "Commercial", expiredAmount: "5.000.000,00" },
-  { key: 7, no: 7, customerNumber: "CUS007", customerName: "SAMPOERNA LAND, PT", accountNumber: "130252577", accountName: "KAO INDONESIA, PT", accountGroupType: "Industrial", expiredAmount: "5.000.000,00" },
-  { key: 8, no: 8, customerNumber: "CUS008", customerName: "SAMPOERNA LAND, PT", accountNumber: "22514869", accountName: "TUNAS BARU LAMPUNG PT", accountGroupType: "Industrial", expiredAmount: "5.000.000,00" },
-  { key: 9, no: 9, customerNumber: "CUS009", customerName: "BHIRAWA STEEL PT", accountNumber: "21533206", accountName: "ANUGRAH ARTACITRA SEMESTA", accountGroupType: "Commercial", expiredAmount: "5.000.000,00" },
-  { key: 10, no: 10, customerNumber: "CUS010", customerName: "BHIRAWA STEEL PT", accountNumber: "110025881", accountName: "HUME SAKTI INDONESIA, PT", accountGroupType: "Industrial", expiredAmount: "5.000.000,00" },
-];
-
-const APPROVAL_ROWS = [
-  { key: 1, no: 1, approver: "Approver 1", role: "Supervisor", status: "Waiting Approval" },
-  { key: 2, no: 2, approver: "Approver 2", role: "Manager", status: "Pending" },
-];
-
-const ATTACHMENT_ROWS = [
-  { key: 1, no: 1, fileName: "expired-gas-deposit.xlsx", uploadedBy: "maker", uploadDate: "16 Apr 2026" },
-];
-
-const parseAmount = (amount = "") => {
-  if (!amount) return 0;
-  const normalized = String(amount).replaceAll(".", "").replace(",", ".");
-  const parsed = Number(normalized);
-  return Number.isNaN(parsed) ? 0 : parsed;
-};
-
-const formatAmount = (amount = 0) => {
-  const safeAmount = Number.isFinite(amount) ? amount : 0;
+const formatNumber = (value) => {
+  if (value === null || value === undefined || value === "") return "-";
+  const parsed = Number(value);
+  if (Number.isNaN(parsed)) return value;
   return new Intl.NumberFormat("id-ID", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  }).format(safeAmount);
+  }).format(parsed);
 };
 
-const ExpiredGasDepositeSummary = ({ values, selectedRows }) => {
-  const infoItems = [
-    {
-      label: "Expired Date",
-      value: values.expiredDate?.format ? values.expiredDate.format("DD MMM YYYY") : "{value}",
-    },
-    { label: "Currency", value: values.currency || "{value}" },
-    { label: "Total Amount", value: values.totalAmount || "{value}" },
-    { label: "Description", value: values.description || "{value}", fullWidth: true },
-  ];
-
-  const infoColumns = [
-    { key: "no", title: "NO", dataIndex: "no", width: 20, align: "center" },
-    { key: "customerNumber", title: "CUSTOMER NUMBER", dataIndex: "customerNumber", width: 80 },
-    { key: "customerName", title: "CUSTOMER NAME", dataIndex: "customerName", width: 120 },
-    { key: "accountNumber", title: "ACCOUNT NUMBER", dataIndex: "accountNumber", width: 80 },
-    { key: "accountName", title: "ACCOUNT NAME", dataIndex: "accountName", width: 140 },
-    { key: "accountGroupType", title: "ACCOUNT GROUP TYPE", dataIndex: "accountGroupType", width: 80 },
-    { key: "expiredAmount", title: "EXPIRED AMOUNT", dataIndex: "expiredAmount", width: 70, align: "right" },
-  ];
-
-  return (
-    <div className="space-y-4">
-      <CardContainer header={<p className="mt-[15px] text-primary">EXPIRED GAS DEPOSIT INFORMATION</p>}>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-4 text-[12px]">
-          {infoItems.map((item) => (
-            <div key={item.label} className={item.fullWidth ? "md:col-span-3" : ""}>
-              <p className="mb-1 font-semibold text-[#4B465C]">{item.label}</p>
-              <p className="text-[#4B465C]">{item.value}</p>
-            </div>
-          ))}
-        </div>
-      </CardContainer>
-
-      <CardContainer header={<p className="mt-[15px] text-primary">GAS DEPOSIT INFORMATION</p>}>
-        <TableRBI
-          idTable="rc-expired-gd-confirm-info-table"
-          dataSource={selectedRows}
-          columns={infoColumns}
-          totalData={selectedRows.length}
-          tableScrolled={{ x: 1800, y: 300 }}
-          showExport={false}
-          usePagination={false}
-          showRefresh={false}
-        />
-      </CardContainer>
-    </div>
-  );
-};
-
-ExpiredGasDepositeSummary.propTypes = {
-  values: PropTypes.shape({
-    expiredDate: PropTypes.shape({ format: PropTypes.func }),
-    currency: PropTypes.string,
-    totalAmount: PropTypes.string,
-    description: PropTypes.string,
-  }).isRequired,
-  selectedRows: PropTypes.arrayOf(PropTypes.object).isRequired,
+const toDateKey = (value) => {
+  if (!value) return null;
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return null;
+  return parsed.toISOString().slice(0, 10);
 };
 
 const PayGasDepositeExpiredCreatePage = () => {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const [form] = Form.useForm();
+  const { data_expired_source, loading_expired_source } = useSelector((state) => state.gasDepositPayment);
+  const { currencyDDL } = useSelector((state) => state.receipt);
+
   const [currentStep, setCurrentStep] = useState(0);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
-  const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
-  const [searchRows, setSearchRows] = useState(INITIAL_SEARCH_ROWS);
-  const [selectedSearchRowKey, setSelectedSearchRowKey] = useState(INITIAL_SEARCH_ROWS[0].key);
-  const [selectedDepositRows, setSelectedDepositRows] = useState([]);
+  const [selectedSearchRowKeys, setSelectedSearchRowKeys] = useState([]);
+  const [selectedRows, setSelectedRows] = useState([]);
+  const selectedExpiredDate = Form.useWatch("expiredDate", form);
+  const selectedCurrency = Form.useWatch("currency", form);
 
   const routes = [
     { path: "", breadcrumbName: "Payment & Collection" },
@@ -137,173 +60,205 @@ const PayGasDepositeExpiredCreatePage = () => {
     { title: "ATTACHMENT" },
   ];
 
-  const selectedSearchRow = useMemo(
-    () => searchRows.find((row) => row.key === selectedSearchRowKey) || null,
-    [searchRows, selectedSearchRowKey],
+  useEffect(() => {
+    dispatch(getCurrencyDDL());
+  }, [dispatch]);
+
+  const currencyOptions = useMemo(
+    () => (currencyDDL?.data || []).map((item) => ({ label: item.name, value: item.name })),
+    [currencyDDL],
   );
 
-  const selectedTotalAmount = useMemo(
-    () => formatAmount(selectedDepositRows.reduce((sum, row) => sum + parseAmount(row.expiredAmount), 0)),
-    [selectedDepositRows],
+  const queueRows = useMemo(
+    () => (data_expired_source || []).map((item, index) => ({
+      ...item,
+      key: item.rbiLedgerId,
+      no: index + 1,
+    })),
+    [data_expired_source],
   );
 
-  const handleExpiredAmountChange = (recordKey, nextValue) => {
-    setSearchRows((prev) =>
-      prev.map((row) =>
-        row.key === recordKey ? { ...row, expiredAmount: nextValue } : row,
-      ),
-    );
-  };
-
-  const searchColumns = useMemo(
-    () => [
-      { key: "no", title: "NO", dataIndex: "no", width: 30, align: "center" },
-      { key: "customerNumber", title: "CUSTOMER NUMBER", dataIndex: "customerNumber", width: 100 },
-      { key: "customerName", title: "CUSTOMER NAME", dataIndex: "customerName", width: 150 },
-      { key: "accountNumber", title: "ACCOUNT NUMBER", dataIndex: "accountNumber", width: 100 },
-      { key: "accountName", title: "ACCOUNT NAME", dataIndex: "accountName", width: 180 },
-      {
-        key: "expiredAmount",
-        title: "EXPIRED AMOUNT",
-        dataIndex: "expiredAmount",
-        width: 120,
-        render: (_, record) => (
-          <InputComponent
-            value={record.expiredAmount}
-            onClick={(event) => event.stopPropagation()}
-            onChange={(event) => handleExpiredAmountChange(record.key, event.target.value)}
-            placeholder="Input Amount"
-          />
-        ),
-      },
-      {
-        key: "totalExpiredAmount",
-        title: "TOTAL EXPIRED AMOUNT",
-        dataIndex: "expiredAmount",
-        width: 120,
-        render: (text) => (
-          <InputComponent
-            value={text}
-            disabled
-            placeholder="0"
-          />
-        ),
-      },
-    ],
-    [],
+  const selectedTableRows = useMemo(
+    () => selectedRows.map((item, index) => ({
+      ...item,
+      no: index + 1,
+    })),
+    [selectedRows],
   );
 
-  const infoColumns = useMemo(
-    () => [
-      { key: "no", title: "NO", dataIndex: "no", width: 20, align: "center" },
-      { key: "customerNumber", title: "CUSTOMER NUMBER", dataIndex: "customerNumber", width: 80 },
-      { key: "customerName", title: "CUSTOMER NAME", dataIndex: "customerName", width: 120 },
-      { key: "accountNumber", title: "ACCOUNT NUMBER", dataIndex: "accountNumber", width: 80 },
-      { key: "accountName", title: "ACCOUNT NAME", dataIndex: "accountName", width: 140 },
-      { key: "accountGroupType", title: "ACCOUNT GROUP TYPE", dataIndex: "accountGroupType", width: 80 },
-    ],
-    [],
-  );
+  const filteredQueueRows = useMemo(() => {
+    const expiredDateKey = toDateKey(selectedExpiredDate);
 
-  const approvalColumns = useMemo(
-    () => [
-      { key: "no", title: "NO", dataIndex: "no", width: 20, align: "center" },
-      { key: "approver", title: "APPROVER", dataIndex: "approver", width: 100 },
-      { key: "role", title: "ROLE", dataIndex: "role", width: 80 },
-      { key: "status", title: "STATUS", dataIndex: "status", width: 100 },
-    ],
-    [],
-  );
+    return queueRows.filter((row) => {
+      const rowDateKey = toDateKey(row.expiredDate);
+      const isCurrencyMatch = selectedCurrency ? row.currency === selectedCurrency : true;
+      const isDateMatch = expiredDateKey ? rowDateKey === expiredDateKey : true;
+      return isCurrencyMatch && isDateMatch;
+    });
+  }, [queueRows, selectedCurrency, selectedExpiredDate]);
 
-  const attachmentColumns = useMemo(
-    () => [
-      { key: "no", title: "NO", dataIndex: "no", width: 20, align: "center" },
-      { key: "fileName", title: "FILE NAME", dataIndex: "fileName", width: 150 },
-      { key: "uploadedBy", title: "UPLOADED BY", dataIndex: "uploadedBy", width: 80 },
-      { key: "uploadDate", title: "UPLOAD DATE", dataIndex: "uploadDate", width: 80 },
-    ],
-    [],
-  );
-
-  const confirmationItems = [
-    {
-      key: "expiredGasDeposit",
-      label: "Expired Gas Deposite",
-      children: (
-        <ExpiredGasDepositeSummary
-          values={form.getFieldsValue()}
-          selectedRows={selectedDepositRows}
-        />
-      ),
-    },
-    {
-      key: "approval",
-      label: "Approval",
-      children: (
-        <CardContainer header={<p className="mt-[15px] text-primary">APPROVAL INFORMATION</p>}>
-          <TableRBI
-            idTable="rc-expired-gd-confirm-approval-table"
-            dataSource={APPROVAL_ROWS}
-            columns={approvalColumns}
-            totalData={APPROVAL_ROWS.length}
-            tableScrolled={{ x: 1000, y: 250 }}
-            showExport={false}
-            usePagination={false}
-          />
-        </CardContainer>
-      ),
-    },
-    {
-      key: "attachment",
-      label: "Attachment",
-      children: (
-        <CardContainer header={<p className="mt-[15px] text-primary">ATTACHMENT</p>}>
-          <TableRBI
-            idTable="rc-expired-gd-confirm-attachment-table"
-            dataSource={ATTACHMENT_ROWS}
-            columns={attachmentColumns}
-            totalData={ATTACHMENT_ROWS.length}
-            tableScrolled={{ x: 1000, y: 250 }}
-            showExport={false}
-            usePagination={false}
-          />
-        </CardContainer>
-      ),
-    },
-  ];
-
-  const handleOpenSearch = async () => {
+  const openSearchModal = async () => {
     await form.validateFields(["expiredDate", "currency"]);
+    const expiredDateParam = toDateKey(selectedExpiredDate);
+    dispatch(getPayGasDepositExpiredSourceList({
+      expiredDate: expiredDateParam,
+      currency: selectedCurrency,
+    }));
+    setSelectedSearchRowKeys(selectedRows.map((item) => item.rbiLedgerId || item.key));
+    if (!filteredQueueRows.length) {
+      message.info("No gas deposit data matches the selected expired date and currency");
+    }
     setIsSearchModalOpen(true);
   };
 
-  const handleConfirmSearch = () => {
-    if (!selectedSearchRow) return;
+  const recalculateTotals = useCallback((rows) => {
+    form.setFieldsValue({
+      totalAmount: formatNumber(rows.reduce((sum, row) => sum + Number(row.claimAmount || 0), 0)),
+      totalAmountEqv: formatNumber(rows.reduce((sum, row) => sum + Number(row.claimEqvAmount || 0), 0)),
+    });
+  }, [form]);
 
-    setSelectedDepositRows([{ ...selectedSearchRow, no: 1 }]);
-    form.setFieldsValue({ totalAmount: selectedSearchRow.expiredAmount });
+  const handleConfirmSearch = () => {
+    const nextRows = filteredQueueRows
+      .filter((row) => selectedSearchRowKeys.includes(row.key))
+      .map((row) => ({
+        ...row,
+        claimAmount: row.remainingClaimableAmount,
+        claimEqvAmount: row.remainingClaimableEqvAmount,
+      }));
+    setSelectedRows(nextRows);
+    recalculateTotals(nextRows);
+
     setIsSearchModalOpen(false);
   };
+
+  const handleClaimAmountChange = useCallback((targetRow, value) => {
+    const claimAmount = Number(value || 0);
+
+    const nextRows = selectedRows.map((row) => {
+      if (row.key !== targetRow.key) return row;
+
+      const maxClaim = Number(row.remainingClaimableAmount || 0);
+      const safeClaimAmount = Math.min(Math.max(claimAmount, 0), maxClaim);
+      const baseAmount = Number(row.remainingClaimableAmount || 0);
+      const baseEqvAmount = Number(row.remainingClaimableEqvAmount || 0);
+      const claimEqvAmount = baseAmount > 0
+        ? (safeClaimAmount / baseAmount) * baseEqvAmount
+        : 0;
+
+      return {
+        ...row,
+        claimAmount: safeClaimAmount,
+        claimEqvAmount,
+      };
+    });
+
+    setSelectedRows(nextRows);
+    recalculateTotals(nextRows);
+  }, [recalculateTotals, selectedRows]);
 
   const handleNext = async () => {
     if (currentStep === 0) {
       await form.validateFields(["expiredDate", "currency", "description"]);
+      if (!selectedRows.length) {
+        message.warning("Please select at least one gas deposit row");
+        return;
+      }
     }
 
     setCurrentStep((prev) => Math.min(prev + 1, steps.length - 1));
   };
 
-  const handleSubmit = async () => {
-    await form.validateFields();
-    setIsConfirmationModalOpen(true);
+  const handlePrev = () => {
+    setCurrentStep((prev) => Math.max(prev - 1, 0));
   };
 
-  const handleReset = () => {
-    form.resetFields();
-    setSelectedDepositRows([]);
-    setSearchRows(INITIAL_SEARCH_ROWS);
-    setSelectedSearchRowKey(INITIAL_SEARCH_ROWS[0].key);
-  };
+  const searchColumns = useMemo(() => [
+    { key: "no", title: "NO", dataIndex: "no", width: 60, align: "center" },
+    { key: "customerNumber", title: "CUSTOMER NUMBER", dataIndex: "customerNumber", width: 180 },
+    { key: "customerName", title: "CUSTOMER NAME", dataIndex: "customerName", width: 220 },
+    { key: "accountNumber", title: "ACCOUNT NUMBER", dataIndex: "accountNumber", width: 180 },
+    {
+      key: "expiredInitialAmount",
+      title: "EXPIRED INITIAL",
+      dataIndex: "expiredInitialAmount",
+      width: 170,
+      align: "right",
+      render: (value) => formatNumber(value),
+    },
+    {
+      key: "claimedAmount",
+      title: "ALREADY CLAIMED",
+      dataIndex: "claimedAmount",
+      width: 170,
+      align: "right",
+      render: (value) => formatNumber(value),
+    },
+    {
+      key: "remainingClaimableAmount",
+      title: "REMAINING CLAIMABLE",
+      dataIndex: "remainingClaimableAmount",
+      width: 190,
+      align: "right",
+      render: (value) => formatNumber(value),
+    },
+    { key: "currency", title: "CURRENCY", dataIndex: "currency", width: 100, render: (value) => value || "-" },
+  ], []);
+
+  const selectedColumns = useMemo(() => [
+    { key: "no", title: "NO", dataIndex: "no", width: 60, align: "center" },
+    { key: "customerNumber", title: "CUSTOMER NUMBER", dataIndex: "customerNumber", width: 180 },
+    { key: "customerName", title: "CUSTOMER NAME", dataIndex: "customerName", width: 220 },
+    { key: "accountNumber", title: "ACCOUNT NUMBER", dataIndex: "accountNumber", width: 180 },
+    {
+      key: "expiredInitialAmount",
+      title: "EXPIRED INITIAL",
+      dataIndex: "expiredInitialAmount",
+      width: 170,
+      align: "right",
+      render: (value) => formatNumber(value),
+    },
+    {
+      key: "remainingClaimableAmount",
+      title: "REMAINING CLAIMABLE",
+      dataIndex: "remainingClaimableAmount",
+      width: 190,
+      align: "right",
+      render: (value) => formatNumber(value),
+    },
+    {
+      key: "claimAmount",
+      title: "CLAIM AMOUNT",
+      dataIndex: "claimAmount",
+      width: 180,
+      render: (value, row) => (
+        <InputComponent
+          value={value}
+          onChange={(event) => handleClaimAmountChange(row, event?.target?.value)}
+          placeholder="Input claim amount"
+        />
+      ),
+    },
+    {
+      key: "claimEqvAmount",
+      title: "CLAIM EQV",
+      dataIndex: "claimEqvAmount",
+      width: 170,
+      align: "right",
+      render: (value) => formatNumber(value),
+    },
+  ], [handleClaimAmountChange]);
+
+  const confirmationRows = useMemo(
+    () => [
+      { label: "Expired Date", value: form.getFieldValue("expiredDate") || "-" },
+      { label: "Currency", value: form.getFieldValue("currency") || "-" },
+      { label: "Total Amount", value: form.getFieldValue("totalAmount") || "-" },
+      { label: "Total Amount EQV", value: form.getFieldValue("totalAmountEqv") || "-" },
+      { label: "Description", value: form.getFieldValue("description") || "-", fullWidth: true },
+    ],
+    [form],
+  );
 
   return (
     <>
@@ -312,57 +267,48 @@ const PayGasDepositeExpiredCreatePage = () => {
       <NxFormStepper
         steps={steps}
         current={currentStep}
-        onPrev={() => setCurrentStep((prev) => Math.max(0, prev - 1))}
-        onNext={() => setCurrentStep((prev) => Math.min(steps.length - 1, prev + 1))}
+        onPrev={handlePrev}
+        onNext={handleNext}
       />
 
-      <Form form={form} layout="vertical" initialValues={{ currency: "IDR" }}>
+      <Form form={form} layout="vertical">
         {currentStep === 0 && (
           <>
             <CardContainer
-              header={<p className="mt-[15px] text-primary">EXPIRED GAS DEPOSIT INFORMATION</p>}
+              header={(
+                <div className="flex -my-4 justify-between items-center">
+                  <p className="mt-[15px] text-primary">EXPIRED GAS DEPOSIT INFORMATION</p>
+                  <ButtonComponent
+                    type="submit"
+                    border={false}
+                    onClick={openSearchModal}
+                    disabled={!selectedExpiredDate || !selectedCurrency}
+                  >
+                    Search Gas Deposit
+                  </ButtonComponent>
+                </div>
+              )}
               className="mt-2"
             >
-              <div className="mb-3 flex justify-end">
-                <ButtonComponent type="submit" border={false} onClick={handleOpenSearch}>
-                  Search Gas Deposite
-                </ButtonComponent>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <Form.Item
-                  name="expiredDate"
-                  label="Expired Date"
-                  rules={[{ required: true }]}
-                  style={{ marginBottom: 0 }}
-                >
-                  <DateComponent placeholder="Select Expired Date" />
+              <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+                <Form.Item name="expiredDate" label="Expired Date" rules={[{ required: true }]} style={{ marginBottom: 0 }}>
+                  <DateComponent placeholder="Select Expired Date" dateDisable={() => false} />
                 </Form.Item>
-
-                <Form.Item
-                  name="currency"
-                  label="Currency"
-                  rules={[{ required: true }]}
-                  style={{ marginBottom: 0 }}
-                >
-                  <SelectComponent placeholder="Select Currency" options={CURRENCY_OPTIONS} />
+                <Form.Item name="currency" label="Currency" rules={[{ required: true }]} style={{ marginBottom: 0 }}>
+                  <SelectComponent placeholder="Select Currency" options={currencyOptions} />
                 </Form.Item>
-
-                <Form.Item
-                  name="totalAmount"
-                  label="Total Amount"
-                  rules={[{ required: true }]}
-                  style={{ marginBottom: 0 }}
-                >
-                  <InputComponent disabled placeholder={selectedTotalAmount || "0,00"} />
+                <Form.Item name="totalAmount" label="Total Amount" style={{ marginBottom: 0 }}>
+                  <InputComponent disabled placeholder="0,00" />
                 </Form.Item>
-
+                <Form.Item name="totalAmountEqv" label="Total Amount EQV" style={{ marginBottom: 0 }}>
+                  <InputComponent disabled placeholder="0,00" />
+                </Form.Item>
                 <Form.Item
                   name="description"
                   label="Description"
                   rules={[{ required: true }]}
                   style={{ marginBottom: 0 }}
-                  className="md:col-span-3"
+                  className="lg:col-span-4"
                 >
                   <InputComponent type="textarea" rows={3} placeholder="Type..." />
                 </Form.Item>
@@ -374,14 +320,13 @@ const PayGasDepositeExpiredCreatePage = () => {
               className="mt-2"
             >
               <TableRBI
-                idTable="rc-expired-gd-info-table"
-                dataSource={selectedDepositRows}
-                columns={infoColumns}
-                totalData={selectedDepositRows.length}
-                tableScrolled={{ x: 1800, y: 420 }}
+                idTable="rc-pay-gas-deposit-expired-selected-table"
+                dataSource={selectedTableRows}
+                columns={selectedColumns}
+                totalData={selectedTableRows.length}
+                tableScrolled={{ x: 1400, y: 350 }}
                 showExport={false}
                 usePagination={false}
-                showRefresh={false}
               />
             </CardContainer>
           </>
@@ -392,15 +337,23 @@ const PayGasDepositeExpiredCreatePage = () => {
             header={<p className="mt-[15px] text-primary">APPROVAL INFORMATION</p>}
             className="mt-2"
           >
-            <TableRBI
-              idTable="rc-expired-gd-approval-table"
-              dataSource={APPROVAL_ROWS}
-              columns={approvalColumns}
-              totalData={APPROVAL_ROWS.length}
-              tableScrolled={{ x: 1000, y: 420 }}
-              showExport={false}
-              usePagination={false}
-            />
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-x-6 gap-y-5 text-[12px]">
+              {confirmationRows.map((item) => (
+                <div key={item.label} className={item.fullWidth ? "md:col-span-4" : ""}>
+                  <p className="mb-1 font-semibold text-[#4B465C]">{item.label}</p>
+                  <p className="text-[#4B465C]">{item.value}</p>
+                </div>
+              ))}
+            </div>
+            <div className="mt-6 flex justify-end">
+              <ButtonComponent
+                type="submit"
+                border={false}
+                onClick={() => navigate(RECEIPT_AND_COLLECTION_ROUTES.GAS_DEPOSITE_EXPIRED_APPROVAL)}
+              >
+                Open Approval Queue
+              </ButtonComponent>
+            </div>
           </CardContainer>
         )}
 
@@ -409,84 +362,58 @@ const PayGasDepositeExpiredCreatePage = () => {
             header={<p className="mt-[15px] text-primary">ATTACHMENT</p>}
             className="mt-2"
           >
-            <TableRBI
-              idTable="rc-expired-gd-attachment-table"
-              dataSource={ATTACHMENT_ROWS}
-              columns={attachmentColumns}
-              totalData={ATTACHMENT_ROWS.length}
-              tableScrolled={{ x: 1000, y: 420 }}
-              showExport={false}
-              usePagination={false}
-            />
+            <div className="py-6 text-[14px] text-[#4B465C]">
+              Attachment flow for Payment Expired Gas Deposit is not implemented yet.
+            </div>
           </CardContainer>
         )}
 
         <NxFormFooter
           current={currentStep}
           totalSteps={steps.length}
-          onPrev={() => setCurrentStep((prev) => Math.max(0, prev - 1))}
+          onPrev={handlePrev}
           onNext={handleNext}
           onCancel={() => navigate(RECEIPT_AND_COLLECTION_ROUTES.GAS_DEPOSITE_VIEW)}
-          onClear={handleReset}
+          onClear={() => {
+            form.resetFields();
+            setSelectedRows([]);
+            setSelectedSearchRowKeys([]);
+          }}
           onSaveDraft={() => {}}
-          onSubmit={handleSubmit}
+          onSubmit={() => navigate(RECEIPT_AND_COLLECTION_ROUTES.GAS_DEPOSITE_EXPIRED_APPROVAL)}
         />
       </Form>
 
-      {/* Modal Search Gas Deposite */}
       <ModalCustom
         isOpen={isSearchModalOpen}
         handleCancel={() => setIsSearchModalOpen(false)}
-        header="SEARCH GAS DEPOSITE"
+        header="SEARCH GAS DEPOSIT"
         width={1200}
-        footer={
-          <div className="flex justify-end gap-2 px-2">
-            <ButtonComponent key="cancel" className="!w-auto !px-6" onClick={() => setIsSearchModalOpen(false)}>
-              cancel
+      >
+        <div className="pb-4">
+          <TableRBI
+            idTable="rc-pay-gas-deposit-expired-search-table"
+            dataSource={filteredQueueRows}
+            columns={searchColumns}
+            totalData={filteredQueueRows.length}
+            tableScrolled={{ x: 1400, y: 350 }}
+            showExport={false}
+            usePagination={false}
+            loading={loading_expired_source}
+            rowSelection={{
+              selectedRowKeys: selectedSearchRowKeys,
+              onChange: (nextKeys) => setSelectedSearchRowKeys(nextKeys),
+            }}
+          />
+          <div className="mt-4 flex items-center justify-end gap-2">
+            <ButtonComponent type="default" onClick={() => setIsSearchModalOpen(false)}>
+              Cancel
             </ButtonComponent>
-            <ButtonComponent key="confirm" type="primary" border={false} className="!w-auto !px-6" onClick={handleConfirmSearch}>
+            <ButtonComponent type="submit" border={false} onClick={handleConfirmSearch}>
               Confirm
             </ButtonComponent>
           </div>
-        }
-      >
-        <CardContainer className="!mt-0">
-          <TableRBI
-            idTable="rc-expired-gd-search-table"
-            dataSource={searchRows}
-            columns={searchColumns}
-            totalData={searchRows.length}
-            tableScrolled={{ x: 1200, y: 360 }}
-            showExport={false}
-            usePagination={false}
-            useInfiniteScroll={true}
-            hasMore={false}
-            fixedColumns={{ left: [], right: ["expiredAmount", "totalExpiredAmount"] }}
-            enableRowClick={true}
-            selectedRowKey={selectedSearchRowKey}
-            onRowClick={(record) => setSelectedSearchRowKey(record.key)}
-          />
-        </CardContainer>
-      </ModalCustom>
-
-      {/* Modal Confirmation */}
-      <ModalCustom
-        isOpen={isConfirmationModalOpen}
-        handleCancel={() => setIsConfirmationModalOpen(false)}
-        header="CONFIRMATION"
-        type="confirmation"
-        width={1200}
-        hidePadding={{ top: true }}
-        footer={[
-          <ButtonComponent key="cancel" onClick={() => setIsConfirmationModalOpen(false)}>
-            cancel
-          </ButtonComponent>,
-          <ButtonComponent key="confirm" type="primary" border={false} onClick={() => setIsConfirmationModalOpen(false)}>
-            Confirm
-          </ButtonComponent>,
-        ]}
-      >
-        <Tabs items={confirmationItems} className="[&_.ant-tabs-nav]:mb-4" />
+        </div>
       </ModalCustom>
     </>
   );

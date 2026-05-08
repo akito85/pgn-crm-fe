@@ -94,6 +94,7 @@ import ListDetailCaCiMapping from "../../app/pages/ReceiptAndCollection/MasterDa
 import ListFormCaCiMapping from "../../app/pages/ReceiptAndCollection/MasterData/CaCiMapping/ListFormCaCiMapping";
 import PayGasDepositePage from "../../app/pages/ReceiptAndCollection/GasDeposite/PayGasDepositePage";
 import PayGasDepositeCreatePage from "../../app/pages/ReceiptAndCollection/GasDeposite/PayGasDepositeCreatePage";
+import PayGasDepositeExpiredApprovalPage from "../../app/pages/ReceiptAndCollection/GasDeposite/PayGasDepositeExpiredApprovalPage";
 import PayGasDepositeExpiredCreatePage from "../../app/pages/ReceiptAndCollection/GasDeposite/PayGasDepositeExpiredCreatePage";
 
 
@@ -266,5 +267,6 @@ export const RECEIPT_AND_COLLECTION_ELEMENTS = {
   GAS_DEPOSITE_VIEW: <PayGasDepositePage />,
   GAS_DEPOSITE_CREATE: <PayGasDepositeCreatePage />,
   GAS_DEPOSITE_UPDATE: <PayGasDepositeCreatePage />,
-  GAS_DEPOSITE_EXPIRED_CREATE: <PayGasDepositeExpiredCreatePage />
+  GAS_DEPOSITE_EXPIRED_CREATE: <PayGasDepositeExpiredCreatePage />,
+  GAS_DEPOSITE_EXPIRED_APPROVAL: <PayGasDepositeExpiredApprovalPage />
 };

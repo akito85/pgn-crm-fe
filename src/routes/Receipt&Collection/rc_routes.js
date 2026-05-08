@@ -167,4 +167,5 @@ export const RECEIPT_AND_COLLECTION_ROUTES = {
   GAS_DEPOSITE_CREATE: "/receipt-and-collection/gas-deposite/create",
   GAS_DEPOSITE_UPDATE: "/receipt-and-collection/gas-deposite/update",
   GAS_DEPOSITE_EXPIRED_CREATE: "/receipt-and-collection/gas-deposite/create-expired",
+  GAS_DEPOSITE_EXPIRED_APPROVAL: "/receipt-and-collection/gas-deposite/approval-expired",
 };
