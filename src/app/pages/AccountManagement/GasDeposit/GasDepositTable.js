@@ -235,6 +235,7 @@ const GasDepositTable = ({
       <Toolbar items={itemActions} type="detail" />
       <NxTable
         idTable="gas-deposit-table"
+        className="[&_.ant-table-expanded-row-fixed]:!pl-2"
         dataSource={dataSource}
         totalData={totalElement}
         current={page}

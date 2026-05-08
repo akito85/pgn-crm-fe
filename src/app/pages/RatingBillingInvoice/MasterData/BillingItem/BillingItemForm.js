@@ -455,6 +455,7 @@ const BillingItemForm = (props) => {
   const handleSetDataUpdate = useCallback(
     (dataDetail, dataCompare = null) => {
       setStartDate(moment(dataDetail?.startDate));
+      setEndDate(dataDetail?.endDate ? moment(dataDetail?.endDate) : null);
       setSelectedHierarchy(dataDetail?.approvalHierarchy);
       const typeId = resolveTypeId(dataDetail?.transMappingType);
 
@@ -1551,6 +1552,8 @@ const BillingItemForm = (props) => {
               allData={allDataDetailTable}
               dataAttachment={listDataAttachment}
               dataConfirm={dataSend}
+              dataCriteriaTable={dataCriteriaTable}
+              dataMappingItemTable={dataMappingItemTable}
               dataApproval={selectedHierarchy}
               dataApprovalTable={appHierDataDetail}
               listApproval={appHierOptions}

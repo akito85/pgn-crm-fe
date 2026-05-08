@@ -36,20 +36,20 @@ const AdjustmentBillingSectionForm = ({
   idInvoice,
   setIdInvoice,
   dataInvoice = {},
-  setDataInvoice = () => {},
+  setDataInvoice = () => { },
   form,
   listDataABI = [],
-  setListDataABI = () => {},
+  setListDataABI = () => { },
   adjustmentId,
   cycleId,
   setCycleId,
   billingPeriodId,
   setBillingPeriodId,
-  setRangeDisableDate = () => {},
+  setRangeDisableDate = () => { },
   rangeDisableDate,
   selectedClassification,
-  setSelectedClassification = () => {},
-  onRecalculate = () => {},
+  setSelectedClassification = () => { },
+  onRecalculate = () => { },
   loadingRecalculate = false,
   disableRecalculate = false,
   hasSuccessfulRecalculate = false,
@@ -110,6 +110,11 @@ const AdjustmentBillingSectionForm = ({
     rateType: false,
     topType: false,
     topValue: false,
+  });
+  const initialRateCriteriaRef = useRef({
+    captured: false,
+    rateType: null,
+    rateDate: null,
   });
   const previousHydratedAccountIdRef = useRef();
   const selectedRateType = Form.useWatch("rateType", form);
@@ -190,13 +195,13 @@ const AdjustmentBillingSectionForm = ({
   const topTypeOptions =
     (dataListSelectTOP || []).length > 0
       ? dataListSelectTOP.map((item) => ({
-          label: item?.text || item?.name || item?.value || item?.code,
-          value: item?.code || item?.value || item?.id || item?.text,
-        }))
+        label: item?.text || item?.name || item?.value || item?.code,
+        value: item?.code || item?.value || item?.id || item?.text,
+      }))
       : [
-          { label: "TOP", value: "TOP" },
-          { label: "DATE", value: "DATE" },
-        ];
+        { label: "TOP", value: "TOP" },
+        { label: "DATE", value: "DATE" },
+      ];
 
   const runLazyFetch = useCallback(
     async (key, thunk, payload) => {
@@ -535,10 +540,32 @@ const AdjustmentBillingSectionForm = ({
         return;
       }
 
+      const normalizedRateType = String(selectedRateType || "");
+      const normalizedRateDate = moment(selectedRateDate).format("YYYY-MM-DD");
+
+      if (type === "update" && adjustmentId) {
+        if (!initialRateCriteriaRef.current.captured) {
+          initialRateCriteriaRef.current = {
+            captured: true,
+            rateType: normalizedRateType,
+            rateDate: normalizedRateDate,
+          };
+          return;
+        }
+
+        const isUnchangedFromInitial =
+          initialRateCriteriaRef.current.rateType === normalizedRateType &&
+          initialRateCriteriaRef.current.rateDate === normalizedRateDate;
+
+        if (isUnchangedFromInitial) {
+          return;
+        }
+      }
+
       try {
         const response = await dispatch(
           getRateAdjustment({
-            rateDate: moment(selectedRateDate).format("YYYY-MM-DD"),
+            rateDate: normalizedRateDate,
             rateType: selectedRateType,
           }),
         ).unwrap();
@@ -559,7 +586,7 @@ const AdjustmentBillingSectionForm = ({
     };
 
     fetchRateAdjustment();
-  }, [dispatch, form, selectedRateDate, selectedRateType]);
+  }, [adjustmentId, dispatch, form, selectedRateDate, selectedRateType, type]);
 
   // Sync transactionDate state from form value (for update mode)
   useEffect(() => {
@@ -1029,7 +1056,7 @@ const AdjustmentBillingSectionForm = ({
               loading={dropdownLoading.billingPeriod}
               disabled={
                 !form.getFieldValue().billingCycle ||
-                !form.getFieldValue().accountNumberWithName
+                  !form.getFieldValue().accountNumberWithName
                   ? true
                   : false
               }
@@ -1051,7 +1078,7 @@ const AdjustmentBillingSectionForm = ({
                     .then(() => {
                       fetchedRef.current.billingPeriod = true;
                     })
-                    .catch(() => {})
+                    .catch(() => { })
                     .finally(() => {
                       setDropdownLoading((prev) => ({
                         ...prev,
@@ -1117,7 +1144,7 @@ const AdjustmentBillingSectionForm = ({
               loading={dropdownLoading.invoice}
               disabled={
                 !form.getFieldValue().billingCycle ||
-                !form.getFieldValue().currentBillingPeriod
+                  !form.getFieldValue().currentBillingPeriod
                   ? true
                   : false
               }

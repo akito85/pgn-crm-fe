@@ -8,6 +8,9 @@ import TableRBI from "../../../../../../../components/TableRBI";
 import columnsMapping from "../../Table/TableMappingInformation";
 import columnsDetail from "../../Table/TableDetailMappingInformation";
 import { useSelector } from "react-redux";
+import { Tabs } from "antd";
+
+const { TabPane } = Tabs;
 
 const onFilter = (dataIndex, value, record) => {
   const search = moment(value, dateFormatting.dateFormal, true).isValid()
@@ -95,8 +98,20 @@ const sorterDetail = (fieldSort, a, b) => {
   return handleCompare(fa, fb);
 };
 
-const BillingItemFormConfirmation = ({ dataConfirm = {} }) => {
-  const { data_billingItemCategoryDdl, data_billType, data_typeList, data_criteriaList, data_categoryList } = useSelector(
+const BillingItemFormConfirmation = ({ dataConfirm = {}, dataCriteriaTable = [], dataMappingItemTable = [] }) => {
+  const { 
+    data_billingItemCategoryDdl, 
+    data_billType, 
+    data_typeList, 
+    data_criteriaList, 
+    data_categoryList,
+    data_specialGLList,
+    data_glAccountList,
+    data_classificationTypeList,
+    data_accountTypeList,
+    data_glAccountBankList,
+    data_mappingItemTypeList
+  } = useSelector(
     (state) => state.billing_item
   );
 
@@ -109,7 +124,8 @@ const BillingItemFormConfirmation = ({ dataConfirm = {} }) => {
   const [detailMapping, setDetailMapping] = useState(false);
   const [category, setCategory] = useState("");
   const [dataDetailTable, setDataDetailTable] = useState([]);
-  const [subHeader, setSubHeader] = useState("")
+  const [subHeader, setSubHeader] = useState("");
+  const [activeTab, setActiveTab] = useState("mapping");
   
   const [pageDetail, setPageDetail] = useState(1);
   const [pageSizeDetail, setPageSizeDetail] = useState(10);
@@ -249,6 +265,100 @@ const BillingItemFormConfirmation = ({ dataConfirm = {} }) => {
     title: col.title
   })), [detailCols]);
 
+  const criteriaCols = useMemo(() => {
+    const isBank = dataConfirm?.bank || !!dataConfirm?.bankValue;
+    const criteriaCode = data_criteriaList?.find(
+      (c) => c.id === dataConfirm?.criteria?.[0]?.criteriaCode || c.code === dataConfirm?.criteria?.[0]?.criteriaCode
+    )?.code;
+
+    const renderSelectValue = (value, options) => {
+      if (!value && value !== 0) return "-";
+      const found = options.find((o) => o.value === value || o.label === value);
+      return found ? found.label : value || "-";
+    };
+
+    let dynamicCriteriaCol = [];
+    if (criteriaCode === "CLASSIFICATION_TYPE") {
+      const opts = (data_classificationTypeList || []).map((item) => ({
+        value: item.id,
+        label: item.name,
+      }));
+      dynamicCriteriaCol.push({
+        title: "CLASSIFICATION TYPE",
+        dataIndex: "criteriaValue",
+        render: (value) => renderSelectValue(value, opts),
+      });
+    } else if (criteriaCode === "ACCOUNT_TYPE") {
+      const opts = (data_accountTypeList || []).map((item) => ({
+        value: item.id,
+        label: item.name,
+      }));
+      dynamicCriteriaCol.push({
+        title: "ACCOUNT TYPE",
+        dataIndex: "criteriaValue",
+        render: (value) => renderSelectValue(value, opts),
+      });
+    }
+
+    const glAccountOpts = (isBank && data_glAccountBankList?.length > 0)
+      ? (data_glAccountBankList || []).map((item) => ({
+          value: item.glNumber,
+          label: `${item.glNumber} - ${item.glDescription}`,
+        }))
+      : (data_glAccountList || []).map((item) => ({
+          value: item.glAccountId ?? item.id,
+          label: `${item.glAccount ?? item.account} - ${item.glAccountDesc ?? item.name}`,
+        }));
+
+    const specialGlOpts = (data_specialGLList || []).map((item) => ({
+      value: item.id,
+      label: item.name,
+    }));
+
+    return [
+      {
+        title: "NO",
+        dataIndex: "no",
+        width: 60,
+        render: (_, __, index) => index + 1,
+      },
+      ...dynamicCriteriaCol,
+      {
+        title: "GL ACCOUNT",
+        dataIndex: "glAccountId",
+        render: (value) => renderSelectValue(value, glAccountOpts),
+      },
+      {
+        title: "DESCRIPTION ACCOUNT",
+        dataIndex: "descriptionAccount",
+        render: (value) => value || "-",
+      },
+      {
+        title: "SPECIAL GL",
+        dataIndex: "specialGlId",
+        render: (value) => renderSelectValue(value, specialGlOpts),
+      },
+      {
+        title: "START DATE",
+        dataIndex: "startDate",
+        render: (value) => value || "-",
+      },
+      {
+        title: "END DATE",
+        dataIndex: "endDate",
+        render: (value) => value || "-",
+      },
+    ];
+  }, [
+    dataConfirm, data_criteriaList, data_classificationTypeList, data_accountTypeList,
+    data_glAccountBankList, data_glAccountList, data_specialGLList
+  ]);
+
+  const columnDefinitionsCriteria = useMemo(() => criteriaCols.map(col => ({
+    key: col.key || col.dataIndex || col.title,
+    title: col.title
+  })), [criteriaCols]);
+
   // Sliced data for FE pagination in TableRBI
   const processedMappingData = useMemo(() => {
     let filtered = (dataConfirm?.mappingInfo || []);
@@ -385,55 +495,85 @@ const BillingItemFormConfirmation = ({ dataConfirm = {} }) => {
         {"MAPPING INFORMATION"}
       </div>
 
-      <div className="w-full">
-        <TableRBI
-          idTable="mappingInfoTable"
-          dataSource={slicedMappingData}
-          columns={mappingColumns}
-          totalData={processedMappingData?.length || 0}
-          current={page}
-          pageSize={pageSize}
-          onChange={handleChange}
-          onSizeChanger={handleChange}
-          onSort={onSortMapping}
-          tableScrolled={{ y: 525, x: 2000 }}
-          columnDefinitions={columnDefinitionsMapping}
-          fixedColumns={fixedColumns}
-          setFixedColumns={setFixedColumns}
-          showAdvanceSearch={false}
-          showSearchBar={false}
-          showExport={false}
-        />
-      </div>
+      <Tabs
+        defaultActiveKey="mapping"
+        activeKey={activeTab}
+        onChange={(key) => setActiveTab(key)}
+        type="card"
+        className="mb-4"
+      >
+        <TabPane tab="Mapping Detail" key="mapping" />
+        <TabPane tab="Criteria Detail" key="criteria" />
+      </Tabs>
 
-      {detailMapping ? (
-        <div>
-          <div className="text-primary text-xs font-bold uppercase mt-5 mb-5">
-            {"DETAIL MAPPING INFORMATION"}
-          </div>
-          <div className="text-primary text-xs font-bold mt-3">
-            {`Category: ${subHeader || ""}`}
-          </div>
+      {activeTab === "mapping" && (
+        <div className="w-full">
           <TableRBI
-            idTable="detailMappingInfoTable"
-            dataSource={slicedDetailData}
-            columns={detailCols}
-            totalData={processedDetailData?.length || 0}
-            current={pageDetail}
-            pageSize={pageSizeDetail}
-            onChange={handleChangeDetail}
-            onSizeChanger={handleChangeDetail}
-            onSort={onSortDetail}
+            idTable="mappingInfoTable"
+            dataSource={slicedMappingData}
+            columns={mappingColumns}
+            totalData={processedMappingData?.length || 0}
+            current={page}
+            pageSize={pageSize}
+            onChange={handleChange}
+            onSizeChanger={handleChange}
+            onSort={onSortMapping}
             tableScrolled={{ y: 525, x: 2000 }}
-            columnDefinitions={columnDefinitionsDetail}
-            fixedColumns={fixedColumnsDetail}
-            setFixedColumns={setFixedColumnsDetail}
+            columnDefinitions={columnDefinitionsMapping}
+            fixedColumns={fixedColumns}
+            setFixedColumns={setFixedColumns}
             showAdvanceSearch={false}
             showSearchBar={false}
             showExport={false}
           />
+          {detailMapping ? (
+            <div className="mt-5">
+              <div className="text-primary text-xs font-bold uppercase mt-5 mb-5">
+                {"DETAIL MAPPING INFORMATION"}
+              </div>
+              <div className="text-primary text-xs font-bold mt-3">
+                {`Category: ${subHeader || ""}`}
+              </div>
+              <TableRBI
+                idTable="detailMappingInfoTable"
+                dataSource={slicedDetailData}
+                columns={detailCols}
+                totalData={processedDetailData?.length || 0}
+                current={pageDetail}
+                pageSize={pageSizeDetail}
+                onChange={handleChangeDetail}
+                onSizeChanger={handleChangeDetail}
+                onSort={onSortDetail}
+                tableScrolled={{ y: 525, x: 2000 }}
+                columnDefinitions={columnDefinitionsDetail}
+                fixedColumns={fixedColumnsDetail}
+                setFixedColumns={setFixedColumnsDetail}
+                showAdvanceSearch={false}
+                showSearchBar={false}
+                showExport={false}
+              />
+            </div>
+          ) : null}
         </div>
-      ) : null}
+      )}
+
+      {activeTab === "criteria" && (
+        <div className="w-full">
+          <TableRBI
+            idTable="criteriaDetailInfoTable"
+            dataSource={dataCriteriaTable}
+            columns={criteriaCols}
+            totalData={dataCriteriaTable?.length || 0}
+            tableScrolled={{ y: 525, x: 1200 }}
+            columnDefinitions={columnDefinitionsCriteria}
+            fixedColumns={{ left: ["NO"], right: [] }}
+            showAdvanceSearch={false}
+            showSearchBar={false}
+            showExport={false}
+            usePagination={false}
+          />
+        </div>
+      )}
     </Fragment>
   );
 };
