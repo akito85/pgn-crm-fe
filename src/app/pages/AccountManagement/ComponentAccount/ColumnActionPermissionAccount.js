@@ -56,7 +56,7 @@ export const RenderContentActions = (
     );
   } else {
     return (
-      <div className="w-full flex justify-center gap-4 mt-1 items-start">
+      <div className="w-full flex justify-center gap-4 items-center">
         {itemRender?.map((item) => {
           if (permissions?.includes(item?.action)) {
             return item?.render(record, totalLength);

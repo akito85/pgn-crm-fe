@@ -10,17 +10,21 @@ const defaultListConfig = {
   fetchListActionCreator: getListServiceAgreement,
   buildListActionPayload: ({
     scope,
-    encodedSearch,
+    search,
+    inputFields,
     sort,
     page,
     pageSize,
     isLoadMore,
   }) => ({
     id: scope.idAccount,
-    search: encodedSearch,
-    sort,
-    page,
-    pageSize,
+    body: {
+      page,
+      size: pageSize,
+      sort,
+      inputFields,
+      searchs: search,
+    },
     isLoadMore,
   }),
   downloadActionCreator: downloadServiceAgreement,
@@ -69,11 +73,6 @@ export const useServiceAgreementListController = ({
   const [search, setSearch] = useState({});
   const [inputFields, setInputFields] = useState([]);
 
-  const encodedSearch = useMemo(
-    () => encodeURIComponent(JSON.stringify(search)),
-    [search]
-  );
-
   const dataSourceWithKeys = useMemo(
     () => config.mapRows(data?.result || []),
     [config, data?.result]
@@ -81,6 +80,8 @@ export const useServiceAgreementListController = ({
 
   const totalElements = data?.page?.totalElements || 0;
   const hasMore = dataSourceWithKeys.length < totalElements;
+
+  const isExistMain = data?.isExistMain || false;
 
   const isEnabled = useMemo(() => {
     if (typeof config.enabled === "function") {
@@ -96,8 +97,8 @@ export const useServiceAgreementListController = ({
 
       const payload = config.buildListActionPayload({
         scope,
-        encodedSearch,
         search,
+        inputFields,
         sort,
         page: nextPage,
         pageSize: loadMoreSize,
@@ -111,10 +112,10 @@ export const useServiceAgreementListController = ({
     [
       config,
       dispatch,
-      encodedSearch,
       isEnabled,
       loadMoreSize,
       scope,
+      inputFields,
       search,
       sort,
     ]
@@ -182,6 +183,7 @@ export const useServiceAgreementListController = ({
     handleLoadMore,
     handleSearch,
     hasMore,
+    isExistMain,
     inputFields,
     loading,
     onSort,

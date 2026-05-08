@@ -4,7 +4,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import {
   LeftCircleOutlined,
   RightCircleOutlined,
-  RightOutlined,
 } from "@ant-design/icons";
 
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
@@ -21,7 +20,6 @@ import {
   getDetailTosSubmission,
   getListAppHier,
   getListAppHierDetail,
-  getListCategory,
   updateTosSubmissionBody,
   validateOverlapTos
 } from "../../../../../../../redux/slices/account_management/detailAccount/tosSubmissionSlice";
@@ -95,7 +93,6 @@ const CreateTosSubmission = ({ typeForm }) => {
     dataListAppHierIdForm = [],
     dataListAppHierDetailForm = [],
     dataDetail = {},
-    dataOverlap= {}
   } = useSelector((state) => state.tosSubmission);
   
   const isLoading = loading || loadingForm;
@@ -330,18 +327,15 @@ const CreateTosSubmission = ({ typeForm }) => {
     }
   };
 
-  const preventSubmit = () => {
-    let count = 0;
-    const length = steps.length;
-    steps.forEach((item) => {
-      if (!item.disabled) {
-        count++;
-      }
-    });
-    return count !== length;
-  };
+  const hasIncompleteStep = steps.some((item) => item.disabled);
+  const hasAttachment = listDataAttachment.length > 0;
+  const isSubmitDisabled = hasIncompleteStep || !hasAttachment;
 
-  const handleSubmitForm = (value) => {
+  const handleSubmitForm = () => {
+    if (typeSubmit === 2 && !hasAttachment) {
+      return;
+    }
+
     setModalConfirm(true);
   };
   const handleCancelModalConfirm = () => {
@@ -399,7 +393,7 @@ const CreateTosSubmission = ({ typeForm }) => {
               files: element.file,
               category: categoryId,
             };
-            const response = await accountManagementService.uploadAttachment(
+            await accountManagementService.uploadAttachment(
               `/v1/dbs/api/tossubmission/uploadAttachment/${idTosSubmission}`,
               body
             );
@@ -436,7 +430,7 @@ const CreateTosSubmission = ({ typeForm }) => {
               files: element.file,
               category: categoryId,
             };
-            const response = await accountManagementService.uploadAttachment(
+            await accountManagementService.uploadAttachment(
               `/v1/dbs/api/tossubmission/uploadAttachment/${id}`,
               body
             );
@@ -534,7 +528,6 @@ const CreateTosSubmission = ({ typeForm }) => {
             <div className="steps-action flex w-full justify-between gap-x-2">
               <ButtonComponent
                 type="menu"
-                icon={<SVGIcon name="IconArrowNarrowLeft" width={24} />}
                 onClick={() => setModalBack(true)}
               >
                 Cancel
@@ -559,11 +552,21 @@ const CreateTosSubmission = ({ typeForm }) => {
                       scrollLeftHandler();
                     }}
                     type="menu"
-                    icon={<SVGIcon name="IconArrowNarrowLeft" width={24} />}
                   >
                     Previous
                   </ButtonComponent>
                 )}
+                <>
+                  <ButtonComponent
+                      disabled={hasIncompleteStep}
+                      form="tosSubmissionForm"
+                      htmlType="submit"
+                      type="secondary"
+                      onClick={() => setTypeSubmit(1)}
+                    >
+                      Save as Draft
+                    </ButtonComponent>
+                </>
                 {current < steps.length - 1 && (
                   <ButtonComponent
                     onClick={handleButtonNext}
@@ -574,19 +577,12 @@ const CreateTosSubmission = ({ typeForm }) => {
                     Next
                   </ButtonComponent>
                 )}
+                
                 {current === steps.length - 1 ? (
                   <>
+                    
                     <ButtonComponent
-                      disabled={preventSubmit()}
-                      form="tosSubmissionForm"
-                      htmlType="submit"
-                      type="secondary"
-                      onClick={() => setTypeSubmit(1)}
-                    >
-                      Save as Draft
-                    </ButtonComponent>
-                    <ButtonComponent
-                      disabled={preventSubmit()}
+                      disabled={isSubmitDisabled}
                       form="tosSubmissionForm"
                       htmlType="submit"
                       type="approve"
