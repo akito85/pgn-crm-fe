@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import AccountInfoSection from "./Form/AccountInfoSection";
 import ServiceAgreementSection from "./Form/ServiceAgreementSection";
 import ContactInfoSection from "./Form/ContactInfoSection";
-import PaymentPlanInfoSection from "./Form/PaymentPlanInfoSection";
+import RePlanInfoSection from "./Form/RePlanInfoSection";
 import OpenItemInfoSection from "./Form/OpenItemInfoSection";
-import PaymentPlanDetailSection from "./Form/PaymentPlanDetailSection";
+import RePlanDetailSection from "./Form/RePlanDetailSection";
 
-const RestructureForm = ({
+const RePlanForm = ({
     form,
     listAccount,
     handleAccountChange,
@@ -36,13 +36,12 @@ const RestructureForm = ({
                 accountNumber={form.getFieldValue("accountNumber")}
                 ref={contactRef}
             />
-            <PaymentPlanInfoSection 
+            <RePlanInfoSection 
                 form={form}
-                disabled={disabled}
                 onPlanInfoChange={setPlanInfo}
             />
             <OpenItemInfoSection openItems={openItems} />
-            <PaymentPlanDetailSection 
+            <RePlanDetailSection 
                 planInfo={planInfo} 
                 openItems={openItems} 
                 onValidationChange={onPlanDetailValidation}
@@ -52,5 +51,4 @@ const RestructureForm = ({
     );
 };
 
-export default RestructureForm;
-
+export default RePlanForm;

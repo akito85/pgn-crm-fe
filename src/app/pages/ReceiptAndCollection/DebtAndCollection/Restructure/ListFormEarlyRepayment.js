@@ -1,7 +1,7 @@
-import { WarningOutlined, InfoCircleFilled } from "@ant-design/icons";
+import { WarningOutlined } from "@ant-design/icons";
 import { Form, Spin, message } from "antd";
 import moment from "moment";
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import BreadCrumb from "../../../../../components/BreadCrumb";
@@ -15,14 +15,11 @@ import {
     getListApprovalById,
     getListCategory,
     getDetailRestructure,
-    saveRestructure,
-    updateRestructure,
-    getSa,
-    getPrimaryContact,
-    resetBadDebt,
+    saveEarlyRepayment,
+    updateEarlyRepayment,
 } from "../../../../../redux/slices/receipt_collection/restructure";
 import { DEBT_AND_COLLECTION_ROUTES } from "../../../../../routes/DebtAndCollection/rc_routes";
-import RestructureForm from "./RestructureForm";
+import EarlyRepaymentForm from "./EarlyRepaymentForm";
 import SubSectionCard from "../../../../../components/SubSectionCard";
 import { ModalConfirm } from "../../../../../components/Modal/ModalPopUp";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
@@ -31,26 +28,17 @@ import ApprovalComponentGeneral from "../../../../../components/Approval/Approva
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 import receiptCollectionHttpService from "../../../../../redux/services/receiptCollectionHttpService";
 import { configApp } from "../../../../../constants/configApp";
-import ContentModalConfirmRestructure from "./ContentModalConfirmRestructure";
-import { getMandatoryAttachments } from "../../../../../constants/restructure";
+import ContentModalConfirmEarlyRepayment from "./ContentModalConfirmEarlyRepayment";
 import { uploadAttachments } from "../../../../../utils/uploadHelper";
 
 
-const ListFormRestructure = (props) => {
+const ListFormEarlyRepayment = (props) => {
     const { type } = props;
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const [form] = Form.useForm();
-    const accountSegment = Form.useWatch("accountSegment", form);
     const location = useLocation();
-    const sessionId = sessionStorage.getItem("restructure_update_id");
-    const id = location?.state?.id || sessionId;
-
-    useEffect(() => {
-        if (location?.state?.id) {
-            sessionStorage.setItem("restructure_update_id", location.state.id);
-        }
-    }, [location]);
+    const { id } = location?.state || {};
 
     const {
         listCustomer,
@@ -64,8 +52,13 @@ const ListFormRestructure = (props) => {
         data_detail
     } = useSelector((state) => state.restructure);
 
-    // listAccount dari Redux store sudah berformat { value, label, accountName, ... }
-    // sesuai response backend GET /restructure/get-list-account
+    // Mocking dataAccNumber for the slicing purpose (since Warranty uses dataAccNumber)
+    const dataAccNumber = {
+        data: [
+            { id: 1, name: "ACC-001" },
+            { id: 2, name: "ACC-002" }
+        ]
+    };
 
     const [current, setCurrent] = useState(0);
     const [modalBack, setModalBack] = useState(false);
@@ -79,8 +72,8 @@ const ListFormRestructure = (props) => {
     // Validation states for step 0
     const [isPlanDetailValid, setIsPlanDetailValid] = useState(true);
     const [contacts, setContacts] = useState([]);
+    const [selectedInstallmentDetailIds, setSelectedInstallmentDetailIds] = useState([]);
     const [installmentsByCurrency, setInstallmentsByCurrency] = useState({});
-    const contactRef = useRef(null);
 
     const steps = [
         { title: "CREATE", value: "Create" },
@@ -122,71 +115,64 @@ const ListFormRestructure = (props) => {
 
         // Set default values for mandatory fields that might be disabled or need defaults
         form.setFieldsValue({
+            source: "SAP FSCD",
             requestDate: moment(),
         });
 
-        if (type === "update" && id) {
+        if (id) {
             dispatch(getDetailRestructure(id));
         }
-    }, [dispatch, type, id, form]);
+    }, [dispatch, id, form]);
 
     useEffect(() => {
-        console.log("ListFormRestructure update check:", { type, id, data_detail });
-        if (type === "update" && id && data_detail) {
-            const rest = data_detail.data?.restructure || data_detail.restructure;
-            console.log("Extracted restructure detail:", rest);
-            if (rest) {
-                form.setFieldsValue({
-                    accountNumber: rest.accountNumber,
-                    accountName: rest.accountName,
-                    customerNumber: rest.customerNumber,
-                    customerName: rest.customerName,
-                    accountGroupType: rest.accountGroupType,
-                    sor: rest.sor,
-                    costCenter: rest.costCenter,
-                    accountSegment: rest.accountSegment,
-                    meterReadingCode: rest.meterReadingCode,
-                    accountType: rest.accountType,
-                    classificationType: rest.classificationType,
-                    accountStatus: rest.accountStatus,
-                    saNumber: rest.saNumber,
-                    saName: rest.saName,
-                    saDate: rest.saDate ? moment(rest.saDate) : null,
-                    startDate: rest.startDate ? moment(rest.startDate) : null,
-                    endDate: rest.endDate ? moment(rest.endDate) : null,
-                    type: rest.type,
-                    tenor: rest.tenor,
-                    startPeriod: rest.startPeriod ? moment(rest.startPeriod) : null,
-                    description: rest.remark || rest.description,
+        if (data_detail && data_detail.restructure) {
+            const res = data_detail.restructure;
+            
+            // Pre-populate account and installment fields
+            form.setFieldsValue({
+                accountNumber: res.accountNumber,
+                accountName: res.accountName,
+                customerNumber: res.customerNumber,
+                customerName: res.customerName,
+                accountGroupType: res.accountGroupType,
+                sor: res.sor,
+                costCenter: res.costCenter,
+                accountSegment: res.accountSegment,
+                meterReadingCode: res.meterReadingCode,
+                accountType: res.accountType,
+                classificationType: res.classificationType,
+                accountStatus: res.accountStatus,
+                
+                type: res.type,
+                tenor: res.tenor,
+                startPeriod: res.startPeriod ? moment(res.startPeriod).format("MMMM YYYY") : "",
+                source: res.source || "Manual",
+                requestDate: res.createdDate ? moment(res.createdDate).format("DD MMMM YYYY") : moment().format("DD MMMM YYYY"),
+                remark: res.description,
+            });
+
+            // Populate contacts
+            setContacts(res.contactList || []);
+
+            // Map calculationList to installmentsByCurrency format
+            const calc = data_detail.calculationList || [];
+            const eligibleIds = calc.filter(curr => curr.status !== "Paid").map(curr => curr.key || curr.id || curr.keyId);
+            setSelectedInstallmentDetailIds(eligibleIds);
+
+            const groupedCalc = calc.reduce((acc, curr) => {
+                const cur = curr.currency || "IDR";
+                if (!acc[cur]) acc[cur] = [];
+                acc[cur].push({
+                    key: curr.key || curr.id,
+                    periode: curr.periode,
+                    amount: curr.amount,
+                    status: curr.status || "Open"
                 });
-
-                if (rest.appHierId) {
-                    setSelectedHierarchy(rest.appHierId);
-                }
-
-                if (rest.contactList && rest.contactList.length > 0 && contactRef.current) {
-                    const formattedContacts = rest.contactList.map((item, index) => ({
-                        key: item.key || item.id || index + 1,
-                        contactId: item.contactId || item.id,
-                        isPrimary: item.isPrimary || false,
-                        isManual: item.isManual || false,
-                        cpName: item.cpName || [item.firstName, item.middleName, item.lastName].filter(Boolean).join(" "),
-                        job: item.job,
-                        position: item.position,
-                        address: item.address || item.contactAddress || "-",
-                        details: item.details || item.criteria || item.contactDetails || []
-                    }));
-                    console.log("Formatted contacts for setting:", formattedContacts);
-                    contactRef.current.setContacts(formattedContacts);
-                }
-            }
-
-            const attachments = data_detail.data?.attachmentDtoList || data_detail.attachmentDtoList || [];
-            if (attachments.length > 0) {
-                setListDataAttachment(attachments.map(a => ({ ...a, dataType: "exist" })));
-            }
+                return acc;
+            }, {});
+            setInstallmentsByCurrency(groupedCalc);
         }
-    }, [type, id, data_detail, form]);
+    }, [data_detail, form]);
 
     useEffect(() => {
         if (selectedHierarchy) {
@@ -194,7 +180,7 @@ const ListFormRestructure = (props) => {
         }
     }, [dispatch, selectedHierarchy]);
 
-    const handleAccountChange = async (value) => {
+    const handleAccountChange = (value) => {
         const selected = listAccount.find((acc) => acc.value === value);
         if (selected) {
             form.setFieldsValue({
@@ -211,40 +197,6 @@ const ListFormRestructure = (props) => {
                 accountStatus: selected.accountStatus,
             });
             dispatch(getBadDebtByAccount(value));
-            
-            if (contactRef.current) {
-                contactRef.current.resetNonManualContacts();
-            }
-
-            // Automatically fetch SA
-            try {
-                const action = await dispatch(getSa(value));
-                if (action.meta.requestStatus === "fulfilled" && action.payload) {
-                    const data = action.payload;
-                    form.setFieldsValue({
-                        saNumber: data.saNumber,
-                        saName: data.saName,
-                        saDate: data.saDate ? moment(data.saDate) : null,
-                        startDate: data.startDate ? moment(data.startDate) : null,
-                        endDate: data.endDate ? moment(data.endDate) : null,
-                    });
-                }
-            } catch (err) {
-                console.error("Failed to fetch SA info", err);
-            }
-
-            // Automatically fetch Primary Contact
-            try {
-                const contactAction = await dispatch(getPrimaryContact(value));
-                if (contactAction.meta.requestStatus === "fulfilled" && contactAction.payload) {
-                    const primaryContact = contactAction.payload;
-                    if (primaryContact && contactRef.current) {
-                        contactRef.current.addContact(primaryContact);
-                    }
-                }
-            } catch (err) {
-                console.error("Failed to fetch primary contact", err);
-            }
         }
     };
 
@@ -306,61 +258,31 @@ const ListFormRestructure = (props) => {
         }
     };
 
-    const buildRequestBody = (values, isDraft) => ({
-        accountNumber: values.accountNumber !== undefined ? values.accountNumber : null,
-        accountName: values.accountName !== undefined ? values.accountName : null,
-        customerNumber: values.customerNumber !== undefined ? values.customerNumber : null,
-        customerName: values.customerName !== undefined ? values.customerName : null,
-        accountGroupType: values.accountGroupType !== undefined ? values.accountGroupType : null,
-        sor: values.sor !== undefined ? values.sor : null,
-        costCenter: values.costCenter !== undefined ? values.costCenter : null,
-        accountSegment: values.accountSegment !== undefined ? values.accountSegment : null,
-        meterReadingCode: values.meterReadingCode !== undefined ? values.meterReadingCode : null,
-        accountType: values.accountType !== undefined ? values.accountType : null,
-        classificationType: values.classificationType !== undefined ? values.classificationType : null,
-        sapCustId: values.sapCustId !== undefined ? values.sapCustId : null,
-        accountStatus: values.accountStatus !== undefined ? values.accountStatus : null,
-        saNumber: values.saNumber !== undefined ? values.saNumber : null,
-        type: values.type !== undefined ? values.type : null,
-        tenor: values.tenor !== undefined ? values.tenor : null,
-        startPeriod: values.startPeriod ? moment(values.startPeriod).format("YYYY-MM-DD") : null,
-        source: values.source ,
-        description: values.description !== undefined ? values.description : null,
-        contactIds: contacts.map((c) => c.id || c.contactId).filter(Boolean),
-        appHierId: selectedHierarchy !== undefined && selectedHierarchy !== null ? selectedHierarchy : null,
+    const buildERRequestBody = (values, isDraft) => ({
+        restructureId: id,
+        earlyRepaymentDate: values.earlyRepaymentDate
+            ? moment(values.earlyRepaymentDate).format("YYYY-MM-DD")
+            : null,
+        earlyRepaymentReason: values.earlyRepaymentReason,
+        installmentDetailIds: selectedInstallmentDetailIds,
+        appHierId: selectedHierarchy,
         attachmentIds: listDataAttachment.map((a) => a.id).filter(Boolean),
-        badDebtList: badDebtList.map((item) => ({
-            invoiceNumber: item.invoiceNo,
-            invoicePeriod: item.invoicePeriod,
-            currency: item.currency,
-            allocation: item.allocation,
-            amount: item.amount,
-        })),
-        calculationList: Object.values(installmentsByCurrency).flat().map((item) => ({
-            periode: item.periode,
-            currency: item.currency,
-            amount: parseFloat(String(item.amount).replace(/,/g, "")) || 0,
-        })),
         isDraft,
     });
 
     const handleSaveDraft = async () => {
         const values = form.getFieldsValue(true);
-        if (!values.accountNumber) {
-            message.warning("Account Number wajib diisi untuk menyimpan draft");
-            return;
-        }
-        const body = buildRequestBody(values, true);
+        const body = buildERRequestBody(values, true);
         const action = type === "update" && id
-            ? await dispatch(updateRestructure({ id, body }))
-            : await dispatch(saveRestructure({ body }));
+            ? await dispatch(updateEarlyRepayment({ id, body }))
+            : await dispatch(saveEarlyRepayment({ body }));
         if (action.meta.requestStatus === "fulfilled") {
-            const restructureId = action.payload?.data?.restructureId || id;
+            const repaymentId = action.payload?.data?.repaymentId || id;
             const newAttachments = listDataAttachment.filter(item => item.dataType !== "exist");
-            if (newAttachments.length > 0 && restructureId) {
-                uploadAttachments(newAttachments, restructureId, "RESTRUCTURE",
+            if (newAttachments.length > 0 && repaymentId) {
+                await uploadAttachments(newAttachments, repaymentId, "EARLY_REPAYMENT_RESTRUCTURE",
                     (body) => receiptCollectionHttpService.uploadImage(`/v1/dbs/api/attachment/upload/v1`, body)
-                ).catch(err => console.error("Async draft upload failed", err));
+                );
             }
             message.success("Draft berhasil disimpan!");
             navigate(DEBT_AND_COLLECTION_ROUTES.VIEW_RESTRUCTURE);
@@ -370,17 +292,6 @@ const ListFormRestructure = (props) => {
     const handleSubmit = async () => {
         try {
             const values = await form.validateFields();
-            const segment = values?.accountSegment;
-            const mandatory = getMandatoryAttachments(segment);
-            const uploadedCategories = (listDataAttachment || []).map(a => a.fileCategoryName);
-            const missing = mandatory.filter(cat => !uploadedCategories.includes(cat));
-            const blockingMissing = missing.filter(cat => !cat.toLowerCase().includes("optional"));
-            
-            if (blockingMissing.length > 0) {
-                message.warning(`Attachment mandatory kurang: ${blockingMissing.join(", ")}`);
-                return;
-            }
-
             setFormValues(values);
             setIsModalSubmit(true);
         } catch (error) {
@@ -390,19 +301,19 @@ const ListFormRestructure = (props) => {
 
     const handleSave = async () => {
         setIsModalSubmit(false);
-        const body = buildRequestBody(formValues, false);
+        const body = buildERRequestBody(formValues, false);
         const action = type === "update" && id
-            ? await dispatch(updateRestructure({ id, body }))
-            : await dispatch(saveRestructure({ body }));
+            ? await dispatch(updateEarlyRepayment({ id, body }))
+            : await dispatch(saveEarlyRepayment({ body }));
         if (action.meta.requestStatus === "fulfilled") {
-            const restructureId = action.payload?.data?.restructureId || id;
+            const repaymentId = action.payload?.data?.repaymentId || id;
             const newAttachments = listDataAttachment.filter(item => item.dataType !== "exist");
-            if (newAttachments.length > 0 && restructureId) {
-                uploadAttachments(newAttachments, restructureId, "RESTRUCTURE",
+            if (newAttachments.length > 0 && repaymentId) {
+                await uploadAttachments(newAttachments, repaymentId, "EARLY_REPAYMENT_RESTRUCTURE",
                     (body) => receiptCollectionHttpService.uploadImage(`/v1/dbs/api/attachment/upload/v1`, body)
-                ).catch(err => console.error("Async submit upload failed", err));
+                );
             }
-            message.success("Payment Plan berhasil disubmit!");
+            message.success("Early Repayment berhasil disubmit!");
             navigate(DEBT_AND_COLLECTION_ROUTES.VIEW_RESTRUCTURE);
         }
     };
@@ -410,8 +321,8 @@ const ListFormRestructure = (props) => {
     const routes = [
         { path: "", breadcrumbName: "Payment & Collection" },
         { path: "", breadcrumbName: "Debt & Collection" },
-        { path: DEBT_AND_COLLECTION_ROUTES.VIEW_RESTRUCTURE, breadcrumbName: "Payment Plan" },
-        { path: "", breadcrumbName: type === "create" ? "Create" : "Update" },
+        { path: DEBT_AND_COLLECTION_ROUTES.VIEW_RESTRUCTURE, breadcrumbName: "Early Repayment" },
+        { path: "", breadcrumbName: type === "create" ? "Create Early Repayment" : "Update Early Repayment" },
     ];
 
     const handlePlanDetailValidation = useCallback((isValid) => {
@@ -439,16 +350,19 @@ const ListFormRestructure = (props) => {
                     onFinish={handleSubmit}
                 >
                     <div style={{ display: current !== 0 ? "none" : "block" }}>
-                        <RestructureForm
+                        <EarlyRepaymentForm
                             form={form}
-                            listAccount={listAccount}
+                            dataAccNumber={dataAccNumber}
                             handleAccountChange={handleAccountChange}
-                            disabled={type === "update"}
+                            disabled={true}
                             openItems={badDebtList}
                             onContactChange={handleContactChange}
                             onPlanDetailValidation={handlePlanDetailValidation}
                             onInstallmentsChange={handleInstallmentsChange}
-                            contactRef={contactRef}
+                            onInstallmentDetailIdsChange={setSelectedInstallmentDetailIds}
+                            data_detail={data_detail}
+                            contacts={contacts}
+                            installmentsByCurrency={installmentsByCurrency}
                         />
                     </div>
 
@@ -468,36 +382,6 @@ const ListFormRestructure = (props) => {
                     <div style={{ display: current !== 2 ? "none" : "block" }} className="mt-8">
                         <BaseContainer header={"ATTACHMENT INFORMATION"}>
                             <SubSectionCard>
-                                {(() => {
-                                    const mandatory = getMandatoryAttachments(accountSegment);
-                                    const uploadedCategories = (listDataAttachment || []).map(a => a.fileCategoryName);
-                                    const missingCategories = mandatory.filter(cat => !uploadedCategories.includes(cat));
-                                    const mandatoryMissing = missingCategories.filter(cat => !cat.toLowerCase().includes("optional"));
-
-                                    if (mandatoryMissing.length === 0) return null;
-
-                                    return (
-                                        <div 
-                                            className="flex items-start gap-3 p-4 border mb-4" 
-                                            style={{ 
-                                                backgroundColor: "#FFF3E6", 
-                                                borderColor: "#FFE0B2",
-                                                borderRadius: "8px",
-                                                color: "#B36214"
-                                            }}
-                                        >
-                                            <InfoCircleFilled style={{ fontSize: "18px", marginTop: "2px", color: "#D97706" }} />
-                                            <div className="flex flex-col gap-1 text-[14px]">
-                                                <span style={{ color: "#B36214", fontWeight: "600" }}>
-                                                    Please upload the required documents below to continue the process.
-                                                </span>
-                                                <span style={{ color: "#B36214", fontWeight: "500" }}>
-                                                    {missingCategories.join(", ")}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    );
-                                })()}
                                 <AttachmentComponent
                                     type={type}
                                     data={listDataAttachment || []}
@@ -509,7 +393,6 @@ const ListFormRestructure = (props) => {
                                     service={receiptCollectionHttpService}
                                     configApplication={configApp.PAYMENT_SERVICE}
                                     typeRBI={"data"}
-                                    mandatory={true}
                                 />
                             </SubSectionCard>
                         </BaseContainer>
@@ -526,11 +409,6 @@ const ListFormRestructure = (props) => {
                             setCurrent(0);
                             setSelectedHierarchy(null); 
                             setListDataAttachment([]); 
-                            setContacts([]);
-                            dispatch(resetBadDebt());
-                            if (contactRef.current) {
-                                contactRef.current.setContacts([]);
-                            }
                         }}
                         onSaveDraft={handleSaveDraft}
                         onSubmit={() => form.submit()}
@@ -569,7 +447,7 @@ const ListFormRestructure = (props) => {
                     </div>
                 }
             >
-                <ContentModalConfirmRestructure
+                <ContentModalConfirmEarlyRepayment
                     formValues={formValues}
                     contacts={contacts}
                     openItems={badDebtList}
@@ -578,10 +456,11 @@ const ListFormRestructure = (props) => {
                     appHierOptions={appHierOptions}
                     appHierDataDetail={appHierDataDetail}
                     selectedHierarchy={selectedHierarchy}
+                    data_detail={data_detail}
                 />
             </ModalCustom>
         </>
     );
 };
 
-export default ListFormRestructure;
+export default ListFormEarlyRepayment;
