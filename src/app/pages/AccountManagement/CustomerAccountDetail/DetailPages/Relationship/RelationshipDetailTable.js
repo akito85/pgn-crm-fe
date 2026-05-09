@@ -6,9 +6,9 @@ import NxTable from "../../../../../../components/Nx/NxTable";
  * Renders the expandable nested "Related Detail" table for a relationship row.
  *
  * @param {object}   props
- * @param {Array}    [props.relatedDetail=[]] - Related detail records from the parent row.
+ * @param {Array}    [props.relatedDetails=[]] - Related detail records from the parent row.
  */
-const RelationshipDetailTable = ({ relatedDetail = [] }) => {
+const RelationshipDetailTable = ({ relatedDetails = [], key }) => {
   const searchInput = useRef(null);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
@@ -30,9 +30,13 @@ const RelationshipDetailTable = ({ relatedDetail = [] }) => {
     <NxTable
       useSelect={false}
       usePagination={false}
-      dataSource={relatedDetail}
+      dataSource={relatedDetails}
       columns={columns}
-      className="related-detail-nested-table"
+      idTable={`relationship-detail-table-${key}`}
+      totalData={relatedDetails.length}
+      rounded={false}
+      showFooter={false}
+      showBorder={false}
     />
   );
 };

@@ -827,7 +827,7 @@ export const columnsTableCriteriaPromo = (
       ),
   },
   {
-    required: true,
+    required: false,
     title: "MAX VALUE UOM",
     key: "maxValueUom",
     width: 240,

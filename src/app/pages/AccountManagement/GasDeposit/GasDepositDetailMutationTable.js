@@ -167,7 +167,7 @@ const GasDepositDetailMutationTable = ({
 
   return (
     <NxTable
-      idTable="gas-deposit-detail-mutation-table"
+      idTable={`gas-deposit-detail-mutation-table-${index}-${detailIndex}`}
       dataSource={dataSource}
       totalData={totalElement}
       tableScrolled={{ x: dataSource.length ? "max-content" : 4000 }}
@@ -183,6 +183,7 @@ const GasDepositDetailMutationTable = ({
       showAdvanceSearch={false}
       showSearchBar={false}
       useSelect={false}
+      showFooter={false}
     />
   );
 };

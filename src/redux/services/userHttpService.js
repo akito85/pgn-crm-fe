@@ -66,8 +66,10 @@ const getDetailByIdBody = async (url, id, customBaseUrl = null) => {
     
     const response = await axios.get(
       baseUrl + url,
-      { id: id },
-      { headers: buildHeaders(baseUrl) }
+      {
+        params: { id: id },
+        headers: buildHeaders(baseUrl),
+      }
     );
     return response?.data;
   } catch (error) {
@@ -83,16 +85,18 @@ const downloadData = async (url, customBaseUrl = null) => {
       headers: buildHeaders(baseUrl),
       responseType: "blob",
     });
-    if (hasValue(response.headers?.get("content-disposition"))) {
-      const filename = response.headers
-        .get("content-disposition")
+    const contentDisposition = response.headers?.["content-disposition"];
+    if (hasValue(contentDisposition)) {
+      const filename = contentDisposition
         .split(";")
         .find((n) => n.includes("filename="))
-        .replace("filename=", "")
+        ?.replace("filename=", "")
         .trim();
 
       const blob = await response?.data;
-      FileSaver.saveAs(blob, filename);
+      if (filename) {
+        FileSaver.saveAs(blob, filename);
+      }
     } else if (errorCode(response) === 204) {
       throw response
     }
@@ -186,7 +190,7 @@ const activationWithOutRemark = async (url, customBaseUrl = null) => {
   try {
     const baseUrl = customBaseUrl || configApp.USER_MANAGEMENT_SERVICE;
     
-    const response = await axios.post(baseUrl + url, {
+    const response = await axios.post(baseUrl + url, {}, {
       headers: buildHeaders(baseUrl),
     });
     return response?.data;

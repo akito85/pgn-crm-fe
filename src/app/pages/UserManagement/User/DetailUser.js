@@ -80,10 +80,9 @@ const DetailUser = () => {
     setCurrentTax(sizeTax !== pageSizeChange ? 1 : pageChange);
     setSizeTax(pageSizeChange);
   };
-  const handleDataPaginationGenerate = (currentTax, sizeTax) => {
-    setCurrentChangeAuth(sizeChangeAuth !== sizeTax ? 1 : currentTax);
-    setSizeChangeAuth(sizeTax);
-   
+  const handleDataPaginationGenerate = (currentGenerateChange, sizeGenerateChange) => {
+    setCurrentGenerate(sizeGenerate !== sizeGenerateChange ? 1 : currentGenerateChange);
+    setSizeGenerate(sizeGenerateChange);
   };
   const handleDataPaginationChangeAuth = (currentChangeAuthChange, sizeChangeAuthChange) => {
     setCurrentChangeAuth(sizeChangeAuth !== sizeChangeAuthChange ? 1 : currentChangeAuthChange);

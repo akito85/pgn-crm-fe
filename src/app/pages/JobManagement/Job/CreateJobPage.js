@@ -13,6 +13,7 @@ import NxTableBase from "../../../../components/Nx/NxTableBase";
 import { JOB_MGMT_ROUTES } from "../../../../routes/job_management/job_routes";
 import { fetchSchemas, fetchProcedures, fetchProcedureParameters, clearProcedures, clearParameters } from "../../../../redux/slices/job_management/oracleMetadataSlice";
 import { fetchTaskQueues } from "../../../../redux/slices/job_management/taskQueueSlice";
+import { fetchHandlers } from "../../../../redux/slices/job_management/handlerRegistrySlice";
 import { getAllGroupAccessPaginate } from "../../../../redux/slices/system_setup/group_access";
 import { useGetJobByIdQuery, useCreateJobMutation, useUpdateJobMutation } from "../../../../redux/slices/job_management/jobApiSlice";
 
@@ -162,6 +163,8 @@ const CreateJobPage = () => {
     useSelector((state) => state.oracleMetadata);
   const { queues: taskQueues, loading: taskQueuesLoading } =
     useSelector((state) => state.taskQueue);
+  const { handlers: registeredHandlers, loading: handlersLoading } =
+    useSelector((state) => state.handlerRegistry);
   const { data: groupAccessData, loading: groupAccessLoading } = useSelector((state) => state.groupAccess);
   const groupList = groupAccessData?.result ?? [];
   const [selectedSchema,    setSelectedSchema]    = useState(null);
@@ -173,6 +176,7 @@ const CreateJobPage = () => {
   useEffect(() => {
     dispatch(fetchTaskQueues());
     dispatch(getAllGroupAccessPaginate({ search: '', page: 0, pageSize: 200 }));
+    dispatch(fetchHandlers());
   }, [dispatch]);
 
   // Populate form when editing an existing job
@@ -225,7 +229,12 @@ const CreateJobPage = () => {
       setSelectedSchema(null);
       setSelectedProcedure(null);
       dispatch(clearProcedures());
-      form.setFieldValue('handler', undefined);
+      // Only clear handler when switching away from STORED_PROCEDURE
+      // so the existing value is preserved when switching between SCRIPT / CUSTOM_HANDLER
+      if (!form.getFieldValue('handler') ||
+          form.getFieldValue('handler') === 'StoredProcedureJobHandler') {
+        form.setFieldValue('handler', undefined);
+      }
     }
   }, [executeType, dispatch]);
 
@@ -383,38 +392,56 @@ const CreateJobPage = () => {
               </Form.Item>
 
               <Form.Item label="Handler" name="handler" {...formItemProps} rules={[
-                { required: executeType !== "STORED_PROCEDURE", message: "Please input handler" },
-                { max: 100, message: "Maximum 100 characters" },
+                { required: executeType !== "STORED_PROCEDURE", message: "Please select a handler" },
               ]}>
-                <Input
-                  placeholder="e.g. com.nxs.jobhandler.genfile"
-                  maxLength={100}
-                  style={inputStyle}
-                  disabled={executeType === "STORED_PROCEDURE"}
-                />
+                {executeType === "STORED_PROCEDURE" ? (
+                  <Input
+                    value="StoredProcedureJobHandler"
+                    disabled
+                    style={{ ...inputStyle, color: "#666", background: "#fafafa" }}
+                  />
+                ) : registeredHandlers.length > 0 ? (
+                  <Select
+                    placeholder="Select handler"
+                    style={fieldStyle}
+                    loading={handlersLoading}
+                    showSearch
+                    optionFilterProp="children"
+                    allowClear
+                  >
+                    {registeredHandlers.map((h) => (
+                      <Option key={h.handlerClass} value={h.handlerClass}>
+                        {h.displayName} — {h.handlerClass}
+                        {h.workers.length === 0 && (
+                          <span style={{ color: '#faad14', marginLeft: 6, fontSize: 11 }}>
+                            (no active workers)
+                          </span>
+                        )}
+                      </Option>
+                    ))}
+                  </Select>
+                ) : (
+                  <Input
+                    placeholder={handlersLoading ? "Loading handlers..." : "e.g. StoredProcedureJobHandler (registry unavailable)"}
+                    maxLength={200}
+                    style={inputStyle}
+                    disabled={handlersLoading}
+                  />
+                )}
               </Form.Item>
 
               <Form.Item
                 label="Task Queue"
                 name="taskQueueId"
-                tooltip="Assigns this job to a specific worker queue. Workers in that queue will exclusively pick up and process this job. Leave blank to use the default queue."
+                tooltip="Physical queue routing requires JobRunr Pro. Currently all jobs use the default shared queue."
                 {...formItemProps}
               >
-                <Select
-                  placeholder="Default queue (leave blank)"
-                  style={fieldStyle}
-                  loading={taskQueuesLoading}
-                  allowClear
-                >
-                  {taskQueues.map((q) => (
-                    <Option key={q.queueId} value={q.queueId}>
-                      {q.queueName}
-                      {q.priority != null && (
-                        <span className="ml-2 text-xs text-gray-400">(priority {q.priority})</span>
-                      )}
-                    </Option>
-                  ))}
-                </Select>
+                <Input
+                  value="Default"
+                  disabled
+                  style={{ ...fieldStyle, color: "#666", background: "#fafafa", cursor: "not-allowed" }}
+                  suffix={<span style={{ fontSize: 11, color: "#aaa" }}>JobRunr OSS</span>}
+                />
               </Form.Item>
 
               {executeType === "STORED_PROCEDURE" && (<>
