@@ -61,21 +61,21 @@ export const columns = (
             align: "center",
         },
         {
-            key: "sor1",
+            key: "sor",
             title: "SOR",
             dataIndex: "sor",
             width: 150,
             align: "center",
         },
         {
-            key: "costCenter1",
+            key: "costCenter",
             title: "COST CENTER",
             dataIndex: "costCenter",
             width: 200,
             align: "center",
         },
         {
-            key: "accountSegment1",
+            key: "accountSegment",
             title: "ACCOUNT SEGMENT",
             dataIndex: "accountSegment",
             width: 150,
@@ -89,7 +89,7 @@ export const columns = (
             align: "center",
         },
         {
-            key: "meterReadingCode1",
+            key: "meterReadingCode",
             title: "METER READING CODE",
             dataIndex: "meterReadingCode",
             width: 180,
@@ -138,40 +138,6 @@ export const columns = (
             align: "center",
         },
         {
-            key: "sor2",
-            title: "SOR",
-            dataIndex: "sor",
-            width: 150,
-            align: "center",
-        },
-        {
-            key: "costCenter2",
-            title: "COST CENTER",
-            dataIndex: "costCenter",
-            width: 200,
-            align: "center",
-        },
-        {
-            key: "accountSegment2",
-            title: "ACCOUNT SEGMENT",
-            dataIndex: "accountSegment",
-            width: 150,
-            align: "center",
-        },
-        {
-            key: "meterReadingCode2",
-            title: "METER READING CODE",
-            dataIndex: "meterReadingCode",
-            width: 180,
-            align: "center",
-        },
-        {
-            key: "type1",
-            title: "TYPE",
-            dataIndex: "type",
-            width: 150,
-        },
-        {
             key: "serviceAgreementNumber",
             title: "SERVICE AGREEMENT NUMBER",
             dataIndex: "serviceAgreementNumber",
@@ -182,12 +148,6 @@ export const columns = (
             title: "SERVICE AGREEMENT NAME",
             dataIndex: "serviceAgreementName",
             width: 250,
-        },
-        {
-            key: "source1",
-            title: "SOURCE",
-            dataIndex: "source",
-            width: 150,
         },
         {
             key: "serviceAgreementDate",
@@ -226,7 +186,7 @@ export const columns = (
             width: 100,
         },
         {
-            key: "type2",
+            key: "type",
             title: "TYPE",
             dataIndex: "type",
             width: 150,
@@ -244,7 +204,7 @@ export const columns = (
             width: 150,
         },
         {
-            key: "source2",
+            key: "source",
             title: "SOURCE",
             dataIndex: "source",
             width: 150,
@@ -270,7 +230,7 @@ export const columns = (
             fixed: "right",
             render: (text) => (
                 <div className="flex justify-center w-full">
-                    <StatusComponent colour={text}>{text}</StatusComponent>
+                    <StatusComponent colour={text || 'none'}>{text || '-'}</StatusComponent>
                 </div>
             )
         },
@@ -283,7 +243,7 @@ export const columns = (
             fixed: "right",
             render: (text) => (
                 <div className="flex justify-center w-full">
-                    <StatusComponent colour={text}>{text}</StatusComponent>
+                    <StatusComponent colour={text || 'none'}>{text || '-'}</StatusComponent>
                 </div>
             )
         },
@@ -296,7 +256,7 @@ export const columns = (
             fixed: "right",
             render: (text) => (
                 <div className="flex justify-center w-full">
-                    <StatusComponent colour={text}>{text}</StatusComponent>
+                    <StatusComponent colour={text || 'none'}>{text || '-'}</StatusComponent>
                 </div>
             )
         },
