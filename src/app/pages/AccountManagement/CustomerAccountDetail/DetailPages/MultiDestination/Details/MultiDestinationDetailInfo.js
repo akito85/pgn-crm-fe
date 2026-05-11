@@ -2,7 +2,7 @@ import { dateFormatting } from "../../../../../../../utils";
 import NxDetailText from "../../../../../../../components/Nx/NxDetailText";
 import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
 import NxDate from "../../../../../../../components/Nx/NxDatePicker";
-import StatusComponent from "../../../../../../../components/StatusComponent";
+import NxStatusComponent from "../../../../../../../components/Nx/NxStatusComponent";
 
 /**
  * Presentational info panel for a multi destination record.
@@ -67,10 +67,10 @@ const MultiDestinationDetailInfo = ({ detail = {} }) => {
             {NxDate.formatDate(endDate, dateFormatting.date)}
           </NxDetailText>
           <NxDetailText label="Status">
-            <StatusComponent colour={status}>{status}</StatusComponent>
+            <NxStatusComponent colour={status}>{status}</NxStatusComponent>
           </NxDetailText>
           <NxDetailText label="Status Approval">
-            <StatusComponent colour={statusApproval}>{statusApproval}</StatusComponent>
+            <NxStatusComponent colour={statusApproval}>{statusApproval}</NxStatusComponent>
           </NxDetailText>
         </div>
         <div className="w-full">

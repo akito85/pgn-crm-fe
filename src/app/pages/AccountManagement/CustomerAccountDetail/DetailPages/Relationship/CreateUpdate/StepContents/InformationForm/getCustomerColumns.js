@@ -46,14 +46,14 @@ const getCustomerColumns = (
     ),
   },
   {
-    key: "partyType",
+    key: "customerIdentificationType",
     title: "IDENTIFICATION TYPE",
-    dataIndex: "partyType",
+    dataIndex: "customerIdentificationType",
     width: 231,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "partyType",
+      "customerIdentificationType",
       searchInput,
       searchedColumn,
       searchText,

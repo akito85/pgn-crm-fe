@@ -210,6 +210,7 @@ const InvoiceRelationDetail = ({
             idAccount={accountId}
             idCustomer={customerId}
             type={accountType}
+            collapsible
           />
 
           {draftExist && (

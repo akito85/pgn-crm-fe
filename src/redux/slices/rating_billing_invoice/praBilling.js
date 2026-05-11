@@ -4,7 +4,7 @@ import userHttpService from "../../services/userHttpService";
 import { setBodyError, showModalError, validateError } from "../general_slice";
 
 const initialState = {
-  created_prabilling_data: [], 
+  created_prabilling_data: [],
   loadingCreate: false,
   loading: false,
   loadingModal: false,
@@ -139,9 +139,8 @@ export const getPrabillSummaryServiceAgreement = createAsyncThunk(
   "GET_PRABILL_SUMMARY_SERVICE_AGREEMENT",
   async ({ id, search, page, pageSize, sort }, thunkAPI) => {
     try {
-      let url = `/v1/dbs/api/prabill/summary/service-agreement/${id}?page=${
-        page - 1
-      }&size=${pageSize}`;
+      let url = `/v1/dbs/api/prabill/summary/service-agreement/${id}?page=${page - 1
+        }&size=${pageSize}`;
 
       if (search) url += `&search=${encodeURIComponent(search)}`;
       if (sort) url += `&sort=${sort}`;
@@ -179,9 +178,8 @@ export const getPrabillSummaryUsage = createAsyncThunk(
     try {
       let url = `/v1/dbs/api/prabill/summary/usage?billPeriod=${encodeURIComponent(
         billPeriod,
-      )}&customerNumber=${encodeURIComponent(customerNumber)}&page=${
-        page - 1
-      }&size=${pageSize}`;
+      )}&customerNumber=${encodeURIComponent(customerNumber)}&page=${page - 1
+        }&size=${pageSize}`;
 
       if (search) url += `&search=${encodeURIComponent(search)}`;
       if (sort) url += `&sort=${sort}`;
@@ -223,11 +221,11 @@ export const getListBillingPeriodForPrabilling = createAsyncThunk(
 
       const transformedData = Array.isArray(rawData)
         ? rawData.map((item) => ({
-            id: item.id,
-            name: item.name,
-            code: item.code,
-            ...item,
-          }))
+          id: item.id,
+          name: item.name,
+          code: item.code,
+          ...item,
+        }))
         : [];
 
       return transformedData;
@@ -325,9 +323,8 @@ export const getListAccountGroup = createAsyncThunk(
         queryParams = segmentIds.map((id) => `idSegment=${id}`).join("&");
       }
 
-      const url = `/v1/dbs/api/account-group-type/list${
-        queryParams ? `?${queryParams}` : ""
-      }`;
+      const url = `/v1/dbs/api/account-group-type/list${queryParams ? `?${queryParams}` : ""
+        }`;
 
       const response = await ratingBillingHttpService.getAll(url);
 
@@ -736,7 +733,7 @@ export const getDetailPrabillingResult = createAsyncThunk(
     thunkAPI,
   ) => {
     try {
-      let url = `/v1/dbs/api/prabill/detail?search=${encodeURIComponent(
+      let url = `/v1/dbs/api/prabill/detail?initCode=${encodeURIComponent(
         initCode,
       )}&page=${page}&size=${pageSize}`;
 
@@ -1959,7 +1956,7 @@ const prabillingSlice = createSlice({
       state.loading_customer_detail.saPrcRuleDet = false;
       state.customer_account_detail.saPrcRuleDetData = { result: [], page: {} };
     },
-  
+
     [getCustomerAccountDetail.pending]: (state) => {
       state.loading_customer_account_detail = true;
     },
