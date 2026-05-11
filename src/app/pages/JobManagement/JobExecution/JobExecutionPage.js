@@ -73,6 +73,30 @@ const JobExecutionPage = () => {
 
   useEffect(() => { handleFetch(); }, [handleFetch]);
 
+  const NON_TERMINAL_STATUSES = useMemo(
+    () => new Set(["PENDING", "SCHEDULED", "PROCESSING", "ON_HOLD", "SUSPENDED"]),
+    []
+  );
+  const POLL_INTERVAL_MS = 5000;
+
+  useEffect(() => {
+    const anyRunning = accumulatedData.some(
+      (r) => r && NON_TERMINAL_STATUSES.has(r.status)
+    );
+    if (!anyRunning) return undefined;
+
+    const id = setInterval(() => {
+      dispatch(getAllJobExecutionPaginate({
+        search: "",
+        page: 1,
+        pageSize: PAGE_SIZE,
+        sort,
+      }));
+    }, POLL_INTERVAL_MS);
+
+    return () => clearInterval(id);
+  }, [accumulatedData, dispatch, sort, NON_TERMINAL_STATUSES]);
+
   useEffect(() => {
     if (!data?.content) return;
     if (page === 1) {
