@@ -9,8 +9,9 @@ import { FormStepper } from "../../../../../../components/FormStepNavigation";
 import { ModalConfirm } from "../../../../../../components/Modal/ModalPopUp";
 import { debounce } from "lodash";
 import {
-    approveOrRejectRestructure,
+    bulkApproveOrRejectRestructure,
     getListApprovalRestructure,
+    getListApprovalEarlyRepayment,
     getDetailRestructure,
     getApprovalHistory,
     deleteRestructure,
@@ -33,7 +34,7 @@ const ModalApprovalRestructure = ({
     handleListRefresh = () => { },
 }) => {
     // Selector
-    const { data_approval_list, loading_approval_list } = useSelector((state) => state.restructure);
+    const { data_approval_list, loading_approval_list, data_approval_list_er, loading_approval_list_er } = useSelector((state) => state.restructure);
 
     // Declaration
     const containerRef = useRef(null);
@@ -41,7 +42,6 @@ const ModalApprovalRestructure = ({
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const [form] = Form.useForm();
-    const dataApproval = data_approval_list?.result || [];
 
     // Use State
     const [page, setPage] = useState(1);
@@ -59,11 +59,21 @@ const ModalApprovalRestructure = ({
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [activeTab, setActiveTab] = useState("payment_plan");
 
+    const activeData = activeTab === "early_repayment" ? data_approval_list_er : data_approval_list;
+    const activeLoading = activeTab === "early_repayment" ? loading_approval_list_er : loading_approval_list;
+    const dataApproval = activeData?.result || [];
+
     const { actions: accessList } = useGrantAccessHooks("page");
 
-    // Initial fetch
+    // Initial fetch — refetch when tab switches too
     useEffect(() => {
-        if (isOpen) {
+        if (!isOpen) return;
+        setPage(1);
+        setSelectedRowKeys([]);
+        setDataTableSelect([]);
+        if (activeTab === "early_repayment") {
+            dispatch(getListApprovalEarlyRepayment({ statusApproval: "Pending", isLoadMore: false }));
+        } else {
             dispatch(
                 getListApprovalRestructure({
                     page: 0,
@@ -72,15 +82,14 @@ const ModalApprovalRestructure = ({
                     isLoadMore: false,
                 })
             );
-            setPage(1);
         }
-    }, [dispatch, isOpen, search]);
+    }, [dispatch, isOpen, search, activeTab]);
 
     // Load more handler
     const handleLoadMore = async () => {
+        if (activeTab === "early_repayment") return; // ER list is not paginated
         const nextPage = page + 1;
-        const totalPages = data_approval_list?.page?.totalPages || 0;
-
+        const totalPages = activeData?.page?.totalPages || 0;
         if (nextPage <= totalPages) {
             await dispatch(
                 getListApprovalRestructure({
@@ -94,7 +103,7 @@ const ModalApprovalRestructure = ({
     };
 
     const hasMore =
-        dataApproval.length < (data_approval_list?.page?.totalElements || 0);
+        dataApproval.length < (activeData?.page?.totalElements || activeData?.totalElements || 0);
 
     const handleSearch = (selectedKeys, confirm, dataIndex) => {
         confirm();
@@ -177,15 +186,19 @@ const ModalApprovalRestructure = ({
     };
 
     const handleRefresh = () => {
-        const reqSearch = encodeURIComponent(JSON.stringify(search));
-        dispatch(
-            getListApprovalRestructure({
-                page: 0,
-                pageSize: 100,
-                search: reqSearch,
-                isLoadMore: false,
-            })
-        );
+        if (activeTab === "early_repayment") {
+            dispatch(getListApprovalEarlyRepayment({ statusApproval: "Pending", isLoadMore: false }));
+        } else {
+            const reqSearch = encodeURIComponent(JSON.stringify(search));
+            dispatch(
+                getListApprovalRestructure({
+                    page: 0,
+                    pageSize: 100,
+                    search: reqSearch,
+                    isLoadMore: false,
+                })
+            );
+        }
     };
 
     const processedColumns = tableApprovalRestructure(
@@ -229,26 +242,14 @@ const ModalApprovalRestructure = ({
         } else {
             setIsSubmitting(true);
             try {
-                // Submit approval for each selected record
-                // Backend unified endpoint handles both INSTALLMENT and EARLY_REPAYMENT based on category param
                 const category = activeTab === "payment_plan" ? "RESTRUCTURE" : "EARLY_REPAYMENT_RESTRUCTURE";
-                
-                // Assuming the backend expects multiple IDs or we loop
-                // The Redux action approveOrRejectRestructure takes { body }
-                // Based on backend RestructureApprovalController, it takes a single CommonApprovalRequest
-                
-                const promises = dataTableSelect.map((item) => {
-                    const payload = {
-                        id: item.id,
-                        action: action,
-                        remark: formValue.remark,
-                        approvalId: item.approvalId || item.tApprovalId, // Ensure we have the right ID
-                        category: category
-                    };
-                    return dispatch(approveOrRejectRestructure({ body: payload })).unwrap();
-                });
-
-                await Promise.all(promises);
+                const items = dataTableSelect.map((item) => ({
+                    id: item.id,
+                    action: action,
+                    remark: formValue.remark,
+                    approvalId: item.approvalId || item.tApprovalId,
+                }));
+                await dispatch(bulkApproveOrRejectRestructure({ body: { items, category } })).unwrap();
                 
                 message.success(`${action === "APPROVE" ? "Approved" : "Rejected"} successfully`);
                 handleCancelForm();
@@ -412,7 +413,7 @@ const ModalApprovalRestructure = ({
                                     key: a.id || index + 1,
                                 }))}
                                 columns={processedColumns}
-                                totalData={data_approval_list?.page?.totalElements || 0}
+                                totalData={activeData?.page?.totalElements || activeData?.totalElements || 0}
                                 tableScrolled={{ x: 1200, y: 300 }}
                                 onSort={onSort}
                                 showExport={false}
@@ -422,7 +423,7 @@ const ModalApprovalRestructure = ({
                                 onAdvanceSearch={handleAdvanceSearch}
                                 columnDefinitions={processedColumns.map(c => ({ key: c.key, title: c.title }))}
                                 rowSelection={rowSelection}
-                                loading={loading_approval_list}
+                                loading={activeLoading}
                                 usePagination={false}
                                 useInfiniteScroll={true}
                                 onLoadMore={handleLoadMore}

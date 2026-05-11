@@ -7,7 +7,6 @@ import SectionCard from "../../../../../components/SectionCard";
 import TableRBI from "../../../../../components/TableRBI";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
 import LogHistoryInfo from "../../../../../components/LogHistoryInfo";
-import DOMPurify from "dompurify";
 
 const DetailPaymentPlan = ({
     isEmbedded,
@@ -88,7 +87,7 @@ const DetailPaymentPlan = ({
                             <DetailText label="Source">{dataHeader?.source}</DetailText>
                             <DetailText label="Request Date">{dataHeader?.requestDate ? moment(dataHeader.requestDate).format("DD MMM YYYY") : "-"}</DetailText>
                             <div className="col-span-5">
-                                <DetailText label="Description">{DOMPurify.sanitize(dataHeader?.description) || "-"}</DetailText>
+                                <DetailText label="Description">{dataHeader?.description || "-"}</DetailText>
                             </div>
                         </div>
                     </SectionCard>

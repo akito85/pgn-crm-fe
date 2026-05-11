@@ -7,7 +7,7 @@ import ApprovalComponentGeneral from "../../../../../components/Approval/Approva
 import TableRBI from "../../../../../components/TableRBI";
 import SectionCard from "../../../../../components/SectionCard";
 import StatusComponent from "../../../../../components/StatusComponent";
-import DOMPurify from "dompurify";
+
 const getMandatoryAttachments = (segment) => {
     if (segment === "KL") {
         return [
@@ -248,7 +248,7 @@ const ContentModalConfirmRestructure = ({
                             <DetailText label="Source">{formValues?.source }</DetailText>
                             <DetailText label="Request Date">{formValues?.requestDate ? moment(formValues.requestDate).format("DD MMM YYYY") : "-"}</DetailText>
                             <div className="col-span-5">
-                                <DetailText label="Description">{DOMPurify.sanitize(formValues?.description) || "-"}</DetailText>
+                                <DetailText label="Description">{formValues?.description || "-"}</DetailText>
                             </div>
                         </div>
                     </SectionCard>
