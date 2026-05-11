@@ -160,7 +160,7 @@ const columnAttachment = (
     : res;
 };
 
-const Attachment = ({ data = [], updateData = () => { }, type }) => {
+const Attachment = ({ data = [], updateData = () => { }, type, categoryOptions = [] }) => {
   // Declaration
   const searchInput = useRef(null);
   const dispatch = useDispatch();
@@ -182,11 +182,15 @@ const Attachment = ({ data = [], updateData = () => { }, type }) => {
     (state) => state.accountServiceAgreement
   );
 
+  const effectiveCategories = categoryOptions.length > 0 ? categoryOptions : data_category_attachment;
+
   // Use Effect
   useEffect(() => {
-    dispatch(getListCategoryAttachment());
-    dispatch(getGlobalPropertiesAttachment());
-  }, [dispatch]);
+    if (categoryOptions.length === 0) {
+      dispatch(getListCategoryAttachment());
+      dispatch(getGlobalPropertiesAttachment());
+    }
+  }, [dispatch, categoryOptions.length]);
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -341,7 +345,7 @@ const Attachment = ({ data = [], updateData = () => { }, type }) => {
       <ModalAttachment
         openUpload={modalUpload}
         updateData={updateData}
-        categoryOptions={data_category_attachment}
+        categoryOptions={effectiveCategories}
         handleCancel={() => setModalUpload(false)}
         valueGuard={
           configApplication === configApp.MASTER_MANAGEMENT

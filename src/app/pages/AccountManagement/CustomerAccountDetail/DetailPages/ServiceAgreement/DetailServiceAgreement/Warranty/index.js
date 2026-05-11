@@ -116,10 +116,12 @@ const Warranty = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
       dispatch(
         getListWarrantyTermPaging({
           id: idSA,
-          page: targetPage,
-          pageSize,
-          search: encodedSearch,
-          sort,
+          body: {
+            page: targetPage,
+            size: pageSize,
+            searchs: encodedSearch,
+            sort: sort || "createdDate~desc",
+          },
         })
       );
     },

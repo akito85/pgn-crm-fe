@@ -34,12 +34,10 @@ export const getListWarrantyInfo = createAsyncThunk(
 // TODO: confirm endpoint URL
 export const getListWarrantyTermPaging = createAsyncThunk(
   "GET_LIST_WARRANTY_TERM_PAGING",
-  async ({ id, page, pageSize, search, sort }, thunkAPI) => {
+  async ({ id, body }, thunkAPI) => {
     try {
-      const searchParams = search || "";
-      const sortParams = sort || "createdDate~desc";
-      const url = `/v1/dbs/api/warrantyterm/list-warranty-term/${id}?page=${page}&size=${pageSize}&searchs=${searchParams}&sort=${sortParams}`;
-      const response = await accountManagementService.getPagination(url);
+      const url = `/v1/dbs/api/warranty-term/list/${id}`;
+      const response = await accountManagementService.updateDataWithMethodPost(url, body);
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
@@ -52,7 +50,7 @@ export const downloadWarrantyTermList = createAsyncThunk(
   "DOWNLOAD_WARRANTY_TERM_LIST",
   async ({ id }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/warrantyterm/download/${id}`;
+      const url = `/v1/dbs/api/warranty-term/download/${id}`;
       const response = await accountManagementService.downloadData(url);
       return response.data;
     } catch (error) {
@@ -66,7 +64,7 @@ export const approvalWarrantyTerm = createAsyncThunk(
   "APPROVAL_WARRANTY_TERM",
   async (body, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/warrantyterm/approve`;
+      const url = `/v1/dbs/api/warranty-term/approve`;
       const response = await accountManagementService.activationWithRemark(url, body);
       const successBody = {
         title: "Successful",
@@ -94,7 +92,7 @@ export const createWarrantyTerm = createAsyncThunk(
   "CREATE_WARRANTY_TERM",
   async (body, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/warrantyterm/create`;
+      const url = `/v1/dbs/api/warranty-term/create`;
       const response = await accountManagementService.createData(url, body);
       const successBody = {
         title: "Successful",
@@ -121,7 +119,7 @@ export const updateWarrantyTerm = createAsyncThunk(
   "UPDATE_WARRANTY_TERM",
   async (body, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/warrantyterm/update`;
+      const url = `/v1/dbs/api/warranty-term/update`;
       const response = await accountManagementService.createData(url, body);
       const successBody = {
         title: "Successful",
@@ -148,7 +146,7 @@ export const getDetailWarrantyTerm = createAsyncThunk(
   "GET_DETAIL_WARRANTY_TERM",
   async (id, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/warrantyterm/get-detail/${id}`;
+      const url = `/v1/dbs/api/warranty-term/get-detail/${id}`;
       const response = await accountManagementService.getDetail(url);
       return response.data;
     } catch (error) {
@@ -162,7 +160,7 @@ export const getApprovalHistoryWarranty = createAsyncThunk(
   "GET_APPROVAL_HISTORY_WARRANTY",
   async (id, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/warrantyterm/approval-history/${id}`;
+      const url = `/v1/dbs/api/warranty-term/approval-history/${id}`;
       const response = await accountManagementService.getDetail(url);
       return Array.isArray(response.data) ? null : response.data;
     } catch (error) {
@@ -176,7 +174,7 @@ export const getListAppHierWarranty = createAsyncThunk(
   "GET_LIST_APP_HIER_WARRANTY",
   async (thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/warrantyterm/get-list-approval-hierarchies`;
+      const url = `/v1/dbs/api/warranty-term/approval-hierarchies`;
       const response = await accountManagementService.getAll(url);
       return (response.data || []).map((appHier) => ({
         name: appHier.approvalName,
@@ -193,7 +191,7 @@ export const getListAppHierDetailWarranty = createAsyncThunk(
   "GET_LIST_APP_HIER_DETAIL_WARRANTY",
   async ({ id }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/warrantyterm/get-approval-hierarchies/${id}`;
+      const url = `/v1/dbs/api/warranty-term/approval-hierarchy/${id}`;
       const response = await accountManagementService.getAll(url);
       return (response.data || []).map((a, index) => ({
         ...a,
@@ -214,7 +212,7 @@ export const getListAppHierWarrantyInactive = createAsyncThunk(
   "GET_LIST_APP_HIER_WARRANTY_INACTIVE",
   async (thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/warrantyterm/get-list-approval-hierarchies`;
+      const url = `/v1/dbs/api/warranty-term/approval-hierarchies`;
       const response = await accountManagementService.getAll(url);
       return response.data || [];
     } catch (error) {
@@ -228,7 +226,7 @@ export const getListAppHierDetailWarrantyInactive = createAsyncThunk(
   "GET_LIST_APP_HIER_DETAIL_WARRANTY_INACTIVE",
   async ({ id }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/warrantyterm/get-approval-hierarchies/${id}`;
+      const url = `/v1/dbs/api/warranty-term/get-approval-hierarchies/${id}`;
       const response = await accountManagementService.getAll(url);
       return response.data || [];
     } catch (error) {
@@ -242,7 +240,7 @@ export const inactiveWarrantyTerm = createAsyncThunk(
   "INACTIVE_WARRANTY_TERM",
   async ({ data }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/warrantyterm/inactivate`;
+      const url = `/v1/dbs/api/warranty-term/inactivate`;
       const response = await accountManagementService.activationWithRemark(url, data);
       const successBody = {
         title: "Successful",
@@ -271,7 +269,7 @@ export const deleteDraftWarrantyTerm = createAsyncThunk(
   "DELETE_DRAFT_WARRANTY_TERM",
   async ({ id }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/warrantyterm/delete/${id}`;
+      const url = `/v1/dbs/api/warranty-term/delete/${id}`;
       const response = await accountManagementService.deleteData(url);
       const successBody = {
         title: "Successful",
@@ -295,12 +293,11 @@ export const deleteDraftWarrantyTerm = createAsyncThunk(
   }
 );
 
-// TODO: confirm endpoint URL for attachment category
 export const getListAttachmentCategory = createAsyncThunk(
   "GET_LIST_ATTACHMENT_CATEGORY_WARRANTY",
   async (thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/warrantyterm/list-category`;
+      const url = `/v1/dbs/api/warranty-term/list-category`;
       const response = await accountManagementService.getAll(url);
       return (response.data || []).map((category) => ({
         glbTypeValId: category?.id,

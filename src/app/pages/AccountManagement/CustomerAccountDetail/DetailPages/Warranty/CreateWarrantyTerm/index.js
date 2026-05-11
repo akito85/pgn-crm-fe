@@ -31,6 +31,7 @@ import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_m
 import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
 import HeaderDetail from "../../../HeaderDetail";
 import NxBreadCrumb from "../../../../../../../components/Nx/NxBreadCrumb";
+import ContentModalConfirm from "./ContentModalConfirm";
 
 
 const routes = (item) => [
@@ -62,7 +63,7 @@ const routes = (item) => [
 ];
 
 // ─── Warranty Information Step ────────────────────────────────────────────────
-const WarrantyInformationStep = ({ form }) => (
+const WarrantyInformationStep = ({ form, currency, startDate, description }) => (
   <NxBaseContainer border header="WARRANTY TERM INFORMATION">
     <div className="w-full grid grid-cols-3 gap-4">
       <Form.Item
@@ -94,7 +95,13 @@ const WarrantyInformationStep = ({ form }) => (
         name="endDate"
         // End Date is NOT required
       >
-        <DatePicker className="w-full" format="DD MMM YYYY" />
+        <DatePicker
+          className="w-full"
+          format="DD MMM YYYY"
+          disabledDate={(current) =>
+            startDate ? current.isBefore(moment(startDate).startOf("day")) : false
+          }
+        />
       </Form.Item>
 
       <Form.Item
@@ -111,24 +118,49 @@ const WarrantyInformationStep = ({ form }) => (
       <Form.Item
         label="Amount"
         name="amount"
-        rules={[{ required: true, message: "Amount is required" }]}
+        rules={[
+          { required: true, message: "Amount is required" },
+          {
+            validator: (_, value) => {
+              if (value !== undefined && value !== null && value !== "" && Number(value) === 0) {
+                return Promise.reject(new Error("Amount must be greater than 0"));
+              }
+              return Promise.resolve();
+            },
+          },
+        ]}
       >
         <InputNumber
-          type={"number"}
           placeholder="Enter Amount"
           controls={false}
-          style={{
-            width: "100%",
-          }}
+          style={{ width: "100%" }}
           size="middle"
-          // Formatter digunakan untuk mengubah tampilan angka saat user selesai mengetik (onBlur)
-          // RegExp ini akan menambahkan titik separator setiap 3 digit (misal: 1000000 -> 1.000.000)
-          formatter={(value) =>
-            value ? `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".") : ""
-          }
-          // Parser digunakan untuk mengembalikan nilai ke bentuk asli angka (menghapus titik) sebelum disimpan ke state/form
-          parser={(value) => value?.toString()?.replace(/\./g, "")}
+          precision={currency === "USD" ? 2 : 0}
+          formatter={(value) => {
+            if (value === undefined || value === null || value === "") return "";
+            const isUSD = currency === "USD";
+            if (isUSD) {
+              const num = parseFloat(`${value}`);
+              if (isNaN(num)) return "";
+              const parts = num.toFixed(2).split(".");
+              parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+              return parts.join(",");
+            }
+            return `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+          }}
+          parser={(value) => {
+            if (!value) return "";
+            const isUSD = currency === "USD";
+            if (isUSD) return value.replace(/\./g, "").replace(",", ".");
+            return value.replace(/\./g, "");
+          }}
           min={0}
+          onKeyDown={(e) => {
+            const allowed = ["Backspace", "Delete", "Tab", "Escape", "Enter", "ArrowLeft", "ArrowRight", "Home", "End"];
+            if (allowed.includes(e.key) || e.ctrlKey || e.metaKey) return;
+            if (currency === "USD" && e.key === ",") return;
+            if (!/^\d$/.test(e.key)) e.preventDefault();
+          }}
         />
       </Form.Item>
 
@@ -138,8 +170,13 @@ const WarrantyInformationStep = ({ form }) => (
         rules={[{ required: true, message: "Description is required" }]}
         className="col-span-3"
       >
-        <Input.TextArea rows={4} placeholder="Enter Description" />
+        <Input.TextArea rows={4} placeholder="Enter Description" maxLength={255} />
       </Form.Item>
+      <span className="col-span-3 text-xs -mt-3 text-[#92979D]">
+        You have{" "}
+        {description === undefined || description === null ? 255 : 255 - String(description).length}{" "}
+        of 255 characters remaining
+      </span>
     </div>
   </NxBaseContainer>
 );
@@ -244,7 +281,7 @@ const CreateWarrantyTerm = ({ typeForm }) => {
   const steps = [
     {
       title: "Warranty Term Information",
-      content: <WarrantyInformationStep form={form} />,
+      content: <WarrantyInformationStep form={form} currency={warrantyObj.currency} startDate={warrantyObj.startDate} description={warrantyObj.description} />,
       disabled: !isStep0Valid,
     },
     
@@ -307,13 +344,15 @@ const CreateWarrantyTerm = ({ typeForm }) => {
     handleButtonNext();
   };
 
-  const preventSubmit = () => {
-    let count = steps.filter((s) => !s.disabled).length;
-    return count !== steps.length;
-  };
+  const hasIncompleteStep = steps.some((s) => s.disabled);
+  const hasAttachment = listDataAttachment.length > 0;
+  const isSubmitDisabled = hasIncompleteStep || !hasAttachment;
 
   // ─── Submit ───────────────────────────────────────────────────────────
-  const handleSubmitForm = () => setModalConfirm(true);
+  const handleSubmitForm = () => {
+    if (typeSubmit === 2 && !hasAttachment) return;
+    setModalConfirm(true);
+  };
   const handleCancelModalConfirm = () => setModalConfirm(false);
 
   const resolveAttachmentCategoryId = (attachment) =>
@@ -329,8 +368,8 @@ const CreateWarrantyTerm = ({ typeForm }) => {
     const body = {
       id: typeForm === "update" ? id : undefined,
       saId: idSA,
-      docNumber: warrantyObj?.docNumber,
-      docDate: warrantyObj?.docDate
+      documentNumber: warrantyObj?.docNumber,
+      documentDate: warrantyObj?.docDate
         ? moment(warrantyObj.docDate).format(dateFormatting.date)
         : "",
       startDate: warrantyObj?.startDate
@@ -344,6 +383,7 @@ const CreateWarrantyTerm = ({ typeForm }) => {
       description: warrantyObj?.description,
       appHierId: selectedHierarchy,
       flag: typeSubmit, // 1 = draft, 2 = submit
+      remark : warrantyObj?.remark || ""
     };
 
     const thunk = typeForm === "create" ? createWarrantyTerm : updateWarrantyTerm;
@@ -362,8 +402,8 @@ const CreateWarrantyTerm = ({ typeForm }) => {
         if (!categoryId) throw new Error("Attachment category is required");
         // TODO: confirm upload endpoint URL
         await accountManagementService.uploadAttachment(
-          `/v1/dbs/api/warrantyterm/uploadAttachment/${recordId}`,
-          { files: element.file, category: categoryId }
+          `/v1/dbs/api/warranty-term/upload-attachment`,
+          { files: element.file, category: categoryId, refId : recordId }
         );
       }
 
@@ -500,6 +540,16 @@ const CreateWarrantyTerm = ({ typeForm }) => {
                   </ButtonComponent>
                 )}
 
+                <ButtonComponent
+                  disabled={hasIncompleteStep}
+                  form="warrantyTermForm"
+                  htmlType="submit"
+                  type="secondary"
+                  onClick={() => setTypeSubmit(1)}
+                >
+                  Save as Draft
+                </ButtonComponent>
+
                 {current < steps.length - 1 && (
                   <ButtonComponent
                     onClick={handleButtonNext}
@@ -512,26 +562,15 @@ const CreateWarrantyTerm = ({ typeForm }) => {
                 )}
 
                 {current === steps.length - 1 && (
-                  <>
-                    <ButtonComponent
-                      disabled={preventSubmit()}
-                      form="warrantyTermForm"
-                      htmlType="submit"
-                      type="secondary"
-                      onClick={() => setTypeSubmit(1)}
-                    >
-                      Save as Draft
-                    </ButtonComponent>
-                    <ButtonComponent
-                      disabled={preventSubmit()}
-                      form="warrantyTermForm"
-                      htmlType="submit"
-                      type="approve"
-                      onClick={() => setTypeSubmit(2)}
-                    >
-                      Submit
-                    </ButtonComponent>
-                  </>
+                  <ButtonComponent
+                    disabled={isSubmitDisabled}
+                    form="warrantyTermForm"
+                    htmlType="submit"
+                    type="approve"
+                    onClick={() => setTypeSubmit(2)}
+                  >
+                    Submit
+                  </ButtonComponent>
                 )}
               </div>
             </div>
@@ -547,29 +586,17 @@ const CreateWarrantyTerm = ({ typeForm }) => {
 
         {/* Modal Confirm */}
         {modalConfirm && (
-          <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 max-w-md w-full shadow-xl">
-              <p className="text-[18px] font-bold mb-4">
-                {typeSubmit === 1 ? "Save as Draft" : "Submit"} Confirmation
-              </p>
-              <p className="text-gray-600 mb-6">
-                Are you sure you want to{" "}
-                {typeSubmit === 1 ? "save as draft" : "submit"} this Warranty Term?
-              </p>
-              <div className="flex justify-end gap-3">
-                <ButtonComponent type="menu" onClick={handleCancelModalConfirm}>
-                  Cancel
-                </ButtonComponent>
-                <ButtonComponent
-                  type="approve"
-                  loading={loadingForm}
-                  onClick={handleProcessModalConfirm}
-                >
-                  Confirm
-                </ButtonComponent>
-              </div>
-            </div>
-          </div>
+          <ContentModalConfirm
+            isOpen={modalConfirm}
+            loadingSubmit={loadingForm}
+            handleCancel={handleCancelModalConfirm}
+            handleConfirm={handleProcessModalConfirm}
+            warrantyObj={warrantyObj}
+            selectedHierarchy={selectedHierarchy}
+            listDataAttachment={listDataAttachment}
+            listDataAppHierDetail={dataListAppHierDetailForm}
+            listApproval={dataListAppHierIdForm}
+          />
         )}
 
         {/* Modal Error Retry */}
