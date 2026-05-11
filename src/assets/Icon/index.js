@@ -14,6 +14,7 @@ import IconDelete from "./IconDelete";
 import IconDetail from "./IconDetail";
 import IconDownload from "./IconDownload";
 import IconDropdown from "./IconDropdown";
+import IconEarlyRepayment from "./IconEarlyRepayment";
 import IconEdit from "./IconEdit";
 import IconEditTable from "./IconEditTable";
 import IconEraserTable from "./IconEraserTable";
@@ -75,6 +76,7 @@ import IconTripleDot from "./IconTripleDot";
 import IconChevronLeft from "./IconChevronLeft";
 import IconChevronDown from "./IconChevronDown";
 import IconAddTable from "./IconAddTable";
+import IconRePlan from "./IconRePlan";
 import { FileOutlined } from "@ant-design/icons";
 
 const Icon = (props) => {
@@ -238,6 +240,10 @@ const Icon = (props) => {
       return <IconChevronDown {...props} />;
     case "IconAddTable":
       return <IconAddTable {...props} />;
+    case "IconEarlyRepayment":
+      return <IconEarlyRepayment {...iconProps} />;
+    case "IconRePlan":
+      return <IconRePlan {...iconProps} />;
     default:
       return;
   }

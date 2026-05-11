@@ -16,13 +16,12 @@ import {
     getListCategory,
     getDetailRestructure,
     saveRestructure,
-    updateRestructure,
     getSa,
     getPrimaryContact,
     resetBadDebt,
 } from "../../../../../redux/slices/receipt_collection/restructure";
 import { DEBT_AND_COLLECTION_ROUTES } from "../../../../../routes/DebtAndCollection/rc_routes";
-import RestructureForm from "./RestructureForm";
+import RePlanForm from "./RePlanForm";
 import SubSectionCard from "../../../../../components/SubSectionCard";
 import { ModalConfirm } from "../../../../../components/Modal/ModalPopUp";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
@@ -31,26 +30,17 @@ import ApprovalComponentGeneral from "../../../../../components/Approval/Approva
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 import receiptCollectionHttpService from "../../../../../redux/services/receiptCollectionHttpService";
 import { configApp } from "../../../../../constants/configApp";
-import ContentModalConfirmRestructure from "./ContentModalConfirmRestructure";
+import ContentModalConfirmRePlan from "./ContentModalConfirmRePlan";
 import { getMandatoryAttachments } from "../../../../../constants/restructure";
 import { uploadAttachments } from "../../../../../utils/uploadHelper";
 
-
-const ListFormRestructure = (props) => {
-    const { type } = props;
+const ListFormRePlan = (props) => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const [form] = Form.useForm();
     const accountSegment = Form.useWatch("accountSegment", form);
     const location = useLocation();
-    const sessionId = sessionStorage.getItem("restructure_update_id");
-    const id = location?.state?.id || sessionId;
-
-    useEffect(() => {
-        if (location?.state?.id) {
-            sessionStorage.setItem("restructure_update_id", location.state.id);
-        }
-    }, [location]);
+    const id = location?.state?.id;
 
     const {
         listCustomer,
@@ -63,9 +53,6 @@ const ListFormRestructure = (props) => {
         loading,
         data_detail
     } = useSelector((state) => state.restructure);
-
-    // listAccount dari Redux store sudah berformat { value, label, accountName, ... }
-    // sesuai response backend GET /restructure/get-list-account
 
     const [current, setCurrent] = useState(0);
     const [modalBack, setModalBack] = useState(false);
@@ -120,21 +107,18 @@ const ListFormRestructure = (props) => {
         dispatch(getAllApprovalList());
         dispatch(getListCategory());
 
-        // Set default values for mandatory fields that might be disabled or need defaults
         form.setFieldsValue({
             requestDate: moment(),
         });
 
-        if (type === "update" && id) {
+        if (id) {
             dispatch(getDetailRestructure(id));
         }
-    }, [dispatch, type, id, form]);
+    }, [dispatch, id, form]);
 
     useEffect(() => {
-        console.log("ListFormRestructure update check:", { type, id, data_detail });
-        if (type === "update" && id && data_detail) {
+        if (id && data_detail) {
             const rest = data_detail.data?.restructure || data_detail.restructure;
-            console.log("Extracted restructure detail:", rest);
             if (rest) {
                 form.setFieldsValue({
                     accountNumber: rest.accountNumber,
@@ -148,45 +132,33 @@ const ListFormRestructure = (props) => {
                     meterReadingCode: rest.meterReadingCode,
                     accountType: rest.accountType,
                     classificationType: rest.classificationType,
+                    sapCustId: rest.sapCustId,
                     accountStatus: rest.accountStatus,
                     saNumber: rest.saNumber,
                     saName: rest.saName,
                     saDate: rest.saDate ? moment(rest.saDate) : null,
-                    startDate: rest.startDate ? moment(rest.startDate) : null,
-                    endDate: rest.endDate ? moment(rest.endDate) : null,
+                    saStartDate: rest.saStartDate ? moment(rest.saStartDate) : null,
+                    saEndDate: rest.saEndDate ? moment(rest.saEndDate) : null,
+                    minContract: rest.minContract,
+                    maxContract: rest.maxContract,
+                    uom: rest.uom,
                     type: rest.type,
                     tenor: rest.tenor,
                     startPeriod: rest.startPeriod ? moment(rest.startPeriod) : null,
-                    description: rest.remark || rest.description,
+                    source: rest.source,
+                    description: rest.description,
                 });
 
-                if (rest.appHierId) {
-                    setSelectedHierarchy(rest.appHierId);
+                if (rest.contactList) {
+                    setContacts(rest.contactList);
                 }
 
-                if (rest.contactList && rest.contactList.length > 0 && contactRef.current) {
-                    const formattedContacts = rest.contactList.map((item, index) => ({
-                        key: item.key || item.id || index + 1,
-                        contactId: item.contactId || item.id,
-                        isPrimary: item.isPrimary || false,
-                        isManual: item.isManual || false,
-                        cpName: item.cpName || [item.firstName, item.middleName, item.lastName].filter(Boolean).join(" "),
-                        job: item.job,
-                        position: item.position,
-                        address: item.address || item.contactAddress || "-",
-                        details: item.details || item.criteria || item.contactDetails || []
-                    }));
-                    console.log("Formatted contacts for setting:", formattedContacts);
-                    contactRef.current.setContacts(formattedContacts);
+                if (rest.accountNumber) {
+                    dispatch(getBadDebtByAccount(rest.accountNumber));
                 }
-            }
-
-            const attachments = data_detail.data?.attachmentDtoList || data_detail.attachmentDtoList || [];
-            if (attachments.length > 0) {
-                setListDataAttachment(attachments.map(a => ({ ...a, dataType: "exist" })));
             }
         }
-    }, [type, id, data_detail, form]);
+    }, [data_detail, id, dispatch, form]);
 
     useEffect(() => {
         if (selectedHierarchy) {
@@ -194,7 +166,7 @@ const ListFormRestructure = (props) => {
         }
     }, [dispatch, selectedHierarchy]);
 
-    const handleAccountChange = async (value) => {
+    const handleAccountChange = (value) => {
         const selected = listAccount.find((acc) => acc.value === value);
         if (selected) {
             form.setFieldsValue({
@@ -210,33 +182,64 @@ const ListFormRestructure = (props) => {
                 classificationType: selected.classificationType,
                 accountStatus: selected.accountStatus,
             });
-            dispatch(getBadDebtByAccount(value));
-            
-            if (contactRef.current) {
-                contactRef.current.resetNonManualContacts();
-            }
 
-            // Automatically fetch SA
+            dispatch(getBadDebtByAccount(value));
+            fetchPrimaryContact(value);
+            fetchSaInfo(value);
+        } else {
+            form.resetFields([
+                "accountName",
+                "customerNumber",
+                "customerName",
+                "accountGroupType",
+                "sor",
+                "costCenter",
+                "accountSegment",
+                "meterReadingCode",
+                "accountType",
+                "classificationType",
+                "accountStatus",
+                "saNumber",
+                "saName",
+                "saDate",
+                "saStartDate",
+                "saEndDate",
+                "minContract",
+                "maxContract",
+                "uom",
+            ]);
+            dispatch(resetBadDebt());
+        }
+    };
+
+    const fetchSaInfo = async (accountNumber) => {
+        if (accountNumber) {
             try {
-                const action = await dispatch(getSa(value));
-                if (action.meta.requestStatus === "fulfilled" && action.payload) {
-                    const data = action.payload;
+                const saAction = await dispatch(getSa(accountNumber));
+                if (saAction.payload) {
+                    const sa = saAction.payload;
                     form.setFieldsValue({
-                        saNumber: data.saNumber,
-                        saName: data.saName,
-                        saDate: data.saDate ? moment(data.saDate) : null,
-                        startDate: data.startDate ? moment(data.startDate) : null,
-                        endDate: data.endDate ? moment(data.endDate) : null,
+                        saNumber: sa.saNumber,
+                        saName: sa.saName,
+                        saDate: sa.saDate ? moment(sa.saDate) : null,
+                        saStartDate: sa.saStartDate ? moment(sa.saStartDate) : null,
+                        saEndDate: sa.saEndDate ? moment(sa.saEndDate) : null,
+                        minContract: sa.minContract,
+                        maxContract: sa.maxContract,
+                        uom: sa.uom,
                     });
                 }
             } catch (err) {
                 console.error("Failed to fetch SA info", err);
             }
+        }
+    };
 
-            // Automatically fetch Primary Contact
+    const fetchPrimaryContact = async (accountNumber) => {
+        if (accountNumber) {
             try {
-                const contactAction = await dispatch(getPrimaryContact(value));
-                if (contactAction.meta.requestStatus === "fulfilled" && contactAction.payload) {
+                const contactAction = await dispatch(getPrimaryContact(accountNumber));
+                if (contactAction.payload) {
                     const primaryContact = contactAction.payload;
                     if (primaryContact && contactRef.current) {
                         contactRef.current.addContact(primaryContact);
@@ -250,7 +253,6 @@ const ListFormRestructure = (props) => {
 
     const next = () => {
         if (current === 0) {
-            // Validation 1: Mandatory Fields for Step 0
             form.validateFields([
                 "accountNumber",
                 "type",
@@ -258,13 +260,11 @@ const ListFormRestructure = (props) => {
                 "startPeriod",
                 "description"
             ]).then(() => {
-                // Validation 2: Contact Information cannot be empty
                 if (contacts.length === 0) {
                     message.warning("Contact Information tidak boleh kosong.");
                     return;
                 }
 
-                // Validation 3: Payment Plan Detail amount must be valid (total matches)
                 if (!isPlanDetailValid) {
                     message.warning("Total amount pada Payment Plan Detail harus sesuai dengan Open Item.");
                     return;
@@ -350,12 +350,11 @@ const ListFormRestructure = (props) => {
             message.warning("Account Number wajib diisi untuk menyimpan draft");
             return;
         }
+
         const body = buildRequestBody(values, true);
-        const action = type === "update" && id
-            ? await dispatch(updateRestructure({ id, body }))
-            : await dispatch(saveRestructure({ body }));
+        const action = await dispatch(saveRestructure({ body }));
         if (action.meta.requestStatus === "fulfilled") {
-            const restructureId = action.payload?.data?.restructureId || id;
+            const restructureId = action.payload?.data?.restructureId;
             const newAttachments = listDataAttachment.filter(item => item.dataType !== "exist");
             if (newAttachments.length > 0 && restructureId) {
                 uploadAttachments(newAttachments, restructureId, "RESTRUCTURE",
@@ -370,12 +369,11 @@ const ListFormRestructure = (props) => {
     const handleSubmit = async () => {
         try {
             const values = await form.validateFields();
-            const segment = values?.accountSegment;
-            const mandatory = getMandatoryAttachments(segment);
-            const uploadedCategories = (listDataAttachment || []).map(a => a.fileCategoryName);
+            const uploadedCategories = listDataAttachment.map(a => a.fileCategoryName);
+            const mandatory = getMandatoryAttachments(values.accountSegment);
             const missing = mandatory.filter(cat => !uploadedCategories.includes(cat));
             const blockingMissing = missing.filter(cat => !cat.toLowerCase().includes("optional"));
-            
+
             if (blockingMissing.length > 0) {
                 message.warning(`Attachment mandatory kurang: ${blockingMissing.join(", ")}`);
                 return;
@@ -391,11 +389,9 @@ const ListFormRestructure = (props) => {
     const handleSave = async () => {
         setIsModalSubmit(false);
         const body = buildRequestBody(formValues, false);
-        const action = type === "update" && id
-            ? await dispatch(updateRestructure({ id, body }))
-            : await dispatch(saveRestructure({ body }));
+        const action = await dispatch(saveRestructure({ body }));
         if (action.meta.requestStatus === "fulfilled") {
-            const restructureId = action.payload?.data?.restructureId || id;
+            const restructureId = action.payload?.data?.restructureId;
             const newAttachments = listDataAttachment.filter(item => item.dataType !== "exist");
             if (newAttachments.length > 0 && restructureId) {
                 uploadAttachments(newAttachments, restructureId, "RESTRUCTURE",
@@ -411,7 +407,8 @@ const ListFormRestructure = (props) => {
         { path: "", breadcrumbName: "Payment & Collection" },
         { path: "", breadcrumbName: "Debt & Collection" },
         { path: DEBT_AND_COLLECTION_ROUTES.VIEW_RESTRUCTURE, breadcrumbName: "Payment Plan" },
-        { path: "", breadcrumbName: type === "create" ? "Create" : "Update" },
+        { path: "", breadcrumbName: "Re-Plan" },
+        { path: "", breadcrumbName: "Create" },
     ];
 
     const handlePlanDetailValidation = useCallback((isValid) => {
@@ -426,6 +423,12 @@ const ListFormRestructure = (props) => {
         setInstallmentsByCurrency(installments);
     }, []);
 
+    // Warn box for missing attachments
+    const uploadedCategories = listDataAttachment.map(a => a.fileCategoryName);
+    const mandatory = getMandatoryAttachments(accountSegment);
+    const missingCategories = mandatory.filter(cat => !uploadedCategories.includes(cat));
+    const strictlyMandatoryMissing = missingCategories.filter(cat => !cat.toLowerCase().includes("optional"));
+
     return (
         <>
             <BreadCrumb routes={routes} />
@@ -439,16 +442,17 @@ const ListFormRestructure = (props) => {
                     onFinish={handleSubmit}
                 >
                     <div style={{ display: current !== 0 ? "none" : "block" }}>
-                        <RestructureForm
+                        <RePlanForm
                             form={form}
                             listAccount={listAccount}
                             handleAccountChange={handleAccountChange}
-                            disabled={type === "update"}
+                            disabled={true} // pre-populated from old skema
                             openItems={badDebtList}
                             onContactChange={handleContactChange}
                             onPlanDetailValidation={handlePlanDetailValidation}
                             onInstallmentsChange={handleInstallmentsChange}
-                            contactRef={contactRef}
+                            contacts={contacts}
+                            ref={contactRef}
                         />
                     </div>
 
@@ -466,40 +470,31 @@ const ListFormRestructure = (props) => {
                     </div>
 
                     <div style={{ display: current !== 2 ? "none" : "block" }} className="mt-8">
+                        {strictlyMandatoryMissing.length > 0 && (
+                            <div 
+                                className="flex items-start gap-3 p-4 mb-4 border" 
+                                style={{ 
+                                    backgroundColor: "#FFF3E6", 
+                                    borderColor: "#FFE0B2",
+                                    borderRadius: "8px",
+                                    color: "#B36214"
+                                }}
+                            >
+                                <InfoCircleFilled style={{ fontSize: "18px", marginTop: "2px", color: "#D97706" }} />
+                                <div className="flex flex-col gap-1 text-[14px]">
+                                    <span style={{ color: "#B36214", fontWeight: "600" }}>
+                                        Please upload the required documents below to continue the process.
+                                    </span>
+                                    <span style={{ color: "#B36214", fontWeight: "500" }}>
+                                        {missingCategories.join(", ")}
+                                    </span>
+                                </div>
+                            </div>
+                        )}
                         <BaseContainer header={"ATTACHMENT INFORMATION"}>
                             <SubSectionCard>
-                                {(() => {
-                                    const mandatory = getMandatoryAttachments(accountSegment);
-                                    const uploadedCategories = (listDataAttachment || []).map(a => a.fileCategoryName);
-                                    const missingCategories = mandatory.filter(cat => !uploadedCategories.includes(cat));
-                                    const mandatoryMissing = missingCategories.filter(cat => !cat.toLowerCase().includes("optional"));
-
-                                    if (mandatoryMissing.length === 0) return null;
-
-                                    return (
-                                        <div 
-                                            className="flex items-start gap-3 p-4 border mb-4" 
-                                            style={{ 
-                                                backgroundColor: "#FFF3E6", 
-                                                borderColor: "#FFE0B2",
-                                                borderRadius: "8px",
-                                                color: "#B36214"
-                                            }}
-                                        >
-                                            <InfoCircleFilled style={{ fontSize: "18px", marginTop: "2px", color: "#D97706" }} />
-                                            <div className="flex flex-col gap-1 text-[14px]">
-                                                <span style={{ color: "#B36214", fontWeight: "600" }}>
-                                                    Please upload the required documents below to continue the process.
-                                                </span>
-                                                <span style={{ color: "#B36214", fontWeight: "500" }}>
-                                                    {missingCategories.join(", ")}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    );
-                                })()}
                                 <AttachmentComponent
-                                    type={type}
+                                    type={"create"}
                                     data={listDataAttachment || []}
                                     dataListCategory={dataListCategory || []}
                                     updateData={setListDataAttachment}
@@ -509,7 +504,7 @@ const ListFormRestructure = (props) => {
                                     service={receiptCollectionHttpService}
                                     configApplication={configApp.PAYMENT_SERVICE}
                                     typeRBI={"data"}
-                                    mandatory={true}
+                                    mandatory={strictlyMandatoryMissing.length > 0}
                                 />
                             </SubSectionCard>
                         </BaseContainer>
@@ -526,15 +521,10 @@ const ListFormRestructure = (props) => {
                             setCurrent(0);
                             setSelectedHierarchy(null); 
                             setListDataAttachment([]); 
-                            setContacts([]);
-                            dispatch(resetBadDebt());
-                            if (contactRef.current) {
-                                contactRef.current.setContacts([]);
-                            }
                         }}
                         onSaveDraft={handleSaveDraft}
                         onSubmit={() => form.submit()}
-                        type={type}
+                        type={"create"}
                         isLoading={false}
                     />
                 </Form>
@@ -569,7 +559,7 @@ const ListFormRestructure = (props) => {
                     </div>
                 }
             >
-                <ContentModalConfirmRestructure
+                <ContentModalConfirmRePlan
                     formValues={formValues}
                     contacts={contacts}
                     openItems={badDebtList}
@@ -584,4 +574,4 @@ const ListFormRestructure = (props) => {
     );
 };
 
-export default ListFormRestructure;
+export default ListFormRePlan;

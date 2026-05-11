@@ -110,7 +110,8 @@ const ListDetailPaymentChannel = () => {
     };
 
     const actionCreator =
-      data_detail?.tApprovalDto?.approvalType === "INACTIVE_PAYMENT_CHANNEL"
+      data_detail?.tApprovalDto?.approvalType === "INACTIVE_PAYMENT_CHANNEL" ||
+      data_detail?.tApprovalDto?.approvalType === "ACTIVE_PAYMENT_CHANNEL"
         ? approveOrRejectInactivePaymentChannel
         : approveOrRejectPaymentChannel;
 
