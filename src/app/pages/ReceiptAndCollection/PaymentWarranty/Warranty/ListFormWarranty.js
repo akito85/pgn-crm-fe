@@ -29,11 +29,11 @@ import {
   getPaymentWarrantyPartnerBranchList,
   getWarrantyTypeOptions,
   getServiceAgreementByAccountId,
+  getWarrantyRate,
 } from "../../../../../redux/slices/receipt_collection/warranty";
 
 
 import {
-  getConvertedCurrency,
   getAllAccountNumberDDL,
   getAccountNumberDDL,
   resetDataAccountNumber,
@@ -76,7 +76,8 @@ const ListFormWarranty = (props) => {
     data_detail, 
     dataMutation,
     dataServiceAgreement,
-    loadingServiceAgreement
+    loadingServiceAgreement,
+    warrantyRate,
   } = useSelector((state) => state.warranty);
   
   const {
@@ -84,7 +85,6 @@ const ListFormWarranty = (props) => {
     dataAccNumber,
     currencyDDL,
     rateTypeDDL,
-    data_converted_currency
   } = useSelector((state) => state.receipt);
 
 
@@ -108,6 +108,7 @@ const ListFormWarranty = (props) => {
   const mutationInitializedRef = useRef(false);
   const warrantyType = Form.useWatch("warrantyType", form);
   const headerCurrencyId = Form.useWatch("currency", form);
+  const headerRateAmount = Form.useWatch("rateAmount", form);
   const headerCurrency = useMemo(() => {
     if (!headerCurrencyId) return null;
     const foundById = currencyDDL?.data?.find(c => c.id === headerCurrencyId);
@@ -242,6 +243,13 @@ const ListFormWarranty = (props) => {
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [current]);
+
+  // Auto-fill Rate field from M_RBI_DAILY_RATES when warrantyType is CASH
+  useEffect(() => {
+    if (warrantyRate?.convertedRate != null) {
+      form.setFieldsValue({ rateAmount: warrantyRate.convertedRate });
+    }
+  }, [warrantyRate, form]);
 
   const isPartialEdit = useMemo(() => {
     if (type !== "update" || !data_detail) return false;
@@ -513,6 +521,18 @@ const ListFormWarranty = (props) => {
           onFinish={handleSubmit} 
           onFinishFailed={(errorInfo) => console.log('Validation Failed:', errorInfo)}
           preserve={true}
+          onValuesChange={(changedValues, allValues) => {
+            const isCash = allValues.warrantyType === 'CASH';
+            const relevant = 'warrantyType' in changedValues || 'currency' in changedValues || 'rateType' in changedValues || 'rateDate' in changedValues;
+            if (isCash && relevant) {
+              const fromCurrency = allValues.currency;
+              const rateTypeName = rateTypeDDL?.data?.find((item) => item?.id === allValues.rateType)?.name;
+              const rateDate = allValues.rateDate ? moment(allValues.rateDate).format('YYYY-MM-DD') : null;
+              if (fromCurrency && rateTypeName && rateDate) {
+                dispatch(getWarrantyRate({ fromCurrency, rateType: rateTypeName, rateDate }));
+              }
+            }
+          }}
         >
           
           <div style={{ display: current !== 0 ? "none" : undefined }}>
@@ -532,6 +552,7 @@ const ListFormWarranty = (props) => {
                 warrantyType={warrantyType}
                 headerCurrency={headerCurrency}
                 mutationDataInfo={mutationDataInfo.filter(m => !m._delete)}
+                hasMutations={mutationDataInfo.filter(m => !m._delete).length > 0}
                 columnMutation={columnMutation}
                 setIsModalMutationOpen={setIsModalMutationOpen}
                 dispatch={dispatch}
@@ -634,6 +655,7 @@ const ListFormWarranty = (props) => {
         mutationDataInfo={mutationDataInfo.filter(m => !m._delete)}
         warrantyType={warrantyType}
         headerCurrency={headerCurrency}
+        rateAmount={headerRateAmount}
         fetchMutation={(newMutation) => {
             if (newMutation) {
                 if (mutationModalType === "update") {
