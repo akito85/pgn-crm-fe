@@ -405,8 +405,8 @@ const JobGroupPage = () => {
           onExpand={handleExpandRow}
           actionColumn={actionColumn}
           loadingKeys={loadingKeys}
-          // showRefresh
-          // onRefresh={handleRefresh}
+          showRefresh
+          onRefresh={handleRefresh}
           useInfiniteScroll
           onLoadMore={handleLoadMore}
           hasMore={hasMore}

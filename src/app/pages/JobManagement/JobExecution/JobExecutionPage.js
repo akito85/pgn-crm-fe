@@ -358,6 +358,8 @@ const JobExecutionPage = () => {
           hasMore={hasMore}
           onLoadMore={handleLoadMore}
           loadMoreThreshold={20}
+          showRefresh={true}
+          onRefresh={handleRefresh}
           showExport={true}
           handleDownload={() => {}}
         />

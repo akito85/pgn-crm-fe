@@ -335,8 +335,8 @@ const JobPage = () => {
           hasMore={hasMore}
           onLoadMore={handleLoadMore}
           loadMoreThreshold={20}
-          // onRefresh={handleRefresh}
-          // showRefresh={true}
+          onRefresh={handleRefresh}
+          showRefresh={true}
         />
       </NxCardContainer>
 
