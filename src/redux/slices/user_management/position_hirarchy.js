@@ -8,6 +8,7 @@ const initialState = {
   data_detail: null,
   loading: false,
   data_position: null,
+  data_employee: null,
 };
 
 // pagination position hierarchy
@@ -185,7 +186,7 @@ export const activationPositionHierarchy = createAsyncThunk(
       const response = await userHttpService?.createData(url, body);
       const bodyMessage = {
         title: "Successfull",
-        description: response?.message,
+        description: response?.data?.message,
         return: false,
       };
       thunkAPI.dispatch(showModalSuccess(bodyMessage));
@@ -271,18 +272,17 @@ const positionHierarchySlice = createSlice({
       state.data_detail = action.payload;
     },
 
-    // get detail position (employee list for a position node — stored in state.data,
-    // consumed by DetailPositionHierarchy and PositionHierarchyForm via useSelector)
+    // get detail position (employee list for a position node)
     [getDetailPosition.pending]: (state) => {
       state.loading = true;
     },
     [getDetailPosition.rejected]: (state, action) => {
       state.loading = false;
-      state.data = action.payload;
+      state.data_employee = action.payload;
     },
     [getDetailPosition.fulfilled]: (state, action) => {
       state.loading = false;
-      state.data = action.payload;
+      state.data_employee = action.payload;
     },
 
     // create position hierarchy
