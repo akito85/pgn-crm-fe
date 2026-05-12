@@ -353,11 +353,7 @@ const ContactSection = ({
         return (
           <Popconfirm
             title="Set as Primary"
-            description="Kontak primary sebelumnya akan dinonaktifkan. Lanjutkan?"
-            onConfirm={(e) => {
-              e.stopPropagation();
-              handleSetPrimary(record.key);
-            }}
+            onConfirm={(e) => { e.stopPropagation(); handleSetPrimary(record.key); }}
             onCancel={(e) => e.stopPropagation()}
             okText="Yes"
             cancelText="No"

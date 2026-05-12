@@ -9,7 +9,7 @@ import InputComponent from "../../../../../../components/InputComponent";
 import { FormStepper, FormFooter } from "../../../../../../components/FormStepNavigation";
 import ApprovalSectionForm from "../../../../ProductAndPromo/Pricing/Form/ApprovalSectionForm";
 import AttachmentComponent from "../../../../../../components/Attachment/AttachmentComponent";
-import { dateFormatting, hasValue, parseMonetaryValue } from "../../../../../../utils";
+import { hasValue } from "../../../../../../utils";
 
 // Redux Actions
 import {
@@ -18,10 +18,10 @@ import {
     getListApprovalById,
     getPaymentWarrantyPartnerList,
     getPaymentWarrantyPartnerBranchList,
+    getWarrantyRate,
 } from "../../../../../../redux/slices/receipt_collection/warranty";
 
 import {
-    getConvertedCurrency,
     getAllAccountNumberDDL,
     getAccountNumberDDL,
     resetDataAccountNumber,
@@ -47,7 +47,7 @@ const ModalCreateWarranty = ({
     const dispatch = useDispatch();
 
     // Redux Warranty state
-    const { dataListAppHierId, dataListAppHierDetail, loading, dataPaymentWarrantyPartner, dataPaymentWarrantyPartnerBranch } = useSelector((state) => state.warranty);
+    const { dataListAppHierId, dataListAppHierDetail, loading, dataPaymentWarrantyPartner, dataPaymentWarrantyPartnerBranch, warrantyRate } = useSelector((state) => state.warranty);
 
     // Redux Receipt state (reusing master data)
     const {
@@ -56,7 +56,6 @@ const ModalCreateWarranty = ({
         payGatewayDDL,
         currencyDDL,
         rateTypeDDL,
-        data_converted_currency
     } = useSelector((state) => state.receipt);
 
     const [current, setCurrent] = useState(0);
@@ -154,37 +153,29 @@ const ModalCreateWarranty = ({
     };
 
     // --- Rate Amount Logic ---
-    const [requestBodyConvertedRate, setRequestBodyConvertedRate] = useState({});
-
     useEffect(() => {
-        const { fromCurrency, toCurrency, rateType, rateDate } = requestBodyConvertedRate;
-        if (fromCurrency && toCurrency && rateType && rateDate) {
-            const body = {
-                ...requestBodyConvertedRate,
-                rateType: rateTypeDDL?.data?.filter((item) => item?.id === rateType)[0]?.name,
-            };
-            dispatch(getConvertedCurrency(body));
-        }
-    }, [dispatch, requestBodyConvertedRate, rateTypeDDL]);
-
-    useEffect(() => {
-        if (hasValue(data_converted_currency) && Object.keys(data_converted_currency).length !== 0) {
-            const rateAmountValue = data_converted_currency?.convertedRate?.toLocaleString(
+        if (warrantyRate?.convertedRate != null) {
+            const rateAmountValue = warrantyRate.convertedRate.toLocaleString(
                 "en-US",
                 { minimumFractionDigits: 2, maximumFractionDigits: 2 }
             );
             form.setFieldsValue({ rateAmount: rateAmountValue });
         }
-    }, [data_converted_currency, form]);
+    }, [warrantyRate, form]);
 
     const onFormValuesChange = (changedValues, allValues) => {
-        if (changedValues.currency || changedValues.convertedCurrency || changedValues.rateType || changedValues.rateDate) {
-            setRequestBodyConvertedRate({
-                fromCurrency: allValues.currency,
-                toCurrency: allValues.convertedCurrency || allValues.currency,
-                rateType: allValues.rateType,
-                rateDate: allValues.rateDate ? moment(allValues.rateDate).format(dateFormatting.date) : null
-            });
+        const isCash = allValues.warrantyType === 'CASH';
+        const warrantyTypeChanged = 'warrantyType' in changedValues;
+        const currencyChanged = 'currency' in changedValues;
+        const rateTypeChanged = 'rateType' in changedValues;
+        const rateDateChanged = 'rateDate' in changedValues;
+        if (isCash && (warrantyTypeChanged || currencyChanged || rateTypeChanged || rateDateChanged)) {
+            const fromCurrency = allValues.currency;
+            const rateTypeName = rateTypeDDL?.data?.find((item) => item?.id === allValues.rateType)?.name;
+            const rateDate = allValues.rateDate ? moment(allValues.rateDate).format('YYYY-MM-DD') : null;
+            if (fromCurrency && rateTypeName && rateDate) {
+                dispatch(getWarrantyRate({ fromCurrency, rateType: rateTypeName, rateDate }));
+            }
         }
     };
 
@@ -217,7 +208,6 @@ const ModalCreateWarranty = ({
         setCurrent(0);
         setListDataAttachment([]);
         setSelectedHierarchy(null);
-        setRequestBodyConvertedRate({});
         dispatch(resetDataAccountNumber());
         form.resetFields();
     };

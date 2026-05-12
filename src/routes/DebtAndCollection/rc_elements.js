@@ -30,6 +30,10 @@ import FormActivitiesPlan from "../../app/pages/DebtAndCollection/ActivitiesPlan
 import ViewRestructure from "../../app/pages/ReceiptAndCollection/DebtAndCollection/Restructure/ViewRestructure";
 import ListFormRestructure from "../../app/pages/ReceiptAndCollection/DebtAndCollection/Restructure/ListFormRestructure";
 import ListDetailRestructure from "../../app/pages/ReceiptAndCollection/DebtAndCollection/Restructure/ListDetailRestructure";
+import UploadRestructurePage from "../../app/pages/ReceiptAndCollection/DebtAndCollection/Restructure/Upload/UploadRestructurePage";
+
+import ListFormEarlyRepayment from "../../app/pages/ReceiptAndCollection/DebtAndCollection/Restructure/ListFormEarlyRepayment";
+import ListFormRePlan from "../../app/pages/ReceiptAndCollection/DebtAndCollection/Restructure/ListFormRePlan";
 
 import ViewOffset from "../../app/pages/ReceiptAndCollection/DebtAndCollection/Offset/ViewOffset";
 import ListFormOffset from "../../app/pages/ReceiptAndCollection/DebtAndCollection/Offset/ListFormOffset";
@@ -90,6 +94,11 @@ export const DEBT_AND_COLLECTION_ELEMENTS = {
   CREATE_RESTRUCTURE_PAGE: <ListFormRestructure type="create" />,
   UPDATE_RESTRUCTURE_PAGE: <ListFormRestructure type="update" />,
   DETAIL_RESTRUCTURE_PAGE: <ListDetailRestructure />,
+  UPLOAD_RESTRUCTURE_PAGE: <UploadRestructurePage />,
+
+  // Early Repayment
+  CREATE_EARLY_REPAYMENT_PAGE: <ListFormEarlyRepayment type="create" />,
+  CREATE_RE_PLAN_PAGE: <ListFormRePlan type="create" />,
 
   // Offset
   VIEW_OFFSET_PAGE: <ViewOffset />,

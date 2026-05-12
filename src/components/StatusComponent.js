@@ -52,6 +52,11 @@ const StatusComponent = ({
         tColor = "text-white";
         break;
 
+      case "submitted":
+        bgColor = "bg-[#28C76F]";
+        tColor = "text-white";
+        break;
+
       case "in_progress":
         bgColor = "bg-[#f57c00]";
         tColor = "text-white";
@@ -96,9 +101,15 @@ const StatusComponent = ({
       case "failed billing":
       case "fail":
       case "not_paid":
+      case "broken":
+        bgColor = "status-inactive";
+        tColor = "text-white";
+        break;
+
       case "cancelled":
       case "CANCELLED":
-        bgColor = "status-inactive";
+      case "canceled":
+        bgColor = "bg-[#f57c00]";
         tColor = "text-white";
         break;
 
@@ -116,7 +127,6 @@ const StatusComponent = ({
       case "awaiting_approval":
       case "awaiting approval":
       case "processing":
-      case "submitted":
       case "waiting":
       case "waiting approval":
       case "waiting_approval":
@@ -140,6 +150,11 @@ const StatusComponent = ({
 
       case "main":
         bgColor = "status-active";
+        tColor = "text-white";
+        break;
+      
+      case "break":
+        bgColor = "bg-[#0075BF]";
         tColor = "text-white";
         break;
 
@@ -227,7 +242,12 @@ const StatusComponent = ({
         break;
 
       case "terminated":
-        bgColor = "bg-white";
+        bgColor = "bg-[#00CFE8]";
+        tColor = "text-white";
+        break;
+        
+      case "early payoff":
+        bgColor = "bg-[#0075BF]";
         tColor = "text-white";
         break;
 

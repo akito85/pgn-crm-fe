@@ -180,19 +180,6 @@ const ContentModalConfirmBank = ({
 
             <div className="flex flex-col gap-4 mt-4">
               <div className="text-primary text-xs font-bold uppercase">
-                GL ACCOUNT INFORMATION
-              </div>
-              <TableRBI
-                idTable="preview-gl-table"
-                columns={glColumns}
-                dataSource={glAccounts}
-                useSelect={false}
-                usePagination={false}
-              />
-            </div>
-
-            <div className="flex flex-col gap-4 mt-4">
-              <div className="text-primary text-xs font-bold uppercase">
                 CONTACT LIST INFORMATION
               </div>
               <TableRBI
