@@ -50,6 +50,10 @@ const initialState = {
   list_srInstallments: [],
   list_srSchedules: [],
   list_srBillingItems: [],
+  // Action Logs
+  list_srActionLogs: [],
+  pagination_listSrActionLogs: { totalPage: 0, totalElement: 0, currentPage: 0, pageSize: 10 },
+  loading_listSrActionLogs: false,
   // UI State
   loading: false,
   loading_detailSr: false,
@@ -167,6 +171,20 @@ export const getServiceRequestDraft = createAsyncThunk(
       const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/detail-draft/${id}`;
       const response = await accountManagementService.getDetail(url);
       return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+// Get Service Request Action Logs
+export const getServiceRequestActionLogs = createAsyncThunk(
+  "GET_SERVICE_REQUEST_ACTION_LOGS",
+  async ({ serviceRequestId, body, isLoadMore }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/service-request/${serviceRequestId}/action-log`;
+      const response = await accountManagementService.updateDataWithMethodPost(url, body);
+      return { ...response.data, isLoadMore };
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
@@ -1004,6 +1022,41 @@ const serviceRequestSlice = createSlice({
       if (!action.meta.arg?.isLoadMore) {
         state.list_serviceRequest = [];
         state.pagination_listSr = { totalPage: 0, totalElement: 0, currentPage: 0, pageSize: 10 };
+      }
+    },
+
+    // =====================================================
+    // SERVICE REQUEST ACTION LOGS
+    // =====================================================
+    [getServiceRequestActionLogs.pending]: (state, action) => {
+      if (!action.meta.arg?.isLoadMore) state.loading_listSrActionLogs = true;
+    },
+    [getServiceRequestActionLogs.fulfilled]: (state, action) => {
+      state.loading_listSrActionLogs = false;
+      const { result, page, isLoadMore } = action.payload;
+      if (Array.isArray(result)) {
+        if (isLoadMore) {
+          const currentIds = new Set(state.list_srActionLogs.map((i) => i.id));
+          state.list_srActionLogs = [
+            ...state.list_srActionLogs,
+            ...result.filter((i) => !currentIds.has(i.id)),
+          ];
+        } else {
+          state.list_srActionLogs = result;
+        }
+      }
+      state.pagination_listSrActionLogs = {
+        totalPage: page?.totalPages || 0,
+        totalElement: page?.totalElements || 0,
+        currentPage: page?.number || 0,
+        pageSize: page?.size || 10,
+      };
+    },
+    [getServiceRequestActionLogs.rejected]: (state, action) => {
+      state.loading_listSrActionLogs = false;
+      if (!action.meta.arg?.isLoadMore) {
+        state.list_srActionLogs = [];
+        state.pagination_listSrActionLogs = { totalPage: 0, totalElement: 0, currentPage: 0, pageSize: 10 };
       }
     },
 

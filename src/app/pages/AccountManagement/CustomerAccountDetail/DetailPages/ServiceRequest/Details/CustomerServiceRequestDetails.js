@@ -15,7 +15,6 @@ import BreadCrumb from "../../../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
 import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
 import NxCardContainer from "../../../../../../../components/Nx/NxCardContainer";
-import NxTable from "../../../../../../../components/Nx/NxTable";
 import NxDetailText from "../../../../../../../components/Nx/NxDetailText";
 import NxDate from "../../../../../../../components/Nx/NxDatePicker";
 
@@ -29,18 +28,7 @@ import HeaderDetail from "../../../HeaderDetail";
 import CustomerServiceRequestDetailTabs from "./CustomerServiceRequestDetailTabs";
 import SVGIcon from "../../../../../../../assets/Icon/index";
 import NxBreadCrumb from "../../../../../../../components/Nx/NxBreadCrumb";
-
-// ── Action Log columns ────────────────────────────────────────────────────────
-const LOG_COLUMNS = [
-  { title: "NO", width: 60, align: "center", render: (_, __, i) => i + 1 },
-  {
-    title: "DATE", dataIndex: "createdDate", width: 180, sorter: true, filter: true,
-    render: (v) => NxDate.formatDate(v, "DD MMM YYYY HH:mm:ss"),
-  },
-  { title: "USERNAME", dataIndex: "createdBy",  width: 150, sorter: true, filter: true },
-  { title: "ACTION",   dataIndex: "remark",     width: 250, sorter: true, filter: true },
-  { title: "REMARK",   dataIndex: "newValue",   sorter: true, filter: true, render: (v) => v || "-" },
-];
+import ActionLogTable from "./ActionLogTable";
 
 const CustomerServiceRequestDetails = ({ type = "standard" }) => {
   const dispatch = useDispatch();
@@ -146,22 +134,7 @@ const CustomerServiceRequestDetails = ({ type = "standard" }) => {
           />
 
           {/* Action Log */}
-          <NxCardContainer header="ACTION LOG">
-            <NxBaseContainer border>
-              <NxTable
-                idTable="action-log-table"
-                dataSource={(Array.isArray(detail_serviceRequest?.actionLog) ? detail_serviceRequest.actionLog : [])
-                  .map((item, i) => ({ ...item, key: item.id || i }))}
-                columns={LOG_COLUMNS}
-                usePagination={false}
-                useInfiniteScroll={true}
-                hasMore={false}
-                fontSize="small"
-                tablePadding="small"
-                tableScrolled={{ x: "max-content", y: 300 }}
-              />
-            </NxBaseContainer>
-          </NxCardContainer>
+          <ActionLogTable serviceRequestId={id} />
 
           {/* History Log Information */}
           <NxCardContainer header="HISTORY LOG INFORMATION">
