@@ -15,6 +15,8 @@ const MutationForm = ({ disabled, currencyDDL, warrantyType, headerCurrency }) =
   const dispatch = useDispatch();
   const form = Form.useFormInstance();
   const mutationType = Form.useWatch("type", form);
+  const mutationAmount = Form.useWatch("amount", form);
+  const mutationRate = Form.useWatch("rate", form);
   const { dataMutationCategoryOptions, loadingMutationCategory } = useSelector((state) => state.warranty);
 
   React.useEffect(() => {
@@ -22,6 +24,14 @@ const MutationForm = ({ disabled, currencyDDL, warrantyType, headerCurrency }) =
       dispatch(getMutationCategoryOptions(mutationType));
     }
   }, [mutationType, dispatch]);
+
+  React.useEffect(() => {
+    const amount = typeof mutationAmount === 'object' ? mutationAmount?.floatValue : mutationAmount;
+    const rate = typeof mutationRate === 'object' ? mutationRate?.floatValue : mutationRate;
+    if (amount != null && rate != null) {
+      form.setFieldsValue({ eqvAmount: parseFloat((amount * rate).toFixed(2)) });
+    }
+  }, [mutationAmount, mutationRate, form]);
 
   return (
     <SubSectionCard>
@@ -170,12 +180,12 @@ const MutationForm = ({ disabled, currencyDDL, warrantyType, headerCurrency }) =
           >
             <InputComponent 
               placeholder="Input.." 
-              disabled={disabled || warrantyType !== WARRANTY_TYPES.CASH} 
+              disabled={true} 
               type="numeric"
               thousandSeparator=","
               decimalSeparator="."
-              decimalScale={2}
-              fixedDecimalScale={true}
+              decimalScale={8}
+              fixedDecimalScale={false}
             />
           </Form.Item>
         </Col>
@@ -188,7 +198,7 @@ const MutationForm = ({ disabled, currencyDDL, warrantyType, headerCurrency }) =
           >
             <InputComponent 
               placeholder="Input.." 
-              disabled={disabled} 
+              disabled={true} 
               type="numeric"
               thousandSeparator=","
               decimalSeparator="."

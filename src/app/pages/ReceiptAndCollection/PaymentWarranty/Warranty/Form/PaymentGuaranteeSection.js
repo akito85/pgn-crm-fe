@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useRef } from "react";
 import moment from "moment";
 import { useSelector } from "react-redux";
-import { Form, Row, Col, Select, DatePicker, Input } from "antd";
+import { Form, Row, Col, Select, DatePicker, Input, message } from "antd";
 import CardContainer from "../../../../../../components/CardContainer";
 import InputComponent from "../../../../../../components/InputComponent";
 import { WARRANTY_TYPES, CLAIM_PERIOD_TERM_TYPES, CLAIM_PERIOD_TERM_OPTIONS } from "../../../../../../constants/warranty";
@@ -16,9 +16,22 @@ const PaymentGuaranteeSection = ({
   currencyDDL,
   rateTypeDDL,
   getPaymentWarrantyPartnerBranchList,
-  isPartialEdit
+  isPartialEdit,
+  hasMutations,
 }) => {
   const { dataWarrantyTypeOptions, loadingPaymentWarrantyPartnerBranch } = useSelector((state) => state.warranty);
+  const prevCurrencyRef = useRef(null);
+  const prevRateTypeRef = useRef(null);
+  const prevRateDateRef = useRef(null);
+
+  const guardChange = (fieldName, prevRef) => {
+    if (hasMutations) {
+      message.warning("Please clear mutation first");
+      form.setFieldsValue({ [fieldName]: prevRef.current });
+      return true;
+    }
+    return false;
+  };
 
   return (
     <CardContainer header="PAYMENT GUARANTEE INFORMATION">
@@ -96,7 +109,16 @@ const PaymentGuaranteeSection = ({
             rules={[{ required: true }]}
             // API: currency
           >
-            <Select disabled={isPartialEdit} placeholder="Select Currency">
+            <Select
+              disabled={isPartialEdit}
+              placeholder="Select Currency"
+              onFocus={() => { prevCurrencyRef.current = form.getFieldValue('currency'); }}
+              onChange={() => {
+                prevCurrencyRef.current = prevCurrencyRef.current ?? form.getFieldValue('currency');
+                guardChange('currency', prevCurrencyRef);
+                prevCurrencyRef.current = null;
+              }}
+            >
               {currencyDDL?.data?.map((item) => (<Option key={item.id} value={item.id}>{item.name}</Option>))}
             </Select>
           </Form.Item>
@@ -113,7 +135,17 @@ const PaymentGuaranteeSection = ({
                     rules={[{ required: true }]}
                     // API: rateType
                   >
-                    <Select placeholder="Select Rate Type" allowClear disabled={isPartialEdit}>
+                    <Select
+                      placeholder="Select Rate Type"
+                      allowClear
+                      disabled={isPartialEdit}
+                      onFocus={() => { prevRateTypeRef.current = form.getFieldValue('rateType'); }}
+                      onChange={() => {
+                        prevRateTypeRef.current = prevRateTypeRef.current ?? form.getFieldValue('rateType');
+                        guardChange('rateType', prevRateTypeRef);
+                        prevRateTypeRef.current = null;
+                      }}
+                    >
                       {rateTypeDDL?.data?.filter(item => item.name || item.description).map((item) => (
                         <Option key={item.id} value={item.id}>
                           {item.name ? `${item.name}${item.description ? ` - ${item.description}` : ''}` : item.description}
@@ -129,7 +161,18 @@ const PaymentGuaranteeSection = ({
                     rules={[{ required: true }]}
                     // API: rateDate
                   >
-                    <DatePicker placeholder="Select Rate Date" className="w-full" style={{ borderRadius: '8px' }} disabled={isPartialEdit} />
+                    <DatePicker
+                      placeholder="Select Rate Date"
+                      className="w-full"
+                      style={{ borderRadius: '8px' }}
+                      disabled={isPartialEdit}
+                      onFocus={() => { prevRateDateRef.current = form.getFieldValue('rateDate'); }}
+                      onChange={(_val, _str) => {
+                        prevRateDateRef.current = prevRateDateRef.current ?? form.getFieldValue('rateDate');
+                        guardChange('rateDate', prevRateDateRef);
+                        prevRateDateRef.current = null;
+                      }}
+                    />
                   </Form.Item>
                 </Col>
 
@@ -146,8 +189,8 @@ const PaymentGuaranteeSection = ({
                       type="numeric"
                       thousandSeparator=","
                       decimalSeparator="."
-                      decimalScale={2}
-                      fixedDecimalScale={true}
+                      decimalScale={8}
+                      fixedDecimalScale={false}
                     />
                   </Form.Item>
                 </Col>
