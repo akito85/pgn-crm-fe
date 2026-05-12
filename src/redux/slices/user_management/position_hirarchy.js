@@ -271,7 +271,8 @@ const positionHierarchySlice = createSlice({
       state.data_detail = action.payload;
     },
 
-    // get detail position
+    // get detail position (employee list for a position node — stored in state.data,
+    // consumed by DetailPositionHierarchy and PositionHierarchyForm via useSelector)
     [getDetailPosition.pending]: (state) => {
       state.loading = true;
     },
@@ -280,19 +281,6 @@ const positionHierarchySlice = createSlice({
       state.data = action.payload;
     },
     [getDetailPosition.fulfilled]: (state, action) => {
-      state.loading = false;
-      state.data = action.payload;
-    },
-
-    // get pagination
-    [getPositionHierarchyPaginate.pending]: (state) => {
-      state.loading = true;
-    },
-    [getPositionHierarchyPaginate.rejected]: (state, action) => {
-      state.loading = false;
-      state.data = action.payload;
-    },
-    [getPositionHierarchyPaginate.fulfilled]: (state, action) => {
       state.loading = false;
       state.data = action.payload;
     },
