@@ -1,5 +1,5 @@
 import { DownOutlined, MoreOutlined, UpOutlined } from "@ant-design/icons";
-import { Checkbox, Popover, Space, Spin, Tooltip } from "antd";
+import { Checkbox, Popover, Space, Spin, Tag, Tooltip } from "antd";
 import moment from "moment";
 import React, { useEffect, useRef, useState } from "react";
 import Highlighter from "react-highlight-words";
@@ -27,8 +27,6 @@ import {
   getParentAccountOptions,
 } from "../../../../../redux/slices/receipt_collection/bankSlice";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
-import CardComponent from "../../../../../components/Card/CardComponent";
-import FunctionalTableCriteriaPayment from "./Table/FunctionalTableCriteriaPayment";
 import FunctionalTableCategoryInformation from "./Table/FunctionalTableCategoryInformation";
 import FunctionalTableVAAccount from "./Table/FunctionalTableVAAccount";
 import FunctionalTableVATransaction from "./Table/FunctionalTableVATransaction";
@@ -78,16 +76,16 @@ const DetailBank = ({
   const dispatch = useDispatch();
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [pageContact, setPageContact] = useState(1);
-  const [pageSizeContact, setPageSizeContact] = useState(10);
+  const [pageContact] = useState(1);
+  const [pageSizeContact] = useState(10);
   const searchInput = useRef(null);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
-  const [sort, setSort] = useState("");
+  const [, setSort] = useState("");
   const [search, setSearch] = useState("");
   const [openModal, setOpenModal] = useState(false);
-  const [criteriaValues, setCriteriaValues] = useState([]);
-  const [listDataCriteria, setListDataCriteria] = useState([]);
+  const [, setCriteriaValues] = useState([]);
+  const [, setListDataCriteria] = useState([]);
   const [pageBank, setPageBank] = useState(1);
   const [pageSizeBank, setPageSizeBank] = useState(10);
   const [idVA, setIdVA] = useState();
@@ -100,14 +98,13 @@ const DetailBank = ({
 
   const [approveOrReject, setApproveOrReject] = useState("");
   const [modalConfirm, setModalConfirm] = useState(false);
-  const [remark, setRemark] = useState("");
+  const [, setRemark] = useState("");
 
   const [openModalHistory, setOpenModalHistory] = useState(false);
   const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
   const [openModalInactivate, setOpenModalInactivate] = useState(false);
   const [bankAccountName, setBankAccountName] = useState();
-  const [idBankAccount, setIdBankAccount] = useState();
-  const [statusBank, setStatusBank] = useState();
+  const [, setStatusBank] = useState();
 
   const [listDataCategoryInfoModal, setListDataCategoryInfoModal] = useState([]);
   const [modalAccountInfoCollapsed, setModalAccountInfoCollapsed] = useState(false);
@@ -207,11 +204,6 @@ const DetailBank = ({
     );
   };
 
-  const handleChange = (page, pageSize) => {
-    setPage(page);
-    setPageSize(pageSize);
-  };
-
   const handleChangeSizeBank = (pageChange, pageSizeChange) => {
     const tempPage = pageSizeBank !== pageSizeChange ? 1 : pageChange;
     setPageBank(tempPage);
@@ -231,8 +223,8 @@ const DetailBank = ({
     setPageSize(pageSize);
   };
 
-  const [fieldSort, setFieldSort] = useState("");
-  const [orderSort, setOrderSort] = useState("");
+  const [, setFieldSort] = useState("");
+  const [, setOrderSort] = useState("");
 
   const paginationTable = (typeData = "data") => {
     let result = [...dataSource];
@@ -344,6 +336,14 @@ const DetailBank = ({
       width: 60,
       align: "center",
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
+    },
+    {
+      title: "PRIMARY",
+      dataIndex: "isPrimary",
+      width: 120,
+      align: "center",
+      render: (val) =>
+        val === "Y" ? <Tag color="blue">Primary</Tag> : <span className="text-gray-400">-</span>,
     },
     {
       title: "CONTACT NAME",
@@ -962,21 +962,6 @@ const DetailBank = ({
       },
     },
   ];
-
-  const criteriaSelect =
-    data_modal?.accountBankDto?.criteriaDtoList?.map((item) => {
-      return {
-        id: item?.criteria,
-        accountInformationId: item?.accountInformationId,
-        criteriaName: item?.criteriaName,
-      };
-    }) || [];
-
-  const mappingCriteria = criteriaSelect.map((a) => a.criteriaName || ""); 
-  const criteria = mappingCriteria.reduce(
-    (current, next) => current + (next ? `, ${next}` : ""),
-    ""
-  );
 
   const showButtonApproval = data_modal?.tApprovalDto?.isApprover;
 
