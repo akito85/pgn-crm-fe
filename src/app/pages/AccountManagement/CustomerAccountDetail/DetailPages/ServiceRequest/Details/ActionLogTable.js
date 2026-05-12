@@ -83,7 +83,7 @@ const ActionLogTable = ({ serviceRequestId }) => {
       <NxBaseContainer border>
         <NxTable
           idTable="action-log-table"
-          dataSource={list_srActionLogs.map((item, i) => ({ ...item, key: item.id || i }))}
+          dataSource={list_srActionLogs}
           totalData={totalElement}
           current={page}
           columns={columns}
