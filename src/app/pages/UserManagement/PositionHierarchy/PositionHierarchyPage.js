@@ -1,4 +1,4 @@
-import { Alert, Checkbox, DatePicker, Form, Tooltip } from "antd";
+import { Alert, DatePicker, Form, Tooltip } from "antd";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { NavLink } from "react-router-dom";
@@ -13,13 +13,15 @@ import {
   duplicatePositionHierarchy,
   getPositionHierarchyPaginate,
 } from "../../../../redux/slices/user_management/position_hirarchy";
-import SVGIcon from "../../../../assets/Icon/index";
 import ViewListIcon from "../../../../assets/Icon/Nx/IconViewList";
+import IconEditNx from "../../../../assets/Icon/Nx/IconEdit";
+import IconPower from "../../../../assets/Icon/Nx/IconPower";
+import IconCopy from "../../../../assets/Icon/Nx/IconCopy";
 import InputComponent from "../../../../components/InputComponent";
 import { dateFormatting } from "../../../../utils";
 import { useTryAgainHooks } from "../../../../utils/useTryAgainHooks";
 import { TablePositionHierarchy, columnsPositionHierarchy } from "./TablePositionHierarchy";
-import { DownloadOutlined, CopyOutlined, PlusOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
+import { DownloadOutlined, PlusOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
 import moment from "moment";
 
 const OPERATOR_SELECTOR_MAP = {
@@ -290,76 +292,39 @@ const PositionHierarchyPage = () => {
       {
         action: "Activate",
         type: "table",
-        render: (record, data_length) => (
-          <>
-            {data_length > 3 ? (
-              <ButtonComponent
-                onClick={() =>
-                  record?.status === "DRAFT" && handleOpenModal(record, "activation")
-                }
-                border={false}
-                disabled={record?.status === "ACTIVE" || record?.status === "INACTIVE"}
-              >
-                <Checkbox checked={record?.status === "INACTIVE"} />
-                <span className="text-black">
-                  {record?.status === "ACTIVE" ? " Inactivate Draft" : " Activate Draft"}
-                </span>
-              </ButtonComponent>
-            ) : (
-              <Tooltip title={record?.status === "ACTIVE" ? "Inactivate" : "Activate"}>
-                <div
-                  className={record?.status !== "DRAFT" ? "cursor-not-allowed" : "cursor-pointer"}
-                  onClick={() => record?.status === "DRAFT" && handleOpenModal(record, "activation")}
-                >
-                  <Checkbox
-                    checked={record?.status === "INACTIVE"}
-                    className={record?.status !== "DRAFT" ? "cursor-not-allowed" : "cursor-pointer"}
-                    disabled={record?.status === "ACTIVE" || record?.status === "INACTIVE"}
-                  />
-                </div>
-              </Tooltip>
-            )}
-          </>
+        render: (record) => (
+          <Tooltip title={record?.status === "DRAFT" ? "Activate Draft" : "Inactivate Draft"}>
+            <ButtonComponent
+              icon={
+                <IconPower
+                  color={record?.status === "DRAFT" ? "#1976D2" : "#C0BEC6"}
+                />
+              }
+              border={false}
+              disabled={record?.status !== "DRAFT"}
+              onClick={() => record?.status === "DRAFT" && handleOpenModal(record, "activation")}
+            />
+          </Tooltip>
         ),
       },
       {
         action: "Update",
         type: "table",
-        render: (record, data_length) => (
+        render: (record) => (
           <Tooltip title="Update">
             <NavLink
               to={record?.status !== "INACTIVE" ? USER_ROUTES.UPDATE_POSITION : undefined}
               state={record?.status !== "INACTIVE" ? { id: record?.hierId } : undefined}
-              className={record?.status === "INACTIVE" ? "cursor-not-allowed" : "cursor-pointer"}
             >
-              {data_length > 3 ? (
-                <ButtonComponent
-                  icon={
-                    <SVGIcon
-                      name="IconEdit"
-                      color={record?.status === "INACTIVE" ? "#8D91A0" : "#0075bf"}
-                      width={24}
-                    />
-                  }
-                  border={false}
-                  disabled={record?.status === "INACTIVE"}
-                >
-                  <span
-                    className={
-                      record?.status?.toLowerCase() === "inactive" ? "text-[#8D91A0]" : "text-black"
-                    }
-                  >
-                    {" "}
-                    Update
-                  </span>
-                </ButtonComponent>
-              ) : (
-                <SVGIcon
-                  name="IconEdit"
-                  color={record?.status === "INACTIVE" ? "#C0BEC6" : "#ACC424"}
-                  width={24}
-                />
-              )}
+              <ButtonComponent
+                icon={
+                  <IconEditNx
+                    color={record?.status === "INACTIVE" ? "#C0BEC6" : "#1976D2"}
+                  />
+                }
+                border={false}
+                disabled={record?.status === "INACTIVE"}
+              />
             </NavLink>
           </Tooltip>
         ),
@@ -367,24 +332,14 @@ const PositionHierarchyPage = () => {
       {
         action: "duplicate",
         type: "table",
-        render: (record, data_length) => (
-          <>
-            {data_length > 3 ? (
-              <ButtonComponent
-                icon={<CopyOutlined style={{ fontSize: "24px" }} />}
-                border={false}
-                onClick={() => handleOpenModal(record, "duplicate")}
-              >
-                <span className="text-black"> Duplicate</span>
-              </ButtonComponent>
-            ) : (
-              <Tooltip title="Duplicate">
-                <div className="cursor-pointer" onClick={() => handleOpenModal(record, "duplicate")}>
-                  <CopyOutlined style={{ fontSize: "24px", color: "var(--primary)" }} />
-                </div>
-              </Tooltip>
-            )}
-          </>
+        render: (record) => (
+          <Tooltip title="Duplicate">
+            <ButtonComponent
+              icon={<IconCopy color="#1976D2" />}
+              border={false}
+              onClick={() => handleOpenModal(record, "duplicate")}
+            />
+          </Tooltip>
         ),
       },
     ],
