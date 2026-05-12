@@ -92,10 +92,10 @@ const BankForm = ({ type }) => {
   const [deletedAttachmentIds, setDeletedAttachmentIds] = useState([]);
   const [initialAttachmentIds, setInitialAttachmentIds] = useState([]);
 
-  const [flag, setFlag] = useState(false);
+  const [, setFlag] = useState(false);
   const [modalConfirm, setModalConfirm] = useState(false);
   const [kirimBody, setKirimBody] = useState({});
-  const [codeBank, setCodeBank] = useState("");
+  const [, setCodeBank] = useState("");
 
   const [contactPage, setContactPage] = useState(1); 
   const [contactPageSize, setContactPageSize] = useState(10);
@@ -364,7 +364,7 @@ const BankForm = ({ type }) => {
       const formattedContacts = contactData.map((contact) => ({
         id: contact.id || null, 
         contactId: contact.contactId || null,
-        isPrimary: contact.primary ? "Y" : "N",
+        isPrimary: contact.primary ? "primary" : "N",
         description: contact.desc || "",
         firstName: contact.firstName,
         middleName: contact.middleName || null,
