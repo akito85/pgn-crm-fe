@@ -52,13 +52,13 @@ export const columnWarranty = (
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(search, "accountName", searchInput, searchedColumn, searchText, handleSearch),
   },
-  {
-    key: "accountType",
-    title: "ACCOUNT TYPE",
-    dataIndex: "accountType",
-    sorter: true,
-    ...getColumnSearchPropsUseFilteredValue(search, "accountType", searchInput, searchedColumn, searchText, handleSearch),
-  },
+  // {
+  //   key: "accountType",
+  //   title: "ACCOUNT TYPE",
+  //   dataIndex: "accountType",
+  //   sorter: true,
+  //   ...getColumnSearchPropsUseFilteredValue(search, "accountType", searchInput, searchedColumn, searchText, handleSearch),
+  // },
   // {
   //   key: "saNumber",
   //   title: "SA NUMBER",
