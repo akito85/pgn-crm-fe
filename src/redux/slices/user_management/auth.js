@@ -13,9 +13,10 @@ import { errorBody, errorCode, errorMessage } from "../../../utils";
 
 // ─── Granted-access TTL cache ─────────────────────────────────────────────
 // Avoids re-flashing the action-button skeleton on every route change.
-// The server is still authoritative on every action endpoint hit.
+// Fresh cache (within TTL) skips the network round-trip entirely.
+// Stale cache (expired) falls through to a full refresh.
 const GRANTED_ACCESS_CACHE_PREFIX = "granted-access:";
-const GRANTED_ACCESS_TTL_MS = 5 * 60 * 1000;
+const GRANTED_ACCESS_TTL_MS = 15 * 60 * 1000; // 15 min
 
 const hashToken = (token) => {
   if (!token) return "anon";
@@ -486,14 +487,16 @@ export const confirmNewPassword = createAsyncThunk(
 export const checkGrantedAccess = createAsyncThunk(
   "CHECK_GRANTED_ACCESS",
   async (pathname, thunkAPI) => {
-    // Cached payload? Dispatch immediately so the action column renders
-    // without the skeleton flash, then refresh in the background.
+    // Fresh cache hit — dispatch immediately and skip the network round-trip.
+    // Permissions rarely change mid-session; the next page load after TTL
+    // expires will refresh from the server.
     const cached = readGrantedAccessCache(pathname);
     if (cached) {
       thunkAPI.dispatch(grantedAccess(cached));
-    } else {
-      thunkAPI.dispatch(grantedAccess(null));
+      return;
     }
+    // No cache or expired — show skeleton while fetching.
+    thunkAPI.dispatch(grantedAccess(null));
     try {
       const data = await authService.checkGrantedAccess(pathname);
       const payload = data?.data;

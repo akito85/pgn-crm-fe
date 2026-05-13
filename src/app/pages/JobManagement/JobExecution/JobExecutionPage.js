@@ -147,7 +147,7 @@ const JobExecutionPage = () => {
   const actionColumn = useMemo(() => ({
     title: "ACTIONS",
     key: "actions",
-    width: 100,
+    width: 120,
     align: "center",
     fixed: "right",
     render: (_, record) => {
@@ -215,19 +215,10 @@ const JobExecutionPage = () => {
           disabled: !(status === "SCHEDULED" && isRecurring),
           onClick: () => handleAction(suspendExecution, record.executionId),
         },
-        {
-          key: "view",
-          label: (
-            <span style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, padding: "2px 0" }}>
-              <ViewListIcon width="18" height="18" /> View Details
-            </span>
-          ),
-          onClick: () => navigate(JOB_MGMT_ROUTES.VIEW_JOB_EXECUTION_DETAIL, { state: { id: record.executionId } }),
-        },
       ];
 
       return (
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
           <Dropdown menu={{ items: menuItems }} trigger={["click"]}>
             <button
               style={{ background: "none", border: "none", cursor: "pointer", padding: 4, display: "flex", alignItems: "center" }}
@@ -237,6 +228,13 @@ const JobExecutionPage = () => {
               <IconThreeDots />
             </button>
           </Dropdown>
+          <button
+            style={{ background: "none", border: "none", cursor: "pointer", padding: 4, display: "flex", alignItems: "center", color: "#1976D2" }}
+            onClick={() => navigate(JOB_MGMT_ROUTES.VIEW_JOB_EXECUTION_DETAIL, { state: { id: record.executionId } })}
+            type="button"
+          >
+            <ViewListIcon />
+          </button>
         </div>
       );
     },
