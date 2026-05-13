@@ -281,11 +281,10 @@ const PositionHierarchyPage = () => {
           <NavLink
             to={USER_ROUTES.DETAIL_POSITION}
             state={{ id: record?.hierId }}
-            className="flex items-center gap-1.5"
+            className="flex items-center justify-center"
             style={{ color: "#1976D2" }}
           >
             <ViewListIcon />
-            <span style={{ fontSize: 12 }}>View</span>
           </NavLink>
         ),
       },
@@ -298,11 +297,11 @@ const PositionHierarchyPage = () => {
           return (
             <span
               className={`flex items-center gap-2 ${isDraft ? "cursor-pointer" : "cursor-not-allowed"}`}
-              style={{ color }}
+              style={{ color, padding: "5px 8px" }}
               onClick={() => isDraft && handleOpenModal(record, "activation")}
             >
-              <IconPower color={color} width="16" height="16" />
-              <span style={{ fontSize: 13 }}>{isDraft ? "Activate" : "Inactivate"}</span>
+              <IconPower color={color} width="18" height="18" />
+              <span style={{ fontSize: 14 }}>{isDraft ? "Activate" : "Inactivate"}</span>
             </span>
           );
         },
@@ -317,11 +316,11 @@ const PositionHierarchyPage = () => {
             <NavLink
               to={enabled ? USER_ROUTES.UPDATE_POSITION : undefined}
               state={enabled ? { id: record?.hierId } : undefined}
-              style={{ pointerEvents: enabled ? "auto" : "none" }}
+              style={{ pointerEvents: enabled ? "auto" : "none", padding: "5px 8px" }}
               className="flex items-center gap-2"
             >
-              <IconEditNx color={color} width="16" height="16" />
-              <span style={{ fontSize: 13, color }}>Update</span>
+              <IconEditNx color={color} width="18" height="18" />
+              <span style={{ fontSize: 14, color }}>Update</span>
             </NavLink>
           );
         },
@@ -332,11 +331,11 @@ const PositionHierarchyPage = () => {
         render: (record) => (
           <span
             className="flex items-center gap-2 cursor-pointer"
-            style={{ color: "#1976D2" }}
+            style={{ color: "#1976D2", padding: "5px 8px" }}
             onClick={() => handleOpenModal(record, "duplicate")}
           >
-            <IconCopy color="#1976D2" width="16" height="16" />
-            <span style={{ fontSize: 13 }}>Duplicate</span>
+            <IconCopy color="#1976D2" width="18" height="18" />
+            <span style={{ fontSize: 14 }}>Duplicate</span>
           </span>
         ),
       },

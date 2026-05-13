@@ -166,19 +166,40 @@ const JobExecutionPage = () => {
 
       const menuItems = [
         {
-          key: "view",
+          key: "cancel",
           label: (
-            <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <ViewListIcon width="16" height="16" /> View Details
+            <span style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, padding: "2px 0", opacity: ["PENDING","SCHEDULED","PROCESSING","ON_HOLD","SUSPENDED"].includes(status) ? 1 : 0.4 }}>
+              <IconCancel width="18" height="18" /> Cancel
             </span>
           ),
-          onClick: () => navigate(JOB_MGMT_ROUTES.VIEW_JOB_EXECUTION_DETAIL, { state: { id: record.executionId } }),
+          disabled: !["PENDING","SCHEDULED","PROCESSING","ON_HOLD","SUSPENDED"].includes(status),
+          onClick: () => handleAction(cancelExecution, record.executionId),
+        },
+        {
+          key: "hold",
+          label: (
+            <span style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, padding: "2px 0", opacity: status === "PENDING" ? 1 : 0.4 }}>
+              <IconOnHold width="18" height="18" /> On-Hold
+            </span>
+          ),
+          disabled: status !== "PENDING",
+          onClick: () => handleAction(holdExecution, record.executionId),
+        },
+        {
+          key: "restart",
+          label: (
+            <span style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, padding: "2px 0", opacity: ["FAILED","CANCELLED","SUCCEEDED"].includes(status) ? 1 : 0.4 }}>
+              <IconRestart width="18" height="18" /> Restart
+            </span>
+          ),
+          disabled: !["FAILED","CANCELLED","SUCCEEDED"].includes(status),
+          onClick: () => handleAction(restartExecution, record.executionId),
         },
         {
           key: "stop",
           label: (
-            <span style={{ display: "flex", alignItems: "center", gap: 8, opacity: status === "PROCESSING" ? 1 : 0.4 }}>
-              <IconStop width="16" height="16" /> Stop
+            <span style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, padding: "2px 0", opacity: status === "PROCESSING" ? 1 : 0.4 }}>
+              <IconStop width="18" height="18" /> Stop
             </span>
           ),
           disabled: status !== "PROCESSING",
@@ -187,42 +208,21 @@ const JobExecutionPage = () => {
         {
           key: "suspend",
           label: (
-            <span style={{ display: "flex", alignItems: "center", gap: 8, opacity: (status === "SCHEDULED" && isRecurring) ? 1 : 0.4 }}>
-              <IconSuspend width="16" height="16" /> Suspend
+            <span style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, padding: "2px 0", opacity: (status === "SCHEDULED" && isRecurring) ? 1 : 0.4 }}>
+              <IconSuspend width="18" height="18" /> Suspend
             </span>
           ),
           disabled: !(status === "SCHEDULED" && isRecurring),
           onClick: () => handleAction(suspendExecution, record.executionId),
         },
         {
-          key: "hold",
+          key: "view",
           label: (
-            <span style={{ display: "flex", alignItems: "center", gap: 8, opacity: status === "PENDING" ? 1 : 0.4 }}>
-              <IconOnHold width="16" height="16" /> On-Hold
+            <span style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, padding: "2px 0" }}>
+              <ViewListIcon width="18" height="18" /> View Details
             </span>
           ),
-          disabled: status !== "PENDING",
-          onClick: () => handleAction(holdExecution, record.executionId),
-        },
-        {
-          key: "cancel",
-          label: (
-            <span style={{ display: "flex", alignItems: "center", gap: 8, opacity: ["PENDING","SCHEDULED","PROCESSING","ON_HOLD","SUSPENDED"].includes(status) ? 1 : 0.4 }}>
-              <IconCancel width="16" height="16" /> Cancel
-            </span>
-          ),
-          disabled: !["PENDING","SCHEDULED","PROCESSING","ON_HOLD","SUSPENDED"].includes(status),
-          onClick: () => handleAction(cancelExecution, record.executionId),
-        },
-        {
-          key: "restart",
-          label: (
-            <span style={{ display: "flex", alignItems: "center", gap: 8, opacity: ["FAILED","CANCELLED","SUCCEEDED"].includes(status) ? 1 : 0.4 }}>
-              <IconRestart width="16" height="16" /> Restart
-            </span>
-          ),
-          disabled: !["FAILED","CANCELLED","SUCCEEDED"].includes(status),
-          onClick: () => handleAction(restartExecution, record.executionId),
+          onClick: () => navigate(JOB_MGMT_ROUTES.VIEW_JOB_EXECUTION_DETAIL, { state: { id: record.executionId } }),
         },
       ];
 

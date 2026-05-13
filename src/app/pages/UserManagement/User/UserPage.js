@@ -292,11 +292,10 @@ const UserPage = () => {
         <Link
           to={USER_ROUTES.DETAIL_USER}
           state={{ id: record?.userCode }}
-          className="flex items-center gap-1.5"
+          className="flex items-center justify-center"
           style={{ color: "#1976D2" }}
         >
           <ViewListIcon />
-          <span style={{ fontSize: 12 }}>View</span>
         </Link>
       ),
     },
@@ -312,9 +311,9 @@ const UserPage = () => {
             state={active ? { id: record?.userCode } : undefined}
             style={{ pointerEvents: active ? "auto" : "none" }}
           >
-            <span className="flex items-center gap-2" style={{ color }}>
-              <IconEditNx color={color} width="16" height="16" />
-              <span style={{ fontSize: 13 }}>Update</span>
+            <span className="flex items-center gap-2" style={{ color, padding: "5px 8px" }}>
+              <IconEditNx color={color} width="18" height="18" />
+              <span style={{ fontSize: 14 }}>Update</span>
             </span>
           </Link>
         );
@@ -332,9 +331,9 @@ const UserPage = () => {
             state={enabled ? { id: record?.userId } : undefined}
             style={{ pointerEvents: enabled ? "auto" : "none" }}
           >
-            <span className="flex items-center gap-2" style={{ color }}>
-              <IconGenerateLink color={color} width="16" height="16" />
-              <span style={{ fontSize: 13 }}>Generate</span>
+            <span className="flex items-center gap-2" style={{ color, padding: "5px 8px" }}>
+              <IconGenerateLink color={color} width="18" height="18" />
+              <span style={{ fontSize: 14 }}>Generate</span>
             </span>
           </Link>
         );
@@ -349,7 +348,7 @@ const UserPage = () => {
         return (
           <span
             className="flex items-center gap-2 cursor-pointer"
-            style={{ color }}
+            style={{ color, padding: "5px 8px" }}
             onClick={() => {
               setOpenModal(true);
               setSelectedUserId(record?.userId);
@@ -357,8 +356,8 @@ const UserPage = () => {
               setRecord(record);
             }}
           >
-            <IconPower color={color} width="16" height="16" />
-            <span style={{ fontSize: 13 }}>{isActive ? "Inactivate" : "Activate"}</span>
+            <IconPower color={color} width="18" height="18" />
+            <span style={{ fontSize: 14 }}>{isActive ? "Inactivate" : "Activate"}</span>
           </span>
         );
       },

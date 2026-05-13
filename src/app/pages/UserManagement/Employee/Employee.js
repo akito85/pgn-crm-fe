@@ -270,11 +270,10 @@ const Employee = () => {
         <Link
           to={USER_ROUTES.DETAIL_EMPLOYEE}
           state={{ id: record?.employeeCode }}
-          className="flex items-center gap-1.5"
+          className="flex items-center justify-center"
           style={{ color: "#1976D2" }}
         >
           <ViewListIcon />
-          <span style={{ fontSize: 12 }}>View</span>
         </Link>
       ),
     },
@@ -290,9 +289,9 @@ const Employee = () => {
             state={active ? { id: record?.employeeCode } : undefined}
             style={{ pointerEvents: active ? "auto" : "none" }}
           >
-            <span className="flex items-center gap-2" style={{ color }}>
-              <IconEditNx color={color} width="16" height="16" />
-              <span style={{ fontSize: 13 }}>Update</span>
+            <span className="flex items-center gap-2" style={{ color, padding: "5px 8px" }}>
+              <IconEditNx color={color} width="18" height="18" />
+              <span style={{ fontSize: 14 }}>Update</span>
             </span>
           </Link>
         );
@@ -310,9 +309,9 @@ const Employee = () => {
             state={active ? { id: record?.employeeCode } : undefined}
             style={{ pointerEvents: active ? "auto" : "none" }}
           >
-            <span className="flex items-center gap-2" style={{ color }}>
-              <IconForwardTask color={color} width="16" height="16" />
-              <span style={{ fontSize: 13 }}>Forward</span>
+            <span className="flex items-center gap-2" style={{ color, padding: "5px 8px" }}>
+              <IconForwardTask color={color} width="18" height="18" />
+              <span style={{ fontSize: 14 }}>Forward</span>
             </span>
           </Link>
         );
@@ -327,7 +326,7 @@ const Employee = () => {
         return (
           <span
             className={`flex items-center gap-2 ${active ? "cursor-pointer" : "cursor-not-allowed"}`}
-            style={{ color }}
+            style={{ color, padding: "5px 8px" }}
             onClick={() => {
               if (active) {
                 setEmpId(record?.employeeId);
@@ -335,8 +334,8 @@ const Employee = () => {
               }
             }}
           >
-            <IconTerminate color={color} width="16" height="16" />
-            <span style={{ fontSize: 13 }}>Terminate</span>
+            <IconTerminate color={color} width="18" height="18" />
+            <span style={{ fontSize: 14 }}>Terminate</span>
           </span>
         );
       },

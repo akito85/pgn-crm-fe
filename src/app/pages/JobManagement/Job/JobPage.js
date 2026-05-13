@@ -190,8 +190,8 @@ const JobPage = () => {
         canCreate && {
           key: "copy",
           label: (
-            <span style={{ display: "flex", alignItems: "center", gap: 8, opacity: copyingId === record.id ? 0.5 : 1 }}>
-              <IconCopy width="16" height="16" /> Copy
+            <span style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, padding: "2px 0", opacity: copyingId === record.id ? 0.5 : 1 }}>
+              <IconCopy width="18" height="18" /> Copy
             </span>
           ),
           onClick: () => handleCopy(record),
@@ -200,8 +200,8 @@ const JobPage = () => {
         canUpdate && {
           key: "update",
           label: (
-            <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <IconEditMenu width="16" height="16" /> Update
+            <span style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, padding: "2px 0" }}>
+              <IconEditMenu width="18" height="18" /> Update
             </span>
           ),
           onClick: () => toUpdate(record.id),
@@ -209,8 +209,8 @@ const JobPage = () => {
         canDelete && {
           key: "delete",
           label: (
-            <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <IconDeleteMenu width="16" height="16" /> Delete
+            <span style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, padding: "2px 0" }}>
+              <IconDeleteMenu width="18" height="18" /> Delete
             </span>
           ),
           onClick: () => {
@@ -218,7 +218,7 @@ const JobPage = () => {
             setDeleteModalOpen(true);
           },
         },
-      ].filter(Boolean);
+      ].filter(Boolean).sort((a, b) => a.key.localeCompare(b.key));
 
       return (
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
@@ -235,12 +235,11 @@ const JobPage = () => {
           )}
           {canView && (
             <button
-              style={{ background: "none", border: "none", cursor: "pointer", padding: 4, display: "flex", alignItems: "center", gap: 4, color: "#1976D2" }}
+              style={{ background: "none", border: "none", cursor: "pointer", padding: 4, display: "flex", alignItems: "center", color: "#1976D2" }}
               onClick={() => toView(record.id)}
               type="button"
             >
               <ViewListIcon />
-              <span style={{ fontSize: 12 }}>View</span>
             </button>
           )}
         </div>

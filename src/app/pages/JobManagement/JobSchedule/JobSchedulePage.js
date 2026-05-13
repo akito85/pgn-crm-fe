@@ -139,8 +139,8 @@ const JobSchedulePage = () => {
         ...(showActivate ? [{
           key: "activate",
           label: (
-            <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <IconPower width="16" height="16" /> Activate
+            <span style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, padding: "2px 0" }}>
+              <IconPower width="18" height="18" /> Activate
             </span>
           ),
           onClick: () => handleAction(activateSchedule, record.scheduleId),
@@ -148,8 +148,8 @@ const JobSchedulePage = () => {
         ...(showPause ? [{
           key: "pause",
           label: (
-            <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <IconSuspend width="16" height="16" /> Pause
+            <span style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, padding: "2px 0" }}>
+              <IconSuspend width="18" height="18" /> Pause
             </span>
           ),
           onClick: () => handleAction(pauseSchedule, record.scheduleId),
@@ -157,8 +157,8 @@ const JobSchedulePage = () => {
         {
           key: "view",
           label: (
-            <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <ViewListIcon width="16" height="16" /> View
+            <span style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, padding: "2px 0" }}>
+              <ViewListIcon width="18" height="18" /> View
             </span>
           ),
           onClick: () => navigate(JOB_MGMT_ROUTES.VIEW_JOB_SCHEDULE_DETAIL, { state: { id: record.scheduleId } }),
@@ -166,8 +166,8 @@ const JobSchedulePage = () => {
         {
           key: "delete",
           label: (
-            <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <IconDeleteMenu width="16" height="16" /> Delete
+            <span style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, padding: "2px 0" }}>
+              <IconDeleteMenu width="18" height="18" /> Delete
             </span>
           ),
           onClick: () => {
@@ -175,7 +175,7 @@ const JobSchedulePage = () => {
             setDeleteModalOpen(true);
           },
         },
-      ];
+      ].sort((a, b) => a.key.localeCompare(b.key));
 
       return (
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>

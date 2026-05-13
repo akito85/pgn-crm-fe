@@ -185,8 +185,8 @@ const JobGroupPage = () => {
         canUpdate && {
           key: "update",
           label: (
-            <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <IconEditMenu width="16" height="16" /> Update
+            <span style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, padding: "2px 0" }}>
+              <IconEditMenu width="18" height="18" /> Update
             </span>
           ),
           onClick: () => navigate(JOB_MGMT_ROUTES.UPDATE_JOB_GROUP, { state: { id: record.id } }),
@@ -194,8 +194,8 @@ const JobGroupPage = () => {
         canDelete && {
           key: "delete",
           label: (
-            <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <IconDeleteMenu width="16" height="16" /> Delete
+            <span style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, padding: "2px 0" }}>
+              <IconDeleteMenu width="18" height="18" /> Delete
             </span>
           ),
           onClick: () => {
@@ -207,7 +207,7 @@ const JobGroupPage = () => {
             setDeleteModalOpen(true);
           },
         },
-      ].filter(Boolean);
+      ].filter(Boolean).sort((a, b) => a.key.localeCompare(b.key));
 
       return (
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
@@ -238,7 +238,6 @@ const JobGroupPage = () => {
                 padding: 4,
                 display: "flex",
                 alignItems: "center",
-                gap: 4,
                 color: "#1976D2",
               }}
               onClick={(e) => {
@@ -248,7 +247,6 @@ const JobGroupPage = () => {
               type="button"
             >
               <ViewListIcon />
-              <span style={{ fontSize: 12 }}>View</span>
             </button>
           )}
         </div>
