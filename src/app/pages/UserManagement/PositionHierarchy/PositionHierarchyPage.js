@@ -1,4 +1,4 @@
-import { Alert, DatePicker, Form, Tooltip } from "antd";
+import { Alert, DatePicker, Form } from "antd";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { NavLink } from "react-router-dom";
@@ -278,68 +278,66 @@ const PositionHierarchyPage = () => {
         action: "View",
         type: "table",
         render: (record) => (
-          <Tooltip title="Detail">
-            <NavLink
-              to={USER_ROUTES.DETAIL_POSITION}
-              state={{ id: record?.hierId }}
-              className="flex flex-col justify-center items-center"
-            >
-              <ViewListIcon />
-            </NavLink>
-          </Tooltip>
+          <NavLink
+            to={USER_ROUTES.DETAIL_POSITION}
+            state={{ id: record?.hierId }}
+            className="flex items-center gap-1.5"
+            style={{ color: "#1976D2" }}
+          >
+            <ViewListIcon />
+            <span style={{ fontSize: 12 }}>View</span>
+          </NavLink>
         ),
       },
       {
         action: "Activate",
         type: "table",
-        render: (record) => (
-          <Tooltip title={record?.status === "DRAFT" ? "Activate Draft" : "Inactivate Draft"}>
-            <ButtonComponent
-              icon={
-                <IconPower
-                  color={record?.status === "DRAFT" ? "#1976D2" : "#C0BEC6"}
-                />
-              }
-              border={false}
-              disabled={record?.status !== "DRAFT"}
-              onClick={() => record?.status === "DRAFT" && handleOpenModal(record, "activation")}
-            />
-          </Tooltip>
-        ),
+        render: (record) => {
+          const isDraft = record?.status === "DRAFT";
+          const color = isDraft ? "#1976D2" : "#C0BEC6";
+          return (
+            <span
+              className={`flex items-center gap-2 ${isDraft ? "cursor-pointer" : "cursor-not-allowed"}`}
+              style={{ color }}
+              onClick={() => isDraft && handleOpenModal(record, "activation")}
+            >
+              <IconPower color={color} width="16" height="16" />
+              <span style={{ fontSize: 13 }}>{isDraft ? "Activate" : "Inactivate"}</span>
+            </span>
+          );
+        },
       },
       {
         action: "Update",
         type: "table",
-        render: (record) => (
-          <Tooltip title="Update">
+        render: (record) => {
+          const enabled = record?.status !== "INACTIVE";
+          const color = enabled ? "#1976D2" : "#C0BEC6";
+          return (
             <NavLink
-              to={record?.status !== "INACTIVE" ? USER_ROUTES.UPDATE_POSITION : undefined}
-              state={record?.status !== "INACTIVE" ? { id: record?.hierId } : undefined}
+              to={enabled ? USER_ROUTES.UPDATE_POSITION : undefined}
+              state={enabled ? { id: record?.hierId } : undefined}
+              style={{ pointerEvents: enabled ? "auto" : "none" }}
+              className="flex items-center gap-2"
             >
-              <ButtonComponent
-                icon={
-                  <IconEditNx
-                    color={record?.status === "INACTIVE" ? "#C0BEC6" : "#1976D2"}
-                  />
-                }
-                border={false}
-                disabled={record?.status === "INACTIVE"}
-              />
+              <IconEditNx color={color} width="16" height="16" />
+              <span style={{ fontSize: 13, color }}>Update</span>
             </NavLink>
-          </Tooltip>
-        ),
+          );
+        },
       },
       {
         action: "duplicate",
         type: "table",
         render: (record) => (
-          <Tooltip title="Duplicate">
-            <ButtonComponent
-              icon={<IconCopy color="#1976D2" />}
-              border={false}
-              onClick={() => handleOpenModal(record, "duplicate")}
-            />
-          </Tooltip>
+          <span
+            className="flex items-center gap-2 cursor-pointer"
+            style={{ color: "#1976D2" }}
+            onClick={() => handleOpenModal(record, "duplicate")}
+          >
+            <IconCopy color="#1976D2" width="16" height="16" />
+            <span style={{ fontSize: 13 }}>Duplicate</span>
+          </span>
         ),
       },
     ],

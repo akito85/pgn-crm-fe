@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Alert, Form, Tooltip } from "antd";
+import { Alert, Form } from "antd";
 import { Link, NavLink } from "react-router-dom";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
@@ -267,87 +267,79 @@ const Employee = () => {
       action: "View",
       type: "table",
       render: (record) => (
-        <Tooltip title="Detail">
-          <Link
-            to={USER_ROUTES.DETAIL_EMPLOYEE}
-            state={{ id: record?.employeeCode }}
-            className="flex flex-col justify-center items-center"
-          >
-            <ViewListIcon />
-          </Link>
-        </Tooltip>
+        <Link
+          to={USER_ROUTES.DETAIL_EMPLOYEE}
+          state={{ id: record?.employeeCode }}
+          className="flex items-center gap-1.5"
+          style={{ color: "#1976D2" }}
+        >
+          <ViewListIcon />
+          <span style={{ fontSize: 12 }}>View</span>
+        </Link>
       ),
     },
     {
       action: "Update",
       type: "table",
-      render: (record) => (
-        <Tooltip title="Update">
+      render: (record) => {
+        const active = record?.status === "ACTIVE";
+        const color = active ? "#1976D2" : "#C0BEC6";
+        return (
           <Link
-            to={record?.status === "ACTIVE" ? USER_ROUTES.UPDATE_EMPLOYEE : undefined}
-            state={
-              record?.status === "ACTIVE" ? { id: record?.employeeCode } : undefined
-            }
+            to={active ? USER_ROUTES.UPDATE_EMPLOYEE : undefined}
+            state={active ? { id: record?.employeeCode } : undefined}
+            style={{ pointerEvents: active ? "auto" : "none" }}
           >
-            <ButtonComponent
-              icon={
-                <IconEditNx
-                  color={record?.status === "ACTIVE" ? "#1976D2" : "#C0BEC6"}
-                />
-              }
-              border={false}
-              disabled={record?.status !== "ACTIVE"}
-            />
+            <span className="flex items-center gap-2" style={{ color }}>
+              <IconEditNx color={color} width="16" height="16" />
+              <span style={{ fontSize: 13 }}>Update</span>
+            </span>
           </Link>
-        </Tooltip>
-      ),
+        );
+      },
     },
     {
       action: "forward",
       type: "table",
-      render: (record) => (
-        <Tooltip title="Forward Task">
+      render: (record) => {
+        const active = record?.status === "ACTIVE";
+        const color = active ? "#1976D2" : "#C0BEC6";
+        return (
           <Link
-            to={record?.status === "ACTIVE" ? USER_ROUTES.FORWARD_TASK : undefined}
-            state={
-              record?.status === "ACTIVE" ? { id: record?.employeeCode } : undefined
-            }
+            to={active ? USER_ROUTES.FORWARD_TASK : undefined}
+            state={active ? { id: record?.employeeCode } : undefined}
+            style={{ pointerEvents: active ? "auto" : "none" }}
           >
-            <ButtonComponent
-              icon={
-                <IconForwardTask
-                  color={record?.status === "ACTIVE" ? "#1976D2" : "#C0BEC6"}
-                />
-              }
-              border={false}
-              disabled={record?.status !== "ACTIVE"}
-            />
+            <span className="flex items-center gap-2" style={{ color }}>
+              <IconForwardTask color={color} width="16" height="16" />
+              <span style={{ fontSize: 13 }}>Forward</span>
+            </span>
           </Link>
-        </Tooltip>
-      ),
+        );
+      },
     },
     {
       action: "terminate",
       type: "table",
-      render: (record) => (
-        <Tooltip title="Terminate">
-          <ButtonComponent
-            icon={
-              <IconTerminate
-                color={record?.status === "ACTIVE" ? "#BE3036" : "#C0BEC6"}
-              />
-            }
-            border={false}
-            disabled={record?.status !== "ACTIVE"}
+      render: (record) => {
+        const active = record?.status === "ACTIVE";
+        const color = active ? "#BE3036" : "#C0BEC6";
+        return (
+          <span
+            className={`flex items-center gap-2 ${active ? "cursor-pointer" : "cursor-not-allowed"}`}
+            style={{ color }}
             onClick={() => {
-              if (record?.status === "ACTIVE") {
+              if (active) {
                 setEmpId(record?.employeeId);
                 setModalTerm(true);
               }
             }}
-          />
-        </Tooltip>
-      ),
+          >
+            <IconTerminate color={color} width="16" height="16" />
+            <span style={{ fontSize: 13 }}>Terminate</span>
+          </span>
+        );
+      },
     },
   ], []);
 

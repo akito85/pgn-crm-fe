@@ -3,7 +3,7 @@ import {
   ExclamationCircleOutlined,
   UploadOutlined,
 } from "@ant-design/icons";
-import { Alert, Form, Tooltip } from "antd";
+import { Alert, Form } from "antd";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, NavLink } from "react-router-dom";
@@ -289,94 +289,79 @@ const UserPage = () => {
       action: "View",
       type: "table",
       render: (record) => (
-        <Tooltip title="Detail">
-          <Link
-            to={USER_ROUTES.DETAIL_USER}
-            state={{ id: record?.userCode }}
-            className="flex flex-col justify-center items-center"
-          >
-            <ViewListIcon />
-          </Link>
-        </Tooltip>
+        <Link
+          to={USER_ROUTES.DETAIL_USER}
+          state={{ id: record?.userCode }}
+          className="flex items-center gap-1.5"
+          style={{ color: "#1976D2" }}
+        >
+          <ViewListIcon />
+          <span style={{ fontSize: 12 }}>View</span>
+        </Link>
       ),
     },
     {
       action: "Update",
       type: "table",
-      render: (record) => (
-        <Tooltip title="Update">
+      render: (record) => {
+        const active = record?.status === "ACTIVE";
+        const color = active ? "#1976D2" : "#C0BEC6";
+        return (
           <Link
-            to={record?.status === "ACTIVE" ? USER_ROUTES.UPDATE_USER : undefined}
-            state={record?.status === "ACTIVE" ? { id: record?.userCode } : undefined}
+            to={active ? USER_ROUTES.UPDATE_USER : undefined}
+            state={active ? { id: record?.userCode } : undefined}
+            style={{ pointerEvents: active ? "auto" : "none" }}
           >
-            <ButtonComponent
-              icon={
-                <IconEditNx
-                  color={record?.status === "ACTIVE" ? "#1976D2" : "#C0BEC6"}
-                />
-              }
-              border={false}
-              disabled={record?.status !== "ACTIVE"}
-            />
+            <span className="flex items-center gap-2" style={{ color }}>
+              <IconEditNx color={color} width="16" height="16" />
+              <span style={{ fontSize: 13 }}>Update</span>
+            </span>
           </Link>
-        </Tooltip>
-      ),
+        );
+      },
     },
     {
       action: "Generate",
       type: "table",
-      render: (record) => (
-        <Tooltip title="Generate Link Password">
+      render: (record) => {
+        const enabled = record?.status === "ACTIVE" && record.authType !== "LDAP";
+        const color = enabled ? "#1976D2" : "#C0BEC6";
+        return (
           <Link
-            to={
-              record?.status === "ACTIVE" && record.authType !== "LDAP"
-                ? USER_ROUTES.GENERATE_PASSWORD
-                : undefined
-            }
-            state={
-              record?.status === "ACTIVE" && record.authType !== "LDAP"
-                ? { id: record?.userId }
-                : undefined
-            }
+            to={enabled ? USER_ROUTES.GENERATE_PASSWORD : undefined}
+            state={enabled ? { id: record?.userId } : undefined}
+            style={{ pointerEvents: enabled ? "auto" : "none" }}
           >
-            <ButtonComponent
-              icon={
-                <IconGenerateLink
-                  color={
-                    record?.status === "ACTIVE" && record.authType !== "LDAP"
-                      ? "#1976D2"
-                      : "#C0BEC6"
-                  }
-                />
-              }
-              border={false}
-              disabled={!(record?.status === "ACTIVE" && record.authType !== "LDAP")}
-            />
+            <span className="flex items-center gap-2" style={{ color }}>
+              <IconGenerateLink color={color} width="16" height="16" />
+              <span style={{ fontSize: 13 }}>Generate</span>
+            </span>
           </Link>
-        </Tooltip>
-      ),
+        );
+      },
     },
     {
       action: "Activate",
       type: "table",
-      render: (record) => (
-        <Tooltip title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}>
-          <ButtonComponent
-            icon={
-              <IconPower
-                color={record?.status === "ACTIVE" ? "#1976D2" : "#C0BEC6"}
-              />
-            }
-            border={false}
+      render: (record) => {
+        const isActive = record?.status === "ACTIVE";
+        const color = "#1976D2";
+        return (
+          <span
+            className="flex items-center gap-2 cursor-pointer"
+            style={{ color }}
             onClick={() => {
               setOpenModal(true);
               setSelectedUserId(record?.userId);
               setActivate(record?.status);
               setRecord(record);
             }}
-          />
-        </Tooltip>
-      ),
+          >
+            <IconPower color={color} width="16" height="16" />
+            <span style={{ fontSize: 13 }}>{isActive ? "Inactivate" : "Activate"}</span>
+          </span>
+        );
+      },
     },
   ], [handleDownload]);
 

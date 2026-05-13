@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { Dropdown, Skeleton, Spin } from "antd";
-import { EyeOutlined } from "@ant-design/icons";
 import { JOB_MGMT_ROUTES } from "../../../../routes/job_management/job_routes";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 import NxTable from "../../../../components/Nx/NxTable";
@@ -22,6 +21,7 @@ import IconThreeDots from "../../../../assets/Icon/Nx/IconThreeDots";
 import IconPower from "../../../../assets/Icon/Nx/IconPower";
 import IconSuspend from "../../../../assets/Icon/Nx/IconSuspend";
 import IconDeleteMenu from "../../../../assets/Icon/Nx/IconDeleteMenu";
+import ViewListIcon from "../../../../assets/Icon/Nx/IconViewList";
 
 const PAGE_SIZE = 20;
 
@@ -158,7 +158,7 @@ const JobSchedulePage = () => {
           key: "view",
           label: (
             <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <EyeOutlined /> View
+              <ViewListIcon width="16" height="16" /> View
             </span>
           ),
           onClick: () => navigate(JOB_MGMT_ROUTES.VIEW_JOB_SCHEDULE_DETAIL, { state: { id: record.scheduleId } }),

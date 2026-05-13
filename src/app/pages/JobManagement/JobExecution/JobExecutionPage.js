@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { PlusCircleOutlined, EyeOutlined } from "@ant-design/icons";
+import { PlusCircleOutlined } from "@ant-design/icons";
 import { Dropdown, Skeleton, Spin } from "antd";
 import { JOB_MGMT_ROUTES } from "../../../../routes/job_management/job_routes";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
@@ -27,6 +27,7 @@ import IconRestart from "../../../../assets/Icon/Nx/IconRestart";
 import IconOnHold from "../../../../assets/Icon/Nx/IconOnHold";
 import IconSuspend from "../../../../assets/Icon/Nx/IconSuspend";
 import IconCancel from "../../../../assets/Icon/Nx/IconCancel";
+import ViewListIcon from "../../../../assets/Icon/Nx/IconViewList";
 
 const PAGE_SIZE = 30;
 
@@ -168,7 +169,7 @@ const JobExecutionPage = () => {
           key: "view",
           label: (
             <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <EyeOutlined /> View Details
+              <ViewListIcon width="16" height="16" /> View Details
             </span>
           ),
           onClick: () => navigate(JOB_MGMT_ROUTES.VIEW_JOB_EXECUTION_DETAIL, { state: { id: record.executionId } }),
