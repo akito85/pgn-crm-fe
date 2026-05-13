@@ -97,12 +97,12 @@ export const columnWarranty = (
     ...getColumnSearchPropsUseFilteredValue(search, "customerGroup", searchInput, searchedColumn, searchText, handleSearch),
   },
   {
-    key: "type",
+    key: "warrantyType",
     title: "TYPE",
-    dataIndex: "type",
+    dataIndex: "warrantyType",
     align: "center",
     sorter: true,
-    ...getColumnSearchPropsUseFilteredValue(search, "type", searchInput, searchedColumn, searchText, handleSearch),
+    ...getColumnSearchPropsUseFilteredValue(search, "warrantyType", searchInput, searchedColumn, searchText, handleSearch),
   },
   {
     key: "classificationType",
