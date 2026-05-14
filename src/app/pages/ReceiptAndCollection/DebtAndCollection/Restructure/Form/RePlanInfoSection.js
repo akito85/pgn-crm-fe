@@ -82,8 +82,8 @@ const RePlanInfoSection = ({ form, onPlanInfoChange }) => {
       <SubSectionCard>
         <Row gutter={[16, 16]}>
           <Col style={{ width: "20%" }}>
-              <Form.Item name="saNumber" label="Reference Number" rules={[{ required: true }]}>
-                  <Input placeholder="Reference Number" disabled={true} />
+              <Form.Item name="restructureCode" label="Payment Plan Code" rules={[{ required: true }]}>
+                  <Input placeholder="Payment Plan Code" disabled={true} />
               </Form.Item>
           </Col>
           <Col style={{ width: "20%" }}>

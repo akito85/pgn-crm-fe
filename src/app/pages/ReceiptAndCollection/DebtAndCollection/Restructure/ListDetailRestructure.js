@@ -14,8 +14,14 @@ import {
     getListCategory,
     getAllApprovalList,
     getListApprovalById,
-    resetDetail
+    resetDetail,
+    getOpenItemDetail,
+    resetOpenItemDetail,
+    getPaymentPlanDetail,
+    resetPaymentPlanDetail
 } from "../../../../../redux/slices/receipt_collection/restructure";
+import ModalOpenItemDetail from "./Modal/ModalOpenItemDetail";
+import ModalPaymentPlanDetail from "./Modal/ModalPaymentPlanDetail";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 import BaseContainer from "../../../../../components/BaseContainer";
 import CardContainerNoBorder from "../../../../../components/CardContainerNoBorder";
@@ -33,6 +39,8 @@ import DOMPurify from "dompurify";
 import { DEBT_AND_COLLECTION_ROUTES } from "../../../../../routes/DebtAndCollection/rc_routes";
 import DetailPaymentPlan from "./DetailPaymentPlan";
 import DetailEarlyRepayment from "./DetailEarlyRepayment";
+import DetailRePlan from "./DetailRePlan";
+import DetailCancel from "./DetailCancel";
 
 const ListDetailRestructure = ({ selectedId: propId, onClose, onRefresh, approvalType: propApprovalType, isApprover: propIsApprover }) => {
     const dispatch = useDispatch();
@@ -41,6 +49,8 @@ const ListDetailRestructure = ({ selectedId: propId, onClose, onRefresh, approva
     const [form] = Form.useForm();
     const [modalApprove, setModalApprove] = useState(false);
     const [approveOrReject, setApproveOrReject] = useState("");
+    const [modalOpenItem, setModalOpenItem] = useState(false);
+    const [modalPaymentPlan, setModalPaymentPlan] = useState(false);
     const id = propId || location?.state?.id || "RES001"; 
     const isEmbedded = !!propId;
 
@@ -95,7 +105,11 @@ const ListDetailRestructure = ({ selectedId: propId, onClose, onRefresh, approva
         loading,
         data_detail,
         dataListAppHierId,
-        dataListAppHierDetail
+        dataListAppHierDetail,
+        openItemDetail,
+        loadingOpenItemDetail,
+        paymentPlanDetail,
+        loadingPaymentPlanDetail
     } = useSelector((state) => state.restructure);
 
     const [segmentedPage, setSegmentedPage] = useState("Payment Plan");
@@ -113,7 +127,38 @@ const ListDetailRestructure = ({ selectedId: propId, onClose, onRefresh, approva
     const approvalName = (dataListAppHierId || []).find(x => x.appHierId === data_detail?.restructure?.appHierId)?.approvalName || dataHeader?.approvalName || dataHeader?.appHierId || "-";
 
     const isApprover = propIsApprover || location?.state?.isApprover || false;
-    const isEarlyRepayment = (propApprovalType || location?.state?.approvalType) === "EARLY_REPAYMENT_RESTRUCTURE" && isApprover;
+    const approvalType = propApprovalType || location?.state?.approvalType || data_detail?.tApprovalDto?.category;
+    const isEarlyRepayment = (approvalType === "EARLY_REPAYMENT_RESTRUCTURE");
+    const isRePlan = (approvalType === "REPLAN_RESTRUCTURE");
+    const isCancel = (approvalType === "CANCEL_RESTRUCTURE");
+
+    const handleBack = () => {
+        if (isEmbedded && onClose) {
+            onClose();
+        } else {
+            navigate(-1);
+        }
+    };
+
+    const handleOpenItemDetail = (record) => {
+        setModalOpenItem(true);
+        dispatch(getOpenItemDetail(record.key || record.id || "1345"));
+    };
+
+    const handleCloseOpenItemModal = () => {
+        setModalOpenItem(false);
+        dispatch(resetOpenItemDetail());
+    };
+
+    const handlePaymentPlanDetail = (record) => {
+        setModalPaymentPlan(true);
+        dispatch(getPaymentPlanDetail(record.key || record.id || "1345"));
+    };
+
+    const handleClosePaymentPlanModal = () => {
+        setModalPaymentPlan(false);
+        dispatch(resetPaymentPlanDetail());
+    };
 
     useEffect(() => {
         if (id) {
@@ -194,7 +239,11 @@ const ListDetailRestructure = ({ selectedId: propId, onClose, onRefresh, approva
                     acc[cur].push({
                         key: curr.key || curr.id,
                         periode: curr.periode,
-                        amount: curr.amount
+                        amount: curr.amount,
+                        dueDate: curr.dueDate,
+                        balance: curr.balance,
+                        detailCode: curr.detailCode,
+                        status: curr.status
                     });
                     return acc;
                 }, {});
@@ -256,7 +305,7 @@ const ListDetailRestructure = ({ selectedId: propId, onClose, onRefresh, approva
                 { title: "NO", dataIndex: "key", width: 50, render: (_, __, i) => i + 1 },
                 { title: "INVOICE NO", dataIndex: "invoiceNo" },
                 { title: "INVOICE PERIOD", dataIndex: "invoicePeriod" },
-                { title: "ALLOCATION", dataIndex: "allocation" },
+                { title: "BILLING ITEM", dataIndex: "allocation" },
                 { 
                     title: "AMOUNT", 
                     dataIndex: "amount", 
@@ -266,6 +315,17 @@ const ListDetailRestructure = ({ selectedId: propId, onClose, onRefresh, approva
                         return num.toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 });
                     }
                 },
+                {
+                    title: "ACTION",
+                    dataIndex: "action",
+                    width: 100,
+                    align: "center",
+                    render: (_, record) => (
+                        <div className="flex justify-center items-center cursor-pointer" onClick={() => handleOpenItemDetail(record)}>
+                            <SVGIcon name="IconDetail" width="20px" height="20px" color="#0075bf" />
+                        </div>
+                    )
+                }
             ];
 
             return (
@@ -284,6 +344,7 @@ const ListDetailRestructure = ({ selectedId: propId, onClose, onRefresh, approva
                             <div className="flex-1 text-right pr-4">
                                 {total.toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 })}
                             </div>
+                            <div className="w-[100px]"></div>
                         </div>
                     </SectionCard>
                 </div>
@@ -309,6 +370,30 @@ const ListDetailRestructure = ({ selectedId: propId, onClose, onRefresh, approva
                     align: "right",
                     render: (val) => (parseFloat(val) || 0).toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 })
                 },
+                { title: "DUE DATE", dataIndex: "dueDate", render: (val) => val ? moment(val).format("DD MMM YYYY") : "-" },
+                { 
+                    title: "BALANCE", 
+                    dataIndex: "balance", 
+                    align: "right",
+                    render: (val) => (parseFloat(val) || 0).toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 })
+                },
+                { title: "DETAIL CODE", dataIndex: "detailCode" },
+                { 
+                    title: "STATUS", 
+                    dataIndex: "status",
+                    render: (status) => <StatusComponent colour={status || "Draft"}>{status || "Draft"}</StatusComponent>
+                },
+                {
+                    title: "ACTION",
+                    dataIndex: "action",
+                    width: 100,
+                    align: "center",
+                    render: (_, record) => (
+                        <div className="flex justify-center items-center cursor-pointer" onClick={() => handlePaymentPlanDetail(record)}>
+                            <SVGIcon name="IconDetail" width="20px" height="20px" color="#0075bf" />
+                        </div>
+                    )
+                }
             ];
 
             return (
@@ -327,6 +412,8 @@ const ListDetailRestructure = ({ selectedId: propId, onClose, onRefresh, approva
                             <div className="flex-1 text-right pr-4">
                                 {currentSum.toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 })}
                             </div>
+                            <div className="flex-[4]"></div>
+                            <div className="w-[100px]"></div>
                         </div>
                     </SectionCard>
                 </div>
@@ -392,6 +479,50 @@ const ListDetailRestructure = ({ selectedId: propId, onClose, onRefresh, approva
                     setListDataAttachment={setListDataAttachment}
                     dispatch={dispatch}
                     renderOpenItems={renderOpenItems}
+                    getListCategory={getListCategory}
+                    receiptCollectionHttpService={receiptCollectionHttpService}
+                    configApp={configApp}
+                />
+            ) : isRePlan ? (
+                <DetailRePlan
+                    isEmbedded={isEmbedded}
+                    segmentedPage={segmentedPage}
+                    setSegmentedPage={setSegmentedPage}
+                    dataHeader={dataHeader}
+                    data_detail={data_detail}
+                    contacts={contacts}
+                    contactColumns={contactColumns}
+                    expandable={expandable}
+                    appHierDataDetail={appHierDataDetail}
+                    appHierOptions={appHierOptions}
+                    selectedHierarchy={selectedHierarchy}
+                    setSelectedHierarchy={setSelectedHierarchy}
+                    approvalName={approvalName}
+                    listDataAttachment={listDataAttachment}
+                    setListDataAttachment={setListDataAttachment}
+                    dispatch={dispatch}
+                    renderOpenItems={renderOpenItems}
+                    renderPaymentPlanDetail={renderPaymentPlanDetail}
+                    getListCategory={getListCategory}
+                    receiptCollectionHttpService={receiptCollectionHttpService}
+                    configApp={configApp}
+                />
+            ) : isCancel ? (
+                <DetailCancel
+                    isEmbedded={isEmbedded}
+                    segmentedPage={segmentedPage}
+                    setSegmentedPage={setSegmentedPage}
+                    dataHeader={dataHeader}
+                    data_detail={data_detail}
+                    appHierDataDetail={appHierDataDetail}
+                    appHierOptions={appHierOptions}
+                    selectedHierarchy={selectedHierarchy}
+                    setSelectedHierarchy={setSelectedHierarchy}
+                    approvalName={approvalName}
+                    listDataAttachment={listDataAttachment}
+                    setListDataAttachment={setListDataAttachment}
+                    dispatch={dispatch}
+                    renderPaymentPlanDetail={renderPaymentPlanDetail}
                     getListCategory={getListCategory}
                     receiptCollectionHttpService={receiptCollectionHttpService}
                     configApp={configApp}
@@ -462,6 +593,20 @@ const ListDetailRestructure = ({ selectedId: propId, onClose, onRefresh, approva
                 approveOrReject={approveOrReject}
                 menu="Restructure"
                 named={dataHeader?.id}
+            />
+
+            <ModalOpenItemDetail
+                isOpen={modalOpenItem}
+                handleCancel={handleCloseOpenItemModal}
+                data={openItemDetail}
+                loading={loadingOpenItemDetail}
+            />
+
+            <ModalPaymentPlanDetail
+                isOpen={modalPaymentPlan}
+                handleCancel={handleClosePaymentPlanModal}
+                data={paymentPlanDetail}
+                loading={loadingPaymentPlanDetail}
             />
         </Spin>
     );

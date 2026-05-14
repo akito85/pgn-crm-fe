@@ -12,8 +12,9 @@ import DateComponent from "../../../../../components/DateComponent";
 import InputLabel from "../../../../../components/InputLabel";
 import LogHistoryInfo from "../../../../../components/LogHistoryInfo";
 import SubSectionCard from "../../../../../components/SubSectionCard";
+import DOMPurify from "dompurify";
 
-const DetailEarlyRepayment = ({
+const DetailRePlan = ({
     isEmbedded,
     segmentedPage,
     setSegmentedPage,
@@ -31,77 +32,15 @@ const DetailEarlyRepayment = ({
     setListDataAttachment,
     dispatch,
     renderOpenItems,
+    renderPaymentPlanDetail,
     getListCategory,
     receiptCollectionHttpService,
     configApp
 }) => {
-    const renderEarlyPayoffDetail = () => {
-        const list = data_detail?.selectedInstallmentDetails || data_detail?.calculationList || [];
-        const grouped = list.reduce((acc, item) => {
-            const cur = item.currency || "IDR";
-            if (!acc[cur]) acc[cur] = [];
-            acc[cur].push(item);
-            return acc;
-        }, {});
-
-        const currencies = Object.keys(grouped);
-        if (currencies.length === 0) return <DetailText label="">No data available</DetailText>;
-
-        return currencies.map(currency => {
-            const rows = grouped[currency] || [];
-            const isIdr = currency === "IDR";
-            const currentSum = rows.reduce((sum, r) => sum + (parseFloat(r.amount) || 0), 0);
-
-            const columns = [
-                { title: "NO", dataIndex: "key", width: 50, align: "center", render: (_, __, i) => i + 1 },
-                { title: "PERIODE", dataIndex: "periode" },
-                {
-                    title: "AMOUNT",
-                    dataIndex: "amount",
-                    align: "right",
-                    render: (val) => (parseFloat(val) || 0).toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 })
-                },
-                {
-                    title: "BALANCE",
-                    dataIndex: "balance",
-                    align: "right",
-                    render: (val) => (parseFloat(val) || 0).toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 })
-                },
-                { 
-                    title: "STATUS", 
-                    dataIndex: "status", 
-                    render: (text) => <div className="flex justify-center w-full"><StatusComponent colour={text}>{text}</StatusComponent></div> 
-                }
-            ];
-
-            return (
-                <div key={currency} className="mb-4">
-                    <SectionCard title={`CURRENCY ${currency}`}>
-                        <TableRBI
-                            idTable={`er-detail-view-${currency}`}
-                            dataSource={rows}
-                            columns={columns}
-                            usePagination={false}
-                            showAdvanceSearch={false}
-                            showSearchBar={false}
-                        />
-                        <div className="flex bg-[#F5F5F5] border border-t-0 p-2 font-bold text-[12px]">
-                            <div className="flex-[2] text-center">TOTAL</div>
-                            <div className="flex-1 text-right pr-4">
-                                {currentSum.toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 })}
-                            </div>
-                            <div className="flex-1"></div>
-                        </div>
-                    </SectionCard>
-                </div>
-            );
-        });
-    };
-
-    const earlyRepaymentItems = [
+    const rePlanItems = [
         {
             key: "Payment Plan",
-            label: "Early Repayment",
+            label: "Re-Plan",
             children: (
                 <div className="p-5 min-h-[400px] flex flex-col gap-4">
                     <SectionCard title="ACCOUNT INFORMATION">
@@ -122,8 +61,14 @@ const DetailEarlyRepayment = ({
                         </div>
                     </SectionCard>
 
-                    <SectionCard title="INSTALMENT INFORMATION">
+                    <SectionCard title="RE-PLAN INFORMATION">
                         <div className="grid grid-cols-5 gap-y-4 gap-x-4 w-full">
+                            <InputComponent
+                                label="Payment Plan Code"
+                                mandatory={true}
+                                disabled={true}
+                                value={dataHeader?.restructureNumber || "-"}
+                            />
                             <InputComponent
                                 label="Type"
                                 mandatory={true}
@@ -148,46 +93,20 @@ const DetailEarlyRepayment = ({
                                 label="Source"
                                 mandatory={true}
                                 disabled={true}
-                                value={data_detail?.earlyRepayment?.source || dataHeader?.source || "-"}
+                                value={dataHeader?.source || "-"}
                             />
                             <DateComponent
                                 label="Request Date"
                                 mandatory={true}
                                 disabled={true}
                                 format="DD MMM YYYY"
-                                value={data_detail?.earlyRepayment?.createdDate ? moment(data_detail.earlyRepayment.createdDate) : (dataHeader?.requestDate ? moment(dataHeader.requestDate) : null)}
-                            />
-                            <DateComponent
-                                label="Early Repayment Date"
-                                mandatory={true}
-                                disabled={true}
-                                format="DD MMM YYYY"
-                                value={data_detail?.earlyRepayment?.repaymentDate ? moment(data_detail.earlyRepayment.repaymentDate) : (data_detail?.tApprovalDto?.requestedDate ? moment(data_detail.tApprovalDto.requestedDate) : null)}
+                                value={dataHeader?.createdDate ? moment(dataHeader.createdDate) : (dataHeader?.requestDate ? moment(dataHeader.requestDate) : null)}
                             />
                             <div className="col-span-5 flex flex-col w-auto">
-                                <InputLabel text="Remark" mandatory={true} />
-                                <Input.TextArea
-                                    rows={2}
-                                    style={{
-                                        borderRadius: "6px",
-                                        boxShadow: "0 1px 2px 0 rgb(0 0 0 / 0.05)",
-                                        marginTop: "8px"
-                                    }}
-                                    value={dataHeader?.description || "-"}
-                                    disabled={true}
-                                />
-                            </div>
-                            <div className="col-span-5 flex flex-col w-auto">
-                                <InputLabel text="Early Repayment Reason" mandatory={true} />
-                                <Input.TextArea
-                                    rows={2}
-                                    style={{
-                                        borderRadius: "6px",
-                                        boxShadow: "0 1px 2px 0 rgb(0 0 0 / 0.05)",
-                                        marginTop: "8px"
-                                    }}
-                                    value={data_detail?.earlyRepayment?.reason || data_detail?.tApprovalDto?.remarks || "-"}
-                                    disabled={true}
+                                <InputLabel text="Description" mandatory={true} />
+                                <div 
+                                    className="p-2 border rounded-md bg-[#F5F5F5] mt-2 min-h-[60px]"
+                                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(dataHeader?.description || "-") }}
                                 />
                             </div>
                         </div>
@@ -200,7 +119,7 @@ const DetailEarlyRepayment = ({
             label: "Approval",
             children: (
                 <div className="p-5 min-h-[400px]">
-                    <SectionCard title="EARLY REPAYMENT APPROVAL INFORMATION">
+                    <SectionCard title="RE-PLAN APPROVAL INFORMATION">
                         <ApprovalComponentGeneral
                             dataTable={appHierDataDetail}
                             dataOption={appHierOptions}
@@ -240,7 +159,7 @@ const DetailEarlyRepayment = ({
         <>
             <div className={isEmbedded ? "" : "mt-5"}>
                 <CardContainerNoBorder 
-                    header="EARLY REPAYMENT DETAIL"
+                    header="RE-PLAN DETAIL"
                     className="!border-[1.5px] !border-[#0075bf] !rounded-md !bg-white !shadow-none"
                     noPadding
                     collapsible={true}
@@ -249,7 +168,7 @@ const DetailEarlyRepayment = ({
                         <Tabs
                             activeKey={segmentedPage}
                             onChange={(key) => setSegmentedPage(key)}
-                            items={earlyRepaymentItems}
+                            items={rePlanItems}
                             className="custom-confirm-tabs"
                             tabBarStyle={{
                                 paddingLeft: "16px",
@@ -269,55 +188,27 @@ const DetailEarlyRepayment = ({
                         collapsible={true}
                     >
                         <div className="p-4">
-                            <Tabs
-                                defaultActiveKey="Payment Plan"
-                                items={[
-                                    {
-                                        key: "Payment Plan",
-                                        label: "Payment Plan",
-                                        children: (
-                                            <SubSectionCard>
-                                                <TableRBI
-                                                    idTable="table-contact-detail-pp"
-                                                    dataSource={contacts}
-                                                    columns={contactColumns}
-                                                    expandable={expandable}
-                                                    usePagination={false}
-                                                    showAdvanceSearch={false}
-                                                    showSearchBar={false}
-                                                />
-                                            </SubSectionCard>
-                                        )
-                                    },
-                                    {
-                                        key: "Early Payoff",
-                                        label: "Early Payoff",
-                                        children: (
-                                            <SubSectionCard>
-                                                <TableRBI
-                                                    idTable="table-contact-detail-er"
-                                                    dataSource={data_detail?.earlyRepayment?.contactList || []}
-                                                    columns={contactColumns}
-                                                    expandable={expandable}
-                                                    usePagination={false}
-                                                    showAdvanceSearch={false}
-                                                    showSearchBar={false}
-                                                />
-                                            </SubSectionCard>
-                                        )
-                                    }
-                                ]}
-                            />
+                            <SubSectionCard>
+                                <TableRBI
+                                    idTable="table-contact-detail"
+                                    dataSource={contacts}
+                                    columns={contactColumns}
+                                    expandable={expandable}
+                                    usePagination={false}
+                                    showAdvanceSearch={false}
+                                    showSearchBar={false}
+                                />
+                            </SubSectionCard>
                         </div>
                     </CardContainerNoBorder>
 
                     <CardContainerNoBorder 
-                        header="EARLY PAY OFF DETAIL"
+                        header="RE-PLAN DETAIL"
                         className="!border-[1.5px] !border-[#0075bf] !rounded-md !bg-white !shadow-none"
                         collapsible={true}
                     >
                         <div className="p-4">
-                            {renderEarlyPayoffDetail()}
+                            {renderPaymentPlanDetail()}
                         </div>
                     </CardContainerNoBorder>
 
@@ -350,4 +241,4 @@ const DetailEarlyRepayment = ({
     );
 };
 
-export default DetailEarlyRepayment;
+export default DetailRePlan;

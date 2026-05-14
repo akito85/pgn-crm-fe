@@ -115,27 +115,35 @@ const ContentModalConfirmEarlyRepayment = ({
 
             return (
                 <div key={currency} className="mb-4">
-                    <div className="text-[12px] font-bold mb-2">CURRENCY {currency}</div>
-                    <TableRBI
-                        idTable={`open-item-confirm-${currency}`}
-                        dataSource={rows}
-                        columns={columns}
-                        usePagination={false}
-                        showAdvanceSearch={false}
-                        showSearchBar={false}
-                    />
-                    <div className="flex bg-[#F5F5F5] border border-t-0 p-2 font-bold text-[12px]">
-                        <div className="flex-[4] text-center">TOTAL</div>
-                        <div className="flex-1 text-right pr-4">
-                            {total.toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 })}
+                    <SectionCard title={`CURRENCY ${currency}`}>
+                        <TableRBI
+                            idTable={`open-item-confirm-${currency}`}
+                            dataSource={rows}
+                            columns={columns}
+                            usePagination={false}
+                            showAdvanceSearch={false}
+                            showSearchBar={false}
+                        />
+                        <div className="flex bg-[#F5F5F5] border border-t-0 p-2 font-bold text-[12px]">
+                            <div className="flex-[4] text-center">TOTAL</div>
+                            <div className="flex-1 text-right pr-4">
+                                {total.toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 })}
+                            </div>
                         </div>
-                    </div>
+                    </SectionCard>
                 </div>
             );
         });
     };
 
     const renderEarlyPaymentCalculation = () => {
+        const openItemTotals = openItems.reduce((acc, item) => {
+            const cur = item.currency || "IDR";
+            const amount = parseFloat(String(item.amount).replace(/,/g, "")) || 0;
+            acc[cur] = (acc[cur] || 0) + amount;
+            return acc;
+        }, {});
+
         const currencies = Object.keys(installmentsByCurrency);
         if (currencies.length === 0) return <DetailText label="">No data available</DetailText>;
 
@@ -143,6 +151,7 @@ const ContentModalConfirmEarlyRepayment = ({
             const rows = installmentsByCurrency[currency] || [];
             const isIdr = currency === "IDR";
             const currentSum = rows.reduce((sum, r) => sum + (parseFloat(r.amount) || 0), 0);
+            const targetTotal = openItemTotals[currency] || 0;
 
             const columns = [
                 { title: "NO", dataIndex: "key", width: 50, align: "center", render: (_, __, i) => i + 1 },
@@ -152,6 +161,20 @@ const ContentModalConfirmEarlyRepayment = ({
                     dataIndex: "amount",
                     align: "right",
                     render: (val) => parseFloat(val).toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 })
+                },
+                {
+                    title: "BALANCE",
+                    dataIndex: "balance",
+                    align: "right",
+                    render: (_, __, index) => {
+                        const sumPaidUpToThisRow = rows
+                            .slice(0, index + 1)
+                            .reduce((sum, r) => sum + (parseFloat(String(r.amount).replace(/,/g, "")) || 0), 0);
+                        const balance = Math.max(0, targetTotal - sumPaidUpToThisRow);
+                        return balance.toLocaleString(isIdr ? "id-ID" : "en-US", {
+                            maximumFractionDigits: 2,
+                        });
+                    }
                 },
                 {
                     title: "STATUS",
@@ -167,20 +190,22 @@ const ContentModalConfirmEarlyRepayment = ({
 
             return (
                 <div key={currency} className="mb-4">
-                    <div className="text-[12px] font-bold mb-2">CURRENCY {currency}</div>
-                    <TableRBI
-                        dataSource={rows}
-                        columns={columns}
-                        usePagination={false}
-                        showAdvanceSearch={false}
-                        showSearchBar={false}
-                    />
-                    <div className="flex bg-[#F5F5F5] border border-t-0 p-2 font-bold text-[12px]">
-                        <div className="flex-[3] text-center">TOTAL</div>
-                        <div className="flex-1 text-right pr-[150px]">
-                            {currentSum.toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 })}
+                    <SectionCard title={`CURRENCY ${currency}`}>
+                        <TableRBI
+                            dataSource={rows}
+                            columns={columns}
+                            usePagination={false}
+                            showAdvanceSearch={false}
+                            showSearchBar={false}
+                        />
+                        <div className="flex bg-[#F5F5F5] border border-t-0 p-2 font-bold text-[12px]">
+                            <div className="flex-[2] text-center">TOTAL</div>
+                            <div className="flex-1 text-right pr-4">
+                                {currentSum.toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 })}
+                            </div>
+                            <div className="flex-[4]"></div>
                         </div>
-                    </div>
+                    </SectionCard>
                 </div>
             );
         });

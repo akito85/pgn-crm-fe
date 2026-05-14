@@ -135,6 +135,7 @@ const ListFormRePlan = (props) => {
                     sapCustId: rest.sapCustId,
                     accountStatus: rest.accountStatus,
                     saNumber: rest.saNumber,
+                    restructureCode: rest.restructureNumber || rest.restructureCode || rest.saNumber,
                     saName: rest.saName,
                     saDate: rest.saDate ? moment(rest.saDate) : null,
                     saStartDate: rest.saStartDate ? moment(rest.saStartDate) : null,
@@ -379,7 +380,8 @@ const ListFormRePlan = (props) => {
                 return;
             }
 
-            setFormValues(values);
+            const allValues = form.getFieldsValue(true);
+            setFormValues(allValues);
             setIsModalSubmit(true);
         } catch (error) {
             console.log("Validation failed", error);
