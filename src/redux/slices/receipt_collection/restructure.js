@@ -23,12 +23,15 @@ const initialState = {
     dataApprovalHistory: null,
     data_approval_list: null,
     loading_approval_list: false,
+    data_approval_list_er: null,
+    loading_approval_list_er: false,
     loading: false,
     loadingHistory: false,
     isFailed: false,
     isSuccess: false,
     message: "",
     isApprover: false,
+    data_upload_validation: null,
     loading_upload_validation: false,
     loading_download_template: false,
     restructureTypes: [],
@@ -146,6 +149,21 @@ export const getListApprovalRestructure = createAsyncThunk(
             const url = `/v1/dbs/api/restructure/get-list?page=${page}&size=${pageSize}&searchs=${searchParams}`;
             const response = await receiptCollectionHttpService.getAll(url);
             return { ...response?.data, isLoadMore };
+        } catch (error) {
+            const message = error?.response?.data?.message || error?.message || error?.toString();
+            thunkAPI.dispatch(showModalError({ title: "Failed", description: `${message}` }));
+            return thunkAPI.rejectWithValue(error);
+        }
+    }
+);
+
+export const getListApprovalEarlyRepayment = createAsyncThunk(
+    "GET_LIST_APPROVAL_EARLY_REPAYMENT",
+    async ({ statusApproval = "Pending", isLoadMore = false } = {}, thunkAPI) => {
+        try {
+            const url = `/v1/dbs/api/early-repayment/get-list?statusApproval=${encodeURIComponent(statusApproval)}`;
+            const response = await receiptCollectionHttpService.getAll(url);
+            return { data: response?.data, isLoadMore };
         } catch (error) {
             const message = error?.response?.data?.message || error?.message || error?.toString();
             thunkAPI.dispatch(showModalError({ title: "Failed", description: `${message}` }));
@@ -518,9 +536,30 @@ export const approveOrRejectRestructure = createAsyncThunk(
     "APPROVE_OR_REJECT_RESTRUCTURE",
     async ({ body }, thunkAPI) => {
         try {
-            const category = body.category || "INSTALLMENT";
+            const category = body.category || "RESTRUCTURE";
             const url = `/v1/dbs/api/approval/approve-reject?category=${category}`;
             const response = await receiptCollectionHttpService.createData(url, body);
+            return response?.data;
+        } catch (error) {
+            const message =
+                error?.response?.data?.message || error?.message || error?.toString();
+            const errorBody = {
+                title: "Failed",
+                description: `${message}`,
+            };
+            thunkAPI.dispatch(showModalError(errorBody));
+            return thunkAPI.rejectWithValue(error.response);
+        }
+    }
+);
+
+export const bulkApproveOrRejectRestructure = createAsyncThunk(
+    "BULK_APPROVE_OR_REJECT_RESTRUCTURE",
+    async ({ body }, thunkAPI) => {
+        try {
+            const category = body.category || "RESTRUCTURE";
+            const url = `/v1/dbs/api/approval/bulk-approve-reject?category=${category}`;
+            const response = await receiptCollectionHttpService.createData(url, { items: body.items });
             return response?.data;
         } catch (error) {
             const message =
@@ -676,6 +715,17 @@ const restructureSlice = createSlice({
             state.loading = false;
         },
 
+        // Bulk Approve Or Reject
+        [bulkApproveOrRejectRestructure.pending]: (state) => {
+            state.loading = true;
+        },
+        [bulkApproveOrRejectRestructure.fulfilled]: (state) => {
+            state.loading = false;
+        },
+        [bulkApproveOrRejectRestructure.rejected]: (state) => {
+            state.loading = false;
+        },
+
         // Delete
         [deleteRestructure.pending]: (state) => {
             state.loading = true;
@@ -776,6 +826,25 @@ const restructureSlice = createSlice({
             state.loading_approval_list = false;
         },
 
+        // Get Early Repayment Approval List
+        [getListApprovalEarlyRepayment.pending]: (state) => {
+            state.loading_approval_list_er = true;
+        },
+        [getListApprovalEarlyRepayment.fulfilled]: (state, action) => {
+            state.loading_approval_list_er = false;
+            const payload = action.payload?.data;
+            if (action.payload?.isLoadMore) {
+                const oldResult = state.data_approval_list_er?.result || [];
+                const newResult = payload?.result || [];
+                state.data_approval_list_er = { ...payload, result: [...oldResult, ...newResult] };
+            } else {
+                state.data_approval_list_er = payload;
+            }
+        },
+        [getListApprovalEarlyRepayment.rejected]: (state) => {
+            state.loading_approval_list_er = false;
+        },
+
         // Get List Category
         [getListCategory.fulfilled]: (state, action) => {
             state.dataListCategory = action.payload;
@@ -785,11 +854,13 @@ const restructureSlice = createSlice({
         [uploadRestructureValidation.pending]: (state) => {
             state.loading_upload_validation = true;
         },
-        [uploadRestructureValidation.fulfilled]: (state) => {
+        [uploadRestructureValidation.fulfilled]: (state, action) => {
             state.loading_upload_validation = false;
+            state.data_upload_validation = action.payload?.data || action.payload;
         },
         [uploadRestructureValidation.rejected]: (state) => {
             state.loading_upload_validation = false;
+            state.data_upload_validation = null;
         },
 
         // Save Upload

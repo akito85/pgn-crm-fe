@@ -7,7 +7,6 @@ import ApprovalComponentGeneral from "../../../../../components/Approval/Approva
 import TableRBI from "../../../../../components/TableRBI";
 import SectionCard from "../../../../../components/SectionCard";
 import StatusComponent from "../../../../../components/StatusComponent";
-import DOMPurify from "dompurify";
 
 const ContentModalConfirmEarlyRepayment = ({
     formValues = {},
@@ -219,10 +218,10 @@ const ContentModalConfirmEarlyRepayment = ({
                 <div className="p-5 bg-[#f8f7fa] min-h-[400px] flex flex-col gap-4">
                     <SectionCard title="ACCOUNT INFORMATION">
                         <div className="grid grid-cols-5 gap-y-4 gap-x-4 w-full">
-                            <DetailText label="Customer Number">{detail?.customerNumber || formValues?.customerNumber || "CUS001"}</DetailText>
-                            <DetailText label="Customer Name">{detail?.customerName || formValues?.customerName || "PLN (PERSERO), PT"}</DetailText>
-                            <DetailText label="Account Number">{detail?.accountNumber || formValues?.accountNumber || "130252597"}</DetailText>
-                            <DetailText label="Account Name">{detail?.accountName || formValues?.accountName || "PLN (PERSERO), PT"}</DetailText>
+                            <DetailText label="Customer Number">{detail?.customerNumber || formValues?.customerNumber || "-"}</DetailText>
+                            <DetailText label="Customer Name">{detail?.customerName || formValues?.customerName || "-"}</DetailText>
+                            <DetailText label="Account Number">{detail?.accountNumber || formValues?.accountNumber || "-"}</DetailText>
+                            <DetailText label="Account Name">{detail?.accountName || formValues?.accountName || "-"}</DetailText>
                             <DetailText label="Account Group Type">{detail?.accountGroupType || formValues?.accountGroupType || "-"}</DetailText>
                             <DetailText label="SOR">{detail?.sor || formValues?.sor || "-"}</DetailText>
                             <DetailText label="Cost Center">{detail?.costCenter || formValues?.costCenter || "-"}</DetailText>
@@ -237,13 +236,13 @@ const ContentModalConfirmEarlyRepayment = ({
 
                     <SectionCard title="INSTALMENT INFORMATION">
                         <div className="grid grid-cols-5 gap-y-4 gap-x-4 w-full">
-                            <DetailText label="Type">{formValues?.type || "{value}"}</DetailText>
-                            <DetailText label="Tenor">{formValues?.tenor ? `${formValues.tenor} Months` : "{value}"}</DetailText>
-                            <DetailText label="Star Period">{formValues?.startPeriod ? moment(formValues.startPeriod).format("MMM YYYY") : "{value}"}</DetailText>
-                            <DetailText label="Source">{formValues?.source || "{value}"}</DetailText>
-                            <DetailText label="Request Date">{formValues?.requestDate ? moment(formValues.requestDate).format("DD MMM YYYY") : "{value}"}</DetailText>
+                            <DetailText label="Type">{formValues?.type || "-"}</DetailText>
+                            <DetailText label="Tenor">{formValues?.tenor ? `${formValues.tenor} Months` : "-"}</DetailText>
+                            <DetailText label="Start Period">{formValues?.startPeriod ? moment(formValues.startPeriod).format("MMM YYYY") : "-"}</DetailText>
+                            <DetailText label="Source">{formValues?.source || "-"}</DetailText>
+                            <DetailText label="Request Date">{formValues?.requestDate ? moment(formValues.requestDate).format("DD MMM YYYY") : "-"}</DetailText>
                             <div className="col-span-5">
-                                <DetailText label="Remark">{formValues?.remark || "{value}"}</DetailText>
+                                <DetailText label="Remark">{formValues?.remark || "-"}</DetailText>
                             </div>
                         </div>
                     </SectionCard>

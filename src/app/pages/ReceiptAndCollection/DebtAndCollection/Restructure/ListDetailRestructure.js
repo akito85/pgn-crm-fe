@@ -35,7 +35,7 @@ import SubSectionCard from "../../../../../components/SubSectionCard";
 import LogHistoryInfo from "../../../../../components/LogHistoryInfo";
 import StatusComponent from "../../../../../components/StatusComponent";
 import SVGIcon from "../../../../../assets/Icon/index";
-import DOMPurify from "dompurify";
+
 import { DEBT_AND_COLLECTION_ROUTES } from "../../../../../routes/DebtAndCollection/rc_routes";
 import DetailPaymentPlan from "./DetailPaymentPlan";
 import DetailEarlyRepayment from "./DetailEarlyRepayment";
