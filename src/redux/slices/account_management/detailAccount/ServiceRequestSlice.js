@@ -61,6 +61,7 @@ const initialState = {
   loading_listSrWorkOrders: false,
   loading_listSrActivities: false,
   loading_listSrDataRequirements: false,
+  pagination_listSrDataRequirements: { totalPage: 0, totalElement: 0, currentPage: 0, pageSize: 10 },
   loading_srDataRequirementValues: false,
   error_srDataRequirementValues: null,
   loading_dropdowns: false,
@@ -183,6 +184,20 @@ export const getServiceRequestActionLogs = createAsyncThunk(
   async ({ serviceRequestId, body, isLoadMore }, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/service-request/${serviceRequestId}/action-log`;
+      const response = await accountManagementService.updateDataWithMethodPost(url, body);
+      return { ...response.data, isLoadMore };
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+// Get Service Request Data Requirements
+export const getServiceRequestDataRequirements = createAsyncThunk(
+  "GET_SERVICE_REQUEST_DATA_REQUIREMENTS",
+  async ({ serviceRequestId, body, isLoadMore }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/service-request/${serviceRequestId}/data-requirement`;
       const response = await accountManagementService.updateDataWithMethodPost(url, body);
       return { ...response.data, isLoadMore };
     } catch (error) {
@@ -821,11 +836,11 @@ export const getSrActivities = createAsyncThunk(
 // Get Data Requirements by Service Request
 export const getSrDataRequirements = createAsyncThunk(
   "GET_SR_DATA_REQUIREMENTS",
-  async ({ accountId, srId, page = 1, size = 10 }, thunkAPI) => {
+  async ({ accountId, serviceRequestId, body, isLoadMore = false }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/${srId}/datarequirements/list?page=${page}&size=${size}`;
-      const response = await accountManagementService.getAll(url);
-      return response.data;
+      const url = `/v1/dbs/api/account/${accountId}/service-request/${serviceRequestId}/data-requirement`;
+      const response = await accountManagementService.updateDataWithMethodPost(url, body);
+      return { ...response.data, isLoadMore };
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
@@ -1387,15 +1402,36 @@ const serviceRequestSlice = createSlice({
     // =====================================================
     // DATA REQUIREMENTS
     // =====================================================
-    [getSrDataRequirements.pending]: (state) => {
-      state.loading_listSrDataRequirements = true;
+    [getSrDataRequirements.pending]: (state, action) => {
+      if (!action.meta.arg?.isLoadMore) state.loading_listSrDataRequirements = true;
     },
     [getSrDataRequirements.fulfilled]: (state, action) => {
       state.loading_listSrDataRequirements = false;
-      state.list_srDataRequirements = action.payload;
+      const { result, page, isLoadMore } = action.payload;
+      if (Array.isArray(result)) {
+        if (isLoadMore) {
+          const currentIds = new Set(state.list_srDataRequirements.map((i) => i.id));
+          state.list_srDataRequirements = [
+            ...state.list_srDataRequirements,
+            ...result.filter((i) => !currentIds.has(i.id)),
+          ];
+        } else {
+          state.list_srDataRequirements = result;
+        }
+      }
+      state.pagination_listSrDataRequirements = {
+        totalPage: page?.totalPages || 0,
+        totalElement: page?.totalElements || 0,
+        currentPage: page?.number || 0,
+        pageSize: page?.size || 10,
+      };
     },
-    [getSrDataRequirements.rejected]: (state) => {
+    [getSrDataRequirements.rejected]: (state, action) => {
       state.loading_listSrDataRequirements = false;
+      if (!action.meta.arg?.isLoadMore) {
+        state.list_srDataRequirements = [];
+        state.pagination_listSrDataRequirements = { totalPage: 0, totalElement: 0, currentPage: 0, pageSize: 10 };
+      }
     },
 
     // =====================================================
