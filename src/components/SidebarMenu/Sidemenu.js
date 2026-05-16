@@ -464,7 +464,11 @@ const SideMenu = ({ isCollapsed }) => {
     if (!Array.isArray(tree)) return tree;
     return tree
       .map((item) => {
-        if (whitelistMenu.includes(item.name)) return null;
+        // Allow standalone /relationship menu through even though "Relationship"
+        // is in the blacklist (the blacklist entry suppresses sub-level relationship
+        // tabs that live under Account Management, not the top-level page).
+        const isStandaloneRelationship = item.name === "Relationship" && item.path === "/relationship";
+        if (!isStandaloneRelationship && whitelistMenu.includes(item.name)) return null;
         if (item.children) {
           const filteredChildren = removeProfileItems(item.children);
           if (filteredChildren.length === 0) {
