@@ -2,7 +2,9 @@ import { DownloadOutlined, PlusOutlined } from "@ant-design/icons";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, NavLink } from "react-router-dom";
-import { Checkbox, Tooltip } from "antd";
+import ViewListIcon from "../../../../assets/Icon/Nx/IconViewList";
+import IconEditNx from "../../../../assets/Icon/Nx/IconEdit";
+import IconPower from "../../../../assets/Icon/Nx/IconPower";
 import SVGIcon from "../../../../assets/Icon/index";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
@@ -246,61 +248,50 @@ const LoginBackgroundPage = () => {
           <Link
             to={SYSTEM_SETUP_ROUTES.DETAIL_LOGIN_BACKGROUND}
             state={{ id: record?.loginBackgroundId }}
+            className="flex items-center justify-center"
+            style={{ color: "#1976D2" }}
           >
-            <Tooltip title="Detail">
-              <div className="pt-1">
-                <SVGIcon name="IconDetail" width={24} />
-              </div>
-            </Tooltip>
+            <ViewListIcon />
           </Link>
         ),
       },
       {
         action: "Update",
         type: "table",
-        render: (record) => (
-          <Tooltip title="Update">
-            {record.status === "ACTIVE" ? (
-              <Link
-                to={SYSTEM_SETUP_ROUTES.UPDATE_LOGIN_BACKGROUND}
-                state={{ id: record?.loginBackgroundId }}
-              >
-                <SVGIcon name="IconEdit" width={24} />
-              </Link>
-            ) : (
-              <div
-                className={
-                  record.status === "INACTIVE" ? "cursor-not-allowed" : ""
-                }
-              >
-                <SVGIcon
-                  name="IconEdit"
-                  width={24}
-                  color={record.status !== "INACTIVE" ? "#ACC424" : "#8D91A0"}
-                  className={
-                    record.status === "INACTIVE" ? "disabled" : undefined
-                  }
-                />
-              </div>
-            )}
-          </Tooltip>
-        ),
+        render: (record) => {
+          const active = record?.status === "ACTIVE";
+          const color = active ? "#1976D2" : "#C0BEC6";
+          return (
+            <Link
+              to={active ? SYSTEM_SETUP_ROUTES.UPDATE_LOGIN_BACKGROUND : undefined}
+              state={active ? { id: record?.loginBackgroundId } : undefined}
+              style={{ pointerEvents: active ? "auto" : "none" }}
+            >
+              <span className="flex items-center gap-2" style={{ color, padding: "5px 8px" }}>
+                <IconEditNx color={color} width="18" height="18" />
+                <span style={{ fontSize: 14 }}>Update</span>
+              </span>
+            </Link>
+          );
+        },
       },
       {
         action: "Activate",
         type: "table",
-        render: (record) => (
-          <Tooltip
-            title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}
-          >
-            <div className="pt-1">
-              <Checkbox
-                onClick={() => handleInactive(record)}
-                checked={record.status !== "ACTIVE"}
-              />
-            </div>
-          </Tooltip>
-        ),
+        render: (record) => {
+          const isActive = record?.status === "ACTIVE";
+          const color = "#1976D2";
+          return (
+            <span
+              className="flex items-center gap-2 cursor-pointer"
+              style={{ color, padding: "5px 8px" }}
+              onClick={() => handleInactive(record)}
+            >
+              <IconPower color={color} width="18" height="18" />
+              <span style={{ fontSize: 14 }}>{isActive ? "Inactivate" : "Activate"}</span>
+            </span>
+          );
+        },
       },
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps
