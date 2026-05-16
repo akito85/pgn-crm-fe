@@ -265,12 +265,10 @@ const LoginBackgroundPage = () => {
             <Link
               to={active ? SYSTEM_SETUP_ROUTES.UPDATE_LOGIN_BACKGROUND : undefined}
               state={active ? { id: record?.loginBackgroundId } : undefined}
-              style={{ pointerEvents: active ? "auto" : "none" }}
+              style={{ pointerEvents: active ? "auto" : "none", color }}
+              className="flex items-center justify-center"
             >
-              <span className="flex items-center gap-2" style={{ color, padding: "5px 8px" }}>
-                <IconEditNx color={color} width="18" height="18" />
-                <span style={{ fontSize: 14 }}>Update</span>
-              </span>
+              <IconEditNx color={color} width="18" height="18" />
             </Link>
           );
         },
@@ -279,16 +277,14 @@ const LoginBackgroundPage = () => {
         action: "Activate",
         type: "table",
         render: (record) => {
-          const isActive = record?.status === "ACTIVE";
           const color = "#1976D2";
           return (
             <span
-              className="flex items-center gap-2 cursor-pointer"
-              style={{ color, padding: "5px 8px" }}
+              className="flex items-center justify-center cursor-pointer"
+              style={{ color }}
               onClick={() => handleInactive(record)}
             >
               <IconPower color={color} width="18" height="18" />
-              <span style={{ fontSize: 14 }}>{isActive ? "Inactivate" : "Activate"}</span>
             </span>
           );
         },
