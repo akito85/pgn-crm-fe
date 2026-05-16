@@ -8,6 +8,10 @@ import {
   getRelationshipApprovals,
   approveOrRejectAllRelationship,
 } from "../../../../../../redux/slices/account_management/detailAccount/relationshipSlice";
+import {
+  getStandaloneRelationshipApprovals,
+  approveOrRejectAllStandaloneRelationship,
+} from "../../../../../../redux/slices/relationship/standaloneRelationshipSlice";
 import { getRelationshipColumns } from "./getRelationshipColumns";
 import { showModalError } from "../../../../../../redux/slices/general_slice";
 import NxBaseContainer from "../../../../../../components/Nx/NxBaseContainer";
@@ -21,15 +25,17 @@ const RelationshipApprovalModal = ({
   isOpen,
   handleCancel = () => {},
   afterFinish = () => {},
+  isStandalone = false,
 }) => {
   // Selector
+  const sliceKey = isStandalone ? "standaloneRelationship" : "relationship";
   const {
     list_relationshipApproval,
     pagination_listRelationshipApproval,
     loading_listRelationshipApproval,
     loading_approveRelationship,
     loading_rejectRelationship,
-  } = useSelector((state) => state.relationship);
+  } = useSelector((state) => state[sliceKey]);
 
   const loadingApproval = loading_approveRelationship || loading_rejectRelationship;
 
@@ -64,16 +70,11 @@ const RelationshipApprovalModal = ({
         filterRules,
       };
 
-      dispatch(
-        getRelationshipApprovals({
-          accountId,
-          page,
-          pageSize: loadMoreSize,
-          sort,
-          body,
-          isLoadMore: false,
-        })
-      );
+      const fetchThunk = isStandalone ? getStandaloneRelationshipApprovals : getRelationshipApprovals;
+      const fetchArgs = isStandalone
+        ? { page, pageSize: loadMoreSize, sort, body, isLoadMore: false }
+        : { accountId, page, pageSize: loadMoreSize, sort, body, isLoadMore: false };
+      dispatch(fetchThunk(fetchArgs));
       setPage(1);
     }
   }, [dispatch, isOpen, search, sort, filters, filterRules]);
@@ -109,16 +110,11 @@ const RelationshipApprovalModal = ({
         filterRules,
       };
 
-      dispatch(
-        getRelationshipApprovals({
-          accountId,
-          page: nextPage,
-          pageSize: loadMoreSize,
-          sort,
-          body,
-          isLoadMore: true,
-        })
-      );
+      const loadMoreThunk = isStandalone ? getStandaloneRelationshipApprovals : getRelationshipApprovals;
+      const loadMoreArgs = isStandalone
+        ? { page: nextPage, pageSize: loadMoreSize, sort, body, isLoadMore: true }
+        : { accountId, page: nextPage, pageSize: loadMoreSize, sort, body, isLoadMore: true };
+      dispatch(loadMoreThunk(loadMoreArgs));
       setPage(nextPage);
     }
   };
@@ -234,10 +230,14 @@ const RelationshipApprovalModal = ({
           description: values.remark,
         }));
 
-      dispatch(approveOrRejectAllRelationship({ accountId, body, inactiveBody, action }))
-        .unwrap()
-        .then(() => { resetForm(); })
-        .catch(() => {});
+      if (isStandalone) {
+        dispatch(approveOrRejectAllStandaloneRelationship({ body, inactiveBody, onSuccess: resetForm }));
+      } else {
+        dispatch(approveOrRejectAllRelationship({ accountId, body, inactiveBody, action }))
+          .unwrap()
+          .then(() => { resetForm(); })
+          .catch(() => {});
+      }
     } catch {}
   };
 
