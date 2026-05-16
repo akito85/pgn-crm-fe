@@ -14,6 +14,7 @@ import report_setup from "./report";
 import { notification } from "./notification";
 import { job_management } from "./job_management";
 import AuditTrailPage from "../app/pages/AuditTrail/AuditTrailPage";
+import { relationship } from "./relationship";
 export const index = [
   {
     path: "/",
@@ -49,5 +50,6 @@ export const index = [
   ...invoice,
   ...report_setup,
   ...debt_and_collection,
-  ...notification
+  ...notification,
+  ...relationship,
 ];

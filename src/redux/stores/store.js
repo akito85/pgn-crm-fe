@@ -123,6 +123,7 @@ import installmentReducer from "../slices/rating_billing_invoice/installment";
 import accountPromoReducer from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/Promo/store/slices/promoSlice";
 import accountingReducer from "../slices/receipt_collection/accounting";
 import relationshipReducer from "../slices/account_management/detailAccount/relationshipSlice";
+import standaloneRelationshipReducer from "../slices/relationship/standaloneRelationshipSlice";
 import warrantyReducer from "../slices/receipt_collection/warranty";
 import transferToReceiptReducer from "../slices/receipt_collection/transferToReceipt";
 import transferToCustomerReducer from "../slices/receipt_collection/transferToCustomer";
@@ -228,6 +229,7 @@ const reducer = combineReducers({
   accountEquipment: equpmentReducer,
   accountPromo: accountPromoReducer,
   relationship: relationshipReducer,
+  standaloneRelationship: standaloneRelationshipReducer,
   multiDestination: multiDestinationReducer,
   gasDeposit: gasDepositReducer,
 
