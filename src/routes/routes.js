@@ -8,11 +8,12 @@ import { account_management } from "./account_management";
 import SwitchPage from "../app/pages/Authentication/SwitchPage";
 import { receipt_and_collection } from "./Receipt&Collection";
 import { rating_billing } from "./rating_billing";
-import { debt_and_collection } from "./DebtAndCollection";  
+import { debt_and_collection } from "./DebtAndCollection";
 import { invoice } from "./invoice";
 import report_setup from "./report";
 import { notification } from "./notification";
 import { job_management } from "./job_management";
+import AuditTrailPage from "../app/pages/AuditTrail/AuditTrailPage";
 export const index = [
   {
     path: "/",
@@ -33,6 +34,10 @@ export const index = [
   {
     path: "/switch-position",
     element: <SwitchPage type={"switch-position"} />,
+  },
+  {
+    path: "/audit-trail",
+    element: <AuditTrailPage />,
   },
   ...product_promo,
   ...user_management,

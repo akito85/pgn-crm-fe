@@ -155,6 +155,7 @@ import handlerRegistryReducer from "../slices/job_management/handlerRegistrySlic
 import jobScheduleReducer from "../slices/job_management/jobScheduleSlice";
 import { jobApiSlice } from "../slices/job_management/jobApiSlice";
 import { jobGroupApiSlice } from "../slices/job_management/jobGroupApiSlice";
+import auditTrailReducer from "../slices/user_management/audit_trail";
 
 const reducer = combineReducers({
   jobManagement: jobManagementReducer,
@@ -344,6 +345,9 @@ const reducer = combineReducers({
 
   // notifications
   notifications: notificationsReducer,
+
+  // audit trail
+  audit_trail: auditTrailReducer,
 });
 
 // add throttle middlewares
