@@ -49,6 +49,7 @@ export const DEBT_AND_COLLECTION_ROUTES = {
 
   // Restructure
   VIEW_RESTRUCTURE: "/debt-and-collection/restructure",
+  VIEW_RESTRUCTURE_MONITORING: "/debt-and-collection/restructure-monitoring",
   CREATE_RESTRUCTURE: "/debt-and-collection/restructure/create",
   DETAIL_RESTRUCTURE: "/debt-and-collection/restructure/view",
   UPDATE_RESTRUCTURE: "/debt-and-collection/restructure/update",
