@@ -851,8 +851,17 @@ const BillingBucketForm = ({ type }) => {
 
   // Handle Save Form
   const handleSave = async (formValue) => {
-    // Save as draft: skip all mandatory validations
+    // Save as draft: hanya wajib billingBucketCode
     if (!isSubmitRef.current) {
+      try {
+        await form.validateFields(["billingBucketCode"]);
+      } catch {
+        setCurrent(0);
+        setTimeout(() => {
+          form.scrollToField("billingBucketCode", { behavior: "smooth", block: "center" });
+        }, 100);
+        return;
+      }
       setBodyData({ ...formValue });
       setModalConfirm(true);
       setListSectionInfo([
