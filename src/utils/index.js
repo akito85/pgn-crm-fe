@@ -215,14 +215,14 @@ export const renderColumn = (
   type,
   search = {},
   formatType = null,
+  size = "default"
 ) => {
-  // console.log(dataIndex, ' data index');
 
   if (searchedColumn) {
     if (type === "status") {
       return (
         <div className={"flex justify-center px-0 my-0"}>
-          <StatusComponent colour={text}>{toTitleCase(text)}</StatusComponent>
+          <StatusComponent colour={text} size={size}>{toTitleCase(text)}</StatusComponent>
         </div>
       );
     } else if (useTooltip && type !== "status") {

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Checkbox, Spin, Tooltip } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, NavLink } from "react-router-dom";
@@ -6,6 +6,7 @@ import moment from "moment";
 import { WarningOutlined } from "@ant-design/icons";
 
 import NxBaseContainer from "../../../../../../../../components/Nx/NxBaseContainer";
+import NxModal from "../../../../../../../../components/Nx/NxModal";
 import NxTable from "../../../../../../../../components/Nx/NxTable";
 import SVGIcon from "../../../../../../../../assets/Icon/index";
 import ButtonComponent from "../../../../../../../../components/ButtonComponent";
@@ -29,8 +30,9 @@ import { hasValue, renderColumn, renderDateColumn } from "../../../../../../../.
 import { nxApplyFixedColumns } from "../../../../../../../../utils/Nx/nxApplyFixedColumns";
 import { ModalConfirm, ModalError } from "../../../../../../../../components/Modal/ModalPopUp";
 import ModalInactivateWithHierarchy from "../../../../../../../../components/Modal/ModalInactivateWithHierarchy";
+import WarrantyTermDetailContent from "../../../Warranty/DetailWarrantyTerm/WarrantyTermDetailContent";
 
-const Warranty = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
+const Warranty = ({ idSA, idAccount, idCustomer, type }) => {
   const dispatch = useDispatch();
   const searchInput = useRef(null);
 
@@ -59,6 +61,8 @@ const Warranty = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
   const [modalError, setModalError] = useState(false);
   const [bodyError, setBodyError] = useState({});
   const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
+  const [openWarrantyTermDetailModal, setOpenWarrantyTermDetailModal] = useState(false);
+  const [selectedWarrantyTermId, setSelectedWarrantyTermId] = useState(null);
 
   // ─── Redux ───────────────────────────────────────────────────────────
   const { dataWarrantyInfo, dataWarrantyTerm, loadingDownload, dataApprovalHistory, loading } =
@@ -106,8 +110,16 @@ const Warranty = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
     }
   }, [dataWarrantyInfo]);
 
-  const encodedSearch = useMemo(
-    () => encodeURIComponent(JSON.stringify(search)),
+  const warrantyTermInputFields = useMemo(
+    () =>
+      Object.entries(search)
+        .filter(([, value]) => value !== null && value !== undefined && value !== "")
+        .map(([column, value]) => ({
+          condition: "AND",
+          column,
+          operator: "EQUALS",
+          value,
+        })),
     [search]
   );
 
@@ -116,16 +128,18 @@ const Warranty = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
       dispatch(
         getListWarrantyTermPaging({
           id: idSA,
+          page: targetPage,
+          size: pageSize,
+          sort: sort || "createdDate~desc",
           body: {
-            page: targetPage,
-            size: pageSize,
-            searchs: encodedSearch,
-            sort: sort || "createdDate~desc",
+            listType: "all",
+            inputFields: warrantyTermInputFields,
+            searchs: [],
           },
         })
       );
     },
-    [dispatch, encodedSearch, idSA, sort]
+    [dispatch, idSA, sort, warrantyTermInputFields]
   );
 
   useEffect(() => {
@@ -189,6 +203,14 @@ const Warranty = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
 
     setShowApprovalHistoryModal(false);
   };
+  const handleOpenWarrantyTermDetailModal = useCallback((warrantyTermId) => {
+    setSelectedWarrantyTermId(warrantyTermId);
+    setOpenWarrantyTermDetailModal(true);
+  }, []);
+  const handleCloseWarrantyTermDetailModal = useCallback(() => {
+    setOpenWarrantyTermDetailModal(false);
+    setSelectedWarrantyTermId(null);
+  }, []);
   const handleOpenModalInactivate = (record) => {
     setDataInactivate(record);
     setOpenModalInactivate(true);
@@ -261,6 +283,9 @@ const Warranty = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
     setModalError(false);
     setBodyError({});
   };
+
+  const statusSize = "small";
+
   // ─── WARRANTY INFORMATION columns (display-only, ACTION = detail icon) ─
   const warrantyInfoColumns = useMemo(
     () => [
@@ -325,18 +350,19 @@ const Warranty = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
         align: "center",
         fixed: "right",
         render: (_, record) => (
-          <Link
-            to={ACCOUNT_MANAGEMENT_ROUTES.DETAIL_WARRANTY_TERM}
-            state={{ id: record?.id, idSA, idAccount, idCustomer, type }}
-          >
-            <Tooltip title="Detail">
+          <Tooltip title="Detail">
+            <button
+              type="button"
+              className="flex justify-center cursor-pointer bg-transparent border-0 p-0"
+              onClick={() => handleOpenWarrantyTermDetailModal(record?.id)}
+            >
               <SVGIcon name="IconDetail" width={24} />
-            </Tooltip>
-          </Link>
+            </button>
+          </Tooltip>
         ),
       },
     ],
-    [idSA, idAccount, idCustomer, type]
+    [handleOpenWarrantyTermDetailModal]
   );
 
   // ─── WARRANTY TERM columns ────────────────────────────────────────────
@@ -416,33 +442,59 @@ const Warranty = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
           search, "amount", searchInput, searchedColumn, searchText, handleSearch, true
         ),
         render: (text) =>
-          renderColumn("amount", hasValue(search["amount"]), searchText, text, false, "input", search),
+          renderColumn(
+            "amount", 
+            hasValue(search["amount"]), 
+            searchText, 
+            text, 
+            false,
+            "input", 
+            search,
+            "currency-idr"),
       },
       {
         title: "STATUS",
         dataIndex: "status",
         key: "status",
-        width: 160,
+        width: 120,
         sorter: true,
         fixed: "right",
         ...getColumnSearchPropsUseFilteredValue(
           search, "status", searchInput, searchedColumn, searchText, handleSearch, true
         ),
         render: (text) =>
-          renderColumn("status", hasValue(search["status"]), searchText, text, false, "status", search),
+          renderColumn(
+            "status", 
+            hasValue(search["status"]), 
+            searchText, 
+            text, 
+            false, 
+            "status",
+            search, 
+            null,
+            statusSize),
       },
       {
         title: "STATUS APPROVAL",
         dataIndex: "statusApproval",
         key: "statusApproval",
-        width: 240,
+        width: 180,
         sorter: true,
         fixed: "right",
         ...getColumnSearchPropsUseFilteredValue(
           search, "statusApproval", searchInput, searchedColumn, searchText, handleSearch, true
         ),
         render: (text) =>
-          renderColumn("statusApproval", hasValue(search["statusApproval"]), searchText, text, false, "status", search),
+          renderColumn(
+            "statusApproval", 
+            hasValue(search["statusApproval"]), 
+            searchText, 
+            text, 
+            false, 
+            "status", 
+            search, 
+            null,
+            statusSize),
       },
     ],
     [handleSearch, search, searchText, searchedColumn]
@@ -455,7 +507,7 @@ const Warranty = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
       action: "Download",
       render: (
         <ButtonComponent
-          icon={<SVGIcon name="IconDownload" width={24} />}
+          icon={<SVGIcon name="IconDownload" width={20} />}
           type="submit"
           loading={loadingDownload}
           onClick={() => dispatch(downloadWarrantyTermList({ id: idSA }))}
@@ -481,7 +533,7 @@ const Warranty = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
           state={{ idAccount, idCustomer, type, idSA }}
         >
           <ButtonComponent
-            icon={<SVGIcon name="IconButtonCreate" width={24} />}
+            icon={<SVGIcon name="IconButtonCreate" width={20} />}
             type="submit"
           >
             Create
@@ -495,29 +547,28 @@ const Warranty = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
       action: "View",
       type: "table",
       render: (record, data) => {
+        const handleView = () => handleOpenWarrantyTermDetailModal(record?.id);
         const renderAction =
           data > 3 ? (
             <ButtonComponent
-              icon={<SVGIcon name="IconDetail" color={"#0075bf"} width={24} />}
+              icon={<SVGIcon name="IconDetail" color={"#0075bf"} width={20} />}
               border={false}
+              onClick={handleView}
             >
               <span className={"text-black"}>Detail</span>
             </ButtonComponent>
           ) : (
             <Tooltip title="Detail">
-              <div>
-                <SVGIcon name="IconDetail" width={24} />
-              </div>
+              <button
+                type="button"
+                className="cursor-pointer bg-transparent border-0 p-0"
+                onClick={handleView}
+              >
+                <SVGIcon name="IconDetail" width={20} />
+              </button>
             </Tooltip>
           );
-        return (
-          <Link
-            to={ACCOUNT_MANAGEMENT_ROUTES.DETAIL_WARRANTY_TERM}
-            state={{ id: record?.id, idSA, idAccount, idCustomer, type }}
-          >
-            {renderAction}
-          </Link>
-        );
+        return renderAction;
       },
     },
 
@@ -535,7 +586,7 @@ const Warranty = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
                 state={{ id: record?.id, idAccount, idCustomer, type, idSA }}
               >
                 <ButtonComponent
-                  icon={<SVGIcon name="IconEdit" color={"#0075bf"} width={24} />}
+                  icon={<SVGIcon name="IconEdit" color={"#0075bf"} width={20} />}
                   border={false}
                 >
                   <span className={"text-black"}>Update</span>
@@ -543,7 +594,7 @@ const Warranty = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
               </Link>
             ) : (
               <ButtonComponent
-                icon={<SVGIcon name="IconEdit" color={"#8D91A0"} width={24} />}
+                icon={<SVGIcon name="IconEdit" color={"#8D91A0"} width={20} />}
                 border={false}
                 disabled
               >
@@ -558,12 +609,12 @@ const Warranty = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
                   state={{ id: record?.id, idAccount, idCustomer, type, idSA }}
                 >
                   <div>
-                    <SVGIcon name="IconEdit" width={24} />
+                    <SVGIcon name="IconEdit" width={20} />
                   </div>
                 </Link>
               ) : (
                 <div className={"cursor-not-allowed"}>
-                  <SVGIcon name="IconEdit" width={24} color={"#C0BEC6"} />
+                  <SVGIcon name="IconEdit" width={20} color={"#C0BEC6"} />
                 </div>
               )}
             </Tooltip>
@@ -640,7 +691,7 @@ const Warranty = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
         const renderAction =
           data > 3 ? (
             <ButtonComponent
-              icon={<SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />}
+              icon={<SVGIcon name="IconLogHistory" color={"#0075bf"} width={20} />}
               border={false}
               onClick={() => handleApprovalHistoryModal(true, record?.id)}
             >
@@ -650,7 +701,7 @@ const Warranty = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
             <Tooltip title="Approval History">
               <span>
                 <ButtonComponent
-                  icon={<SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />}
+                  icon={<SVGIcon name="IconLogHistory" color={"#0075bf"} width={20} />}
                   border={false}
                   onClick={() => handleApprovalHistoryModal(true, record?.id)}
                 />
@@ -737,6 +788,31 @@ const Warranty = ({ idSA, idAccount, idCustomer, type, dataDetailSA }) => {
       </NxBaseContainer>
 
       {/* ── Modals ── */}
+      <NxModal
+        isOpen={openWarrantyTermDetailModal}
+        handleCancel={handleCloseWarrantyTermDetailModal}
+        title="DETAIL WARRANTY TERM"
+        width={1212}
+        footer={
+          <div className="flex justify-end">
+            <ButtonComponent type="default" onClick={handleCloseWarrantyTermDetailModal}>
+              back
+            </ButtonComponent>
+          </div>
+        }
+      >
+        <div className="max-h-[900px] overflow-y-auto p-4">
+          <WarrantyTermDetailContent
+            id={selectedWarrantyTermId}
+            idSA={idSA}
+            idAccount={idAccount}
+            idCustomer={idCustomer}
+            type={type}
+            false
+          />
+        </div>
+      </NxModal>
+
       <NxHistoryModal
         isOpen={showApprovalHistoryModal}
         handleClose={() => handleApprovalHistoryModal(false)}

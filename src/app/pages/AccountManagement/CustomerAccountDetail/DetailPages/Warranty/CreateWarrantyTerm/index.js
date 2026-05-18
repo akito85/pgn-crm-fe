@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { DatePicker, Form, Input, InputNumber, Select, Spin, Steps } from "antd";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
@@ -17,6 +17,7 @@ import { ModalError } from "../../../../../../../components/Modal/ModalPopUp";
 import { dateFormatting } from "../../../../../../../utils";
 import { bytesConverter } from "../../../../../../../utils/bytesConverter";
 import accountManagementService from "../../../../../../../redux/services/account_management/accountManagementService";
+import { validateCreateUpdate } from "../../../../../../../redux/slices/general_slice";
 import {
   createWarrantyTerm,
   updateWarrantyTerm,
@@ -62,8 +63,18 @@ const routes = (item) => [
   },
 ];
 
+const STEP_0_FIELDS = [
+  "docNumber",
+  "docDate",
+  "startDate",
+  "endDate",
+  "currency",
+  "amount",
+  "description",
+];
+
 // ─── Warranty Information Step ────────────────────────────────────────────────
-const WarrantyInformationStep = ({ form, currency, startDate, description }) => (
+const WarrantyInformationStep = ({ currency, startDate, description }) => (
   <NxBaseContainer border header="WARRANTY TERM INFORMATION">
     <div className="w-full grid grid-cols-3 gap-4">
       <Form.Item
@@ -197,6 +208,7 @@ const CreateWarrantyTerm = ({ typeForm }) => {
   const [modalError, setModalError] = useState(false);
   const [bodyError, setBodyError] = useState({});
   const [loadingForm, setLoadingForm] = useState(false);
+  const [loadingNext, setLoadingNext] = useState(false);
   const [typeSubmit, setTypeSubmit] = useState(1);
   const [selectedHierarchy, setSelectedHierarchy] = useState();
   const [listDataAttachment, setListDataAttachment] = useState([]);
@@ -281,7 +293,13 @@ const CreateWarrantyTerm = ({ typeForm }) => {
   const steps = [
     {
       title: "Warranty Term Information",
-      content: <WarrantyInformationStep form={form} currency={warrantyObj.currency} startDate={warrantyObj.startDate} description={warrantyObj.description} />,
+      content: (
+        <WarrantyInformationStep
+          currency={warrantyObj.currency}
+          startDate={warrantyObj.startDate}
+          description={warrantyObj.description}
+        />
+      ),
       disabled: !isStep0Valid,
     },
     
@@ -313,11 +331,65 @@ const CreateWarrantyTerm = ({ typeForm }) => {
 
   const items = steps.map((item) => ({ key: item.title, title: item.title }));
 
+  const buildWarrantyPayload = useCallback(
+    ({ flag = typeSubmit, validationType = null } = {}) => ({
+      id: typeForm === "update" ? id : undefined,
+      saId: idSA,
+      documentNumber: warrantyObj?.docNumber || null,
+      documentDate: warrantyObj?.docDate
+        ? moment(warrantyObj.docDate).format(dateFormatting.date)
+        : null,
+      startDate: warrantyObj?.startDate
+        ? moment(warrantyObj.startDate).format(dateFormatting.date)
+        : null,
+      endDate: warrantyObj?.endDate
+        ? moment(warrantyObj.endDate).format(dateFormatting.date)
+        : null,
+      currency: warrantyObj?.currency || null,
+      amount:
+        warrantyObj?.amount !== undefined &&
+        warrantyObj?.amount !== null &&
+        warrantyObj?.amount !== ""
+          ? warrantyObj.amount
+          : null,
+      description: warrantyObj?.description || null,
+      appHierId: selectedHierarchy || null,
+      flag,
+      remark: warrantyObj?.remark || "",
+      validationType,
+    }),
+    [id, idSA, selectedHierarchy, typeForm, typeSubmit, warrantyObj]
+  );
+
   // ─── Navigation ───────────────────────────────────────────────────────
   const next = useCallback(() => {
     setCurrent((prev) => prev + 1);
     return Promise.resolve(true);
   }, []);
+
+  const validateStepBeforeNext = useCallback(async () => {
+    if (current !== 0) {
+      return true;
+    }
+
+    await form.validateFields(STEP_0_FIELDS);
+
+    const endPoint =
+      typeForm === "create"
+        ? "/v1/dbs/api/warranty-term/validate-create"
+        : "/v1/dbs/api/warranty-term/validate-update";
+
+    await dispatch(
+      validateCreateUpdate({
+        body: buildWarrantyPayload({ flag: 2, validationType: "DATA" }),
+        services: accountManagementService,
+        endPoint,
+        type: typeForm,
+      })
+    ).unwrap();
+
+    return true;
+  }, [buildWarrantyPayload, current, dispatch, form, typeForm]);
 
   const prev = () => setCurrent((prev) => prev - 1);
 
@@ -328,20 +400,32 @@ const CreateWarrantyTerm = ({ typeForm }) => {
     if (containerRef.current) containerRef.current.scrollLeft -= 250;
   };
 
-  const handleButtonNext = () => {
-    next().then((ok) => {
-      if (ok) scrollRightHandler();
-    });
+  const handleButtonNext = async () => {
+    if (loadingNext) return;
+
+    try {
+      setLoadingNext(true);
+      const ok = await validateStepBeforeNext();
+      if (ok) {
+        await next();
+        scrollRightHandler();
+      }
+    } catch (error) {
+      return;
+    } finally {
+      setLoadingNext(false);
+    }
   };
 
-  const handleSetCurrent = (targetStep) => {
+  const handleSetCurrent = async (targetStep) => {
+    if (loadingNext) return;
     if (targetStep === current) return;
     if (targetStep < current) {
       setCurrent(targetStep);
       return;
     }
     if (targetStep !== current + 1 || steps[current].disabled) return;
-    handleButtonNext();
+    await handleButtonNext();
   };
 
   const hasIncompleteStep = steps.some((s) => s.disabled);
@@ -365,26 +449,7 @@ const CreateWarrantyTerm = ({ typeForm }) => {
     if (loadingForm) return;
     setLoadingForm(true);
 
-    const body = {
-      id: typeForm === "update" ? id : undefined,
-      saId: idSA,
-      documentNumber: warrantyObj?.docNumber,
-      documentDate: warrantyObj?.docDate
-        ? moment(warrantyObj.docDate).format(dateFormatting.date)
-        : "",
-      startDate: warrantyObj?.startDate
-        ? moment(warrantyObj.startDate).format(dateFormatting.date)
-        : "",
-      endDate: warrantyObj?.endDate
-        ? moment(warrantyObj.endDate).format(dateFormatting.date)
-        : "",
-      currency: warrantyObj?.currency,
-      amount: warrantyObj?.amount,
-      description: warrantyObj?.description,
-      appHierId: selectedHierarchy,
-      flag: typeSubmit, // 1 = draft, 2 = submit
-      remark : warrantyObj?.remark || ""
-    };
+      const body = buildWarrantyPayload();
 
     const thunk = typeForm === "create" ? createWarrantyTerm : updateWarrantyTerm;
 
@@ -553,7 +618,8 @@ const CreateWarrantyTerm = ({ typeForm }) => {
                 {current < steps.length - 1 && (
                   <ButtonComponent
                     onClick={handleButtonNext}
-                    disabled={steps[current].disabled}
+                    disabled={steps[current].disabled || loadingNext}
+                    loading={loadingNext}
                     type="submit"
                     icon={<SVGIcon name="IconArrowNarrowRight" width={24} />}
                   >

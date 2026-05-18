@@ -31,12 +31,12 @@ export const getListWarrantyInfo = createAsyncThunk(
   }
 );
 
-// TODO: confirm endpoint URL
+// Warranty term Info
 export const getListWarrantyTermPaging = createAsyncThunk(
   "GET_LIST_WARRANTY_TERM_PAGING",
-  async ({ id, body }, thunkAPI) => {
+  async ({ id, page = 1, size = 10, sort = "createdDate~desc", body }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/warranty-term/list/${id}`;
+      const url = `/v1/dbs/api/warranty-term/list/${id}?page=${page}&size=${size}&sort=${sort}`;
       const response = await accountManagementService.updateDataWithMethodPost(url, body);
       return response.data;
     } catch (error) {
@@ -146,7 +146,7 @@ export const getDetailWarrantyTerm = createAsyncThunk(
   "GET_DETAIL_WARRANTY_TERM",
   async (id, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/warranty-term/get-detail/${id}`;
+      const url = `/v1/dbs/api/warranty-term/detail/${id}`;
       const response = await accountManagementService.getDetail(url);
       return response.data;
     } catch (error) {
@@ -297,7 +297,7 @@ export const getListAttachmentCategory = createAsyncThunk(
   "GET_LIST_ATTACHMENT_CATEGORY_WARRANTY",
   async (thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/warranty-term/list-category`;
+      const url = `/v1/dbs/api/warranty-term/attachment-category`;
       const response = await accountManagementService.getAll(url);
       return (response.data || []).map((category) => ({
         glbTypeValId: category?.id,
