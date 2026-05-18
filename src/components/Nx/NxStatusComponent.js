@@ -156,6 +156,10 @@ const NxStatusComponent = ({
 
       // ===== PENDING/ASSIGNED STATUSES =====
       case "pending":
+        bgColor = "bg-[#F57C00]";
+        tColor = "text-white";
+        break;
+
       case "assigned":
         bgColor = "status-pending";
         tColor = "text-yellow-800";
