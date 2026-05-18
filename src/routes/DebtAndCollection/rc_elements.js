@@ -28,6 +28,7 @@ import DetailActivitiesPlan from "../../app/pages/DebtAndCollection/ActivitiesPl
 import FormActivitiesPlan from "../../app/pages/DebtAndCollection/ActivitiesPlan/FormActivitiesPlan";
 
 import ViewRestructure from "../../app/pages/ReceiptAndCollection/DebtAndCollection/Restructure/ViewRestructure";
+import RestructureMonitoring from "../../app/pages/ReceiptAndCollection/DebtAndCollection/RestructureMonitoring/RestructureMonitoring";
 import ListFormRestructure from "../../app/pages/ReceiptAndCollection/DebtAndCollection/Restructure/ListFormRestructure";
 import ListDetailRestructure from "../../app/pages/ReceiptAndCollection/DebtAndCollection/Restructure/ListDetailRestructure";
 import UploadRestructurePage from "../../app/pages/ReceiptAndCollection/DebtAndCollection/Restructure/Upload/UploadRestructurePage";
@@ -91,6 +92,7 @@ export const DEBT_AND_COLLECTION_ELEMENTS = {
 
   // Restructure
   VIEW_RESTRUCTURE_PAGE: <ViewRestructure />,
+  VIEW_RESTRUCTURE_MONITORING_PAGE: <RestructureMonitoring />,
   CREATE_RESTRUCTURE_PAGE: <ListFormRestructure type="create" />,
   UPDATE_RESTRUCTURE_PAGE: <ListFormRestructure type="update" />,
   DETAIL_RESTRUCTURE_PAGE: <ListDetailRestructure />,
