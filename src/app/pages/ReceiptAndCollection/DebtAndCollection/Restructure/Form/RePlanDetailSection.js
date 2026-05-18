@@ -204,6 +204,29 @@ const RePlanDetailSection = ({ planInfo = {}, openItems = [], onValidationChange
       },
     },
     { title: "DUE DATE", dataIndex: "dueDate" },
+    {
+      title: "BALANCE",
+      dataIndex: "balance",
+      align: "right",
+      render: (_, record, index) => {
+        const isIdr = currency === "IDR";
+        const targetTotal = openItemTotals[currency] || 0;
+        // Calculate running sum up to this row from the CURRENT state of rows
+        const rows = installmentsByCurrency[currency] || [];
+        const sumPaidUpToThisRow = rows
+          .slice(0, index + 1)
+          .reduce((sum, r) => sum + (parseFloat(String(r.amount).replace(/,/g, "")) || 0), 0);
+        const balance = Math.max(0, targetTotal - sumPaidUpToThisRow);
+
+        return (
+          <span className="font-medium text-gray-500">
+            {balance.toLocaleString(isIdr ? "id-ID" : "en-US", {
+              maximumFractionDigits: 2,
+            })}
+          </span>
+        );
+      },
+    },
   ];
 
   if (!tenor || !startPeriod) {

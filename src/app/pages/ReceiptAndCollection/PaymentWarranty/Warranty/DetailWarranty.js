@@ -308,22 +308,22 @@ const DetailWarranty = ({ data_detail }) => {
       <SectionCard title="SERVICE AGREEMENT DETAIL">
         <div className="w-full grid grid-cols-5 gap-y-4 gap-x-4">
             <DetailText label="Service Agreement Number">{data_detail?.serviceAgreementNumber || data_detail?.saNumber || "-"}</DetailText>
-            <DetailText label="Service Agreement Reference">{data_detail?.serviceAgreementReference || data_detail?.saReference || selectedSA?.saReference || "-"}</DetailText>
-            <DetailText label="Service Type">{data_detail?.serviceType || selectedSA?.serviceType?.value || "-"}</DetailText>
-            <DetailText label="Type">{data_detail?.saType || data_detail?.type || selectedSA?.saType?.value || "-"}</DetailText>
-            <DetailText label="PBG Type">{data_detail?.pbgType || selectedSA?.pjbgType?.value || "-"}</DetailText>
-            <DetailText label="Service Agreement Date">{data_detail?.saDate ? moment(data_detail?.saDate).format("DD/MM/YYYY") : selectedSA?.saDate ? moment(selectedSA.saDate).format("DD/MM/YYYY") : "-"}</DetailText>
-            <DetailText label="Start Date">{data_detail?.saStartDate ? moment(data_detail?.saStartDate).format("DD/MM/YYYY") : selectedSA?.startDate ? moment(selectedSA.startDate).format("DD/MM/YYYY") : "-"}</DetailText>
-            <DetailText label="End Date">{data_detail?.saEndDate ? moment(data_detail?.saEndDate).format("DD/MM/YYYY") : selectedSA?.endDate ? moment(selectedSA.endDate).format("DD/MM/YYYY") : "-"}</DetailText>
-            <DetailText label="Commitment Date">{data_detail?.commitmentDate ? moment(data_detail?.commitmentDate).format("DD/MM/YYYY") : selectedSA?.commitmentDate ? moment(selectedSA.commitmentDate).format("DD/MM/YYYY") : "-"}</DetailText>
+            <DetailText label="Service Agreement Reference">{ selectedSA?.saReference || "-"}</DetailText>
+            <DetailText label="Service Type">{ selectedSA?.serviceType?.value || "-"}</DetailText>
+            <DetailText label="Type">{ selectedSA?.saType || "-"}</DetailText>
+            <DetailText label="PBG Type">{ selectedSA?.pjbgType || "-"}</DetailText>
+            <DetailText label="Service Agreement Date">{ selectedSA?.saDate ? moment(selectedSA.saDate).format("DD/MM/YYYY") : "-"}</DetailText>
+            <DetailText label="Start Date">{ selectedSA?.startDate ? moment(selectedSA.startDate).format("DD/MM/YYYY") : "-"}</DetailText>
+            <DetailText label="End Date">{selectedSA?.endDate ? moment(selectedSA.endDate).format("DD/MM/YYYY") : "-"}</DetailText>
+            <DetailText label="Commitment Date">{selectedSA?.commitmentDate ? moment(selectedSA.commitmentDate).format("DD/MM/YYYY") : "-"}</DetailText>
             <DetailText label="Status Approval">
-                {data_detail?.saStatusApproval || selectedSA?.approvalStatus ? <StatusComponent status={data_detail?.saStatusApproval || selectedSA?.approvalStatus} /> : "-"}
+                {selectedSA?.approvalStatus ? <StatusComponent colour={selectedSA?.approvalStatus}>{selectedSA?.approvalStatus}</StatusComponent> : "-"}
             </DetailText>
             <DetailText label="Status">
-                {data_detail?.saStatus || selectedSA?.status ? <StatusComponent status={data_detail?.saStatus || selectedSA?.status} /> : "-"}
+                {selectedSA?.status ? <StatusComponent colour={selectedSA?.status}>{selectedSA?.status}</StatusComponent> : "-"}
             </DetailText>
             <div className="col-span-5">
-                <DetailText label="Description">{data_detail?.saDescription || selectedSA?.description || "-"}</DetailText>
+                <DetailText label="Description">{ selectedSA?.description || "-"}</DetailText>
             </div>
         </div>
       </SectionCard>

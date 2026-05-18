@@ -15,6 +15,7 @@ import {
     getDetailRestructure,
     getApprovalHistory,
     deleteRestructure,
+    approveOrRejectRestructure
 } from "../../../../../../redux/slices/receipt_collection/restructure";
 import { tableApprovalRestructure } from "./TableApprovalRestructure";
 import { formMessageRequired } from "../../../../../../utils";
@@ -84,6 +85,24 @@ const ModalApprovalRestructure = ({
             );
         }
     }, [dispatch, isOpen, search, activeTab]);
+
+    // Update search when tab changes
+    useEffect(() => {
+        if (isOpen) {
+            const category = activeTab === "payment_plan" ? "RESTRUCTURE" : 
+                             activeTab === "early_repayment" ? "EARLY_REPAYMENT_RESTRUCTURE" :
+                             activeTab === "re_plan" ? "REPLAN_RESTRUCTURE" : "CANCEL_RESTRUCTURE";
+            
+            setSearch(prev => ({
+                ...prev,
+                approvalType: category, 
+                statusApproval: "Pending"
+            }));
+            setPage(1);
+            setSelectedRowKeys([]);
+            setDataTableSelect([]);
+        }
+    }, [activeTab, isOpen]);
 
     // Load more handler
     const handleLoadMore = async () => {
@@ -213,7 +232,9 @@ const ModalApprovalRestructure = ({
 
     const steps = [
         {
-            title: activeTab === "payment_plan" ? "Payment Plan Information" : "Early Repayment Information",
+            title: activeTab === "payment_plan" ? "Payment Plan Information" : 
+                   activeTab === "early_repayment" ? "Early Repayment Information" :
+                   activeTab === "re_plan" ? "Re-Plan Information" : "Cancel Information",
             disabled: dataTableSelect.length === 0,
         },
         {
@@ -242,14 +263,23 @@ const ModalApprovalRestructure = ({
         } else {
             setIsSubmitting(true);
             try {
-                const category = activeTab === "payment_plan" ? "RESTRUCTURE" : "EARLY_REPAYMENT_RESTRUCTURE";
-                const items = dataTableSelect.map((item) => ({
-                    id: item.id,
-                    action: action,
-                    remark: formValue.remark,
-                    approvalId: item.approvalId || item.tApprovalId,
-                }));
-                await dispatch(bulkApproveOrRejectRestructure({ body: { items, category } })).unwrap();
+                const category = activeTab === "payment_plan" ? "RESTRUCTURE" : 
+                                 activeTab === "early_repayment" ? "EARLY_REPAYMENT_RESTRUCTURE" :
+                                 activeTab === "re_plan" ? "REPLAN_RESTRUCTURE" : "CANCEL_RESTRUCTURE";
+                
+                
+                const promises = dataTableSelect.map((item) => {
+                    const payload = {
+                        id: item.id,
+                        action: action,
+                        remark: formValue.remark,
+                        approvalId: item.approvalId || item.tApprovalId, // Ensure we have the right ID
+                        category: category
+                    };
+                    return dispatch(approveOrRejectRestructure({ body: payload })).unwrap();
+                });
+
+                await Promise.all(promises);
                 
                 message.success(`${action === "APPROVE" ? "Approved" : "Rejected"} successfully`);
                 handleCancelForm();
@@ -387,6 +417,20 @@ const ModalApprovalRestructure = ({
                         >
                             Early Repayment
                         </ButtonComponent>
+                        <ButtonComponent
+                            type={activeTab === "re_plan" ? "primary" : "default"}
+                            onClick={() => setActiveTab("re_plan")}
+                            className="!h-[32px] !text-[12px]"
+                        >
+                            Re-Plan
+                        </ButtonComponent>
+                        <ButtonComponent
+                            type={activeTab === "cancel" ? "primary" : "default"}
+                            onClick={() => setActiveTab("cancel")}
+                            className="!h-[32px] !text-[12px]"
+                        >
+                            Cancel
+                        </ButtonComponent>
                     </div>
 
                     <Form
@@ -398,7 +442,9 @@ const ModalApprovalRestructure = ({
                         <div className="w-full grid grid-cols-1 gap-x-4 pt-[10px]">
                             <div className="flex gap-2 justify-between mb-2">
                                 <p className="text-primary uppercase font-bold">
-                                    {activeTab === "payment_plan" ? "Payment Plan Information" : "Early Repayment Information"}
+                                    {activeTab === "payment_plan" ? "Payment Plan Information" : 
+                                     activeTab === "early_repayment" ? "Early Repayment Information" :
+                                     activeTab === "re_plan" ? "Re-Plan Information" : "Cancel Information"}
                                 </p>
                                 {selectedRowKeys.length > 0 && (
                                     <p className="text-sm font-semibold text-blue-600">

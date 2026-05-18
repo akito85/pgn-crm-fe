@@ -39,6 +39,12 @@ const initialState = {
     restructureContacts: [],
     allContacts: [],
     rePlanReasons: [],
+    cancelReasons: [],
+    loadingCancelReasons: false,
+    openItemDetail: null,
+    loadingOpenItemDetail: false,
+    paymentPlanDetail: null,
+    loadingPaymentPlanDetail: false,
 };
 
 export const getListCustomerRestructure = createAsyncThunk(
@@ -437,6 +443,19 @@ export const getRePlanReasons = createAsyncThunk(
     }
 );
 
+export const getCancelReasons = createAsyncThunk(
+    "GET_CANCEL_REASONS",
+    async (_, thunkAPI) => {
+        try {
+            const url = "/v1/dbs/api/restructure/get-cancel-reasons";
+            const response = await receiptCollectionHttpService.getAll(url);
+            return response?.data || [];
+        } catch (error) {
+            return thunkAPI.rejectWithValue(error);
+        }
+    }
+);
+
 export const getContactsByAccount = createAsyncThunk(
     "GET_CONTACTS_BY_ACCOUNT",
     async (accountNumber, thunkAPI) => {
@@ -573,15 +592,45 @@ export const deleteRestructure = createAsyncThunk(
 
 export const cancelRestructure = createAsyncThunk(
     "CANCEL_RESTRUCTURE",
-    async (id, thunkAPI) => {
+    async ({ id, body }, thunkAPI) => {
         try {
             const url = `/v1/dbs/api/restructure/cancel/${id}`;
-            const response = await receiptCollectionHttpService.updateData(url);
+            const response = await receiptCollectionHttpService.updateData(url, body);
             return response?.data;
         } catch (error) {
             const message = error?.response?.data?.message || error?.message || error?.toString();
             const errorBody = { title: "Failed", description: `${message}` };
             thunkAPI.dispatch(showModalError(errorBody));
+            return thunkAPI.rejectWithValue(error.response);
+        }
+    }
+);
+
+export const getOpenItemDetail = createAsyncThunk(
+    "GET_OPEN_ITEM_DETAIL",
+    async (id, thunkAPI) => {
+        try {
+            const url = `/v1/dbs/api/restructure/open-item/${id}`;
+            const response = await receiptCollectionHttpService.getDetail(url);
+            return response?.data;
+        } catch (error) {
+            const message = error?.response?.data?.message || error?.message || error?.toString();
+            thunkAPI.dispatch(showModalError({ title: "Failed", description: `${message}` }));
+            return thunkAPI.rejectWithValue(error.response);
+        }
+    }
+);
+
+export const getPaymentPlanDetail = createAsyncThunk(
+    "GET_PAYMENT_PLAN_DETAIL",
+    async (id, thunkAPI) => {
+        try {
+            const url = `/v1/dbs/api/restructure/payment-plan/${id}`;
+            const response = await receiptCollectionHttpService.getDetail(url);
+            return response?.data;
+        } catch (error) {
+            const message = error?.response?.data?.message || error?.message || error?.toString();
+            thunkAPI.dispatch(showModalError({ title: "Failed", description: `${message}` }));
             return thunkAPI.rejectWithValue(error.response);
         }
     }
@@ -597,6 +646,12 @@ const restructureSlice = createSlice({
         },
         resetDetail: (state) => {
             state.data_detail = null;
+        },
+        resetOpenItemDetail: (state) => {
+            state.openItemDetail = null;
+        },
+        resetPaymentPlanDetail: (state) => {
+            state.paymentPlanDetail = null;
         },
     },
     extraReducers: {
@@ -723,8 +778,15 @@ const restructureSlice = createSlice({
         },
 
         // Get List Approval By Id
+        [getListApprovalById.pending]: (state) => {
+            state.loading_approval_detail = true;
+        },
         [getListApprovalById.fulfilled]: (state, action) => {
+            state.loading_approval_detail = false;
             state.dataListAppHierDetail = action.payload;
+        },
+        [getListApprovalById.rejected]: (state) => {
+            state.loading_approval_detail = false;
         },
 
         // Get Approval History
@@ -834,6 +896,17 @@ const restructureSlice = createSlice({
         [getRePlanReasons.fulfilled]: (state, action) => {
             state.rePlanReasons = action.payload;
         },
+        // Cancel Reasons
+        [getCancelReasons.pending]: (state) => {
+            state.loadingCancelReasons = true;
+        },
+        [getCancelReasons.fulfilled]: (state, action) => {
+            state.loadingCancelReasons = false;
+            state.cancelReasons = action.payload;
+        },
+        [getCancelReasons.rejected]: (state) => {
+            state.loadingCancelReasons = false;
+        },
         // Contacts
         [getContactsByAccount.pending]: (state) => {
             state.loading = true;
@@ -856,9 +929,31 @@ const restructureSlice = createSlice({
         [getAllContactsRestructure.rejected]: (state) => {
             state.loading = false;
         },
+        // Get Open Item Detail
+        [getOpenItemDetail.pending]: (state) => {
+            state.loadingOpenItemDetail = true;
+        },
+        [getOpenItemDetail.fulfilled]: (state, action) => {
+            state.loadingOpenItemDetail = false;
+            state.openItemDetail = action.payload;
+        },
+        [getOpenItemDetail.rejected]: (state) => {
+            state.loadingOpenItemDetail = false;
+        },
+        // Get Payment Plan Detail
+        [getPaymentPlanDetail.pending]: (state) => {
+            state.loadingPaymentPlanDetail = true;
+        },
+        [getPaymentPlanDetail.fulfilled]: (state, action) => {
+            state.loadingPaymentPlanDetail = false;
+            state.paymentPlanDetail = action.payload;
+        },
+        [getPaymentPlanDetail.rejected]: (state) => {
+            state.loadingPaymentPlanDetail = false;
+        },
     },
 });
 
 const { reducer, actions } = restructureSlice;
-export const { resetBadDebt, resetDetail } = actions;
+export const { resetBadDebt, resetDetail, resetOpenItemDetail, resetPaymentPlanDetail } = actions;
 export default reducer;
