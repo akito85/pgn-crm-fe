@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Form, Spin } from "antd";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -81,6 +81,7 @@ const BillingBucketForm = ({ type }) => {
   const [endDate, setEndDate] = useState();
 
   const [flag, setFlag] = useState(false);
+  const isSubmitRef = useRef(false);
   const [listSectionInfo, setListSectionInfo] = useState([
     {
       value: "Billing Bucket",
@@ -581,7 +582,7 @@ const BillingBucketForm = ({ type }) => {
       data_detail,
       data_detail_draft,
     ) => {
-      return bodyData?.criteria.map((item) => {
+      return (bodyData?.criteria || []).map((item) => {
         const tempData =
           id && data_detail_draft?.information?.id === id
             ? data_detail_draft?.listCriteria || []
@@ -601,8 +602,8 @@ const BillingBucketForm = ({ type }) => {
     ) => {
       return columnsTableCriteriaBillingBucket().filter(
         (item) =>
-          !bodyData.criteria.includes(item.indexValue) &&
-          bodyData.criteria.includes(item.indexValue) === 1,
+          !(bodyData.criteria || []).includes(item.indexValue) &&
+          (bodyData.criteria || []).includes(item.indexValue) === 1,
       );
     };
 
@@ -641,7 +642,7 @@ const BillingBucketForm = ({ type }) => {
       filteredCriteria,
     );
 
-    const includesAll = bodyData.criteria.includes(24);
+    const includesAll = (bodyData.criteria || []).includes(24);
 
     // listDetail already mapped with correct fields in mapListDataBI
 
@@ -832,6 +833,7 @@ const BillingBucketForm = ({ type }) => {
   }, []);
 
   const handleSubmit = () => {
+    isSubmitRef.current = true;
     setFlag(true);
     setTimeout(() => {
       form.submit();
@@ -839,14 +841,48 @@ const BillingBucketForm = ({ type }) => {
   };
 
   const handleSaveDraft = () => {
+    isSubmitRef.current = false;
     setFlag(false);
     setTimeout(() => {
-      form.submit();
+      const formValue = form.getFieldsValue();
+      handleSave(formValue);
     }, 0);
   };
 
   // Handle Save Form
   const handleSave = async (formValue) => {
+    // Save as draft: hanya wajib billingBucketCode
+    if (!isSubmitRef.current) {
+      try {
+        await form.validateFields(["billingBucketCode"]);
+      } catch {
+        setCurrent(0);
+        setTimeout(() => {
+          form.scrollToField("billingBucketCode", { behavior: "smooth", block: "center" });
+        }, 100);
+        return;
+      }
+      setBodyData({ ...formValue });
+      setModalConfirm(true);
+      setListSectionInfo([
+        {
+          value: "Billing Bucket",
+          paramValue: [
+            "billingBucketCode",
+            "name",
+            "priorityPeriod",
+            "currency",
+            "category",
+            "criteria",
+            "startDate",
+          ],
+        },
+        { value: "Approval", paramValue: ["apphierId"] },
+        { value: "Attachment" },
+      ]);
+      return;
+    }
+
     let errorBody = {};
     const hasOverlappingCriteria = checkOverlappingData(
       { startDate: formValue?.startDate, endDate: formValue?.endDate },
@@ -916,7 +952,9 @@ const BillingBucketForm = ({ type }) => {
         };
         dispatch(showModalError(errorBody));
       } else {
-        const isDataValid = await checkDataValidity(formValue);
+        const isDataValid = isSubmitRef.current
+          ? await checkDataValidity(formValue)
+          : true;
 
         if (isDataValid) {
           setBodyData({
