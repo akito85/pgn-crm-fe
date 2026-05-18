@@ -143,7 +143,7 @@ const CalculationDetail = ({ calculationCode }) => {
             if (originalRender) {
               content = originalRender(text, record, index);
             } else {
-              content = text || "-";
+              content = text || "";
             }
             
             return {

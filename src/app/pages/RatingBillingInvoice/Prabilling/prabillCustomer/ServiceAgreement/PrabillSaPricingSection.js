@@ -194,7 +194,7 @@ const PrabillSaPricingSection = ({ prabillSaId }) => {
               Price Code
             </p>
             <DetailText label="Price Code">
-              {priceDet?.fullPriceCode || "-"}
+              {priceDet?.fullPriceCode || ""}
             </DetailText>
           </div>
 
@@ -203,7 +203,7 @@ const PrabillSaPricingSection = ({ prabillSaId }) => {
               Price Adjustment
             </p>
             <DetailText label="Price Adjustment">
-              {priceDet?.pricingAdjustment || "-"}
+              {priceDet?.pricingAdjustment || ""}
             </DetailText>
           </div>
 
@@ -212,7 +212,7 @@ const PrabillSaPricingSection = ({ prabillSaId }) => {
               Pricing Rule
             </p>
             <DetailText label="Pricing Rule">
-              {priceDet?.priceCode || "-"}
+              {priceDet?.priceCode || ""}
             </DetailText>
           </div>
         </div>

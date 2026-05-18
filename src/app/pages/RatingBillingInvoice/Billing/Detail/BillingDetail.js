@@ -100,10 +100,10 @@ const BillingDetail = ({
               ? moment(selectedBillingData?.updatedDate).format(
                   "DD MMM YYYY HH:mm:ss",
                 )
-              : "-"}
+              : ""}
           </DetailText>
           <DetailText label={"Updated By"}>
-            {selectedBillingData?.updatedBy || "-"}
+            {selectedBillingData?.updatedBy || ""}
           </DetailText>
         </div>
       </CardContainer>
