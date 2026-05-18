@@ -141,8 +141,12 @@ const ListDetailRestructure = ({ selectedId: propId, onClose, onRefresh, approva
     };
 
     const handleOpenItemDetail = (record) => {
+        if (!record.key && !record.id) {
+            message.error('Invalid record');
+            return;
+        }
         setModalOpenItem(true);
-        dispatch(getOpenItemDetail(record.key || record.id || "1345"));
+        dispatch(getOpenItemDetail(record.key || record.id));
     };
 
     const handleCloseOpenItemModal = () => {
@@ -151,8 +155,12 @@ const ListDetailRestructure = ({ selectedId: propId, onClose, onRefresh, approva
     };
 
     const handlePaymentPlanDetail = (record) => {
+        if (!record.key && !record.id) {
+            message.error('Invalid record');
+            return;
+        }
         setModalPaymentPlan(true);
-        dispatch(getPaymentPlanDetail(record.key || record.id || "1345"));
+        dispatch(getPaymentPlanDetail(record.key || record.id));
     };
 
     const handleClosePaymentPlanModal = () => {

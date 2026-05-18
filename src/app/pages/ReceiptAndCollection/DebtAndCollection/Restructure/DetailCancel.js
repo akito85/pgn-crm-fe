@@ -9,7 +9,6 @@ import InputComponent from "../../../../../components/InputComponent";
 import DateComponent from "../../../../../components/DateComponent";
 import InputLabel from "../../../../../components/InputLabel";
 import LogHistoryInfo from "../../../../../components/LogHistoryInfo";
-import DOMPurify from "dompurify";
 
 const DetailCancel = ({
     isEmbedded,
@@ -86,8 +85,9 @@ const DetailCancel = ({
                                 <InputLabel text="Remark" mandatory={true} />
                                 <div 
                                     className="p-2 border rounded-md bg-[#F5F5F5] mt-2 min-h-[60px]"
-                                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(dataHeader?.remark || "-") }}
-                                />
+                                >
+                                    {dataHeader?.remark || "-"}
+                                </div>
                             </div>
                         </div>
                     </SectionCard>

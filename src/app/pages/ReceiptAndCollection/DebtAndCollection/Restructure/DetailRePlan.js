@@ -12,7 +12,6 @@ import DateComponent from "../../../../../components/DateComponent";
 import InputLabel from "../../../../../components/InputLabel";
 import LogHistoryInfo from "../../../../../components/LogHistoryInfo";
 import SubSectionCard from "../../../../../components/SubSectionCard";
-import DOMPurify from "dompurify";
 
 const DetailRePlan = ({
     isEmbedded,
@@ -106,8 +105,9 @@ const DetailRePlan = ({
                                 <InputLabel text="Description" mandatory={true} />
                                 <div 
                                     className="p-2 border rounded-md bg-[#F5F5F5] mt-2 min-h-[60px]"
-                                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(dataHeader?.description || "-") }}
-                                />
+                                >
+                                    {dataHeader?.description || "-"}
+                                </div>
                             </div>
                         </div>
                     </SectionCard>
