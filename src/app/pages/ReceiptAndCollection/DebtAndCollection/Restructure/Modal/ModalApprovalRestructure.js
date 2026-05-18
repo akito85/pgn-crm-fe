@@ -15,6 +15,7 @@ import {
     getDetailRestructure,
     getApprovalHistory,
     deleteRestructure,
+    approveOrRejectRestructure
 } from "../../../../../../redux/slices/receipt_collection/restructure";
 import { tableApprovalRestructure } from "./TableApprovalRestructure";
 import { formMessageRequired } from "../../../../../../utils";
