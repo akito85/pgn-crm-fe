@@ -28,6 +28,7 @@ const initialState = {
   list_srAttachmentCategories: [],
   loading_listSrAttachmentCategories: false,
   list_srContacts: [],
+  pagination_listSrContacts: { totalPage: 0, totalElement: 0, currentPage: 0, pageSize: 10 },
   loading_listSrContacts: false,
   loading_listSrAttachments: false,
   // Dropdowns
@@ -754,11 +755,11 @@ export const getSrAttachments = createAsyncThunk(
 // Get Contacts by Service Request
 export const getSrContacts = createAsyncThunk(
   "GET_SR_CONTACTS",
-  async ({ accountId, srId }, thunkAPI) => {
+  async ({ accountId, srId, body, isLoadMore }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/${srId}/contacts`;
-      const response = await accountManagementService.getAll(url);
-      return response.data;
+      const url = `/v1/dbs/api/account/${accountId}/service-request/contact`;
+      const response = await accountManagementService.updateDataWithMethodPost(url, body);
+      return { ...response.data, isLoadMore };
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
@@ -1359,16 +1360,36 @@ const serviceRequestSlice = createSlice({
     // =====================================================
     // CONTACTS
     // =====================================================
-    [getSrContacts.pending]: (state) => {
-      state.loading_listSrContacts = true;
+    [getSrContacts.pending]: (state, action) => {
+      if (!action.meta.arg?.isLoadMore) state.loading_listSrContacts = true;
     },
     [getSrContacts.fulfilled]: (state, action) => {
       state.loading_listSrContacts = false;
-      const raw = action.payload;
-      state.list_srContacts = Array.isArray(raw?.data) ? raw.data : (Array.isArray(raw) ? raw : []);
+      const { result, page, isLoadMore } = action.payload;
+      if (Array.isArray(result)) {
+        if (isLoadMore) {
+          const currentIds = new Set(state.list_srContacts.map((i) => i.id));
+          state.list_srContacts = [
+            ...state.list_srContacts,
+            ...result.filter((i) => !currentIds.has(i.id)),
+          ];
+        } else {
+          state.list_srContacts = result;
+        }
+      }
+      state.pagination_listSrContacts = {
+        totalPage: page?.totalPages || 0,
+        totalElement: page?.totalElements || 0,
+        currentPage: page?.number || 0,
+        pageSize: page?.size || 10,
+      };
     },
-    [getSrContacts.rejected]: (state) => {
+    [getSrContacts.rejected]: (state, action) => {
       state.loading_listSrContacts = false;
+      if (!action.meta.arg?.isLoadMore) {
+        state.list_srContacts = [];
+        state.pagination_listSrContacts = { totalPage: 0, totalElement: 0, currentPage: 0, pageSize: 10 };
+      }
     },
 
     // =====================================================

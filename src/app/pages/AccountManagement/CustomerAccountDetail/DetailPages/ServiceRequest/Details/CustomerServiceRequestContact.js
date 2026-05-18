@@ -1,128 +1,93 @@
-import { useEffect, useState } from "react";
-import { Table } from "antd";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import NxTable from "../../../../../../../components/Nx/NxTable";
-import StatusComponent from "../../../../../../../components/StatusComponent";
-import { getSrContacts } from "../../../../../../../redux/slices/account_management/detailAccount/ServiceRequestSlice";
 import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
-
-// ── Expand sub-table (CONTACT DETAIL) ────────────────────────────────────────
-const EXPAND_COLUMNS = [
-  { title: "NO",    width: 60,  align: "center", render: (_, __, i) => i + 1 },
-  { title: "TYPE",  dataIndex: "type",  width: 150 },
-  { title: "VALUE", dataIndex: "value" },
-];
-
-const ExpandSubTable = ({ details = [] }) => (
-  <div className="py-3 px-4 bg-[#f9fafb]">
-    <div className="text-primary text-sm font-semibold uppercase mb-2 px-1">
-      CONTACT DETAIL
-    </div>
-    <Table
-      dataSource={details.map((d, i) => ({ ...d, key: d.id ?? i }))}
-      columns={EXPAND_COLUMNS}
-      pagination={false}
-      size="small"
-      bordered
-      style={{ fontSize: 12 }}
-    />
-  </div>
-);
-
-// ── Main columns ──────────────────────────────────────────────────────────────
-const MAIN_COLUMNS = [
-  {
-    title: "NO",
-    width: 60,
-    align: "center",
-    render: (_, __, i) => i + 1,
-  },
-  {
-    title: "PRIMARY",
-    dataIndex: "primary",
-    width: 80,
-    sorter: true,
-    filter: true,
-    render: (v) => {
-      const isYes = v === "Yes" || v === true || v === 1;
-      return (
-        <StatusComponent colour={isYes ? "active" : "inactive"} margin={false}>
-          {isYes ? "Yes" : "No"}
-        </StatusComponent>
-      );
-    },
-  },
-  { title: "CONTACT NAME",    dataIndex: "contactName",                   width: 160, sorter: true, filter: true },
-  { title: "JOB",             dataIndex: "job",                           width: 140, sorter: true, filter: true },
-  { title: "POSITION",        dataIndex: "position",                      width: 140, sorter: true, filter: true },
-  { title: "CONTACT ADDRESS", dataIndex: "contactAddress",                width: 200, sorter: true, filter: true },
-  { title: "ADDITIONAL NOTE", dataIndex: "contactAddressAdditionalNote",  width: 180, sorter: true, filter: true },
-  { title: "DESCRIPTION",     dataIndex: "description",                   width: 200, sorter: true, filter: true },
-  {
-    title: "STATUS",
-    dataIndex: "status",
-    width: 100,
-    sorter: true,
-    filter: true,
-    render: (v) => (
-      <StatusComponent colour={(v || "").toLowerCase()} margin={false}>
-        {v}
-      </StatusComponent>
-    ),
-  },
-];
+import { getSrContacts } from "../../../../../../../redux/slices/account_management/detailAccount/ServiceRequestSlice";
+import { getContactColumns } from "./getContactColumns";
+import ContactDetailTable from "./ContactDetailTable";
 
 // ── Component ─────────────────────────────────────────────────────────────────
-const CustomerServiceRequestContact = ({
-  id,
-  idAccount,
-  onSort = () => {},
-}) => {
+const CustomerServiceRequestContact = ({ id, idAccount }) => {
   const dispatch = useDispatch();
-  const [expandedKeys, setExpandedKeys] = useState([]);
 
-  const { list_srContacts, loading_listSrContacts } = useSelector(
+  const [page, setPage] = useState(0);
+  const [loadMoreSize] = useState(10);
+  const [searchedColumn, setSearchedColumn] = useState("");
+  const [searchText, setSearchText] = useState("");
+  const [sort, setSort] = useState("");
+  const [search, setSearch] = useState({});
+  const [filters, setFilters] = useState([]);
+  const [filterRules, setFilterRules] = useState([]);
+  const searchInput = useRef(null);
+
+  const { list_srContacts, loading_listSrContacts, pagination_listSrContacts } = useSelector(
     (state) => state.serviceRequest
   );
 
-  useEffect(() => {
-    if (id && idAccount) {
-      dispatch(getSrContacts({ accountId: idAccount, srId: id }));
-    }
-  }, [dispatch, id, idAccount]);
+  const totalElement = pagination_listSrContacts?.totalElement || 0;
+  const hasMore = list_srContacts.length < totalElement;
 
-  const contacts = Array.isArray(list_srContacts) ? list_srContacts : [];
+  const handleSearch = (selectedKeys, confirm, dataIndex) => {
+    confirm();
+    setSearchText(selectedKeys[0]);
+    setSearchedColumn(dataIndex);
+    setSearch((prev) => {
+      if (prev[dataIndex] !== selectedKeys[0]) setPage(0);
+      return { ...prev, [dataIndex]: selectedKeys[0] };
+    });
+  };
+
+  const onSort = (_, __, sorter) => {
+    const dataSort = sorter.order
+      ? `${sorter.field}~${sorter.order === "ascend" ? "asc" : "desc"}`
+      : "";
+    setSort(dataSort);
+  };
+
+  const handleLoadMore = async () => {
+    const nextPage = page + 1;
+    if (nextPage <= (pagination_listSrContacts?.totalPage || 0)) {
+      const body = { page: nextPage, size: loadMoreSize, sort, searchs: search, filters, filterRules };
+      await dispatch(getSrContacts({ accountId: idAccount, srId: id, body, isLoadMore: true })).unwrap();
+    }
+    setPage(nextPage);
+  };
+
+  useEffect(() => {
+    if (!id || !idAccount) return;
+    const body = { page: 0, size: loadMoreSize, sort, searchs: search, filters, filterRules };
+    setPage(0);
+    dispatch(getSrContacts({ accountId: idAccount, srId: id, body, isLoadMore: false }));
+  }, [sort, search, filters, filterRules, id, idAccount]);
+
+  const columns = useMemo(
+    () => getContactColumns({ search, searchInput, searchedColumn, searchText, handleSearch }),
+    [search, searchInput, searchText, searchedColumn]
+  );
+
+  const expandedRowRender = (record, index) => (
+    <ContactDetailTable details={record.details || []} contactKey={index} />
+  );
 
   return (
-    <NxBaseContainer border>
+    <NxBaseContainer header="CONTACT" border>
       <NxTable
         idTable="sr-contact-table"
-        dataSource={contacts.map((item, i) => ({ ...item, key: item.id ?? i }))}
-        columns={MAIN_COLUMNS}
+        dataSource={list_srContacts}
+        totalData={totalElement}
+        current={page}
+        columns={columns}
+        onSort={onSort}
         usePagination={false}
         useInfiniteScroll={true}
-        hasMore={false}
-        showAdvanceSearch={false}
-        showSearchBar={false}
+        hasMore={hasMore}
+        onLoadMore={handleLoadMore}
+        loadMoreThreshold={20}
+        loading={loading_listSrContacts}
         fontSize="small"
         tablePadding="small"
         tableScrolled={{ x: "max-content" }}
-        loading={loading_listSrContacts}
-        onSort={onSort}
-        expandable={{
-          expandedRowKeys: expandedKeys,
-          onExpand: (isExpanded, record) => {
-            setExpandedKeys(
-              isExpanded
-                ? [...expandedKeys, record.key]
-                : expandedKeys.filter((k) => k !== record.key)
-            );
-          },
-          expandedRowRender: (record) => (
-            <ExpandSubTable details={record.details || []} />
-          ),
-          rowExpandable: () => true,
-        }}
+        expandable={ list_srContacts.length ? { expandedRowRender } : undefined}
       />
     </NxBaseContainer>
   );
