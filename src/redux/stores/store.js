@@ -154,6 +154,7 @@ import taskQueueReducer from "../slices/job_management/taskQueueSlice";
 import handlerRegistryReducer from "../slices/job_management/handlerRegistrySlice";
 import { jobApiSlice } from "../slices/job_management/jobApiSlice";
 import { jobGroupApiSlice } from "../slices/job_management/jobGroupApiSlice";
+import preRequisiteTemplateReducer from "../slices/system_setup/preRequisiteTemplate";
 
 const reducer = combineReducers({
   jobManagement: jobManagementReducer,
@@ -342,6 +343,9 @@ const reducer = combineReducers({
 
   // notifications
   notifications: notificationsReducer,
+
+  // system setup
+  preRequisiteTemplate: preRequisiteTemplateReducer,
 });
 
 // add throttle middlewares
