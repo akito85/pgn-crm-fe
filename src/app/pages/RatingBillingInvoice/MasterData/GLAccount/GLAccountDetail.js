@@ -147,9 +147,7 @@ const GLAccountDetail = () => {
       : isActivatedApproval
         ? approveRejectActivatedGLAccount({ id, body: data })
         : approveRejectGLAccount({ id, body: data });
-    return dispatch(
-      approvalAction,
-    )
+    return dispatch(approvalAction)
       .unwrap()
       .then(() => {
         setModalConfirm(false);
@@ -181,36 +179,35 @@ const GLAccountDetail = () => {
           }
         >
           {bodyApproval.isApprover && (
-              <div className="border border-[#D6E1F0] rounded-lg mb-4">
-                <div className="px-4 py-3 border-b border-[#D6E1F0]">
-                  <p className="font-semibold text-primary">
-                    {isActivatedApproval
-                      ? "ACTIVATE REQUEST INFORMATION"
-                      : isInactiveApproval
+            <div className="border border-[#D6E1F0] rounded-lg mb-4">
+              <div className="px-4 py-3 border-b border-[#D6E1F0]">
+                <p className="font-semibold text-primary">
+                  {isActivatedApproval
+                    ? "ACTIVATE REQUEST INFORMATION"
+                    : isInactiveApproval
                       ? "INACTIVE REQUEST INFORMATION"
                       : "APPROVAL REQUEST INFORMATION"}
-                  </p>
-                </div>
-                <div className="p-4">
-                  <div className="w-full grid grid-cols-4 gap-x-8 gap-y-2">
-                    <DetailText label={"Requested Date"}>
-                      {bodyApproval.approvalDetail?.requestedDate
-                        ? moment(
+                </p>
+              </div>
+              <div className="p-4">
+                <div className="w-full grid grid-cols-4 gap-x-8 gap-y-2">
+                  <DetailText label={"Requested Date"}>
+                    {bodyApproval.approvalDetail?.requestedDate
+                      ? moment(
                           bodyApproval.approvalDetail.requestedDate,
                         ).format(dateFormatting.date)
-                        : "-"}
-                    </DetailText>
-                    <DetailText label={"Requested By"}>
-                      {bodyApproval.approvalDetail?.requestedBy ||
-                        "-"}
-                    </DetailText>
-                    <DetailText label={"Remark"}>
-                      {bodyApproval.approvalDetail?.remarks || "-"}
-                    </DetailText>
-                  </div>
+                      : ""}
+                  </DetailText>
+                  <DetailText label={"Requested By"}>
+                    {bodyApproval.approvalDetail?.requestedBy || ""}
+                  </DetailText>
+                  <DetailText label={"Remark"}>
+                    {bodyApproval.approvalDetail?.remarks || ""}
+                  </DetailText>
                 </div>
               </div>
-            )}
+            </div>
+          )}
           <Tabs
             activeKey={activeTab}
             onChange={setActiveTab}
@@ -229,13 +226,13 @@ const GLAccountDetail = () => {
                       <div style={{ padding: "16px" }}>
                         <div className="w-full grid grid-cols-3 gap-x-8 gap-y-2">
                           <DetailText label={"GL Account Number"}>
-                            {dataDetail?.glAccount || "-"}
+                            {dataDetail?.glAccount || ""}
                           </DetailText>
                           <DetailText label={"GL Account Description"}>
-                            {dataDetail?.glAccountDesc || "-"}
+                            {dataDetail?.glAccountDesc || ""}
                           </DetailText>
                           <DetailText label={"Description"}>
-                            {dataDetail?.remark || "-"}
+                            {dataDetail?.remark || ""}
                           </DetailText>
                         </div>
                       </div>
@@ -287,8 +284,8 @@ const GLAccountDetail = () => {
               <DetailText label={"Created Date"}>
                 {dataLogInformation?.createdDate
                   ? moment(dataLogInformation.createdDate).format(
-                    dateFormatting.dateTime,
-                  )
+                      dateFormatting.dateTime,
+                    )
                   : "-"}
               </DetailText>
               <DetailText label={"Created By"}>
@@ -297,8 +294,8 @@ const GLAccountDetail = () => {
               <DetailText label={"Updated Date"}>
                 {dataLogInformation?.updatedDate
                   ? moment(dataLogInformation.updatedDate).format(
-                    dateFormatting.dateTime,
-                  )
+                      dateFormatting.dateTime,
+                    )
                   : "-"}
               </DetailText>
               <DetailText label={"Updated By"}>
@@ -375,8 +372,9 @@ const GLAccountDetail = () => {
               <SVGIcon name="IconFailed" width={48} />
               <p className="text-[18px] font-bold">{"Failed"}</p>
             </div>
-            <p className="pl-[70px]">{`Your data was not ${approveOrReject === "Approve" ? "Approved" : "Rejected"
-              }. ${bodyError.message}.`}</p>
+            <p className="pl-[70px]">{`Your data was not ${
+              approveOrReject === "Approve" ? "Approved" : "Rejected"
+            }. ${bodyError.message}.`}</p>
             <p className="pl-[70px]">Please try again.</p>
           </div>
         </ModalError>

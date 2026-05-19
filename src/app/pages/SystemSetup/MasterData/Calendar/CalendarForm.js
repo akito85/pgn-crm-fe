@@ -93,7 +93,14 @@ const CalendarForm = ({ type }) => {
   const [listSectionInfo, setListSectionInfo] = useState([
     {
       value: "Calendar",
-      paramValue: ["name", "startDate", "holidayType", "criteria"],
+      paramValue: [
+        "name",
+        "startDate",
+        "endDate",
+        "holidayType",
+        "criteria",
+        "description",
+      ],
     },
     { value: "Approval", paramValue: ["apphierId"] },
     { value: "Attachment" },
@@ -240,10 +247,10 @@ const CalendarForm = ({ type }) => {
     const criteriaSelect = allCriteria
       ? [24]
       : Object.entries(CRITERIA_FIELD_TO_ID)
-        .filter(([field]) =>
-          criterias.some((row) => row[field]?.label != null),
-        )
-        .map(([, criteriaId]) => criteriaId);
+          .filter(([field]) =>
+            criterias.some((row) => row[field]?.label != null),
+          )
+          .map(([, criteriaId]) => criteriaId);
 
     const dataCriteriaList = criterias
       .filter((item) => !item.allCriteria)
@@ -568,12 +575,12 @@ const CalendarForm = ({ type }) => {
         const errorBadge =
           item.value !== "Attachment"
             ? (errorFields || []).reduce(
-              (current, next) =>
-                item.paramValue?.includes(next.name[0])
-                  ? current + 1
-                  : current,
-              0,
-            )
+                (current, next) =>
+                  item.paramValue?.includes(next.name[0])
+                    ? current + 1
+                    : current,
+                0,
+              )
             : listDataAttachment.length < 1
               ? 1
               : 0;
@@ -655,7 +662,14 @@ const CalendarForm = ({ type }) => {
           setListSectionInfo([
             {
               value: "Calendar",
-              paramValue: ["name", "startDate", "holidayType", "criteria"],
+              paramValue: [
+                "name",
+                "startDate",
+                "endDate",
+                "holidayType",
+                "criteria",
+                "description",
+              ],
             },
             { value: "Approval", paramValue: ["apphierId"] },
             { value: "Attachment" },
@@ -685,7 +699,7 @@ const CalendarForm = ({ type }) => {
             await ratingBillingHttpService.uploadAttachment(
               `/v1/dbs/api/calendar/create-attachment?categoryId=${element.fileCategoryId}&referenceId=${referenceId}`,
               formData,
-              () => { },
+              () => {},
             );
           }
           setLoadingForm(false);
@@ -724,7 +738,7 @@ const CalendarForm = ({ type }) => {
             await ratingBillingHttpService.uploadAttachment(
               `/v1/dbs/api/calendar/create-attachment?categoryId=${element.fileCategoryId}&referenceId=${referenceId}`,
               formData,
-              () => { },
+              () => {},
             );
           }
           setLoadingForm(false);
@@ -759,7 +773,14 @@ const CalendarForm = ({ type }) => {
       setListSectionInfo([
         {
           value: "Calendar",
-          paramValue: ["name", "startDate", "holidayType", "criteria"],
+          paramValue: [
+            "name",
+            "startDate",
+            "endDate",
+            "holidayType",
+            "criteria",
+            "description",
+          ],
         },
         { value: "Approval", paramValue: ["apphierId"] },
         { value: "Attachment" },
@@ -845,12 +866,16 @@ const CalendarForm = ({ type }) => {
                   name={"endDate"}
                   rules={[
                     {
+                      required: true,
+                      message: "Please input your End Date!",
+                    },
+                    {
                       validator: (_, value) =>
-                        (value && moment(startDate) <= moment(value)) || !value
+                        value && moment(startDate) <= moment(value)
                           ? Promise.resolve()
                           : Promise.reject(
-                            new Error("End date must be after Start date"),
-                          ),
+                              new Error("End date must be after Start date"),
+                            ),
                     },
                   ]}
                 >
@@ -915,6 +940,12 @@ const CalendarForm = ({ type }) => {
                   <Form.Item
                     label={"Description"}
                     name={"description"}
+                    rules={[
+                      {
+                        required: true,
+                        message: "Please input your Description!",
+                      },
+                    ]}
                     className={"w-full"}
                   >
                     <InputComponent type="textarea" />
@@ -1040,8 +1071,9 @@ const CalendarForm = ({ type }) => {
               <SVGIcon name="IconFailed" width={48} />
               <p className="text-[18px] font-bold">{"Failed"}</p>
             </div>
-            <p className="pl-[70px]">{`Your data was not ${flag ? "submitted" : "saved"
-              }. ${bodyError.message}.`}</p>
+            <p className="pl-[70px]">{`Your data was not ${
+              flag ? "submitted" : "saved"
+            }. ${bodyError.message}.`}</p>
             <p className="pl-[70px]">Please try again.</p>
           </div>
         </ModalError>
