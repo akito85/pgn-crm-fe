@@ -35,7 +35,7 @@ import PrabillSaPricingSection from "./ServiceAgreement/PrabillSaPricingSection"
 import PrabillSaTosSection from "./ServiceAgreement/PrabillSaTosSection";
 
 const renderValue = (val) => {
-  if (val === null || val === undefined || val === "") return "-";
+  if (val === null || val === undefined || val === "") return " ";
   return String(val);
 };
 
@@ -49,7 +49,7 @@ const TAB_CONFIGS = [
     key: "0",
     label: "Service Agreement",
     dataKey: "saData",
-    scrollX: 2800,
+    scrollX: 1500,
     action: "getCustomerSaData",
   },
   {
