@@ -133,7 +133,6 @@ const PreRequisiteTemplateTable = ({
         ["Inactivate", "View", "Update"],
         itemActions,
         "View",
-        // "page"
     ).map((col) => ({
         ...col,
         width: 70,

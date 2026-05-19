@@ -45,6 +45,7 @@ import CalendarForm from "../../app/pages/SystemSetup/MasterData/Calendar/Calend
 import CalendarDetail from "../../app/pages/SystemSetup/MasterData/Calendar/CalendarDetail";
 import PreRequisiteTemplate from "../../app/pages/SystemSetup/PreRequisiteTemplate/PreRequisiteTemplate";
 import PreRequisiteTemplateDetail from "../../app/pages/SystemSetup/PreRequisiteTemplate/Details/PreRequisiteTemplateDetail";
+import CreateUpdatePreRequisiteTemplate from "../../app/pages/SystemSetup/PreRequisiteTemplate/CreateUpdate/CreateUpdatePreRequisiteTemplate";
 
 export const SYSTEM_SETUP_ELEMENTS = {
   // menu
@@ -149,6 +150,6 @@ export const SYSTEM_SETUP_ELEMENTS = {
   // Pre Requisite Template
   VIEW_PRE_REQUISITE_TEMPLATE_PAGE: <PreRequisiteTemplate />,
   DETAIL_PRE_REQUISITE_TEMPLATE_PAGE: <PreRequisiteTemplateDetail />,
-  CREATE_PRE_REQUISITE_TEMPLATE_PAGE: <CalendarForm type="create" />,
-  UPDATE_PRE_REQUISITE_TEMPLATE_PAGE: <CalendarForm type="update" />,
+  CREATE_PRE_REQUISITE_TEMPLATE_PAGE: <CreateUpdatePreRequisiteTemplate type="create" />,
+  UPDATE_PRE_REQUISITE_TEMPLATE_PAGE: <CreateUpdatePreRequisiteTemplate type="update" />,
 };
