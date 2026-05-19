@@ -626,6 +626,7 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
           idAccount={accountId}
           idCustomer={customerId}
           type={accountType}
+          collapsible
         />
         <Spin spinning={loading}>
           <Form

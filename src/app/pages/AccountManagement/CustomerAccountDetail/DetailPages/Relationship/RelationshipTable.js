@@ -274,7 +274,7 @@ const RelationshipTable = ({
     }));
   }, [baseColumns, actionCols]);
 
-  const expandedRowRender = (record) => <RelationshipDetailTable relatedDetail={record.relatedDetail} />;
+  const expandedRowRender = (record, index) => <RelationshipDetailTable relatedDetails={record.relatedDetail} key={index} />;
 
   return (
     <div className="flex flex-col gap-y-4">
@@ -284,7 +284,7 @@ const RelationshipTable = ({
         dataSource={dataSource}
         totalData={totalElement}
         current={page}
-        tableScrolled={{ x: dataSource.length ? "max-content" : 2000 }}
+        tableScrolled={{ x: dataSource.length ? "max-content" : 1390 }}
         onSort={onSort}
         columns={columns}
         usePagination={false}

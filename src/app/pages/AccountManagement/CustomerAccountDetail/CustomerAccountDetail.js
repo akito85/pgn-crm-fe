@@ -116,6 +116,7 @@ const CustomerAccountDetail = ({ type = "standard" }) => {
             idAccount={id}
             idCustomer={idCustomer}
             type={type}
+            collapsible
           />
           <div className="flex flex-col gap-y-4">
             <AccountDetailInformation

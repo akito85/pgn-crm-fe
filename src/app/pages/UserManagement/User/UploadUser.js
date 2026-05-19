@@ -68,19 +68,19 @@ const UploadUser = () => {
             groupAccessId: parseInt(item?.groupAccessId),
             status: item?.status,
             startDate:
-              item?.startDate === "" || null
+              !item?.startDate
                 ? moment()
                 : moment(item?.startDate).clone(),
             endDate:
-              item?.endDate === "" || null
+              !item?.endDate
                 ? moment()
                 : moment(item?.endDate).clone(),
             startDateGa:
-              item?.startDate === "" || null
+              !item?.startDateGa
                 ? moment()
                 : moment(item?.startDateGa).clone(),
             endDateGa:
-              item?.endDate === "" || null
+              !item?.endDateGa
                 ? moment()
                 : moment(item?.endDateGa).clone(),
             message: item?.message,
@@ -102,7 +102,9 @@ const UploadUser = () => {
   // handle change file
   const handleFileChange = ({ fileList }) => {
     setFileList(fileList);
-    handleUpload();
+    if (fileName) {
+      handleUpload(fileName);
+    }
   };
 
   // props dragger
@@ -117,7 +119,7 @@ const UploadUser = () => {
       setFileName(file);
       return false;
     },
-    onChange: handleFileChange,
+    onChange: ({ fileList }) => handleFileChange({ fileList }),
     disabled: showListUpload,
   };
 
@@ -147,18 +149,20 @@ const UploadUser = () => {
   };
 
   // handle upload
-  const handleUpload = async () => {
+  const handleUpload = async (fileToUpload) => {
+    const uploadFile = fileToUpload || fileName;
+    if (!uploadFile) return;
     try {
       setFileProgress(0);
       const body = {
-        image: fileName,
+        image: uploadFile,
         onProgress: (progress) => setFileProgress(progress),
       };
       await dispatch(uploadUser(body)).unwrap();
     } catch (error) {
       setFileList((prevFileList) =>
         prevFileList.map((file) => {
-          if (file.name === fileName.name) {
+          if (file.name === uploadFile.name) {
             return { ...file, status: "error" };
           }
           return file;
@@ -213,7 +217,7 @@ const UploadUser = () => {
             endDateGa: moment(item?.endDateGa).isValid()
               ? moment(item?.endDateGa).format(dateFormatting.dateFormal)
               : moment(),
-            startDateGa: moment(item?.endDateGa).isValid()
+            startDateGa: moment(item?.startDateGa).isValid()
               ? moment(item?.startDateGa).format(dateFormatting.dateFormal)
               : moment(),
           };

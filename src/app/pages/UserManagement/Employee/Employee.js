@@ -29,6 +29,16 @@ import { dateFormatting, formMessageRequired, hasValue } from "../../../../utils
 import { clearBodyMessage, hideModalError } from "../../../../redux/slices/general_slice";
 import moment from "moment";
 
+const OPERATOR_SELECTOR_MAP = {
+  "Contains": "LIKE",
+  "Equal to": "EQUALS",
+  "Not equal to": "NOT_EQUALS",
+  "Greater than": "GREATER_THAN",
+  "Less than": "LESS_THAN",
+  "Is empty": "IS_NULL",
+  "Is not empty": "IS_NOT_NULL",
+};
+
 const Employee = () => {
   const { data_status } = useSelector((state) => state.employee);
   const { bodyError } = useSelector((state) => state?.general);
@@ -74,17 +84,21 @@ const Employee = () => {
   // Build combined search string from basic + advanced search
   const buildSearch = useCallback((basicSearch, advSearch) => {
     let combined = { ...basicSearch };
+    const applyFilter = (f) => {
+      if (!f.column) return;
+      const selector = OPERATOR_SELECTOR_MAP[f.operator] || "LIKE";
+      const isNullOp = selector === "IS_NULL" || selector === "IS_NOT_NULL";
+      if (isNullOp) {
+        combined[f.column] = `~${selector}`;
+      } else if (f.value) {
+        combined[f.column] = `${f.value}~${selector}`;
+      }
+    };
     if (advSearch?.filters) {
-      advSearch.filters.forEach((f) => {
-        if (f.column && f.value) combined[f.column] = f.value;
-      });
+      advSearch.filters.forEach(applyFilter);
     }
     if (advSearch?.filterRules) {
-      advSearch.filterRules.forEach((rule) =>
-        rule.filters.forEach((f) => {
-          if (f.column && f.value) combined[f.column] = f.value;
-        })
-      );
+      advSearch.filterRules.forEach((rule) => rule.filters.forEach(applyFilter));
     }
     return encodeURIComponent(JSON.stringify(combined));
   }, []);

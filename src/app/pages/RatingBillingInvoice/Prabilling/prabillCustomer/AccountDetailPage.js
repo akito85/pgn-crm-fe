@@ -102,7 +102,7 @@ const AccountDetailPage = () => {
   const [saDetailTab, setSaDetailTab] = useState("Detail");
   const saDetailRef = useRef(null);
 
-  const { customerNumber, billPeriod, inSor, accNumber, saNumber } =
+  const { customerNumber, billPeriod, inSor, accNumber, saNumber, id } =
     location.state || {};
   const { customer_account_detail, loading_customer_detail } = useSelector(
     (state) => state.rbi_prabilling
@@ -128,9 +128,10 @@ const AccountDetailPage = () => {
   const routes = [
     { path: "", breadcrumbName: "Rating Billing" },
     { path: RBI_ROUTES.PRABILLING_VIEW, breadcrumbName: "Prabilling" },
-    { path: RBI_ROUTES.PRABILLING_DETAIL, breadcrumbName: "Detail Prabilling" },
+    { path: RBI_ROUTES.PRABILLING_DETAIL, breadcrumbName: "Detail Prabilling", state: { id } },
     { path: "", breadcrumbName: "Customer Detail" },
   ];
+
 
   // Load ALL data on mount - eager loading
   useEffect(() => {

@@ -15,15 +15,17 @@ const getSrRefColumns = (
   setIsOpen = () => {}
 ) => [
   {
+    key: "no",
     title: "NO",
-    width: 80,
+    width: 50,
     align: "center",
     render: (_, __, index) => index + 1
   },
   {
-    title: "SERVICE REQUEST NUMBER",
+    key: "requestNumber",
+    title: "SR NUMBER",
     dataIndex: "requestNumber",
-    width: 200,
+    width: 150,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -35,9 +37,10 @@ const getSrRefColumns = (
     )
   },
   {
-    title: "SERVICE REQUEST REFERENCE",
+    key: "reference",
+    title: "SR REFERENCE",
     dataIndex: "reference",
-    width: 220,
+    width: 150,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -49,6 +52,7 @@ const getSrRefColumns = (
     )
   },
   {
+    key: "type",
     title: "TYPE",
     dataIndex: "type",
     width: 150,
@@ -63,9 +67,10 @@ const getSrRefColumns = (
     )
   },
   {
+    key: "category",
     title: "CATEGORY",
     dataIndex: "category",
-    width: 160,
+    width: 150,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -77,9 +82,10 @@ const getSrRefColumns = (
     )
   },
   {
-    title: "SUB CATEGORY",
+    key: "subCategory",
+    title: "SUB-CATEGORY",
     dataIndex: "subCategory",
-    width: 160,
+    width: 150,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -91,6 +97,7 @@ const getSrRefColumns = (
     )
   },
   {
+    key: "channel",
     title: "CHANNEL",
     dataIndex: "channel",
     width: 140,
@@ -105,6 +112,22 @@ const getSrRefColumns = (
     )
   },
   {
+    key: "priority",
+    title: "PRIORITY",
+    dataIndex: "priority",
+    width: 150,
+    sorter: true,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "priority",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch
+    )
+  },
+  {
+    key: "source",
     title: "REQUEST SOURCE",
     dataIndex: "source",
     width: 150,
@@ -119,9 +142,10 @@ const getSrRefColumns = (
     )
   },
   {
+    key: "requestDate",
     title: "REQUEST DATE",
     dataIndex: "requestDate",
-    width: 200,
+    width: 140,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -134,9 +158,10 @@ const getSrRefColumns = (
     render: (date) => NxDate.formatDate(date, "DD MMM YYYY")
   },
   {
+    key: "openDate",
     title: "OPEN DATE",
     dataIndex: "openDate",
-    width: 200,
+    width: 140,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -149,9 +174,10 @@ const getSrRefColumns = (
     render: (date) => NxDate.formatDate(date, "DD MMM YYYY")
   },
   {
+    key: "resolvedDate",
     title: "RESOLVED DATE",
     dataIndex: "resolvedDate",
-    width: 200,
+    width: 140,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -164,9 +190,10 @@ const getSrRefColumns = (
     render: (date) => NxDate.formatDate(date, "DD MMM YYYY")
   },
   {
+    key: "closedDate",
     title: "CLOSED DATE",
     dataIndex: "closedDate",
-    width: 200,
+    width: 140,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -179,9 +206,10 @@ const getSrRefColumns = (
     render: (date) => NxDate.formatDate(date, "DD MMM YYYY")
   },
   {
+    key: "age",
     title: "AGE (HOUR)",
     dataIndex: "age",
-    width: 120,
+    width: 150,
     sorter: true,
     align: "center",
     ...getColumnSearchPropsUseFilteredValue(
@@ -195,9 +223,10 @@ const getSrRefColumns = (
     render: (age) => age || "0"
   },
   {
+    key: "description",
     title: "DESCRIPTION",
     dataIndex: "description",
-    width: 250,
+    width: 200,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -209,120 +238,27 @@ const getSrRefColumns = (
     )
   },
   {
-    title: "STATUS APPROVAL",
-    dataIndex: "statusApproval",
-    width: 160,
+    key: "escalation",
+    title: "ESCALATION",
+    dataIndex: "escalation",
+    width: 150,
     sorter: true,
     align: "center",
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "statusApproval",
+      "escalation",
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
+      true
     ),
-    render: (status) => {
-      const colorMap = {
-        approved: "green",
-        waitingApproval: "orange",
-        pending: "orange",
-        rejected: "red"
-      };
-      const displayText = {
-        approved: "Approved",
-        waitingApproval: "Waiting Approval",
-        pending: "Pending",
-        rejected: "Rejected"
-      };
-      return (
-        <div className="flex justify-center">
-          <StatusComponent colour={colorMap[status] || "gray"}>
-            {displayText[status] || toTitleCase(String(status || "")) || "-"}
-          </StatusComponent>
-        </div>
-      );
-    }
-  },
-  {
-    title: "STATUS PRE-REQUISITE",
-    dataIndex: "statusPrerequisite",
-    width: 180,
-    sorter: true,
-    align: "center",
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "statusPrerequisite",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (status) => {
-      const colorMap = {
-        completed: "green",
-        pending: "red",
-        none: "blue"
-      };
-      const displayText = {
-        completed: "Completed",
-        pending: "Pending",
-        none: "None"
-      };
-      return (
-        <div className="flex justify-center">
-          <StatusComponent colour={colorMap[status] || "gray"}>
-            {displayText[status] || toTitleCase(String(status || "")) || "-"}
-          </StatusComponent>
-        </div>
-      );
-    }
-  },
-  {
-    title: "STATUS",
-    dataIndex: "status",
-    width: 140,
-    sorter: true,
-    align: "center",
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "status",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (status) => {
-      const colorMap = {
-        inProgress: "blue",
-        onHold: "orange",
-        closed: "red",
-        canceled: "gray",
-        open: "green",
-        active: "green",
-        pending: "orange"
-      };
-      const displayText = {
-        inProgress: "In Progress",
-        onHold: "On Hold",
-        closed: "Closed",
-        canceled: "Canceled",
-        open: "Open"
-      };
-      return (
-        <div className="flex justify-center">
-          <StatusComponent colour={colorMap[status] || "gray"}>
-            {displayText[status] || toTitleCase(String(status || "")) || "-"}
-          </StatusComponent>
-        </div>
-      );
-    }
   },
   {
     key: "action",
     title: "ACTION",
     align: "center",
-    width: 120,
+    width: 100,
     fixed: "right",
     render: (_, record) => (
       <div className="flex w-full justify-center gap-4">
