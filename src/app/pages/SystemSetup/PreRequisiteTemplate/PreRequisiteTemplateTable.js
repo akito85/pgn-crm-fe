@@ -10,7 +10,8 @@ import { useColumnActionPermission } from "../../../../components/ColumnActionPe
 import { getPreRequisiteTemplateColumns } from "./GetPreRequisiteTemplateColumns";
 
 const PreRequisiteTemplateTable = ({
-    refeshSignal = 0,
+    refreshSignal = 0,
+    handleInactivateModal = () => {},
 }) => {
     const {
         loading_list_prt: loading,
@@ -115,7 +116,7 @@ const PreRequisiteTemplateTable = ({
                     }
                 }
             ),
-        // handleInactivate: ({ id }) => handleInactivateModal(true, id, accountNumber)
+        handleInactivate: ({ id }) => handleInactivateModal(true, id)
     });
 
     const baseColumns = useMemo(
@@ -133,7 +134,7 @@ const PreRequisiteTemplateTable = ({
         ["Inactivate", "View", "Update"],
         itemActions,
         "View",
-        "table"
+        // "page"
     ).map((col) => ({
         ...col,
         width: 70,
@@ -161,8 +162,8 @@ const PreRequisiteTemplateTable = ({
     }, [sort, search, filters, filterRules]);
 
     useEffect(() => {
-        if (refeshSignal > 0) handleRefresh();
-    }, [refeshSignal]);
+        if (refreshSignal > 0) handleRefresh();
+    }, [refreshSignal]);
 
     return (
     <div className="flex flex-col gap-y-4">

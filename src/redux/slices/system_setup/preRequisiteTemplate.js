@@ -58,10 +58,10 @@ const preRequisiteTemplateSlice = createSlice({
             }
 
             state.pagination_prt = {
-                totalPage: page?.totalPage || 0,
-                totalElement: page?.totalElement || 0,
-                currentPage: page?.currentPage || 0,
-                pageSize: page?.pageSize || 10,
+                totalPage: page?.totalPages || 0,
+                totalElement: page?.totalElements || 0,
+                currentPage: page?.number || 0,
+                pageSize: page?.size || 10,
             };
             state.loading_list_prt = false;
         },
