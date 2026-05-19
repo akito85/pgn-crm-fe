@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import accountManagementService from "../../services/account_management/accountManagementService";
 
 const initialState = {
+    // List Pre-requisite Template
     loading_list_prt: false,
     list_prt: [],
     pagination_prt: {
@@ -10,6 +11,10 @@ const initialState = {
         currentPage: 0,
         pageSize: 10,
     },
+
+    // Detail Pre-requisite Template
+    loading_detail_prt: false,
+    detail_prt: {},
 };
 
 export const getPreRequisiteTemplate = createAsyncThunk(
@@ -31,10 +36,24 @@ export const getPreRequisiteTemplate = createAsyncThunk(
     }
 );
 
+export const getDetailPreRequisiteTemplate = createAsyncThunk(
+    "GET_DETAIL_PRE_REQUISITE_TEMPLATE",
+    async (id, thunkAPI) => {
+        try {
+            const url = `/v1/dbs/api/pre-requisite-template/detail/${id}`;
+            const response = await accountManagementService.getDetail(url);
+            return response.data;
+        } catch (error) {
+            return thunkAPI.rejectWithValue(error.response);
+        }
+    }
+);
+
 const preRequisiteTemplateSlice = createSlice({
     name: "preRequisiteTemplate",
     initialState,
     extraReducers: {
+        // List Pre-requisite Template
         [getPreRequisiteTemplate.pending]: (state, action) => {
             if (!action.meta.arg?.isLoadMore) {
                 state.loading_list_prt = true;
@@ -77,6 +96,19 @@ const preRequisiteTemplateSlice = createSlice({
                     pageSize: 10,
                 };
             }
+        },
+        // Detail Pre-requisite Template
+        [getDetailPreRequisiteTemplate.pending]: (state) => {
+            state.detail_prt = {};
+            state.loading_detail_prt = true;
+        },
+        [getDetailPreRequisiteTemplate.fulfilled]: (state, action) => {
+            state.detail_prt = action.payload || {};
+            state.loading_detail_prt = false;
+        },
+        [getDetailPreRequisiteTemplate.rejected]: (state) => {
+            state.detail_prt = {};
+            state.loading_detail_prt = false;
         },
     },
 });
