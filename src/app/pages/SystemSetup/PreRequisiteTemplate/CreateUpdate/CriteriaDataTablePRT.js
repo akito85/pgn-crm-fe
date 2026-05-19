@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { Button, Empty, Form, Input, Tooltip } from "antd";
+import moment from "moment";
 import NxTable from "../../../../../components/Nx/NxTable";
 import SVGIcon from "../../../../../assets/Icon/index";
+import DateComponent from "../../../../../components/DateComponent";
 
 /**
  * Editable cell component — renders an Input when the row is in edit mode,
@@ -12,6 +14,8 @@ const EditableCell = ({
     dataIndex,
     title,
     required,
+    inputType,
+    form,
     children,
     ...restProps
 }) => {
@@ -19,19 +23,59 @@ const EditableCell = ({
         return <td {...restProps}>{children}</td>;
     }
 
+    const getInput = () => {
+        if (inputType === "startDate") {
+            return (
+                <DateComponent
+                    format="DD MMM YYYY"
+                    onChange={() => form?.resetFields(["endDate"])}
+                />
+            );
+        }
+        if (inputType === "endDate") {
+            const startDate = form?.getFieldValue("startDate");
+            return (
+                <DateComponent
+                    format="DD MMM YYYY"
+                    disabled={!startDate}
+                    dateDisable={(current) => {
+                        if (!startDate) return false;
+                        return moment(current).isBefore(moment(startDate), "day");
+                    }}
+                />
+            );
+        }
+        return <Input size="small" />;
+    };
+
+    const getRules = () => {
+        const rules = [];
+        if (required) {
+            rules.push({ required: true, message: `${title} is required!` });
+        }
+        if (inputType === "endDate") {
+            rules.push({
+                validator: (_, value) => {
+                    const startDate = form?.getFieldValue("startDate");
+                    if (!value || !startDate) return Promise.resolve();
+                    return moment(value).isSameOrAfter(moment(startDate), "day")
+                        ? Promise.resolve()
+                        : Promise.reject(new Error("End Date must be after Start Date"));
+                },
+            });
+        }
+        return rules.length ? rules : undefined;
+    };
+
     return (
         <td {...restProps}>
             {editing ? (
                 <Form.Item
                     name={dataIndex}
                     style={{ margin: 0 }}
-                    rules={
-                        required
-                            ? [{ required: true, message: `${title} is required!` }]
-                            : undefined
-                    }
+                    rules={getRules()}
                 >
-                    <Input size="small" />
+                    {getInput()}
                 </Form.Item>
             ) : (
                 children
@@ -86,7 +130,11 @@ const CriteriaDataTablePRT = ({
     };
 
     const edit = (record) => {
-        form.setFieldsValue({ ...record });
+        form.setFieldsValue({
+            ...record,
+            startDate: record.startDate ? moment(record.startDate) : undefined,
+            endDate: record.endDate ? moment(record.endDate) : undefined,
+        });
         setStatusAction("edit");
         setStoredData(true);
         setEditingKey(record.key);
@@ -140,7 +188,24 @@ const CriteriaDataTablePRT = ({
             key: c.value,
             title: c.name.toUpperCase(),
             dataIndex: c.value,
+            inputType: "text",
         })),
+        {
+            key: "startDate",
+            title: "START DATE",
+            dataIndex: "startDate",
+            width: 160,
+            inputType: "startDate",
+            render: (val) => val ? moment(val).format("DD MMM YYYY") : "-",
+        },
+        {
+            key: "endDate",
+            title: "END DATE",
+            dataIndex: "endDate",
+            width: 160,
+            inputType: "endDate",
+            render: (val) => val ? moment(val).format("DD MMM YYYY") : "-",
+        },
         {
             key: "operation",
             title: "ACTION",
@@ -196,7 +261,9 @@ const CriteriaDataTablePRT = ({
             editing: isEditing(record),
             dataIndex: col.dataIndex,
             title: typeof col.title === "string" ? col.title : col.dataIndex,
-            required: selectedCriteria.some((c) => c.value === col.dataIndex),
+            required: selectedCriteria.some((c) => c.value === col.dataIndex) || col.dataIndex === "startDate",
+            inputType: col.inputType || "text",
+            form,
         }),
     }));
 
