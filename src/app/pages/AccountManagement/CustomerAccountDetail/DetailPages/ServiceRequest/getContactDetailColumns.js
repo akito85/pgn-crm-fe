@@ -1,5 +1,5 @@
-import { renderColumn } from "../../../../../../../utils";
-import { getColumnSearchPropsUseFilteredValueFE } from "../../../../../../../utils/getColumnSearchProps";
+import { renderColumn } from "../../../../../../utils";
+import { getColumnSearchPropsUseFilteredValueFE } from "../../../../../../utils/getColumnSearchProps";
 
 const getContactDetailColumns = ({ search, searchInput, searchedColumn, searchText, handleSearch }) => [
   {
