@@ -1,8 +1,8 @@
 import { useMemo, useRef, useState } from "react";
-import NxTable from "../../../../../../../components/Nx/NxTable";
+import NxTable from "../../../../../../components/Nx/NxTable";
 import { getContactDetailColumns } from "./getContactDetailColumns";
 
-const ContactDetailTable = ({ details = [], contactKey }) => {
+const ServiceRequestContactDetailTable = ({ details = [], idTable }) => {
   const searchInput = useRef(null);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
@@ -17,17 +17,17 @@ const ContactDetailTable = ({ details = [], contactKey }) => {
 
   const columns = useMemo(
     () => getContactDetailColumns({ search, searchInput, searchedColumn, searchText, handleSearch }),
-    [search, searchText, searchedColumn]
+    [search, searchText, searchedColumn] // eslint-disable-line react-hooks/exhaustive-deps
   );
 
   return (
     <NxTable
-      useSelect={false}
-      usePagination={false}
+      idTable={idTable}
       dataSource={details}
       columns={columns}
-      idTable={`contact-detail-table-${contactKey}`}
       totalData={details.length}
+      useSelect={false}
+      usePagination={false}
       tableScrolled={{ x: "max-content" }}
       rounded={false}
       showFooter={false}
@@ -36,4 +36,4 @@ const ContactDetailTable = ({ details = [], contactKey }) => {
   );
 };
 
-export default ContactDetailTable;
+export default ServiceRequestContactDetailTable;
