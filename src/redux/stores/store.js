@@ -144,6 +144,7 @@ import caCiMappingReducer from "../slices/receipt_collection/caCiMapping";
 import serviceRequestReducer from "../slices/account_management/detailAccount/ServiceRequestSlice";
 import paymentCycleReducer from "../slices/receipt_collection/paymentCycle";
 import paymentPeriodReducer from "../slices/receipt_collection/paymentPeriod";
+import exceptionReducer from "../slices/receipt_collection/exceptionSlice";
 import billingItemCategoryReducer from "../slices/system_setup/master_data/billingItemCategory";
 import calendarReducer from "../slices/system_setup/master_data/calendar";
 import jobManagementReducer from "../slices/job_management/jobSlice";
@@ -309,6 +310,7 @@ const reducer = combineReducers({
   billingItemCategory: billingItemCategoryReducer,
   calendar: calendarReducer,
   caCiMapping: caCiMappingReducer,
+  exception: exceptionReducer,
 
   // Attachment
   attachment: attachmentReducer,

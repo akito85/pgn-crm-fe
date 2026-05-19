@@ -92,6 +92,8 @@ import ListFormLiborRate from "../../app/pages/ReceiptAndCollection/MasterData/L
 import ViewCaCiMapping from "../../app/pages/ReceiptAndCollection/MasterData/CaCiMapping/ViewCaCiMapping";
 import ListDetailCaCiMapping from "../../app/pages/ReceiptAndCollection/MasterData/CaCiMapping/ListDetailCaCiMapping";
 import ListFormCaCiMapping from "../../app/pages/ReceiptAndCollection/MasterData/CaCiMapping/ListFormCaCiMapping";
+import ViewException from "../../app/pages/ReceiptAndCollection/Exception/ViewException";
+import ExceptionForm from "../../app/pages/ReceiptAndCollection/Exception/ExceptionForm";
 
 
 
@@ -258,4 +260,9 @@ export const RECEIPT_AND_COLLECTION_ELEMENTS = {
   DETAIL_CA_CI_MAPPING: <ListDetailCaCiMapping />,
   CREATE_CA_CI_MAPPING: <ListFormCaCiMapping type={"create"} />,
   UPDATE_CA_CI_MAPPING: <ListFormCaCiMapping type={"update"} />,
+
+  // Exception
+  VIEW_EXCEPTION: <ViewException />,
+  CREATE_EXCEPTION: <ExceptionForm type={"create"} />,
+  UPDATE_EXCEPTION: <ExceptionForm type={"update"} />,
 };

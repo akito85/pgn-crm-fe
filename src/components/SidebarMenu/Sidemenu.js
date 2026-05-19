@@ -84,6 +84,9 @@ const whitelistMenu = [
   "Notifications",
   // Job Execution detail page — accessed via "View Details" action, not direct navigation
   "Detail Job Execution",
+  // Exception create/update — no sidebar entry, accessed via Exception list page
+  "Exception Create",
+  "Exception Update",
 ];
 
 /**

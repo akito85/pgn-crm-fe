@@ -161,4 +161,9 @@ export const RECEIPT_AND_COLLECTION_ROUTES = {
   DETAIL_CA_CI_MAPPING: "/receipt-and-collection/ca-ci-mapping/view",
   CREATE_CA_CI_MAPPING: "/receipt-and-collection/ca-ci-mapping/create",
   UPDATE_CA_CI_MAPPING: "/receipt-and-collection/ca-ci-mapping/update",
+
+  // Exception
+  VIEW_EXCEPTION: "/receipt-and-collection/exception",
+  CREATE_EXCEPTION: "/receipt-and-collection/exception/create",
+  UPDATE_EXCEPTION: "/receipt-and-collection/exception/update",
 };
