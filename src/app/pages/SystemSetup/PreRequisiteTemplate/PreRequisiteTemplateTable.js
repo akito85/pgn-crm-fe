@@ -104,15 +104,14 @@ const PreRequisiteTemplateTable = ({
             ),
         handleCreate: () =>
             navigate(
-                SYSTEM_SETUP_ROUTES.CREATE_PRE_REQUISITE_TEMPLATE
+                SYSTEM_SETUP_ROUTES.CREATE_PRE_REQUISITE_TEMPLATE,
             ),
-        handleUpdate: ({ id, status }) =>
+        handleUpdate: ({ id }) =>
             navigate(
                 SYSTEM_SETUP_ROUTES.UPDATE_PRE_REQUISITE_TEMPLATE,
                 {
                     state: {
                         id,
-                        status,
                     }
                 }
             ),
@@ -167,7 +166,7 @@ const PreRequisiteTemplateTable = ({
 
     return (
     <div className="flex flex-col gap-y-4">
-        <Toolbar items={itemActions} type="detail" />
+        <Toolbar items={itemActions} type="page" />
         <NxTable
             idTable="pre-requisite-template-table"
             dataSource={dataSource}
