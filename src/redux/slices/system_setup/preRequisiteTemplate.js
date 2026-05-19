@@ -15,6 +15,22 @@ const initialState = {
     // Detail Pre-requisite Template
     loading_detail_prt: false,
     detail_prt: {},
+
+    // source type
+    loading_source_type: false,
+    list_source_type: [],
+
+    // sr category
+    loading_sr_category: false,
+    list_sr_category: [],
+
+    // sr sub category
+    loading_sr_sub_category: false,
+    list_sr_sub_category: [],
+
+    // criteria
+    loading_criteria: false,
+    list_criteria: [],
 };
 
 export const getPreRequisiteTemplate = createAsyncThunk(
@@ -41,6 +57,58 @@ export const getDetailPreRequisiteTemplate = createAsyncThunk(
     async (id, thunkAPI) => {
         try {
             const url = `/v1/dbs/api/pre-requisite-template/detail/${id}`;
+            const response = await accountManagementService.getDetail(url);
+            return response.data;
+        } catch (error) {
+            return thunkAPI.rejectWithValue(error.response);
+        }
+    }
+);
+
+export const getSourceType = createAsyncThunk(
+    "GET_SOURCE_TYPE",
+    async (_, thunkAPI) => {
+        try {
+            const url = '/v1/dbs/api/pre-requisite-template/list-source-type';
+            const response = await accountManagementService.getDetail(url);
+            return response.data;
+        } catch (error) {
+            return thunkAPI.rejectWithValue(error.response);
+        }
+    }
+);
+
+export const getSrCategory = createAsyncThunk(
+    "GET_SR_CATEGORY",
+    async (_, thunkAPI) => {
+        try {
+            const url = '/v1/dbs/api/pre-requisite-template/list-sr-category';
+            const response = await accountManagementService.getDetail(url);
+            return response.data;
+        } catch (error) {
+            return thunkAPI.rejectWithValue(error.response);
+        }
+    }
+);
+
+export const getSrSubCategory = createAsyncThunk(
+    "GET_SR_SUB_CATEGORY",
+    async (_, thunkAPI) => {
+        try {
+            const url = '/v1/dbs/api/pre-requisite-template/list-sr-sub-category';
+            const response = await accountManagementService.getDetail(url);
+            return response.data;
+        } catch (error) {
+            return thunkAPI.rejectWithValue(error.response);
+        }
+    }
+);
+
+export const getCriteria = createAsyncThunk(
+    "GET_CRITERIA",
+    async (_, thunkAPI) => {
+        try {
+            const url = '/v1/dbs/api/pre-requisite-template/list-criteria';
             const response = await accountManagementService.getDetail(url);
             return response.data;
         } catch (error) {
@@ -109,6 +177,58 @@ const preRequisiteTemplateSlice = createSlice({
         [getDetailPreRequisiteTemplate.rejected]: (state) => {
             state.detail_prt = {};
             state.loading_detail_prt = false;
+        },
+        // Source Type
+        [getSourceType.pending]: (state) => {
+            state.list_source_type = [];
+            state.loading_source_type = true;
+        },
+        [getSourceType.fulfilled]: (state, action) => {
+            state.list_source_type = action.payload || [];
+            state.loading_source_type = false;
+        },
+        [getSourceType.rejected]: (state) => {
+            state.list_source_type = [];
+            state.loading_source_type = false;
+        },
+        // SR Category
+        [getSrCategory.pending]: (state) => {
+            state.list_sr_category = [];
+            state.loading_sr_category = true;
+        },
+        [getSrCategory.fulfilled]: (state, action) => {
+            state.list_sr_category = action.payload || [];
+            state.loading_sr_category = false;
+        },
+        [getSrCategory.rejected]: (state) => {
+            state.list_sr_category = [];
+            state.loading_sr_category = false;
+        },
+        // SR Sub Category
+        [getSrSubCategory.pending]: (state) => {
+            state.list_sr_sub_category = [];
+            state.loading_sr_sub_category = true;
+        },
+        [getSrSubCategory.fulfilled]: (state, action) => {
+            state.list_sr_sub_category = action.payload || [];
+            state.loading_sr_sub_category = false;
+        },
+        [getSrSubCategory.rejected]: (state) => {
+            state.list_sr_sub_category = [];
+            state.loading_sr_sub_category = false;
+        },
+        // Criteria
+        [getCriteria.pending]: (state) => {
+            state.list_criteria = [];
+            state.loading_criteria = true;
+        },
+        [getCriteria.fulfilled]: (state, action) => {
+            state.list_criteria = action.payload || [];
+            state.loading_criteria = false;
+        },
+        [getCriteria.rejected]: (state) => {
+            state.list_criteria = [];
+            state.loading_criteria = false;
         },
     },
 });
