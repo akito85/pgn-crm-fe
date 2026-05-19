@@ -270,24 +270,6 @@ const GeneralTemplateDetail = () => {
           type={"tabs"}
           element={
             <>
-              {data_detail?.inactiveApproval?.isInactive &&
-              data_detail?.isApprover ? (
-                <div className="mb-3">
-                  <BaseContainer header={"Inactive Request Information"}>
-                    <div className="w-full grid grid-cols-4 gap-5">
-                      <DetailText label="Requested Date">
-                        {renderDateTime(data_detail?.inactiveApproval?.requestDate)}
-                      </DetailText>
-                      <DetailText label="Requested By">
-                        {data_detail?.inactiveApproval?.requestBy}
-                      </DetailText>
-                      <DetailText label="Remark">
-                        {data_detail?.inactiveApproval?.remark}
-                      </DetailText>
-                    </div>
-                  </BaseContainer>
-                </div>
-              ) : null}
               {(data_detail?.isApprover || data_detail?.inactiveApproval?.isInactive) &&
                 (data_detail?.approvalType === "INACTIVE_GENERAL_TEMPLATE" ||
                   data_detail?.inactiveApproval?.isInactive) ? (

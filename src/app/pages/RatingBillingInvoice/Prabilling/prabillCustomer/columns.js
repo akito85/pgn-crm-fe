@@ -792,6 +792,6 @@ export const createSaPrcRuleDetColumns = (renderValue) => [
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
           })
-        : "-",
+        : "",
   },
 ];

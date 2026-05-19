@@ -1,7 +1,6 @@
 import {
   Tooltip,
   Spin,
-  Checkbox,
   Tabs,
   Calendar,
   Badge,
@@ -556,47 +555,46 @@ const CalendarView = () => {
       render: (record, data_length) => {
         const canInactivate =
           record.statusApproval === "APPROVED" && record.status === "ACTIVE";
+        const actionLabel = record.status !== "ACTIVE" ? "Activate" : "Inactivate";
+        const disabledReason = !canInactivate
+          ? record.statusApproval !== "APPROVED"
+            ? "Only approved items can be inactivated"
+            : "Only active items can be inactivated"
+          : "";
 
         const Content =
           data_length > 3 ? (
-            canInactivate ? (
+            <Tooltip title={disabledReason || actionLabel}>
               <ButtonComponent
                 icon={
-                  <Checkbox
-                    className="inactive-check"
-                    onClick={() => handleInactive(record)}
-                    disabled={false}
-                    checked={false}
+                  <SVGIcon
+                    name="IconCheckbox"
+                    width={20}
+                    color={canInactivate ? "#0075bf" : "#8D91A0"}
                   />
                 }
                 type={"action"}
                 border={false}
-                onClick={() => handleInactive(record)}
+                disabled={!canInactivate}
+                onClick={() => canInactivate && handleInactive(record)}
               >
-                <span className="ml-1 text-black">
-                  {record.status !== "ACTIVE" ? "Activate" : "Inactivate"}
+                <span className={canInactivate ? "text-black ml-0" : "text-gray-400 ml-0"}>
+                  {actionLabel}
                 </span>
               </ButtonComponent>
-            ) : (
-              <div className="flex items-center px-2 py-1">
-                <Checkbox className="inactive-check" disabled checked={false} />
-                <span className="text-gray-400 ml-6">
-                  {record.status !== "ACTIVE" ? "Activate" : "Inactivate"}
-                </span>
-              </div>
-            )
+            </Tooltip>
           ) : (
-            <Tooltip
-              title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}
-            >
+            <Tooltip title={disabledReason || actionLabel}>
               <div className="pt-1">
-                <Checkbox
-                  className="inactive-check"
-                  onClick={
-                    canInactivate ? () => handleInactive(record) : undefined
-                  }
-                  disabled={!canInactivate}
-                  checked={record.status !== "ACTIVE"}
+                <SVGIcon
+                  name="IconCheckbox"
+                  width={20}
+                  color={canInactivate ? "#0075bf" : "#8D91A0"}
+                  onClick={() => canInactivate && handleInactive(record)}
+                  style={{
+                    cursor: canInactivate ? "pointer" : "not-allowed",
+                    opacity: canInactivate ? 1 : 0.6,
+                  }}
                 />
               </div>
             </Tooltip>

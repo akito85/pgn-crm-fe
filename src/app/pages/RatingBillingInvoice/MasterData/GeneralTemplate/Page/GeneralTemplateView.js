@@ -38,6 +38,14 @@ const GeneralTemplateView = () => {
   const searchInput = useRef(null);
   const dispatch = useDispatch();
 
+  const normalizeStatus = (value) =>
+    (value || "")
+      .toString()
+      .replace(/_/g, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+      .toUpperCase();
+
   // Use State
   const [page, setPage] = useState(1);
   const initialPageSize = 100;
@@ -489,14 +497,19 @@ const GeneralTemplateView = () => {
       action: "Activate",
       type: "table",
       render: (record, data) => {
-        const isWaiting =
-          record.statusApproval === "WAITING_APPROVAL" ||
-          record.statusApproval === "WAITING APPROVAL";
-        const isEnabled = !isWaiting;
-        const isActive = record.status === "ACTIVE";
-        const label = isActive ? "Inactivate" : "Activate";
+        const rowStatus = normalizeStatus(record.status);
+        const rowStatusApproval = normalizeStatus(record.statusApproval);
+        const canInactivate =
+          rowStatus === "ACTIVE" &&
+          ["APPROVED", "DRAFT", "REJECTED", "WAITING APPROVAL"].includes(
+            rowStatusApproval,
+          );
+        const canActivate =
+          rowStatus === "INACTIVE" && rowStatusApproval !== "WAITING APPROVAL";
+        const isActivateOrInactivate = canInactivate || canActivate;
+        const label = rowStatus !== "ACTIVE" ? "Activate" : "Inactivate";
         const handleClick = () =>
-          isActive
+          rowStatus === "ACTIVE"
             ? handleOpenModalInactivate(record)
             : handleOpenModalActivate(record);
 
@@ -506,17 +519,17 @@ const GeneralTemplateView = () => {
               icon={
                 <Checkbox
                   className="inactive-check"
-                  onClick={isEnabled ? handleClick : undefined}
-                  disabled={!isEnabled || !isActive}
-                  checked={!isActive}
+                  onClick={isActivateOrInactivate ? handleClick : undefined}
+                  disabled={!isActivateOrInactivate}
+                  checked={rowStatus !== "ACTIVE"}
                 />
               }
               border={false}
-              disabled={!isEnabled}
-              onClick={isEnabled ? handleClick : undefined}
+              disabled={!isActivateOrInactivate}
+              onClick={isActivateOrInactivate ? handleClick : undefined}
               type={"action"}
             >
-              <span className={isEnabled ? "text-black ml-1" : "text-[#8D91A0] ml-1"}>
+              <span className={isActivateOrInactivate ? "text-black ml-1" : "text-[#8D91A0] ml-1"}>
                 {label}
               </span>
             </ButtonComponent>
@@ -525,9 +538,9 @@ const GeneralTemplateView = () => {
               <div className="pt-1">
                 <Checkbox
                   className="inactive-check"
-                  onClick={isEnabled ? handleClick : undefined}
-                  disabled={!isEnabled || !isActive}
-                  checked={!isActive}
+                  onClick={isActivateOrInactivate ? handleClick : undefined}
+                  disabled={!isActivateOrInactivate}
+                  checked={rowStatus !== "ACTIVE"}
                 />
               </div>
             </Tooltip>

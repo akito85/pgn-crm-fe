@@ -38,6 +38,7 @@ const EarlyRepaymentForm = ({
             <EREarlyRepaymentDetailSection 
                 installmentsByCurrency={installmentsByCurrency} 
                 onInstallmentDetailIdsChange={onInstallmentDetailIdsChange}
+                openItems={openItems}
             />
             <EROpenItemInfoSection openItems={openItems} />
             <ERInstallmentCalculationDetailSection installmentsByCurrency={installmentsByCurrency} />
