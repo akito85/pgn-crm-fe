@@ -3,13 +3,12 @@ import { useState, useEffect } from "react"
 import NxBaseContainer from "../../../../../components/Nx/NxBaseContainer"
 import NxBreadCrumb from "../../../../../components/Nx/NxBreadCrumb"
 import NxCardContainer from "../../../../../components/Nx/NxCardContainer"
-import NxDetailText from "../../../../../components/Nx/NxDetailText"
-import NxTable from "../../../../../components/Nx/NxTable"
 import { SYSTEM_SETUP_ROUTES } from "../../../../../routes/system_setup/setup_routes"
 import InputComponent from "../../../../../components/InputComponent"
 import SelectComponent from "../../../../../components/SelectComponent"
 import { useDispatch, useSelector } from "react-redux"
 import { getCriteria, getSourceType, getSrCategory, getSrSubCategory } from "../../../../../redux/slices/system_setup/preRequisiteTemplate"
+import CriteriaDataTablePRT from "./CriteriaDataTablePRT"
 
 const CreateUpdatePreRequisiteTemplate = ({ formType = "create" }) => {
     const dispatch = useDispatch();
@@ -25,6 +24,8 @@ const CreateUpdatePreRequisiteTemplate = ({ formType = "create" }) => {
     } = useSelector((state) => state.preRequisiteTemplate);
 
     const [criteriaValues, setCriteriaValues] = useState([]);
+    const [listDataCriteria, setListDataCriteria] = useState([]);
+    const [storedDataCriteria, setStoredDataCriteria] = useState(false);
 
     useEffect(() => {
         dispatch(getSourceType());
@@ -84,11 +85,16 @@ const CreateUpdatePreRequisiteTemplate = ({ formType = "create" }) => {
         const updated = criteriaValues.filter((item) => item !== value);
         setCriteriaValues(updated);
         form.setFieldsValue({ criteria: updated });
+        // Remove the deselected criteria column from existing table rows
+        setListDataCriteria((prev) =>
+            prev.map(({ [value]: _removed, ...rest }) => rest)
+        );
     }
 
     const handleClearCriteria = () => {
         setCriteriaValues([]);
         form.setFieldsValue({ criteria: [] });
+        setListDataCriteria([]);
     }
 
     return (
@@ -200,15 +206,14 @@ const CreateUpdatePreRequisiteTemplate = ({ formType = "create" }) => {
             </NxCardContainer>
             <NxCardContainer header={"PRE-REQUISITE TEMPLATE CRITERIA"}>
                 <NxBaseContainer border>
-                    {/* <NxTable
-                        idTable={"table-criteria-prt"}
-                        dataSource={detail?.criteriaDatas || []}
-                        totalData={detail?.criteriaDatas?.length || 0}
-                        tableScrolled={{ x: "max-content" }}
-                        usePagination={false}
-                        useInfiniteScroll={false}
-                        columns={processedColumnCriteria}
-                    /> */}
+                    <CriteriaDataTablePRT
+                        criteriaValues={criteriaValues}
+                        criteriaOptions={list_criteria}
+                        data={listDataCriteria}
+                        updateData={setListDataCriteria}
+                        storedData={storedDataCriteria}
+                        setStoredData={setStoredDataCriteria}
+                    />
                 </NxBaseContainer>
             </NxCardContainer>
             <NxCardContainer header={"PRE-REQUISITE TEMPLATE LIST"}>
