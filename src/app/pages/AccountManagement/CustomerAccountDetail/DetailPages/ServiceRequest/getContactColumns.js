@@ -1,6 +1,5 @@
-import { getColumnSearchPropsUseFilteredValue } from "../../../../../../../utils/getColumnSearchProps";
-import StatusComponent from "../../../../../../../components/StatusComponent";
-import NxStatusComponent from "../../../../../../../components/Nx/NxStatusComponent";
+import { getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
+import NxStatusComponent from "../../../../../../components/Nx/NxStatusComponent";
 
 const getContactColumns = ({ search, searchInput, searchedColumn, searchText, handleSearch }) => [
   {
@@ -17,7 +16,7 @@ const getContactColumns = ({ search, searchInput, searchedColumn, searchText, ha
     width: 200,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(search, "primary", searchInput, searchedColumn, searchText, handleSearch),
-    render: (v) => v === "Y" ? "Primary" : "Non-Primary",
+    render: (v) => (v === "Y" || v === "Primary") ? "Primary" : "Non-Primary",
   },
   {
     key: "contactName",
@@ -75,7 +74,7 @@ const getContactColumns = ({ search, searchInput, searchedColumn, searchText, ha
     fixed: "right",
     align: "center",
     render: (v) => (
-      <div className={" flex justify-center"}>
+      <div className="flex justify-center">
         <NxStatusComponent colour={(v || "").toLowerCase()} margin={false}>
           {v}
         </NxStatusComponent>

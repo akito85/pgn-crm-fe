@@ -1,10 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import NxTable from "../../../../../../../components/Nx/NxTable";
 import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
 import { getSrContacts } from "../../../../../../../redux/slices/account_management/detailAccount/ServiceRequestSlice";
-import { getContactColumns } from "./getContactColumns";
-import ContactDetailTable from "./ContactDetailTable";
+import ServiceRequestContactTable from "../ServiceRequestContactTable";
 
 // ── Component ─────────────────────────────────────────────────────────────────
 const CustomerServiceRequestContact = ({ id, idAccount }) => {
@@ -12,13 +10,10 @@ const CustomerServiceRequestContact = ({ id, idAccount }) => {
 
   const [page, setPage] = useState(0);
   const [loadMoreSize] = useState(10);
-  const [searchedColumn, setSearchedColumn] = useState("");
-  const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
-  const [filters, setFilters] = useState([]);
-  const [filterRules, setFilterRules] = useState([]);
-  const searchInput = useRef(null);
+  const [filters] = useState([]);
+  const [filterRules] = useState([]);
 
   const { list_srContacts, loading_listSrContacts, pagination_listSrContacts } = useSelector(
     (state) => state.serviceRequest
@@ -27,21 +22,13 @@ const CustomerServiceRequestContact = ({ id, idAccount }) => {
   const totalElement = pagination_listSrContacts?.totalElement || 0;
   const hasMore = list_srContacts.length < totalElement;
 
-  const handleSearch = (selectedKeys, confirm, dataIndex) => {
-    confirm();
-    setSearchText(selectedKeys[0]);
-    setSearchedColumn(dataIndex);
-    setSearch((prev) => {
-      if (prev[dataIndex] !== selectedKeys[0]) setPage(0);
-      return { ...prev, [dataIndex]: selectedKeys[0] };
-    });
+  const handleSearch = (searchObj) => {
+    setPage(0);
+    setSearch(searchObj);
   };
 
-  const onSort = (_, __, sorter) => {
-    const dataSort = sorter.order
-      ? `${sorter.field}~${sorter.order === "ascend" ? "asc" : "desc"}`
-      : "";
-    setSort(dataSort);
+  const handleSort = (sortStr) => {
+    setSort(sortStr);
   };
 
   const handleLoadMore = async () => {
@@ -58,36 +45,24 @@ const CustomerServiceRequestContact = ({ id, idAccount }) => {
     const body = { page: 0, size: loadMoreSize, sort, searchs: search, filters, filterRules };
     setPage(0);
     dispatch(getSrContacts({ accountId: idAccount, srId: id, body, isLoadMore: false }));
-  }, [sort, search, filters, filterRules, id, idAccount]);
-
-  const columns = useMemo(
-    () => getContactColumns({ search, searchInput, searchedColumn, searchText, handleSearch }),
-    [search, searchInput, searchText, searchedColumn]
-  );
-
-  const expandedRowRender = (record, index) => (
-    <ContactDetailTable details={record.details || []} contactKey={index} />
-  );
+  }, [sort, search, filters, filterRules, id, idAccount]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <NxBaseContainer header="CONTACT" border>
-      <NxTable
+      <ServiceRequestContactTable
         idTable="sr-contact-table"
         dataSource={list_srContacts}
         totalData={totalElement}
         current={page}
-        columns={columns}
-        onSort={onSort}
         usePagination={false}
         useInfiniteScroll={true}
         hasMore={hasMore}
         onLoadMore={handleLoadMore}
-        loadMoreThreshold={20}
         loading={loading_listSrContacts}
+        onSearch={handleSearch}
+        onSort={handleSort}
         fontSize="small"
         tablePadding="small"
-        tableScrolled={{ x: "max-content" }}
-        expandable={ list_srContacts.length ? { expandedRowRender } : undefined}
       />
     </NxBaseContainer>
   );
