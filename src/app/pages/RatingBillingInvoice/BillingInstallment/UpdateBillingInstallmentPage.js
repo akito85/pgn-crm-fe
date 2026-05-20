@@ -250,6 +250,7 @@ const UpdateBillingInstallmentPage = () => {
           detailsByCurrency[detail.currency].push({
             period: d.period,
             amount: d.amount,
+            billHeaderId: d.billHeaderId,
           });
         });
         setInstallmentDetails(detailsByCurrency);
@@ -399,7 +400,27 @@ const UpdateBillingInstallmentPage = () => {
     setInstallmentValidationError({});
     if (value) {
       dispatchWithLoading(getAccountDetail(value), setLoadingAccountDetail);
-      dispatchWithLoading(getOpenItems(value), setLoadingOpenItems);
+      // fetch open items with retry if billHeaderId missing
+      const fetchOpenItemsWithRetry = async (acc, retries = 1) => {
+        try {
+          const action = await dispatch(getOpenItems(acc));
+          const payload = action?.payload || [];
+          const anyMissing = (payload || []).some((group) => (group.items || []).some((it) => it.billHeaderId == null));
+          if (anyMissing && retries > 0) {
+            await new Promise((r) => setTimeout(r, 500));
+            return fetchOpenItemsWithRetry(acc, retries - 1);
+          }
+          return payload;
+        } catch (e) {
+          return [];
+        }
+      };
+
+      // perform fetch with manual loading control because fetchOpenItemsWithRetry returns a Promise
+      setLoadingOpenItems(true);
+      fetchOpenItemsWithRetry(value)
+        .catch(() => {})
+        .finally(() => setLoadingOpenItems(false));
     }
   };
 
@@ -563,6 +584,13 @@ const UpdateBillingInstallmentPage = () => {
 
     selectedCurrencies.forEach((currency) => {
       const currencyItems = selectedOpenItems.filter((item) => item.currency === currency);
+      // find billHeaderId from first selected open item for this currency
+      const firstSelected = currencyItems[0];
+      const billHeaderIdForCurrency = firstSelected
+        ? (data_open_items || [])
+            .find((g) => g.currency === currency)?.items?.find((i) => i.billItemId === firstSelected.billItemId)
+            ?.billHeaderId
+        : null;
       const totalAmount = currencyItems.reduce((sum, item) => {
         const openItem = (data_open_items || []).find((g) => g.currency === currency)?.items?.find(
           (i) => i.billItemId === item.billItemId,
@@ -576,6 +604,7 @@ const UpdateBillingInstallmentPage = () => {
         newDetails[currency] = periods.map((period, idx) => ({
           period,
           amount: idx === tenor - 1 ? lastMonthAmount : monthlyAmount,
+          billHeaderId: billHeaderIdForCurrency || null,
         }));
         newErrors[currency] = null;
       } else {
@@ -583,6 +612,8 @@ const UpdateBillingInstallmentPage = () => {
         newDetails[currency] = periods.map((period, idx) => ({
           period,
           amount: existingDetails[idx]?.amount || 0,
+          // preserve existing billHeaderId if present, otherwise use billHeaderId from selected open item
+          billHeaderId: existingDetails[idx]?.billHeaderId || billHeaderIdForCurrency || null,
         }));
       }
     });
@@ -700,6 +731,7 @@ const UpdateBillingInstallmentPage = () => {
         items: (installmentDetails[currency] || []).map((detail) => ({
           period: detail.period,
           amount: detail.amount,
+          billHeaderId: detail.billHeaderId || null,
         })),
       };
     });
@@ -771,6 +803,15 @@ const UpdateBillingInstallmentPage = () => {
       ],
       selectedOpenItems: confirmationData.openItems,
     };
+
+    // Validate that all detail items include non-null billHeaderId
+    const missingBillHeader = (body.details || []).some((d) => (d.items || []).some((it) => !it.billHeaderId));
+    if (missingBillHeader) {
+      setLoadingForm(false);
+      setBodyError({ message: "Tidak dapat menyimpan: billHeaderId tidak tersedia pada beberapa periode. Pastikan open item memiliki billHeaderId." });
+      setModalError(true);
+      return;
+    }
 
     dispatch(updateInstallment({ installmentId: id, body }))
       .unwrap()

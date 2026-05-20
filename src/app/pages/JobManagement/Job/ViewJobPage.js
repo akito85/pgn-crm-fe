@@ -99,9 +99,11 @@ const ViewJobPage = () => {
               }
             })()}
 
-            {/* Row 4: ACCESS */}
-            <KvItem label="Module"      value={job.module} />
-            <KvItem label="Group Access" value={job.accessGroupId ?? "—"} />
+            {/* Row 4: ACCESS + STATUS */}
+            <KvItem label="Module"        value={job.module} />
+            <KvItem label="Group Access"  value={job.accessGroup ?? (job.accessGroupId ? String(job.accessGroupId) : "—")} />
+            <KvItem label="Status"        value={job.status} />
+            <KvItem label="Parent Job ID" value={job.parentJobId ?? "—"} />
 
             {/* Row 5: DESCRIPTION - spans columns 3-5 */}
             <div style={{ gridColumn: "3 / -1" }}>

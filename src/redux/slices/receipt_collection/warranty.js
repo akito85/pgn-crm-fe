@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice, createEntityAdapter } from "@reduxjs/toolkit";
 import receiptCollectionHttpService from "../../services/receiptCollectionHttpService";
+import ratingBillingHttpService from "../../services/ratingBillingHttpService";
 import {
   showModalError,
   setBodyError,
@@ -71,6 +72,8 @@ const initialState = warrantyAdapter.getInitialState({
   isSuccess: false,
   message: "",
   dataServiceAgreement: null,
+  warrantyRate: null,
+  loadingWarrantyRate: false,
 });
 
 
@@ -991,6 +994,19 @@ export const getDownloadTemplate = createAsyncThunk(
   }
 );
 
+export const getWarrantyRate = createAsyncThunk(
+  "GET_WARRANTY_RATE",
+  async ({ fromCurrency, rateType, rateDate }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/daily-rate/warranty-rate?fromCurrency=${fromCurrency}&rateType=${encodeURIComponent(rateType)}&rateDate=${rateDate}`;
+      const response = await ratingBillingHttpService.getAll(url);
+      return response?.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
 const warrantySlice = createSlice({
   name: "warranty",
   initialState,
@@ -1437,6 +1453,17 @@ const warrantySlice = createSlice({
     },
     [getServiceAgreementByAccountId.rejected]: (state) => {
       state.loadingServiceAgreement = false;
+    },
+    [getWarrantyRate.pending]: (state) => {
+      state.loadingWarrantyRate = true;
+    },
+    [getWarrantyRate.fulfilled]: (state, action) => {
+      state.loadingWarrantyRate = false;
+      state.warrantyRate = action.payload ?? null;
+    },
+    [getWarrantyRate.rejected]: (state) => {
+      state.loadingWarrantyRate = false;
+      state.warrantyRate = null;
     },
   },
 });

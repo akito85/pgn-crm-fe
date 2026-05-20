@@ -875,6 +875,21 @@ const monitoringUsageSlice = createSlice({
         state.loading = false;
       });
 
+    // download failed data for a specific batch
+    builder
+      .addCase(getDownloadFailed.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(getDownloadFailed.fulfilled, (state, action) => {
+        state.data_download_failed = action.payload;
+        state.loading = false;
+      })
+      .addCase(getDownloadFailed.rejected, (state, action) => {
+        state.isFailed = true;
+        state.data_download_failed = action.payload;
+        state.loading = false;
+      });
+
     builder
       .addCase(getApprovalHierarchy.pending, (state) => {
         state.loading = true;

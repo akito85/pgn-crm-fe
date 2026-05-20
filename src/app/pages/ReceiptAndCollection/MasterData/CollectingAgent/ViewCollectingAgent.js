@@ -318,6 +318,7 @@ const ViewCollectingAgent = () => {
                 width: 180,
                 sorter: true,
                 isClassification: true,
+                align: "left",
                 filteredValue: [search?.name] || null,
                 ...getColumnSearchPropsUseFilteredValue(
                     search, "name", searchInput, searchedColumn, searchText, handleSearch, true

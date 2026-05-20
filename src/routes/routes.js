@@ -2,17 +2,19 @@ import Dashboard from "../app/pages/dashboard";
 import { user_management } from "./user_management";
 import { system_setup } from "./system_setup";
 import { product_promo } from "./product_promo";
-import MonitoringSession from "../app/pages/MonitoringSession";
+import MonitoringSession from "../app/pages/UserManagement/MonitoringSession/MonitoringSessionPage";
 import NewPassword from "../app/pages/Authentication/NewPassword";
 import { account_management } from "./account_management";
 import SwitchPage from "../app/pages/Authentication/SwitchPage";
 import { receipt_and_collection } from "./Receipt&Collection";
 import { rating_billing } from "./rating_billing";
-import { debt_and_collection } from "./DebtAndCollection";  
+import { debt_and_collection } from "./DebtAndCollection";
 import { invoice } from "./invoice";
 import report_setup from "./report";
 import { notification } from "./notification";
 import { job_management } from "./job_management";
+import AuditTrailPage from "../app/pages/AuditTrail/AuditTrailPage";
+import { relationship } from "./relationship";
 export const index = [
   {
     path: "/",
@@ -34,6 +36,10 @@ export const index = [
     path: "/switch-position",
     element: <SwitchPage type={"switch-position"} />,
   },
+  {
+    path: "/audit-trail",
+    element: <AuditTrailPage />,
+  },
   ...product_promo,
   ...user_management,
   ...job_management,
@@ -44,5 +50,6 @@ export const index = [
   ...invoice,
   ...report_setup,
   ...debt_and_collection,
-  ...notification
+  ...notification,
+  ...relationship,
 ];

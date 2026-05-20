@@ -1,145 +1,56 @@
-import { Col, DatePicker, Form, Input, InputNumber, Row, Select } from "antd";
-import React from "react";
-import BaseContainer from "../../../../../components/BaseContainer";
-import { formMessageRequired } from "../../../../../utils";
-
-const { Option } = Select;
+import React, { useState, useEffect } from "react";
+import AccountInfoSection from "./Form/AccountInfoSection";
+import ServiceAgreementSection from "./Form/ServiceAgreementSection";
+import ContactInfoSection from "./Form/ContactInfoSection";
+import PaymentPlanInfoSection from "./Form/PaymentPlanInfoSection";
+import OpenItemInfoSection from "./Form/OpenItemInfoSection";
+import PaymentPlanDetailSection from "./Form/PaymentPlanDetailSection";
 
 const RestructureForm = ({
     form,
-    listCustomer,
     listAccount,
-    onCustomerChange,
-    onAccountChange,
-    showCustomerInfo = true,
-    showRestructureInfo = true,
-    disabledRestructure = false
+    handleAccountChange,
+    disabled,
+    openItems = [],
+    onContactChange,
+    onPlanDetailValidation,
+    onInstallmentsChange,
+    contactRef
 }) => {
+    const [planInfo, setPlanInfo] = useState({ type: null, tenor: null, startPeriod: null });
+
     return (
-        <div className="flex flex-col gap-5">
-            {showCustomerInfo && (
-                <BaseContainer header={"CUSTOMER INFORMATION"}>
-                    <Row gutter={[16, 16]} className="p-4">
-                        <Col span={8}>
-                            <Form.Item
-                                name={"customerNumber"}
-                                label={"Customer Number"}
-                                rules={formMessageRequired("Customer Number")}
-                            >
-                                <Select
-                                    placeholder="Select Customer"
-                                    onChange={onCustomerChange}
-                                    showSearch
-                                    size="middle"
-                                    filterOption={(input, option) =>
-                                        option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
-                                    }
-                                >
-                                    {listCustomer?.map((item) => (
-                                        <Option key={item.value} value={item.value}>
-                                            {item.label}
-                                        </Option>
-                                    ))}
-                                </Select>
-                            </Form.Item>
-                        </Col>
-                        <Col span={8}>
-                            <Form.Item
-                                name={"accountNumber"}
-                                label={"Account Number"}
-                                rules={formMessageRequired("Account Number")}
-                            >
-                                <Select
-                                    placeholder="Select Account"
-                                    onChange={onAccountChange}
-                                    showSearch
-                                    size="middle"
-                                    disabled={!form.getFieldValue("customerNumber")}
-                                    filterOption={(input, option) =>
-                                        option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
-                                    }
-                                >
-                                    {listAccount?.map((item) => (
-                                        <Option key={item.value} value={item.value}>
-                                            {item.label}
-                                        </Option>
-                                    ))}
-                                </Select>
-                            </Form.Item>
-                        </Col>
-                        <Col span={8}>
-                            <Form.Item
-                                name={"customerName"}
-                                label={"Customer Name"}
-                            >
-                                <Input disabled className="bg-gray-100" size="middle" />
-                            </Form.Item>
-                        </Col>
-                        <Col span={8}>
-                            <Form.Item
-                                name={"area"}
-                                label={"Area"}
-                            >
-                                <Input disabled className="bg-gray-100" size="middle" />
-                            </Form.Item>
-                        </Col>
-                        <Col span={8}>
-                            <Form.Item
-                                name={"segment"}
-                                label={"Segment"}
-                            >
-                                <Input disabled className="bg-gray-100" size="middle" />
-                            </Form.Item>
-                        </Col>
-                    </Row>
-                </BaseContainer>
-            )}
-
-
-
-            {showRestructureInfo && (
-                <BaseContainer header={"RESTRUCTURE INFORMATION"}>
-                    <Row gutter={[16, 16]} className="p-4">
-                        <Col span={12}>
-                            <Form.Item
-                                name={"totalMonth"}
-                                label={"Total Month"}
-                                rules={formMessageRequired("Total Month")}
-                            >
-                                <InputNumber
-                                    type={"number"}
-                                    controls={false}
-                                    style={{
-                                        width: "100%",
-                                    }}
-                                    className={disabledRestructure ? 'bg-gray-100' : ''}
-                                    placeholder="Input total month"
-                                    size="middle"
-                                    disabled={disabledRestructure}
-                                />
-                            </Form.Item>
-                        </Col>
-                        <Col span={12}>
-                            <Form.Item
-                                name={"startPeriod"}
-                                label={"Start Period"}
-                                rules={formMessageRequired("Start Period")}
-                            >
-                                <DatePicker
-                                    picker="month"
-                                    format="MMM YYYY"
-                                    className={`w-full ${disabledRestructure ? 'bg-gray-100' : ''}`}
-                                    placeholder="Select start period"
-                                    size="middle"
-                                    disabled={disabledRestructure}
-                                />
-                            </Form.Item>
-                        </Col>
-                    </Row>
-                </BaseContainer>
-            )}
+        <div className="flex flex-col gap-1">
+            <AccountInfoSection 
+                form={form}
+                listAccount={listAccount}
+                handleAccountChange={handleAccountChange}
+                disabled={disabled}
+            />
+            <ServiceAgreementSection 
+                form={form}
+                disabled={disabled}
+            />
+            <ContactInfoSection 
+                onContactsChange={onContactChange} 
+                accountNumber={form.getFieldValue("accountNumber")}
+                ref={contactRef}
+            />
+            <PaymentPlanInfoSection 
+                form={form}
+                disabled={disabled}
+                onPlanInfoChange={setPlanInfo}
+            />
+            <OpenItemInfoSection openItems={openItems} />
+            <PaymentPlanDetailSection 
+                planInfo={planInfo} 
+                openItems={openItems} 
+                onValidationChange={onPlanDetailValidation}
+                onInstallmentsChange={onInstallmentsChange}
+            />
         </div>
     );
 };
 
 export default RestructureForm;
+
