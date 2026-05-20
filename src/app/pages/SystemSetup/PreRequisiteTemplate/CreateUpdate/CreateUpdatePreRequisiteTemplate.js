@@ -117,24 +117,17 @@ const CreateUpdatePreRequisiteTemplate = ({ type = "create" }) => {
 
     // --- Detail mode handlers ---
 
-    const handleOpenDetailMode = useCallback(async (record = null) => {
+    const handleOpenDetailMode = useCallback((record = null) => {
         if (record) {
             setEditingDetailRecord(record);
             detailForm.setFieldsValue(record);
-            setIsDetailMode(true);
-            window.scrollTo({ top: 0, behavior: "smooth" });
         } else {
-            try {
-                await form.validateFields();
-                setEditingDetailRecord(null);
-                detailForm.resetFields();
-                setIsDetailMode(true);
-                window.scrollTo({ top: 0, behavior: "smooth" });
-            } catch {
-                // validation failed — stay on form
-            }
+            setEditingDetailRecord(null);
+            detailForm.resetFields();
         }
-    }, [form, detailForm]);
+        setIsDetailMode(true);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    }, [detailForm]);
 
     const handleSaveDetail = useCallback(async () => {
         try {
