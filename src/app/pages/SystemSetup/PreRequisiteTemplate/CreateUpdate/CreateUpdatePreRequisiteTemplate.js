@@ -17,11 +17,6 @@ import NxDate from "../../../../../components/Nx/NxDatePicker"
 import SVGIcon from "../../../../../assets/Icon/index"
 import { useNavigate } from "react-router-dom"
 
-const STATUS_OPTIONS = [
-    { label: "Active", value: "ACTIVE" },
-    { label: "Inactive", value: "INACTIVE" },
-];
-
 const CreateUpdatePreRequisiteTemplate = ({ type = "create" }) => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -323,7 +318,6 @@ const CreateUpdatePreRequisiteTemplate = ({ type = "create" }) => {
             srCategory: values.srCategory,
             srSubCategory: values.srSubCategory,
             description: values.description,
-            status: values.status,
             criteria: (values.criteria || []).map((c) => ({ criteria: c })),
             criteriaData: criteriaDataRows.map(({ key, startDate, endDate, ...rest }) => ({
                 ...rest,
@@ -385,7 +379,6 @@ const CreateUpdatePreRequisiteTemplate = ({ type = "create" }) => {
                             <NxDetailText label={"Source Type"}>{getNameByValue(list_source_type, formSnapshot.sourceType)}</NxDetailText>
                             <NxDetailText label={"SR Category"}>{getNameByValue(list_sr_category, formSnapshot.srCategory)}</NxDetailText>
                             <NxDetailText label={"SR Sub Category"}>{getNameByValue(list_sr_sub_category, formSnapshot.srSubCategory)}</NxDetailText>
-                            <NxDetailText label={"Status"}>{formSnapshot.status || "-"}</NxDetailText>
                         </div>
                         <div className="w-full grid gap-4 mt-4">
                             <NxDetailText label={"Criteria"}>
@@ -420,13 +413,6 @@ const CreateUpdatePreRequisiteTemplate = ({ type = "create" }) => {
                                 <SelectComponent>
                                     {(list_sr_sub_category || []).map((data, index) => (
                                         <Select.Option key={index} value={data.id}>{data.name}</Select.Option>
-                                    ))}
-                                </SelectComponent>
-                            </Form.Item>
-                            <Form.Item name="status" label="Status" required rules={[{ required: true, message: "Status is required" }]} className="no-margin-form">
-                                <SelectComponent>
-                                    {STATUS_OPTIONS.map((opt) => (
-                                        <Select.Option key={opt.value} value={opt.value}>{opt.label}</Select.Option>
                                     ))}
                                 </SelectComponent>
                             </Form.Item>
