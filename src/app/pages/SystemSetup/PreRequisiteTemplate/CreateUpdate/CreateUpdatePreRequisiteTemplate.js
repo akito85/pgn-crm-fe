@@ -53,6 +53,18 @@ const CreateUpdatePreRequisiteTemplate = ({ type = "create" }) => {
     const [modalForm] = Form.useForm();
     const [detailForm] = Form.useForm();
 
+    const watchedSourceTypeId = Form.useWatch("sourceType", form);
+    const isServiceRequest = useMemo(() => {
+        const found = list_source_type.find((item) => item.id === watchedSourceTypeId);
+        return found?.value === "SERVICE_REQUEST";
+    }, [watchedSourceTypeId, list_source_type]);
+
+    const watchedType = Form.useWatch("type", detailForm);
+    const isPOS = useMemo(() => {
+        const found = list_pre_requisite_type.find((item) => item.id === watchedType);
+        return found?.value === "POINT_OF_SALES";
+    }, [watchedType, list_pre_requisite_type]);
+
     const routes = useMemo(() => {
         const base = [
             { path: "", breadcrumbName: "System Setup" },
@@ -356,6 +368,27 @@ const CreateUpdatePreRequisiteTemplate = ({ type = "create" }) => {
         form.setFieldsValue({ criteria: [] });
     };
 
+    const handleSourceTypeChange = (value) => {
+        const found = list_source_type.find((item) => item.id === value);
+        if (found?.value !== "SERVICE_REQUEST") {
+            form.setFieldsValue({ srCategory: undefined, srSubCategory: undefined });
+        }
+    };
+
+    const handleTypeChange = (value) => {
+        const found = list_pre_requisite_type.find((item) => item.id === value);
+        if (found?.value !== "POINT_OF_SALES") {
+            detailForm.setFieldsValue({
+                billingCycle: undefined,
+                period: undefined,
+                currency: undefined,
+                transactionDate: undefined,
+                invoiceDate: undefined,
+                termOfPayment: undefined
+            });
+        }
+    }
+
     const formSnapshot = isDetailMode ? form.getFieldsValue(true) : {};
 
     return (
@@ -378,8 +411,12 @@ const CreateUpdatePreRequisiteTemplate = ({ type = "create" }) => {
                         <div className="w-full grid grid-cols-2 gap-4">
                             <NxDetailText label={"Name"}>{formSnapshot.name || "-"}</NxDetailText>
                             <NxDetailText label={"Source Type"}>{getNameByValue(list_source_type, formSnapshot.sourceType)}</NxDetailText>
-                            <NxDetailText label={"SR Category"}>{getNameByValue(list_sr_category, formSnapshot.srCategory)}</NxDetailText>
-                            <NxDetailText label={"SR Sub Category"}>{getNameByValue(list_sr_sub_category, formSnapshot.srSubCategory)}</NxDetailText>
+                            {isServiceRequest && (
+                                <>
+                                <NxDetailText label={"SR Category"}>{getNameByValue(list_sr_category, formSnapshot.srCategory)}</NxDetailText>
+                                <NxDetailText label={"SR Sub Category"}>{getNameByValue(list_sr_sub_category, formSnapshot.srSubCategory)}</NxDetailText>
+                                </>
+                            )}
                         </div>
                         <div className="w-full grid gap-4 mt-4">
                             <NxDetailText label={"Criteria"}>
@@ -397,26 +434,30 @@ const CreateUpdatePreRequisiteTemplate = ({ type = "create" }) => {
                                 <InputComponent />
                             </Form.Item>
                             <Form.Item name="sourceType" label="Source Type" required rules={[{ required: true, message: "Source Type is required" }]} className="no-margin-form">
-                                <SelectComponent>
+                                <SelectComponent onChange={handleSourceTypeChange}>
                                     {(list_source_type || []).map((data, index) => (
                                         <Select.Option key={index} value={data.id}>{data.name}</Select.Option>
                                     ))}
                                 </SelectComponent>
                             </Form.Item>
-                            <Form.Item name="srCategory" label="SR Category" required rules={[{ required: true, message: "SR Category is required" }]} className="no-margin-form">
-                                <SelectComponent>
-                                    {(list_sr_category || []).map((data, index) => (
-                                        <Select.Option key={index} value={data.id}>{data.name}</Select.Option>
-                                    ))}
-                                </SelectComponent>
-                            </Form.Item>
-                            <Form.Item name="srSubCategory" label="SR Sub Category" required rules={[{ required: true, message: "SR Sub Category is required" }]} className="no-margin-form">
-                                <SelectComponent>
-                                    {(list_sr_sub_category || []).map((data, index) => (
-                                        <Select.Option key={index} value={data.id}>{data.name}</Select.Option>
-                                    ))}
-                                </SelectComponent>
-                            </Form.Item>
+                            {isServiceRequest && (
+                                <>
+                                <Form.Item name="srCategory" label="SR Category" required rules={[{ required: true, message: "SR Category is required" }]} className="no-margin-form">
+                                    <SelectComponent>
+                                        {(list_sr_category || []).map((data, index) => (
+                                            <Select.Option key={index} value={data.id}>{data.name}</Select.Option>
+                                        ))}
+                                    </SelectComponent>
+                                </Form.Item>
+                                <Form.Item name="srSubCategory" label="SR Sub Category" required rules={[{ required: true, message: "SR Sub Category is required" }]} className="no-margin-form">
+                                    <SelectComponent>
+                                        {(list_sr_sub_category || []).map((data, index) => (
+                                            <Select.Option key={index} value={data.id}>{data.name}</Select.Option>
+                                        ))}
+                                    </SelectComponent>
+                                </Form.Item>
+                                </>
+                            )}
                         </div>
                         <div className="w-full grid gap-4 mt-4">
                             <Form.Item name="criteria" label="Criteria" required rules={[{ required: true, message: "Criteria is required" }]} className="no-margin-form">
@@ -525,7 +566,7 @@ const CreateUpdatePreRequisiteTemplate = ({ type = "create" }) => {
             >
                 <NxCardContainer header={"PRE-REQUISITE INFORMATION"}>
                     <NxBaseContainer border>
-                        <div className="w-full grid grid-cols-2 gap-4">
+                        <div className="w-full grid grid-cols-3 gap-4">
                             <Form.Item
                                 name="type"
                                 label="Type"
@@ -533,7 +574,7 @@ const CreateUpdatePreRequisiteTemplate = ({ type = "create" }) => {
                                 rules={[{ required: true, message: "Type is required" }]}
                                 className="no-margin-form"
                             >
-                                <SelectComponent>
+                                <SelectComponent onChange={handleTypeChange}>
                                     {(list_pre_requisite_type || []).map((data, index) => (
                                         <Select.Option key={index} value={data.id}>{data.name}</Select.Option>
                                     ))}
@@ -549,6 +590,55 @@ const CreateUpdatePreRequisiteTemplate = ({ type = "create" }) => {
                                 <InputComponent />
                             </Form.Item>
                         </div>
+                        {isPOS && (
+                            <div className="w-full grid grid-cols-3 gap-4">
+                                <Form.Item
+                                    name="billingCycle"
+                                    label="Billing Cycle"
+                                    className="no-margin-form"
+                                >
+                                    <InputComponent />
+                                </Form.Item>
+                                <Form.Item
+                                    name="period"
+                                    label="Period"
+                                    className="no-margin-form"
+                                >
+                                    <InputComponent />
+                                </Form.Item>
+                                <Form.Item
+                                    name="currency"
+                                    label="Currency"
+                                    className="no-margin-form"
+                                >
+                                    <InputComponent />
+                                </Form.Item>
+                                <Form.Item
+                                    name="transactionDate"
+                                    label="Transaction Date"
+                                    className="no-margin-form"
+                                >
+                                    <InputComponent />
+                                </Form.Item>
+                                <Form.Item
+                                    name="invoiceDate"
+                                    label="Invoice Date"
+                                    className="no-margin-form"
+                                >
+                                    <InputComponent />
+                                </Form.Item>
+                                <Form.Item
+                                    name="termOfPayment"
+                                    label="Term of Payment"
+                                    className="no-margin-form"
+                                >
+                                    <div className="flex justify-between gap-2">
+                                        <InputComponent />
+                                        <InputComponent />
+                                    </div>
+                                </Form.Item>
+                            </div>
+                        )}
                         <div className="w-full mt-4">
                             <Form.Item
                                 name="description"
