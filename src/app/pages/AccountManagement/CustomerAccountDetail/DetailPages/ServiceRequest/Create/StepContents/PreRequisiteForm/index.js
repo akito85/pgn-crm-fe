@@ -6,7 +6,7 @@ import { Button, Popconfirm, Tooltip } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 
 import {
-  getSrPrerequisites,
+  getServiceRequestPreRequisites,
   deleteSrPrerequisite,
 } from "../../../../../../../../../redux/slices/account_management/detailAccount/ServiceRequestSlice";
 import ButtonComponent from "../../../../../../../../../components/ButtonComponent";
@@ -30,12 +30,12 @@ export default function PreRequisiteForm({
   const navigate = useNavigate();
   const location = useLocation();
 
-  const srId = location?.state?.id;
+  const serviceRequestId = location?.state?.id;
   const accountId = account?.accountInformation?.accountId;
-  const isCreateFlow = !srId; // TRUE = SR baru, belum punya ID
+  const isCreateFlow = !serviceRequestId; // TRUE = SR baru, belum punya ID
 
   const PAGE_SIZE = 10;
-  // Remote data (UPDATE flow: srId ada)
+  // Remote data (UPDATE flow: serviceRequestId ada)
   const [prereqData, setPrereqData] = useState([]);
   const [prereqPage, setPrereqPage] = useState(1);
   const [prereqHasMore, setPrereqHasMore] = useState(false);
@@ -43,7 +43,7 @@ export default function PreRequisiteForm({
   const loadingRef = useRef(false);
   const newPrerequisiteProcessed = useRef(false);
 
-  // Local data (CREATE flow: belum ada srId, simpan di form field)
+  // Local data (CREATE flow: belum ada serviceRequestId, simpan di form field)
   const [localPrereqs, setLocalPrereqs] = useState(() =>
     form?.getFieldValue("srFormPreRequisites") || []
   );
@@ -80,9 +80,9 @@ export default function PreRequisiteForm({
 
   const fetchPage = useCallback(
     async (page) => {
-      if (!accountId || !srId) return;
+      if (!accountId || !serviceRequestId) return;
       const result = await dispatch(
-        getSrPrerequisites({ accountId, srId, page, size: PAGE_SIZE }),
+        getServiceRequestPreRequisites({ accountId, serviceRequestId }),
       ).unwrap();
 
       const payload = result?.data ?? result;
@@ -92,11 +92,11 @@ export default function PreRequisiteForm({
 
       return { items: mapItems(content, page), hasMore };
     },
-    [dispatch, accountId, srId, mapItems],
+    [dispatch, accountId, serviceRequestId, mapItems],
   );
 
   const loadFirst = useCallback(() => {
-    if (!accountId || !srId) return;
+    if (!accountId || !serviceRequestId) return;
     setPrereqData([]);
     setPrereqPage(1);
     setPrereqHasMore(false);
@@ -109,7 +109,7 @@ export default function PreRequisiteForm({
       })
       .catch(() => {})
       .finally(() => setPrereqLoading(false));
-  }, [fetchPage, accountId, srId]);
+  }, [fetchPage, accountId, serviceRequestId]);
 
   useEffect(() => {
     loadFirst();
@@ -175,11 +175,11 @@ export default function PreRequisiteForm({
         return;
       }
       await dispatch(
-        deleteSrPrerequisite({ accountId, srId, id: record.id }),
+        deleteSrPrerequisite({ accountId, serviceRequestId, id: record.id }),
       );
       loadFirst();
     },
-    [dispatch, accountId, srId, isCreateFlow, form, loadFirst],
+    [dispatch, accountId, serviceRequestId, isCreateFlow, form, loadFirst],
   );
 
   const columnMain = [
@@ -285,7 +285,7 @@ export default function PreRequisiteForm({
         account,
         customer,
         serviceRequestData: serializedData,
-        srId,
+        serviceRequestId,
         accountId,
         fromWizard: true,
         returnPath: location?.pathname,
