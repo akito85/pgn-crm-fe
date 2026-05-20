@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import accountManagementService from "../../services/account_management/accountManagementService";
+import { showModalSuccess } from "../general_slice";
 
 const initialState = {
     // List Pre-requisite Template
@@ -15,6 +16,9 @@ const initialState = {
     // Detail Pre-requisite Template
     loading_detail_prt: false,
     detail_prt: {},
+
+    // Create/Update Pre-requisite Template
+    loading_create_update_prt: false,
 
     // source type
     loading_source_type: false,
@@ -73,6 +77,34 @@ export const getDetailPreRequisiteTemplate = createAsyncThunk(
             return response.data;
         } catch (error) {
             return thunkAPI.rejectWithValue(error.response);
+        }
+    }
+);
+
+export const createPreRequisiteTemplate = createAsyncThunk(
+    "CREATE_PRE_REQUISITE_TEMPLATE",
+    async (body, thunkAPI) => {
+        try {
+            const url = '/v1/dbs/api/pre-requisite-template/create';
+            const response = await accountManagementService.createData(url, body);
+            const successBody = {
+                title: "Successful",
+                description: "Your pre-requisite template has been created successfully.",
+                return: false,
+            };
+            thunkAPI.dispatch(showModalSuccess(successBody));
+            return response.data;
+        } catch (error) {
+            let message =
+                (error.response && error.response.data && error.response.data.message) ||
+                error.message || error.toString();
+            if (Math.floor((error.response?.data?.code || 0) /100) !== 4) message = "An unknown error occurred";
+            const errorBody = {
+                title: "Failed",
+                description: `Your pre-requisite template failed to be created. ${message}`,
+            };
+            thunkAPI.dispatch(showModalSuccess(errorBody));
+            return thunkAPI.rejectWithValue(error?.response);
         }
     }
 );
@@ -228,6 +260,16 @@ const preRequisiteTemplateSlice = createSlice({
         [getDetailPreRequisiteTemplate.rejected]: (state) => {
             state.detail_prt = {};
             state.loading_detail_prt = false;
+        },
+        // Create Pre-requisite Template
+        [createPreRequisiteTemplate.pending]: (state) => {
+            state.loading_create_update_prt = true;
+        },
+        [createPreRequisiteTemplate.fulfilled]: (state) => {
+            state.loading_create_update_prt = false;
+        },
+        [createPreRequisiteTemplate.rejected]: (state) => {
+            state.loading_create_update_prt = false;
         },
         // Source Type
         [getSourceType.pending]: (state) => {
