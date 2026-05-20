@@ -27,6 +27,10 @@ const initialState = {
     loading_source_type: false,
     list_source_type: [],
 
+    // sr type
+    loading_sr_type: false,
+    list_sr_type: [],
+
     // sr category
     loading_sr_category: false,
     list_sr_category: [],
@@ -173,6 +177,19 @@ export const getSourceType = createAsyncThunk(
     async (_, thunkAPI) => {
         try {
             const url = '/v1/dbs/api/pre-requisite-template/list-source-type';
+            const response = await accountManagementService.getDetail(url);
+            return response.data;
+        } catch (error) {
+            return thunkAPI.rejectWithValue(error.response);
+        }
+    }
+);
+
+export const getSrType = createAsyncThunk(
+    "GET_SR_TYPE",
+    async (_, thunkAPI) => {
+        try {
+            const url = '/v1/dbs/api/pre-requisite-template/list-sr-type';
             const response = await accountManagementService.getDetail(url);
             return response.data;
         } catch (error) {
@@ -362,6 +379,19 @@ const preRequisiteTemplateSlice = createSlice({
         [getSourceType.rejected]: (state) => {
             state.list_source_type = [];
             state.loading_source_type = false;
+        },
+        // SR Type
+        [getSrType.pending]: (state) => {
+            state.list_sr_type = [];
+            state.loading_sr_type = true;
+        },
+        [getSrType.fulfilled]: (state, action) => {
+            state.list_sr_type = action.payload || [];
+            state.loading_sr_type = false;
+        },
+        [getSrType.rejected]: (state) => {
+            state.list_sr_type = [];
+            state.loading_sr_type = false;
         },
         // SR Category
         [getSrCategory.pending]: (state) => {

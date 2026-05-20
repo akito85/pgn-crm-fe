@@ -279,6 +279,9 @@ const PreRequisiteTemplateDetail = () => {
                         <div className="w-full grid grid-cols-2 gap-4">
                             <NxDetailText label="Name">{detail?.name}</NxDetailText>
                             <NxDetailText label="Source Type">{detail?.sourceTypeName}</NxDetailText>
+                            <NxDetailText label="SR Type">{detail?.srTypeName}</NxDetailText>
+                            <NxDetailText label="SR Category">{detail?.srCategoryName}</NxDetailText>
+                            <NxDetailText label="Account Type">{detail?.srSubCategoryName}</NxDetailText>
                             <NxDetailText label="Criteria">{detail?.criterias}</NxDetailText>
                         </div>
                         <div className="w-full">

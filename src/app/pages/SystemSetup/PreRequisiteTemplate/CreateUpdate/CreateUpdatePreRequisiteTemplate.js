@@ -9,7 +9,7 @@ import { SYSTEM_SETUP_ROUTES } from "../../../../../routes/system_setup/setup_ro
 import InputComponent from "../../../../../components/InputComponent"
 import SelectComponent from "../../../../../components/SelectComponent"
 import { useDispatch, useSelector } from "react-redux"
-import { createPreRequisiteTemplate, updatePreRequisiteTemplate, getDetailPreRequisiteTemplate, getAccountGroupType, getAccountSegment, getCriteria, getPreRequisiteType, getSourceType, getSrCategory, getSrSubCategory } from "../../../../../redux/slices/system_setup/preRequisiteTemplate"
+import { createPreRequisiteTemplate, updatePreRequisiteTemplate, getDetailPreRequisiteTemplate, getAccountGroupType, getAccountSegment, getCriteria, getPreRequisiteType, getSourceType, getSrCategory, getSrSubCategory, getSrType } from "../../../../../redux/slices/system_setup/preRequisiteTemplate"
 import Toolbar from "../../../../../components/Toolbar"
 import NxModal from "../../../../../components/Nx/NxModal"
 import NxTable from "../../../../../components/Nx/NxTable"
@@ -28,6 +28,8 @@ const CreateUpdatePreRequisiteTemplate = ({ type = "create" }) => {
     const {
         list_source_type = [],
         loading_source_type = false,
+        list_sr_type = [],
+        loading_sr_type = false,
         list_sr_category = [],
         loading_sr_category = false,
         list_sr_sub_category = [],
@@ -59,6 +61,7 @@ const CreateUpdatePreRequisiteTemplate = ({ type = "create" }) => {
 
     useEffect(() => {
         dispatch(getSourceType());
+        dispatch(getSrType());
         dispatch(getSrCategory());
         dispatch(getSrSubCategory());
         dispatch(getCriteria());
@@ -83,6 +86,7 @@ const CreateUpdatePreRequisiteTemplate = ({ type = "create" }) => {
         form.setFieldsValue({
             name: detail_prt.name,
             sourceType: byName(list_source_type, detail_prt.sourceTypeName),
+            srType: byName(list_sr_type, detail_prt.srTypeName),
             srCategory: byName(list_sr_category, detail_prt.srCategoryName),
             srSubCategory: byName(list_sr_sub_category, detail_prt.srSubCategoryName),
             description: detail_prt.description,
@@ -107,7 +111,7 @@ const CreateUpdatePreRequisiteTemplate = ({ type = "create" }) => {
                 description: row.description,
             }))
         );
-    }, [detail_prt, type, form, list_source_type, list_sr_category, list_sr_sub_category, list_criteria, list_account_group_type, list_account_segment, list_pre_requisite_type]);
+    }, [detail_prt, type, form, list_source_type, list_sr_type, list_sr_category, list_sr_sub_category, list_criteria, list_account_group_type, list_account_segment, list_pre_requisite_type]);
 
     const watchedSourceTypeId = Form.useWatch("sourceType", form);
     const isServiceRequest = useMemo(() => {
@@ -385,6 +389,7 @@ const CreateUpdatePreRequisiteTemplate = ({ type = "create" }) => {
         const payload = {
             name: values.name,
             sourceType: values.sourceType,
+            srType: values.srType,
             srCategory: values.srCategory,
             srSubCategory: values.srSubCategory,
             description: values.description,
@@ -475,6 +480,7 @@ const CreateUpdatePreRequisiteTemplate = ({ type = "create" }) => {
                             <NxDetailText label={"Source Type"}>{getNameByValue(list_source_type, formSnapshot.sourceType)}</NxDetailText>
                             {isServiceRequest && (
                                 <>
+                                <NxDetailText label={"SR Type"}>{getNameByValue(list_sr_type, formSnapshot.srType)}</NxDetailText>
                                 <NxDetailText label={"SR Category"}>{getNameByValue(list_sr_category, formSnapshot.srCategory)}</NxDetailText>
                                 <NxDetailText label={"SR Sub Category"}>{getNameByValue(list_sr_sub_category, formSnapshot.srSubCategory)}</NxDetailText>
                                 </>
@@ -504,6 +510,13 @@ const CreateUpdatePreRequisiteTemplate = ({ type = "create" }) => {
                             </Form.Item>
                             {isServiceRequest && (
                                 <>
+                                <Form.Item name="srType" label="SR Type" required rules={[{ required: true, message: "SR Type is required" }]} className="no-margin-form">
+                                    <SelectComponent>
+                                        {(list_sr_type || []).map((data, index) => (
+                                            <Select.Option key={index} value={data.id}>{data.name}</Select.Option>
+                                        ))}
+                                    </SelectComponent>
+                                </Form.Item>
                                 <Form.Item name="srCategory" label="SR Category" required rules={[{ required: true, message: "SR Category is required" }]} className="no-margin-form">
                                     <SelectComponent>
                                         {(list_sr_category || []).map((data, index) => (
@@ -593,6 +606,7 @@ const CreateUpdatePreRequisiteTemplate = ({ type = "create" }) => {
                         <Button
                             type="menu"
                             onClick={() => { navigate(-1); }}
+                            disabled={loading_create_update_prt}
                         >
                             Cancel
                         </Button>
@@ -601,6 +615,7 @@ const CreateUpdatePreRequisiteTemplate = ({ type = "create" }) => {
                                 type="reject"
                                 icon={<SVGIcon name="IconButtonClear" width={14} />}
                                 onClick={handleClearForm}
+                                disabled={loading_create_update_prt}
                             >
                                 Clear Data
                             </Button>
