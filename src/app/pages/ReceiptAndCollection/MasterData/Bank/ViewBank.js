@@ -1,14 +1,19 @@
-import React, {useCallback, useEffect, useMemo, useRef, useState} from "react";
-import {useDispatch, useSelector} from "react-redux";
-import {Link, NavLink} from "react-router-dom";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Link, NavLink } from "react-router-dom";
 import CardContainer from "../../../../../components/CardContainer";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import {RECEIPT_AND_COLLECTION_ROUTES} from "../../../../../routes/Receipt&Collection/rc_routes";
+import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import SVGIcon from "../../../../../assets/Icon/index";
 import Highlighter from "react-highlight-words";
-import {DownloadOutlined} from "@ant-design/icons";
-import {Checkbox, Spin, Tooltip} from "antd";
+import { Checkbox, Spin, Tooltip } from "antd";
 import TableRBI from "../../../../../components/TableRBI";
 import {
   getAllApprovalList,
@@ -19,16 +24,18 @@ import {
   inactiveBank,
 } from "../../../../../redux/slices/receipt_collection/bankSlice";
 import ModalInactivateWithHierarchy from "../../../../../components/Modal/ModalInactivateWithHierarchy";
-import {intToNPWP} from "../../../../../utils/npwp";
-import {
-  getColumnSearchPropsUseFilteredValue
-} from "../../../../../utils/getColumnSearchProps";
+import { intToNPWP } from "../../../../../utils/npwp";
+import { getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
 import ModalHistory from "../../../../../components/Modal/ModalHistory";
-import {useTryAgainHooks} from "../../../../../utils/useTryAgainHooks";
+import { useTryAgainHooks } from "../../../../../utils/useTryAgainHooks";
 import Toolbar from "../../../../../components/Toolbar";
-import {useColumnActionPermission} from "../../../../../components/ColumnActionPermission";
-import {disabledActionByStatus, hasValue, renderColumn} from "../../../../../utils";
-import {applyFixedColumns} from "../../../../../utils/applyFixedColumns";
+import { useColumnActionPermission } from "../../../../../components/ColumnActionPermission";
+import {
+  disabledActionByStatus,
+  hasValue,
+  renderColumn,
+} from "../../../../../utils";
+import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
 
 export const columnsBank = (
   page = 1,
@@ -39,7 +46,7 @@ export const columnsBank = (
   handleSearch = () => {},
   handleInactive = () => {},
   handleApprovalHistory = () => {},
-  search = {}
+  search = {},
 ) => [
   {
     title: "NO",
@@ -147,7 +154,10 @@ export const columnsBank = (
     ),
     render: (_, record) => {
       const val = record.isBranch;
-      const display = val === true || val === "Y" || val === "BRANCH" ? "BRANCH" : "HEAD OFFICE";
+      const display =
+        val === true || val === "Y" || val === "BRANCH"
+          ? "BRANCH"
+          : "HEAD OFFICE";
       return renderColumn(
         "isBranch",
         hasValue(search["isBranch"]),
@@ -306,24 +316,24 @@ export const columnsBank = (
     width: 150,
     filteredValue: [search?.status] || null,
     ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "status",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true,
+      search,
+      "status",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
     ),
     render: (text) =>
-        renderColumn(
-            "status",
-            hasValue(search["status"]),
-            searchText,
-            text,
-            false,
-            "status",
-            search,
-        ),
+      renderColumn(
+        "status",
+        hasValue(search["status"]),
+        searchText,
+        text,
+        false,
+        "status",
+        search,
+      ),
   },
   {
     key: "statusApproval",
@@ -334,34 +344,37 @@ export const columnsBank = (
     width: 150,
     filteredValue: [search?.statusApproval] || null,
     ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "statusApproval",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true,
+      search,
+      "statusApproval",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
     ),
     render: (text) =>
-        renderColumn(
-            "statusApproval",
-            hasValue(search["statusApproval"]),
-            searchText,
-            text,
-            false,
-            "status",
-            search,
-        ),
+      renderColumn(
+        "statusApproval",
+        hasValue(search["statusApproval"]),
+        searchText,
+        text,
+        false,
+        "status",
+        search,
+      ),
   },
 ];
 
 const ViewBank = () => {
-  const { data, dataApprovalHistory, loading } = useSelector((state) => state.bank);
+  const { data, dataApprovalHistory, loading } = useSelector(
+    (state) => state.bank,
+  );
   const { bodyError } = useSelector((state) => state?.general);
   const dispatch = useDispatch();
 
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const initialPageSize = 100;
+  const loadMoreSize = 20;
   const searchInput = useRef(null);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
@@ -374,28 +387,79 @@ const ViewBank = () => {
   const [openModalHistory, setOpenModalHistory] = useState(false);
   const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
   const [body, setBody] = useState({});
+  const [allData, setAllData] = useState([]);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const shouldResetRef = useRef(true);
   const [fixedColumns, setFixedColumns] = useState(() => ({
     left: ["no"],
     right: ["status", "statusApproval", "action"],
   }));
 
-  const handleFetch = useCallback(() => {
+  const hasMore = allData.length < (data?.page?.totalElements || 0);
+
+  // Initial fetch and search/sort changes
+  useEffect(() => {
     dispatch(
       getPaginateBank({
         search: encodeURIComponent(JSON.stringify(search)),
-        page,
-        pageSize,
+        page: 1,
+        pageSize: initialPageSize,
         sort,
-      })
+      }),
     );
-  }, [dispatch, page, pageSize, search, sort]);
+  }, [search, sort, dispatch, refreshKey]);
 
+  // Accumulate data for infinite scroll
   useEffect(() => {
-    handleFetch();
-  }, [handleFetch]);
+    if (data?.result) {
+      if (shouldResetRef.current || page === 1) {
+        setAllData(data.result);
+        shouldResetRef.current = false;
+      } else {
+        setAllData((prev) => {
+          const ids = new Set(prev.map((item) => item.id));
+          const newItems = data.result.filter((item) => !ids.has(item.id));
+          return [...prev, ...newItems];
+        });
+      }
+    }
+  }, [data, page]);
 
-  const handleSearch = (selectedKeys, confirm, dataIndex) => {
+  // Handle Refresh
+  const handleRefresh = useCallback(() => {
+    shouldResetRef.current = true;
+    if (page === 1) {
+      setRefreshKey((prev) => prev + 1);
+    } else {
+      setPage(1);
+    }
+  }, [page]);
+
+  // Handle Load More (infinite scroll)
+  const handleLoadMore = useCallback(async () => {
+    if (allData.length >= (data?.page?.totalElements || 0)) return;
+    const nextPage = Math.floor(allData.length / loadMoreSize) + 1;
+    setPage(nextPage);
+    await dispatch(
+      getPaginateBank({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page: nextPage,
+        pageSize: loadMoreSize,
+        sort,
+      }),
+    );
+  }, [
+    allData.length,
+    data?.page?.totalElements,
+    search,
+    sort,
+    dispatch,
+    loadMoreSize,
+  ]);
+
+  const handleSearch = useCallback((selectedKeys, confirm, dataIndex) => {
     confirm();
+    shouldResetRef.current = true;
     if (dataIndex !== "isBranch") {
       setSearchText(selectedKeys[0]);
       setSearchedColumn(dataIndex);
@@ -410,7 +474,9 @@ const ViewBank = () => {
       });
     } else {
       if (selectedKeys[0]) {
-        const tempSearchedText = "BRANCH".includes(selectedKeys[0] || "") ? "Y" : "N";
+        const tempSearchedText = "BRANCH".includes(selectedKeys[0] || "")
+          ? "Y"
+          : "N";
         setSearchText(selectedKeys[0]);
         setSearchedColumn(dataIndex);
         setSearch((prevState) => {
@@ -425,10 +491,9 @@ const ViewBank = () => {
       } else {
         setSearchText(selectedKeys[0]);
         setSearchedColumn(dataIndex);
-        const temp = { ...search };
-        delete temp[dataIndex];
-
         setSearch((prevState) => {
+          const temp = { ...prevState };
+          delete temp[dataIndex];
           if (prevState[dataIndex] !== selectedKeys[0]) {
             setPage(1);
           }
@@ -436,11 +501,10 @@ const ViewBank = () => {
         });
       }
     }
-  };
+  }, []);
 
-  const handleChange = (page, pageSize) => {
-    setPage(page);
-    setPageSize(pageSize);
+  const handleChange = (pageChange) => {
+    setPage(pageChange);
   };
 
   const handleInactive = (r) => {
@@ -453,11 +517,19 @@ const ViewBank = () => {
   const routes = [
     { path: "", breadcrumbName: "System Setup" },
     { path: "", breadcrumbName: "Master Data" },
-    { path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_MASTER_BANK, breadcrumbName: "Bank" },
+    {
+      path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_MASTER_BANK,
+      breadcrumbName: "Bank",
+    },
   ];
 
   const onSort = (_, __, sort) => {
-    const dataSort = sort.order !== undefined ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}` : "";
+    const dataSort =
+      sort.order !== undefined
+        ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
+        : "";
+    shouldResetRef.current = true;
+    setPage(1);
     setSort(dataSort);
   };
 
@@ -474,17 +546,16 @@ const ViewBank = () => {
       .then(() => {
         handleClear();
         handleCancelModalInactivate();
-        let tempSearch = "";
-        for (const dataIndex in search) {
-          if (Object.hasOwnProperty.call(search, dataIndex)) {
-            const tempSearchText = search[dataIndex];
-            if (tempSearchText) {
-              tempSearch += `${dataIndex}~${tempSearchText},`;
-            }
-          }
-        }
-        tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
-        dispatch(getPaginateBank({ search: tempSearch, page, pageSize, sort }));
+        shouldResetRef.current = true;
+        setPage(1);
+        dispatch(
+          getPaginateBank({
+            search: encodeURIComponent(JSON.stringify(search)),
+            page: 1,
+            pageSize: initialPageSize,
+            sort,
+          }),
+        );
       });
   };
 
@@ -518,24 +589,27 @@ const ViewBank = () => {
     }));
   };
 
-  const handleApprovalHistory = async (recordData) => {
-    try {
-      setBody(recordData);
-      await dispatch(getApprovalHistory(recordData.id))?.unwrap();
-      setOpenModalHistory(true);
-    } catch (error) {
-      setOpenModalHistory(false);
-    }
-  };
+  const handleApprovalHistory = useCallback(
+    async (recordData) => {
+      try {
+        setBody(recordData);
+        await dispatch(getApprovalHistory(recordData.id))?.unwrap();
+        setOpenModalHistory(true);
+      } catch (error) {
+        setOpenModalHistory(false);
+      }
+    },
+    [dispatch],
+  );
 
   const handleDownload = () => {
     dispatch(
       getDownloadBank({
         search: encodeURIComponent(JSON.stringify(search)),
-        page,
-        pageSize,
+        page: 1,
+        pageSize: initialPageSize,
         sort,
-      })
+      }),
     );
   };
 
@@ -547,7 +621,9 @@ const ViewBank = () => {
           onClick={handleDownload}
           type="submit"
           border={false}
-          icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
+          icon={
+            <SVGIcon name="IconButtonDownload" style={{ fontSize: "20px" }} />
+          }
         >
           Download List
         </ButtonComponent>
@@ -557,7 +633,12 @@ const ViewBank = () => {
       action: "Create",
       render: (
         <NavLink to={RECEIPT_AND_COLLECTION_ROUTES.CREATE_MASTER_BANK}>
-          <ButtonComponent icon={<SVGIcon name="IconButtonCreate" width={24} />} type="submit">
+          <ButtonComponent
+            icon={
+              <SVGIcon name="IconButtonCreate" style={{ fontSize: "20px" }} />
+            }
+            type="submit"
+          >
             Create
           </ButtonComponent>
         </NavLink>
@@ -568,10 +649,13 @@ const ViewBank = () => {
       type: "table",
       render: (record) => {
         return (
-          <Link to={RECEIPT_AND_COLLECTION_ROUTES.DETAIL_MASTER_BANK} state={{ id: record?.id }}>
+          <Link
+            to={RECEIPT_AND_COLLECTION_ROUTES.DETAIL_MASTER_BANK}
+            state={{ id: record?.id }}
+          >
             <Tooltip title="Detail">
               <div className="pt-0">
-                <SVGIcon name="IconDetail" width={24} />
+                <SVGIcon name="IconDetail" width={20} />
               </div>
             </Tooltip>
           </Link>
@@ -582,32 +666,51 @@ const ViewBank = () => {
       action: "Update",
       type: "table",
       render: (record, data) => {
-        const isDisabled = disabledActionByStatus("update", record?.status, record?.statusApproval);
-        const linkContent = data > 3 ? (
-          <ButtonComponent
-            icon={<SVGIcon name="IconEdit" color={isDisabled ? "#8D91A0" : "#0075bf"} width={24} />}
-            type={"action"}
-            border={false}
-            disabled={isDisabled}
-          >
-            <span className={`ml-0 ${isDisabled ? "text-[#8D91A0]" : "text-black"}`}> Update</span>
-          </ButtonComponent>
-        ) : (
-          <Tooltip title="Update">
-            <div className="pt-0">
-              <SVGIcon
-                name="IconEdit"
-                width={24}
-                color={isDisabled ? "#8D91A0" : "#ACC424"}
-                className={isDisabled ? "cursor-not-allowed" : undefined}
-              />
-            </div>
-          </Tooltip>
+        const isDisabled = disabledActionByStatus(
+          "update",
+          record?.status,
+          record?.statusApproval,
         );
+        const linkContent =
+          data > 3 ? (
+            <ButtonComponent
+              icon={
+                <SVGIcon
+                  name="IconEdit"
+                  color={isDisabled ? "#8D91A0" : "#0075bf"}
+                  width={24}
+                />
+              }
+              type={"action"}
+              border={false}
+              disabled={isDisabled}
+            >
+              <span
+                className={`ml-0 ${isDisabled ? "text-[#8D91A0]" : "text-black"}`}
+              >
+                {" "}
+                Update
+              </span>
+            </ButtonComponent>
+          ) : (
+            <Tooltip title="Update">
+              <div className="pt-0">
+                <SVGIcon
+                  name="IconEdit"
+                  width={24}
+                  color={isDisabled ? "#8D91A0" : "#ACC424"}
+                  className={isDisabled ? "cursor-not-allowed" : undefined}
+                />
+              </div>
+            </Tooltip>
+          );
         return isDisabled ? (
           <div>{linkContent}</div>
         ) : (
-          <Link to={RECEIPT_AND_COLLECTION_ROUTES.UPDATE_MASTER_BANK} state={{ id: record?.id }}>
+          <Link
+            to={RECEIPT_AND_COLLECTION_ROUTES.UPDATE_MASTER_BANK}
+            state={{ id: record?.id }}
+          >
             {linkContent}
           </Link>
         );
@@ -618,38 +721,49 @@ const ViewBank = () => {
       type: "table",
       render: (record, data) => {
         const statusLowerCase = record?.status?.toLowerCase();
-        const isDisabled = disabledActionByStatus("activate", record?.status, record?.statusApproval);
-        const Content = data > 3 ? (
-          <ButtonComponent
-            icon={
-              <Checkbox
-                className="inactive-check"
-                onClick={() => handleInactive(record)}
-                disabled={isDisabled}
-                checked={record?.status !== "Active"}
-              />
-            }
-            type={"action"}
-            border={false}
-            disabled={isDisabled}
-            onClick={() => handleInactive(record)}
-          >
-            <span className="text-black ml-1">
-              {record?.status === "Active" ? "Inactivate" : "Activate"}
-            </span>
-          </ButtonComponent>
-        ) : (
-          <Tooltip title={statusLowerCase === "active" || statusLowerCase === "draft" ? "Inactivate" : "Activate"}>
-            <div className="pt-1">
-              <Checkbox
-                className="inactive-check"
-                onClick={() => handleInactive(record)}
-                checked={record?.status !== "Active"}
-                disabled={isDisabled}
-              />
-            </div>
-          </Tooltip>
+        const isDisabled = disabledActionByStatus(
+          "activate",
+          record?.status,
+          record?.statusApproval,
         );
+        const Content =
+          data > 3 ? (
+            <ButtonComponent
+              icon={
+                <Checkbox
+                  className="inactive-check"
+                  onClick={() => handleInactive(record)}
+                  disabled={isDisabled}
+                  checked={record?.status !== "Active"}
+                />
+              }
+              type={"action"}
+              border={false}
+              disabled={isDisabled}
+              onClick={() => handleInactive(record)}
+            >
+              <span className="text-black ml-1">
+                {record?.status === "Active" ? "Inactivate" : "Activate"}
+              </span>
+            </ButtonComponent>
+          ) : (
+            <Tooltip
+              title={
+                statusLowerCase === "active" || statusLowerCase === "draft"
+                  ? "Inactivate"
+                  : "Activate"
+              }
+            >
+              <div className="pt-1">
+                <Checkbox
+                  className="inactive-check"
+                  onClick={() => handleInactive(record)}
+                  checked={record?.status !== "Active"}
+                  disabled={isDisabled}
+                />
+              </div>
+            </Tooltip>
+          );
         return Content;
       },
     },
@@ -659,7 +773,9 @@ const ViewBank = () => {
       render: (record, data) => {
         return data > 3 ? (
           <ButtonComponent
-            icon={<SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />}
+            icon={
+              <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
+            }
             type={"action"}
             border={false}
             onClick={() => handleApprovalHistory(record)}
@@ -692,30 +808,43 @@ const ViewBank = () => {
       } else if (bodyError?.action === "DOWNLOAD_MASTER_BANK") {
         handleDownload();
       }
-      handleFetch();
+      handleRefresh();
     } catch (error) {
-      handleFetch();
+      handleRefresh();
     }
   };
 
-  const actionCols = useColumnActionPermission(["view", "history", "update", "activate"], itemActions);
+  const actionCols = useColumnActionPermission(
+    ["view", "history", "update", "activate"],
+    itemActions,
+  );
 
   const allColumns = useMemo(() => {
     return [
-        ...columnsBank(page,
-        pageSize,
+      ...columnsBank(
+        1,
+        initialPageSize,
         searchInput,
         searchedColumn,
         searchText,
         handleSearch,
         handleInactive,
         handleApprovalHistory,
-        search
-        ), ...actionCols].map((col) => ({
+        search,
+      ),
+      ...actionCols,
+    ].map((col) => ({
       ...col,
       key: col.key || col.dataIndex || col.title,
     }));
-  }, [actionCols, handleApprovalHistory, handleSearch, page, pageSize, search, searchText, searchedColumn]);
+  }, [
+    actionCols,
+    handleApprovalHistory,
+    handleSearch,
+    search,
+    searchText,
+    searchedColumn,
+  ]);
 
   const processedColumns = useMemo(() => {
     return applyFixedColumns(allColumns, fixedColumns);
@@ -730,15 +859,16 @@ const ViewBank = () => {
         <CardContainer
           header={
             <div className="flex -my-4 justify-between items-center">
-              <p className="mt-[15px] font-bold text-nowrap">BANK LIST</p>
+              <p className="mt-[15px] text-nowrap">BANK LIST</p>
 
               <Toolbar items={itemActions} />
             </div>
           }
         >
           <TableRBI
-            dataSource={data?.result}
-            pageSize={pageSize}
+            idTable="bankTable"
+            dataSource={allData}
+            pageSize={initialPageSize}
             showExport={true}
             handleDownload={handleDownload}
             columns={processedColumns}
@@ -750,6 +880,13 @@ const ViewBank = () => {
             tableScrolled={{ x: "max-content", y: 525 }}
             fixedColumns={fixedColumns}
             setFixedColumns={setFixedColumns}
+            useInfiniteScroll={true}
+            usePagination={false}
+            onLoadMore={handleLoadMore}
+            hasMore={hasMore}
+            showRefresh={true}
+            onRefresh={handleRefresh}
+            refreshLabel="Refresh"
           />
         </CardContainer>
 
