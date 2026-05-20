@@ -4,7 +4,7 @@ import DynamicTableInlineBilling from "../../Table/DynamicTableInlineBilling";
 const CriteriaDetailTab = ({
   criteriaType = null,
   dataTable = [],
-  onDataChange = () => { },
+  onDataChange = () => {},
   data_specialGLList = [],
   data_glAccountList = [],
   data_classificationTypeList = [],
@@ -12,16 +12,16 @@ const CriteriaDetailTab = ({
   data_criteriaOptions = [],
   type = "create",
   isEditabled = false,
-  setIsEditabled = () => { },
+  setIsEditabled = () => {},
   startDateLock = null,
   endDateLock = null,
-  setModalRequired = () => { },
+  setModalRequired = () => {},
   onCancelEdit = null,
   defaultNewRowValues = {},
   disabledColumns = [],
   isBank = false,
   data_glAccountBankList = [],
-  onSearchGLAccount = () => { },
+  onSearchGLAccount = () => {},
 }) => {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -42,7 +42,8 @@ const CriteriaDetailTab = ({
     if (isNumericId) {
       return (
         data_criteriaOptions?.find(
-          (item) => item.id === criteriaType || item.id === Number(criteriaType),
+          (item) =>
+            item.id === criteriaType || item.id === Number(criteriaType),
         )?.code || null
       );
     }
@@ -78,15 +79,16 @@ const CriteriaDetailTab = ({
 
   const criteriaColConfig = getCriteriaColumnConfig();
 
-  const glAccountOptions = (isBank && data_glAccountBankList?.length > 0)
-    ? data_glAccountBankList.map((item) => ({
-      value: item.glNumber,
-      label: `${item.glNumber} - ${item.glDescription}`,
-    }))
-    : data_glAccountList.map((item) => ({
-      value: item.glAccountId ?? item.id,
-      label: `${item.glAccount ?? item.account} - ${item.glAccountDesc ?? item.name}`,
-    }));
+  const glAccountOptions =
+    isBank && data_glAccountBankList?.length > 0
+      ? data_glAccountBankList.map((item) => ({
+          value: item.glNumber,
+          label: `${item.glNumber} - ${item.glDescription}`,
+        }))
+      : data_glAccountList.map((item) => ({
+          value: item.glAccountId ?? item.id,
+          label: `${item.glAccount ?? item.account} - ${item.glAccountDesc ?? item.name}`,
+        }));
 
   const specialGlOptions = data_specialGLList.map((item) => ({
     value: item.id,
@@ -108,16 +110,17 @@ const CriteriaDetailTab = ({
     },
     ...(criteriaColConfig
       ? [
-        {
-          title: criteriaColConfig.label,
-          dataIndex: "criteriaValue",
-          inputType: "select",
-          options: criteriaColConfig.options,
-          required: true,
-          width: 200,
-          render: (value) => renderSelectValue(value, criteriaColConfig.options),
-        },
-      ]
+          {
+            title: criteriaColConfig.label,
+            dataIndex: "criteriaValue",
+            inputType: "select",
+            options: criteriaColConfig.options,
+            required: true,
+            width: 200,
+            render: (value) =>
+              renderSelectValue(value, criteriaColConfig.options),
+          },
+        ]
       : []),
     {
       title: "GL ACCOUNT",
@@ -129,9 +132,9 @@ const CriteriaDetailTab = ({
       onSearch: isBank
         ? undefined
         : (val) => {
-          setGlAccountSearchValue(val);
-          onSearchGLAccount(val);
-        },
+            setGlAccountSearchValue(val);
+            onSearchGLAccount(val);
+          },
       searchValue: glAccountSearchValue,
       render: (value) => renderSelectValue(value, glAccountOptions),
       onClick: (selectedLabel, form) => {
@@ -149,7 +152,9 @@ const CriteriaDetailTab = ({
             return label === selectedLabel;
           });
           form.setFieldsValue({
-            descriptionAccount: found ? (found.glAccountDesc ?? found.name ?? "") : "",
+            descriptionAccount: found
+              ? (found.glAccountDesc ?? found.name ?? "")
+              : "",
           });
         }
       },
@@ -187,14 +192,7 @@ const CriteriaDetailTab = ({
   ];
 
   const totalColWidth =
-    60 +
-    (criteriaColConfig ? 200 : 0) +
-    250 +
-    220 +
-    180 +
-    180 +
-    180 +
-    120; // kolom ACTIONS
+    60 + (criteriaColConfig ? 200 : 0) + 250 + 220 + 180 + 180 + 180 + 120; // kolom ACTIONS
 
   return (
     <DynamicTableInlineBilling
