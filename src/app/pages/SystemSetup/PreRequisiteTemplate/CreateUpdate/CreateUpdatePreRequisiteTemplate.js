@@ -15,9 +15,11 @@ import NxModal from "../../../../../components/Nx/NxModal"
 import NxTable from "../../../../../components/Nx/NxTable"
 import NxDate from "../../../../../components/Nx/NxDatePicker"
 import SVGIcon from "../../../../../assets/Icon/index"
+import { useNavigate } from "react-router-dom"
 
 const CreateUpdatePreRequisiteTemplate = ({ formType = "create" }) => {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const {
         list_source_type = [],
         loading_source_type = false,
@@ -68,6 +70,10 @@ const CreateUpdatePreRequisiteTemplate = ({ formType = "create" }) => {
         }
         return base;
     }, [isDetailMode]);
+
+    const getNameByValue = useCallback((list, value) =>
+        list?.find((item) => item.value === value)?.name || value || "-"
+    , []);
 
     // --- Criteria modal handlers ---
 
@@ -268,6 +274,7 @@ const CreateUpdatePreRequisiteTemplate = ({ formType = "create" }) => {
             key: "type",
             title: "TYPE",
             dataIndex: "type",
+            render: (value) => getNameByValue(list_pre_requisite_type, value),
         },
         {
             key: "name",
@@ -301,7 +308,7 @@ const CreateUpdatePreRequisiteTemplate = ({ formType = "create" }) => {
                 </div>
             ),
         },
-    ], [handleOpenDetailMode, handleDeleteDetailRow]);
+    ], [handleOpenDetailMode, handleDeleteDetailRow, list_pre_requisite_type, getNameByValue]);
 
     // --- Selected criteria options for modal form ---
 
@@ -315,6 +322,13 @@ const CreateUpdatePreRequisiteTemplate = ({ formType = "create" }) => {
         const values = form.getFieldsValue(true);
         console.log("submit", { ...values, criteriaDataRows, detailRows });
     }
+
+    const handleClearForm = useCallback(() => {
+        form.resetFields();
+        setCriteriaValues([]);
+        setCriteriaDataRows([]);
+        setDetailRows([]);
+    }, [form]);
 
     const handleSelectCriteria = (value) => {
         const updated = [...new Set([...criteriaValues, value])];
@@ -356,13 +370,15 @@ const CreateUpdatePreRequisiteTemplate = ({ formType = "create" }) => {
                         <>
                         <div className="w-full grid grid-cols-2 gap-4">
                             <NxDetailText label={"Name"}>{formSnapshot.name || "-"}</NxDetailText>
-                            <NxDetailText label={"Source Type"}>{formSnapshot.sourceType || "-"}</NxDetailText>
-                            <NxDetailText label={"SR Category"}>{formSnapshot.srCategory || "-"}</NxDetailText>
-                            <NxDetailText label={"SR Sub Category"}>{formSnapshot.srSubCategory || "-"}</NxDetailText>
+                            <NxDetailText label={"Source Type"}>{getNameByValue(list_source_type, formSnapshot.sourceType)}</NxDetailText>
+                            <NxDetailText label={"SR Category"}>{getNameByValue(list_sr_category, formSnapshot.srCategory)}</NxDetailText>
+                            <NxDetailText label={"SR Sub Category"}>{getNameByValue(list_sr_sub_category, formSnapshot.srSubCategory)}</NxDetailText>
                         </div>
                         <div className="w-full grid gap-4 mt-4">
                             <NxDetailText label={"Criteria"}>
-                                {(formSnapshot.criteria || []).join(", ") || "-"}
+                                {(formSnapshot.criteria || [])
+                                    .map((v) => getNameByValue(list_criteria, v))
+                                    .join(", ") || "-"}
                             </NxDetailText>
                             <NxDetailText label={"Description"}>{formSnapshot.description || "-"}</NxDetailText>
                         </div>
@@ -460,6 +476,34 @@ const CreateUpdatePreRequisiteTemplate = ({ formType = "create" }) => {
                     </NxBaseContainer>
                 </NxCardContainer>
             )}
+
+            <NxBaseContainer border>
+                <div className="flex justify-between">
+                    <Button
+                        type="menu"
+                        onClick={() => {
+                            navigate(-1);
+                        }}
+                    >
+                        Cancel
+                    </Button>
+                    <div className="flex w-full justify-end gap-x-2">
+                        <Button
+                            type="reject"
+                            icon={<SVGIcon name="IconButtonDelete" width={14} />}
+                            onClick={handleClearForm}
+                        >
+                            Clear Data
+                        </Button>
+                        <Button
+                            type="approve"
+                            onClick={() => form.submit()}
+                        >
+                            Submit
+                        </Button>
+                    </div>
+                </div>
+            </NxBaseContainer>
         </Form>
 
         {/* PRE-REQUISITE INFORMATION — shown only in detail mode */}
