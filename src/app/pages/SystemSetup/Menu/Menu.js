@@ -73,6 +73,7 @@ const Menu = () => {
   const pageRef = useRef(0);
   const isFetchingRef = useRef(false);
   const hasMoreRef = useRef(false);
+  const handleCancelTryAgainRef = useRef(null);
 
   const buildSearch = useCallback((advSearch) => {
     const combined = {};
@@ -395,7 +396,7 @@ const Menu = () => {
   ];
 
   const handleRetry = useCallback(() => {
-    handleCancelTryAgain();
+    handleCancelTryAgainRef.current?.();
     if (bodyError?.action === "INACTIVE_MENU") {
       dispatch(inactiveMenu(body));
     } else if (bodyError?.action === "GET_MENU_DETAIL") {
@@ -404,9 +405,10 @@ const Menu = () => {
       handleDownload();
     }
     resetAndReload();
-  }, [handleCancelTryAgain, bodyError, body, dispatch, handleDownload, resetAndReload]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [bodyError, body, dispatch, handleDownload, resetAndReload]);
 
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
+  handleCancelTryAgainRef.current = handleCancelTryAgain;
 
   return (
     <>
