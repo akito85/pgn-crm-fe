@@ -80,12 +80,12 @@ const ContentModalConfirm = ({
                         {/* TRANSFER INFORMATION */}
                         <SubSectionCard title="TRANSFER TO CUSTOMER INFORMATION" className="mx-6 mb-4">
                             <div className="grid grid-cols-4 gap-y-4 gap-x-4 w-full">
-                                <DetailText label="From Customer Number">{data?.fromCustomerNumber || "-"}</DetailText>
-                                <DetailText label="From Customer Name">{data?.fromCustomerName || "-"}</DetailText>
-                                <DetailText label="Area Code">{data?.areaCode || "-"}</DetailText>
-                                <DetailText label="Category">{data?.category || "-"}</DetailText>
+                                <DetailText label="From Customer Number">{data?.fromCustomerNumber || ""}</DetailText>
+                                <DetailText label="From Customer Name">{data?.fromCustomerName || ""}</DetailText>
+                                <DetailText label="Area Code">{data?.areaCode || ""}</DetailText>
+                                <DetailText label="Category">{data?.category || ""}</DetailText>
                                 <div className="col-span-4">
-                                    <DetailText label="Description">{data?.description || "-"}</DetailText>
+                                    <DetailText label="Description">{data?.description || ""}</DetailText>
                                 </div>
                             </div>
                         </SubSectionCard>
@@ -93,30 +93,30 @@ const ContentModalConfirm = ({
                         {/* GUARANTEE INFORMATION */}
                         <SubSectionCard title="GUARANTEE INFORMATION" className="mx-6 mb-4">
                             <div className="grid grid-cols-5 gap-y-4 gap-x-4 w-full">
-                                <DetailText label="Payment Guarantee Code">{data?.paymentWarrantyCode || "-"}</DetailText>
-                                <DetailText label="Cost Center">{data?.warrantyAreaCode || "-"}</DetailText>
-                                <DetailText label="Account Number">{data?.accountNumber || "-"}</DetailText>
-                                <DetailText label="Account Name">{data?.accountName || "-"}</DetailText>
-                                <DetailText label="Customer Number">{data?.customerId || "-"}</DetailText>
-                                <DetailText label="Customer Name">{data?.customerName || "-"}</DetailText>
-                                <DetailText label="Customer Segment">{data?.customerSegment || "-"}</DetailText>
-                                <DetailText label="Customer Group">{data?.customerGroup || "-"}</DetailText>
-                                <DetailText label="Type">{data?.type || "-"}</DetailText>
-                                <DetailText label="Document Number">{data?.documentNumber || "-"}</DetailText>
+                                <DetailText label="Payment Guarantee Code">{data?.paymentWarrantyCode || ""}</DetailText>
+                                <DetailText label="Cost Center">{data?.warrantyAreaCode || ""}</DetailText>
+                                <DetailText label="Account Number">{data?.accountNumber || ""}</DetailText>
+                                <DetailText label="Account Name">{data?.accountName || ""}</DetailText>
+                                <DetailText label="Customer Number">{data?.customerId || ""}</DetailText>
+                                <DetailText label="Customer Name">{data?.customerName || ""}</DetailText>
+                                <DetailText label="Customer Segment">{data?.customerSegment || ""}</DetailText>
+                                <DetailText label="Customer Group">{data?.customerGroup || ""}</DetailText>
+                                <DetailText label="Type">{data?.type || ""}</DetailText>
+                                <DetailText label="Document Number">{data?.documentNumber || ""}</DetailText>
                                 <DetailText label="Document Date">{data?.mutationDate ? moment(data.mutationDate).format("DD MMM YYYY") : (data?.documentDate ? moment(data.documentDate).format("DD MMM YYYY") : "-")}</DetailText>
-                                <DetailText label="Issuer">{data?.publisher || "-"}</DetailText>
-                                <DetailText label="Issuer Branch">{data?.issuerBranch || "-"}</DetailText>
-                                <DetailText label="Currency">{data?.currency || "-"}</DetailText>
-                                <DetailText label="Balance Amount">{data?.balance?.toLocaleString("id-ID") || "-"}</DetailText>
-                                <DetailText label="Rate Type">{data?.rateType || "-"}</DetailText>
+                                <DetailText label="Issuer">{data?.publisher || ""}</DetailText>
+                                <DetailText label="Issuer Branch">{data?.issuerBranch || ""}</DetailText>
+                                <DetailText label="Currency">{data?.currency || ""}</DetailText>
+                                <DetailText label="Balance Amount">{data?.balance?.toLocaleString("id-ID") || ""}</DetailText>
+                                <DetailText label="Rate Type">{data?.rateType || ""}</DetailText>
                                 <DetailText label="Rate Date">{data?.rateDate ? moment(data.rateDate).format("DD MMM YYYY") : "-"}</DetailText>
-                                <DetailText label="Rate">{data?.rate?.toLocaleString("id-ID") || "-"}</DetailText>
-                                <DetailText label="EQV Balance Amount">{data?.equivalent?.toLocaleString("id-ID") || "-"}</DetailText>
+                                <DetailText label="Rate">{data?.rate?.toLocaleString("id-ID") || ""}</DetailText>
+                                <DetailText label="EQV Balance Amount">{data?.equivalent?.toLocaleString("id-ID") || ""}</DetailText>
                                 <DetailText label="Reff. Start Date">{data?.effectiveDate ? moment(data.effectiveDate).format("DD MMM YYYY") : "-"}</DetailText>
                                 <DetailText label="Reff. End Date">{data?.expiringDate ? moment(data.expiringDate).format("DD MMM YYYY") : "-"}</DetailText>
                                 <DetailText label="Claim Period">{data?.endDateClaim ? moment(data.endDateClaim).format("DD MMM YYYY") : "-"}</DetailText>
-                                <DetailText label="Account Type">{data?.accountType || "-"}</DetailText>
-                                <DetailText label="Classification Type">{data?.classificationType || "-"}</DetailText>
+                                <DetailText label="Account Type">{data?.accountType || ""}</DetailText>
+                                <DetailText label="Classification Type">{data?.classificationType || ""}</DetailText>
                             </div>
                         </SubSectionCard>
 

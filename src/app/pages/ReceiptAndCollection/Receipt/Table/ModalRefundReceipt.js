@@ -290,7 +290,7 @@ const ModalRefundReceipt = ({
             key: "costCenter",
             sorter: true,
             width: 200,
-            render: (val) => val || "-"
+            render: (val) => val || ""
         },
         {
             title: "CUSTOMER NUMBER",
@@ -310,7 +310,7 @@ const ModalRefundReceipt = ({
             dataIndex: "accountNumber",
             key: "accountNumber",
             width: 200,
-            render: (_, record) => record.accountNumber || record.accountId || "-"
+            render: (_, record) => record.accountNumber || record.accountId || ""
         },
         {
             title: "TOTAL UNAPPLY AMOUNT",
@@ -341,7 +341,7 @@ const ModalRefundReceipt = ({
             dataIndex: "costCenter",
             key: "costCenter",
             width: 200,
-            render: (val) => val || "-"
+            render: (val) => val || ""
         },
         {
             title: "CUSTOMER NUMBER",
@@ -361,7 +361,7 @@ const ModalRefundReceipt = ({
             dataIndex: "accountNumber",
             key: "accountNumber",
             width: 200,
-            render: (_, record) => record.accountNumber || record.accountId || "-"
+            render: (_, record) => record.accountNumber || record.accountId || ""
         },
         {
             title: "TOTAL UNAPPLY AMOUNT",
@@ -683,11 +683,11 @@ const ModalRefundReceipt = ({
                                         />
                                         <div className="mt-4">
                                             <p className="mb-2 font-bold">Refund Date</p>
-                                            <div className="text-gray-700">{refundDate?.format('DD MMM YYYY') || "-"}</div>
+                                            <div className="text-gray-700">{refundDate?.format('DD MMM YYYY') || ""}</div>
                                         </div>
                                         <div className="mt-4">
                                             <p className="mb-2 font-bold">Remark</p>
-                                            <div className="text-gray-700">{remarkStep3 || "-"}</div>
+                                            <div className="text-gray-700">{remarkStep3 || ""}</div>
                                         </div>
                                     </>
                                 )}
@@ -705,7 +705,7 @@ const ModalRefundReceipt = ({
                                         />
                                         <div className="mt-4">
                                             <p className="mb-2 font-bold">Remark</p>
-                                            <div className="text-gray-700">{remarkStep4 || "-"}</div>
+                                            <div className="text-gray-700">{remarkStep4 || ""}</div>
                                         </div>
                                     </>
                                 )}

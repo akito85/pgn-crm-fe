@@ -166,13 +166,13 @@ const ViewPaymentWarrantyPartner = () => {
       title: "START DATE",
       dataIndex: "startDate",
       key: "startDate",
-      render: (text, record) => renderColumn("startDate", searchedColumn, searchText, record?.startDate || "-", false, "input", search),
+      render: (text, record) => renderColumn("startDate", searchedColumn, searchText, record?.startDate || "", false, "input", search),
     },
     {
       title: "END DATE",
       dataIndex: "endDate",
       key: "endDate",
-      render: (text, record) => renderColumn("endDate", searchedColumn, searchText, record?.endDate || "-", false, "input", search),
+      render: (text, record) => renderColumn("endDate", searchedColumn, searchText, record?.endDate || "", false, "input", search),
     },
     {
       title: "STATUS",

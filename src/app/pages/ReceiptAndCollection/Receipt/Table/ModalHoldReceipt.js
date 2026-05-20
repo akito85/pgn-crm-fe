@@ -438,7 +438,7 @@ const ModalHoldReceipt = ({
                                 <div className="p-4 bg-orange-50 border border-orange-200 rounded">
                                     <div className="text-sm text-gray-600">Approval</div>
                                     <div className="text-lg font-bold text-orange-600">
-                                        {appHierOptions.find((opt) => opt.value === selectedAppHierId)?.name || "-"}
+                                        {appHierOptions.find((opt) => opt.value === selectedAppHierId)?.name || ""}
                                     </div>
                                 </div>
                             </div>
@@ -467,7 +467,7 @@ const ModalHoldReceipt = ({
                                     <div>
                                         <strong>Hold Reason:</strong>
                                         <div className="p-2 bg-gray-50 border rounded mt-1">
-                                            {holdReason || "-"}
+                                            {holdReason || ""}
                                         </div>
                                     </div>
                                 )}

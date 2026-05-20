@@ -38,32 +38,32 @@ const DetailPaymentPlan = ({
                 <div className="p-5 min-h-[400px] flex flex-col gap-4">
                     <SectionCard title="ACCOUNT INFORMATION">
                         <div className="grid grid-cols-5 gap-y-4 gap-x-4 w-full">
-                            <DetailText label="Account Number">{dataHeader?.accountNumber || "-"}</DetailText>
-                            <DetailText label="Account Name">{dataHeader?.accountName || "-"}</DetailText>
-                            <DetailText label="Customer Number">{dataHeader?.customerNumber || "-"}</DetailText>
-                            <DetailText label="Customer Name">{dataHeader?.customerName || "-"}</DetailText>
-                            <DetailText label="Account Group Type">{dataHeader?.accountGroupType || "-"}</DetailText>
-                            <DetailText label="SOR">{dataHeader?.sor || "-"}</DetailText>
-                            <DetailText label="Cost Center">{dataHeader?.costCenter || "-"}</DetailText>
-                            <DetailText label="Account Segment">{dataHeader?.accountSegment || "-"}</DetailText>
-                            <DetailText label="Meter Reading Code">{dataHeader?.meterReadingCode || "-"}</DetailText>
-                            <DetailText label="Account Type">{dataHeader?.accountType || "-"}</DetailText>
-                            <DetailText label="Classification Type">{dataHeader?.classificationType || "-"}</DetailText>
-                            <DetailText label="SAP Cust ID">{dataHeader?.sapCustId || "-"}</DetailText>
-                            <DetailText label="Account Status">{dataHeader?.accountStatus || "-"}</DetailText>
+                            <DetailText label="Account Number">{dataHeader?.accountNumber || ""}</DetailText>
+                            <DetailText label="Account Name">{dataHeader?.accountName || ""}</DetailText>
+                            <DetailText label="Customer Number">{dataHeader?.customerNumber || ""}</DetailText>
+                            <DetailText label="Customer Name">{dataHeader?.customerName || ""}</DetailText>
+                            <DetailText label="Account Group Type">{dataHeader?.accountGroupType || ""}</DetailText>
+                            <DetailText label="SOR">{dataHeader?.sor || ""}</DetailText>
+                            <DetailText label="Cost Center">{dataHeader?.costCenter || ""}</DetailText>
+                            <DetailText label="Account Segment">{dataHeader?.accountSegment || ""}</DetailText>
+                            <DetailText label="Meter Reading Code">{dataHeader?.meterReadingCode || ""}</DetailText>
+                            <DetailText label="Account Type">{dataHeader?.accountType || ""}</DetailText>
+                            <DetailText label="Classification Type">{dataHeader?.classificationType || ""}</DetailText>
+                            <DetailText label="SAP Cust ID">{dataHeader?.sapCustId || ""}</DetailText>
+                            <DetailText label="Account Status">{dataHeader?.accountStatus || ""}</DetailText>
                         </div>
                     </SectionCard>
 
                     <SectionCard title="SERVICE AGREEMENT INFORMATION">
                         <div className="grid grid-cols-5 gap-y-4 gap-x-4 w-full">
-                            <DetailText label="Service Agreement Number">{dataHeader?.saNumber || "-"}</DetailText>
-                            <DetailText label="Service Agreement Name">{dataHeader?.saName || "-"}</DetailText>
+                            <DetailText label="Service Agreement Number">{dataHeader?.saNumber || ""}</DetailText>
+                            <DetailText label="Service Agreement Name">{dataHeader?.saName || ""}</DetailText>
                             <DetailText label="Service Agreement Date">{dataHeader?.saDate ? moment(dataHeader.saDate).format("DD MMM YYYY") : "-"}</DetailText>
                             <DetailText label="Start Date">{dataHeader?.startDate ? moment(dataHeader.startDate).format("DD MMM YYYY") : "-"}</DetailText>
                             <DetailText label="End Date">{dataHeader?.endDate ? moment(dataHeader.endDate).format("DD MMM YYYY") : "-"}</DetailText>
-                            <DetailText label="Minimum Contract">{dataHeader?.minContract || "-"}</DetailText>
-                            <DetailText label="Maximum Contract">{dataHeader?.maxContract || "-"}</DetailText>
-                            <DetailText label="UOM">{dataHeader?.uom || "-"}</DetailText>
+                            <DetailText label="Minimum Contract">{dataHeader?.minContract || ""}</DetailText>
+                            <DetailText label="Maximum Contract">{dataHeader?.maxContract || ""}</DetailText>
+                            <DetailText label="UOM">{dataHeader?.uom || ""}</DetailText>
                         </div>
                     </SectionCard>
 
@@ -81,13 +81,13 @@ const DetailPaymentPlan = ({
 
                     <SectionCard title="PAYMENT PLAN INFORMATION">
                         <div className="grid grid-cols-5 gap-y-4 gap-x-4 w-full">
-                            <DetailText label="Type">{dataHeader?.type || "-"}</DetailText>
+                            <DetailText label="Type">{dataHeader?.type || ""}</DetailText>
                             <DetailText label="Tenor">{dataHeader?.tenor ? `${dataHeader.tenor} Months` : "-"}</DetailText>
                             <DetailText label="Start Period">{dataHeader?.startPeriod ? moment(dataHeader.startPeriod).format("MMM YYYY") : "-"}</DetailText>
                             <DetailText label="Source">{dataHeader?.source}</DetailText>
                             <DetailText label="Request Date">{dataHeader?.requestDate ? moment(dataHeader.requestDate).format("DD MMM YYYY") : "-"}</DetailText>
                             <div className="col-span-5">
-                                <DetailText label="Description">{dataHeader?.description || "-"}</DetailText>
+                                <DetailText label="Description">{dataHeader?.description || ""}</DetailText>
                             </div>
                         </div>
                     </SectionCard>
@@ -188,11 +188,11 @@ const DetailPaymentPlan = ({
                 <div className="mt-5">
                     <LogHistoryInfo
                         data={{
-                            recordId: dataHeader?.id || "-",
+                            recordId: dataHeader?.id || "",
                             createdDate: dataHeader?.createdDate ? moment(dataHeader?.createdDate).format("DD MMM YYYY HH:mm:ss") : "-",
-                            createdBy: dataHeader?.createdBy || "-",
+                            createdBy: dataHeader?.createdBy || "",
                             updatedDate: dataHeader?.updatedDate ? moment(dataHeader?.updatedDate).format("DD MMM YYYY HH:mm:ss") : "-",
-                            updatedBy: dataHeader?.updatedBy || "-"
+                            updatedBy: dataHeader?.updatedBy || ""
                         }} 
                     />
                 </div>

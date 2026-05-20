@@ -23,22 +23,22 @@ const ModalOpenItemDetail = ({ isOpen, handleCancel, data: rawData, loading }) =
         >
             <Spin spinning={loading}>
                 <div className="flex flex-col gap-4">
-                    <SectionCard title={`CURRENCY ${data?.currency || "-"}`}>
+                    <SectionCard title={`CURRENCY ${data?.currency || ""}`}>
                         <div className="grid grid-cols-4 gap-y-6 gap-x-4">
-                            <DetailText label="Invoice No">{data?.invoiceNo || "-"}</DetailText>
-                            <DetailText label="Invoice Period">{data?.invoicePeriod || "-"}</DetailText>
-                            <DetailText label="Billing Item">{data?.billingItem || "-"}</DetailText>
+                            <DetailText label="Invoice No">{data?.invoiceNo || ""}</DetailText>
+                            <DetailText label="Invoice Period">{data?.invoicePeriod || ""}</DetailText>
+                            <DetailText label="Billing Item">{data?.billingItem || ""}</DetailText>
                             <DetailText label="Amount">{data?.amount?.toLocaleString() || "0"}</DetailText>
                         </div>
                     </SectionCard>
 
                     <SectionCard title="HISTORY LOG INFORMATION">
                         <div className="grid grid-cols-5 gap-y-6 gap-x-4">
-                            <DetailText label="Record ID">{data?.recordId || "-"}</DetailText>
-                            <DetailText label="Created Date">{data?.createdDate || "-"}</DetailText>
-                            <DetailText label="Created By">{data?.createdBy || "-"}</DetailText>
-                            <DetailText label="Updated Date">{data?.updatedDate || "-"}</DetailText>
-                            <DetailText label="Updated By">{data?.updatedBy || "-"}</DetailText>
+                            <DetailText label="Record ID">{data?.recordId || ""}</DetailText>
+                            <DetailText label="Created Date">{data?.createdDate || ""}</DetailText>
+                            <DetailText label="Created By">{data?.createdBy || ""}</DetailText>
+                            <DetailText label="Updated Date">{data?.updatedDate || ""}</DetailText>
+                            <DetailText label="Updated By">{data?.updatedBy || ""}</DetailText>
                         </div>
                     </SectionCard>
                 </div>

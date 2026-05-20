@@ -218,31 +218,31 @@ const ContentModalConfirmEarlyRepayment = ({
                 <div className="p-5 bg-[#f8f7fa] min-h-[400px] flex flex-col gap-4">
                     <SectionCard title="ACCOUNT INFORMATION">
                         <div className="grid grid-cols-5 gap-y-4 gap-x-4 w-full">
-                            <DetailText label="Customer Number">{detail?.customerNumber || formValues?.customerNumber || "-"}</DetailText>
-                            <DetailText label="Customer Name">{detail?.customerName || formValues?.customerName || "-"}</DetailText>
-                            <DetailText label="Account Number">{detail?.accountNumber || formValues?.accountNumber || "-"}</DetailText>
-                            <DetailText label="Account Name">{detail?.accountName || formValues?.accountName || "-"}</DetailText>
-                            <DetailText label="Account Group Type">{detail?.accountGroupType || formValues?.accountGroupType || "-"}</DetailText>
-                            <DetailText label="SOR">{detail?.sor || formValues?.sor || "-"}</DetailText>
-                            <DetailText label="Cost Center">{detail?.costCenter || formValues?.costCenter || "-"}</DetailText>
-                            <DetailText label="Account Segment">{detail?.accountSegment || formValues?.accountSegment || "-"}</DetailText>
-                            <DetailText label="Meter Reading Code">{detail?.meterReadingCode || formValues?.meterReadingCode || "-"}</DetailText>
-                            <DetailText label="Account Type">{detail?.accountType || formValues?.accountType || "-"}</DetailText>
-                            <DetailText label="Classification Type">{detail?.classificationType || formValues?.classificationType || "-"}</DetailText>
-                            <DetailText label="SAP Cust ID">{detail?.sapCustId || formValues?.sapCustId || "-"}</DetailText>
-                            <DetailText label="Account Status">{detail?.accountStatus || formValues?.accountStatus || "-"}</DetailText>
+                            <DetailText label="Customer Number">{detail?.customerNumber || formValues?.customerNumber || ""}</DetailText>
+                            <DetailText label="Customer Name">{detail?.customerName || formValues?.customerName || ""}</DetailText>
+                            <DetailText label="Account Number">{detail?.accountNumber || formValues?.accountNumber || ""}</DetailText>
+                            <DetailText label="Account Name">{detail?.accountName || formValues?.accountName || ""}</DetailText>
+                            <DetailText label="Account Group Type">{detail?.accountGroupType || formValues?.accountGroupType || ""}</DetailText>
+                            <DetailText label="SOR">{detail?.sor || formValues?.sor || ""}</DetailText>
+                            <DetailText label="Cost Center">{detail?.costCenter || formValues?.costCenter || ""}</DetailText>
+                            <DetailText label="Account Segment">{detail?.accountSegment || formValues?.accountSegment || ""}</DetailText>
+                            <DetailText label="Meter Reading Code">{detail?.meterReadingCode || formValues?.meterReadingCode || ""}</DetailText>
+                            <DetailText label="Account Type">{detail?.accountType || formValues?.accountType || ""}</DetailText>
+                            <DetailText label="Classification Type">{detail?.classificationType || formValues?.classificationType || ""}</DetailText>
+                            <DetailText label="SAP Cust ID">{detail?.sapCustId || formValues?.sapCustId || ""}</DetailText>
+                            <DetailText label="Account Status">{detail?.accountStatus || formValues?.accountStatus || ""}</DetailText>
                         </div>
                     </SectionCard>
 
                     <SectionCard title="INSTALMENT INFORMATION">
                         <div className="grid grid-cols-5 gap-y-4 gap-x-4 w-full">
-                            <DetailText label="Type">{formValues?.type || "-"}</DetailText>
+                            <DetailText label="Type">{formValues?.type || ""}</DetailText>
                             <DetailText label="Tenor">{formValues?.tenor ? `${formValues.tenor} Months` : "-"}</DetailText>
                             <DetailText label="Start Period">{formValues?.startPeriod ? moment(formValues.startPeriod).format("MMM YYYY") : "-"}</DetailText>
-                            <DetailText label="Source">{formValues?.source || "-"}</DetailText>
+                            <DetailText label="Source">{formValues?.source || ""}</DetailText>
                             <DetailText label="Request Date">{formValues?.requestDate ? moment(formValues.requestDate).format("DD MMM YYYY") : "-"}</DetailText>
                             <div className="col-span-5">
-                                <DetailText label="Remark">{formValues?.remark || "-"}</DetailText>
+                                <DetailText label="Remark">{formValues?.remark || ""}</DetailText>
                             </div>
                         </div>
                     </SectionCard>
