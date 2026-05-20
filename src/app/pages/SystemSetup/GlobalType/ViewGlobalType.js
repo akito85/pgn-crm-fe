@@ -7,9 +7,13 @@ import ButtonComponent from "../../../../components/ButtonComponent";
 import SVGIcon from "../../../../assets/Icon/index";
 import { SYSTEM_SETUP_ROUTES } from "../../../../routes/system_setup/setup_routes";
 import {
+  deleteGlobalType,
   downloadExcelGlobalType,
   getAllGlobalTypesPaginate,
 } from "../../../../redux/slices/system_setup/globalTypes";
+import { WarningOutlined } from "@ant-design/icons";
+import { ModalConfirm } from "../../../../components/Modal/ModalPopUp";
+import useIsSuperUser from "../../../../components/useIsSuperUser";
 import BaseContainer from "../../../../components/BaseContainer";
 import TablePagination from "../../../../components/TablePagination";
 import Toolbar from "../../../../components/Toolbar";
@@ -34,6 +38,9 @@ const ViewGlobalType = () => {
   const [searchedColumn, setSearchedColumn] = useState("");
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
+  const [modalDelete, setModalDelete] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
+  const isSuperUser = useIsSuperUser();
 
   // handle fetch
   const handleFetch = useCallback(() => {
@@ -215,8 +222,35 @@ const ViewGlobalType = () => {
           </Tooltip>
         )
       }
-    }
+    },
+    ...(isSuperUser ? [{
+      action: 'Delete',
+      type: 'table',
+      render: (record) => (
+        <Tooltip title="Delete">
+          <SVGIcon
+            name="IconDelete"
+            width={24}
+            style={{ cursor: 'pointer' }}
+            onClick={() => {
+              setDeleteId(record?.glbTypeId);
+              setModalDelete(true);
+            }}
+          />
+        </Tooltip>
+      )
+    }] : []),
   ];
+
+  const handleDelete = async () => {
+    try {
+      setModalDelete(false);
+      await dispatch(deleteGlobalType(deleteId))?.unwrap();
+      await handleFetch()?.unwrap();
+    } catch (error) {
+      await handleFetch()?.unwrap();
+    }
+  };
 
   // handle retry modal error
   const handleRetry = () => {
@@ -244,7 +278,7 @@ const ViewGlobalType = () => {
             <TablePagination
               // loading={loading}
               dataSource={dataSource}
-              columns={[...columns, ...useColumnActionPermission(['update', 'view'], itemActions)]}
+              columns={[...columns, ...useColumnActionPermission(['update', 'view', ...(isSuperUser ? ['delete'] : [])], itemActions)]}
               current={page}
               pageSize={pageSize}
               onChange={handleChange}
@@ -255,6 +289,25 @@ const ViewGlobalType = () => {
           </div>
         </BaseContainer>
       </Spin>
+
+      {/* MODAL DELETE */}
+      <ModalConfirm
+        isOpen={modalDelete}
+        handleCancel={() => setModalDelete(false)}
+        handleOk={handleDelete}
+        header="Delete Global Type"
+        width={500}
+        useOk={true}
+      >
+        <div className="w-full flex flex-col mt-10 justify-end">
+          <div className={"w-full flex flex-row items-center px-10"}>
+            <WarningOutlined style={{ color: "red" }} className={"text-4xl"} />
+            <span className={"text-lg text-black font-bold h-auto mx-auto"}>
+              Are you sure you want to permanently delete this global type? All associated values will also be removed. This cannot be undone.
+            </span>
+          </div>
+        </div>
+      </ModalConfirm>
 
       {/* modal try again */}
       {renderModal()}

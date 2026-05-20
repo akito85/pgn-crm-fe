@@ -2,7 +2,6 @@ import {
   Spin,
   Tree,
   Tooltip,
-  Checkbox,
 } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import BaseContainer from "../../../../components/BaseContainer";
@@ -21,10 +20,12 @@ import ModalCustom from "../../../../components/Modal/ModalCustom";
 import { useDispatch, useSelector } from "react-redux";
 import {
   activeAndInactiveGroupAccess,
+  deleteGroupAccess,
   detailGroupAccess,
   downloadGroupAccess,
   getAllGroupAccessPaginate,
 } from "../../../../redux/slices/system_setup/group_access";
+import useIsSuperUser from "../../../../components/useIsSuperUser";
 import { SYSTEM_SETUP_ROUTES } from "../../../../routes/system_setup/setup_routes";
 import moment from "moment";
 import {
@@ -64,6 +65,9 @@ const GroupAccess = () => {
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
   const [body, setBody] = useState({});
+  const [modalDelete, setModalDelete] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
+  const isSuperUser = useIsSuperUser();
 
   // handle fetch
   const handleFetch = useCallback(() => {
@@ -171,6 +175,17 @@ const GroupAccess = () => {
   // handle cancel modal
   const handleCancel = () => {
     setModalInactive(false);
+    setModalDelete(false);
+  };
+
+  const handleDelete = async () => {
+    try {
+      handleCancel();
+      await dispatch(deleteGroupAccess(deleteId))?.unwrap();
+      await handleFetch()?.unwrap();
+    } catch (error) {
+      await handleFetch()?.unwrap();
+    }
   };
 
   const handleChange = (pageChange, pageSizeChange) => {
@@ -313,25 +328,38 @@ const GroupAccess = () => {
     {
       action: 'Activate',
       type: 'table',
-      render: (record, data_length) => {
-        return (
-          <Tooltip
-            title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}
-          >
-            <div>
-              <Checkbox
-                onClick={() => {
-                  setModalInactive(true);
-                  setGaId(record?.gaId);
-                  setStatus(record?.status);
-                }}
-                checked={record?.status !== "ACTIVE"}
-              />
-            </div>
-          </Tooltip>
-        )
-      }
-    }
+      render: (record) => (
+        <Tooltip title={record?.status === "ACTIVE" ? "Inactivate" : "Activate"}>
+          <SVGIcon
+            name="IconEye"
+            width={24}
+            color={record?.status === "ACTIVE" ? "#ACC424" : "#8D91A0"}
+            onClick={() => {
+              setModalInactive(true);
+              setGaId(record?.gaId);
+              setStatus(record?.status);
+            }}
+          />
+        </Tooltip>
+      )
+    },
+    ...(isSuperUser ? [{
+      action: 'Delete',
+      type: 'table',
+      render: (record) => (
+        <Tooltip title="Delete">
+          <SVGIcon
+            name="IconDelete"
+            width={24}
+            style={{ cursor: 'pointer' }}
+            onClick={() => {
+              setDeleteId(record?.gaId);
+              setModalDelete(true);
+            }}
+          />
+        </Tooltip>
+      )
+    }] : []),
   ];
 
   // handle retry modal error
@@ -367,7 +395,7 @@ const GroupAccess = () => {
               current={page}
               pageSize={pageSize}
               onChange={handleChange}
-              columns={[...columns, ...useColumnActionPermission(['view', 'update', 'activate'], itemActions)]}
+              columns={[...columns, ...useColumnActionPermission(['view', 'update', 'activate', ...(isSuperUser ? ['delete'] : [])], itemActions)]}
               onSort={onSort}
               tableScrolled={{
                 x: 1200,
@@ -484,6 +512,25 @@ const GroupAccess = () => {
           <p className="pl-11">Your data was not created. Please try again.</p>
         </div>
       </ModalSuccess>
+
+      {/* MODAL DELETE */}
+      <ModalConfirm
+        isOpen={modalDelete}
+        handleCancel={() => setModalDelete(false)}
+        handleOk={handleDelete}
+        header="Delete Group Access"
+        width={500}
+        useOk={true}
+      >
+        <div className="w-full flex flex-col mt-10 justify-end">
+          <div className={"w-full flex flex-row items-center px-10"}>
+            <WarningOutlined style={{ color: "red" }} className={"text-4xl"} />
+            <span className={"text-lg text-black font-bold h-auto mx-auto"}>
+              Are you sure you want to permanently delete this group access? All menu and action assignments will also be removed. This cannot be undone.
+            </span>
+          </div>
+        </div>
+      </ModalConfirm>
 
       {/* modal try again */}
       {renderModal()}

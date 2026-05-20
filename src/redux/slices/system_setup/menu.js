@@ -173,6 +173,24 @@ export const getActions = createAsyncThunk(
   }
 );
 
+export const deleteMenu = createAsyncThunk(
+  "DELETE_MENU",
+  async (id, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/menus/${id}`;
+      const response = await userHttpService.deleteData(url);
+      const successBody = { title: "Successful", description: "Menu deleted successfully." };
+      thunkAPI.dispatch(showModalSuccess(successBody));
+      return response.data;
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({ error: errorBody(errorCode(error), "deleted", errorMessage(error)), action: "DELETE_MENU", back: false })
+      );
+      return thunkAPI.rejectWithValue(error?.response?.data);
+    }
+  }
+);
+
 const mainMenuSlice = createSlice({
   name: "main_Menu",
   initialState,

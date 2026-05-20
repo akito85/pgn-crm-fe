@@ -1,313 +1,299 @@
-import React, { useCallback, useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import { useSelector, useDispatch } from "react-redux";
-import BaseContainer from "../../../../components/BaseContainer";
-import {
-  Spin,
-  Checkbox,
-  Tooltip,
-} from "antd";
+import NxCardContainer from "../../../../components/Nx/NxCardContainer";
+import NxTable from "../../../../components/Nx/NxTable";
+import { Tooltip } from "antd";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import ModalCustom from "../../../../components/Modal/ModalCustom";
-import {
-  DownloadOutlined,
-  PlusOutlined,
-  WarningOutlined,
-} from "@ant-design/icons";
+import { PlusOutlined, WarningOutlined } from "@ant-design/icons";
 import { Link, NavLink } from "react-router-dom";
-import { useState } from "react";
-import TablePagination from "../../../../components/TablePagination";
 import { SYSTEM_SETUP_ROUTES } from "../../../../routes/system_setup/setup_routes";
 import {
+  deleteMenu,
   downloadMenu,
   getAllMenuPaginate,
   getMenuDetail,
   inactiveMenu,
 } from "../../../../redux/slices/system_setup/menu";
+import useIsSuperUser from "../../../../components/useIsSuperUser";
 import SVGIcon from "../../../../assets/Icon/index";
 import DetailMenuLayout from "./DetailMenuLayout";
-import {
-  ModalConfirm,
-} from "../../../../components/Modal/ModalPopUp";
-import { renderColumn } from "../../../../utils";
-import Toolbar from "../../../../components/Toolbar";
+import { ModalConfirm } from "../../../../components/Modal/ModalPopUp";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
 import { useTryAgainHooks } from "../../../../utils/useTryAgainHooks";
-import { getColumnSearchPropsPaging } from "../../../../utils/getColumnSearchProps";
+import StatusComponent from "../../../../components/StatusComponent";
+
+const OPERATOR_MAP = {
+  "Contains": "LIKE",
+  "Equal to": "EQUALS",
+  "Not equal to": "NOT_EQUALS",
+  "Greater than": "GREATER_THAN",
+  "Less than": "LESS_THAN",
+  "Is empty": "IS_NULL",
+  "Is not empty": "IS_NOT_NULL",
+};
 
 const Menu = () => {
   const dispatch = useDispatch();
-  const { data, data_detail, loading } = useSelector(
-    (state) => state.main_Menu
-  );
-  const { bodyError } = useSelector(state => state?.general);
+  const { data_detail } = useSelector((state) => state.main_Menu);
+  const { bodyError } = useSelector((state) => state?.general);
 
-  // state
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const rawToken = useSelector((state) => state.auth?.token);
+  const userId = useMemo(() => {
+    try {
+      const t = JSON.parse(rawToken || "{}");
+      return t?.userId || t?.id || t?.username || null;
+    } catch {
+      return null;
+    }
+  }, [rawToken]);
+
+  // Infinite scroll data state
+  const [allData, setAllData] = useState([]);
+  const [totalElements, setTotalElements] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [pageSize, setPageSize] = useState(30);
+  const [sort, setSort] = useState("");
+  const [advancedSearch, setAdvancedSearch] = useState(null);
+  const [fixedColumns, setFixedColumns] = useState({ left: [], right: [] });
+
+  // Modal state
   const [modalInactive, setModalInactive] = useState(false);
   const [modalDetail, setModalDetail] = useState(false);
-  const [modalType, setModalType] = useState("");
   const [id, setId] = useState("");
-  const [status, setStatus] = useState();
-  const searchInput = useRef(null);
-  const [searchedColumn, setSearchedColumn] = useState("");
-  const [searchText, setSearchText] = useState("");
-  const [sort, setSort] = useState("");
-  const [search, setSearch] = useState({});
+  const [status, setStatus] = useState("");
   const [body, setBody] = useState({});
+  const [modalDelete, setModalDelete] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
 
-  // handle fetch
-  const handleFetch = useCallback(() => {
-    dispatch(
-      getAllMenuPaginate({ search: encodeURIComponent(JSON?.stringify(search)), page, pageSize, sort })
-    );
-  }, [dispatch, page, pageSize, search, sort]);
+  const isSuperUser = useIsSuperUser();
 
+  const pageRef = useRef(0);
+  const isFetchingRef = useRef(false);
+  const hasMoreRef = useRef(false);
+
+  const buildSearch = useCallback((advSearch) => {
+    const combined = {};
+    const applyFilter = (f) => {
+      if (!f.column) return;
+      const selector = OPERATOR_MAP[f.operator] || "LIKE";
+      const isNullOp = selector === "IS_NULL" || selector === "IS_NOT_NULL";
+      if (isNullOp) {
+        combined[f.column] = `~${selector}`;
+      } else if (f.value) {
+        combined[f.column] = `${f.value}~${selector}`;
+      }
+    };
+    if (advSearch?.filters) advSearch.filters.forEach(applyFilter);
+    if (advSearch?.filterRules) advSearch.filterRules.forEach((rule) => rule.filters.forEach(applyFilter));
+    return encodeURIComponent(JSON.stringify(combined));
+  }, []);
+
+  const fetchPage = useCallback(
+    async (page, replace = false, signal = null) => {
+      if (isFetchingRef.current) return;
+      if (signal?.aborted) return;
+      isFetchingRef.current = true;
+      setIsLoading(true);
+      try {
+        const reqSearch = buildSearch(advancedSearch);
+        const result = await dispatch(
+          getAllMenuPaginate({ page: page + 1, pageSize, sort, search: reqSearch })
+        ).unwrap();
+        if (signal?.aborted) return;
+        const rows = result?.result ?? [];
+        const pageInfo = result?.page ?? {};
+        const nextHasMore = page < (pageInfo.totalPages ?? 0) - 1;
+        setAllData((prev) => (replace ? rows : [...prev, ...rows]));
+        setTotalElements(pageInfo.totalElements ?? 0);
+        setHasMore(nextHasMore);
+        hasMoreRef.current = nextHasMore;
+        pageRef.current = page;
+      } catch (e) {
+        if (!signal?.aborted) console.error("Menu fetchPage error", e);
+      } finally {
+        isFetchingRef.current = false;
+        if (!signal?.aborted) setIsLoading(false);
+      }
+    },
+    [advancedSearch, sort, pageSize, dispatch, buildSearch]
+  );
 
   useEffect(() => {
-    handleFetch()
-  }, [handleFetch]);
+    const signal = { aborted: false };
+    pageRef.current = 0;
+    setAllData([]);
+    setHasMore(false);
+    setIsLoading(true);
+    fetchPage(0, true, signal);
+    return () => {
+      signal.aborted = true;
+      isFetchingRef.current = false;
+    };
+  }, [advancedSearch, sort, pageSize]); // intentionally exclude fetchPage
 
+  const onLoadMore = useCallback(() => {
+    if (!hasMoreRef.current || isFetchingRef.current) return;
+    return fetchPage(pageRef.current + 1, false);
+  }, [fetchPage]);
 
-  // handle detail
-  const handleDetail = async (id) => {
+  const onSort = useCallback((_, __, sortInfo) => {
+    const dataSort = sortInfo.order
+      ? `${sortInfo.field}~${sortInfo.order === "ascend" ? "asc" : "desc"}`
+      : "";
+    setSort(dataSort);
+  }, []);
+
+  const onAdvanceSearch = useCallback((searchData) => {
+    setAdvancedSearch(searchData);
+  }, []);
+
+  const handleChange = useCallback((_, pageSizeChange) => {
+    setPageSize(pageSizeChange);
+  }, []);
+
+  const handleDownload = useCallback(() => {
+    dispatch(
+      downloadMenu({
+        page: 1,
+        pageSize: totalElements || 1000,
+        sort,
+        search: buildSearch(advancedSearch),
+      })
+    );
+  }, [dispatch, sort, totalElements, advancedSearch, buildSearch]);
+
+  const resetAndReload = useCallback(() => {
+    const signal = { aborted: false };
+    pageRef.current = 0;
+    setAllData([]);
+    setHasMore(false);
+    setIsLoading(true);
+    fetchPage(0, true, signal);
+  }, [fetchPage]);
+
+  const handleCancel = useCallback(() => {
+    setModalInactive(false);
+    setModalDelete(false);
+  }, []);
+
+  const handleOk = async () => {
+    const payload = { id, status };
+    setBody(payload);
+    handleCancel();
     try {
-      setBody(id)
-      await dispatch(getMenuDetail(id))?.unwrap();
+      await dispatch(inactiveMenu(payload))?.unwrap();
+    } catch {}
+    resetAndReload();
+  };
+
+  const handleDetail = async (menuId) => {
+    try {
+      setBody(menuId);
+      await dispatch(getMenuDetail(menuId))?.unwrap();
       setModalDetail(true);
-    } catch (error) {
+    } catch {
       setModalDetail(false);
     }
   };
 
-
-  const handleChange = (pageChange, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
-    setPage(tempPage);
-    setPageSize(pageSizeChange);
-  };
-  const handleSearch = (selectedKeys, confirm, dataIndex) => {
-    confirm();
-    setSearchText(selectedKeys[0]);
-    setSearchedColumn(dataIndex);
-    setSearch((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
-      }
-      return {
-        ...prevState,
-        [dataIndex]: selectedKeys[0],
-      };
-    });
+  const handleDelete = async () => {
+    handleCancel();
+    try {
+      await dispatch(deleteMenu(deleteId))?.unwrap();
+    } catch {}
+    resetAndReload();
   };
 
-  // onsort
-  const onSort = (_, __, sort) => {
-    const dataSort = sort.order
-      ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
-      : "";
-    setSort(dataSort);
-  };
-
-
-  // handle download 
-  const handleDownload = () => {
-    dispatch(
-      downloadMenu({
-        page,
-        pageSize,
-        sort,
-        search: encodeURIComponent(JSON?.stringify(search)),
-      })
-    );
-  }
-
-  const handleCancel = () => {
-    setModalInactive(false);
-
-  }
-  const columns = [
+  const columns = useMemo(() => [
     {
       title: "NO",
+      key: "no",
       width: 60,
       align: "center",
-      render: (text, object, index) => (page - 1) * pageSize + index + 1,
+      render: (_, __, index) => index + 1,
     },
     {
       title: "MENU NAME",
       dataIndex: "name",
+      key: "name",
       sorter: true,
       width: 240,
-      ellipsis: {
-        showTitle: false,
-      },
-      ...getColumnSearchPropsPaging(
-        "name",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch
-      ),
-      render: (text) => renderColumn('name', searchedColumn, searchText, text, true, 'input', search)
+      ellipsis: { showTitle: false },
     },
     {
       title: "PATH",
       dataIndex: "path",
+      key: "path",
       width: 240,
       sorter: true,
       align: "left",
-      ellipsis: {
-        showTitle: false,
-      },
-      ...getColumnSearchPropsPaging(
-        "path",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch
-      ),
-      render: (text) => renderColumn('path', searchedColumn, searchText, text, true, 'input', search)
-
+      ellipsis: { showTitle: false },
     },
     {
       title: "MENU TYPE",
       dataIndex: "menuType",
+      key: "menuType",
       align: "center",
       sorter: true,
-      ...getColumnSearchPropsPaging(
-        "menuType",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch
-      ),
-      render: (text) => renderColumn('menuType', searchedColumn, searchText, text, false, 'input', search)
+      width: 160,
     },
     {
       title: "PARENT",
       dataIndex: "parentName",
-      // width: 125,
+      key: "parentName",
       sorter: true,
-      ellipsis: {
-        showTitle: false,
-      },
-      ...getColumnSearchPropsPaging(
-        "parentName",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch
-      ),
-      render: (text) => renderColumn('parentName', searchedColumn, searchText, text, true, 'input', search)
-
+      ellipsis: { showTitle: false },
     },
     {
       title: "IS PAGE",
       dataIndex: "isPage",
-      // width: 120,
+      key: "isPage",
       align: "center",
       sorter: true,
-      ...getColumnSearchPropsPaging(
-        "isPage",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch
-      ),
-      render: (text) => renderColumn('isPage', searchedColumn, searchText, text, false, 'input', search)
+      width: 100,
     },
     {
       title: "ORDER",
       dataIndex: "menuOrder",
-      width: 100,
+      key: "menuOrder",
+      width: 90,
       align: "center",
       sorter: true,
-      ...getColumnSearchPropsPaging(
-        "menuOrder",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch
-      ),
-      render: (text) => renderColumn('menuOrder', searchedColumn, searchText, text, false, 'input', search)
     },
     {
       title: "DESCRIPTION",
       dataIndex: "description",
-      width: 270,
+      key: "description",
       align: "left",
       sorter: true,
-      ellipsis: {
-        showTitle: false,
-      },
-      ...getColumnSearchPropsPaging(
-        "description",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch
-      ),
-      render: (text) => renderColumn('menuOrder', searchedColumn, searchText, text, true, 'input', search)
+      ellipsis: { showTitle: false },
     },
     {
       title: "STATUS",
       dataIndex: "status",
+      key: "status",
       width: 120,
+      align: "center",
       sorter: true,
       fixed: "right",
-      ...getColumnSearchPropsPaging(
-        "status",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch
-      ),
-      render: (text) => renderColumn('menuOrder', searchedColumn, searchText, text, false, 'status', search)
+      render: (text) => {
+        const label = text
+          ? text.charAt(0).toUpperCase() + text.slice(1).toLowerCase()
+          : text;
+        return label ? (
+          <StatusComponent colour={text} size="small">{label}</StatusComponent>
+        ) : text;
+      },
     },
-  ];
+  ], []);
 
-  const routes = [
+  const itemActions = useMemo(() => [
+    // Toolbar actions
     {
-      path: "",
-      breadcrumbName: "System Setup",
-    },
-    {
-      path: SYSTEM_SETUP_ROUTES.VIEW_MENU,
-      breadcrumbName: "Menu",
-    },
-  ];
-
-  const handleOk = async () => {
-    try {
-      const payload = { id: id, status: status };
-      setBody(payload)
-      handleCancel()
-      await dispatch(inactiveMenu(payload))?.unwrap();
-      await handleFetch()?.unwrap()
-    } catch (error) {
-      await handleFetch()?.unwrap()
-      handleCancel()
-    }
-  };
-
-  // item actions
-  const itemActions = [
-    // toolbar items
-    {
-      action: 'Download',
-      render: (
-        <ButtonComponent
-          icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
-          type={"submit"}
-          onClick={handleDownload}
-        >
-          Download List
-        </ButtonComponent>
-      )
-    },
-    {
-      action: 'Create',
+      action: "Create",
       render: (
         <NavLink to={SYSTEM_SETUP_ROUTES.CREATE_MENU} state={{ x: 1 }}>
           <ButtonComponent
@@ -317,123 +303,150 @@ const Menu = () => {
             Create Menu
           </ButtonComponent>
         </NavLink>
-      )
+      ),
     },
-
-    // column action
+    // Table column actions
     {
-      action: 'View',
-      type: 'table',
-      render: (record, data_length) => {
-        return (
-          <Tooltip title="Detail">
-            <div
-              onClick={() => {
-                handleDetail(record?.menuId);
-                setModalType("detail");
-              }}
-            >
-              <SVGIcon name="IconDetail" width={24} />
-            </div>
-          </Tooltip>
-        )
-      }
+      action: "View",
+      type: "table",
+      render: (record) => (
+        <Tooltip title="Detail">
+          <SVGIcon
+            name="IconDetail"
+            width={24}
+            onClick={() => handleDetail(record?.menuId)}
+          />
+        </Tooltip>
+      ),
     },
     {
-      action: 'Update',
-      type: 'table',
-      render: (record, data_length) => {
+      action: "Update",
+      type: "table",
+      render: (record) => {
+        const active = record?.status?.toLowerCase() !== "inactive";
         return (
           <Tooltip title="Update">
-            <div className={`${record?.status?.toLowerCase() === "inactive" && 'cursor-not-allowed'}`}>
-              <Link
-                to={record?.status?.toLowerCase() !== "inactive" && SYSTEM_SETUP_ROUTES.UPDATE_MENU}
-                state={record?.status?.toLowerCase() !== "inactive" && { id: record?.menuId }}
-              >
-                <div border={false}>
-                  <SVGIcon
-                    name="IconEdit"
-                    width={24}
-                    className={`${record?.status?.toLowerCase() === "inactive" && 'cursor-not-allowed'}`}
-                    color={record?.status?.toLowerCase() === 'inactive' ? "#8D91A0" : "#ACC424"} />
-                </div>
-              </Link>
-            </div>
+            <Link
+              to={active ? SYSTEM_SETUP_ROUTES.UPDATE_MENU : undefined}
+              state={active ? { id: record?.menuId } : undefined}
+              style={{ pointerEvents: active ? "auto" : "none" }}
+            >
+              <SVGIcon
+                name="IconEdit"
+                width={24}
+                color={active ? "#ACC424" : "#8D91A0"}
+              />
+            </Link>
           </Tooltip>
-        )
-      }
+        );
+      },
     },
     {
-      action: 'Activate',
-      type: 'table',
-      render: (record, data_length) => {
-        return (
-          <Tooltip
-            title={record?.status === "ACTIVE" ? "Inactivate" : "Activate"}
-          >
-            <div>
-              <Checkbox
-                border={false}
-                onClick={() => {
-                  setModalInactive(true);
-                  setId(record?.menuId);
-                  setStatus(record?.status);
-                }}
-                checked={record?.status !== "ACTIVE"}
-              />
-            </div>
-          </Tooltip>
-        )
-      }
-    }
+      action: "Activate",
+      type: "table",
+      render: (record) => (
+        <Tooltip title={record?.status === "ACTIVE" ? "Inactivate" : "Activate"}>
+          <SVGIcon
+            name="IconEye"
+            width={24}
+            color={record?.status === "ACTIVE" ? "#ACC424" : "#8D91A0"}
+            onClick={() => {
+              setModalInactive(true);
+              setId(record?.menuId);
+              setStatus(record?.status);
+            }}
+          />
+        </Tooltip>
+      ),
+    },
+    ...(isSuperUser ? [{
+      action: "Delete",
+      type: "table",
+      render: (record) => (
+        <Tooltip title="Delete">
+          <SVGIcon
+            name="IconDelete"
+            width={24}
+            color="#D32F2F"
+            onClick={() => {
+              setDeleteId(record?.menuId);
+              setModalDelete(true);
+            }}
+          />
+        </Tooltip>
+      ),
+    }] : []),
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  ], [isSuperUser]);
+
+  const actionColumns = useColumnActionPermission(
+    ["View", "Update", "Activate", ...(isSuperUser ? ["Delete"] : [])],
+    itemActions
+  );
+
+  const allColumns = useMemo(
+    () => [...columns, ...actionColumns],
+    [columns, actionColumns]
+  );
+
+  const routes = [
+    { path: "", breadcrumbName: "System Setup" },
+    { path: SYSTEM_SETUP_ROUTES.VIEW_MENU, breadcrumbName: "Menu" },
   ];
 
-  // handle retry modal error
-  const handleRetry = () => {
-    try {
-      handleCancelTryAgain();
-      if (bodyError?.action === "INACTIVE_MENU") {
-        dispatch(inactiveMenu(body));
-      } else if (bodyError?.action === "GET_MENU_DETAIL") {
-        dispatch(getMenuDetail(body))
-      } else if (bodyError?.action === "DOWNLOAD_MENU") {
-        handleDownload()
-      }
-      handleFetch();
-    } catch (error) {
-      handleFetch();
+  const handleRetry = useCallback(() => {
+    handleCancelTryAgain();
+    if (bodyError?.action === "INACTIVE_MENU") {
+      dispatch(inactiveMenu(body));
+    } else if (bodyError?.action === "GET_MENU_DETAIL") {
+      dispatch(getMenuDetail(body));
+    } else if (bodyError?.action === "DOWNLOAD_MENU") {
+      handleDownload();
     }
-  };
+    resetAndReload();
+  }, [handleCancelTryAgain, bodyError, body, dispatch, handleDownload, resetAndReload]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // use hooks handle retry
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
+
   return (
     <>
-      <Spin spinning={loading} className={"w-full top-20"}>
-        <BreadCrumb routes={routes} />
-        <Toolbar items={itemActions} />
-        <BreadCrumb pageName={["System Setup", "Menu"]} />
-        <BaseContainer header={"MENU LIST"}>
-          <div className={"w-full"}>
-            <TablePagination
-              dataSource={data?.result}
-              totalData={data?.page?.totalElements}
-              current={page}
-              pageSize={pageSize}
-              onChange={handleChange}
-              tableScrolled={{ y: 525, x: 1800 }}
-              columns={[...columns, ...useColumnActionPermission(['view', 'update', 'activate'], itemActions)]}
-              onSort={onSort}
-            />
-          </div>
-        </BaseContainer>
-      </Spin>
+      <BreadCrumb routes={routes} />
 
+      <NxCardContainer header="MENU LIST" className="mt-4" actions={itemActions}>
+        <NxTable
+          idTable="menu-list"
+          userId={userId}
+          dataSource={allData}
+          columns={allColumns}
+          columnDefinitions={columns}
+          rowKey={(r) => r.menuId ?? r.id}
+          loading={isLoading}
+          totalData={totalElements}
+          current={pageRef.current + 1}
+          pageSize={pageSize}
+          onChange={handleChange}
+          onSizeChanger={handleChange}
+          onSort={onSort}
+          onAdvanceSearch={onAdvanceSearch}
+          fixedColumns={fixedColumns}
+          setFixedColumns={setFixedColumns}
+          useInfiniteScroll={true}
+          onLoadMore={onLoadMore}
+          hasMore={hasMore}
+          handleDownload={handleDownload}
+          showExport={true}
+          showAdvanceSearch={true}
+          showSearchBar={true}
+          tableScrolled={{ x: 1800, y: 525 }}
+        />
+      </NxCardContainer>
+
+      {/* Detail modal */}
       <ModalCustom
         isOpen={modalDetail}
-        header={"MENU DETAIL"}
-        width={modalType === "detail" ? 1000 : 500}
-        type={"detail"}
+        header="MENU DETAIL"
+        width={1000}
+        type="detail"
         handleCancel={() => setModalDetail(false)}
       >
         <DetailMenuLayout data_detail={data_detail} />
@@ -444,6 +457,7 @@ const Menu = () => {
         </div>
       </ModalCustom>
 
+      {/* Activate / Inactivate modal */}
       <ModalConfirm
         isOpen={modalInactive}
         handleCancel={() => setModalInactive(false)}
@@ -452,17 +466,34 @@ const Menu = () => {
         useOk={true}
       >
         <div className="w-full flex flex-col mt-10 justify-end">
-          <div className={"w-full flex flex-row items-center px-10"}>
-            <WarningOutlined style={{ color: "red" }} className={"text-4xl"} />
-            <span className={"text-lg text-black font-bold h-auto mx-auto"}>
-              {`Are you sure want to ${status === "ACTIVE" ? "inactivate" : "activate"
-                }?`}
+          <div className="w-full flex flex-row items-center px-10">
+            <WarningOutlined style={{ color: "red" }} className="text-4xl" />
+            <span className="text-lg text-black font-bold h-auto mx-auto">
+              {`Are you sure you want to ${status === "ACTIVE" ? "inactivate" : "activate"}?`}
             </span>
           </div>
         </div>
       </ModalConfirm>
 
-      {/* modal try again */}
+      {/* Delete modal */}
+      <ModalConfirm
+        isOpen={modalDelete}
+        handleCancel={() => setModalDelete(false)}
+        handleOk={handleDelete}
+        header="Delete Menu"
+        width={500}
+        useOk={true}
+      >
+        <div className="w-full flex flex-col mt-10 justify-end">
+          <div className="w-full flex flex-row items-center px-10">
+            <WarningOutlined style={{ color: "red" }} className="text-4xl" />
+            <span className="text-lg text-black font-bold h-auto mx-auto">
+              Are you sure you want to permanently delete this menu? This cannot be undone.
+            </span>
+          </div>
+        </div>
+      </ModalConfirm>
+
       {renderModal()}
     </>
   );

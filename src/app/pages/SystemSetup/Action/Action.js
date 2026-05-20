@@ -5,7 +5,6 @@ import BaseContainer from "../../../../components/BaseContainer";
 import {
   Spin,
   Tooltip,
-  Checkbox,
 } from "antd";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import ModalCustom from "../../../../components/Modal/ModalCustom";
@@ -21,11 +20,13 @@ import DetailText from "../../../../components/DetailText";
 import moment from "moment";
 import { hasValue, renderColumn, toTitleCase } from "../../../../utils";
 import {
+  deleteAction,
   downloadAction,
   getAllActionPaginate,
   getDetailAction,
   inactiveAction,
 } from "../../../../redux/slices/system_setup/action";
+import useIsSuperUser from "../../../../components/useIsSuperUser";
 import { SYSTEM_SETUP_ROUTES } from "../../../../routes/system_setup/setup_routes";
 import TablePagination from "../../../../components/TablePagination";
 import {
@@ -59,6 +60,9 @@ const Action = () => {
   const [search, setSearch] = useState({});
   const [status, setStatus] = useState("");
   const [body, setBody] = useState({});
+  const [modalDelete, setModalDelete] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
+  const isSuperUser = useIsSuperUser();
 
   // handle fetch
   const handleFetch = useCallback(() => {
@@ -164,7 +168,17 @@ const Action = () => {
   const handleCancel = () => {
     setModalDetail(false);
     setModalActive(false);
+    setModalDelete(false);
+  };
 
+  const handleDelete = async () => {
+    try {
+      handleCancel();
+      await dispatch(deleteAction(deleteId))?.unwrap();
+      await handleFetch()?.unwrap();
+    } catch (error) {
+      await handleFetch()?.unwrap();
+    }
   };
 
 
@@ -281,26 +295,38 @@ const Action = () => {
     {
       action: 'Activate',
       type: 'table',
-      render: (record, data_length) => {
-        return (
-          <Tooltip
-            title={record?.status === "ACTIVE" ? "Inactivate" : "Activate"}
-          >
-            <div>
-              <Checkbox
-                border={false}
-                onClick={() => {
-                  setModalActive(true);
-                  setActId(record?.actionId);
-                  setStatus(record.status);
-                }}
-                checked={record?.status !== "ACTIVE"}
-              />
-            </div>
-          </Tooltip>
-        )
-      }
-    }
+      render: (record) => (
+        <Tooltip title={record?.status === "ACTIVE" ? "Inactivate" : "Activate"}>
+          <SVGIcon
+            name="IconEye"
+            width={24}
+            color={record?.status === "ACTIVE" ? "#ACC424" : "#8D91A0"}
+            onClick={() => {
+              setModalActive(true);
+              setActId(record?.actionId);
+              setStatus(record.status);
+            }}
+          />
+        </Tooltip>
+      )
+    },
+    ...(isSuperUser ? [{
+      action: 'Delete',
+      type: 'table',
+      render: (record) => (
+        <Tooltip title="Delete">
+          <SVGIcon
+            name="IconDelete"
+            width={24}
+            style={{ cursor: 'pointer' }}
+            onClick={() => {
+              setDeleteId(record?.actionId);
+              setModalDelete(true);
+            }}
+          />
+        </Tooltip>
+      )
+    }] : []),
   ];
 
   // handle retry modal error
@@ -336,13 +362,32 @@ const Action = () => {
                   current={page}
                   pageSize={pageSize}
                   onChange={handleChange}
-                  columns={[...columns, ...useColumnActionPermission(['view', 'update', 'activate'], itemActions)]}
+                  columns={[...columns, ...useColumnActionPermission(['view', 'update', 'activate', ...(isSuperUser ? ['delete'] : [])], itemActions)]}
                   onSort={onSort}
                   tableScrolled={{ y: 500, x: 800 }}
                 />
               </div>
             </BaseContainer>
           </Spin>
+
+          {/* MODAL DELETE */}
+          <ModalConfirm
+            isOpen={modalDelete}
+            handleCancel={() => setModalDelete(false)}
+            handleOk={handleDelete}
+            header="Delete Action"
+            width={500}
+            useOk={true}
+          >
+            <div className="w-full flex flex-col mt-10 justify-end">
+              <div className={"w-full flex flex-row items-center px-10"}>
+                <WarningOutlined style={{ color: "red" }} className={"text-4xl"} />
+                <span className={"text-lg text-black font-bold h-auto mx-auto"}>
+                  Are you sure you want to permanently delete this action? This cannot be undone.
+                </span>
+              </div>
+            </div>
+          </ModalConfirm>
 
           {/* MODAL ACTIVE/INACTIVE */}
           <ModalConfirm
