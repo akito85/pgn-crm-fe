@@ -8,7 +8,7 @@ import { SYSTEM_SETUP_ROUTES } from "../../../../../routes/system_setup/setup_ro
 import InputComponent from "../../../../../components/InputComponent"
 import SelectComponent from "../../../../../components/SelectComponent"
 import { useDispatch, useSelector } from "react-redux"
-import { getCriteria, getSourceType, getSrCategory, getSrSubCategory } from "../../../../../redux/slices/system_setup/preRequisiteTemplate"
+import { getAccountGroupType, getAccountSegment, getCriteria, getSourceType, getSrCategory, getSrSubCategory } from "../../../../../redux/slices/system_setup/preRequisiteTemplate"
 import Toolbar from "../../../../../components/Toolbar"
 import NxModal from "../../../../../components/Nx/NxModal"
 import NxTable from "../../../../../components/Nx/NxTable"
@@ -27,6 +27,10 @@ const CreateUpdatePreRequisiteTemplate = ({ formType = "create" }) => {
         loading_sr_sub_category = false,
         list_criteria = [],
         loading_criteria = false,
+        list_account_group_type = [],
+        loading_account_group_type = false,
+        list_account_segment = [],
+        loading_account_segment = false,
     } = useSelector((state) => state.preRequisiteTemplate);
 
     const [criteriaValues, setCriteriaValues] = useState([]);
@@ -39,6 +43,8 @@ const CreateUpdatePreRequisiteTemplate = ({ formType = "create" }) => {
         dispatch(getSrCategory());
         dispatch(getSrSubCategory());
         dispatch(getCriteria());
+        dispatch(getAccountGroupType());
+        dispatch(getAccountSegment());
     }, [dispatch]);
 
     const routes = [
@@ -400,7 +406,20 @@ const CreateUpdatePreRequisiteTemplate = ({ formType = "create" }) => {
                                     rules={[{ required: true, message: `${c.name} is required` }]}
                                     className="no-margin-form"
                                 >
-                                    <InputComponent />
+                                    <SelectComponent>
+                                        {c.value === "ACCOUNT_GROUP_TYPE"
+                                            ? (list_account_group_type || []).map((data, index) => (
+                                                <Select.Option key={index} value={data.value}>
+                                                    {data.name}
+                                                </Select.Option>
+                                            ))
+                                            : (list_account_segment || []).map((data, index) => (
+                                                <Select.Option key={index} value={data.value}>
+                                                    {data.name}
+                                                </Select.Option>
+                                            ))
+                                        }
+                                    </SelectComponent>
                                 </Form.Item>
                             ))}
                         </div>

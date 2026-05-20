@@ -31,6 +31,14 @@ const initialState = {
     // criteria
     loading_criteria: false,
     list_criteria: [],
+
+    // account group type
+    loading_account_group_type: false,
+    list_account_group_type: [],
+
+    // account segment
+    loading_account_segment: false,
+    list_account_segment: [],
 };
 
 export const getPreRequisiteTemplate = createAsyncThunk(
@@ -109,6 +117,32 @@ export const getCriteria = createAsyncThunk(
     async (_, thunkAPI) => {
         try {
             const url = '/v1/dbs/api/pre-requisite-template/list-criteria';
+            const response = await accountManagementService.getDetail(url);
+            return response.data;
+        } catch (error) {
+            return thunkAPI.rejectWithValue(error.response);
+        }
+    }
+);
+
+export const getAccountGroupType = createAsyncThunk(
+    "GET_ACCOUNT_GROUP_TYPE",
+    async (_, thunkAPI) => {
+        try {
+            const url = '/v1/dbs/api/pre-requisite-template/list-account-group-type';
+            const response = await accountManagementService.getDetail(url);
+            return response.data;
+        } catch (error) {
+            return thunkAPI.rejectWithValue(error.response);
+        }
+    }
+);
+
+export const getAccountSegment = createAsyncThunk(
+    "GET_ACCOUNT_SEGMENT",
+    async (_, thunkAPI) => {
+        try {
+            const url = '/v1/dbs/api/pre-requisite-template/list-account-segment';
             const response = await accountManagementService.getDetail(url);
             return response.data;
         } catch (error) {
@@ -229,6 +263,32 @@ const preRequisiteTemplateSlice = createSlice({
         [getCriteria.rejected]: (state) => {
             state.list_criteria = [];
             state.loading_criteria = false;
+        },
+        // Account Group Type
+        [getAccountGroupType.pending]: (state) => {
+            state.list_account_group_type = [];
+            state.loading_account_group_type = true;
+        },
+        [getAccountGroupType.fulfilled]: (state, action) => {
+            state.list_account_group_type = action.payload || [];
+            state.loading_account_group_type = false;
+        },
+        [getAccountGroupType.rejected]: (state) => {
+            state.list_account_group_type = [];
+            state.loading_account_group_type = false;
+        },
+        // Account Segment
+        [getAccountSegment.pending]: (state) => {
+            state.list_account_segment = [];
+            state.loading_account_segment = true;
+        },
+        [getAccountSegment.fulfilled]: (state, action) => {
+            state.list_account_segment = action.payload || [];
+            state.loading_account_segment = false;
+        },
+        [getAccountSegment.rejected]: (state) => {
+            state.list_account_segment = [];
+            state.loading_account_segment = false;
         },
     },
 });
