@@ -140,7 +140,7 @@ const CustomerServiceRequestDetails = ({ type = "standard" }) => {
             idCustomer={idCustomer}
             accountType={accountType}
             data_accountDetail={data_accountDetail}
-            detail_serviceRequest={detail_serviceRequest}
+            data_detail={detail_serviceRequest}
           />
 
           {/* Action Log */}

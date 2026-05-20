@@ -7,7 +7,8 @@ import NxApprovalInput from "./NxApprovalInput";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
 
-const NxInactivateModal = ({
+const NxActivateInactivateModal = ({
+  action = "inactivate",
   isOpen = false,
   handleCloseModal = () => {},
   onFinish = () => {},
@@ -34,10 +35,13 @@ const NxInactivateModal = ({
     [approvalHierarchtDetailsName]: approvalHierarchyDetails,
     [loadingListApprovalOptionsName]: loadingApprovalOptions,
     [loadingListHierarchyDetailName]: loadingHierarchyDetails,
-    [loadingInactivateName]: inactivateLoading,
-  } = useSelector(
-    (state) => state[sliceName]
-  );
+    [loadingInactivateName]: actionLoading,
+  } = useSelector((state) => state[sliceName] ?? {});
+
+  const showApproval = !!sliceName;
+  const derivedHeader = header ?? (action === "inactivate" ? "INACTIVATE" : "ACTIVATE");
+  const alertType = action === "inactivate" ? "warning" : "info";
+  const defaultMessage = `Are you sure you want to ${action} this ${menu} named ${named}?`;
 
   const handleClear = () => {
     form.resetFields();
@@ -53,37 +57,36 @@ const NxInactivateModal = ({
   };
 
   const handleSelectHierarchy = (appHierId) => {
-    if (appHierId)
-      dispatch(getApprovalHierarchyDetails(appHierId));
-  }
+    if (appHierId) dispatch(getApprovalHierarchyDetails(appHierId));
+  };
 
   useEffect(() => {
-    dispatch(getApprovalOptions())
+    if (sliceName) dispatch(getApprovalOptions());
   }, []);
 
   return (
     <NxModal
       isOpen={isOpen}
       handleCancel={handleCancelModalFinal}
-      title={`${header} INFORMATION`}
+      title={`${derivedHeader} INFORMATION`}
       width={width}
       type={"confirmation"}
       footer={
         <div className="flex justify-end">
-          <Button onClick={handleCancelModalFinal} type="menu" disabled={inactivateLoading}>
+          <Button onClick={handleCancelModalFinal} type="menu" disabled={actionLoading}>
             Cancel
           </Button>
           <Button
             form="formApproveReject"
             type="submit"
             htmlType="submit"
-            loading={inactivateLoading}
+            loading={actionLoading}
           >
             Confirm
           </Button>
         </div>
       }
-      loading={inactivateLoading}
+      loading={actionLoading}
     >
       <div className="p-4">
         <Form
@@ -93,30 +96,27 @@ const NxInactivateModal = ({
           onFinish={handleSaveModal}
           className="flex flex-col gap-y-4"
         >
-          {/* Alert Section */}
           <Alert
-            message={
-              customMessage
-                ? customMessage
-                : `Are you sure you want to inactivate this ${menu} named ${named}?`
-            }
+            message={customMessage ?? defaultMessage}
             icon={
               <ExclamationCircleOutlined
                 style={{ fontSize: "16x", color: "#65481C" }}
               />
             }
-            type={"warning"}
+            type={alertType}
             showIcon
             className="p-0 m-0"
           />
-          <NxApprovalInput
-            form={form}
-            hierarchyDetails={approvalHierarchyDetails}
-            options={approvalOptions}
-            handleSelectHierarchy={handleSelectHierarchy}
-            loading={inactivateLoading || loadingApprovalOptions || loadingHierarchyDetails}
-            tableLoading={loadingHierarchyDetails}
-          />
+          {showApproval && (
+            <NxApprovalInput
+              form={form}
+              hierarchyDetails={approvalHierarchyDetails}
+              options={approvalOptions}
+              handleSelectHierarchy={handleSelectHierarchy}
+              loading={actionLoading || loadingApprovalOptions || loadingHierarchyDetails}
+              tableLoading={loadingHierarchyDetails}
+            />
+          )}
           <Form.Item
             name={"remark"}
             label={"Remark"}
@@ -128,7 +128,7 @@ const NxInactivateModal = ({
               rows={1}
               type="textarea"
               placeholder={"Type your remark"}
-              disabled={inactivateLoading}
+              disabled={actionLoading}
             />
           </Form.Item>
         </Form>
@@ -137,4 +137,4 @@ const NxInactivateModal = ({
   );
 };
 
-export default NxInactivateModal;
+export default NxActivateInactivateModal;

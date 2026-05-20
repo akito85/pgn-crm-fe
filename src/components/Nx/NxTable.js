@@ -1797,6 +1797,7 @@ const NxTable = ({
               max-height: none !important;
               line-height: normal !important;
               border-left: none !important;
+              overflow: visible !important;
             }
 
             #${safeId} .ant-table-expanded-row-fixed {

@@ -98,4 +98,10 @@ export const SYSTEM_SETUP_ROUTES = {
   DETAIL_CALENDAR: "/system-setup/calendar/view",
   CREATE_CALENDAR: "/system-setup/calendar/create",
   UPDATE_CALENDAR: "/system-setup/calendar/update",
+
+  // Pre Requisite Template
+  VIEW_PRE_REQUISITE_TEMPLATE: "/system-setup/pre-requisite-template",
+  DETAIL_PRE_REQUISITE_TEMPLATE: "/system-setup/pre-requisite-template/view",
+  CREATE_PRE_REQUISITE_TEMPLATE: "/system-setup/pre-requisite-template/create",
+  UPDATE_PRE_REQUISITE_TEMPLATE: "/system-setup/pre-requisite-template/update",
 };

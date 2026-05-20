@@ -8,7 +8,13 @@ import {
   getRelationshipApprovalHierarchies,
   getRelationshipApprovalHierarchy,
 } from "../../../../../../redux/slices/account_management/detailAccount/relationshipSlice";
-import NxInactivateModal from "../../../../../../components/Nx/NxInactivateModal";
+import {
+  getStandaloneRelationshipApprovalHistory,
+  inactivateStandaloneRelationship,
+  getStandaloneRelationshipApprovalHierarchies,
+  getStandaloneRelationshipApprovalHierarchy,
+} from "../../../../../../redux/slices/relationship/standaloneRelationshipSlice";
+import NxActivateInactivateModal from "../../../../../../components/Nx/NxActivateInactivateModal";
 import NxHistoryModal from "../../../../../../components/Nx/NxHistoryModal";
 import NxCardContainer from "../../../../../../components/Nx/NxCardContainer";
 import { getGrantedAccessAccount } from "../../../../../../redux/slices/account_management/accountManagement";
@@ -17,13 +23,15 @@ import NxBaseContainer from "../../../../../../components/Nx/NxBaseContainer";
 import RelationshipApprovalModal from "./RelationshipApprovalModal";
 
 /**
- * Relationship list table module
- * @param {{ accountId: number; customerId: number; type: string }} props
- * @returns
+ * Relationship list table module.
+ * When isStandalone=true, operates without an account context (cross-account list).
+ *
+ * @param {{ accountId: number; customerId: number; isStandalone: boolean }} props
  */
 const Relationship = ({
   accountId,
   customerId,
+  isStandalone = false,
 }) => {
   // --- Hooks ---
   const location = useLocation();
@@ -32,7 +40,8 @@ const Relationship = ({
   const isStandard = location.pathname.includes("account-standard");
   const isOneTime = location.pathname.includes("account-onetime");
 
-  const { detail_relationshipApprovalHistory } = useSelector((state) => state.relationship);
+  const sliceKey = isStandalone ? "standaloneRelationship" : "relationship";
+  const { detail_relationshipApprovalHistory } = useSelector((state) => state[sliceKey]);
 
   const [refreshSignal, setRefreshSignal] = useState(0);
   const [showApprovalModal, setShowApprovalModal] = useState(false);
@@ -47,14 +56,7 @@ const Relationship = ({
   // --- Functions / handlers ---
   const triggerRefresh = () => setRefreshSignal((prev) => prev + 1);
 
-  /**
-   * Open or close inactivate modal
-   * @param {boolean} show
-   * @param {number} relationshipId
-   * @param {string} name
-   */
   const handleInactivateModal = (show, relationshipId = 0, relatedNumber = "") => {
-    console.log({show, relationshipId, relatedNumber});
     if (show) {
       setInactivateId(relationshipId);
       setInactivateNumber(relatedNumber);
@@ -66,39 +68,34 @@ const Relationship = ({
     }
   };
 
-  /**
-   * @param {string} remark
-   * @param {() => {}} handleClear
-   */
   const handleInactivate = ({ remark, appHierId }, handleClear) => {
-    const body = {
-      id: inactivateId,
-      appHierId,
-      remark,
-    };
+    const body = { id: inactivateId, appHierId, remark };
 
-    dispatch(
-      inactivateRelationship({
-        accountId,
-        body,
-      })
-    )
-      .unwrap()
-      .then(() => {
+    if (isStandalone) {
+      dispatch(inactivateStandaloneRelationship({ body, onSuccess: () => {
         setShowInactiveModal(false);
         triggerRefresh();
         handleClear();
-      })
-      .catch(() => {});
+      }}));
+    } else {
+      dispatch(inactivateRelationship({ accountId, body }))
+        .unwrap()
+        .then(() => {
+          setShowInactiveModal(false);
+          triggerRefresh();
+          handleClear();
+        })
+        .catch(() => {});
+    }
   };
 
-  /**
-   * @param {boolean} show
-   * @param {number} relationshipId
-   */
   const handleApprovalHistoryModal = (show, relationshipId = 0) => {
     if (show) {
-      dispatch(getRelationshipApprovalHistory({ accountId, relationshipId }));
+      if (isStandalone) {
+        dispatch(getStandaloneRelationshipApprovalHistory({ relationshipId }));
+      } else {
+        dispatch(getRelationshipApprovalHistory({ accountId, relationshipId }));
+      }
       setShowApprovalHistoryModal(true);
     } else {
       setShowApprovalHistoryModal(false);
@@ -107,18 +104,15 @@ const Relationship = ({
 
   // --- Effects ---
   useEffect(() => {
-    if (isStandard) {
-      dispatch(
-        getGrantedAccessAccount(`/account-management/account-standard/relationship`)
-      );
+    if (isStandalone) {
+      dispatch(getGrantedAccessAccount("/relationship"));
+    } else if (isStandard) {
+      dispatch(getGrantedAccessAccount("/account-management/account-standard/relationship"));
     } else if (isOneTime) {
-      dispatch(
-        getGrantedAccessAccount(`/account-management/account-onetime/relationship`)
-      );
+      dispatch(getGrantedAccessAccount("/account-management/account-onetime/relationship"));
     }
   }, []);
 
-  // Reshape raw API approval history into { create, inactive } buckets.
   useEffect(() => {
     if (detail_relationshipApprovalHistory && detail_relationshipApprovalHistory?.dataApprover) {
       const temp = {
@@ -131,7 +125,6 @@ const Relationship = ({
           inactive: detail_relationshipApprovalHistory?.dataHistory?.INACTIVE_ACCOUNT_RELATIONSHIP || [],
         },
       };
-
       setDataApprovalHistoryFix(temp);
     } else {
       setDataApprovalHistoryFix({});
@@ -148,6 +141,7 @@ const Relationship = ({
           handleInactivateModal={handleInactivateModal}
           handleApprovalHistoryModal={handleApprovalHistoryModal}
           handleApproval={setShowApprovalModal}
+          isStandalone={isStandalone}
         />
 
         <RelationshipApprovalModal
@@ -155,10 +149,11 @@ const Relationship = ({
           isOpen={showApprovalModal}
           handleCancel={() => setShowApprovalModal(false)}
           afterFinish={triggerRefresh}
+          isStandalone={isStandalone}
         />
 
         {/* Inactivate Modal */}
-        <NxInactivateModal
+        <NxActivateInactivateModal
           isOpen={showInactiveModal}
           header={"INACTIVATE"}
           handleCloseModal={() => handleInactivateModal(false)}
@@ -166,14 +161,14 @@ const Relationship = ({
           onFinish={({ remark, appHierId }, handleClear) => handleInactivate({ remark, appHierId }, handleClear)}
           named={inactivateNumber}
           menu="relationship"
-          sliceName="relationship"
+          sliceName={sliceKey}
           approvalOptionsName="list_relationshipApprovalHierarchy"
           approvalHierarchtDetailsName="detail_relationshipApprovalHierarchy"
           loadingInactivateName="loading_inactivateRelationship"
           loadingListApprovalOptionsName="loading_listRelationshipApprovalHierarchy"
           loadingListHierarchyDetailName="loading_detailRelationshipApprovalHierarchy"
-          getApprovalOptions={getRelationshipApprovalHierarchies}
-          getApprovalHierarchyDetails={getRelationshipApprovalHierarchy}
+          getApprovalOptions={isStandalone ? getStandaloneRelationshipApprovalHierarchies : getRelationshipApprovalHierarchies}
+          getApprovalHierarchyDetails={isStandalone ? getStandaloneRelationshipApprovalHierarchy : getRelationshipApprovalHierarchy}
         />
 
         {/* Approval History Modal */}

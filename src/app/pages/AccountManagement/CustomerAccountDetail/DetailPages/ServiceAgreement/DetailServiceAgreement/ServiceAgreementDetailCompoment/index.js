@@ -169,7 +169,7 @@ const ServiceAgreementDetailCompoment = ({ data, dataDraft }) => {
         <div className="flex flex-col gap-y-4">
           <NxBaseContainer border={true} header={"CREATE FROM"}>
             <div className="w-full grid grid-cols-4 gap-4">
-              <NxDetailText label={"Create From"}>{data?.saInfo?.isCustom === "Y" ? "Product" : data?.saInfo?.isCustom === null ? "" : "Custom"}</NxDetailText>
+              <NxDetailText label={"Create From"}>{data?.saInfo?.isCustom === "N" ? "Product" : data?.saInfo?.isCustom === null ? "" : "Custom"}</NxDetailText>
               <NxDetailText label={"Product"}>{data?.saInfo?.productName}</NxDetailText>
             </div>
           </NxBaseContainer>

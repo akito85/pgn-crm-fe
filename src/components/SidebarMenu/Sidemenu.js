@@ -80,7 +80,6 @@ const whitelistMenu = [
   "Additional Information",
   "Account Equipment",
   "Detail Product",
-  "Relationship",
   "Notifications",
   // Job Execution detail page — accessed via "View Details" action, not direct navigation
   "Detail Job Execution",

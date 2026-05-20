@@ -319,7 +319,6 @@ const UpdateServiceAgreement = ({ saType }) => {
 							priceAdjustmentTwo?.priceAdjustmentDetailId || null
 						].filter(Boolean);
 
-						data?.saInfo?.appHierId && dispatch(getDetailApproval(data?.appHierId));
 						data?.saInfo?.appHierId && setSaApprovalObj({ appHierId: data?.saInfo?.appHierId });
 						setDataListVersion(data?.versionList || [])
 						handleDetailApproval(data?.saInfo?.appHierId)
@@ -606,7 +605,9 @@ const UpdateServiceAgreement = ({ saType }) => {
 
 
 	useEffect(() => {
-		setDataTableApproval(data_approval_detail || []);
+		if (data_approval_detail) {
+			setDataTableApproval(data_approval_detail);
+		}
 	}, [data_approval_detail]);
 
 	// handle get detail approval
@@ -1675,7 +1676,7 @@ const UpdateServiceAgreement = ({ saType }) => {
 			},
 			saDetail: {
 				productVersionId: saDetailObj.productVersionId !== undefined ? saDetailObj.productVersionId : null,
-				isCustom: saDetailObj.createFrom === 1 ? "Y" : "N",
+				isCustom: saDetailObj.createFrom === 1 ? "N" : "Y",
 				productDetail: tempArrayProduct.map((item) => {
 					return {
 						name: item.name !== null ? item.name.value : null,

@@ -24,7 +24,7 @@ import { useTryAgainHooks } from "../../../../utils/useTryAgainHooks";
 
 const DetailPositionHierarchy = () => {
   const navigate = useNavigate();
-  const { data_detail, loading, data_position, data } = useSelector(
+  const { data_detail, loading, data_position, data_employee } = useSelector(
     (state) => state?.position_hierarchy
   );
   const { bodyError } = useSelector((state) => state?.general);
@@ -391,7 +391,7 @@ const DetailPositionHierarchy = () => {
         >
           <Spin spinning={loading}>
             <DetailPosition
-              data_detail={data}
+              data_detail={data_employee}
               handleCancelModal={handleCancel}
               data_position={data_position}
             />

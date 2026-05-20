@@ -72,6 +72,7 @@ import { validateCreateUpdate } from "../../../../../../../redux/slices/general_
 import accountManagementService from "../../../../../../../redux/services/account_management/accountManagementService";
 import moment from "moment";
 import NxBreadCrumb from "../../../../../../../components/Nx/NxBreadCrumb";
+import NxCardContainer from "../../../../../../../components/Nx/NxCardContainer";
 
 const CreateCustomerServiceRequest = (props) => {
   const location = useLocation();
@@ -500,27 +501,40 @@ const CreateCustomerServiceRequest = (props) => {
     {
       title: "Approval",
       content: (
-        <NxApprovalInput
-          form={formCreate}
-          options={list_srApprovalHierarchy}
-          hierarchyDetails={detail_srApprovalHierarchy}
-          handleSelectHierarchy={handleSelectHierarchy}
-        />
+        <NxCardContainer
+          header="Approval Information"
+        >
+          <NxBaseContainer border>
+            <NxApprovalInput
+              form={formCreate}
+              options={list_srApprovalHierarchy}
+              hierarchyDetails={detail_srApprovalHierarchy}
+              handleSelectHierarchy={handleSelectHierarchy}
+            />
+          </NxBaseContainer>
+        </NxCardContainer>
       ),
       disabled: false
     },
     {
       title: "Attachment",
       content: (
-        <NxAttachmentInput
-          data={attachmentDataSource}
-          updateData={setAttachmentDataSource}
-          setDeleted={setDeletedAttachments}
-          getAPICategory={getSrAttachmentCategories}
-          categoryData={list_srAttachmentCategories}
-          service={accountManagementService}
-          configApplication={configApp.ACCOUNT_SERVICE}
-        />
+        <NxCardContainer
+          header="Approval Information"
+        >
+          <NxBaseContainer border>
+            <NxAttachmentInput
+              data={attachmentDataSource}
+              updateData={setAttachmentDataSource}
+              setDeleted={setDeletedAttachments}
+              getAPICategory={getSrAttachmentCategories}
+              categoryData={list_srAttachmentCategories}
+              service={accountManagementService}
+              configApplication={configApp.ACCOUNT_SERVICE}
+              mandatory
+            />
+          </NxBaseContainer>
+        </NxCardContainer>
       ),
       disabled: false
     }

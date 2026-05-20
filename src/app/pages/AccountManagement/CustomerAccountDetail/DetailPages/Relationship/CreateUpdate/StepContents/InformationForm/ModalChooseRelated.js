@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getRelatedObjects } from "../../../../../../../../../redux/slices/account_management/detailAccount/relationshipSlice";
+import { getStandaloneRelatedObjects } from "../../../../../../../../../redux/slices/relationship/standaloneRelationshipSlice";
 import NxModal from "../../../../../../../../../components/Nx/NxModal";
 import NxBaseContainer from "../../../../../../../../../components/Nx/NxBaseContainer";
 import NxTable from "../../../../../../../../../components/Nx/NxTable";
@@ -29,6 +30,7 @@ const ModalChooseRelated = ({
   relationshipType,
   relationshipCategory,
   relationshipTypeName,
+  isStandalone = false,
 }) => {
   // --- Hooks ---
   const dispatch = useDispatch();
@@ -44,7 +46,7 @@ const ModalChooseRelated = ({
 
   // --- Redux ---
   const { list_relatedObject, pagination_listRelatedObject, loading_listRelatedObject } =
-    useSelector((state) => state.relationship);
+    useSelector((state) => isStandalone ? state.standaloneRelationship : state.relationship);
 
   // --- Derived values ---
   // Normalize relationshipTypeName for comparison (convert "Child Of" to "CHILD_OF")
@@ -108,15 +110,10 @@ const ModalChooseRelated = ({
     };
     
     if (nextPage <= totalPages) {
-      await dispatch(
-        getRelatedObjects({
-          accountId,
-          relationshipType,
-          relationshipCategory,
-          body,
-          isLoadMore: true,
-        })
-      );
+      const dispatchArgs = isStandalone
+        ? { subjectAccountId: accountId, relationshipType, relationshipCategory, body, isLoadMore: true }
+        : { accountId, relationshipType, relationshipCategory, body, isLoadMore: true };
+      await dispatch(isStandalone ? getStandaloneRelatedObjects(dispatchArgs) : getRelatedObjects(dispatchArgs));
     }
     setPage(nextPage);
   };
@@ -130,17 +127,12 @@ const ModalChooseRelated = ({
         sort,
         searchs: search,
       }
-      
+
       setPage(0);
-      dispatch(
-        getRelatedObjects({
-          accountId,
-          relationshipType,
-          relationshipCategory,
-          body,
-          isLoadMore: false,
-        })
-      );
+      const dispatchArgs = isStandalone
+        ? { subjectAccountId: accountId, relationshipType, relationshipCategory, body, isLoadMore: false }
+        : { accountId, relationshipType, relationshipCategory, body, isLoadMore: false };
+      dispatch(isStandalone ? getStandaloneRelatedObjects(dispatchArgs) : getRelatedObjects(dispatchArgs));
     }
   }, [dispatch, accountId, relationshipType, relationshipCategory, sort, search]);
 
