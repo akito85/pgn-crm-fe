@@ -160,6 +160,10 @@ const CreateUpdatePreRequisiteTemplate = ({ type = "create" }) => {
         detailForm.resetFields();
     }, [detailForm]);
 
+    const handleClearDetail = useCallback(() => {
+        detailForm.resetFields();
+    }, [detailForm]);
+
     const handleDeleteDetailRow = useCallback((key) => {
         setDetailRows((prev) => prev.filter((r) => r.key !== key));
     }, []);
@@ -483,31 +487,33 @@ const CreateUpdatePreRequisiteTemplate = ({ type = "create" }) => {
                 </NxCardContainer>
             )}
 
-            <NxBaseContainer border>
-                <div className="flex justify-between">
-                    <Button
-                        type="menu"
-                        onClick={() => { navigate(-1); }}
-                    >
-                        Cancel
-                    </Button>
-                    <div className="flex w-full justify-end gap-x-2">
+            {!isDetailMode && (
+                <NxBaseContainer border>
+                    <div className="flex justify-between">
                         <Button
-                            type="reject"
-                            icon={<SVGIcon name="IconButtonDelete" width={14} />}
-                            onClick={handleClearForm}
+                            type="menu"
+                            onClick={() => { navigate(-1); }}
                         >
-                            Clear Data
+                            Cancel
                         </Button>
-                        <Button
-                            type="approve"
-                            onClick={() => form.submit()}
-                        >
-                            Submit
-                        </Button>
+                        <div className="flex w-full justify-end gap-x-2">
+                            <Button
+                                type="reject"
+                                icon={<SVGIcon name="IconButtonClear" width={14} />}
+                                onClick={handleClearForm}
+                            >
+                                Clear Data
+                            </Button>
+                            <Button
+                                type="approve"
+                                onClick={() => form.submit()}
+                            >
+                                Submit
+                            </Button>
+                        </div>
                     </div>
-                </div>
-            </NxBaseContainer>
+                </NxBaseContainer>
+            )}
         </Form>
 
         {/* PRE-REQUISITE INFORMATION — shown only in detail mode */}
@@ -555,10 +561,31 @@ const CreateUpdatePreRequisiteTemplate = ({ type = "create" }) => {
                         </div>
                     </NxBaseContainer>
                 </NxCardContainer>
-                <div className="flex justify-end gap-2">
-                    <Button type="menu" onClick={handleCancelDetail}>Cancel</Button>
-                    <Button type="submit" onClick={handleSaveDetail}>Save</Button>
-                </div>
+                <NxBaseContainer border>
+                    <div className="flex justify-between">
+                        <Button
+                            type="menu"
+                            onClick={handleCancelDetail}
+                        >
+                            Cancel
+                        </Button>
+                        <div className="flex w-full justify-end gap-x-2">
+                            <Button
+                                type="reject"
+                                icon={<SVGIcon name="IconButtonClear" width={14} />}
+                                onClick={handleClearDetail}
+                            >
+                                Clear Data
+                            </Button>
+                            <Button
+                                type="submit"
+                                onClick={handleSaveDetail}
+                            >
+                                Save
+                            </Button>
+                        </div>
+                    </div>
+                </NxBaseContainer>
             </Form>
         )}
 
