@@ -233,11 +233,13 @@ const CreateUpdatePreRequisiteTemplate = ({ formType = "create" }) => {
     const handleDeselectCriteria = (value) => {
         const updated = criteriaValues.filter((item) => item !== value);
         setCriteriaValues(updated);
+        setCriteriaDataRows([]);
         form.setFieldsValue({ criteria: updated });
     }
 
     const handleClearCriteria = () => {
         setCriteriaValues([]);
+        setCriteriaDataRows([]);
         form.setFieldsValue({ criteria: [] });
     }
 
