@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from "react-redux";
 import PreRequisiteTemplateTable from "./PreRequisiteTemplateTable";
 import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
-import NxActivateInactivateModal from "../../../../components/Nx/NxActivateInactivateModal";
 import { inactivePreRequisiteTemplate } from "../../../../redux/slices/system_setup/preRequisiteTemplate";
 import NxModal from "../../../../components/Nx/NxModal";
 import { Alert, Button, Form } from "antd";
@@ -29,11 +28,11 @@ const PreRequisiteTemplate = () => {
         }
     };
 
-    const handleInactivate = (_, handleClear) => {
+    const handleInactivate = () => {
         dispatch(inactivePreRequisiteTemplate(inactivateId))
             .unwrap()
             .then(() => {
-                handleClear();
+                form.resetFields();
                 handleInactivateModal(false);
                 setRefreshSignal((prev) => prev + 1);
             })
