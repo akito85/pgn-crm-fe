@@ -115,9 +115,10 @@ const CreateUpdatePreRequisiteTemplate = ({ type = "create" }) => {
 
     const watchedSourceTypeId = Form.useWatch("sourceType", form);
     const isServiceRequest = useMemo(() => {
-        const found = list_source_type.find((item) => item.id === watchedSourceTypeId);
+        const sourceTypeId = watchedSourceTypeId ?? form.getFieldValue("sourceType");
+        const found = list_source_type.find((item) => item.id === sourceTypeId);
         return found?.value === "SERVICE_REQUEST";
-    }, [watchedSourceTypeId, list_source_type]);
+    }, [watchedSourceTypeId, list_source_type, form]);
 
     const watchedType = Form.useWatch("type", detailForm);
     const isPOS = useMemo(() => {
@@ -486,7 +487,7 @@ const CreateUpdatePreRequisiteTemplate = ({ type = "create" }) => {
                                 </>
                             )}
                         </div>
-                        <div className="w-full grid gap-4 mt-4">
+                        <div className="w-full grid gap-4">
                             <NxDetailText label={"Criteria"}>
                                 {(formSnapshot.criteria || [])
                                     .map((v) => getNameByValue(list_criteria, v))

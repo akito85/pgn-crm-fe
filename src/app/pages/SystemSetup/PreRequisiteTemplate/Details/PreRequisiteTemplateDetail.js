@@ -1,4 +1,4 @@
-import { Spin } from "antd"
+import { Button, Spin } from "antd"
 import { useDispatch, useSelector } from "react-redux"
 import { useLocation, useNavigate } from "react-router-dom";
 import NxBreadCrumb from "../../../../../components/Nx/NxBreadCrumb";
@@ -14,6 +14,7 @@ import { getColumnSearchPropsUseFilteredValueFE } from "../../../../../utils/get
 import { renderColumn } from "../../../../../utils";
 import { nxApplyFixedColumns } from "../../../../../utils/Nx/nxApplyFixedColumns";
 import NxDate from "../../../../../components/Nx/NxDatePicker";
+import SVGIcon from "../../../../../assets/Icon/index";
 
 const columnCriteria = (
     searchCriteria,
@@ -326,6 +327,13 @@ const PreRequisiteTemplateDetail = () => {
                         </div>
                     </NxBaseContainer>
                 </NxCardContainer>
+                <NxBaseContainer border>
+                    <div className="flex justify-between">
+                        <Button type={"menu"} icon={<SVGIcon name="IconChevronLeft" width={14} />} onClick={() => navigate(-1)}>
+                            Back      
+                        </Button>
+                    </div>
+                </NxBaseContainer>
             </div>
         </Spin>
         </>
