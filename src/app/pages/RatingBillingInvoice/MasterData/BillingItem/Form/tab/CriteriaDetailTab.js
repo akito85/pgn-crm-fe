@@ -2,28 +2,30 @@ import React, { useState } from "react";
 import DynamicTableInlineBilling from "../../Table/DynamicTableInlineBilling";
 
 const CriteriaDetailTab = ({
-  criteriaType = null,   
+  criteriaType = null,
   dataTable = [],
-  onDataChange = () => {},
+  onDataChange = () => { },
   data_specialGLList = [],
   data_glAccountList = [],
   data_classificationTypeList = [],
   data_accountTypeList = [],
-  data_criteriaOptions = [], 
+  data_criteriaOptions = [],
   type = "create",
   isEditabled = false,
-  setIsEditabled = () => {},
+  setIsEditabled = () => { },
   startDateLock = null,
   endDateLock = null,
-  setModalRequired = () => {},
+  setModalRequired = () => { },
   onCancelEdit = null,
   defaultNewRowValues = {},
   disabledColumns = [],
   isBank = false,
   data_glAccountBankList = [],
+  onSearchGLAccount = () => { },
 }) => {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [glAccountSearchValue, setGlAccountSearchValue] = useState("");
 
   const handleChangePage = (pageChange, pageSizeChange) => {
     setPage(pageSize !== pageSizeChange ? 1 : pageChange);
@@ -78,13 +80,13 @@ const CriteriaDetailTab = ({
 
   const glAccountOptions = (isBank && data_glAccountBankList?.length > 0)
     ? data_glAccountBankList.map((item) => ({
-        value: item.glNumber,
-        label: `${item.glNumber} - ${item.glDescription}`,
-      }))
+      value: item.glNumber,
+      label: `${item.glNumber} - ${item.glDescription}`,
+    }))
     : data_glAccountList.map((item) => ({
-        value: item.glAccountId ?? item.id,
-        label: `${item.glAccount ?? item.account} - ${item.glAccountDesc ?? item.name}`,
-      }));
+      value: item.glAccountId ?? item.id,
+      label: `${item.glAccount ?? item.account} - ${item.glAccountDesc ?? item.name}`,
+    }));
 
   const specialGlOptions = data_specialGLList.map((item) => ({
     value: item.id,
@@ -106,16 +108,16 @@ const CriteriaDetailTab = ({
     },
     ...(criteriaColConfig
       ? [
-          {
-            title: criteriaColConfig.label,
-            dataIndex: "criteriaValue",
-            inputType: "select",
-            options: criteriaColConfig.options,
-            required: true,
-            width: 200,
-            render: (value) => renderSelectValue(value, criteriaColConfig.options),
-          },
-        ]
+        {
+          title: criteriaColConfig.label,
+          dataIndex: "criteriaValue",
+          inputType: "select",
+          options: criteriaColConfig.options,
+          required: true,
+          width: 200,
+          render: (value) => renderSelectValue(value, criteriaColConfig.options),
+        },
+      ]
       : []),
     {
       title: "GL ACCOUNT",
@@ -124,6 +126,13 @@ const CriteriaDetailTab = ({
       required: true,
       width: 250,
       options: glAccountOptions,
+      onSearch: isBank
+        ? undefined
+        : (val) => {
+          setGlAccountSearchValue(val);
+          onSearchGLAccount(val);
+        },
+      searchValue: glAccountSearchValue,
       render: (value) => renderSelectValue(value, glAccountOptions),
       onClick: (selectedLabel, form) => {
         if (!form) return;
@@ -213,6 +222,7 @@ const CriteriaDetailTab = ({
       defaultNewRowValues={defaultNewRowValues}
       disabledColumns={disabledColumns}
       allowDeleteExisting={true}
+      glAccountSearchValue={glAccountSearchValue}
     />
   );
 };

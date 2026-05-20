@@ -394,9 +394,8 @@ export const createBillingItem = createAsyncThunk(
         } else {
           const errorBody = {
             title: "Failed",
-            description: `Your data was not ${
-              body.isSubmit ? "created" : "submitted"
-            }. ${message}.`,
+            description: `Your data was not ${body.isSubmit ? "created" : "submitted"
+              }. ${message}.`,
             return: false,
           };
           thunkAPI.dispatch(showModalError(errorBody));
@@ -429,9 +428,8 @@ export const updateBillingItem = createAsyncThunk(
         } else {
           const errorBody = {
             title: "Failed",
-            description: `Your data was not ${
-              body.isSubmit ? "updated" : "submitted"
-            }. ${message}.`,
+            description: `Your data was not ${body.isSubmit ? "updated" : "submitted"
+              }. ${message}.`,
             return: false,
           };
           thunkAPI.dispatch(showModalError(errorBody));
@@ -453,9 +451,8 @@ export const approvalRejectBillingItem = createAsyncThunk(
       );
       const successBody = {
         title: "Successful",
-        description: `Your data has been ${
-          body.action === "APPROVE" ? "approved" : "rejected"
-        }.`,
+        description: `Your data has been ${body.action === "APPROVE" ? "approved" : "rejected"
+          }.`,
       };
       thunkAPI.dispatch(showModalSuccess(successBody));
       return response.data;
@@ -531,9 +528,8 @@ export const approvalActivatedBillingItem = createAsyncThunk(
       );
       const successBody = {
         title: "Successful",
-        description: `Your data has been ${
-          body.action === "APPROVE" ? "approved" : "rejected"
-        }.`,
+        description: `Your data has been ${body.action === "APPROVE" ? "approved" : "rejected"
+          }.`,
       };
       thunkAPI.dispatch(showModalSuccess(successBody));
       return response.data;
@@ -685,9 +681,12 @@ export const getSpecialGLList = createAsyncThunk(
 
 export const getGLAccountList = createAsyncThunk(
   "GET_GL_ACCOUNT_LIST",
-  async (_, thunkAPI) => {
+  async (params = {}, thunkAPI) => {
     try {
-      const url = "/v1/dbs/api/billingitem/get-gl-account";
+      const searchParam = params?.search?.trim?.();
+      const url = searchParam
+        ? `/v1/dbs/api/billingitem/get-gl-account?search=${encodeURIComponent(searchParam)}`
+        : "/v1/dbs/api/billingitem/get-gl-account";
       const response = await ratingBillingHttpService.getAll(url);
       return response.data?.map((item) => ({
         id: item.glAccountId,
