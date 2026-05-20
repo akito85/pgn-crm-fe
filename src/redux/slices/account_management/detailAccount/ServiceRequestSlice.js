@@ -21,6 +21,7 @@ const initialState = {
   loading_createUpdateSr: false,
   loading_statusUpdateSr: false,
   list_srPrerequisites: [],
+  pagination_listSrPrerequisites: { totalPage: 0, totalElement: 0, currentPage: 0, pageSize: 10 },
   list_srWorkOrders: [],
   list_srActivities: [],
   list_srDataRequirements: [],
@@ -637,13 +638,13 @@ export const getSrActivityStatuses = createAsyncThunk(
 // =====================================================
 
 // Get Prerequisites by Service Request
-export const getSrPrerequisites = createAsyncThunk(
-  "GET_SR_PREREQUISITES",
-  async ({ accountId, srId, page = 1, size = 10 }, thunkAPI) => {
+export const getServiceRequestPreRequisites = createAsyncThunk(
+  "GET_SERVICE_REQUEST_PREREQUISITES",
+  async ({ accountId, serviceRequestId, body, isLoadMore = false }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/${srId}/prerequisites/list?page=${page}&size=${size}`;
-      const response = await accountManagementService.getAll(url);
-      return response.data;
+      const url = `/v1/dbs/api/account/${accountId}/service-request/${serviceRequestId}/pre-requisite`;
+      const response = await accountManagementService.updateDataWithMethodPost(url, body);
+      return { ...response.data, isLoadMore };
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
@@ -1319,15 +1320,36 @@ const serviceRequestSlice = createSlice({
     // =====================================================
     // PREREQUISITES
     // =====================================================
-    [getSrPrerequisites.pending]: (state) => {
-      state.loading_listSrPrerequisites = true;
+    [getServiceRequestPreRequisites.pending]: (state, action) => {
+      if (!action.meta.arg?.isLoadMore) state.loading_listSrPrerequisites = true;
     },
-    [getSrPrerequisites.fulfilled]: (state, action) => {
+    [getServiceRequestPreRequisites.fulfilled]: (state, action) => {
       state.loading_listSrPrerequisites = false;
-      state.list_srPrerequisites = action.payload;
+      const { result, page, isLoadMore } = action.payload;
+      if (Array.isArray(result)) {
+        if (isLoadMore) {
+          const currentIds = new Set(state.list_srPrerequisites.map((i) => i.id));
+          state.list_srPrerequisites = [
+            ...state.list_srPrerequisites,
+            ...result.filter((i) => !currentIds.has(i.id)),
+          ];
+        } else {
+          state.list_srPrerequisites = result;
+        }
+      }
+      state.pagination_listSrPrerequisites = {
+        totalPage: page?.totalPages || 0,
+        totalElement: page?.totalElements || 0,
+        currentPage: page?.number || 0,
+        pageSize: page?.size || 10,
+      };
     },
-    [getSrPrerequisites.rejected]: (state) => {
+    [getServiceRequestPreRequisites.rejected]: (state, action) => {
       state.loading_listSrPrerequisites = false;
+      if (!action.meta.arg?.isLoadMore) {
+        state.list_srPrerequisites = [];
+        state.pagination_listSrPrerequisites = { totalPage: 0, totalElement: 0, currentPage: 0, pageSize: 10 };
+      }
     },
 
     [createSrPrerequisite.pending]: (state) => {
