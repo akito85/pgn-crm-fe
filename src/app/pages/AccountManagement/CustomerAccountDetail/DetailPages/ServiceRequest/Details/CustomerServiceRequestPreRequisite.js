@@ -1,109 +1,84 @@
-import { useEffect } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import NxTable from "../../../../../../../components/Nx/NxTable";
-import NxDate from "../../../../../../../components/Nx/NxDatePicker";
-import StatusComponent from "../../../../../../../components/StatusComponent";
-import { getSrPrerequisites } from "../../../../../../../redux/slices/account_management/detailAccount/ServiceRequestSlice";
 import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
+import { getServiceRequestPreRequisites } from "../../../../../../../redux/slices/account_management/detailAccount/ServiceRequestSlice";
+import { getPreRequisiteColumns } from "./getPreRequisiteColumns";
 
-const COLUMNS = [
-  { title: "NO", width: 60, align: "center", render: (_, __, i) => i + 1 },
-  {
-    title: "TYPE",
-    dataIndex: "prerequisiteTypeName",
-    width: 160,
-    sorter: true,
-    filter: true,
-    render: (v) => v || "-",
-  },
-  {
-    title: "PRE-REQUISITE NAME",
-    dataIndex: "prerequisiteName",
-    width: 220,
-    sorter: true,
-    filter: true,
-    render: (v) => v || "-",
-  },
-  {
-    title: "COMPLETION DATE",
-    dataIndex: "completedDate",
-    width: 160,
-    sorter: true,
-    filter: true,
-    render: (v) => v ? NxDate.formatDate(v, "DD MMM YYYY") : "-",
-  },
-  {
-    title: "REFERENCE",
-    dataIndex: "prerequisiteValue",
-    width: 160,
-    sorter: true,
-    filter: true,
-    render: (v) => v || "-",
-  },
-  {
-    title: "DESCRIPTION",
-    dataIndex: "prerequisiteComments",
-    width: 220,
-    sorter: true,
-    filter: true,
-    render: (v, r) => v || r?.prerequisiteDesc || "-",
-  },
-  {
-    title: "STATUS",
-    dataIndex: "prerequisiteStatus",
-    width: 120,
-    sorter: true,
-    filter: true,
-    render: (v) => v ? (
-      <StatusComponent colour={(v || "").toLowerCase()} margin={false}>
-        {(v || "").replace(/_/g, " ")}
-      </StatusComponent>
-    ) : "-",
-  },
-];
-
-const CustomerServiceRequestPreRequisite = ({
-  id,
-  idAccount,
-  onSort = () => {},
-}) => {
+const CustomerServiceRequestPreRequisite = ({ id, idAccount }) => {
   const dispatch = useDispatch();
+  const { list_srPrerequisites, pagination_listSrPrerequisites, loading_listSrPrerequisites } =
+    useSelector((state) => state.serviceRequest);
 
-  const { list_srPrerequisites, loading_listSrPrerequisites } = useSelector(
-    (state) => state.serviceRequest
-  );
+  const searchInput = useRef(null);
+  const [page, setPage] = useState(0);
+  const [loadMoreSize] = useState(10);
+  const [searchedColumn, setSearchedColumn] = useState("");
+  const [searchText, setSearchText] = useState("");
+  const [sort, setSort] = useState("");
+  const [search, setSearch] = useState({});
+  const [filters, setFilters] = useState([]);
+  const [filterRules, setFilterRules] = useState([]);
+
+  const totalElement = pagination_listSrPrerequisites?.totalElement || 0;
+  const hasMore = list_srPrerequisites.length < totalElement;
+
+  const handleSearch = (selectedKeys, confirm, dataIndex) => {
+    confirm();
+    setSearchText(selectedKeys[0]);
+    setSearchedColumn(dataIndex);
+    setSearch((prev) => {
+      if (prev[dataIndex] !== selectedKeys[0]) setPage(0);
+      return { ...prev, [dataIndex]: selectedKeys[0] };
+    });
+  };
+
+  const onSort = (_, __, sorter) => {
+    const dataSort = sorter.order
+      ? `${sorter.field}~${sorter.order === "ascend" ? "asc" : "desc"}`
+      : "";
+    setSort(dataSort);
+  };
+
+  const handleLoadMore = async () => {
+    const nextPage = page + 1;
+    if (nextPage <= (pagination_listSrPrerequisites?.totalPage || 0)) {
+      const body = { page: nextPage, size: loadMoreSize, sort, searchs: search, filters, filterRules };
+      await dispatch(getServiceRequestPreRequisites({ accountId: idAccount, serviceRequestId: id, body, isLoadMore: true })).unwrap();
+    }
+    setPage(nextPage);
+  };
 
   useEffect(() => {
-    if (id && idAccount) {
-      dispatch(getSrPrerequisites({ accountId: idAccount, srId: id }));
-    }
-  }, [dispatch, id, idAccount]);
+    if (!id) return;
+    const body = { page: 0, size: loadMoreSize, sort, searchs: search, filters, filterRules };
+    setPage(0);
+    dispatch(getServiceRequestPreRequisites({ accountId: idAccount, serviceRequestId: id, body, isLoadMore: false }));
+  }, [sort, search, filters, filterRules, id]);
 
-  const raw = list_srPrerequisites;
-  const items = Array.isArray(raw?.result)
-    ? raw.result
-    : Array.isArray(raw?.data)
-    ? raw.data
-    : Array.isArray(raw)
-    ? raw
-    : [];
+  const columns = useMemo(
+    () => getPreRequisiteColumns({ search, searchInput, searchedColumn, searchText, handleSearch }),
+    [search, searchInput, searchText, searchedColumn]
+  );
 
   return (
     <NxBaseContainer border>
       <NxTable
         idTable="sr-prerequisite-table"
-        dataSource={items.map((item, i) => ({ ...item, key: item.id ?? i }))}
-        columns={COLUMNS}
+        dataSource={list_srPrerequisites}
+        totalData={totalElement}
+        current={page}
+        columns={columns}
+        onSort={onSort}
         usePagination={false}
         useInfiniteScroll={true}
-        hasMore={false}
-        showAdvanceSearch={false}
-        showSearchBar={false}
+        hasMore={hasMore}
+        onLoadMore={handleLoadMore}
+        loadMoreThreshold={20}
+        loading={loading_listSrPrerequisites}
         fontSize="small"
         tablePadding="small"
-        tableScrolled={{ x: "max-content" }}
-        loading={loading_listSrPrerequisites}
-        onSort={onSort}
+        tableScrolled={{ x: "max-content", y: 300 }}
       />
     </NxBaseContainer>
   );
