@@ -115,7 +115,7 @@ const PreRequisiteTemplateTable = ({
                     }
                 }
             ),
-        handleInactivate: ({ id }) => handleInactivateModal(true, id)
+        handleInactivate: ({ id, name }) => handleInactivateModal(true, id, name)
     });
 
     const baseColumns = useMemo(

@@ -15,15 +15,18 @@ const PreRequisiteTemplate = () => {
     } = useSelector((state) => state.preRequisiteTemplate);
     const [refreshSignal, setRefreshSignal] = useState(0);
     const [inactivateId, setInactivateId] = useState(null);
+    const [inactivateName, setInactivateName] = useState(null);
     const [showInactivateModal, setShowInactivateModal] = useState(false);
     const [form] = Form.useForm();
 
-    const handleInactivateModal = (show, newId = null) => {
+    const handleInactivateModal = (show, id = null, name = null) => {
         if (show) {
-            setInactivateId(newId);
+            setInactivateId(id);
+            setInactivateName(name);
             setShowInactivateModal(true);
         } else {
             setInactivateId(null);
+            setInactivateName(null);
             setShowInactivateModal(false);
         }
     };
@@ -81,7 +84,7 @@ const PreRequisiteTemplate = () => {
                             className="flex flex-col gap-y-4"
                         >
                             <Alert
-                                message={`Are you sure you want to inactivate Pre-Requisite Template - ${inactivateId}?`}
+                                message={`Are you sure you want to inactivate Pre-Requisite Template - ${inactivateName ?? inactivateId}?`}
                                 icon={<ExclamationCircleOutlined style={{ fontSize: 16, color: "#65481C" }} />}
                                 type="warning"
                                 showIcon
