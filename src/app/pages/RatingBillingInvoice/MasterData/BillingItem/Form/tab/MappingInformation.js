@@ -56,6 +56,7 @@ const MappingInformation = ({
   disabledCriteriaColumns = [],
   isBank = false,
   data_glAccountBankList = [],
+  onSearchGLAccount = () => {},
   showMappingItemTab = false,
   dataMappingItemTable = [],
   handleChangesMappingItemTable = () => {},
@@ -307,6 +308,7 @@ const MappingInformation = ({
             disabledColumns={disabledCriteriaColumns}
             isBank={isBank}
             data_glAccountBankList={data_glAccountBankList}
+            onSearchGLAccount={onSearchGLAccount}
           />
         )}
 

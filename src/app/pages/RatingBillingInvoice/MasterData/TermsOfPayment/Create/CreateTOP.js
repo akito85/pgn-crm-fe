@@ -222,11 +222,7 @@ const CreateTOP = ({
             <Form.Item
               label={"Criteria"}
               name={"criteria"}
-              rules={
-                isDraft
-                  ? []
-                  : [{ message: requiredMessage("Criteria"), required: true }]
-              }
+              rules={[{ message: requiredMessage("Criteria"), required: true }]}
             >
               <SelectComponent
                 placeholder={"Input Criteria"}
