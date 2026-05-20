@@ -39,6 +39,10 @@ const initialState = {
     // account segment
     loading_account_segment: false,
     list_account_segment: [],
+
+    // pre requisite type
+    loading_pre_requisite_type: false,
+    list_pre_requisite_type: [],
 };
 
 export const getPreRequisiteTemplate = createAsyncThunk(
@@ -143,6 +147,19 @@ export const getAccountSegment = createAsyncThunk(
     async (_, thunkAPI) => {
         try {
             const url = '/v1/dbs/api/pre-requisite-template/list-account-segment';
+            const response = await accountManagementService.getDetail(url);
+            return response.data;
+        } catch (error) {
+            return thunkAPI.rejectWithValue(error.response);
+        }
+    }
+);
+
+export const getPreRequisiteType = createAsyncThunk(
+    "GET_PRE_REQUISITE_TYPE",
+    async (_, thunkAPI) => {
+        try {
+            const url = '/v1/dbs/api/pre-requisite-template/list-pre-requisite-type';
             const response = await accountManagementService.getDetail(url);
             return response.data;
         } catch (error) {
@@ -289,6 +306,19 @@ const preRequisiteTemplateSlice = createSlice({
         [getAccountSegment.rejected]: (state) => {
             state.list_account_segment = [];
             state.loading_account_segment = false;
+        },
+        // Pre Requisite Type
+        [getPreRequisiteType.pending]: (state) => {
+            state.list_pre_requisite_type = [];
+            state.loading_pre_requisite_type = true;
+        },
+        [getPreRequisiteType.fulfilled]: (state, action) => {
+            state.list_pre_requisite_type = action.payload || [];
+            state.loading_pre_requisite_type = false;
+        },
+        [getPreRequisiteType.rejected]: (state) => {
+            state.list_pre_requisite_type = [];
+            state.loading_pre_requisite_type = false;
         },
     },
 });

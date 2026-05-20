@@ -4,16 +4,16 @@ import dayjs from "dayjs"
 import NxBaseContainer from "../../../../../components/Nx/NxBaseContainer"
 import NxBreadCrumb from "../../../../../components/Nx/NxBreadCrumb"
 import NxCardContainer from "../../../../../components/Nx/NxCardContainer"
+import NxDetailText from "../../../../../components/Nx/NxDetailText"
 import { SYSTEM_SETUP_ROUTES } from "../../../../../routes/system_setup/setup_routes"
 import InputComponent from "../../../../../components/InputComponent"
 import SelectComponent from "../../../../../components/SelectComponent"
 import { useDispatch, useSelector } from "react-redux"
-import { getAccountGroupType, getAccountSegment, getCriteria, getSourceType, getSrCategory, getSrSubCategory } from "../../../../../redux/slices/system_setup/preRequisiteTemplate"
+import { getAccountGroupType, getAccountSegment, getCriteria, getPreRequisiteType, getSourceType, getSrCategory, getSrSubCategory } from "../../../../../redux/slices/system_setup/preRequisiteTemplate"
 import Toolbar from "../../../../../components/Toolbar"
 import NxModal from "../../../../../components/Nx/NxModal"
 import NxTable from "../../../../../components/Nx/NxTable"
 import NxDate from "../../../../../components/Nx/NxDatePicker"
-import ButtonComponent from "../../../../../components/ButtonComponent"
 import SVGIcon from "../../../../../assets/Icon/index"
 
 const CreateUpdatePreRequisiteTemplate = ({ formType = "create" }) => {
@@ -31,12 +31,17 @@ const CreateUpdatePreRequisiteTemplate = ({ formType = "create" }) => {
         loading_account_group_type = false,
         list_account_segment = [],
         loading_account_segment = false,
+        list_pre_requisite_type = [],
+        loading_pre_requisite_type = false,
     } = useSelector((state) => state.preRequisiteTemplate);
 
     const [criteriaValues, setCriteriaValues] = useState([]);
     const [criteriaDataRows, setCriteriaDataRows] = useState([]);
+    const [detailRows, setDetailRows] = useState([]);
     const [modalCriteriaOpen, setModalCriteriaOpen] = useState(false);
     const [editingCriteriaRecord, setEditingCriteriaRecord] = useState(null);
+    const [editingDetailRecord, setEditingDetailRecord] = useState(null);
+    const [isDetailMode, setIsDetailMode] = useState(false);
 
     useEffect(() => {
         dispatch(getSourceType());
@@ -45,27 +50,26 @@ const CreateUpdatePreRequisiteTemplate = ({ formType = "create" }) => {
         dispatch(getCriteria());
         dispatch(getAccountGroupType());
         dispatch(getAccountSegment());
+        dispatch(getPreRequisiteType());
     }, [dispatch]);
-
-    const routes = [
-        {
-            path: "",
-            breadcrumbName: "System Setup",
-        },
-        {
-            path: SYSTEM_SETUP_ROUTES.VIEW_PRE_REQUISITE_TEMPLATE,
-            breadcrumbName: "Pre-Requisite Template"
-        },
-        {
-            path: "",
-            breadcrumbName: "Create Pre-Requisite Template"
-        }
-    ]
 
     const [form] = Form.useForm();
     const [modalForm] = Form.useForm();
+    const [detailForm] = Form.useForm();
 
-    // --- Modal handlers ---
+    const routes = useMemo(() => {
+        const base = [
+            { path: "", breadcrumbName: "System Setup" },
+            { path: SYSTEM_SETUP_ROUTES.VIEW_PRE_REQUISITE_TEMPLATE, breadcrumbName: "Pre-Requisite Template" },
+            { path: SYSTEM_SETUP_ROUTES.CREATE_PRE_REQUISITE_TEMPLATE, breadcrumbName: "Create Pre-Requisite Template" },
+        ];
+        if (isDetailMode) {
+            base.push({ path: "", breadcrumbName: "Create Detail" });
+        }
+        return base;
+    }, [isDetailMode]);
+
+    // --- Criteria modal handlers ---
 
     const handleOpenCriteriaModal = useCallback((record) => {
         setEditingCriteriaRecord(record);
@@ -111,7 +115,56 @@ const CreateUpdatePreRequisiteTemplate = ({ formType = "create" }) => {
         setCriteriaDataRows((prev) => prev.filter((r) => r.key !== key));
     }, []);
 
-    // --- Criteria table action items ---
+    // --- Detail mode handlers ---
+
+    const handleOpenDetailMode = useCallback(async (record = null) => {
+        if (record) {
+            setEditingDetailRecord(record);
+            detailForm.setFieldsValue(record);
+            setIsDetailMode(true);
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        } else {
+            try {
+                await form.validateFields();
+                setEditingDetailRecord(null);
+                detailForm.resetFields();
+                setIsDetailMode(true);
+                window.scrollTo({ top: 0, behavior: "smooth" });
+            } catch {
+                // validation failed — stay on form
+            }
+        }
+    }, [form, detailForm]);
+
+    const handleSaveDetail = useCallback(async () => {
+        try {
+            const values = await detailForm.validateFields();
+            if (editingDetailRecord) {
+                setDetailRows((prev) =>
+                    prev.map((r) => r.key === editingDetailRecord.key ? { ...r, ...values } : r)
+                );
+            } else {
+                setDetailRows((prev) => [...prev, { key: Date.now().toString(), ...values }]);
+            }
+            setIsDetailMode(false);
+            setEditingDetailRecord(null);
+            detailForm.resetFields();
+        } catch {
+            // validation failed — stay open
+        }
+    }, [detailForm, editingDetailRecord]);
+
+    const handleCancelDetail = useCallback(() => {
+        setIsDetailMode(false);
+        setEditingDetailRecord(null);
+        detailForm.resetFields();
+    }, [detailForm]);
+
+    const handleDeleteDetailRow = useCallback((key) => {
+        setDetailRows((prev) => prev.filter((r) => r.key !== key));
+    }, []);
+
+    // --- Toolbar action items ---
 
     const itemActionsCriteria = useMemo(() => [
         {
@@ -127,6 +180,21 @@ const CreateUpdatePreRequisiteTemplate = ({ formType = "create" }) => {
             )
         }
     ], [handleOpenCriteriaModal]);
+
+    const itemActionsDetail = useMemo(() => [
+        {
+            action: "Create",
+            render: (
+                <Button
+                    icon={<SVGIcon name="IconButtonCreate" width={14} />}
+                    type="submit"
+                    onClick={() => handleOpenDetailMode(null)}
+                >
+                    Create
+                </Button>
+            )
+        }
+    ], [handleOpenDetailMode]);
 
     // --- Criteria data table columns ---
 
@@ -170,18 +238,12 @@ const CreateUpdatePreRequisiteTemplate = ({ formType = "create" }) => {
                 render: (_, record) => (
                     <div className="flex justify-center gap-2 my-1">
                         <Tooltip title="Update">
-                            <Button
-                                type="table-action"
-                                onClick={() => handleOpenCriteriaModal(record)}
-                            >
+                            <Button type="table-action" onClick={() => handleOpenCriteriaModal(record)}>
                                 <SVGIcon name="IconEdit" width={20} />
                             </Button>
                         </Tooltip>
                         <Tooltip title="Delete">
-                            <Button
-                                type="table-action"
-                                onClick={() => handleDeleteCriteriaRow(record.key)}
-                            >
+                            <Button type="table-action" onClick={() => handleDeleteCriteriaRow(record.key)}>
                                 <SVGIcon name="IconDelete" width={20} />
                             </Button>
                         </Tooltip>
@@ -190,6 +252,56 @@ const CreateUpdatePreRequisiteTemplate = ({ formType = "create" }) => {
             },
         ];
     }, [criteriaValues, list_criteria, handleOpenCriteriaModal, handleDeleteCriteriaRow]);
+
+    // --- Detail list table columns ---
+
+    const detailTableColumns = useMemo(() => [
+        {
+            key: "no",
+            title: "NO",
+            dataIndex: "no",
+            width: 60,
+            align: "center",
+            render: (_, __, index) => index + 1,
+        },
+        {
+            key: "type",
+            title: "TYPE",
+            dataIndex: "type",
+        },
+        {
+            key: "name",
+            title: "NAME",
+            dataIndex: "name",
+        },
+        {
+            key: "description",
+            title: "DESCRIPTION",
+            dataIndex: "description",
+        },
+        {
+            key: "action",
+            title: "ACTION",
+            dataIndex: "action",
+            width: 100,
+            fixed: "right",
+            align: "center",
+            render: (_, record) => (
+                <div className="flex justify-center gap-2 my-1">
+                    <Tooltip title="Update">
+                        <Button type="table-action" onClick={() => handleOpenDetailMode(record)}>
+                            <SVGIcon name="IconEdit" width={20} />
+                        </Button>
+                    </Tooltip>
+                    <Tooltip title="Delete">
+                        <Button type="table-action" onClick={() => handleDeleteDetailRow(record.key)}>
+                            <SVGIcon name="IconDelete" width={20} />
+                        </Button>
+                    </Tooltip>
+                </div>
+            ),
+        },
+    ], [handleOpenDetailMode, handleDeleteDetailRow]);
 
     // --- Selected criteria options for modal form ---
 
@@ -200,28 +312,8 @@ const CreateUpdatePreRequisiteTemplate = ({ formType = "create" }) => {
     // --- Main form handlers ---
 
     const handleSubmit = () => {
-        const {
-            name,
-            sourceType,
-            srCategory,
-            srSubCategory,
-            description,
-            criteria,
-            criteriaData,
-            detail
-        } = form.getFieldsValue(true);
-
-        console.log("submit", {
-            name,
-            sourceType,
-            srCategory,
-            srSubCategory,
-            description,
-            criteria,
-            criteriaData,
-            detail,
-            criteriaDataRows,
-        });
+        const values = form.getFieldsValue(true);
+        console.log("submit", { ...values, criteriaDataRows, detailRows });
     }
 
     const handleSelectCriteria = (value) => {
@@ -243,6 +335,8 @@ const CreateUpdatePreRequisiteTemplate = ({ formType = "create" }) => {
         form.setFieldsValue({ criteria: [] });
     }
 
+    const formSnapshot = isDetailMode ? form.getFieldsValue(true) : {};
+
     return (
         <>
         <Form
@@ -254,138 +348,184 @@ const CreateUpdatePreRequisiteTemplate = ({ formType = "create" }) => {
             className="flex flex-col gap-y-4"
         >
             <NxBreadCrumb routes={routes} />
+
+            {/* PRE-REQUISITE TEMPLATE INFORMATION */}
             <NxCardContainer header={"PRE-REQUISITE TEMPLATE INFORMATION"}>
                 <NxBaseContainer border>
-                    <div className="w-full grid grid-cols-2 gap-4">
-                        <Form.Item
-                            key="name"
-                            name={"name"}
-                            label={"Name"}
-                            required
-                            className="no-margin-form"
-                        >
-                            <InputComponent />
-                        </Form.Item>
-                        <Form.Item
-                            key="sourceType"
-                            name={"sourceType"}
-                            label={"Source Type"}
-                            required
-                            className="no-margin-form"
-                        >
-                            <SelectComponent>
-                                {(list_source_type || [])?.map((data, index) => (
-                                    <Select.Option key={index} value={data.value}>
-                                        {data.name}
-                                    </Select.Option>
-                                ))}
-                            </SelectComponent>
-                        </Form.Item>
-                        <Form.Item
-                            key="srCategory"
-                            name={"srCategory"}
-                            label={"SR Category"}
-                            required
-                            className="no-margin-form"
-                        >
-                            <SelectComponent>
-                                {(list_sr_category || [])?.map((data, index) => (
-                                    <Select.Option key={index} value={data.value}>
-                                        {data.name}
-                                    </Select.Option>
-                                ))}
-                            </SelectComponent>
-                        </Form.Item>
-                        <Form.Item
-                            key="srSubCategory"
-                            name={"srSubCategory"}
-                            label={"SR Sub Category"}
-                            required
-                            className="no-margin-form"
-                        >
-                            <SelectComponent>
-                                {(list_sr_sub_category || [])?.map((data, index) => (
-                                    <Select.Option key={index} value={data.value}>
-                                        {data.name}
-                                    </Select.Option>
-                                ))}
-                            </SelectComponent>
-                        </Form.Item>
-                    </div>
-                    <div className="w-full grid gap-4">
-                        <Form.Item
-                            key="criteria"
-                            name={"criteria"}
-                            label={"Criteria"}
-                            required
-                            className="no-margin-form"
-                        >
-                            <SelectComponent
-                                mode="multiple"
-                                onSelect={handleSelectCriteria}
-                                onDeselect={handleDeselectCriteria}
-                                onClear={handleClearCriteria}
-                            >
-                                {(list_criteria || [])?.map((data, index) => (
-                                    <Select.Option key={index} value={data.value}>
-                                        {data.name}
-                                    </Select.Option>
-                                ))}
-                            </SelectComponent>
-                        </Form.Item>
-                        <Form.Item
-                            key="description"
-                            name={"description"}
-                            label={"Description"}
-                            required
-                            className="no-margin-form"
-                        >
-                            <InputComponent
-                                type={"textarea"}
-                                rows={4}
-                                maxLength={255}
-                            />
-                        </Form.Item>
-                    </div>
+                    {isDetailMode ? (
+                        <>
+                        <div className="w-full grid grid-cols-2 gap-4">
+                            <NxDetailText label={"Name"}>{formSnapshot.name || "-"}</NxDetailText>
+                            <NxDetailText label={"Source Type"}>{formSnapshot.sourceType || "-"}</NxDetailText>
+                            <NxDetailText label={"SR Category"}>{formSnapshot.srCategory || "-"}</NxDetailText>
+                            <NxDetailText label={"SR Sub Category"}>{formSnapshot.srSubCategory || "-"}</NxDetailText>
+                        </div>
+                        <div className="w-full grid gap-4 mt-4">
+                            <NxDetailText label={"Criteria"}>
+                                {(formSnapshot.criteria || []).join(", ") || "-"}
+                            </NxDetailText>
+                            <NxDetailText label={"Description"}>{formSnapshot.description || "-"}</NxDetailText>
+                        </div>
+                        </>
+                    ) : (
+                        <>
+                        <div className="w-full grid grid-cols-2 gap-4">
+                            <Form.Item name="name" label="Name" required className="no-margin-form">
+                                <InputComponent />
+                            </Form.Item>
+                            <Form.Item name="sourceType" label="Source Type" required className="no-margin-form">
+                                <SelectComponent>
+                                    {(list_source_type || []).map((data, index) => (
+                                        <Select.Option key={index} value={data.value}>{data.name}</Select.Option>
+                                    ))}
+                                </SelectComponent>
+                            </Form.Item>
+                            <Form.Item name="srCategory" label="SR Category" required className="no-margin-form">
+                                <SelectComponent>
+                                    {(list_sr_category || []).map((data, index) => (
+                                        <Select.Option key={index} value={data.value}>{data.name}</Select.Option>
+                                    ))}
+                                </SelectComponent>
+                            </Form.Item>
+                            <Form.Item name="srSubCategory" label="SR Sub Category" required className="no-margin-form">
+                                <SelectComponent>
+                                    {(list_sr_sub_category || []).map((data, index) => (
+                                        <Select.Option key={index} value={data.value}>{data.name}</Select.Option>
+                                    ))}
+                                </SelectComponent>
+                            </Form.Item>
+                        </div>
+                        <div className="w-full grid gap-4">
+                            <Form.Item name="criteria" label="Criteria" required className="no-margin-form">
+                                <SelectComponent
+                                    mode="multiple"
+                                    onSelect={handleSelectCriteria}
+                                    onDeselect={handleDeselectCriteria}
+                                    onClear={handleClearCriteria}
+                                >
+                                    {(list_criteria || []).map((data, index) => (
+                                        <Select.Option key={index} value={data.value}>{data.name}</Select.Option>
+                                    ))}
+                                </SelectComponent>
+                            </Form.Item>
+                            <Form.Item name="description" label="Description" required className="no-margin-form">
+                                <InputComponent type="textarea" rows={4} maxLength={255} />
+                            </Form.Item>
+                        </div>
+                        </>
+                    )}
                 </NxBaseContainer>
             </NxCardContainer>
-            <NxCardContainer header={"PRE-REQUISITE TEMPLATE CRITERIA"}>
-                <NxBaseContainer border>
-                    {criteriaValues.length > 0 ? (
+
+            {/* PRE-REQUISITE TEMPLATE CRITERIA — hidden in detail mode */}
+            {!isDetailMode && (
+                <NxCardContainer header={"PRE-REQUISITE TEMPLATE CRITERIA"}>
+                    <NxBaseContainer border>
+                        {criteriaValues.length > 0 ? (
+                            <div className="flex flex-col gap-4">
+                                <Toolbar items={itemActionsCriteria} type="page" />
+                                <NxTable
+                                    idTable={"table-criteria-prt"}
+                                    dataSource={criteriaDataRows}
+                                    totalData={criteriaDataRows.length}
+                                    columns={criteriaTableColumns}
+                                    tableScrolled={{ x: "max-content" }}
+                                    usePagination={false}
+                                    useInfiniteScroll={false}
+                                />
+                            </div>
+                        ) : (
+                            <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={"Select at least one criteria"} />
+                        )}
+                    </NxBaseContainer>
+                </NxCardContainer>
+            )}
+
+            {/* PRE-REQUISITE TEMPLATE LIST — hidden in detail mode */}
+            {!isDetailMode && (
+                <NxCardContainer header={"PRE-REQUISITE TEMPLATE LIST"}>
+                    <NxBaseContainer border>
                         <div className="flex flex-col gap-4">
-                            <Toolbar items={itemActionsCriteria} type="page" />
+                            <Toolbar items={itemActionsDetail} type="page" />
                             <NxTable
-                                idTable={"table-criteria-prt"}
-                                dataSource={criteriaDataRows}
-                                totalData={criteriaDataRows.length}
-                                columns={criteriaTableColumns}
+                                idTable={"table-detail-prt"}
+                                dataSource={detailRows}
+                                totalData={detailRows.length}
+                                columns={detailTableColumns}
                                 tableScrolled={{ x: "max-content" }}
                                 usePagination={false}
                                 useInfiniteScroll={false}
                             />
                         </div>
-                    ) : (
-                        <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={"Select at least one criteria"} />
-                    )}
-                </NxBaseContainer>
-            </NxCardContainer>
-            <NxCardContainer header={"PRE-REQUISITE TEMPLATE LIST"}>
-                <NxBaseContainer border>
-                </NxBaseContainer>
-            </NxCardContainer>
+                    </NxBaseContainer>
+                </NxCardContainer>
+            )}
         </Form>
 
+        {/* PRE-REQUISITE INFORMATION — shown only in detail mode */}
+        {isDetailMode && (
+            <Form
+                id="pre-requisite-detail-form"
+                form={detailForm}
+                layout="vertical"
+                className="flex flex-col gap-y-4"
+            >
+                <NxCardContainer header={"PRE-REQUISITE INFORMATION"}>
+                    <NxBaseContainer border>
+                        <div className="w-full grid grid-cols-2 gap-4">
+                            <Form.Item
+                                name="type"
+                                label="Type"
+                                required
+                                rules={[{ required: true, message: "Type is required" }]}
+                                className="no-margin-form"
+                            >
+                                <SelectComponent>
+                                    {(list_pre_requisite_type || []).map((data, index) => (
+                                        <Select.Option key={index} value={data.value}>{data.name}</Select.Option>
+                                    ))}
+                                </SelectComponent>
+                            </Form.Item>
+                            <Form.Item
+                                name="name"
+                                label="Name"
+                                required
+                                rules={[{ required: true, message: "Name is required" }]}
+                                className="no-margin-form"
+                            >
+                                <InputComponent />
+                            </Form.Item>
+                        </div>
+                        <div className="w-full mt-4">
+                            <Form.Item
+                                name="description"
+                                label="Description"
+                                className="no-margin-form"
+                            >
+                                <InputComponent type="textarea" rows={4} maxLength={255} />
+                            </Form.Item>
+                        </div>
+                    </NxBaseContainer>
+                </NxCardContainer>
+                <div className="flex justify-end gap-2">
+                    <Button type="menu" onClick={handleCancelDetail}>Cancel</Button>
+                    <Button type="submit" onClick={handleSaveDetail}>Save</Button>
+                </div>
+            </Form>
+        )}
+
+        {/* Modal add/edit criteria data */}
         <NxModal
             isOpen={modalCriteriaOpen}
             title="Add Criteria Data"
             width={1000}
             handleCancel={handleCloseCriteriaModal}
             footer={[
-                <div className="flex justify-between" key={'footer-1'}>
-                    <Button type="menu" key={"cancel"} onClick={handleCloseCriteriaModal}>
+                <div className="flex justify-between" key="footer-1">
+                    <Button type="menu" key="cancel" onClick={handleCloseCriteriaModal}>
                         Cancel
                     </Button>
-                    <Button type="submit" key={"save"} onClick={handleSaveCriteriaModal}>
+                    <Button type="submit" key="save" onClick={handleSaveCriteriaModal}>
                         Save
                     </Button>
                 </div>
@@ -398,7 +538,7 @@ const CreateUpdatePreRequisiteTemplate = ({ formType = "create" }) => {
                         layout="vertical"
                         className="flex flex-col gap-y-4 p-4"
                     >
-                        <div className={`grid ${selectedCriteriaOptions.length > 1 ? 'grid-cols-2' : 'grid-cols-1'} gap-4`}>
+                        <div className={`grid ${selectedCriteriaOptions.length > 1 ? "grid-cols-2" : "grid-cols-1"} gap-4`}>
                             {selectedCriteriaOptions.map((c) => (
                                 <Form.Item
                                     key={c.value}
@@ -411,14 +551,10 @@ const CreateUpdatePreRequisiteTemplate = ({ formType = "create" }) => {
                                     <SelectComponent>
                                         {c.value === "ACCOUNT_GROUP_TYPE"
                                             ? (list_account_group_type || []).map((data, index) => (
-                                                <Select.Option key={index} value={data.value}>
-                                                    {data.name}
-                                                </Select.Option>
+                                                <Select.Option key={index} value={data.value}>{data.name}</Select.Option>
                                             ))
                                             : (list_account_segment || []).map((data, index) => (
-                                                <Select.Option key={index} value={data.value}>
-                                                    {data.name}
-                                                </Select.Option>
+                                                <Select.Option key={index} value={data.value}>{data.name}</Select.Option>
                                             ))
                                         }
                                     </SelectComponent>
@@ -427,20 +563,15 @@ const CreateUpdatePreRequisiteTemplate = ({ formType = "create" }) => {
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <Form.Item
-                                key="startDate"
                                 name="startDate"
                                 label="Start Date"
                                 required
                                 rules={[{ required: true, message: "Start Date is required" }]}
                                 className="no-margin-form"
                             >
-                                <NxDate
-                                    dateDisable={() => false}
-                                    placeholder="Select start date"
-                                />
+                                <NxDate dateDisable={() => false} placeholder="Select start date" />
                             </Form.Item>
                             <Form.Item
-                                key="endDate"
                                 name="endDate"
                                 label="End Date"
                                 required
@@ -458,10 +589,7 @@ const CreateUpdatePreRequisiteTemplate = ({ formType = "create" }) => {
                                 ]}
                                 className="no-margin-form"
                             >
-                                <NxDate
-                                    dateDisable={() => false}
-                                    placeholder="Select end date"
-                                />
+                                <NxDate dateDisable={() => false} placeholder="Select end date" />
                             </Form.Item>
                         </div>
                     </Form>
