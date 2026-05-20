@@ -1,32 +1,34 @@
 
-import React, { useEffect, useState } from "react";
-import { Modal, Steps, Button, message, Input, InputNumber, Segmented } from "antd";
-import { LeftOutlined } from "@ant-design/icons";
+import { useEffect, useState } from "react";
+import { Button, message, Input, InputNumber, DatePicker } from "antd";
+import moment from "moment";
 import { useDispatch, useSelector } from "react-redux";
-import TablePagination from "../../../../../components/TablePagination";
+import TableRBI from "../../../../../components/TableRBI";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import { columnsReceipt } from "../ColumnReceiptView"; // Might use parts of this or define custom
+import { columnsReceipt } from "../ColumnReceiptView";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 import receiptCollectionHttpService from "../../../../../redux/services/receiptCollectionHttpService";
 import { configApp } from "../../../../../constants/configApp";
-// import { getListCategoryReceipt } from "../../../../../redux/slices/receipt_collection/receipt"; // If needed
-import { getReceiptCustomerList, getListCategoryReceipt, getPaginateReceipt } from "../../../../../redux/slices/receipt_collection/receipt";
+import { getReceiptCustomerList, getListCategoryReceipt, getAllApprovalListReceipt, getListApprovalByIdReceipt } from "../../../../../redux/slices/receipt_collection/receipt";
 import RadioTabs from "../../../../../components/RadioTabs";
-
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
-
-const { Step } = Steps;
+import { FormStepper } from "../../../../../components/FormStepNavigation";
+import ApprovalSectionForm from "../../../ProductAndPromo/Pricing/Form/ApprovalSectionForm";
 
 const ModalRefundReceipt = ({
     isOpen,
     handleCancel,
-    dataSource,
     onSubmit,
 }) => {
     const dispatch = useDispatch();
-    const { data_customer_list, data, loading } = useSelector((state) => state.receipt);
+    const { data_customer_list, loading, dataListAppHierId, dataListAppHierDetail } = useSelector((state) => state.receipt);
 
     const [currentStep, setCurrentStep] = useState(0);
+
+    // Approval State
+    const [appHierOptions, setAppHierOptions] = useState([]);
+    const [appHierDataDetail, setAppHierDataDetail] = useState([]);
+    const [selectedAppHierId, setSelectedAppHierId] = useState(null);
 
     // Step 1 Selection State
     const [localSelectedData, setLocalSelectedData] = useState([]);
@@ -34,15 +36,15 @@ const ModalRefundReceipt = ({
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
 
-    // Filter/Search State (Placeholder for now)
-    const [searchText, setSearchText] = useState("");
-    const [searchedColumn, setSearchedColumn] = useState("");
-
     // Step 2 Selection State (Receipts)
+    const [eligibleReceipts, setEligibleReceipts] = useState([]); // Filtered receipts
     const [selectedReceipts, setSelectedReceipts] = useState([]);
     const [selectedReceiptRowKeys, setSelectedReceiptRowKeys] = useState([]);
     const [pageReceipt, setPageReceipt] = useState(1);
     const [pageSizeReceipt, setPageSizeReceipt] = useState(10);
+
+    // Refund Date State
+    const [refundDate, setRefundDate] = useState(moment()); // Default: today
 
     const onReceiptSelectChange = (newSelectedRowKeys, newSelectedRows) => {
         setSelectedReceiptRowKeys(newSelectedRowKeys);
@@ -96,36 +98,83 @@ const ModalRefundReceipt = ({
             setLocalSelectedData([]);
             setSelectedRowKeys([]);
             setPage(1);
+            setSelectedAppHierId(null);
+            setAppHierDataDetail([]);
             dispatch(getReceiptCustomerList({ page: 1, pageSize: 10, sort: "createdDate~desc" }));
+            dispatch(getAllApprovalListReceipt());
         }
     }, [isOpen, dispatch]);
 
-    // Fetch receipt list when entering Step 2
+    // Sync approval hierarchy options
     useEffect(() => {
-        if (currentStep === 1) {
-            dispatch(getPaginateReceipt({ page: pageReceipt, pageSize: pageSizeReceipt, sort: "createdDate~desc" }));
+        if (dataListAppHierId && dataListAppHierId.length > 0) {
+            setAppHierOptions(dataListAppHierId.map((a) => ({ name: a.approvalName, value: a.appHierId })));
         }
-    }, [currentStep, pageReceipt, pageSizeReceipt, dispatch]);
+    }, [dataListAppHierId]);
+
+    // Sync approval hierarchy detail
+    useEffect(() => {
+        if (selectedAppHierId) {
+            dispatch(getListApprovalByIdReceipt({ id: selectedAppHierId }));
+        }
+    }, [selectedAppHierId, dispatch]);
+
+    useEffect(() => {
+        if (dataListAppHierDetail && dataListAppHierDetail.length > 0) {
+            setAppHierDataDetail(dataListAppHierDetail.map((a, idx) => ({ ...a, key: idx + 1, employeeDetail: a.employeeDetail?.map((b, i) => ({ ...b, key: i + 1 })) || [] })));
+        } else {
+            setAppHierDataDetail([]);
+        }
+    }, [dataListAppHierDetail]);
+
+    // Fetch eligible receipts when entering Step 2 (Approved & Balance > 0)
+    useEffect(() => {
+        if (currentStep === 1 && isOpen) {
+            const fetchEligibleReceipts = async () => {
+                try {
+                    const url = `/v1/dbs/api/receipt/get-list?searchs=&page=0&size=9999&sort=createdDate~desc`;
+                    const response = await receiptCollectionHttpService.getAll(url);
+
+                    const content = response?.data?.result || [];
+                    const eligible = content.filter(item =>
+                        item.statusApproval === "Approved" &&
+                        (item.unAppliedAmountReal > 0 || item.unAppliedAmount > 0)
+                    );
+
+                    setEligibleReceipts(eligible);
+                } catch (error) {
+                    console.error('Error fetching eligible receipts:', error);
+                    setEligibleReceipts([]);
+                }
+            };
+
+            fetchEligibleReceipts();
+        }
+    }, [currentStep, isOpen]);
 
     const steps = [
         {
-            title: "Customer Information",
+            title: "Customer Info",
             key: "customerInfo",
         },
         {
-            title: "Receipt Information",
+            title: "Receipt Info",
             key: "receiptInfo",
         },
         {
-            title: "Refund Customer Information",
+            title: "Refund Customer",
             key: "refundCustomerInfo",
         },
         {
-            title: "Refund Receipt Information",
+            title: "Refund Receipt",
             key: "refundReceiptInfo",
         },
         {
-            title: "Attachment Information",
+            title: "Approval",
+            key: "approvalInfo",
+        },
+        {
+            title: "Attachment",
             key: "attachmentInfo",
         },
         {
@@ -139,11 +188,75 @@ const ModalRefundReceipt = ({
             message.warning("Please select at least one record.");
             return;
         }
+        
+        // Validate refund date in Step 3 (Refund Customer Information)
+        if (currentStep === 2) {
+            if (!refundDate) {
+                message.error("Refund date is required");
+                return;
+            }
+            
+            // Check if refund date is in the future
+            if (refundDate.isAfter(moment(), 'day')) {
+                message.error("Refund date cannot be in the future");
+                return;
+            }
+            
+            // Check if refund date is before any receipt date
+            const earliestReceiptDate = selectedReceipts.reduce((earliest, receipt) => {
+                const receiptDate = moment(receipt.receiptDate);
+                return !earliest || receiptDate.isBefore(earliest) ? receiptDate : earliest;
+            }, null);
+            
+            if (earliestReceiptDate && refundDate.isBefore(earliestReceiptDate, 'day')) {
+                message.error(`Refund date cannot be before receipt date (${earliestReceiptDate.format('DD MMM YYYY')})`);
+                return;
+            }
+        }
+
+        // Validate Approval step
+        if (currentStep === 4 && !selectedAppHierId) {
+            message.warning("Please select an Approval Hierarchy.");
+            return;
+        }
+        
         setCurrentStep(currentStep + 1);
     };
 
     const handlePrev = () => {
         setCurrentStep(currentStep - 1);
+    };
+
+    const handleSubmit = () => {
+        // Validate refund amounts match
+        const totalCustomerRefund = Object.values(refundAmountData).reduce((sum, val) => sum + (parseFloat(val) || 0), 0);
+        const totalReceiptRefund = Object.values(refundReceiptAmountData).reduce((sum, val) => sum + (parseFloat(val) || 0), 0);
+
+        if (Math.abs(totalCustomerRefund - totalReceiptRefund) > 0.01) {
+            message.error(`Refund amounts mismatch! Customer refund: ${totalCustomerRefund.toLocaleString('id-ID')}, Receipt refund: ${totalReceiptRefund.toLocaleString('id-ID')}`);
+            return;
+        }
+
+        if (!selectedAppHierId) {
+            message.warning("Please select an Approval Hierarchy.");
+            return;
+        }
+
+        // Build the receipts payload from selectedReceipts and refundReceiptAmountData
+        const receiptsPayload = selectedReceipts.map((r) => ({
+            receiptId: r.id,
+            refundAmount: refundReceiptAmountData[r.key] || refundReceiptAmountData[r.id] || 0,
+            remark: remarkStep4,
+        }));
+
+        onSubmit({
+            customerId: localSelectedData[0]?.customerId || localSelectedData[0]?.key,
+            appHierId: selectedAppHierId,
+            refundDate: refundDate?.toDate(),
+            remark: remarkStep3,
+            attachmentIds: listDataAttachment.map((a) => a.id).filter(Boolean),
+            receipts: receiptsPayload,
+        });
     };
 
     const onSelectChange = (newSelectedRowKeys, newSelectedRows) => {
@@ -169,7 +282,7 @@ const ModalRefundReceipt = ({
             title: "NO",
             width: 60,
             align: "center",
-            render: (text, object, index) => (page - 1) * pageSize + index + 1,
+            render: (_, _record, index) => (page - 1) * pageSize + index + 1,
         },
         {
             title: "COST CENTER",
@@ -197,7 +310,7 @@ const ModalRefundReceipt = ({
             dataIndex: "accountNumber",
             key: "accountNumber",
             width: 200,
-            render: (val) => val || "-"
+            render: (_, record) => record.accountNumber || record.accountId || "-"
         },
         {
             title: "TOTAL UNAPPLY AMOUNT",
@@ -206,7 +319,10 @@ const ModalRefundReceipt = ({
             align: "right",
             sorter: true,
             width: 200,
-            render: (value) => value ? value.toLocaleString('id-ID') : '-'
+            render: (_, record) => {
+                const amount = record.unAppliedAmount || record.totalUnAppliedAmount || record.totalUnapplyAmount || 0;
+                return amount ? amount.toLocaleString('id-ID') : '0';
+            }
         }
     ];
     const handleRefundAmountChange = (value, recordKey) => {
@@ -218,7 +334,7 @@ const ModalRefundReceipt = ({
             title: "NO",
             width: 60,
             align: "center",
-            render: (text, object, index) => index + 1,
+            render: (_, _record, index) => index + 1,
         },
         {
             title: "COST CENTER",
@@ -245,7 +361,7 @@ const ModalRefundReceipt = ({
             dataIndex: "accountNumber",
             key: "accountNumber",
             width: 200,
-            render: (val) => val || "-"
+            render: (_, record) => record.accountNumber || record.accountId || "-"
         },
         {
             title: "TOTAL UNAPPLY AMOUNT",
@@ -253,7 +369,10 @@ const ModalRefundReceipt = ({
             key: "unAppliedAmount",
             align: "right",
             width: 200,
-            render: (value) => value ? value.toLocaleString('id-ID') : '-'
+            render: (_, record) => {
+                const amount = record.unAppliedAmount || record.totalUnAppliedAmount || record.totalUnapplyAmount || 0;
+                return amount ? amount.toLocaleString('id-ID') : '0';
+            }
         },
         {
             title: "REFUND AMOUNT",
@@ -281,7 +400,7 @@ const ModalRefundReceipt = ({
             title: "NO",
             width: 60,
             align: "center",
-            render: (text, object, index) => index + 1,
+            render: (_, _record, index) => index + 1,
         },
         {
             title: "RECEIPT CODE",
@@ -394,7 +513,7 @@ const ModalRefundReceipt = ({
                         <div className="flex justify-between items-center">
                             <h3 className="text-blue-500 font-bold uppercase">Customer Information</h3>
                         </div>
-                        <TablePagination
+                        <TableRBI
                             dataSource={dataSourceStep1}
                             columns={columnsStep1}
                             rowSelection={rowSelection}
@@ -410,7 +529,7 @@ const ModalRefundReceipt = ({
                     </div>
                 );
             case 1:
-                const receiptDataSource = data?.result?.map(item => ({
+                const receiptDataSource = eligibleReceipts?.map(item => ({
                     ...item,
                     key: item.id
                 })) || [];
@@ -420,7 +539,7 @@ const ModalRefundReceipt = ({
                         <div className="flex justify-between items-center">
                             <h3 className="text-blue-500 font-bold uppercase">Receipt Information</h3>
                         </div>
-                        <TablePagination
+                        <TableRBI
                             dataSource={receiptDataSource}
                             columns={columnsStep2}
                             rowSelection={receiptRowSelection}
@@ -428,7 +547,7 @@ const ModalRefundReceipt = ({
                             pageSize={pageSizeReceipt}
                             onChange={handleReceiptChangePage}
                             onShowSizeChange={handleReceiptChangePage}
-                            totalData={data?.page?.totalElements || 0}
+                            totalData={eligibleReceipts?.length || 0}
                             showTotal={(total, range) => `Showing ${range[0]} to ${range[1]} of ${total} Records`}
                             tableScrolled={{ x: "max-content", y: 400 }}
                             loading={loading}
@@ -441,7 +560,7 @@ const ModalRefundReceipt = ({
                         <div className="flex justify-between items-center">
                             <h3 className="text-blue-500 font-bold uppercase">Customer Information</h3>
                         </div>
-                        <TablePagination
+                        <TableRBI
                             dataSource={localSelectedData}
                             columns={columnsStep3}
                             // No custom pagination logic needed for selected items list for now
@@ -451,6 +570,16 @@ const ModalRefundReceipt = ({
                             usePagination={false} // Disable external pagination if just showing list
                             useSelect={false}
                         />
+                        <div className="mt-4">
+                            <p className="mb-2 font-bold">Refund Date <span className="text-red-500">*</span></p>
+                            <DatePicker
+                                style={{ width: '300px' }}
+                                value={refundDate}
+                                onChange={(date) => setRefundDate(date)}
+                                format="DD MMM YYYY"
+                                placeholder="Select Refund Date"
+                            />
+                        </div>
                         <div className="mt-4">
                             <p className="mb-2 font-bold">Remark</p>
                             <Input.TextArea
@@ -470,7 +599,7 @@ const ModalRefundReceipt = ({
                         <div className="flex justify-between items-center">
                             <h3 className="text-blue-500 font-bold uppercase">Refund Information</h3>
                         </div>
-                        <TablePagination
+                        <TableRBI
                             dataSource={selectedReceipts}
                             columns={columnsStep4}
                             pagination={false}
@@ -493,7 +622,21 @@ const ModalRefundReceipt = ({
                         </div>
                     </div>
                 );
-            case 4: // Attachment Information
+            case 4: // Approval Information
+                return (
+                    <div className="flex flex-col gap-4">
+                        <div className="flex justify-between items-center">
+                            <h3 className="text-blue-500 font-bold uppercase">Approval Information</h3>
+                        </div>
+                        <ApprovalSectionForm
+                            dataTable={appHierDataDetail}
+                            dataOption={appHierOptions}
+                            selectedHierarchy={selectedAppHierId}
+                            updateSelectedHierarchy={setSelectedAppHierId}
+                        />
+                    </div>
+                );
+            case 5: // Attachment Information
                 return (
                     <div className="flex flex-col gap-4">
                         <div className="flex justify-between items-center">
@@ -511,7 +654,7 @@ const ModalRefundReceipt = ({
                         />
                     </div>
                 );
-            case 5: // Confirmation
+            case 6: // Confirmation
                 return (
                     <div className="flex flex-col gap-4">
                         <div className="w-full">
@@ -519,6 +662,7 @@ const ModalRefundReceipt = ({
                                 data={[
                                     { value: "Customer", label: "Customer" },
                                     { value: "Refund", label: "Refund" },
+                                    { value: "Approval", label: "Approval" },
                                     { value: "Attachment", label: "Attachment" },
                                 ]}
                                 currentPosition={confirmationTab}
@@ -530,13 +674,17 @@ const ModalRefundReceipt = ({
                                         <div className="flex justify-between items-center mb-2">
                                             <h3 className="text-blue-500 font-bold uppercase">Customer Information</h3>
                                         </div>
-                                        <TablePagination
+                                        <TableRBI
                                             dataSource={localSelectedData}
                                             columns={columnsStep3Confirmation}
                                             pagination={false}
                                             usePagination={false}
                                             tableScrolled={{ x: "max-content", y: 400 }}
                                         />
+                                        <div className="mt-4">
+                                            <p className="mb-2 font-bold">Refund Date</p>
+                                            <div className="text-gray-700">{refundDate?.format('DD MMM YYYY') || "-"}</div>
+                                        </div>
                                         <div className="mt-4">
                                             <p className="mb-2 font-bold">Remark</p>
                                             <div className="text-gray-700">{remarkStep3 || "-"}</div>
@@ -548,7 +696,7 @@ const ModalRefundReceipt = ({
                                         <div className="flex justify-between items-center mb-2">
                                             <h3 className="text-blue-500 font-bold uppercase">Refund Information</h3>
                                         </div>
-                                        <TablePagination
+                                        <TableRBI
                                             dataSource={selectedReceipts}
                                             columns={columnsStep4Confirmation}
                                             pagination={false}
@@ -560,6 +708,15 @@ const ModalRefundReceipt = ({
                                             <div className="text-gray-700">{remarkStep4 || "-"}</div>
                                         </div>
                                     </>
+                                )}
+                                {confirmationTab === "Approval" && (
+                                    <ApprovalSectionForm
+                                        showSelect={false}
+                                        disableSelect={true}
+                                        approvalName={appHierOptions.find((o) => o.value === selectedAppHierId)?.name}
+                                        dataTable={appHierDataDetail}
+                                        selectedHierarchy={selectedAppHierId}
+                                    />
                                 )}
                                 {confirmationTab === "Attachment" && (
                                     <AttachmentComponent
@@ -580,39 +737,6 @@ const ModalRefundReceipt = ({
         }
     };
 
-    const renderFooter = () => {
-        return (
-            <div className="flex justify-end gap-5">
-                <ButtonComponent type="default" onClick={handleCancel} className="w-[120px]">
-                    Cancel
-                </ButtonComponent>
-                {currentStep > 0 && (
-                    <ButtonComponent
-                        type="submit"
-                        onClick={handlePrev}
-                        className="w-[120px]"
-                        icon={
-                            <LeftOutlined
-                                style={{ color: "#fff", fontSize: 15, marginRight: 10 }}
-                            />
-                        }
-                    >
-                        Previous
-                    </ButtonComponent>
-                )}
-                {currentStep < steps.length - 1 ? (
-                    <ButtonComponent type="submit" onClick={handleNext} className="w-[120px]">
-                        Next
-                    </ButtonComponent>
-                ) : (
-                    <ButtonComponent type="submit" onClick={() => onSubmit(localSelectedData)} className="w-[120px]">
-                        Confirm
-                    </ButtonComponent>
-                )}
-            </div>
-        );
-    };
-
     return (
         <ModalCustom
             isOpen={isOpen}
@@ -620,18 +744,79 @@ const ModalRefundReceipt = ({
             header="RECEIPT REFUND"
             type={"confirmation"}
             width={1200}
-            footer={renderFooter()}
+            footer={null}
         >
-            <div className="w-full gap-5">
-                <div className="overflow-x-scroll scrollStepsCstm gap-5">
-                    <Steps current={currentStep} labelPlacement="vertical">
-                        {steps.map((item) => (
-                            <Step key={item.key} title={item.title} />
-                        ))}
-                    </Steps>
-                </div>
-                <div className="min-h-[300px] mb-6">
-                    {renderContent()}
+            <FormStepper
+                steps={steps}
+                current={currentStep}
+                onPrev={handlePrev}
+                onNext={handleNext}
+            />
+            <div className="min-h-[300px] mb-6">
+                {renderContent()}
+            </div>
+
+            {/* Custom Footer without Clear Data and Save as Draft */}
+            <div className="bg-white rounded-lg border border-[#D6E1F0] p-4 mt-6">
+                <div className="flex w-full justify-between items-center">
+                    <ButtonComponent
+                        onClick={handleCancel}
+                        className="!border-[#0075BF] !text-[#0075BF]"
+                    >
+                        Cancel
+                    </ButtonComponent>
+                    <div className="flex items-center gap-3">
+                        <Button
+                            disabled={currentStep === 0}
+                            onClick={handlePrev}
+                            style={{
+                                backgroundColor: currentStep === 0 ? "#E0E3E9" : "#fff",
+                                borderColor: currentStep === 0 ? "#E0E3E9" : "#DADDE5",
+                                color: currentStep === 0 ? "#BFC4D0" : "#4B465C",
+                                borderRadius: "6px",
+                                height: "32px",
+                                fontSize: "12px",
+                                border: "1px solid #DADDE5",
+                            }}
+                        >
+                            Previous
+                        </Button>
+                        {currentStep < steps.length - 1 ? (
+                            <Button
+                                key="btn-next"
+                                htmlType="button"
+                                onClick={handleNext}
+                                type="primary"
+                                style={{
+                                    backgroundColor: "#0075BF",
+                                    borderColor: "#0075BF",
+                                    color: "#fff",
+                                    borderRadius: "6px",
+                                    height: "32px",
+                                    fontSize: "12px",
+                                }}
+                            >
+                                Next
+                            </Button>
+                        ) : (
+                            <Button
+                                key="btn-submit"
+                                htmlType="button"
+                                onClick={handleSubmit}
+                                type="primary"
+                                style={{
+                                    backgroundColor: "#388E3C",
+                                    borderColor: "#388E3C",
+                                    color: "#fff",
+                                    borderRadius: "6px",
+                                    height: "32px",
+                                    fontSize: "12px",
+                                }}
+                            >
+                                Submit
+                            </Button>
+                        )}
+                    </div>
                 </div>
             </div>
         </ModalCustom>

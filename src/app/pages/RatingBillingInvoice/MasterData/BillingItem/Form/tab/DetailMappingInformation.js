@@ -137,9 +137,13 @@ const DetailMappingInformation = ({
 
   return (
     <Fragment>
+      {subHeader && (
+        <div className="mb-4 text-sm font-medium">
+          Category: <span className="text-primary">{subHeader}</span>
+        </div>
+      )}
       <DynamicTableInlineBilling
-        header={"DETAIL MAPPING INFORMATION"}
-        subHeader={`Category: ${subHeader}`}
+        header={"DETAIL"}
         tableData={dataTable}
         totalData={dataTable.length || 0}
         onDataChange={handleDataMapChanges}

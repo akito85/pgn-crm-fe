@@ -8,6 +8,13 @@ import {
 import productPromoHttpService from "../../services/productPromoHttpService";
 
 const initialState = {
+  list_promo: [],
+  pagination_promo: {
+    totalPages: 0,
+    totalElements: 0,
+    currentPage: 0,
+    pageSize: 10,
+  },
   data: [],
   data_detail: [],
   data_ApprovalHistory: [],
@@ -21,6 +28,7 @@ const initialState = {
   isSuccess: false,
   message: "",
   data_budget: [],
+  data_country: [],
   data_province: [],
   data_city: [],
   data_industrial_sector: [],
@@ -33,6 +41,7 @@ const initialState = {
   data_cost_center: [],
   data_Gsizes: [],
   data_product: [],
+  data_product_version: [],
   data_customerSegment: [],
   data_customer: [],
   data_adjustment_type: [],
@@ -43,7 +52,6 @@ const initialState = {
   data_condition_type: [],
   data_promo_type: [],
   data_promotion_type: [],
-  data_promo_category: [],
   data_from_item: [],
   data_tiering: [],
   data_uom: [],
@@ -51,14 +59,17 @@ const initialState = {
 
 export const getAllPromoPaginate = createAsyncThunk(
   "GET_ALL_PROMO_PAGINATE",
-  async ({ page, pageSize, search, sort }, thunkAPI) => {
+  async ({ page, pageSize, search, sort, isLoadMore }, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
       const url = `/v1/dbs/api/product-promo/list-product-promo?page=${page}&size=${pageSize}&searchs=${searchParams}&sort=${sortParams}`;
       const response = await productPromoHttpService.getPagination(url);
-      return response.data;
+      return {
+        ...response.data,
+        isLoadMore,
+      };
     } catch (error) {
       if (error.response.data.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
@@ -114,7 +125,7 @@ export const approvePromo = createAsyncThunk(
       const successBody = {
         title: "Successful",
         description: `Your data has been ${
-          body?.action ? "approved" : "rejected"
+          body?.action === "APPROVE" ? "approved" : "rejected"
         }`,
       };
       thunkAPI.dispatch(showModalSuccess(successBody));
@@ -327,7 +338,7 @@ export const getAvailableApprovalPromo = createAsyncThunk(
 
 export const getSelectedApprovalPromo = createAsyncThunk(
   "GET_SELECTED_APPROVAL_PROMO",
-  async ({ id }, thunkAPI) => {
+  async (id, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/product-promo/list-apphier/${id}`;
       const response = await productPromoHttpService.getDetail(url);
@@ -418,24 +429,6 @@ export const getListPromotionType = createAsyncThunk(
   }
 );
 
-export const getListPromoCategory = createAsyncThunk(
-  "GET_PROMO_CATEGORY_LIST",
-  async (thunkAPI) => {
-    try {
-      const url = `/v1/dbs/api/product-promo/promo-category`;
-      const response = await productPromoHttpService.getAll(url);
-      return response.data;
-    } catch (error) {
-      thunkAPI.dispatch(
-        validateError({ error, action: "GET_PROMO_CATEGORY_LIST" })
-      );
-      return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
-      );
-    }
-  }
-);
-
 export const inactivePromo = createAsyncThunk(
   "INACTIVE_PROMO",
   async (body, thunkAPI) => {
@@ -483,6 +476,37 @@ export const getProductList = createAsyncThunk(
   async (thunkAPI) => {
     try {
       const url = `/v1/dbs/api/product-promo/product`;
+      const response = await productPromoHttpService.getAll(url);
+      return response.data.data?.map((item) => {
+        return {
+          value: item.id,
+          label: item.name,
+        };
+      });
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+    }
+  }
+);
+
+export const getProductVersionList = createAsyncThunk(
+  "GET_PRODUCT_VERSION_PROMO",
+  async (id, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/product-promo/product-version/${id}`;
       const response = await productPromoHttpService.getAll(url);
       return response.data.data?.map((item) => {
         return {
@@ -635,9 +659,40 @@ export const getCityList = createAsyncThunk(
 
 export const getProvinceList = createAsyncThunk(
   "GET_PROVINCE_PROMO",
+  async (id, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/product-promo/province/${id}`;
+      const response = await productPromoHttpService.getAll(url);
+      return response.data.map((item) => {
+        return {
+          value: item.id,
+          label: item.text,
+        };
+      });
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+    }
+  }
+);
+
+export const getCountryList = createAsyncThunk(
+  "GET_COUNTRY_PROMO",
   async (thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/product-promo/province`;
+      const url = `/v1/dbs/api/product-promo/country`;
       const response = await productPromoHttpService.getAll(url);
       return response.data.map((item) => {
         return {
@@ -827,7 +882,7 @@ export const getAccountGroupList = createAsyncThunk(
       const response = await productPromoHttpService.getAll(url);
       return response.data.map((item) => {
         return {
-          value: item.id,
+          value: item.Id,
           label: item.text,
         };
       });
@@ -1093,6 +1148,7 @@ export const getFromItemList = createAsyncThunk(
         return {
           value: item.id,
           label: item.text,
+          source: item.source,
         };
       });
     } catch (error) {
@@ -1153,42 +1209,82 @@ const promoSlice = createSlice({
   initialState,
   extraReducers: {
     // Get All Promo Pagination
-    [getAllPromoPaginate.pending]: (state) => {
-      state.loading = true;
+    [getAllPromoPaginate.pending]: (state, action) => {
+      if (!action.meta.arg?.isLoadMore) {
+        state.loading = true;
+      }
     },
     [getAllPromoPaginate.fulfilled]: (state, action) => {
-      state.data = action.payload;
       state.loading = false;
+      const { result, page, isLoadMore } = action.payload;
+
+      // Keep backward compatibility
+      state.data = action.payload;
+
+      if (Array.isArray(result)) {
+        if (isLoadMore) {
+          // Append mode: filter duplicates by ID
+          const currentIds = new Set(state.list_promo.map((item) => item.id));
+          const filteredResult = result.filter((item) => !currentIds.has(item.id));
+          state.list_promo = [
+            ...state.list_promo,
+            ...filteredResult,
+          ];
+        } else {
+          // Replace mode
+          state.list_promo = result;
+        }
+      }
+
+      // Update pagination metadata
+      state.pagination_promo = {
+        totalPages: page?.totalPages || 0,
+        totalElements: page?.totalElements || 0,
+        currentPage: page?.number || 0,
+        pageSize: page?.size || 10,
+      };
     },
     [getAllPromoPaginate.rejected]: (state, action) => {
-      state.data = action.payload;
       state.loading = false;
+
+      // Keep backward compatibility
+      state.data = action.payload;
+
+      if (!action.meta.arg?.isLoadMore) {
+        state.list_promo = [];
+        state.pagination_promo = {
+          totalPages: 0,
+          totalElements: 0,
+          currentPage: 0,
+          pageSize: 10,
+        };
+      }
     },
 
     // Get Detail Promo
     [getDetailPromo.pending]: (state, action) => {
       state.loading = true;
-      state.data_promoDiscountDetail = action.payload;
+      state.data_promoDiscountDetail = {};
     },
     [getDetailPromo.fulfilled]: (state, action) => {
       state.data_promoDiscountDetail = action.payload;
       state.loading = false;
     },
     [getDetailPromo.rejected]: (state, action) => {
-      state.data_promoDiscountDetail = action.payload;
+      state.data_promoDiscountDetail = {};
       state.loading = false;
     },
 
     [getDetailPromoDraft.pending]: (state, action) => {
       state.loading = true;
-      state.data_promoDiscountDetailDraft = action.payload;
+      state.data_promoDiscountDetailDraft = {};
     },
     [getDetailPromoDraft.fulfilled]: (state, action) => {
       state.data_promoDiscountDetailDraft = action.payload;
       state.loading = false;
     },
     [getDetailPromoDraft.rejected]: (state, action) => {
-      state.data_promoDiscountDetailDraft = action.payload;
+      state.data_promoDiscountDetailDraft = {};
       state.loading = false;
     },
 
@@ -1208,6 +1304,7 @@ const promoSlice = createSlice({
     //GET AVAILABLE APPROVAL
     [getAvailableApprovalPromo.pending]: (state) => {
       state.loading = true;
+      state.dataListAppHierId = [];
     },
     [getAvailableApprovalPromo.fulfilled]: (state, action) => {
       state.loading = false;
@@ -1215,10 +1312,12 @@ const promoSlice = createSlice({
     },
     [getAvailableApprovalPromo.rejected]: (state) => {
       state.loading = false;
+      state.dataListAppHierId = [];
     },
     //GET SELECTED APPROVAL
     [getSelectedApprovalPromo.pending]: (state) => {
       state.loading = true;
+      state.dataListAppHierDetail = [];
     },
     [getSelectedApprovalPromo.fulfilled]: (state, action) => {
       state.loading = false;
@@ -1226,6 +1325,7 @@ const promoSlice = createSlice({
     },
     [getSelectedApprovalPromo.rejected]: (state) => {
       state.loading = false;
+      state.dataListAppHierDetail = [];
     },
 
     //LIST ATTAHCHMENT
@@ -1274,6 +1374,19 @@ const promoSlice = createSlice({
     [getProductList.rejected]: (state, action) => {
       state.loading = false;
       state.data_product = action.payload;
+    },
+
+    [getProductVersionList.pending]: (state, action) => {
+      state.loading = true;
+      state.data_product_version = action.payload;
+    },
+    [getProductVersionList.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.data_product_version = action.payload;
+    },
+    [getProductVersionList.rejected]: (state, action) => {
+      state.loading = false;
+      state.data_product_version = action.payload;
     },
 
     [getBudgetList.pending]: (state, action) => {
@@ -1339,6 +1452,19 @@ const promoSlice = createSlice({
     [getProvinceList.rejected]: (state, action) => {
       state.loading = false;
       state.data_province = action.payload;
+    },
+
+    [getCountryList.pending]: (state, action) => {
+      state.loading = true;
+      state.data_country = action.payload;
+    },
+    [getCountryList.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.data_country = action.payload;
+    },
+    [getCountryList.rejected]: (state, action) => {
+      state.loading = false;
+      state.data_country = action.payload;
     },
 
     [getCostCenterList.pending]: (state, action) => {
@@ -1517,18 +1643,6 @@ const promoSlice = createSlice({
     [getListPromotionType.rejected]: (state, action) => {
       state.loading = false;
       state.data_promotion_type = action.payload;
-    },
-
-    [getListPromoCategory.pending]: (state) => {
-      state.loading = true;
-    },
-    [getListPromoCategory.fulfilled]: (state, action) => {
-      state.loading = false;
-      state.data_promo_category = action.payload;
-    },
-    [getListPromoCategory.rejected]: (state, action) => {
-      state.loading = false;
-      state.data_promo_category = action.payload;
     },
 
     [getAdjustmentTypeList.pending]: (state) => {

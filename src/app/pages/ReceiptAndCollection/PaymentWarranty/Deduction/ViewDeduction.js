@@ -1,87 +1,46 @@
-import {
-  Checkbox,
-  Form,
-  Spin,
-  Tooltip,
-} from "antd";
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import BaseContainer from "../../../../../components/BaseContainer";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
-import SVGIcon from "../../../../../assets/Icon/index";
-import ButtonComponent from "../../../../../components/ButtonComponent";
-import TablePagination from "../../../../../components/TablePagination";
-import {
-  DownloadOutlined,
-} from "@ant-design/icons";
-import {
-  renderColumn,
-  renderDateColumn,
-} from "../../../../../utils";
-import BreadCrumb from "../../../../../components/BreadCrumb";
-import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
+import React, { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { NavLink, Link } from "react-router-dom";
-import {
-  getApprovalHistory,
-  getDownloadSetting,
-  getPaginateSetting,
-  inactiveSetting,
-  getAllApprovalList,
-  getListApprovalById
-} from "../../../../../redux/slices/receipt_collection/setting";
-import ModalActiveInactive from "../../../../../components/Modal/ModalActiveInactive";
-import ModalHistory from "../../../../../components/Modal/ModalHistory";
-import { getColumnSearchPropsPaging } from "../../../../../utils/getColumnSearchProps";
-import Toolbar from "../../../../../components/Toolbar";
-import { useTryAgainHooks } from "../../../../../utils/useTryAgainHooks";
+import { Spin, Tooltip, Dropdown, Menu } from "antd";
+import { NavLink, Link, useNavigate } from "react-router-dom";
+import { EyeOutlined, WarningOutlined } from "@ant-design/icons";
+import { debounce } from "lodash";
+
+// Routes
+import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
+
+// Global Custom Components
+import BreadCrumb from "../../../../../components/BreadCrumb";
+import TableRBI from "../../../../../components/TableRBI";
+import CardContainer from "../../../../../components/CardContainer";
+import ButtonComponent from "../../../../../components/ButtonComponent";
+import SVGIcon from "../../../../../assets/Icon/index";
 import { useColumnActionPermission } from "../../../../../components/ColumnActionPermission";
-import { disabledActionByStatus } from "../../../../../utils";
+import ModalHistory from "../../../../../components/Modal/ModalHistory";
+import { ModalConfirm } from "../../../../../components/Modal/ModalPopUp";
 
-const ViewSettings = () => {
-  // Selector
-  const { loading, data, dataApprovalHistory } = useSelector(
-    (state) => state.receiptSetting
-  );
-  const { bodyError } = useSelector((state) => state?.general);
+// Column Configuration
+import { getDeductionColumns } from "./DeductionColumns";
 
-  // Declaration
+// Redux
+import { getPaginateDeduction, getDownloadDeduction, deleteDeduction, getApprovalHistory } from "../../../../../redux/slices/receipt_collection/deduction";
+
+const ViewDeduction = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { data, loading, dataApprovalHistory, loadingHistory } = useSelector((state) => state.deduction);
   const searchInput = useRef(null);
-  // const dataSource = data?.result;
 
-  // State
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const [searchText, setSearchText] = useState("");
+  const [pageSize, setPageSize] = useState(15);
   const [searchedColumn, setSearchedColumn] = useState("");
+  const [searchText, setSearchText] = useState("");
   const [search, setSearch] = useState({});
-  const [sort, setSort] = useState("");
+
+  const [openModalDelete, setOpenModalDelete] = useState(false);
   const [openModalHistory, setOpenModalHistory] = useState(false);
   const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
-  const [body, setBody] = useState({});
-  const [status, setStatus] = useState("");
-  const [id, setId] = useState("");
-  const [settingNameCombined, setSettingNameCombined] = useState("");
-  const [openModalInactivate, setOpenModalInactivate] = useState(false);
+  const [selectedRecord, setSelectedRecord] = useState(null);
 
-
-  const handleFetch = useCallback(() => {
-    dispatch(
-      getPaginateSetting({
-        page,
-        pageSize,
-        sort,
-        search: encodeURIComponent(JSON.stringify(search)),
-      })
-    );
-  }, [dispatch, page, pageSize, search, sort]);
-
-  useEffect(() => {
-    handleFetch();
-  }, [handleFetch]);
-
-
-  // Breadcrumbs
   const routes = [
     {
       path: "",
@@ -89,7 +48,7 @@ const ViewSettings = () => {
     },
     {
       path: "",
-      breadcrumbName: "Payment Warranty",
+      breadcrumbName: "Payment  Guarantee",
     },
     {
       path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_DEDUCTION,
@@ -97,347 +56,151 @@ const ViewSettings = () => {
     },
   ];
 
-  const handleOptions = () => {
-    const data = dataApprovalHistoryFix?.dataApprover || {};
-    const keyData = Object.keys(data);
-    return keyData.map((item) => ({
-      value: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase(),
-    }));
+  useEffect(() => {
+    handleRefresh();
+  }, [dispatch, page, pageSize, search]);
+
+  useEffect(() => {
+    if (dataApprovalHistory && (dataApprovalHistory?.dataApprover || dataApprovalHistory?.dataHistory)) {
+      setDataApprovalHistoryFix({
+        dataApprover: {
+          creation: dataApprovalHistory?.dataApprover?.WARRANTY_DEDUCTION || [],
+        },
+        dataHistory: {
+          creation: dataApprovalHistory?.dataHistory?.WARRANTY_DEDUCTION || [],
+        },
+      });
+    } else {
+      setDataApprovalHistoryFix({});
+    }
+  }, [dataApprovalHistory]);
+
+  const handleChangePage = (page, pageSize) => {
+    setPage(page);
+    setPageSize(pageSize);
   };
 
-  // Function Search Column
+  const handleDownload = () => {
+    dispatch(getDownloadDeduction({ page, pageSize, search: encodeURIComponent(JSON.stringify(search)) }));
+  };
+
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
-    setSearchedColumn(dataIndex);
+    setSearchedColumn(selectedKeys[0] ? dataIndex : "");
+    const shouldResetPage = search[dataIndex] !== selectedKeys[0];
     setSearch((prevState) => {
       return {
         ...prevState,
         [dataIndex]: selectedKeys[0],
       };
     });
-  };
-
-  const handleChange = (page, pageSize) => {
-    setPage(page);
-    setPageSize(pageSize);
-  };
-
-  useEffect(() => {
-    if (dataApprovalHistory && dataApprovalHistory?.dataApprover) {
-      const temp = {
-        dataApprover: {
-          create: dataApprovalHistory?.dataApprover?.RECEIPT_SETTING || [],
-          inactive:
-            dataApprovalHistory?.dataApprover?.INACTIVE_RECEIPT_SETTING || [],
-        },
-        dataHistory: {
-          create: dataApprovalHistory?.dataHistory?.RECEIPT_SETTING || [],
-          inactive:
-            dataApprovalHistory?.dataHistory?.INACTIVE_RECEIPT_SETTING || [],
-        },
-      };
-      setDataApprovalHistoryFix(temp);
-    } else {
-      setDataApprovalHistoryFix({});
-    }
-  }, [dataApprovalHistory]);
-
-  const handleApprovalHistory = async (data) => {
-    try {
-      setBody(data);
-     await dispatch(getApprovalHistory(data))?.unwrap();
-      setOpenModalHistory(true);
-      
-    } catch (error) {
-      setOpenModalHistory(false);
-      
+    if (shouldResetPage) {
+      setPage(1);
     }
   };
 
-  const columns = [
-    {
-      title: "NO",
-      width: 60,
-      align: "center",
-      render: (text, object, index) => (page - 1) * pageSize + index + 1,
-    },
-    {
-      title: "PARTNER CODE",
-      dataIndex: "partnerCode",
-      sorter: true,
-      ...getColumnSearchPropsPaging(
-        "partnerCode",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) =>
-        renderColumn(
-          "partnerCode",
-          searchedColumn,
-          searchText,
-          text,
-          true,
-          "input",
-          search
-        ),
-    },
-
-    {
-      title: "Collection Agent CODE",
-      dataIndex: "caCode",
-      sorter: true,
-      ...getColumnSearchPropsPaging(
-        "caCode",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) =>
-        renderColumn(
-          "caCode",
-          searchedColumn,
-          searchText,
-          text,
-          true,
-          "input",
-          search
-        ),
-    },
-
-    {
-      title: "Payment Channel CODE",
-      dataIndex: "ciCode",
-      sorter: true,
-      ...getColumnSearchPropsPaging(
-        "ciCode",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) =>
-        renderColumn(
-          "ciCode",
-          searchedColumn,
-          searchText,
-          text,
-          true,
-          "input",
-          search
-        ),
-    },
-
-    {
-      title: "DATE START",
-      dataIndex: "dateStart",
-      align: "center",
-      sorter: true,
-      ...getColumnSearchPropsPaging(
-        "dateStart",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        false
-      ),
-      render: (text) => renderColumn("dateStart", searchedColumn, searchText, text),
-    },
-
-    {
-      title: "DATE END",
-      dataIndex: "dateEnd",
-      align: "center",
-      sorter: true,
-      ...getColumnSearchPropsPaging(
-        "dateEnd",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        false
-      ),
-      render: (text) => renderColumn("dateEnd", searchedColumn, searchText, text),
-    },
-
-    {
-      title: "HOUR START",
-      dataIndex: "hourStart",
-      sorter: true,
-      align: "center",
-      ...getColumnSearchPropsPaging(
-        "hourStart",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        false
-      ),
-      render: (text) => text ?? "-",
-    },
-
-    {
-      title: "HOUR END",
-      dataIndex: "hourEnd",
-      sorter: true,
-      align: "center",
-      ...getColumnSearchPropsPaging(
-        "hourEnd",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        false
-      ),
-      render: (text) => text ?? "-",
-    },
-
-    {
-      title: "MINUTE START",
-      dataIndex: "minuteStart",
-      sorter: true,
-      align: "center",
-      ...getColumnSearchPropsPaging(
-        "minuteStart",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        false
-      ),
-      render: (text) => text ?? "-",
-    },
-
-    {
-      title: "MINUTE END",
-      dataIndex: "minuteEnd",
-      sorter: true,
-      align: "center",
-      ...getColumnSearchPropsPaging(
-        "minuteEnd",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        false
-      ),
-      render: (text) => text ?? "-",
-    },
-
-    {
-      title: "TYPE",
-      dataIndex: "type",
-      sorter: true,
-      ellipsis: { showTitle: false },
-      ...getColumnSearchPropsPaging(
-        "type",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        false
-      ),
-      render: (text) =>
-        renderColumn(
-          "type",
-          searchedColumn,
-          searchText,
-          text,
-          true,
-          "input",
-          search
-        ),
-    },
-
-    {
-      title: "STATUS",
-      dataIndex: "status",
-      sorter: true,
-      width: 150,
-      fixed: "right",
-      ...getColumnSearchPropsPaging(
-        "status",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        false
-      ),
-      render: (text) =>
-        renderColumn("status", searchedColumn, searchText, text, false, "status"),
-    },
-    {
-      title: "STATUS APPROVAL",
-      dataIndex: "statusApproval",
-      key: "statusApproval",
-      sorter: true,
-      width: 200,
-      fixed: "right",
-      ...getColumnSearchPropsPaging(
-        "statusApproval",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        false
-      ),
-      render: (text) =>
-        renderColumn(
-          "status",
-          searchedColumn,
-          searchText,
-          text,
-          false,
-          "status"
-        ),
-    },
-  ];
-
-  const onSort = (_, __, sort) => {
-    const dataSort =
-      sort.order !== undefined
-        ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
-        : "";
-    setSort(dataSort);
+  const handleDelete = (record) => {
+    setSelectedRecord(record);
+    setOpenModalDelete(true);
   };
 
-  
-
-  
-
-  // handle download
-  const handleDownload = () => {
+  const handleRefresh = () => {
+    const reqSearch = encodeURIComponent(JSON.stringify(search));
     dispatch(
-      getDownloadSetting({
-        search: encodeURIComponent(JSON.stringify(search)),
-        // search: tempSearch,
-        page,
-        pageSize,
-        sort,
-      })
+      getPaginateDeduction({ search: reqSearch, page, pageSize })
     );
   };
 
-  const combineSettingName = (pCode, ci, ca, typeVal) => {
-    return `${pCode || ""}-${ci || ""}-${ca || ""}-${typeVal || ""}`;
+  const handleGlobalSearch = useCallback(
+    debounce((value) => {
+      setSearchText(value);
+      setSearchedColumn(value ? "all" : "");
+      setSearch((prevState) => {
+        const nextState = { ...prevState };
+        if (value) {
+          nextState.all = value;
+        } else {
+          delete nextState.all;
+        }
+        return nextState;
+      });
+      setPage(1);
+    }, 500),
+    []
+  );
+
+  useEffect(() => {
+    return () => {
+      handleGlobalSearch.cancel();
+    };
+  }, [handleGlobalSearch]);
+
+  const handleAdvanceSearch = (searchData) => {
+    const simpleSearch = {};
+    if (searchData?.filters && Array.isArray(searchData.filters)) {
+      searchData.filters.forEach((rule) => {
+        if (rule.column && rule.value !== undefined && rule.value !== null && rule.value !== "") {
+          simpleSearch[rule.column] = rule.value;
+        }
+      });
+    }
+    setSearch(simpleSearch);
+    setPage(1);
   };
 
+  const handleConfirmDelete = () => {
+    dispatch(deleteDeduction(selectedRecord.id)).unwrap().then(() => {
+      setOpenModalDelete(false);
+      handleRefresh();
+    });
+  };
+
+  const handleHistory = (record) => {
+    setSelectedRecord(record);
+    dispatch(getApprovalHistory({ id: record.id }));
+    setOpenModalHistory(true);
+  };
+
+  const handleOptions = () => {
+    const dataObj = dataApprovalHistoryFix?.dataApprover || {};
+    const keyData = Object.keys(dataObj);
+    return keyData.map((item) => ({
+      value: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase().replace(/_/g, " "),
+    }));
+  };
+
+  const moreActionsMenu = (record) => (
+    <Menu>
+      <Menu.Item
+        key="History"
+        onClick={() => handleHistory(record)}
+      >
+        <div className="flex items-center gap-2">
+          <SVGIcon name="IconLogHistory" color={"#000000"} width={16} />
+          <span>Approval History</span>
+        </div>
+      </Menu.Item>
+      <Menu.Item 
+        key="Delete" 
+        onClick={() => handleDelete(record)}
+      >
+        <div className="flex items-center gap-2">
+          <SVGIcon name="IconDelete" color={"#BE3036"} width={16} />
+          <span className="text-[#BE3036]">Delete</span>
+        </div>
+      </Menu.Item>
+    </Menu>
+  );
+
   const itemActions = [
-    // toolbar items
     {
       action: "Download",
       render: (
         <ButtonComponent
           onClick={handleDownload}
-          type={"submit"}
-          border={false}
-          icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
+          isPrimary={true}
+          icon={<SVGIcon name="IconButtonDownload" width={18} color={"#FFFFFF"} />}
         >
           Download List
         </ButtonComponent>
@@ -448,7 +211,8 @@ const ViewSettings = () => {
       render: (
         <NavLink to={RECEIPT_AND_COLLECTION_ROUTES.CREATE_DEDUCTION}>
           <ButtonComponent
-            icon={<SVGIcon name="IconButtonCreate" width={24} />}
+            isPrimary={true}
+            icon={<SVGIcon name="IconButtonCreate" width={18} color={"#FFFFFF"} />}
             type="submit"
           >
             Create Deduction
@@ -461,280 +225,130 @@ const ViewSettings = () => {
     {
       action: "View",
       type: "table",
-      render: (record, data_length) => {
+      fixed: "right",
+      width: 100,
+      render: (record) => {
         return (
-          <Tooltip title={"Detail"}>
-            <Link
-              to={RECEIPT_AND_COLLECTION_ROUTES.DETAIL_SETTINGS}
-              state={{ id: record?.id }}
-            >
-              {/* <ButtonComponent
-                  className="gap-5"
-                  icon={<SVGIcon name="IconDetail" width={24} />}
-                  border={false}
-                /> */}
-              <SVGIcon name="IconDetail" width={24} />
-            </Link>
-          </Tooltip>
-        );
-      },
-    },
-    {
-      action: "Update",
-      type: "table",
-      render: (record, data_length) => {
-
-        // console.log({
-        //   disabled: disabledActionByStatus('update', record?.status, record?.statusApproval),
-        //   to: !disabledActionByStatus('update', record?.status, record?.statusApproval) ? RECEIPT_AND_COLLECTION_ROUTES.UPDATE_SETTINGS : undefined
-        // });
-        const isDisabled = disabledActionByStatus('update', record?.status, record?.statusApproval);
-        return (
-          data_length > 3 ? (
-            <Link
-              to={!isDisabled ? RECEIPT_AND_COLLECTION_ROUTES.UPDATE_SETTINGS : undefined}
-              state={!isDisabled ? { id: record?.id } : undefined}
-            >
-              <ButtonComponent
-                className="gap-5 w-full"
-                icon={
-                  <SVGIcon name="IconEdit" width={24} color={"#0075BF"} />
-                }
-                border={false}
-              >
-                <span
-                  className={"text-black gap-2 text-xl text-center w-full"}
-                >
-                  Update
-                </span>
-              </ButtonComponent>
-            </Link>
-          ) : (
-            <Tooltip title="Update" className={
-              disabledActionByStatus('update', record?.status, record?.statusApproval) ? "cursor-not-allowed" : "cursor-pointer"
-            }>
+          <div className="flex justify-center items-center gap-2">
+             <Dropdown overlay={moreActionsMenu(record)} trigger={['click']}>
+              <div className="cursor-pointer">
+                <SVGIcon name="IconActionDropdown" width={20} color={"#0075bf"} />
+              </div>
+            </Dropdown>
+            <Tooltip title={"Detail"}>
               <Link
-                to={
-                  disabledActionByStatus('update', record?.status, record?.statusApproval) === false &&
-                  RECEIPT_AND_COLLECTION_ROUTES.UPDATE_SETTINGS}
-                state={
-                  disabledActionByStatus('update', record?.status, record?.statusApproval) === false &&
-                  { id: record?.id }
-                }
+                to={`${RECEIPT_AND_COLLECTION_ROUTES.DETAIL_DEDUCTION}`}
+                state={{ id: record?.id }}
               >
-                <div border={false}>
-                  <SVGIcon name="IconEdit"
-                    color={disabledActionByStatus('update', record?.status, record?.statusApproval) ? "#d3d3d3" : "#ACC424"} width={24}
-                    className={
-                      disabledActionByStatus('update', record?.status, record?.statusApproval) ? "cursor-not-allowed" : "cursor-pointer"
-                    } />
-                </div>
+                 <SVGIcon name="IconDetail" width={24} color={"#0075bf"} />
               </Link>
             </Tooltip>
-          )
-        );
-      },
-    },
-
-    {
-      action: "Activate",
-      type: "table",
-      render: (record, data_length) => {
-        const statusLowerCase = record?.status?.toLowerCase()
-
-        return (
-          data_length > 3 ?
-            <div className="w-full">
-              <ButtonComponent
-                border={false}
-                className={'gap-5 w-full'}
-                onClick={() => handleInactive(record)}
-                disabled={
-                  disabledActionByStatus('activate', record?.status, record?.statusApproval)
-                }
-              >
-                <Checkbox
-                  onClick={() => handleInactive(record)}
-                  checked={record?.status !== "Active"}
-                  disabled={disabledActionByStatus('activate', record?.status, record?.statusApproval)}
-                />
-                <span
-                  className={"text-black ml-6 gap-2 text-xl text-center w-full"}
-                >
-                  {record?.status === "Active" ? "Inactivate" : "Activate"}
-                </span>
-              </ButtonComponent>
-            </div>
-            :
-            <Tooltip title={statusLowerCase === "active" || statusLowerCase === 'draft' ? "Inactivate" : "Activate"}>
-              <div >
-                <Checkbox
-                  border={false}
-                  onClick={() => handleInactive(record)}
-                  checked={record?.status !== "Active"}
-                  disabled={disabledActionByStatus('activate', record?.status, record?.statusApproval)}
-                />
-              </div>
-            </Tooltip>
-        );
-      }
-    },
-    {
-      action: "history",
-      type: "table",
-      render: (record, data_length) => {
-        return (
-          data_length > 3 ?
-            <ButtonComponent
-              className="gap-5"
-              icon={
-                <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
-              }
-              border={false}
-              onClick={() => handleApprovalHistory(record?.id)}
-            >
-              <span className={"text-black gap-2 text-xl text-center"}>
-                Approval History
-              </span>
-            </ButtonComponent>
-            :
-            <Tooltip title={'Approval History'}>
-              <div border={false}
-                onClick={() => handleApprovalHistory(record?.id)}
-              >
-                <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
-              </div>
-            </Tooltip>
+          </div>
         );
       },
     },
   ];
 
-  const handleInactive = (r) => {
-    setOpenModalInactivate(true);
-    setId(r?.id);
-    setSettingNameCombined(
-      combineSettingName(
-        r?.partnerCode,
-        r?.ciCode,
-        r?.caCode,
-        r?.type
-      )
-    );
-    setStatus(r?.status);
-  };
+  const actionCols = useColumnActionPermission(
+    ["view"],
+    itemActions
+  );
 
-  // handle retry modal error
-  const handleRetry = () => {
-    try {
-      handleCancelTryAgain();
-      if (bodyError?.action === "INACTIVE_RECEIPT_SETTING") {
-        dispatch(inactiveSetting(body));
-      }else if (bodyError?.action === "GET_APPROVAL_SETTINGS") {
-        dispatch(getApprovalHistory(body));
-      } else if (bodyError?.action === "DOWNLOAD_SETTINGS") {
-        handleDownload();
-      }
-      handleFetch();
-    } catch (error) {
-      handleFetch();
-    }
-  };
-
-  const handleCancelModalInactivate = () => {
-    setOpenModalInactivate(false);
-  };
-
-  const handleSubmitModalInactivate = (res, handleClear) => {
-    const body = {
-      id: id,
-      appHierId: res.approvalHierarchy,
-      status: status === "Inactive" ? "Active" : "Inactive",
-      remark: res.remark,
-    };
-    setBody({ body });
-    dispatch(inactiveSetting({ body }))
-      .unwrap()
-      .then(() => {
-        handleClear();
-        handleCancelModalInactivate();
-        let tempSearch = "";
-        for (const dataIndex in search) {
-          if (Object.hasOwnProperty.call(search, dataIndex)) {
-            const tempSearchText = search[dataIndex];
-            if (tempSearchText) {
-              tempSearch += `${dataIndex}~${tempSearchText},`;
-            }
-          }
-        }
-        tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
-        dispatch(getPaginateSetting({ search: tempSearch, page, pageSize, sort }));
-      });
-  };
-
-  const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
+  const baseColumns = useMemo(() => {
+    return getDeductionColumns({
+      page,
+      pageSize,
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+    });
+  }, [
+    page,
+    pageSize,
+    searchInput,
+    searchedColumn,
+    searchText,
+  ]);
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
-        <Toolbar items={itemActions} />
-        <BaseContainer header={"DEDUCTION LIST"}>
-          <TablePagination
-            dataSource={data?.result}
-            pageSize={pageSize}
-            // columns={columns}
-            columns={[
-              ...columns,
-              ...useColumnActionPermission(
-                ["view", "history", "update", 'activate'],
-                itemActions
-              ),
-            ]}
+        <CardContainer header={
+          <div className="flex -my-4 justify-between items-center">
+            <p className="mt-[15px] font-bold uppercase text-[#0075BF]">DEDUCTION LIST</p>
+            <div className="flex gap-2">
+              <ButtonComponent
+                onClick={handleDownload}
+                isPrimary={true}
+                icon={<SVGIcon name="IconButtonDownload" width={18} color={"#FFFFFF"} />}
+              >
+                Download List
+              </ButtonComponent>
+              <NavLink to={RECEIPT_AND_COLLECTION_ROUTES.CREATE_DEDUCTION}>
+                <ButtonComponent
+                  isPrimary={true}
+                  icon={<SVGIcon name="IconButtonCreate" width={18} color={"#FFFFFF"} />}
+                  type="submit"
+                >
+                  Create Deduction
+                </ButtonComponent>
+              </NavLink>
+            </div>
+          </div>
+        }>
+          <TableRBI
+            columns={[...baseColumns, ...actionCols]}
+            dataSource={data?.result?.map((item, index) => ({ ...item, key: index })) || []}
+            showExport={true}
+            showSearchBar={true}
+            showAdvanceSearch={true}
+            onSearch={(e) => handleGlobalSearch(e.target.value)}
+            onAdvanceSearch={handleAdvanceSearch}
+            handleDownload={handleDownload}
             current={page}
-            onChange={handleChange}
-            onSizeChanger={handleChange}
-            totalData={data?.page?.totalElements}
-            onSort={onSort}
-            tableScrolled={{
-              x: 2500,
-              y: 525,
-            }}
+            pageSize={pageSize}
+            onChange={handleChangePage}
+            onSizeChanger={handleChangePage}
+            totalData={data?.page?.totalElements || 0}
+            tableScrolled={{ x: "max-content", y: 500 }}
           />
-        </BaseContainer>
-
-        <ModalActiveInactive
-          dispatch={dispatch}
-          getAPIOption={getAllApprovalList}
-          getAPIDetail={getListApprovalById}
-          selector={"receiptSetting"}
-          alertMessage={`Are you sure you want to inactivate this Setting with Setting Code ${settingNameCombined}?`}
-          openModalInactivate={openModalInactivate}
-          handleCloseModalInactivate={handleCancelModalInactivate}
-          onFinish={handleSubmitModalInactivate}
-        />
-
-        {/* <ModalInactivate
-          alertMessage={`Are you sure you want to inactivate this Setting with Setting Code ${settingNameCombined}?`}
-          openModalInactivate={openModalInactivate}
-          handleCloseModalInactivate={handleCancelModalInactivate}
-          onFinish={handleSubmitModalInactivate}
-        /> */}
-
-        <ModalHistory
-          isOpen={openModalHistory && dataApprovalHistoryFix}
-          handleClose={() => setOpenModalHistory(false)}
-          header={"Approval History"}
-          width={850}
-          tabOptions={handleOptions()}
-          dataApprover={dataApprovalHistoryFix?.dataApprover}
-          dataHistory={dataApprovalHistoryFix?.dataHistory}
-        />
+        </CardContainer>
       </Spin>
-      {/* modal try again */}
-      {renderModal()}
-    </LayoutMenu>
+
+      {/* History Modal */}
+      <ModalHistory
+        isOpen={openModalHistory}
+        handleClose={() => setOpenModalHistory(false)}
+        header={
+          <div className="flex items-center gap-2">
+            <span>Approval History</span>
+            {loadingHistory && <Spin size="small" />}
+          </div>
+        }
+        width={850}
+        tabOptions={handleOptions()}
+        dataApprover={dataApprovalHistoryFix?.dataApprover}
+        dataHistory={dataApprovalHistoryFix?.dataHistory}
+      />
+
+      {/* Delete Modal */}
+      <ModalConfirm
+        isOpen={openModalDelete}
+        handleCancel={() => setOpenModalDelete(false)}
+        handleOk={handleConfirmDelete}
+        width={600}
+      >
+        <div className="flex justify-center gap-[20px] mt-6">
+          <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
+          <p className={"text-[18px] font-bold"}>
+            Warning! if you delete this data, it will be permanently.
+          </p>
+        </div>
+      </ModalConfirm>
+    </>
   );
 };
 
-export default ViewSettings;
+export default ViewDeduction;

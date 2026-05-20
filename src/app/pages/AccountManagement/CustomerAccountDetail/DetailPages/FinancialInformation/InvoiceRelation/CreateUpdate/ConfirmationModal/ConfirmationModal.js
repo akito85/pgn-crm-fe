@@ -1,100 +1,94 @@
 import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import ConfirmationModalTabs from "./ConfirmationModalTabs";
-import ModalCustom from "../../../../../../../../../components/Modal/ModalCustom";
-import ButtonComponent from "../../../../../../../../../components/ButtonComponent";
-
-const tabs = [
-  { value: "Invoice Relation Information" },
-  { value: "Approval" },
-  { value: "Attachment" },
-];
+import NxModal from "../../../../../../../../../components/Nx/NxModal";
+import { Button } from "antd";
 
 const ConfirmationModal = ({
   form,
+  formId,
   isOpen,
   handleCancel,
-  selectedAppHierId,
-  selectedApprovalName,
-  hierarchyTableData,
-  dataAttachment,
+  approvalData,
+  attachmentDataSource,
   type = "",
-  data = {},
   service,
   configApplication,
+  loading = false,
+  handleSubmitForm = () => {},
 }) => {
-  const [currentTab, setCurrentTab] = useState(0);
-  const [typeDetailSection, setTypeDetailSection] = useState(tabs[currentTab].value);
+  const tabLength = type === "submit" ? 4 : 3;
 
-  const handleDetailSection = (e) => {
-    setTypeDetailSection(e.target.value);
-    setCurrentTab(tabs.findIndex(tab => tab.value === e.target.value))
-  };
+  const [activeTab, setActiveTab] = useState(0);
+
+  const { loading_createUpdateIr } = useSelector((state) => state.invoiceRelation);
+
+  const isSubmit = type === "submit";
+  const isDraft = type === "draft";
 
   /**
-   * @param {"next" | "prev"} type 
+   * @param {"next" | "prev"} direction
    */
-  const handleChangeTab = (type) => {
-    if (type === "next" && currentTab < (tabs.length -1)) {
-      setTypeDetailSection(tabs[currentTab + 1].value);
-      setCurrentTab(currentTab + 1);
+  const handleChangeTab = (direction) => {
+    if (direction === "next" && activeTab < tabLength - 1) {
+      setActiveTab((prev) => prev + 1);
     }
-    else if (type === "prev" && currentTab >= 0) {
-      setTypeDetailSection(tabs[currentTab - 1].value);
-      setCurrentTab(currentTab - 1);
+    else if (direction === "prev" && activeTab >= 0) {
+      setActiveTab((prev) => prev - 1);
     }
   }
 
   useEffect(() => {
     if (!isOpen) {
-      setTypeDetailSection(tabs[0].value);
-      setCurrentTab(0);
+      setActiveTab(0);
     }
   }, [isOpen])
 
   return (
-    <ModalCustom
+    <NxModal
       isOpen={isOpen}
       width={1000}
-      header={"CONFIRMATION INVOICE RELATION"}
+      title={"CONFIRMATION INVOICE RELATION"}
       type={"confirmation"}
-      handleCancel={handleCancel}
+      hidePadding={{
+        top: true,
+      }}
+      loading={loading}
       footer={[
-        <div className={"w-full justify-end flex gap-[20px]"} key={`footer-1`}>
-          {currentTab > 0 ? (
-            <ButtonComponent type={"default"} onClick={() => handleChangeTab("prev")}>
+        <div className={"flex justify-between"} key={`footer-1`}>
+          <Button type={"menu"} disabled={loading_createUpdateIr} onClick={() => handleCancel()}>
+            Cancel
+          </Button>
+          <div className="flex">
+            <Button disabled={loading_createUpdateIr || activeTab < 1} type={"menu"} onClick={() => handleChangeTab("prev")}>
               Previous
-            </ButtonComponent>
-          ) : (
-            <ButtonComponent type={"default"} onClick={handleCancel}>
-              Cancel
-            </ButtonComponent>
-          )}
-          {currentTab < (tabs.length - 1)  && (
-            <ButtonComponent type={"submit"} onClick={() => handleChangeTab("next")}>
-              Next
-            </ButtonComponent>
-          )}
-          {currentTab === (tabs.length - 1) && (
-            <ButtonComponent type={"submit"} form={form} htmlType={"submit"} >
-              {type === "submit" ? "Submit" : type === "draft" ? "Save as Draft" : ""}
-            </ButtonComponent>
-          )}
+            </Button>
+            {activeTab < (tabLength - 1)  && (
+              <Button type={"submit"} disabled={loading_createUpdateIr} onClick={() => handleChangeTab("next")}>
+                Next
+              </Button>
+            )}
+            {activeTab === (tabLength - 1) && (
+              <Button type={"submit"} form={formId} htmlType={isSubmit ? "submit" : "button"} onClick={isDraft ? handleSubmitForm : undefined} loading={loading_createUpdateIr}>
+                Confirm
+              </Button>
+            )}
+          </div>
         </div>,
       ]}
     >
       <ConfirmationModalTabs
-        options={tabs}
-        handleChangeOption={handleDetailSection}
-        section={typeDetailSection}
-        selectedAppHierId={selectedAppHierId}
-        selectedApprovalName={selectedApprovalName}
-        hierarchyTableData={hierarchyTableData}
-        dataAttachment={dataAttachment}
-        data={data}
+        form={form}
+        approvalData={approvalData}
+        attachmentDataSource={attachmentDataSource}
         service={service}
+        type={type}
         configApplication={configApplication}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        disabled={loading}
       />
-    </ModalCustom>
+    </NxModal>
   )
 }
 

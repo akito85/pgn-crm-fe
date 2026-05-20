@@ -1,16 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Form, Spin } from "antd";
-import { LeftOutlined } from "@ant-design/icons";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import moment from "moment";
-import LayoutMenu from "../../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../../../components/BreadCrumb";
-import RadioTabs from "../../../../../../components/RadioTabs";
+import { FormStepper, FormFooter } from "../../../../../../components/FormStepNavigation";
 import SVGIcon from "../../../../../../assets/Icon";
-import ButtonComponent from "../../../../../../components/ButtonComponent";
 import BillingCycleSectionForm from "../Form/BillingCycleSectionForm";
-import BaseContainer from "../../../../../../components/BaseContainer";
+import CardContainer from "../../../../../../components/CardContainer";
 import ratingBillingHttpService from "../../../../../../redux/services/ratingBillingHttpService";
 import { configApp } from "../../../../../../constants/configApp";
 import ApprovalComponentGeneral from "../../../../../../components/Approval/ApprovalComponentGeneral";
@@ -28,10 +25,13 @@ import AttachmentComponent from "../../../../../../components/Attachment/Attachm
 import { getConfigFileRBIData } from "../../../../../../redux/slices/attachmentSlice";
 import ModalConfirmationBillingCycle from "../Modal/ModalConfirmationBillingCycle";
 import { dateFormatting } from "../../../../../../utils";
-import ModalBack from "../../../../../../components/Modal/ModalBack";
 import { ModalError } from "../../../../../../components/Modal/ModalPopUp";
 import { RBI_ROUTES } from "../../../../../../routes/rating_billing/rbi_routes";
 import { validateCreateUpdate } from "../../../../../../redux/slices/general_slice";
+import ModalCustom from "../../../../../../components/Modal/ModalCustom";
+import ButtonComponent from "../../../../../../components/ButtonComponent";
+import { WarningOutlined } from "@ant-design/icons";
+import { ModalConfirm } from "../../../../../../components/Modal/ModalPopUp";
 
 const BillingCycleForm = ({ type }) => {
   const {
@@ -49,25 +49,53 @@ const BillingCycleForm = ({ type }) => {
   const [form] = Form.useForm();
   const { id, status, statusApproval } = location?.state || {};
 
-  const [valuePage, setValuePage] = useState("Billing Cycle");
+  const [current, setCurrent] = useState(0);
   const [appHierOptions, setAppHierOptions] = useState([]);
   const [appHierDataDetail, setAppHierDataDetail] = useState([]);
   const [listDataAttachment, setListDataAttachment] = useState([]);
+  const [deletedAttachmentIds, setDeletedAttachmentIds] = useState([]);
   const [selectedHierarchy, setSelectedHierarchy] = useState();
   const [bodyData, setBodyData] = useState({});
   const [bodyError, setBodyError] = useState({});
   const [modalConfirm, setModalConfirm] = useState(false);
   const [modalBack, setModalBack] = useState(false);
   const [modalError, setModalError] = useState(false);
-  const [flag, setFlag] = useState(false);
+  const [modalIncomplete, setModalIncomplete] = useState({
+    isOpen: false,
+    stepName: "",
+    stepIndex: 0,
+  });
+  const flagRef = React.useRef(false);
   const [loadingForm, setLoadingForm] = useState(false);
+  const [loadingSave, setLoadingSave] = useState(false);
   const [startDate, setStartDate] = useState();
 
   const isLoading = loading || loadingForm;
 
-  console.log(id, "id");
+  const handleUpdateAttachment = React.useCallback((updater) => {
+    setListDataAttachment((prevState) => {
+      const newState =
+        typeof updater === "function" ? updater(prevState) : updater;
+      const removedItems = prevState.filter(
+        (item) => !newState.some((newItem) => newItem.key === item.key),
+      );
+      const removedExistingIds = removedItems
+        .filter((item) => item.dataType === "exist" && item.id)
+        .map((item) => item.id);
+      if (removedExistingIds.length > 0) {
+        setDeletedAttachmentIds((prev) => [...prev, ...removedExistingIds]);
+      }
+      return newState;
+    });
+  }, []);
 
-  const [tabPages, setTabPages] = useState([
+  const steps = [
+    { title: "BILLING CYCLE", value: "Billing Cycle" },
+    { title: "APPROVAL", value: "Approval" },
+    { title: "ATTACHMENT", value: "Attachment" },
+  ];
+
+  const [tabData, setTabData] = useState([
     {
       value: "Billing Cycle",
       paramValue: [
@@ -81,6 +109,12 @@ const BillingCycleForm = ({ type }) => {
     { value: "Approval", paramValue: ["apphierId"] },
     { value: "Attachment" },
   ]);
+
+  const [valuePage, setValuePage] = useState(steps[0].value);
+
+  useEffect(() => {
+    setValuePage(steps[current].value);
+  }, [current]);
 
   const routes = [
     {
@@ -124,8 +158,9 @@ const BillingCycleForm = ({ type }) => {
       dataInfoDetail?.billingCycleId === id
     ) {
       const datadraftAttachment = (dataInfoDetail?.attachmentDtoList || []).map(
-        (item) => {
+        (item, index) => {
           return {
+            key: index + 1,
             id: item.id,
             size: item.size,
             fileName: item.fileName,
@@ -166,8 +201,9 @@ const BillingCycleForm = ({ type }) => {
       dataInfoDetail?.billingCycleId === id
     ) {
       const dataAttachment = (dataInfoDetail?.attachmentDtoList || []).map(
-        (item) => {
+        (item, index) => {
           return {
+            key: index + 1,
             id: item.id,
             size: item.size,
             fileName: item.fileName,
@@ -237,12 +273,34 @@ const BillingCycleForm = ({ type }) => {
     }
   }, [dataListAppHierDetail]);
 
-  const handleMandatory = (
-    setListSectionInfo = () => {},
-    listDataAttachment,
-    errorFields
-  ) => {
-    setListSectionInfo((prevState) => {
+  const next = () => {
+    const fieldsToValidate = tabData[current]?.paramValue;
+    if (fieldsToValidate) {
+      form
+        .validateFields(fieldsToValidate)
+        .then(() => {
+          if (current < steps.length - 1) {
+            setCurrent(current + 1);
+          }
+        })
+        .catch((error) => {
+          console.log("Validation failed:", error);
+        });
+    } else {
+      if (current < steps.length - 1) {
+        setCurrent(current + 1);
+      }
+    }
+  };
+
+  const prev = () => {
+    if (current > 0) {
+      setCurrent(current - 1);
+    }
+  };
+
+  const handleError = ({ values, errorFields, outOfDate }) => {
+    setTabData((prevState) => {
       const res = prevState.map((item) => {
         const errorBadge =
           item.value !== "Attachment"
@@ -264,10 +322,21 @@ const BillingCycleForm = ({ type }) => {
       });
       return res;
     });
-  };
 
-  const handleError = ({ values, errorFields, outOfDate }) => {
-    handleMandatory(setTabPages, listDataAttachment, errorFields);
+    if (errorFields?.length > 0) {
+      const firstError = errorFields[0].name[0];
+      const stepIndex = tabData.findIndex((page) =>
+        page.paramValue?.includes(firstError)
+      );
+
+      if (stepIndex !== -1) {
+        setModalIncomplete({
+          isOpen: true,
+          stepName: steps[stepIndex].title,
+          stepIndex: stepIndex,
+        });
+      }
+    }
   };
 
   const processData = ({ bodyData, id, type, dateFormatting, flag }) => {
@@ -289,20 +358,23 @@ const BillingCycleForm = ({ type }) => {
     return body;
   };
 
-  // Validate Data before Modal
+  // Helper to build processData with the current flag ref value
+  const buildProcessData = (bodyDataArg) =>
+    processData({
+      bodyData: bodyDataArg,
+      id,
+      type,
+      dateFormatting,
+      flag: flagRef.current,
+    });
+
   const checkDataValidity = async (formValue) => {
     const url =
       type === "create"
         ? "/v1/dbs/api/billingcycle/validate-create"
         : "/v1/dbs/api/billingcycle/validate-update";
 
-    const body = processData({
-      bodyData: formValue,
-      id,
-      type,
-      dateFormatting,
-      flag,
-    });
+    const body = buildProcessData(formValue);
 
     try {
       await dispatch(
@@ -321,7 +393,19 @@ const BillingCycleForm = ({ type }) => {
 
   const handleSubmitForm = async (formValue) => {
     if (listDataAttachment.length === 0) {
-      handleMandatory(setTabPages, listDataAttachment);
+      setTabData((prevState) => {
+        return prevState.map((item) => {
+          if (item.value === "Attachment") {
+            return { ...item, errorBadge: 1 };
+          }
+          return item;
+        });
+      });
+      setModalIncomplete({
+        isOpen: true,
+        stepName: steps[2].title,
+        stepIndex: 2,
+      });
     } else {
       const isDataValid = await checkDataValidity(formValue);
 
@@ -336,10 +420,10 @@ const BillingCycleForm = ({ type }) => {
             ? moment(formValue?.endDate).format(dateFormatting.date)
             : null,
           description: formValue.description || null,
-          appHierId: formValue.apphierId,
+          apphierId: formValue.apphierId,
         });
         setModalConfirm(true);
-        setTabPages([
+        setTabData([
           {
             value: "Billing Cycle",
             paramValue: [
@@ -363,11 +447,12 @@ const BillingCycleForm = ({ type }) => {
     if (type === "create") {
       form.resetFields();
       setAppHierDataDetail([]);
-      setAppHierOptions([]);
       setSelectedHierarchy("");
       setListDataAttachment([]);
+      setDeletedAttachmentIds([]);
       setBodyData({});
-      setTabPages([
+      setCurrent(0);
+      setTabData([
         {
           value: "Billing Cycle",
           paramValue: [
@@ -384,28 +469,15 @@ const BillingCycleForm = ({ type }) => {
     } else {
       dispatch(getInfoDetail(id));
       dispatch(getInfoDetailDraft(id));
+      setCurrent(0);
     }
   };
 
-  const handleConfirm = async () => {
-    setModalConfirm(false);
-    // const payload = {
-    //   ...bodyData,
-    //   isSubmit: flag,
-    //   startDate: moment(bodyData?.startDate).format(dateFormatting.date),
-    //   endDate: bodyData?.endDate
-    //     ? moment(bodyData?.endDate).format(dateFormatting.date)
-    //     : null,
-    //   billingCycleId: type === "update" ? id : null,
-    // };
+  const handleSave = async () => {
+    setLoadingSave(true);
 
-    const payload = processData({
-      bodyData: bodyData,
-      dateFormatting,
-      flag,
-      id,
-      type,
-    });
+    const payload = buildProcessData(bodyData);
+
     if (type === "create") {
       dispatch(createBillingCycle(payload))
         .unwrap()
@@ -425,10 +497,13 @@ const BillingCycleForm = ({ type }) => {
             );
           }
           setLoadingForm(false);
-          setModalConfirm(false);
           handleClear();
+          setLoadingSave(false);
+          setModalConfirm(false);
         })
         .catch((error) => {
+          setLoadingSave(false);
+          setModalConfirm(false);
           if (Math.floor((error?.response?.data.code || 0) / 100) === 5) {
             const message =
               (error.response &&
@@ -449,6 +524,12 @@ const BillingCycleForm = ({ type }) => {
             (item) => item.dataType !== "exist"
           );
           setLoadingForm(true);
+          if (deletedAttachmentIds.length > 0) {
+            await ratingBillingHttpService.deleteDataWithBody(
+              `/v1/dbs/api/attachment/delete-attachment`,
+              { fileId: deletedAttachmentIds },
+            );
+          }
           for (let icon = 0; icon < filterDataAttach.length; icon++) {
             const element = filterDataAttach[icon];
             const body = {
@@ -462,10 +543,13 @@ const BillingCycleForm = ({ type }) => {
             );
           }
           setLoadingForm(false);
-          setModalConfirm(false);
           handleClear();
+          setLoadingSave(false);
+          setModalConfirm(false);
         })
         .catch((error) => {
+          setLoadingSave(false);
+          setModalConfirm(false);
           if (Math.floor((error?.response?.data.code || 0) / 100) === 5) {
             const message =
               (error.response &&
@@ -486,25 +570,51 @@ const BillingCycleForm = ({ type }) => {
   };
 
   const handleRetry = () => {
-    handleConfirm();
+    handleSave();
     setModalError(false);
     setBodyError({});
   };
 
-  // Function Get Data StartDate
+  const handleBack = () => {
+    if (
+      form.getFieldValue() === null ||
+      Object.keys(form.getFieldValue()).length === 0
+    ) {
+      navigate(-1);
+    } else {
+      setModalBack(true);
+    }
+  };
+
+  const handleSubmit = () => {
+    flagRef.current = true;
+    setTimeout(() => {
+      form.submit();
+    }, 0);
+  };
+
+  const handleSaveDraft = () => {
+    flagRef.current = false;
+    setTimeout(() => {
+      form.submit();
+    }, 0);
+  };
+
   const handleStartDate = (value) => {
     form.resetFields(["endDate"]);
     setStartDate(value);
     return value;
   };
+
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={isLoading}>
         <BreadCrumb routes={routes} />
-        <RadioTabs
-          data={tabPages}
-          onChange={(e) => setValuePage(e.target.value)}
-          currentPosition={valuePage}
+        <FormStepper
+          steps={steps}
+          current={current}
+          onPrev={prev}
+          onNext={next}
         />
         <Form
           form={form}
@@ -512,115 +622,102 @@ const BillingCycleForm = ({ type }) => {
           onFinish={handleSubmitForm}
           onFinishFailed={handleError}
         >
-          <div className={`${valuePage !== "Billing Cycle" ? "hidden" : ""}`}>
-            <BillingCycleSectionForm
-              type={type}
-              dataTimeUnit={list_time_unit}
-              startDate={startDate}
-              status={status}
-              handleStartDate={handleStartDate}
-            />
-          </div>
-
-          <div className={`${valuePage !== "Approval" ? "hidden" : ""}`}>
-            <BaseContainer header={"Approval Information"}>
-              <ApprovalComponentGeneral
+          <div
+            style={{
+              display:
+                valuePage !== tabData[0].value ? "none" : undefined,
+            }}
+          >
+              <BillingCycleSectionForm
                 type={type}
-                dataTable={appHierDataDetail}
-                dataOption={appHierOptions}
-                selectedHierarchy={selectedHierarchy}
-                updateSelectedHierarchy={setSelectedHierarchy}
+                dataTimeUnit={list_time_unit}
+                startDate={startDate}
+                status={status}
+                handleStartDate={handleStartDate}
               />
-            </BaseContainer>
           </div>
 
-          <div className={`${valuePage !== "Attachment" ? "hidden" : ""}`}>
-            <BaseContainer header={"Attachment Information"}>
-              <AttachmentComponent
-                type={type}
-                data={listDataAttachment}
-                updateData={setListDataAttachment}
-                dispatch={dispatch}
-                typeSelector="billingCycle"
-                getAPICategory={getListCategoryFile}
-                service={ratingBillingHttpService}
-                configApplication={configApp.RATING_BILLING_SERVICE}
-                getAPIGuard={getConfigFileRBIData}
-                typeRBI={"data"}
-                mandatory={true}
-              />
-            </BaseContainer>
-          </div>
-
-          <div className="mt-[30px] flex">
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => setModalBack(true)}
-              icon={
-                <LeftOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 24,
-                    justifyItems: "center",
-                  }}
+          <div
+            style={{
+              display:
+                valuePage !== tabData[1].value ? "none" : undefined,
+            }}
+          >
+              <CardContainer header={"Approval Information"}>
+                <ApprovalComponentGeneral
+                  type={type}
+                  dataTable={appHierDataDetail}
+                  dataOption={appHierOptions}
+                  selectedHierarchy={selectedHierarchy}
+                  updateSelectedHierarchy={setSelectedHierarchy}
                 />
-              }
-            >
-              Back
-            </ButtonComponent>
-
-            <div className={"w-full flex justify-end gap-5"}>
-              <Form.Item>
-                <ButtonComponent
-                  icon={<SVGIcon name="IconButtonClear" width={24} />}
-                  type="submit"
-                  onClick={() => {
-                    handleClear();
-                  }}
-                >
-                  {type === "update" ? "Reset" : "Clear"}
-                </ButtonComponent>
-              </Form.Item>
-              <Form.Item>
-                <ButtonComponent
-                  type="submit"
-                  htmlType={"submit"}
-                  onClick={() => setFlag(false)}
-                >
-                  Save as Draft
-                </ButtonComponent>
-              </Form.Item>
-              <Form.Item>
-                <ButtonComponent
-                  type="submit"
-                  htmlType={"submit"}
-                  onClick={() => setFlag(true)}
-                >
-                  Save & Submit
-                </ButtonComponent>
-              </Form.Item>
-            </div>
+                </CardContainer>
           </div>
+
+          <div
+            style={{
+              display:
+                valuePage !== tabData[2].value ? "none" : undefined,
+            }}
+          >
+              <CardContainer header={"Attachment Information"}>
+                <AttachmentComponent
+                  type={type}
+                  data={listDataAttachment}
+                  updateData={handleUpdateAttachment}
+                  dispatch={dispatch}
+                  typeSelector="billingCycle"
+                  getAPICategory={getListCategoryFile}
+                  service={ratingBillingHttpService}
+                  configApplication={configApp.RATING_BILLING_SERVICE}
+                  getAPIGuard={getConfigFileRBIData}
+                  typeRBI={"data"}
+                  mandatory={true}
+                />
+                </CardContainer>
+          </div>
+
+          <FormFooter
+            current={current}
+            totalSteps={steps.length}
+            onPrev={prev}
+            onNext={next}
+            onCancel={handleBack}
+            onClear={handleClear}
+            onSaveDraft={handleSaveDraft}
+            onSubmit={handleSubmit}
+            type={type}
+            isLoading={loadingSave || loadingForm}
+          />
         </Form>
 
         <ModalConfirmationBillingCycle
-          isOpen={modalConfirm}
-          handleCancel={() => setModalConfirm(false)}
-          handleConfirm={() => handleConfirm()}
-          data={bodyData}
-          listDataAppHierDetail={appHierDataDetail}
-          apiApproval={dataListAppHierId}
-          listDataAttachment={listDataAttachment}
-          dataOption={appHierOptions}
-          selectedHierarchy={selectedHierarchy}
-          apiTimeUnit={list_time_unit}
-        />
+            isOpen={modalConfirm}
+            handleCancel={() => setModalConfirm(false)}
+            handleConfirm={handleSave}
+            data={bodyData}
+            listDataAppHierDetail={appHierDataDetail}
+            apiApproval={dataListAppHierId}
+            listDataAttachment={listDataAttachment}
+            dataOption={appHierOptions}
+            selectedHierarchy={selectedHierarchy}
+            apiTimeUnit={list_time_unit}
+            isLoading={loadingSave || loadingForm}
+          />
 
-        <ModalBack
+        <ModalConfirm
           isOpen={modalBack}
           handleCancel={() => setModalBack(false)}
           handleOk={() => navigate(-1)}
-        />
+          width={600}
+        >
+          <div className="flex justify-center mt-5 gap-[20px]">
+            <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
+            <p className="text-[18px] font-bold">
+              Are you sure you want to back?
+            </p>
+          </div>
+        </ModalConfirm>
 
         <ModalError
           isOpen={modalError}
@@ -634,13 +731,33 @@ const BillingCycleForm = ({ type }) => {
               <p className="text-[18px] font-bold">{"Failed"}</p>
             </div>
             <p className="pl-[70px]">{`Your data was not ${
-              flag === 1 ? "created" : "submitted"
+              flagRef.current ? "submitted" : "created"
             }. ${bodyError.message}.`}</p>
             <p className="pl-[70px]">Please try again.</p>
           </div>
         </ModalError>
+
+        {/* Modal Incomplete */}
+        <ModalError
+          isOpen={modalIncomplete.isOpen}
+          handleOk={() => {
+            setCurrent(modalIncomplete.stepIndex);
+            setModalIncomplete({ isOpen: false, stepName: "", stepIndex: 0 });
+          }}
+          handleCancel={() => setModalIncomplete({ isOpen: false, stepName: "", stepIndex: 0 })}
+          customText="Go to Step"
+        >
+          <div className="px-5 pt-5 pb-[10px] justify-center">
+            <div className="w-full flex gap-[20px]">
+              <SVGIcon name="IconFailed" width={48} />
+              <p className="text-[18px] font-bold">{"Incomplete Data"}</p>
+            </div>
+            <p className="pl-[70px]">Please complete the mandatory fields in the <b>{modalIncomplete.stepName}</b> section before proceeding.</p>
+          </div>
+        </ModalError>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
+
 export default BillingCycleForm;

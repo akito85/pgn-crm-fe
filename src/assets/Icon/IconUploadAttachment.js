@@ -1,9 +1,10 @@
-const SVG = ({ style = {}, className = "", onClick = () => {} }) => (
+const SVG = ({ style = {}, className = "", onClick = () => {}, ...otherProps }) => (
   <svg
+    {...otherProps}
     width={218}
     style={style}
     height={160}
-    className={`cursor-pointer${className}`}
+    className={`cursor-pointer ${className}`}
     onClick={onClick}
     viewBox="0 0 218 160"
     fill="none"

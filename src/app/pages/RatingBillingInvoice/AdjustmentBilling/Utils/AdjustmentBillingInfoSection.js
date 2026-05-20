@@ -21,7 +21,9 @@ const AdjustmentBillingInfoSection = ({
     ?.find((v) => v.period)?.period;
 
   const labelBillingPeriod = apiBillingPeriod
-    ?.filter((a) => a.id === data?.billingPeriod)
+    ?.filter(
+      (a) => a.id === (data?.correctionBillingPeriod ?? data?.billingPeriod),
+    )
     ?.find((v) => v.period)?.period;
 
   const labelInvoice = apiInvoice
@@ -42,15 +44,22 @@ const AdjustmentBillingInfoSection = ({
   };
 
   return (
-    <div className="w-full grid grid-cols-4 gap-4">
+    <div className="w-full grid grid-cols-5 gap-4">
       <DetailText label={"Type"}>
         {labelType ? labelType : data?.adjustmentTypeName}
       </DetailText>
       <DetailText label={"Billing Cycle"}>
         {labelBillingCycle ? labelBillingCycle : data?.billingCycleName}
       </DetailText>
-      <DetailText label={"Billing Period"}>
-        {labelBillingPeriod ? labelBillingPeriod : data?.billingPeriodName}
+      <DetailText label={"Current Billing Period"}>
+        {data?.currentBillingPeriodName ||
+          data?.currentBillingPeriod ||
+          data?.billingPeriodName}
+      </DetailText>
+      <DetailText label={"Correction Billing Period"}>
+        {labelBillingPeriod
+          ? labelBillingPeriod
+          : data?.correctionBillingPeriodName || data?.billingPeriodName}
       </DetailText>
       <DetailText label={"Invoice Number"}>
         {typeof data?.referenceInvoiceNumber === "string"
@@ -60,6 +69,7 @@ const AdjustmentBillingInfoSection = ({
       <DetailText label={"Currency"}>
         {typeof data?.currency === "string" ? data?.currency : labelCurrency}
       </DetailText>
+      <DetailText label={"Rate"}>{data?.rate}</DetailText>
       <DetailText label={"Document Date"}>
         {data?.documentDate
           ? moment(data?.documentDate).format(dateFormatting.date)
@@ -75,22 +85,29 @@ const AdjustmentBillingInfoSection = ({
           ? moment(data?.accountingDate).format(dateFormatting.date)
           : ""}
       </DetailText>
-      <div className="col-span-2">
-        <DetailText label={"Terms Of Payment"}>
-          {moment.isMoment(data?.termsOfPayment) === true &&
-          isValidDate(data?.termsOfPayment) === true
-            ? moment(data?.termsOfPayment).format(dateFormatting.date)
-            : data?.termsOfPayment}
-        </DetailText>
-      </div>
-      <div className="col-span-2">
-        <DetailText label={"Adjustment Reason"}>
-          {labelAdjustmentReason
-            ? labelAdjustmentReason
-            : data?.adjustmentReasonName}
-        </DetailText>
-      </div>
-      <div className="col-span-4">
+
+      <DetailText label={"Terms Of Payment"}>
+        {moment.isMoment(data?.termsOfPayment) === true &&
+        isValidDate(data?.termsOfPayment) === true
+          ? moment(data?.termsOfPayment).format(dateFormatting.date)
+          : data?.termsOfPayment}
+      </DetailText>
+
+      <DetailText label={"Adjustment Reason"}>
+        {labelAdjustmentReason
+          ? labelAdjustmentReason
+          : data?.adjustmentReasonName}
+      </DetailText>
+
+      <DetailText label={"Classification Adjustment"}>
+        {data?.classification}
+      </DetailText>
+
+      <DetailText label={"Post Invoice"}>{data?.postInvoice}</DetailText>
+
+      <DetailText label={"On Demand"}>{data?.onDemand}</DetailText>
+
+      <div className="col-span-5">
         <DetailText label={"Remark"}>{data?.remark}</DetailText>
       </div>
     </div>

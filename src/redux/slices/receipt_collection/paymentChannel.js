@@ -8,7 +8,6 @@ import {
   validateError,
 } from "../general_slice";
 import { errorBody, errorCode, errorMessage } from "../../../utils";
-import { data } from "autoprefixer";
 
 const initialState = {
   loading: false,
@@ -22,16 +21,16 @@ const initialState = {
   dataCategory: []
 };
 
-export  const getPaginatePaymentChannel = createAsyncThunk(
+export const getPaginatePaymentChannel = createAsyncThunk(
   "GET_ALL_PAYMENT_CHANNEL",
-  async ({ search, page, pageSize, sort }, thunkAPI) => {
+  async ({ search, page, pageSize, sort, isLoadMore }, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
       const url = `/v1/dbs/api/payment-channel/get-list?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
       const response = await receiptCollectionHttpService.getAll(url);
-      return response.data;
+      return { ...response.data, isLoadMore: !!isLoadMore };
     } catch (error) {
       thunkAPI.dispatch(
         validateError({
@@ -299,9 +298,8 @@ export const approveOrRejectPaymentChannel = createAsyncThunk(
       if (Math.floor((error.response.data.code || 0) / 100) === 4) {
         const errorBody = {
           title: "Failed",
-          description: `Your data was not ${
-            body.action === "APPROVE" ? "approved" : "rejected"
-          }. ${message}.`,
+          description: `Your data was not ${body.action === "APPROVE" ? "approved" : "rejected"
+            }. ${message}.`,
           return: false,
         };
         thunkAPI.dispatch(showModalError(errorBody));
@@ -397,22 +395,127 @@ export const getCategoryPayment = createAsyncThunk(
   }
 );
 
+export const inactivePaymentChannel = createAsyncThunk(
+  "INACTIVE_PAYMENT_CHANNEL",
+  async ({ body }, thunkAPI) => {
+    let status = body?.status === "Active" ? "Inactivate" : "Activate";
+    try {
+      const url = `/v1/dbs/api/payment-channel/active-inactive`;
+      const response = await receiptCollectionHttpService.activationWithRemarkPost(
+        url,
+        body
+      );
+      const successMessage = {
+        title: "Successfull",
+        description: "Your data has been submitted.",
+        return: false,
+      };
+      thunkAPI.dispatch(showModalSuccess(successMessage));
+      return response.data;
+    } catch (response) {
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(errorCode(response), status, errorMessage(response)),
+          action: "INACTIVE_PAYMENT_CHANNEL",
+          back: false,
+        })
+      );
+      return thunkAPI.rejectWithValue(response.response.data);
+    }
+  }
+);
+
+export const approveOrRejectInactivePaymentChannel = createAsyncThunk(
+  "APPROVE_OR_REJECT_FOR_INACTIVE_PAYMENT_CHANNEL",
+  async ({ body }, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/payment-channel/approve-inactive";
+      const response =
+        await receiptCollectionHttpService.activationWithRemarkPost(url, body);
+      const message = response?.message;
+      const successMessage = {
+        title: "Successfull",
+        description: `${message}`,
+        return: true,
+      };
+      thunkAPI.dispatch(showModalSuccess(successMessage));
+      return response.data;
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
+        const errorBody = {
+          title: "Failed",
+          description: `Your data was not ${body.action === "APPROVE" ? "approved" : "rejected"
+            }. ${message}.`,
+          return: false,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error);
+    }
+  }
+);
+
+export const saveDraftPaymentChannel = createAsyncThunk(
+  "SAVE_DRAFT_PAYMENT_CHANNEL",
+  async (body, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/payment-channel/save-draft`;
+      const data = await receiptCollectionHttpService.createData(url, body);
+      const successBody = {
+        title: "Successfull",
+        description: `Your data has been saved as draft`,
+        return: false,
+      };
+      thunkAPI.dispatch(showModalSuccess(successBody));
+      return data.data;
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      const errorBody = {
+        title: "Failed",
+        data: error.response.data.data,
+        description: `Your draft was not saved. ${message}.`,
+      };
+      thunkAPI.dispatch(showModalError(errorBody));
+      return thunkAPI.rejectWithValue(error.response.data);
+    }
+  }
+);
+
 const paymentChannelSlice = createSlice({
   name: "paymentChannel",
   initialState,
   extraReducers: {
     //get all employee paginate reducer
     [getPaginatePaymentChannel.pending]: (state, action) => {
-      state.data = action.payload;
       state.loading = true;
     },
     [getPaginatePaymentChannel.fulfilled]: (state, action) => {
-      state.data = action.payload;
+      const { isLoadMore, ...rest } = action.payload || {};
+      if (isLoadMore && state.data?.result) {
+        const existingIds = new Set(state.data.result.map((item) => item.id));
+        const newItems = (rest.result || []).filter((item) => !existingIds.has(item.id));
+        state.data = {
+          ...rest,
+          result: [...state.data.result, ...newItems],
+        };
+      } else {
+        state.data = rest;
+      }
       state.loading = false;
     },
     [getPaginatePaymentChannel.rejected]: (state, action) => {
-      state.data = action.payload;
-      state.loading = true;
+      state.loading = false;
     },
 
     // get type ddl
@@ -512,7 +615,7 @@ const paymentChannelSlice = createSlice({
       state.loadingProduct = false;
     },
 
-    
+
 
     [approveOrRejectPaymentChannel.pending]: (state) => {
       state.loading = true;
@@ -527,7 +630,7 @@ const paymentChannelSlice = createSlice({
       state.message = action.payload;
     },
 
-    
+
 
     // create payment item
     [createPaymentChannel.pending]: (state, action) => {
@@ -579,6 +682,41 @@ const paymentChannelSlice = createSlice({
     },
     [createValidasiPaymentChannel.rejected]: (state, action) => {
       state.data = action.payload;
+      state.loading = false;
+    },
+
+    [inactivePaymentChannel.pending]: (state) => {
+      state.loading = true;
+    },
+    [inactivePaymentChannel.fulfilled]: (state) => {
+      state.isSuccess = true;
+      state.loading = false;
+    },
+    [inactivePaymentChannel.rejected]: (state) => {
+      state.isFailed = true;
+      state.loading = false;
+    },
+
+    [approveOrRejectInactivePaymentChannel.pending]: (state) => {
+      state.loading = true;
+    },
+    [approveOrRejectInactivePaymentChannel.fulfilled]: (state) => {
+      state.isSuccess = true;
+      state.loading = false;
+    },
+    [approveOrRejectInactivePaymentChannel.rejected]: (state, action) => {
+      state.isFailed = true;
+      state.loading = false;
+      state.message = action.payload;
+    },
+
+    [saveDraftPaymentChannel.pending]: (state) => {
+      state.loading = true;
+    },
+    [saveDraftPaymentChannel.fulfilled]: (state) => {
+      state.loading = false;
+    },
+    [saveDraftPaymentChannel.rejected]: (state) => {
       state.loading = false;
     },
   },

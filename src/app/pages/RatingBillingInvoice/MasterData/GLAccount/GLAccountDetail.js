@@ -2,15 +2,13 @@ import React, { useState, useEffect } from "react";
 import { LeftOutlined } from "@ant-design/icons";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Spin } from "antd";
+import { Spin, Tabs } from "antd";
 import moment from "moment";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../../components/BreadCrumb";
-import RadioTabs from "../../../../../components/RadioTabs";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
-import BaseContainer from "../../../../../components/BaseContainer";
+import CardContainer from "../../../../../components/CardContainer";
 import { ModalError } from "../../../../../components/Modal/ModalPopUp";
 import SVGIcon from "../../../../../assets/Icon/index";
 import DetailText from "../../../../../components/DetailText";
@@ -20,34 +18,27 @@ import { configApp } from "../../../../../constants/configApp";
 import {
   approveRejectGLAccount,
   approveRejectInactiveGLAccount,
+  approveRejectActivatedGLAccount,
   resetGLAccountState,
   getDetailGLAccount,
 } from "../../../../../redux/slices/rating_billing_invoice/MasterData/glAccount";
 import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrReject";
-import GLAccountSection from "./_components/GLAccountSection";
 
 const GLAccountDetail = () => {
-  // Selector
   const { loading, data_detail } = useSelector((state) => state.glAccount);
 
-  // Declaration
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const id = useLocation().state?.id;
 
-  // State
   const [modalConfirm, setModalConfirm] = useState(false);
   const [modalErrorServer, setModalErrorServer] = useState(false);
-  const [valuePage, setValuePage] = useState("GL Account");
+  const [activeTab, setActiveTab] = useState("glAccount");
   const [approveOrReject, setApproveOrReject] = useState("");
   const [dataDetail, setDataDetail] = useState({});
   const [listDataAttachment, setListDataAttachment] = useState([]);
   const [bodyError, setBodyError] = useState({});
   const [dataLogInformation, setDataLogInformation] = useState({});
-  const [listSectionInfo] = useState([
-    { value: "GL Account" },
-    { value: "Attachment" },
-  ]);
   const [bodyApproval, setBodyApproval] = useState({
     isApprover: false,
     tAppId: null,
@@ -57,8 +48,11 @@ const GLAccountDetail = () => {
 
   const showButtonApproval =
     bodyApproval.isApprover !== null && bodyApproval.isApprover;
+  const isInactiveApproval =
+    bodyApproval.approvalType === "INACTIVE_GL_ACCOUNT";
+  const isActivatedApproval =
+    bodyApproval.approvalType === "ACTIVATED_GL_ACCOUNT";
 
-  // Use Effect
   useEffect(() => {
     if (id) {
       dispatch(getDetailGLAccount(id));
@@ -74,7 +68,6 @@ const GLAccountDetail = () => {
       const attachments = data_detail?.attachments || [];
       const approvalInfo = data_detail?.approvalInfo || {};
 
-      // Data Attachment Information
       const mappedAttachment = attachments.map((item, index) => ({
         id: item.id || index,
         size: item.size || 0,
@@ -93,7 +86,6 @@ const GLAccountDetail = () => {
         dataType: "exist",
       }));
 
-      // Data History Log Information
       setDataLogInformation({
         recordId: glAccount?.glAccountId || "-",
         createdDate: glAccount?.createdDate || null,
@@ -102,13 +94,11 @@ const GLAccountDetail = () => {
         updatedBy: glAccount?.updatedBy || "-",
       });
 
-      // Set GL Account Data
       setDataDetail({
         glAccountId: glAccount?.glAccountId,
         glAccount: glAccount?.glAccount || "-",
         glAccountDesc: glAccount?.glAccountDesc || "-",
-        specialGlName: glAccount?.specialGlRef?.name || "-",
-        reference: glAccount?.reference || "-",
+        remark: glAccount?.remark || "-",
         status: glAccount?.status || "-",
         statusApproval: glAccount?.approvalStatus || "-",
       });
@@ -124,55 +114,12 @@ const GLAccountDetail = () => {
     }
   }, [data_detail]);
 
-  // Breadcrumbs
   const routes = [
-    {
-      path: "",
-      breadcrumbName: "System Setup",
-    },
-    {
-      path: "",
-      breadcrumbName: "Master Data",
-    },
-    {
-      path: RBI_ROUTES.GLACCOUNT,
-      breadcrumbName: "GL Account",
-    },
-    {
-      path: RBI_ROUTES.GLACCOUNT_DETAIL,
-      breadcrumbName: "Detail GL Account",
-    },
+    { path: "", breadcrumbName: "System Setup" },
+    { path: "", breadcrumbName: "Master Data" },
+    { path: RBI_ROUTES.GLACCOUNT, breadcrumbName: "GL Account" },
+    { path: RBI_ROUTES.GLACCOUNT_DETAIL, breadcrumbName: "Detail GL Account" },
   ];
-
-  const layout = (valuePage) => {
-    switch (valuePage) {
-      case "GL Account":
-        return (
-          <>
-            <GLAccountSection
-              key={"glAccountSection"}
-              dataDetailGLAccount={dataDetail}
-              dataHistory={dataLogInformation}
-            />
-          </>
-        );
-      case "Attachment":
-        return (
-          <BaseContainer header={"Attachment Information"}>
-            <AttachmentComponent
-              type={"detail"}
-              data={listDataAttachment}
-              dispatch={dispatch}
-              typeSelector="glAccount"
-              service={ratingBillingHttpService}
-              configApplication={configApp.RATING_BILLING_SERVICE}
-            />
-          </BaseContainer>
-        );
-      default:
-        return <></>;
-    }
-  };
 
   const handleRetry = () => {
     handleConfirm();
@@ -189,38 +136,28 @@ const GLAccountDetail = () => {
     setModalConfirm(false);
   };
 
-  // handle Confirm
   const handleConfirm = (res, handleClear) => {
-    setModalConfirm(false);
     const data = {
       remark: res.remark,
       action: approveOrReject.toUpperCase(),
       approvalId: bodyApproval.tAppId,
     };
-    dispatch(
-      bodyApproval.approvalType === "INACTIVE_GL_ACCOUNT"
-        ? approveRejectInactiveGLAccount({
-            id: id,
-            body: data,
-          })
-        : approveRejectGLAccount({
-            id: id,
-            body: data,
-          })
-    )
+    const approvalAction = isInactiveApproval
+      ? approveRejectInactiveGLAccount({ id, body: data })
+      : isActivatedApproval
+        ? approveRejectActivatedGLAccount({ id, body: data })
+        : approveRejectGLAccount({ id, body: data });
+    return dispatch(approvalAction)
       .unwrap()
       .then(() => {
+        setModalConfirm(false);
         if (handleClear) handleClear();
         dispatch(getDetailGLAccount(id));
       })
       .catch((error) => {
         if (Math.floor((error?.response?.data?.code || 0) / 100) === 5) {
           const message =
-            (error.response &&
-              error.response.data &&
-              error.response.data.message) ||
-            error.message ||
-            error.toString();
+            error.response?.data?.message || error.message || error.toString();
           setBodyError({ message });
           setModalErrorServer(true);
         }
@@ -228,79 +165,188 @@ const GLAccountDetail = () => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
-        <RadioTabs
-          data={listSectionInfo}
-          onChange={(e) => setValuePage(e.target.value)}
-          currentPosition={valuePage}
-        />
-        <div className="flex flex-col w-full">
-          {bodyApproval.isApprover &&
-            bodyApproval.approvalType &&
-            bodyApproval.approvalType === "INACTIVE_GL_ACCOUNT" && (
-              <BaseContainer header={"Inactive Request Information"}>
-                <div className="w-full grid grid-cols-4 gap-3">
+
+        <CardContainer
+          header={
+            <div className="flex -my-4 justify-between items-center">
+              <p className="mt-[15px] font-bold text-primary">
+                GL ACCOUNT DETAIL
+              </p>
+            </div>
+          }
+        >
+          {bodyApproval.isApprover && (
+            <div className="border border-[#D6E1F0] rounded-lg mb-4">
+              <div className="px-4 py-3 border-b border-[#D6E1F0]">
+                <p className="font-semibold text-primary">
+                  {isActivatedApproval
+                    ? "ACTIVATE REQUEST INFORMATION"
+                    : isInactiveApproval
+                      ? "INACTIVE REQUEST INFORMATION"
+                      : "APPROVAL REQUEST INFORMATION"}
+                </p>
+              </div>
+              <div className="p-4">
+                <div className="w-full grid grid-cols-4 gap-x-8 gap-y-2">
                   <DetailText label={"Requested Date"}>
                     {bodyApproval.approvalDetail?.requestedDate
                       ? moment(
-                          bodyApproval.approvalDetail.requestedDate
+                          bodyApproval.approvalDetail.requestedDate,
                         ).format(dateFormatting.date)
-                      : "-"}
+                      : ""}
                   </DetailText>
                   <DetailText label={"Requested By"}>
-                    {bodyApproval.approvalDetail?.requestedBy || "-"}
+                    {bodyApproval.approvalDetail?.requestedBy || ""}
                   </DetailText>
                   <DetailText label={"Remark"}>
-                    {bodyApproval.approvalDetail?.remarks || "-"}
+                    {bodyApproval.approvalDetail?.remarks || ""}
                   </DetailText>
                 </div>
-              </BaseContainer>
-            )}
-
-          {layout(valuePage)}
-        </div>
-
-        <div className="flex mt-[30px]">
-          <ButtonComponent
-            type={"submit"}
-            onClick={() => navigate(-1)}
-            icon={
-              <LeftOutlined
-                style={{
-                  color: "#fff",
-                  fontSize: 24,
-                  justifyItems: "center",
-                }}
-              />
-            }
-          >
-            Back
-          </ButtonComponent>
-
-          {showButtonApproval ? (
-            <div className={"w-full flex justify-end gap-5"}>
-              <ButtonComponent
-                type="reject"
-                onClick={() => {
-                  setModalConfirm(true);
-                  setApproveOrReject("Reject");
-                }}
-              >
-                Reject
-              </ButtonComponent>
-              <ButtonComponent
-                type="approve"
-                onClick={() => {
-                  setModalConfirm(true);
-                  setApproveOrReject("Approve");
-                }}
-              >
-                Approve
-              </ButtonComponent>
+              </div>
             </div>
-          ) : null}
+          )}
+          <Tabs
+            activeKey={activeTab}
+            onChange={setActiveTab}
+            items={[
+              {
+                key: "glAccount",
+                label: "Content Setup",
+                children: (
+                  <div className="flex flex-col gap-3">
+                    <div
+                      style={{
+                        border: "1px solid #D6E1F0",
+                        borderRadius: "8px",
+                      }}
+                    >
+                      <div style={{ padding: "16px" }}>
+                        <div className="w-full grid grid-cols-3 gap-x-8 gap-y-2">
+                          <DetailText label={"GL Account Number"}>
+                            {dataDetail?.glAccount || ""}
+                          </DetailText>
+                          <DetailText label={"GL Account Description"}>
+                            {dataDetail?.glAccountDesc || ""}
+                          </DetailText>
+                          <DetailText label={"Description"}>
+                            {dataDetail?.remark || ""}
+                          </DetailText>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ),
+              },
+              {
+                key: "attachment",
+                label: "Attachment",
+                children: (
+                  <div className="flex flex-col gap-3">
+                    <div
+                      style={{
+                        border: "1px solid #D6E1F0",
+                        borderRadius: "8px",
+                      }}
+                    >
+                      <div style={{ padding: "16px" }}>
+                        <AttachmentComponent
+                          type={"detail"}
+                          data={listDataAttachment}
+                          dispatch={dispatch}
+                          typeSelector="glAccount"
+                          service={ratingBillingHttpService}
+                          configApplication={configApp.RATING_BILLING_SERVICE}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ),
+              },
+            ]}
+          />
+        </CardContainer>
+
+        <CardContainer
+          header={
+            <div className="flex -my-4 justify-between items-center">
+              <p className="mt-[15px]">HISTORY LOG INFORMATION</p>
+            </div>
+          }
+        >
+          <div className="-m-1">
+            <div className="w-full grid grid-cols-5 gap-x-8 gap-y-2">
+              <DetailText label={"Record ID"}>
+                {dataLogInformation?.recordId || "-"}
+              </DetailText>
+              <DetailText label={"Created Date"}>
+                {dataLogInformation?.createdDate
+                  ? moment(dataLogInformation.createdDate).format(
+                      dateFormatting.dateTime,
+                    )
+                  : "-"}
+              </DetailText>
+              <DetailText label={"Created By"}>
+                {dataLogInformation?.createdBy || "-"}
+              </DetailText>
+              <DetailText label={"Updated Date"}>
+                {dataLogInformation?.updatedDate
+                  ? moment(dataLogInformation.updatedDate).format(
+                      dateFormatting.dateTime,
+                    )
+                  : "-"}
+              </DetailText>
+              <DetailText label={"Updated By"}>
+                {dataLogInformation?.updatedBy || "-"}
+              </DetailText>
+            </div>
+          </div>
+        </CardContainer>
+
+        {/* Back Button */}
+        <div className="bg-white rounded-lg border border-[#D6E1F0] p-4">
+          <div className="flex justify-between items-center">
+            <ButtonComponent
+              type={"submit"}
+              onClick={() => navigate(-1)}
+              icon={
+                <LeftOutlined
+                  style={{
+                    color: "#fff",
+                    fontSize: 24,
+                    justifyItems: "center",
+                  }}
+                />
+              }
+            >
+              Back
+            </ButtonComponent>
+
+            {showButtonApproval && (
+              <div className="flex gap-5">
+                <ButtonComponent
+                  type="reject"
+                  onClick={() => {
+                    setModalConfirm(true);
+                    setApproveOrReject("Reject");
+                  }}
+                >
+                  Reject
+                </ButtonComponent>
+                <ButtonComponent
+                  type="approve"
+                  onClick={() => {
+                    setModalConfirm(true);
+                    setApproveOrReject("Approve");
+                  }}
+                >
+                  Approve
+                </ButtonComponent>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Modal Approve/Reject */}
@@ -333,7 +379,7 @@ const GLAccountDetail = () => {
           </div>
         </ModalError>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

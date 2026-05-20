@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import BreadCrumb from "../../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import { Spin, Tooltip } from "antd";
 import { DownloadOutlined } from "@ant-design/icons";
@@ -33,6 +32,7 @@ const columns = (
 ) => [
     {
       title: "NO",
+      key: "no",
       width: 60,
       align: "center",
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
@@ -40,6 +40,7 @@ const columns = (
     {
       title: "RECEIPT CODE",
       dataIndex: "receiptCode",
+      key: "receiptCode",
       align: "left",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
@@ -73,6 +74,7 @@ const columns = (
     {
       title: "SOR",
       dataIndex: "sor",
+      key: "sor",
       align: "",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
@@ -106,6 +108,7 @@ const columns = (
     {
       title: "COST CENTER",
       dataIndex: "costCenter",
+      key: "costCenter",
       align: "",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
@@ -142,6 +145,7 @@ const columns = (
     {
       title: "CUSTOMER",
       dataIndex: "customerName",
+      key: "customerName",
       align: "left",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
@@ -178,6 +182,7 @@ const columns = (
     {
       title: "ACCOUNT",
       dataIndex: "accountNumber",
+      key: "accountNumber",
       align: "left",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
@@ -214,6 +219,7 @@ const columns = (
     {
       title: "RECEIPT NUMBER",
       dataIndex: "receiptNumber",
+      key: "receiptNumber",
       align: "left",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
@@ -250,6 +256,7 @@ const columns = (
     {
       title: "RECEIPT DATE",
       dataIndex: "receiptDate",
+      key: "receiptDate",
       align: "center",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
@@ -285,6 +292,7 @@ const columns = (
     {
       title: "CURRENCY",
       dataIndex: "currency",
+      key: "currency",
       align: "center",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
@@ -321,6 +329,7 @@ const columns = (
     {
       title: "RECEIPT AMOUNT",
       dataIndex: "amount",
+      key: "amount",
       align: "right",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
@@ -357,6 +366,7 @@ const columns = (
     {
       title: "TYPE",
       dataIndex: "type",
+      key: "type",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -523,7 +533,7 @@ const ViewReconcileReceiptHistories = () => {
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <Toolbar items={itemActions} />
@@ -548,7 +558,7 @@ const ViewReconcileReceiptHistories = () => {
               onSort={onSort}
               handleDownload={handleDownload}
               tableScrolled={{
-                x: 3200,
+                x: "max-content",
                 y: 300,
               }}
             />
@@ -556,7 +566,7 @@ const ViewReconcileReceiptHistories = () => {
         </CardContainer>
       </Spin>
       {renderModal()}
-    </LayoutMenu>
+    </>
   );
 };
 

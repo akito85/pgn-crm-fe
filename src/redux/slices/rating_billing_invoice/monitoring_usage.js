@@ -26,20 +26,22 @@ const initialState = {
   data_approval_history: [],
   updatedData: [],
   deletedData: [],
+  updatedBatchIds: [],
 };
 
 export const updateSingleUsage = createAsyncThunk(
   "UPDATE_SINGLE_USAGE",
-  async ({ recordId, data }, thunkAPI) => {
+  async ({ recordId, data, batchId }, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/usage/detail-batch/${recordId}`;
       const response = await ratingBillingHttpService.updateData(url, data);
       const successMessage = {
         title: "Successful",
         description: "Your data has been updated successfully.",
+        return: false,
       };
       thunkAPI.dispatch(showModalSuccess(successMessage));
-      return response.data;
+      return { data: response.data, batchId };
     } catch (response) {
       const message =
         (response.response &&
@@ -55,7 +57,20 @@ export const updateSingleUsage = createAsyncThunk(
       thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(response.response?.data);
     }
-  }
+  },
+);
+
+export const getSingleBatch = createAsyncThunk(
+  "GET_SINGLE_BATCH",
+  async (batchId, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/usage/list-batch?searchs=batchId~eq~${batchId}&page=1&size=1&sort=createdDate~desc`;
+      const response = await ratingBillingHttpService.getPagination(url);
+      return { batchId, data: response.data?.result?.[0] };
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  },
 );
 
 // export const deleteSingleUsage = createAsyncThunk(
@@ -117,7 +132,7 @@ export const deleteBatch = createAsyncThunk(
       thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(response.response?.data);
     }
-  }
+  },
 );
 
 export const getListUsagePaginate = createAsyncThunk(
@@ -131,7 +146,7 @@ export const getListUsagePaginate = createAsyncThunk(
       const response = await ratingBillingHttpService.getPagination(url);
       return {
         ...response.data,
-        isLoadMore, // Pass the flag to reducer
+        isLoadMore,
       };
     } catch (error) {
       const message =
@@ -150,7 +165,7 @@ export const getListUsagePaginate = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 export const getListBatchPaginate = createAsyncThunk(
   "GET_MONITORING_BATCH_PAGINATE",
@@ -182,7 +197,7 @@ export const getListBatchPaginate = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 // list approval
@@ -213,7 +228,7 @@ export const getListApproval = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getApprovalHierarchy = createAsyncThunk(
@@ -243,7 +258,7 @@ export const getApprovalHierarchy = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getListApprovalById = createAsyncThunk(
@@ -270,7 +285,7 @@ export const getListApprovalById = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getApprovalHistory = createAsyncThunk(
@@ -297,14 +312,14 @@ export const getApprovalHistory = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getDetailBatch = createAsyncThunk(
   "GET_DETAIL_BATCH",
   async (
     { batchId, page, pageSize, search, sort, isLoadMore = false },
-    thunkAPI
+    thunkAPI,
   ) => {
     try {
       const searchParams = search || "";
@@ -332,7 +347,7 @@ export const getDetailBatch = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getFormatUsageType = createAsyncThunk(
@@ -345,7 +360,7 @@ export const getFormatUsageType = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getAssetType = createAsyncThunk(
@@ -358,7 +373,7 @@ export const getAssetType = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const getSource = createAsyncThunk("GET_SOURCE", async (thunkAPI) => {
@@ -381,7 +396,7 @@ export const getAccountNumber = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
-  }
+  },
 );
 
 export const approveRejectData = createAsyncThunk(
@@ -391,13 +406,12 @@ export const approveRejectData = createAsyncThunk(
       const url = "/v1/dbs/api/usage/approve-reject-usage";
       const response = await ratingBillingHttpService.activationWithRemark(
         url,
-        data
+        data,
       );
       const successMessage = {
         title: "Successfull",
-        description: `Your data has been ${
-          data?.action === "APPROVE" ? "approved" : "rejected"
-        }`,
+        description: `Your data has been ${data?.action === "APPROVE" ? "approved" : "rejected"
+          }`,
         return: false,
       };
       thunkAPI.dispatch(showModalSuccess(successMessage));
@@ -412,15 +426,14 @@ export const approveRejectData = createAsyncThunk(
       const errorBody = {
         title: "Failed",
         data: response.response.data.data,
-        description: `Your data was not ${
-          data?.action === "APPROVE" ? "approved" : "rejected"
-        }. ${message}. Please try again.`,
+        description: `Your data was not ${data?.action === "APPROVE" ? "approved" : "rejected"
+          }. ${message}. Please try again.`,
         return: false,
       };
       thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(response.response.data);
     }
-  }
+  },
 );
 
 export const saveSubmitData = createAsyncThunk(
@@ -430,13 +443,12 @@ export const saveSubmitData = createAsyncThunk(
       const url = "/v1/dbs/api/usage/save-usage";
       const response = await ratingBillingHttpService.activationWithRemark(
         url,
-        data
+        data,
       );
       const successMessage = {
         title: "Successful",
-        description: `Your data has been ${
-          data?.isSubmit ? "submitted" : "updated"
-        }.`,
+        description: `Your data has been ${data?.isSubmit ? "submitted" : "updated"
+          }.`,
       };
       thunkAPI.dispatch(showModalSuccess(successMessage));
       return response.data;
@@ -449,9 +461,8 @@ export const saveSubmitData = createAsyncThunk(
         response.toString();
 
       // Custom handling untuk apphierId null error
-      let errorDescription = `Your data was not ${
-        data?.isSubmit ? "submitted" : "updated"
-      }. ${message}. Please try again.`;
+      let errorDescription = `Your data was not ${data?.isSubmit ? "submitted" : "updated"
+        }. ${message}. Please try again.`;
 
       if (
         message.toLowerCase().includes("apphierid") ||
@@ -469,7 +480,7 @@ export const saveSubmitData = createAsyncThunk(
       thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(response.response?.data);
     }
-  }
+  },
 );
 
 export const getDownloadList = createAsyncThunk(
@@ -488,11 +499,34 @@ export const getDownloadList = createAsyncThunk(
           error: response,
           action: "DOWNLOAD_MONITORING_USAGE_LIST",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(response.response.data);
     }
-  }
+  },
+);
+
+export const getDownloadBatchList = createAsyncThunk(
+  "DOWNLOAD_MONITORING_BATCH_LIST",
+  async ({ search, page, pageSize, sort }, thunkAPI) => {
+    try {
+      const searchParams = search === undefined ? "" : search;
+      const sortParams =
+        sort === undefined || sort === "" ? "createdDate~desc" : sort;
+      const url = `/v1/dbs/api/usage/download-list-batch?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
+      const response = await ratingBillingHttpService.downloadData(url);
+      return response.data;
+    } catch (response) {
+      thunkAPI.dispatch(
+        validateError({
+          error: response,
+          action: "DOWNLOAD_MONITORING_BATCH_LIST",
+          back: false,
+        }),
+      );
+      return thunkAPI.rejectWithValue(response.response.data);
+    }
+  },
 );
 
 export const getDownloadTemplate = createAsyncThunk(
@@ -503,7 +537,7 @@ export const getDownloadTemplate = createAsyncThunk(
 
       const response = await ratingBillingHttpService.downloadXlsx(
         url,
-        "monitoring_usage_template"
+        "monitoring_usage_template",
       );
 
       return response;
@@ -516,7 +550,7 @@ export const getDownloadTemplate = createAsyncThunk(
           error: error?.response,
           action: "DOWNLOAD_MONITORING_USAGE_TEMPLATE",
           back: false,
-        })
+        }),
       );
 
       const errorBody = {
@@ -527,7 +561,7 @@ export const getDownloadTemplate = createAsyncThunk(
 
       return thunkAPI.rejectWithValue(error?.response?.data);
     }
-  }
+  },
 );
 
 export const getDownloadFailed = createAsyncThunk(
@@ -543,11 +577,11 @@ export const getDownloadFailed = createAsyncThunk(
           error: response,
           action: "DOWNLOAD_MONITORING_USAGE_FAILED",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(response.response.data);
     }
-  }
+  },
 );
 
 export const uploadMonitoringUsage = createAsyncThunk(
@@ -557,20 +591,83 @@ export const uploadMonitoringUsage = createAsyncThunk(
       const url = "/v1/dbs/api/usage/upload-validation";
       const onProgress = payload.onProgress;
       const formData = new FormData();
-      formData.append("document", payload?.document);
+
+      // Support multiple files — field name is 'documents' (plural)
+      const files = Array.isArray(payload?.documents)
+        ? payload.documents
+        : [payload?.documents];
+      files.forEach((file) => {
+        formData.append("documents", file);
+      });
+
       formData.append("calculationType", payload?.calculationType);
-      const dataRequest = formData;
       const data = await ratingBillingHttpService.uploadAttachment(
         url,
-        dataRequest,
-        onProgress
+        formData,
+        onProgress,
       );
+
+      const responseData = data?.data || {};
+      const successBatches = Array.isArray(responseData?.batches)
+        ? responseData.batches
+        : [];
+      const fileResult = Array.isArray(responseData?.fileResult)
+        ? responseData.fileResult
+        : [];
+      const failedFiles = responseData?.failedFiles ?? 0;
+      const successFiles = responseData?.successFiles ?? 0;
+      const totalFiles = responseData?.totalFiles ?? files.length;
+      const totalRecords = responseData?.totalRecords ?? 0;
+
+      const successfulFileNames = fileResult.length
+        ? fileResult
+          .filter((item) => item?.status?.toLowerCase() === "success")
+          .map((item) => item?.fileName)
+        : successBatches.map((item) => item?.fileName);
+
+      const failedFileNames = fileResult.length
+        ? fileResult
+          .filter((item) => item?.status?.toLowerCase() === "failed")
+          .map((item) => item?.fileName)
+        : [];
+
+      const successFilesText = successBatches.length
+        ? successBatches
+          .map((item) => {
+            const fileName = item?.fileName || "Unknown file";
+            const totalRecords = item?.totalRecords ?? 0;
+            const batchId = item?.batchId ?? "-";
+            return `${fileName} (records: ${totalRecords}, batchId: ${batchId})`;
+          })
+          .join("; ")
+        : "-";
+
+      const failedFilesText = failedFileNames.length
+        ? failedFileNames.join("; ")
+        : "-";
+
       const successMessage = {
-        title: "Successfull",
-        description: "Your data has been uploaded",
+        title: failedFiles > 0 ? "Completed" : "Successfull",
+        description:
+          data?.message ||
+          `${successFiles} file(s) successfully uploaded with ${totalRecords} total records.${failedFiles > 0 ? ` ${failedFiles} file(s) failed.` : ""}`,
+        icon: failedFiles > 0 ? "icon_warning_default" : undefined,
+        return: false,
       };
       thunkAPI.dispatch(showModalSuccess(successMessage));
-      return data;
+      return {
+        ...data,
+        uploadSummary: {
+          totalFiles,
+          successFiles,
+          failedFiles,
+          totalRecords,
+          batches: successBatches,
+          fileResult,
+          successfulFileNames,
+          failedFileNames,
+        },
+      };
     } catch (e) {
       let message = errorMessage(e);
       const errorBody = {
@@ -580,7 +677,7 @@ export const uploadMonitoringUsage = createAsyncThunk(
       thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(e?.response);
     }
-  }
+  },
 );
 
 const monitoringUsageSlice = createSlice({
@@ -606,12 +703,18 @@ const monitoringUsageSlice = createSlice({
       state.updatedData = [];
       state.deletedData = [];
     },
+    clearUpdatedBatchIds: (state) => {
+      state.updatedBatchIds = [];
+    },
+    clearDetailData: (state) => {
+      state.detail_batch = [];
+      state.list_approval_by_id = [];
+      state.list_approval = [];
+    },
   },
   extraReducers: (builder) => {
-    // pagination monitoring usage list
     builder
       .addCase(getListUsagePaginate.pending, (state, action) => {
-        // Only show loading on initial fetch, not on load more
         if (!action.meta.arg?.isLoadMore) {
           state.loading = true;
         }
@@ -621,11 +724,16 @@ const monitoringUsageSlice = createSlice({
         const newData = action.payload.result || [];
         const isLoadMore = action.payload.isLoadMore;
 
-        // If it's load more, append data. Otherwise, replace data
         if (isLoadMore) {
+          const existingIds = new Set(
+            (state.data_list_usage.result || []).map((item) => item.recordId),
+          );
+          const uniqueNewData = newData.filter(
+            (item) => !existingIds.has(item.recordId),
+          );
           state.data_list_usage = {
             ...action.payload,
-            result: [...(state.data_list_usage.result || []), ...newData],
+            result: [...(state.data_list_usage.result || []), ...uniqueNewData],
           };
         } else {
           state.data_list_usage = action.payload;
@@ -634,17 +742,14 @@ const monitoringUsageSlice = createSlice({
       })
       .addCase(getListUsagePaginate.rejected, (state, action) => {
         state.loading = false;
-        // Only clear data on initial fetch failure, not on load more failure
         if (!action.meta.arg?.isLoadMore) {
           state.data_list_usage = { result: [], page: {} };
           state.data = { result: [], page: {} };
         }
       });
 
-    // pagination monitoring batch list
     builder
       .addCase(getListBatchPaginate.pending, (state, action) => {
-        // Only show loading on initial fetch, not on load more
         if (!action.meta.arg?.isLoadMore) {
           state.loading = true;
         }
@@ -654,11 +759,16 @@ const monitoringUsageSlice = createSlice({
         const newData = action.payload.result || [];
         const isLoadMore = action.payload.isLoadMore;
 
-        // If it's load more, append data. Otherwise, replace data
         if (isLoadMore) {
+          const existingIds = new Set(
+            (state.data_list_batch.result || []).map((item) => item.batchId),
+          );
+          const uniqueNewData = newData.filter(
+            (item) => !existingIds.has(item.batchId),
+          );
           state.data_list_batch = {
             ...action.payload,
-            result: [...(state.data_list_batch.result || []), ...newData],
+            result: [...(state.data_list_batch.result || []), ...uniqueNewData],
           };
         } else {
           state.data_list_batch = action.payload;
@@ -667,14 +777,12 @@ const monitoringUsageSlice = createSlice({
       })
       .addCase(getListBatchPaginate.rejected, (state, action) => {
         state.loading = false;
-        // Only clear data on initial fetch failure, not on load more failure
         if (!action.meta.arg?.isLoadMore) {
           state.data_list_batch = { result: [], page: {} };
           state.data = { result: [], page: {} };
         }
       });
 
-    // pagination monitoring approval list
     builder
       .addCase(getListApproval.pending, (state, action) => {
         // Only show loading on initial fetch, not on load more
@@ -754,6 +862,35 @@ const monitoringUsageSlice = createSlice({
       });
 
     builder
+      .addCase(getDownloadBatchList.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(getDownloadBatchList.fulfilled, (state, action) => {
+        state.data_download_batch = action.payload;
+        state.loading = false;
+      })
+      .addCase(getDownloadBatchList.rejected, (state, action) => {
+        state.isFailed = true;
+        state.data_download_batch = action.payload;
+        state.loading = false;
+      });
+
+    // download failed data for a specific batch
+    builder
+      .addCase(getDownloadFailed.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(getDownloadFailed.fulfilled, (state, action) => {
+        state.data_download_failed = action.payload;
+        state.loading = false;
+      })
+      .addCase(getDownloadFailed.rejected, (state, action) => {
+        state.isFailed = true;
+        state.data_download_failed = action.payload;
+        state.loading = false;
+      });
+
+    builder
       .addCase(getApprovalHierarchy.pending, (state) => {
         state.loading = true;
       })
@@ -808,7 +945,7 @@ const monitoringUsageSlice = createSlice({
         // Remove batch dari list
         if (state.data_list_batch?.result) {
           state.data_list_batch.result = state.data_list_batch.result.filter(
-            (item) => item.batchId !== action.payload.batchId
+            (item) => item.batchId !== action.payload.batchId,
           );
           // Update total count
           if (state.data_list_batch.page?.totalElements) {
@@ -842,7 +979,7 @@ const monitoringUsageSlice = createSlice({
         // Update data di detail_batch.usageList jika ada
         if (state.detail_batch?.usageList?.result) {
           const index = state.detail_batch.usageList.result.findIndex(
-            (item) => item.recordId === action.meta.arg.recordId
+            (item) => item.recordId === action.meta.arg.recordId,
           );
           if (index !== -1) {
             state.detail_batch.usageList.result[index] = {
@@ -852,10 +989,38 @@ const monitoringUsageSlice = createSlice({
             };
           }
         }
+
+        // Track batchId yang diupdate untuk refresh di list
+        if (
+          action.payload?.batchId &&
+          !state.updatedBatchIds.includes(action.payload.batchId)
+        ) {
+          state.updatedBatchIds.push(action.payload.batchId);
+        }
       })
       .addCase(updateSingleUsage.rejected, (state) => {
         state.loading = false;
       });
+
+    // Get single batch (untuk refresh specific row di list)
+    builder.addCase(getSingleBatch.fulfilled, (state, action) => {
+      // Update specific batch di data_list_batch
+      if (state.data_list_batch?.result && action.payload?.data) {
+        const index = state.data_list_batch.result.findIndex(
+          (item) => item.batchId === action.payload.batchId,
+        );
+        if (index !== -1) {
+          state.data_list_batch.result[index] = action.payload.data;
+          // Update state.data juga
+          state.data = state.data_list_batch;
+        }
+      }
+
+      // Remove from updatedBatchIds setelah berhasil refresh
+      state.updatedBatchIds = state.updatedBatchIds.filter(
+        (id) => id !== action.payload.batchId,
+      );
+    });
 
     // Delete single usage
     // builder
@@ -944,5 +1109,11 @@ const monitoringUsageSlice = createSlice({
 
 const { reducer } = monitoringUsageSlice;
 export default reducer;
-export const { setClearData,addDeletedData, clearUpdated, clearUpdatedDeleted } =
-  monitoringUsageSlice.actions;
+export const {
+  setClearData,
+  addDeletedData,
+  clearUpdated,
+  clearUpdatedDeleted,
+  clearUpdatedBatchIds,
+  clearDetailData,
+} = monitoringUsageSlice.actions;

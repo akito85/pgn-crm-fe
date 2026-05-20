@@ -1,5 +1,5 @@
 import { Form, Spin } from "antd";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import moment from "moment";
@@ -9,16 +9,11 @@ import {
   showModalSuccess,
 } from "../../../../../redux/slices/general_slice";
 import ratingBillingHttpService from "../../../../../redux/services/ratingBillingHttpService";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../../components/BreadCrumb";
-import RadioTabs from "../../../../../components/RadioTabs";
-import BaseContainer from "../../../../../components/BaseContainer";
+import CardContainer from "../../../../../components/CardContainer";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 import { configApp } from "../../../../../constants/configApp";
-import ButtonComponent from "../../../../../components/ButtonComponent";
-import { LeftOutlined } from "@ant-design/icons";
-import ModalBack from "../../../../../components/Modal/ModalBack";
 import { ModalError } from "../../../../../components/Modal/ModalPopUp";
 import SVGIcon from "../../../../../assets/Icon/index";
 import {
@@ -28,15 +23,17 @@ import {
   createGLAccount,
   updateGLAccount,
   uploadAttachment,
-  getSpecialGLList,
 } from "../../../../../redux/slices/rating_billing_invoice/MasterData/glAccount";
 import { getAttachmentCategory } from "../../../../../redux/slices/rating_billing_invoice/MasterData/billingBucket";
 import { getConfigFileRBIData } from "../../../../../redux/slices/attachmentSlice";
 import ConfirmationGLAccount from "./_components/ConfirmationGLAccount";
 import GLAccountSectionForm from "./_components/GLAccountSectionForm";
+import {
+  FormStepper,
+  FormFooter,
+} from "../../../../../components/FormStepNavigation";
 
 const GLAccountForm = ({ type }) => {
-  // Selector
   const {
     data_detail,
     data_approval_hierarchy,
@@ -44,31 +41,33 @@ const GLAccountForm = ({ type }) => {
     loading,
   } = useSelector((state) => state.glAccount);
 
-  // Declaration
   const [form] = Form.useForm();
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
   const id = location?.state?.id;
 
-  // State
   const [appHierOptions, setAppHierOptions] = useState([]);
   const [appHierDataDetail, setAppHierDataDetail] = useState([]);
   const [listDataAttachment, setListDataAttachment] = useState([]);
+  const [deletedAttachmentIds, setDeletedAttachmentIds] = useState([]);
   const [selectedHierarchy, setSelectedHierarchy] = useState();
-
-  const [flag, setFlag] = useState(false);
-  const [valuePage, setValuePage] = useState("GL Account");
+  const flagRef = useRef(false);
+  const [modalIncomplete, setModalIncomplete] = useState({
+    isOpen: false,
+    stepName: "",
+    stepIndex: 0,
+  });
+  const [current, setCurrent] = useState(0);
   const [listSectionInfo, setListSectionInfo] = useState([
     {
       value: "GL Account",
-      paramValue: ["glAccount", "glAccountDesc", "specialGlValue", "reference"],
+      paramValue: ["glAccount", "glAccountDesc", "remark"],
     },
     { value: "Approval", paramValue: ["apphierId"] },
     { value: "Attachment" },
   ]);
 
-  const [storedDataInline, setStoredDataInline] = useState(false);
   const [loadingForm, setLoadingForm] = useState(false);
   const [modalBack, setModalBack] = useState(false);
   const [modalConfirm, setModalConfirm] = useState(false);
@@ -78,10 +77,63 @@ const GLAccountForm = ({ type }) => {
 
   const isLoading = loading || loadingForm;
 
-  // Use Effect
+  const handleUpdateAttachment = useCallback((updater) => {
+    setListDataAttachment((prevState) => {
+      const newState =
+        typeof updater === "function" ? updater(prevState) : updater;
+      const removedItems = prevState.filter(
+        (item) => !newState.some((newItem) => newItem.key === item.key),
+      );
+      const removedExistingIds = removedItems
+        .filter((item) => item.dataType === "exist" && item.id)
+        .map((item) => item.id);
+      if (removedExistingIds.length > 0) {
+        setDeletedAttachmentIds((prev) => [...prev, ...removedExistingIds]);
+      }
+      return newState;
+    });
+  }, []);
+
+  const steps = [
+    { title: "GL ACCOUNT", value: "GL Account" },
+    { title: "APPROVAL", value: "Approval" },
+    { title: "ATTACHMENT", value: "Attachment" },
+  ];
+
+  const valuePage = steps[current]?.value;
+
+  const routes = [
+    { path: "", breadcrumbName: "System Setup" },
+    { path: "", breadcrumbName: "Master Data" },
+    { path: RBI_ROUTES.GLACCOUNT, breadcrumbName: "GL Account" },
+    {
+      path: type === "create" ? RBI_ROUTES.GLACCOUNT_CREATE : RBI_ROUTES.GLACCOUNT_UPDATE,
+      breadcrumbName: type === "create" ? "Create GL Account" : "Update GL Account",
+    },
+  ];
+
+  // Navigation handlers
+  const next = () => {
+    const fieldsToValidate = listSectionInfo[current]?.paramValue;
+    if (fieldsToValidate) {
+      form
+        .validateFields(fieldsToValidate)
+        .then(() => {
+          if (current < steps.length - 1) setCurrent(current + 1);
+        })
+        .catch(() => {});
+    } else {
+      if (current < steps.length - 1) setCurrent(current + 1);
+    }
+  };
+
+  const prev = () => {
+    if (current > 0) setCurrent(current - 1);
+  };
+
+  // Use Effects
   useEffect(() => {
     dispatch(getApprovalHierarchyList());
-    dispatch(getSpecialGLList());
   }, [dispatch]);
 
   useEffect(() => {
@@ -91,18 +143,13 @@ const GLAccountForm = ({ type }) => {
   }, [dispatch, id, type]);
 
   useEffect(() => {
-    if (
-      id &&
-      data_detail &&
-      Object.keys(data_detail).length > 0 &&
-      type === "update"
-    ) {
+    if (id && data_detail && Object.keys(data_detail).length > 0 && type === "update") {
       const glAccount = data_detail?.glAccount || {};
       const approvalInfo = data_detail?.approvalInfo || {};
       const attachments = data_detail?.attachments || [];
 
-      // Data Attachment Information
       const mappedAttachment = attachments.map((item, index) => ({
+        key: index + 1,
         id: item.id || index,
         size: item.size || 0,
         fileName: item.fileName || "-",
@@ -111,47 +158,45 @@ const GLAccountForm = ({ type }) => {
         fileCategoryId: item.fileCategoryId || null,
         fileCategoryName: item.fileCategoryName || "-",
         pathFile: item.pathFile || "",
-        urlFile1: item.urlFile1 || "",
+        urlFile1: `/v1/dbs/api/gl-account/download-attachment/${item.id}` || "",
         urlFile2: item.urlFile2 || "",
         uploadBy: item.createdBy || "-",
-        uploadDate: item.createdDate
-          ? moment(item.createdDate).format("DD MMM YYYY")
-          : "-",
+        uploadDate: item.createdDate ? moment(item.createdDate).format("DD MMM YYYY") : "-",
         dataType: "exist",
       }));
 
-      // Set form values
+      const hierarchyId =
+        glAccount?.apphierId ||
+        glAccount?.appHierId ||
+        glAccount?.approvalHierarchy ||
+        approvalInfo?.apphierId ||
+        approvalInfo?.appHierId ||
+        null;
+
       form.setFieldsValue({
         glAccount: glAccount?.glAccount || "",
         glAccountDesc: glAccount?.glAccountDesc || "",
-        specialGlValue: glAccount?.specialGl || null,
-        reference: glAccount?.reference || "",
-        apphierId: approvalInfo?.tAppId || null,
+        remark: glAccount?.remark || "",
+        apphierId: hierarchyId,
       });
 
-      setSelectedHierarchy(approvalInfo?.tAppId);
+      setSelectedHierarchy(hierarchyId);
       setListDataAttachment(mappedAttachment);
     }
   }, [id, type, form, data_detail]);
 
   useEffect(() => {
     if (selectedHierarchy && selectedHierarchy !== 0) {
-      dispatch(getApprovalHierarchyDetail(selectedHierarchy));
+      dispatch(getApprovalHierarchyDetail({ id: selectedHierarchy }));
     }
   }, [dispatch, selectedHierarchy]);
 
   useEffect(() => {
-    if (
-      data_approval_hierarchy_detail &&
-      data_approval_hierarchy_detail.length > 0
-    ) {
+    if (data_approval_hierarchy_detail && data_approval_hierarchy_detail.length > 0) {
       const data = data_approval_hierarchy_detail.map((a, index) => ({
         ...a,
         key: index + 1,
-        employeeDetail: a.employeeDetail.map((b, index) => ({
-          ...b,
-          key: index + 1,
-        })),
+        employeeDetail: a.employeeDetail.map((b, index) => ({ ...b, key: index + 1 })),
       }));
       setAppHierDataDetail(data);
     } else {
@@ -169,31 +214,6 @@ const GLAccountForm = ({ type }) => {
     }
   }, [data_approval_hierarchy]);
 
-  // Breadcrumbs
-  const routes = [
-    {
-      path: "",
-      breadcrumbName: "System Setup",
-    },
-    {
-      path: "",
-      breadcrumbName: "Master Data",
-    },
-    {
-      path: RBI_ROUTES.GLACCOUNT,
-      breadcrumbName: "GL Account",
-    },
-    {
-      path:
-        type === "create"
-          ? RBI_ROUTES.GLACCOUNT_CREATE
-          : RBI_ROUTES.GLACCOUNT_UPDATE,
-      breadcrumbName:
-        type === "create" ? "Create GL Account" : "Update GL Account",
-    },
-  ];
-
-  // Validate Data before Modal
   const checkDataValidity = async (formValue) => {
     const url =
       type === "create"
@@ -203,11 +223,10 @@ const GLAccountForm = ({ type }) => {
     const jsonData = {
       ...(type === "update" && { glAccountId: id }),
       glAccount: formValue.glAccount,
-      specialGlValue: formValue.specialGlValue,
-      reference: formValue.reference,
+      remark: formValue.remark,
       glAccountDesc: formValue.glAccountDesc,
       apphierId: formValue.apphierId,
-      isSubmit: flag,
+      isSubmit: flagRef.current,
     };
 
     try {
@@ -216,159 +235,9 @@ const GLAccountForm = ({ type }) => {
     } catch (error) {
       if (error?.response?.data) {
         const message = error.response.data.message || "Validation failed";
-        const errorBody = {
-          title: "Failed",
-          description: message,
-        };
-        dispatch(showModalError(errorBody));
+        dispatch(showModalError({ title: "Failed", description: message }));
       }
       return false;
-    }
-  };
-
-  // Handle Save Form
-  const handleSave = async (formValue) => {
-    let errorBody = {};
-
-    if (listDataAttachment.length === 0) {
-      handleMandatory(setListSectionInfo, listDataAttachment);
-      errorBody = {
-        title: "Failed",
-        description:
-          "Attachment is mandatory. Please upload at least one file.",
-      };
-      dispatch(showModalError(errorBody));
-    } else {
-      handleMandatory(setListSectionInfo, listDataAttachment);
-
-      if (storedDataInline) {
-        errorBody = {
-          title: "Failed",
-          description: `Please save data table inline before submit. Please try again.`,
-        };
-        dispatch(showModalError(errorBody));
-      } else {
-        const isDataValid = await checkDataValidity(formValue);
-
-        if (isDataValid) {
-          setBodyData({ ...formValue });
-          setModalConfirm(true);
-          setListSectionInfo([
-            {
-              value: "GL Account",
-              paramValue: [
-                "glAccount",
-                "glAccountDesc",
-                "specialGlValue",
-                "reference",
-              ],
-            },
-            { value: "Approval", paramValue: ["apphierId"] },
-            { value: "Attachment" },
-          ]);
-        } else {
-          setModalConfirm(false);
-        }
-      }
-    }
-  };
-
-  const handleConfirm = () => {
-    setModalConfirm(false);
-
-    const jsonData = {
-      ...(type === "update" && { glAccountId: id }),
-      glAccount: bodyData.glAccount,
-      specialGlValue: bodyData.specialGlValue,
-      reference: bodyData.reference,
-      glAccountDesc: bodyData.glAccountDesc,
-      apphierId: bodyData.apphierId,
-      isSubmit: flag,
-    };
-
-    if (type === "create") {
-      dispatch(createGLAccount({ body: jsonData }))
-        .unwrap()
-        .then(async (dataForm) => {
-          const glAccountId = dataForm?.glAccountId;
-          setLoadingForm(true);
-          for (let i = 0; i < listDataAttachment.length; i++) {
-            const element = listDataAttachment[i];
-            const body = {
-              files: element.file,
-              categoryId: element.fileCategoryId,
-              referenceId: glAccountId,
-            };
-            await dispatch(uploadAttachment({ body }));
-          }
-          setLoadingForm(false);
-          setModalConfirm(false);
-
-          // Show success modal after all attachments uploaded
-          const successBody = {
-            title: "Successful",
-            description: `Your data has been ${
-              flag ? "submitted" : "created"
-            }.`,
-          };
-          dispatch(showModalSuccess(successBody));
-          handleClear();
-        })
-        .catch((error) => {
-          if (Math.floor((error.response.data.code || 0) / 100) === 5) {
-            const message =
-              (error.response &&
-                error.response.data &&
-                error.response.data.message) ||
-              error.message ||
-              error.toString();
-            setBodyError({ message });
-            setModalError(true);
-          }
-        });
-    } else {
-      dispatch(updateGLAccount({ body: jsonData, id }))
-        .unwrap()
-        .then(async (dataForm) => {
-          const glAccountId = dataForm?.glAccountId;
-          const filterDataAttach = listDataAttachment.filter(
-            (item) => item.dataType !== "exist"
-          );
-          setLoadingForm(true);
-          for (let i = 0; i < filterDataAttach.length; i++) {
-            const element = filterDataAttach[i];
-            const body = {
-              files: element.file,
-              categoryId: element.fileCategoryId,
-              referenceId: glAccountId,
-            };
-            await dispatch(uploadAttachment({ body }));
-          }
-          setLoadingForm(false);
-          setModalConfirm(false);
-
-          // Show success modal after all attachments uploaded
-          const successBody = {
-            title: "Successful",
-            description: `Your data has been ${
-              flag ? "submitted" : "updated"
-            }.`,
-          };
-          dispatch(showModalSuccess(successBody));
-          handleClear();
-        })
-        .catch((error) => {
-          if (Math.floor((error.response.data.code || 0) / 100) === 5) {
-            const message =
-              (error.response &&
-                error.response.data &&
-                error.response.data.message) ||
-              error.message ||
-              error.toString();
-            setBodyError({ message });
-            setModalError(true);
-          }
-        });
     }
   };
 
@@ -401,8 +270,130 @@ const GLAccountForm = ({ type }) => {
     });
   };
 
+  const handleSave = async (formValue) => {
+    const isDraft = !flagRef.current;
+
+    if (!isDraft && listDataAttachment.length === 0) {
+      handleMandatory(setListSectionInfo, listDataAttachment);
+      setModalIncomplete({
+        isOpen: true,
+        stepName: steps[2].title,
+        stepIndex: 2,
+      });
+    } else {
+      handleMandatory(setListSectionInfo, listDataAttachment);
+      const isDataValid = await checkDataValidity(formValue);
+
+      if (isDataValid) {
+        setBodyData({ ...formValue });
+        setModalConfirm(true);
+        setListSectionInfo([
+          { value: "GL Account", paramValue: ["glAccount", "glAccountDesc", "remark"] },
+          { value: "Approval", paramValue: ["apphierId"] },
+          { value: "Attachment" },
+        ]);
+      } else {
+        setModalConfirm(false);
+      }
+    }
+  };
+
+  const handleConfirm = () => {
+    const jsonData = {
+      ...(type === "update" && { glAccountId: id }),
+      glAccount: bodyData.glAccount,
+      remark: bodyData.remark,
+      glAccountDesc: bodyData.glAccountDesc,
+      apphierId: bodyData.apphierId,
+      isSubmit: flagRef.current,
+    };
+
+    if (type === "create") {
+      dispatch(createGLAccount({ body: jsonData }))
+        .unwrap()
+        .then(async (dataForm) => {
+          const glAccountId = dataForm?.glAccountId;
+          setLoadingForm(true);
+          for (let i = 0; i < listDataAttachment.length; i++) {
+            const element = listDataAttachment[i];
+            await dispatch(uploadAttachment({
+              body: { files: element.file, categoryId: element.fileCategoryId, referenceId: glAccountId },
+            }));
+          }
+          setLoadingForm(false);
+          setModalConfirm(false);
+          dispatch(showModalSuccess({
+            title: "Successful",
+            description: `Your data has been ${flagRef.current ? "submitted" : "created"}.`,
+          }));
+          handleClear();
+        })
+        .catch((error) => {
+          setModalConfirm(false);
+          if (Math.floor((error.response.data.code || 0) / 100) === 5) {
+            const message =
+              error.response?.data?.message || error.message || error.toString();
+            setBodyError({ message });
+            setModalError(true);
+          }
+        });
+    } else {
+      dispatch(updateGLAccount({ body: jsonData, id }))
+        .unwrap()
+        .then(async (dataForm) => {
+          const glAccountId = dataForm?.glAccountId;
+          const filterDataAttach = listDataAttachment.filter((item) => item.dataType !== "exist");
+          setLoadingForm(true);
+          if (deletedAttachmentIds.length > 0) {
+            await ratingBillingHttpService.deleteDataWithBody(
+              `/v1/dbs/api/attachment/delete-attachment`,
+              { fileId: deletedAttachmentIds },
+            );
+          }
+          for (let i = 0; i < filterDataAttach.length; i++) {
+            const element = filterDataAttach[i];
+            await dispatch(uploadAttachment({
+              body: { files: element.file, categoryId: element.fileCategoryId, referenceId: glAccountId },
+            }));
+          }
+          setLoadingForm(false);
+          setModalConfirm(false);
+          dispatch(showModalSuccess({
+            title: "Successful",
+            description: `Your data has been ${flagRef.current ? "submitted" : "updated"}.`,
+          }));
+          handleClear();
+        })
+        .catch((error) => {
+          setModalConfirm(false);
+          if (Math.floor((error.response.data.code || 0) / 100) === 5) {
+            const message =
+              error.response?.data?.message || error.message || error.toString();
+            setBodyError({ message });
+            setModalError(true);
+          }
+        });
+    }
+  };
+
+  // Handle Error Tab Form
   const handleError = ({ values, errorFields, outOfDate }) => {
     handleMandatory(setListSectionInfo, listDataAttachment, errorFields);
+
+    if (errorFields?.length > 0) {
+      const firstError = errorFields[0].name[0];
+      const stepIndex = listSectionInfo.findIndex((page) =>
+        page.paramValue?.includes(firstError)
+      );
+
+      if (stepIndex !== -1) {
+        setModalIncomplete({
+          isOpen: true,
+          stepName: steps[stepIndex].title,
+          stepIndex: stepIndex,
+        });
+      }
+    }
   };
 
   const handleClear = () => {
@@ -411,24 +402,29 @@ const GLAccountForm = ({ type }) => {
       setAppHierDataDetail([]);
       setSelectedHierarchy("");
       setListDataAttachment([]);
+      setDeletedAttachmentIds([]);
       setBodyData({});
-      setStoredDataInline(false);
+      setCurrent(0);
       setListSectionInfo([
-        {
-          value: "GL Account",
-          paramValue: [
-            "glAccount",
-            "glAccountDesc",
-            "specialGlValue",
-            "reference",
-          ],
-        },
+        { value: "GL Account", paramValue: ["glAccount", "glAccountDesc", "remark"] },
         { value: "Approval", paramValue: ["apphierId"] },
         { value: "Attachment" },
       ]);
     } else {
       dispatch(getDetailGLAccount(id));
+      setCurrent(0);
     }
+  };
+
+  const handleSubmit = () => {
+    flagRef.current = true;
+    form.submit();
+  };
+
+  const handleSaveDraft = () => {
+    flagRef.current = false;
+    const formValue = form.getFieldsValue();
+    handleSave(formValue);
   };
 
   const handleCloseModalError = () => {
@@ -443,13 +439,15 @@ const GLAccountForm = ({ type }) => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={isLoading}>
         <BreadCrumb routes={routes} />
-        <RadioTabs
-          data={listSectionInfo}
-          onChange={(e) => setValuePage(e.target.value)}
-          currentPosition={valuePage}
+
+        <FormStepper
+          steps={steps}
+          current={current}
+          onPrev={prev}
+          onNext={next}
         />
 
         <Form
@@ -457,29 +455,32 @@ const GLAccountForm = ({ type }) => {
           form={form}
           onFinish={handleSave}
           onFinishFailed={handleError}
+          scrollToFirstError={true}
         >
           {/* GL Account Section */}
-          <div className={`${valuePage !== "GL Account" ? "hidden" : ""}`}>
+          <div style={{ display: valuePage !== "GL Account" ? "none" : undefined }}>
             <GLAccountSectionForm type={type} form={form} />
           </div>
 
-          <div className={valuePage !== "Approval" ? "hidden" : ""}>
-            <BaseContainer header={"Approval Information"}>
+          {/* Approval Section */}
+          <div style={{ display: valuePage !== "Approval" ? "none" : undefined }}>
+            <CardContainer header={"Approval Information"}>
               <ApprovalComponentGeneral
                 dataTable={appHierDataDetail}
                 dataOption={appHierOptions}
                 selectedHierarchy={selectedHierarchy}
                 updateSelectedHierarchy={setSelectedHierarchy}
               />
-            </BaseContainer>
+            </CardContainer>
           </div>
 
-          <div className={valuePage !== "Attachment" ? "hidden" : ""}>
-            <BaseContainer header={"Attachment Information"}>
+          {/* Attachment Section */}
+          <div style={{ display: valuePage !== "Attachment" ? "none" : undefined }}>
+            <CardContainer header={"Attachment Information"}>
               <AttachmentComponent
                 type={type}
                 data={listDataAttachment}
-                updateData={setListDataAttachment}
+                updateData={handleUpdateAttachment}
                 dispatch={dispatch}
                 getAPICategory={getAttachmentCategory}
                 typeSelector="billing_bucket"
@@ -489,63 +490,21 @@ const GLAccountForm = ({ type }) => {
                 typeRBI={"data"}
                 mandatory={true}
               />
-            </BaseContainer>
+            </CardContainer>
           </div>
 
-          <div className="mt-[30px] flex">
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => setModalBack(true)}
-              icon={
-                <LeftOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 24,
-                    justifyItems: "center",
-                  }}
-                />
-              }
-              disabled={storedDataInline}
-            >
-              Back
-            </ButtonComponent>
-
-            <div className="w-full flex justify-end gap-5">
-              <ButtonComponent
-                disabled={storedDataInline ? true : false}
-                icon={
-                  <SVGIcon
-                    name={
-                      type === "update" ? "IconButtonReset" : "IconButtonClear"
-                    }
-                    width={24}
-                  />
-                }
-                type="submit"
-                onClick={() => {
-                  handleClear();
-                }}
-              >
-                {type === "update" ? "Reset" : "Clear"}
-              </ButtonComponent>
-              <ButtonComponent
-                htmlType="submit"
-                type="submit"
-                onClick={() => setFlag(false)}
-                disabled={storedDataInline}
-              >
-                Save as Draft
-              </ButtonComponent>
-              <ButtonComponent
-                htmlType="submit"
-                type="submit"
-                onClick={() => setFlag(true)}
-                disabled={storedDataInline}
-              >
-                Save & Submit
-              </ButtonComponent>
-            </div>
-          </div>
+          <FormFooter
+            current={current}
+            totalSteps={steps.length}
+            onPrev={prev}
+            onNext={next}
+            onCancel={() => navigate(-1)}
+            onClear={handleClear}
+            onSaveDraft={handleSaveDraft}
+            onSubmit={handleSubmit}
+            type={type}
+            isLoading={isLoading}
+          />
         </Form>
 
         <ConfirmationGLAccount
@@ -557,12 +516,7 @@ const GLAccountForm = ({ type }) => {
           dataOption={appHierOptions}
           handleCancel={() => setModalConfirm(false)}
           handleConfirm={() => handleConfirm()}
-        />
-
-        <ModalBack
-          isOpen={modalBack}
-          handleCancel={() => setModalBack(false)}
-          handleOk={() => navigate(-1)}
+          isLoading={isLoading}
         />
 
         <ModalError
@@ -576,14 +530,31 @@ const GLAccountForm = ({ type }) => {
               <SVGIcon name="IconFailed" width={48} />
               <p className="text-[18px] font-bold">{"Failed"}</p>
             </div>
-            <p className="pl-[70px]">{`Your data was not ${
-              flag === 1 ? "created" : "submitted"
-            }. ${bodyError.message}.`}</p>
+            <p className="pl-[70px]">{`Your data was not ${flagRef.current ? "submitted" : "created"}. ${bodyError.message}.`}</p>
             <p className="pl-[70px]">Please try again.</p>
           </div>
         </ModalError>
+
+        {/* Modal Incomplete */}
+        <ModalError
+          isOpen={modalIncomplete.isOpen}
+          handleOk={() => {
+            setCurrent(modalIncomplete.stepIndex);
+            setModalIncomplete({ isOpen: false, stepName: "", stepIndex: 0 });
+          }}
+          handleCancel={() => setModalIncomplete({ isOpen: false, stepName: "", stepIndex: 0 })}
+          customText="Go to Step"
+        >
+          <div className="px-5 pt-5 pb-[10px] justify-center">
+            <div className="w-full flex gap-[20px]">
+              <SVGIcon name="IconFailed" width={48} />
+              <p className="text-[18px] font-bold">{"Incomplete Data"}</p>
+            </div>
+            <p className="pl-[70px]">Please complete the mandatory fields in the <b>{modalIncomplete.stepName}</b> section before proceeding.</p>
+          </div>
+        </ModalError>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

@@ -3,10 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { Form, Modal, Spin, Select, DatePicker } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import moment from "moment";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
-import { LeftOutlined, WarningOutlined } from "@ant-design/icons";
+import { WarningOutlined } from "@ant-design/icons";
 import SVGIcon from "../../../../assets/Icon/index";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
 import ModalCustom from "../../../../components/Modal/ModalCustom";
@@ -22,20 +21,23 @@ import {
   getListAccountGroup,
   getListBillingCycle,
   getListBillingPeriod,
-  getListCalculationType,
   getListCostCenter,
   getListCustomerSegment,
   getListMeterReadingCode,
   getListSchedulerType,
-  getListServiceType,
   getListSor,
   getListSpecificCustomer,
+  getListComponentPrabilling,
   createPrabilling,
   getUserDetailCalculation,
   getUserProfile,
 } from "../../../../redux/slices/rating_billing_invoice/praBilling";
 import { IconModal } from "../../../../utils/Icon";
 import CardContainer from "../../../../components/CardContainer";
+import { FormFooter } from "../../../../components/FormStepNavigation";
+
+const DEFAULT_SEARCH_LIMIT = 10;
+const MAX_SEARCH_LENGTH = 50;
 
 const PrabillingForm = ({ type }) => {
   const {
@@ -51,9 +53,10 @@ const PrabillingForm = ({ type }) => {
     specific_customer_message,
     list_billing_cycle,
     list_billing_period,
+    list_component_prabilling,
     data_user_calculation,
     user_profile,
-    loading_user_profile,
+    loadingCreate,
   } = useSelector((state) => state.rbi_prabilling);
 
   const dispatch = useDispatch();
@@ -64,10 +67,6 @@ const PrabillingForm = ({ type }) => {
   const [billingCycle, setBillingCycle] = useState();
   const [selectedScheduleType, setSelectedScheduleType] = useState(null);
   const [form] = Form.useForm();
-  const formValue = form.getFieldsValue();
-
-  const DEFAULT_SEARCH_LIMIT = 10;
-  const MAX_SEARCH_LENGTH = 50;
 
   const [dataSpecificCustomer, setDataSpecificCustomer] = useState({
     sorId: null,
@@ -97,12 +96,11 @@ const PrabillingForm = ({ type }) => {
 
   useEffect(() => {
     dispatch(getListSor());
-    dispatch(getListServiceType());
     dispatch(getListCustomerSegment());
-    dispatch(getListCalculationType());
     dispatch(getListSchedulerType());
     dispatch(getListCostCenter());
     dispatch(getListBillingCycle());
+    dispatch(getListComponentPrabilling());
     dispatch(getUserDetailCalculation());
     dispatch(getUserProfile());
   }, [dispatch]);
@@ -137,7 +135,7 @@ const PrabillingForm = ({ type }) => {
       };
       dispatch(getListMeterReadingCode(body));
     }
-  }, [data_user_calculation]);
+  }, [data_user_calculation, dispatch, form]);
 
   useEffect(() => {
     if (
@@ -169,7 +167,7 @@ const PrabillingForm = ({ type }) => {
   useEffect(() => {
     let dataMrc = list_meter_reading_code?.reduce(
       (result, current) => result?.concat(current?.dtoList),
-      []
+      [],
     );
     setMergedArrayMrc(dataMrc);
   }, [dispatch, list_meter_reading_code]);
@@ -204,7 +202,7 @@ const PrabillingForm = ({ type }) => {
   const handleSelectCustomer = useCallback(
     (value, option) => {
       const customerData = filteredCustomerList.find(
-        (item) => item.accountNumber === value
+        (item) => item.accountNumber === value,
       );
 
       if (customerData) {
@@ -225,7 +223,7 @@ const PrabillingForm = ({ type }) => {
         limit: DEFAULT_SEARCH_LIMIT,
       }));
     },
-    [filteredCustomerList]
+    [filteredCustomerList],
   );
 
   useEffect(() => {
@@ -248,12 +246,12 @@ const PrabillingForm = ({ type }) => {
       "accountSegment",
       "accountGroupType",
       "specificCustomer",
+      "specificComponentPrabilling",
       "type",
       "scheduleDateTime",
       "remark",
     ];
 
-    // Jangan reset field yang memiliki default data
     if (defaultData?.costCenter?.length > 0) {
       tempData = tempData.filter((item) => item !== "costCenter");
     }
@@ -261,16 +259,13 @@ const PrabillingForm = ({ type }) => {
       tempData = tempData.filter((item) => item !== "sor");
     }
 
-    // Reset form fields
     form.resetFields(tempData);
 
-    // Reset state-state yang terkait
     setSelectedScheduleType(null);
     setSearchCustomerValue("");
     setFilteredCustomerList([]);
-    setBillingCycle(null); // Reset billing cycle state
+    setBillingCycle(null);
 
-    // Reset dataSpecificCustomer ke kondisi awal (hanya dengan default data)
     setDataSpecificCustomer({
       sorId: defaultData?.sor || null,
       costCenterId: defaultData?.costCenter || [],
@@ -280,8 +275,6 @@ const PrabillingForm = ({ type }) => {
       search: "",
       limit: DEFAULT_SEARCH_LIMIT,
     });
-
-    // Reset selected customers map
     setSelectedCustomersMap({});
   };
 
@@ -297,6 +290,7 @@ const PrabillingForm = ({ type }) => {
         : null,
       calculationType: formValue?.calculation_type,
       remark: formValue?.remark,
+      specificComponentPrabilling: formValue?.specificComponentPrabilling || [],
       rRbiCalculationCostCenter: (formValue?.costCenter || []).map((id) => {
         return {
           id: null,
@@ -311,7 +305,7 @@ const PrabillingForm = ({ type }) => {
             calCode: null,
             mreadingCode: id,
           };
-        }
+        },
       ),
       rRbiCalculationAccountSegment: (formValue?.accountSegment || []).map(
         (id) => {
@@ -320,7 +314,7 @@ const PrabillingForm = ({ type }) => {
             calCode: null,
             accSegment: id,
           };
-        }
+        },
       ),
       rRbiCalculationAccountGroupType: (formValue?.accountGroupType || []).map(
         (id) => {
@@ -329,7 +323,7 @@ const PrabillingForm = ({ type }) => {
             calCode: null,
             accGroupType: id,
           };
-        }
+        },
       ),
       rRbiCalculationSpecificCustomer: (formValue?.specificCustomer || []).map(
         (id) => {
@@ -338,7 +332,7 @@ const PrabillingForm = ({ type }) => {
             calCode: null,
             custNumb: id,
           };
-        }
+        },
       ),
     };
 
@@ -366,19 +360,19 @@ const PrabillingForm = ({ type }) => {
 
   const handleSave = async () => {
     const selectedBillingCycle = (list_billing_cycle || []).find(
-      (item) => item.id === dataFinal?.billingCycle
+      (item) => item.id === dataFinal?.billingCycle,
     );
 
     const selectedBillingPeriod = list_billing_period?.data?.find(
-      (item) => item.id === dataFinal?.billingPeriod
+      (item) => item.id === dataFinal?.billingPeriod,
     );
 
     const selectedSor = list_sor?.data?.find(
-      (item) => item.id === dataFinal?.sor
+      (item) => item.id === dataFinal?.sor,
     );
 
     const selectedSchedulerType = list_scheduler_type?.find(
-      (item) => item.id === dataFinal?.scheduleType
+      (item) => item.id === dataFinal?.scheduleType,
     );
 
     if (!user_profile) {
@@ -402,16 +396,16 @@ const PrabillingForm = ({ type }) => {
         selectedBillingPeriod?.name || selectedBillingPeriod?.code || "",
       sor: selectedSor?.name || "",
       costCenter: (dataFinal?.rRbiCalculationCostCenter || []).map(
-        (item) => item.costCenter
+        (item) => item.costCenter,
       ),
       meterReadingCode: (dataFinal?.rRbiCalculationMeterReadingCode || []).map(
-        (item) => item.mreadingCode
+        (item) => item.mreadingCode,
       ),
       accountSegment: (dataFinal?.rRbiCalculationAccountSegment || []).map(
-        (item) => item.accSegment
+        (item) => item.accSegment,
       ),
       accountGroupType: (dataFinal?.rRbiCalculationAccountGroupType || []).map(
-        (item) => item.accGroupType
+        (item) => item.accGroupType,
       ),
 
       billingCycleId: dataFinal?.billingCycle,
@@ -425,6 +419,7 @@ const PrabillingForm = ({ type }) => {
       sorId: dataFinal?.sor,
       calculationTypeId: dataFinal?.calculationType,
       remark: dataFinal?.remark,
+      runDtl: dataFinal?.specificComponentPrabilling || [],
       createdBy: user_profile.username || "",
     };
 
@@ -436,22 +431,24 @@ const PrabillingForm = ({ type }) => {
         }
       })
       .catch((error) => {
-        if (Math.floor((error?.response?.data?.code || 0) / 100) === 5) {
-          const message =
-            error?.response?.data?.message ||
-            error?.message ||
-            error?.toString();
-          setBodyError({ message });
-          setModalError(true);
-        }
+        const message =
+          error?.response?.data?.message ||
+          error?.message ||
+          error?.toString() ||
+          "An error occurred. Please try again.";
+        setBodyError({ message });
+        setModalError(true);
       });
   };
 
   const handleBackPage = () => {
-    if (Object.values(formValue).length > 0) {
+    const currentValues = form.getFieldsValue();
+    const hasFilledValue = Object.values(currentValues).some(
+      (v) => v !== undefined && v !== null && v !== ""
+    );
+    if (hasFilledValue) {
       setOpenBack(true);
     } else {
-      setOpenBack(false);
       navigate(-1);
     }
   };
@@ -565,7 +562,7 @@ const PrabillingForm = ({ type }) => {
   const handleScheduleTypeChange = (value) => {
     setSelectedScheduleType(value);
     const selectedType = list_scheduler_type?.find((item) => item.id === value);
-    if (selectedType?.name?.toLowerCase() !== "schedule") {
+    if (selectedType?.name?.toLowerCase() !== "scheduler") {
       form.setFieldValue("scheduleDateTime", null);
     }
   };
@@ -577,6 +574,7 @@ const PrabillingForm = ({ type }) => {
       "accountSegment",
       "accountGroupType",
       "specificCustomer",
+      "specificComponentPrabilling",
       "type",
       "scheduleDateTime",
       "remark",
@@ -604,7 +602,7 @@ const PrabillingForm = ({ type }) => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
       <Spin spinning={loading}>
         <Form layout={"vertical"} form={form} onFinish={onFinish}>
@@ -665,8 +663,7 @@ const PrabillingForm = ({ type }) => {
               </div>
             }
           >
-            <div className={"w-full grid grid-cols-2 gap-2"}>
-              {/* SOR - Left column */}
+            <div className={"w-full grid grid-cols-5 gap-2"}>
               <Form.Item
                 label={"SOR"}
                 name={"sor"}
@@ -685,7 +682,6 @@ const PrabillingForm = ({ type }) => {
                 />
               </Form.Item>
 
-              {/* Cost Center - Right column */}
               <Form.Item
                 label={"Cost Center"}
                 name={"costCenter"}
@@ -704,7 +700,6 @@ const PrabillingForm = ({ type }) => {
                 />
               </Form.Item>
 
-              {/* Meter Reading Code - Right column */}
               <Form.Item
                 label={"Meter Reading Code"}
                 name={"meterReading"}
@@ -726,7 +721,6 @@ const PrabillingForm = ({ type }) => {
                 />
               </Form.Item>
 
-              {/* Account Segment - Left column */}
               <Form.Item
                 label={"Account Segment"}
                 name={"accountSegment"}
@@ -744,7 +738,6 @@ const PrabillingForm = ({ type }) => {
                 />
               </Form.Item>
 
-              {/* Account Group Type - Left column */}
               <Form.Item
                 label={"Account Group Type"}
                 name={"accountGroupType"}
@@ -766,7 +759,6 @@ const PrabillingForm = ({ type }) => {
                 />
               </Form.Item>
 
-              {/* Specific Customer Account - Right column */}
               <div>
                 <Form.Item
                   label={"Specific Customer Account"}
@@ -892,6 +884,23 @@ const PrabillingForm = ({ type }) => {
                   </Select>
                 </Form.Item>
               </div>
+
+              <Form.Item
+                label={"Specific Component Prabilling"}
+                name={"specificComponentPrabilling"}
+                style={{ marginBottom: 0 }}
+              >
+                <SelectComponent
+                  mode={"multiple"}
+                  options={(list_component_prabilling || []).map((item) => {
+                    return {
+                      label: item?.componentName,
+                      value: item?.componenetCode,
+                    };
+                  })}
+                  placeholder={"Choose Multiple..."}
+                />
+              </Form.Item>
             </div>
           </CardContainer>
           <CardContainer
@@ -965,48 +974,20 @@ const PrabillingForm = ({ type }) => {
               </div>
             </div>
           </CardContainer>
-          <div className={"w-full flex mt-5"}>
-            <div className={"w-full justify-start"}>
-              <Form.Item>
-                <ButtonComponent
-                  type={"submit"}
-                  icon={
-                    <LeftOutlined
-                      style={{
-                        color: "#fff",
-                        fontSize: 16,
-                        justifyItems: "left",
-                      }}
-                    />
-                  }
-                  onClick={handleBackPage}
-                >
-                  Back
-                </ButtonComponent>
-              </Form.Item>
-            </div>
-            <div className={"w-full justify-end flex gap-2"}>
-              <ButtonComponent
-                type={"submit"}
-                icon={
-                  <SVGIcon
-                    name={
-                      type === "update" ? `IconButtonReset` : `IconButtonClear`
-                    }
-                    width={24}
-                  />
-                }
-                onClick={handleReset}
-              >
-                {type === "create" ? "Clear" : "Reset"}
-              </ButtonComponent>
-              <Form.Item>
-                <ButtonComponent type={"submit"} htmlType={"submit"}>
-                  Save
-                </ButtonComponent>
-              </Form.Item>
-            </div>
-          </div>
+
+          <FormFooter
+            onCancel={handleBackPage}
+            onClear={handleReset}
+            onSaveDraft={() => form.submit()}
+            type={type}
+            useNavigation={false}
+            saveDraftLabel="Save"
+            saveDraftStyle={{
+              backgroundColor: "#0075BF",
+              borderColor: "#0075BF",
+              color: "#fff",
+            }}
+          />
         </Form>
       </Spin>
 
@@ -1064,7 +1045,7 @@ const PrabillingForm = ({ type }) => {
                     </span>
                     <span className="text-[13px] text-gray-600">
                       {list_sor?.data?.find(
-                        (item) => item.id === pendingDataFinal?.sor
+                        (item) => item.id === pendingDataFinal?.sor,
                       )?.name || "All"}
                     </span>
                   </div>
@@ -1172,12 +1153,21 @@ const PrabillingForm = ({ type }) => {
         header={"CONFIRMATION"}
         width={900}
         type={"confirmation"}
+        loading={loadingCreate}
         footer={
           <div className={"flex w-full justify-end gap-2 mb-5"}>
-            <ButtonComponent onClick={() => setOpenModal(false)}>
+            <ButtonComponent
+              onClick={() => setOpenModal(false)}
+              disabled={loadingCreate}
+            >
               Cancel
             </ButtonComponent>
-            <ButtonComponent type={"submit"} onClick={handleSave}>
+            <ButtonComponent
+              type={"submit"}
+              onClick={handleSave}
+              isLoading={loadingCreate}
+              disabled={loadingCreate}
+            >
               Confirm
             </ButtonComponent>
           </div>
@@ -1237,7 +1227,7 @@ const PrabillingForm = ({ type }) => {
           <p className="pl-[70px]">Please try again.</p>
         </div>
       </ModalError>
-    </LayoutMenu>
+    </>
   );
 };
 

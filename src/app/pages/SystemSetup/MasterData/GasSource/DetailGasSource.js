@@ -6,7 +6,6 @@ import { LeftOutlined } from "@ant-design/icons";
 import moment from "moment";
 import BaseContainer from "../../../../../components/BaseContainer";
 import BreadCrumb from "../../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../routes/account_management/customer_account_routes";
 import DetailText from "../../../../../components/DetailText";
 import { dateFormatting, hasValue, renderColumn, renderDateColumn } from "../../../../../utils";
@@ -468,7 +467,7 @@ const DetailGasSource = () => {
 
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
@@ -606,7 +605,7 @@ const DetailGasSource = () => {
       </ModalCustom>
       {/* End Modal History Log */}
 
-    </LayoutMenu>
+    </>
   );
 };
 

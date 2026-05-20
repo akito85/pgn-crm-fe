@@ -1,0 +1,18 @@
+.full-width-tabs .ant-tabs-nav {
+  margin-bottom: 0 !important;
+  padding: 0 20px !important;
+}
+
+.full-width-tabs .ant-tabs-nav::before {
+  border-bottom: 1px solid #BDBDBD !important;
+}
+
+.full-width-tabs .ant-tabs-tab {
+  margin: 0 !important;
+  padding: 12px 16px !important;
+}
+
+.full-width-tabs .ant-tabs-ink-bar {
+  height: 2px !important;
+  background: #0075bf !important;
+}

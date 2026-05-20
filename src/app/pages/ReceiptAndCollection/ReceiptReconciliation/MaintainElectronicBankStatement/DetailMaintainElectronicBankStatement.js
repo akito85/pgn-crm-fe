@@ -1,5 +1,5 @@
 import { LeftOutlined } from "@ant-design/icons";
-import { Spin } from "antd";
+import { Spin, Tabs } from "antd";
 import moment from "moment";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -8,8 +8,6 @@ import BaseContainer from "../../../../../components/BaseContainer";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import DetailText from "../../../../../components/DetailText";
-import RadioTabs from "../../../../../components/RadioTabs";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 
 import {
   getElectronicDetail,
@@ -17,6 +15,7 @@ import {
   getTableReverse,
   getTableSundry,
   getTableMatch,
+  checkUserRole,
 } from "../../../../../redux/slices/receipt_collection/electrionicBank";
 
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
@@ -39,6 +38,7 @@ const DetailMaintainElectronicBankStatement = () => {
     data_detail,
     data_cus,
     loadingApprove,
+    userRole,
   } = useSelector((state) => state.electronic);
 
   const dispatch = useDispatch();
@@ -82,6 +82,7 @@ const DetailMaintainElectronicBankStatement = () => {
   useEffect(() => {
     if (id) {
       dispatch(getElectronicDetail(id));
+      dispatch(checkUserRole());
     }
   }, [id, dispatch]);
 
@@ -129,8 +130,8 @@ const DetailMaintainElectronicBankStatement = () => {
     dispatch,
   ]);
 
-  const handleSegmentedPage = (e) => {
-    setSegmentedPage(e.target.value);
+  const handleSegmentedPage = (key) => {
+    setSegmentedPage(key);
     setPage(1); // reset pagination saat pindah tab
   };
 
@@ -165,7 +166,8 @@ const DetailMaintainElectronicBankStatement = () => {
           id={id}
           loading={loading}
           data={data_force}
-          isApprover={data_detail?.isApprover}
+          isApprover={userRole?.isApprover && data_detail?.isApprover}
+          isSubmitter={userRole?.isSubmitter}
           loadingApprove={loadingApprove}
         />
       </>
@@ -183,7 +185,8 @@ const DetailMaintainElectronicBankStatement = () => {
         <DetailRevers
           data={data_reverse}
           id={id}
-          isApprover={data_detail?.isApprover}
+          isApprover={userRole?.isApprover && data_detail?.isApprover}
+          isSubmitter={userRole?.isSubmitter}
         />
       </>
     ),
@@ -201,7 +204,8 @@ const DetailMaintainElectronicBankStatement = () => {
           data={data_sundry}
           id={id}
           data_cus={data_cus}
-          isApprover={data_detail?.isApprover}
+          isApprover={userRole?.isApprover && data_detail?.isApprover}
+          isSubmitter={userRole?.isSubmitter}
         />
       </>
     ),
@@ -212,7 +216,7 @@ const DetailMaintainElectronicBankStatement = () => {
   // ===================== UI ========================
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb
         routes={[
           { breadcrumbName: "Receipt & Collection" },
@@ -268,13 +272,15 @@ const DetailMaintainElectronicBankStatement = () => {
 
         {/* TAB CONTENT */}
         <BaseContainer header="RECEIPT ON BANK STATEMENT INFORMATION">
-          <RadioTabs
-            currentPosition={segmentedPage}
-            data={tabData}
+          <Tabs
+            activeKey={segmentedPage}
             onChange={handleSegmentedPage}
+            items={tabData.map((tab) => ({
+              key: tab.value,
+              label: tab.value,
+              children: renderSection[tab.value],
+            }))}
           />
-
-          {renderSection[segmentedPage]}
         </BaseContainer>
 
         {/* HISTORY INFO */}
@@ -313,7 +319,7 @@ const DetailMaintainElectronicBankStatement = () => {
           </ButtonComponent>
         </div>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

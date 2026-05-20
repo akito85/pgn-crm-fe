@@ -7,7 +7,6 @@ import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrReject";
 import RadioTabs from "../../../../../components/RadioTabs";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import {
   approveOrRejectPaymentInactive,
   approveOrRejectPaymentItem,
@@ -259,7 +258,11 @@ const ListDetailPaymentItem = () => {
   const routes = [
     {
       path: "",
-      breadcrumbName: "Receipt & Collection",
+      breadcrumbName: "System Setup",
+    },
+    {
+      path: "",
+      breadcrumbName: "Master Data",
     },
     {
       path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_PAYMENT_ITEM,
@@ -304,7 +307,7 @@ const ListDetailPaymentItem = () => {
   console.log(dataDraft, "datadraft");
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
       <div>
         <RadioTabs data={tabData} onChange={handleSegmentedPage} />
@@ -410,7 +413,7 @@ const ListDetailPaymentItem = () => {
           </div>
         ) : null}
       </div>
-    </LayoutMenu>
+    </>
   );
 };
 

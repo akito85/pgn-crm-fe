@@ -3,7 +3,13 @@ export const RECEIPT_AND_COLLECTION_ROUTES = {
   VIEW_RECEIPT: "/receipt-and-collection/receipt-list",
   CREATE_RECEIPT: "/receipt-and-collection/receipt-list/create",
   DETAIL_RECEIPT: "/receipt-and-collection/receipt-list/view",
+  APPROVAL_RECEIPT_HOLD: "/receipt-and-collection/receipt-list/approval/hold/:id",
+  APPROVAL_RECEIPT_RELEASE: "/receipt-and-collection/receipt-list/approval/release/:id",
+  APPROVAL_RECEIPT_REFUND: "/receipt-and-collection/receipt-list/approval/refund/:id",
+  APPROVAL_RECEIPT_REVERSE: "/receipt-and-collection/receipt-list/approval/reverse/:id",
   UPDATE_RECEIPT: "/receipt-and-collection/receipt-list/update",
+  CREATE_ACCOUNTING: "/receipt-and-collection/receipt-list/create-accounting",
+  DETAIL_ACCOUNTING: "/receipt-and-collection/receipt-list/view-accounting",
   // Receipt Reconciliation
 
   // Synchronize Receipt
@@ -55,6 +61,10 @@ export const RECEIPT_AND_COLLECTION_ROUTES = {
   //late charge
   VIEW_LATE_CHARGE: "/receipt-and-collection/late-charge-management",
   DETAIL_LATE_CHARGE: "/receipt-and-collection/late-charge-management/view",
+  CREATE_LATE_CHARGE: "/receipt-and-collection/late-charge-management/create",
+  RECALCULATE_LATE_CHARGE: "/receipt-and-collection/late-charge-management/recalculate",
+  REPLACE_LATE_CHARGE: "/receipt-and-collection/late-charge-management/replace",
+  REVERSE_LATE_CHARGE: "/receipt-and-collection/late-charge-management/reverse",
 
   //bridge
   VIEW_BRIDGE: "/receipt-and-collection/bridge",
@@ -69,7 +79,7 @@ export const RECEIPT_AND_COLLECTION_ROUTES = {
   DETAIL_PARTNER: "/receipt-and-collection/partner/view",
   CREATE_PARTNER: "/receipt-and-collection/partner/create",
   UPDATE_PARTNER: "/receipt-and-collection/partner/update",
-  
+
   //Payment
   VIEW_PAYMENT: "/receipt-and-collection/payment",
   VIEW_PARTNER_CA: "/receipt-and-collection/partner-ca",
@@ -88,19 +98,19 @@ export const RECEIPT_AND_COLLECTION_ROUTES = {
   DETAIL_SETTINGS: "/receipt-and-collection/settings/view",
   CREATE_SETTINGS: "/receipt-and-collection/settings/create",
   UPDATE_SETTINGS: "/receipt-and-collection/settings/update",
-  
+
   // Collection Agent
   VIEW_COLLECTING_AGENT: "/receipt-and-collection/collecting-agent",
   DETAIL_COLLECTING_AGENT: "/receipt-and-collection/collecting-agent/view",
   CREATE_COLLECTING_AGENT: "/receipt-and-collection/collecting-agent/create",
   UPDATE_COLLECTING_AGENT: "/receipt-and-collection/collecting-agent/update",
-  
+
   // Payment Channel
   VIEW_PAYMENT_CHANNEL: "/receipt-and-collection/payment-channel",
   DETAIL_PAYMENT_CHANNEL: "/receipt-and-collection/payment-channel/view",
   CREATE_PAYMENT_CHANNEL: "/receipt-and-collection/payment-channel/create",
   UPDATE_PAYMENT_CHANNEL: "/receipt-and-collection/payment-channel/update",
-  
+
   // Accounting
   VIEW_ACCOUNTING: "/receipt-and-collection/accounting",
 
@@ -109,10 +119,46 @@ export const RECEIPT_AND_COLLECTION_ROUTES = {
   DETAIL_DEDUCTION: "/receipt-and-collection/payment-warranty/deduction-list/view",
   CREATE_DEDUCTION: "/receipt-and-collection/payment-warranty/deduction-list/create",
   UPDATE_DEDUCTION: "/receipt-and-collection/payment-warranty/deduction-list/update",
-  
+
   // Transfer to Receipt
   VIEW_TRANSFER_TO_RECEIPT: "/receipt-and-collection/payment-warranty/transfer-to-receipt",
   DETAIL_TRANSFER_TO_RECEIPT: "/receipt-and-collection/payment-warranty/transfer-to-receipt/view",
   CREATE_TRANSFER_TO_RECEIPT: "/receipt-and-collection/payment-warranty/transfer-to-receipt/create",
-  UPDATE_TRANSFER_TO_RECEIPT: "/receipt-and-collection/payment-warranty/transfer-to-receipt/update",
+
+  // Transfer to Customer
+  VIEW_TRANSFER_TO_CUSTOMER: "/receipt-and-collection/payment-warranty/transfer-to-customer",
+  DETAIL_TRANSFER_TO_CUSTOMER: "/receipt-and-collection/payment-warranty/transfer-to-customer/view",
+  CREATE_TRANSFER_TO_CUSTOMER: "/receipt-and-collection/payment-warranty/transfer-to-customer/create",
+
+  // Warranty List
+  VIEW_WARRANTY: "/receipt-and-collection/payment-warranty/warranty",
+  DETAIL_WARRANTY: "/receipt-and-collection/payment-warranty/warranty/view",
+  CREATE_WARRANTY: "/receipt-and-collection/payment-warranty/warranty/create",
+  UPDATE_WARRANTY: "/receipt-and-collection/payment-warranty/warranty/update",
+  UPLOAD_WARRANTY: "/receipt-and-collection/payment-warranty/warranty/upload",
+
+  // History Payment Warranty
+  VIEW_HISTORY_PAYMENT_WARRANTY: "/receipt-and-collection/payment-warranty/history",
+
+  // Gapura Management
+  VIEW_GAPURA_MANAGEMENT: "/receipt-and-collection/gapura-management",
+  DETAIL_GAPURA_MANAGEMENT: "/receipt-and-collection/gapura-management/view",
+
+  // Payment Warranty Partner
+  VIEW_PAYMENT_WARRANTY_PARTNER: "/receipt-and-collection/payment-warranty-partner",
+  DETAIL_PAYMENT_WARRANTY_PARTNER: "/receipt-and-collection/payment-warranty-partner/view",
+  CREATE_PAYMENT_WARRANTY_PARTNER: "/receipt-and-collection/payment-warranty-partner/create",
+  UPDATE_PAYMENT_WARRANTY_PARTNER: "/receipt-and-collection/payment-warranty-partner/update",
+  
+  // Libor Rate
+  VIEW_LIBOR_RATE: "/receipt-and-collection/libor-rate",
+  CREATE_LIBOR_RATE: "/receipt-and-collection/libor-rate/create",
+  UPDATE_LIBOR_RATE: "/receipt-and-collection/libor-rate/update",
+  DETAIL_LIBOR_RATE: "/receipt-and-collection/libor-rate/view",
+
+  // CA CI Mapping
+  VIEW_CA_CI_MAPPING: "/receipt-and-collection/ca-ci-mapping",
+  DETAIL_CA_CI_MAPPING: "/receipt-and-collection/ca-ci-mapping/view",
+  CREATE_CA_CI_MAPPING: "/receipt-and-collection/ca-ci-mapping/create",
+  UPDATE_CA_CI_MAPPING: "/receipt-and-collection/ca-ci-mapping/update",
 };

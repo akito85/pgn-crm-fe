@@ -4,29 +4,34 @@ import { columnAllocation } from "./ColumnAllocation";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import SVGIcon from "../../../../../assets/Icon/index";
 import moment from "moment";
-import { dateFormatting, formMessageRequired, hasValue } from "../../../../../utils";
+import {
+  dateFormatting,
+  formMessageRequired,
+  hasValue,
+} from "../../../../../utils";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import TablePagination from "../../../../../components/TablePagination";
-import { Spin, Steps, Form, Input, Alert } from "antd";
+import { Spin, Form, Button, Tabs } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import RadioTabs from "../../../../../components/RadioTabs";
 import DetailText from "../../../../../components/DetailText";
 import AttachmentSectionForm from "../../../ProductAndPromo/Pricing/Form/AttachmentSectionForm";
-import {
-  getAllocationRecomendationList,
-} from "../../../../../redux/slices/receipt_collection/receipt";
-import {
-  showModalError,
-} from "../../../../../redux/slices/general_slice";
+import { getAllocationRecomendationList, createAllocation } from "../../../../../redux/slices/receipt_collection/receipt";
+import { showModalError } from "../../../../../redux/slices/general_slice";
 import { columnRecommendation } from "./ColumnRecomendation";
 import { updatePagination } from "../../../../../utils/updatePagination";
 import ApprovalSectionForm from "../../../ProductAndPromo/Pricing/Form/ApprovalSectionForm";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
-import { getAllApprovalList, getListApprovalById, getListCategory } from "../../../../../redux/slices/receipt_collection/electrionicBank";
+import {
+  getAllApprovalList,
+  getListApprovalById,
+  getListCategory,
+} from "../../../../../redux/slices/receipt_collection/electrionicBank";
 import receiptCollectionHttpService from "../../../../../redux/services/receiptCollectionHttpService";
 import { configApp } from "../../../../../constants/configApp";
-import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import InputComponent from "../../../../../components/InputComponent";
+import { FormStepper } from "../../../../../components/FormStepNavigation";
+import TableRBI from "../../../../../components/TableRBI";
 
 const AllocationSection = ({
   dataTable,
@@ -77,10 +82,9 @@ const AllocationSection = ({
   const [appHierOptions, setAppHierOptions] = useState([]);
   const [appHierDataDetail, setAppHierDataDetail] = useState([]);
   const [listDataAttachment, setListDataAttachment] = useState([]);
-  const {
-    dataListAppHierId,
-    dataListAppHierDetail,
-  } = useSelector((state) => state.electronic);
+  const { dataListAppHierId, dataListAppHierDetail } = useSelector(
+    (state) => state.electronic,
+  );
 
   // Load Approval Hierarchy List
   useEffect(() => {
@@ -136,21 +140,26 @@ const AllocationSection = ({
       ...prevState,
       [type]: result,
     }));
+
+    // Manual sync for form validation
+    if (type === "approvalHierarchy") {
+      modalForm.setFieldsValue({ approvalHierarchy: result });
+    }
+
     return result;
   };
   // helper to parse formatted amount
   const parseAmount = (val) => {
-    if (typeof val === 'number') return val;
-    if (!val) return 0;
+    if (typeof val === "number") return val;
     // Remove dots (thousand separators) and replace comma with dot (decimal)
-    const normalized = val.toString().replace(/\./g, "").replace(/,/g, ".");
+    const normalized = val?.toString()?.replace(/\./g, "").replace(/,/g, ".");
     return parseFloat(normalized);
   };
 
   const parsedAmount = parseAmount(amount);
   const balance = parsedAmount - totalAllocationAmount;
   // use effec
-
+  const [modalForm] = Form.useForm();
 
   useEffect(() => {
     if (data_recomendation_allocation) {
@@ -169,21 +178,28 @@ const AllocationSection = ({
         // setDataRecomendation(updatedDataRecomendation);
         setDataRecomendation(
           dataRecomendation.filter(
-            (item) => !dataTable.some((obj) => obj.key === item.key)
-          )
+            (item) => !dataTable.some((obj) => obj.key === item.key),
+          ),
         );
       } else {
         setDataRecomendation(
-          data_recomendation_allocation?.map((item) => ({
-            ...item,
-            key: item?.id,
-            billingPeriod: moment(item?.billingPeriod)?.format(
-              dateFormatting?.datePeriod
-            ),
-            createdDate: moment(item.createdDate).format(
-              dateFormatting?.dateTime
-            ),
-          }))
+          data_recomendation_allocation
+            ?.filter(
+              (item) =>
+                item?.billingItemAmount !== 0 &&
+                (item?.allocationStatus === "Unpaid" ||
+                  item?.allocationStatus === "Partially Paid"),
+            )
+            ?.map((item) => ({
+              ...item,
+              key: item?.id,
+              billingPeriod: moment(item?.billingPeriod)?.format(
+                dateFormatting?.datePeriod,
+              ),
+              createdDate: moment(item.createdDate).format(
+                dateFormatting?.dateTime,
+              ),
+            })),
         );
       }
     }
@@ -192,28 +208,28 @@ const AllocationSection = ({
   // set selected row by balance
   useEffect(() => {
     if (dataRecomendation && dataTable?.length === 0) {
-      setSelectedRowKeys(
-        dataRecomendation
-          ?.filter((item) => item?.allocationAmount !== 0)
-          ?.map((item) => item?.key)
-      );
+      setSelectedRowKeys(dataRecomendation?.map((item) => item?.key));
     }
   }, [dataRecomendation]);
 
   // count total amount
-  // useEffect(() => {
-  //     if (selectDataTable?.length > 0) {
-  //         setTotalAllocationAmount(selectDataTable?.reduce((total, row) => total + row.allocationAmount, 0))
-  //     }
-  // }, [selectDataTable]);
+  useEffect(() => {
+    if (dataTable?.length > 0) {
+      setTotalAllocationAmount(
+        dataTable?.reduce((total, row) => total + row.allocationAmount, 0),
+      );
+    } else {
+      setTotalAllocationAmount(0);
+    }
+  }, [dataTable]);
 
   // update table selected data
   useEffect(() => {
     if (openModalAllocation) {
       setSelectDataTable(
         dataRecomendation?.filter((item) =>
-          selectedRowKeys?.includes(item?.key)
-        )
+          selectedRowKeys?.includes(item?.key),
+        ),
       );
     }
   }, [selectedRowKeys, openModalAllocation, dataRecomendation]);
@@ -231,13 +247,13 @@ const AllocationSection = ({
       case "createdDate":
         setTypeColumn("datetime");
         setSearchText(
-          moment(selectedKeys[0])?.format(dateFormatting?.dateTime)
+          moment(selectedKeys[0])?.format(dateFormatting?.dateTime),
         );
         break;
       case "billingPeriod":
         setTypeColumn("datePeriod");
         setSearchText(
-          moment(selectedKeys[0])?.format(dateFormatting?.datePeriod)
+          moment(selectedKeys[0])?.format(dateFormatting?.datePeriod),
         );
         break;
       default:
@@ -271,13 +287,13 @@ const AllocationSection = ({
       case "createdDate":
         setTypeColumn("datetime");
         setSearchTextChoose(
-          moment(selectedKeys[0])?.format(dateFormatting?.dateTime)
+          moment(selectedKeys[0])?.format(dateFormatting?.dateTime),
         );
         break;
       case "billingPeriod":
         setTypeColumn("datePeriod");
         setSearchTextChoose(
-          moment(selectedKeys[0])?.format(dateFormatting?.datePeriod)
+          moment(selectedKeys[0])?.format(dateFormatting?.datePeriod),
         );
         break;
       default:
@@ -298,6 +314,38 @@ const AllocationSection = ({
     });
   };
 
+  // Fungsi untuk update amount tiap baris
+  const handleEditAmount = (rowKey, newValue) => {
+    // 1. Update data di tabel modal
+    setDataRecomendation((prev) =>
+      prev.map((item) =>
+        item.key === rowKey ? { ...item, allocationAmount: Number(newValue) || 0 } : item
+      )
+    );
+
+    // 2. Update data di tabel utama (HANYA kalau barisnya ada)
+    setDataTable((prev) => {
+      // Cek dulu, apakah row ini ada di tabel utama?
+      const isExist = prev.some((item) => item.key === rowKey);
+
+      // Kalau nggak ada (artinya kita lagi ngedit di dalam modal),
+      // STOP di sini. Jangan return array baru biar useEffect nggak ke-trigger & nge-reset datanya!
+      if (!isExist) return prev;
+
+      // Kalau ada, baru update angkanya
+      return prev.map((item) =>
+        item.key === rowKey ? { ...item, allocationAmount: Number(newValue) || 0 } : item
+      );
+    });
+  };
+
+  useEffect(() => {
+    if (openModalAllocation && selectDataTable?.length > 0) {
+      const newTotal = selectDataTable.reduce((total, row) => total + (row.allocationAmount || 0), 0);
+      setTotalAllocationAmount(newTotal);
+    }
+  }, [selectDataTable, openModalAllocation]);
+
   // filtered column
   const filteredColumns = columnAllocation(
     pageChoose,
@@ -305,12 +353,12 @@ const AllocationSection = ({
     searchInput,
     searchedColumn,
     searchText,
-    handleSearch
+    handleSearch,
   )?.filter(
     (item) =>
       item?.dataIndex !== "allocationCode" &&
       item?.dataIndex !== "allocationNumber" &&
-      item?.dataIndex !== "allocationDate"
+      item?.dataIndex !== "allocationDate",
   );
 
   // handle open modal allocation
@@ -334,6 +382,7 @@ const AllocationSection = ({
     setForceObj({});
     setListDataAttachment([]);
     setConfirmationTab("Allocation");
+    modalForm.resetFields();
   };
 
   const onSelectChange = (newSelectedRowKeys, newSelectedRows) => {
@@ -373,263 +422,284 @@ const AllocationSection = ({
     // setSelectDataTable([]);
   };
 
+  const { userData } = useSelector((state) => state.auth);
+
   // handle save data table
   const handleSaveDataTable = () => {
     if (totalAllocationAmount > parsedAmount) {
+      const errorBody = {
+        title: "Alert",
+        description: `Total allocation amount cannot be greater than receipt amount!`,
+      };
+      dispatch(showModalError(errorBody));
     } else {
-      // dispatch(setDataAllocation(selectDataTable));
-      // Merge new data (Approval, Remark, Attachment) into the selected rows
-      // Note: Since these are technically "header" info for the allocation SET, 
-      // we might need to attach them to EACH row, or the backend expects them differently.
-      // Based on typical table-inline patterns, we'll attach them to the objects.
+      // Check if we're in update mode and have a receipt ID
+      const receiptId = formValues?.id; // Assuming receipt ID is available in formValues
+      
+      if (receiptId) {
+        // Call API to create allocation in database
+        const allocationRequest = {
+          receiptId: receiptId,
+          allocationDtoList: selectDataTable.map((row) => ({
+            id: row.id,
+            allocationAmount: row.allocationAmount,
+            remark: forceObj.remark,
+            approvalHierarchyId: forceObj.approvalHierarchy,
+            createdBy: userData?.userName,
+          })),
+          remark: forceObj.remark,
+          approvalHierarchyId: forceObj.approvalHierarchy,
+          attachmentIds: listDataAttachment?.map(att => att.id) || [],
+        };
 
-      const enrichedData = selectDataTable.map(row => ({
-        ...row,
-        remark: forceObj.remark,
-        approvalHierarchyId: forceObj.approvalHierarchy,
-        attachments: listDataAttachment
-      }));
+        dispatch(createAllocation(allocationRequest))
+          .unwrap()
+          .then(() => {
+            // Success - update local state
+            const enrichedData = selectDataTable.map((row) => ({
+              ...row,
+              remark: forceObj.remark,
+              approvalHierarchyId: forceObj.approvalHierarchy,
+              attachments: listDataAttachment,
+              createdBy: userData?.userName,
+            }));
 
-      setDataTable(enrichedData);
+            setDataTable((prev) => [...prev, ...enrichedData]);
+            handleResetModal();
+          })
+          .catch((error) => {
+            console.error("Create allocation failed:", error);
+            const errorBody = {
+              title: "Error",
+              description: error?.message || "Failed to create allocation. Please try again.",
+            };
+            dispatch(showModalError(errorBody));
+          });
+      } else {
+        // For create mode, just update local state (will be saved with receipt)
+        const enrichedData = selectDataTable.map((row) => ({
+          ...row,
+          remark: forceObj.remark,
+          approvalHierarchyId: forceObj.approvalHierarchy,
+          attachments: listDataAttachment,
+          createdBy: userData?.userName,
+        }));
 
-      // handleCancel();
-      setOpenModalAllocation(false);
-      setPageChoose(1);
-      setPageSizeChoose(10);
-      setCurrentStep(0);
-      setForceObj({});
-      setListDataAttachment([]);
+        setDataTable((prev) => [...prev, ...enrichedData]);
+        handleResetModal();
+      }
     }
+  };
+
+  const handleResetModal = () => {
+    setSelectedRowKeys([]);
+    setSelectDataTable([]);
+    setTotalAllocationAmount(0);
+    setOpenModalAllocation(false);
+    setPageChoose(1);
+    setPageSizeChoose(10);
+    setCurrentStep(0);
+    setForceObj({});
+    setListDataAttachment([]);
+    modalForm.resetFields();
   };
 
   const handleOpenModalAllocation = async () => {
     try {
-      const { apphierId, receiptCode, refrence, isMisc, ...keys } =
-        form?.getFieldsValue();
+      try {
+        // Validate specific fields from the Receipt form (tab 1)
+        await form.validateFields([
+          "miscellaneous", "accNumber", "cusNumber", "cusName", "accountName",
+          "segment", "accountGroupType", "accountType", "sor", "costCenterCode",
+          "costCenterName", "receiptCode", "receiptChannel", "paymentType",
+          "paymentGateway", "collectingAgent", "deliveryChannel", "method",
+          "bank", "receiptDate", "currency", "amount", "rateType", "rateDate",
+          "rateAmount", "convertedCurrency", "eqAmount", "description",
+          "registrationNumber", "customerType", "partner"
+        ]);
+      } catch (err) {
+        // If validation fails, show the exact fields
+        if (err?.errorFields?.length > 0) {
+          const failingFields = err.errorFields.map(f => f.name.join('.')).join(', ');
+          console.log("Validation Error Fields:", err.errorFields);
+          const errorBody = {
+            title: "Alert",
+            description: `Please input all mandatory form values! Missing: ${failingFields}`,
+          };
+          dispatch(showModalError(errorBody));
+          return;
+        }
+      }
 
-      const checkValues = Object.values(keys).every((value) => {
-        return value !== undefined && value !== null && value !== "";
-      });
-      // setSelectedRowKeys([]);
-      // setSelectDataTable([]);
-      console.log(checkValues);
-      if (checkValues === false) {
+      if (hasValue(amount) === false || parsedAmount === 0) {
         const errorBody = {
-          title: "Failed",
-          description: `Please input values!`,
-        };
-        dispatch(showModalError(errorBody));
-      } else if (hasValue(amount) === false || parsedAmount === 0) {
-        const errorBody = {
-          title: "Failed",
+          title: "Alert",
           description: `Please input amount!`,
         };
         dispatch(showModalError(errorBody));
       } else {
+        setSelectedRowKeys([]);
+        setSelectDataTable([]);
+        setTotalAllocationAmount(0);
         await dispatch(
           getAllocationRecomendationList({
             search: encodeURIComponent(JSON?.stringify(search)),
             pageChoose,
             pageSizeChoose,
             sort: sort,
-            accountNumberSelected,
+            accountNumberSelected: accountNumberSelected?.includes(" - ")
+              ? (!isNaN(accountNumberSelected?.split(" - ")[0]) ? accountNumberSelected?.split(" - ")[0] : accountNumberSelected?.split(" - ")[1])
+              : accountNumberSelected,
             balance: balance,
             currencyId: formValues?.currency,
             rateAmount: rateAmountValue,
-          })
+          }),
         )?.unwrap();
         setOpenModalAllocation(true);
       }
     } catch (error) {
       setOpenModalAllocation(false);
-
     }
   };
 
   // handle sort
-  const onSort = (_, __, sort) => {
-    const dataSort =
-      sort.order !== undefined
-        ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
-        : "";
-    setSort(dataSort);
+  const steps = [
+    { title: "CHOOSE ALLOCATION" },
+    { title: "APPROVAL" },
+    { title: "ATTACHMENT" },
+    { title: "CONFIRMATION" },
+  ];
+
+  const handleNext = () => {
+    setCurrentStep(currentStep + 1);
+  };
+
+  const handlePrev = () => {
+    setCurrentStep(currentStep - 1);
   };
 
   return (
-    <div className="w-full items-end flex flex-col gap-5">
-      <ButtonComponent
-        type={"submit"}
-        icon={<SVGIcon name="IconButtonCreate" width={24} />}
-        onClick={handleOpenModalAllocation}
-        disabled={isInsert || rateAmountValue === 0}
-      >
-        Create
-      </ButtonComponent>
+    <div className="w-full flex flex-col gap-4">
+      <div className="flex justify-end">
+        <ButtonComponent
+          type={"submit"}
+          icon={<SVGIcon name="IconButtonCreate" width={24} />}
+          onClick={handleOpenModalAllocation}
+          disabled={isInsert || rateAmountValue === 0}
+        >
+          Create
+        </ButtonComponent>
+      </div>
+
       <div className="w-full">
-        <TableInlineAllocation
-          cols={columnAllocation(
+        <TableRBI
+          columns={columnAllocation(
             page,
             pageSize,
             searchInput,
             searchedColumn,
             searchText,
-            handleSearch
+            handleSearch,
+            undefined,
+            () => setOpenModalAllocation(true), // This is "Update" in main view? Usually it should open edit modal.
+            (key) => {
+              const newData = dataTable.filter((item) => item.key !== key);
+              setDataTable(newData);
+            }
           )}
           current={page}
           pageSize={pageSize}
-          scrollTable={{ x: 3500, y: 500 }}
-          actionFix={true}
-          tableData={updatePagination(
+          dataSource={updatePagination(
             dataTable,
             "data",
             searchedColumn,
             searchText,
-            pageChoose,
-            pageSizeChoose,
+            page,
+            pageSize,
             typeColumn
           )}
-          setInserted={setIsInsert}
-          onDataChange={setDataTable}
           totalData={updatePagination(
             dataTable,
             "length",
             searchedColumn,
             searchText,
-            pageChoose,
-            pageSizeChoose,
+            page,
+            pageSize,
             typeColumn
           )}
-          setUpdateSelectDataTable={setSelectDataTable}
-          setUpdateSelectRowKeys={setSelectedRowKeys}
-          setUpdateTotalAmount={setTotalAllocationAmount}
-          rateAmount={rateAmountValue}
-          currency={currencyId}
-        // onSort={onSort}
-        // dispatcher={dispatch}
+          tableScrolled={{ x: 1500, y: 500 }}
+          onChange={(p, s) => {
+            setPage(p);
+            setPageSize(s);
+          }}
+          actionFix={true}
         />
       </div>
-      <div className="w-full flex flex-col">
+
+      <div className="w-full flex flex-col items-end text-sm text-[#4B465C] opacity-80">
         {totalAllocationAmount > parsedAmount && (
           <span className="text-red-800">
             Total amount of selected item has been exceeded Total available
             amount. Please select other item.
           </span>
         )}
-        <span>
-          {" "}
-          Total Amount :{" "}
-          {totalAllocationAmount?.toLocaleString("en-US", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          })}
-        </span>
-        <span>
-          {" "}
-          Balance :{" "}
-          {balance === 0
-            ? 0
-            : balance?.toLocaleString("en-US", {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })}{" "}
-        </span>
+        <div className="flex gap-4 mt-2">
+          <span>
+            Total Amount :{" "}
+            <strong>
+              {totalAllocationAmount?.toLocaleString("en-US", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
+            </strong>
+          </span>
+          <span>
+            Balance :{" "}
+            <strong>
+              {balance === 0
+                ? 0
+                : balance?.toLocaleString("en-US", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+            </strong>
+          </span>
+        </div>
       </div>
       <ModalCustom
         isOpen={openModalAllocation}
         handleCancel={handleCancel}
         type={"confirmation"}
-        header={"Choose Allocation"}
+        header={"CREATE ALLOCATION"}
         width={1200}
-        footer={
-          <div className="flex justify-end gap-5">
-            <ButtonComponent type={"default"} onClick={handleCancel}>
-              Back
-            </ButtonComponent>
-            {currentStep > 0 ? (
-              <ButtonComponent
-                type={"submit"}
-                onClick={() => setCurrentStep(currentStep - 1)}
-                icon={
-                  <LeftOutlined
-                    style={{
-                      color: "#fff",
-                      fontSize: 15, // Ubah ukuran ikon sesuai kebutuhan
-                      marginRight: 10,
-                    }}
-                  />
-                }
-              >
-                Previous
-              </ButtonComponent>
-            ) : null}
-
-            {currentStep < 3 && ( // 3 is index of Confirmation step
-              <ButtonComponent
-                type={"submit"}
-                onClick={() => setCurrentStep(currentStep + 1)}
-                disabled={
-                  (currentStep === 0 && (selectDataTable.length === 0 || !forceObj.remark)) || // Step 1: Selection + Remark
-                  (currentStep === 1 && !forceObj.approvalHierarchy) // Step 2: Approval
-                  // Step 3 (Attachment) is optional? Usually yes, or check listDataAttachment.length === 0
-                }
-              >
-                <div style={{ textAlign: "center" }}>
-                  <span>Next</span>
-                  <RightOutlined
-                    style={{
-                      color: "#fff",
-                      fontSize: 15, // Ubah ukuran ikon sesuai kebutuhan
-                      marginLeft: 10,
-                    }}
-                  />
-                </div>
-              </ButtonComponent>
-            )}
-            {currentStep === 3 && (
-              <ButtonComponent
-                type={"submit"}
-                htmlType={"submit"}
-                onClick={handleSaveDataTable}
-              >
-                Confirm
-              </ButtonComponent>
-            )}
-          </div>
-        }
+        footer={null}
       >
         <div className="w-full gap-5">
-          <div className="overflow-x-scroll scrollStepsCstm gap-5">
-            <Steps
-              current={currentStep}
-              items={[
-                { title: "Allocation Information" },
-                { title: "Approval Information" },
-                { title: "Attachment Information" },
-                { title: "Confirmation" }
-              ]}
-              labelPlacement="vertical"
-            />
-          </div>
+          <FormStepper
+            steps={steps}
+            current={currentStep}
+            onPrev={handlePrev}
+            onNext={handleNext}
+          />
 
-          <Form
-            layout="vertical"
-            className="mt-3"
-          >
+          <Form layout="vertical" className="mt-3" form={modalForm}>
             <Spin spinning={loading}>
               {/* Step 1: Allocation Information */}
-              <div style={{ display: currentStep === 0 ? 'block' : 'none' }}>
+              <div style={{ display: currentStep === 0 ? "block" : "none" }}>
                 <p className="text-primary text-xl font-semibold uppercase py-[20px] gap-5">
-                  RECEIPT ON BANK STATEMENT
+                  ALLOCATION LIST
                 </p>
                 <div className="my-5">
-                  <TablePagination
+                  <TableRBI
                     columns={columnRecommendation(
                       pageChoose,
                       pageSizeChoose,
                       searchInput,
                       searchedColumnChoose,
                       searchTextChoose,
-                      handleSearchModal
+                      handleSearchModal,
+                      undefined,
+                      handleEditAmount
                     )}
                     current={pageChoose}
                     pageSize={pageSizeChoose}
@@ -640,7 +710,7 @@ const AllocationSection = ({
                       searchTextChoose,
                       pageChoose,
                       pageSizeChoose,
-                      typeColumn
+                      typeColumn,
                     )}
                     totalData={updatePagination(
                       dataRecomendation,
@@ -649,18 +719,19 @@ const AllocationSection = ({
                       searchTextChoose,
                       pageChoose,
                       pageSizeChoose,
-                      typeColumn
+                      typeColumn,
                     )}
-                    tableScrolled={{ x: 3500, y: 500 }}
+                    tableScrolled={{ x: 1800, y: 500 }}
                     onChange={handleChange}
                     rowSelection={rowSelection}
                     onSizeChanger={handleChange}
+                    actionFix={true}
                   />
                 </div>
                 {totalAllocationAmount > parsedAmount && (
                   <span className="text-red-800">
-                    Total amount of selected item has been exceeded Total available
-                    amount. Please select other item.
+                    Total amount of selected item has been exceeded Total
+                    available amount. Please select other item.
                   </span>
                 )}
                 <div className="mt-4">
@@ -668,7 +739,7 @@ const AllocationSection = ({
                     label={"Remark"}
                     required
                     validateStatus={!forceObj.remark ? "error" : "success"}
-                    help={!forceObj.remark ? "Remark is required" : null}
+                    help={!forceObj.remark ? "Please input your Remark!" : null}
                   >
                     <InputComponent
                       rows={5}
@@ -681,7 +752,7 @@ const AllocationSection = ({
               </div>
 
               {/* Step 2: Approval Information */}
-              <div style={{ display: currentStep === 1 ? 'block' : 'none' }}>
+              <div style={{ display: currentStep === 1 ? "block" : "none" }}>
                 <div className="my-5 gap-5">
                   <ApprovalSectionForm
                     dataTable={appHierDataDetail}
@@ -695,7 +766,7 @@ const AllocationSection = ({
               </div>
 
               {/* Step 3: Attachment Information */}
-              <div style={{ display: currentStep === 2 ? 'block' : 'none' }}>
+              <div style={{ display: currentStep === 2 ? "block" : "none" }}>
                 <div className="my-5 gap-5">
                   <AttachmentComponent
                     data={listDataAttachment}
@@ -711,42 +782,48 @@ const AllocationSection = ({
               </div>
 
               {/* Step 4: Confirmation */}
-              <div style={{ display: currentStep === 3 ? 'block' : 'none' }}>
+              <div style={{ display: currentStep === 3 ? "block" : "none" }}>
                 <div className="flex flex-col gap-4">
-                  <RadioTabs
-                    data={[
-                      { value: "Allocation" },
-                      { value: "Approval" },
-                      { value: "Attachment" },
+                  <Tabs
+                    activeKey={confirmationTab || "Allocation"}
+                    onChange={(key) => setConfirmationTab(key)}
+                    items={[
+                      { label: "Allocation", key: "Allocation" },
+                      { label: "Approval", key: "Approval" },
+                      { label: "Attachment", key: "Attachment" },
                     ]}
-                    onChange={(e) => setConfirmationTab(e.target.value)}
-                    currentPosition={confirmationTab || "Allocation"}
                   />
                   <div className="flex flex-col gap-4">
-                    <div className="text-primary text-sm font-bold uppercase">
-                      {`${confirmationTab || "Allocation"} INFORMATION`}
-                    </div>
+
 
                     {/* Allocation Info Tab */}
                     {(confirmationTab === "Allocation" || !confirmationTab) && (
                       <>
-                        <TablePagination
+                        <TableRBI
                           columns={columnRecommendation(
                             pageChoose,
                             pageSizeChoose,
                             searchInput,
                             searchedColumnChoose,
                             searchTextChoose,
-                            handleSearchModal
+                            handleSearchModal,
+                            undefined,
+                            handleEditAmount,
+                            true
                           )}
                           dataSource={selectDataTable}
                           usePagination={false}
-                          tableScrolled={{ x: 3500, y: 300 }}
+                          tableScrolled={{ x: 1800, y: 300 }}
                         />
-                        <DetailText label={"Remark"}>{forceObj?.remark}</DetailText>
+                        {/* <DetailText label={"Remark"}>
+                          {forceObj?.remark}
+                        </DetailText>
                         <div className="mt-2">
-                          <strong>Total Amount:</strong> {totalAllocationAmount?.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-                        </div>
+                          <strong>Total Amount:</strong>{" "}
+                          {totalAllocationAmount?.toLocaleString("en-US", {
+                            minimumFractionDigits: 2,
+                          })}
+                        </div> */}
                       </>
                     )}
 
@@ -757,7 +834,7 @@ const AllocationSection = ({
                         disableSelect={true}
                         approvalName={
                           (appHierOptions || []).filter(
-                            (data) => data.value === forceObj.approvalHierarchy
+                            (data) => data.value === forceObj.approvalHierarchy,
                           )?.[0]?.name || ""
                         }
                         dataTable={appHierDataDetail}
@@ -767,17 +844,88 @@ const AllocationSection = ({
 
                     {/* Attachment Info Tab */}
                     {confirmationTab === "Attachment" && (
-                      <AttachmentSectionForm type={"preview"} data={listDataAttachment} />
+                      <AttachmentSectionForm
+                        type={"preview"}
+                        data={listDataAttachment}
+                      />
                     )}
                   </div>
                 </div>
               </div>
-
             </Spin>
           </Form>
         </div>
-      </ModalCustom >
-    </div >
+
+        {/* Custom Footer without Clear Data and Save as Draft */}
+        <div className="bg-white rounded-lg border border-[#D6E1F0] p-4 mt-6">
+          <div className="flex w-full justify-between items-center">
+            <ButtonComponent
+              onClick={handleCancel}
+              className="!border-[#0075BF] !text-[#0075BF]"
+            >
+              Cancel
+            </ButtonComponent>
+            <div className="flex items-center gap-3">
+              <Button
+                disabled={currentStep === 0}
+                onClick={handlePrev}
+                style={{
+                  backgroundColor: currentStep === 0 ? "#E0E3E9" : "#fff",
+                  borderColor: currentStep === 0 ? "#E0E3E9" : "#DADDE5",
+                  color: currentStep === 0 ? "#BFC4D0" : "#4B465C",
+                  borderRadius: "6px",
+                  height: "32px",
+                  fontSize: "12px",
+                  border: "1px solid #DADDE5",
+                }}
+              >
+                Previous
+              </Button>
+              {currentStep < steps.length - 1 ? (
+                <Button
+                  key="btn-next"
+                  htmlType="button"
+                  onClick={handleNext}
+                  type="primary"
+                  disabled={
+                    (currentStep === 0 &&
+                      (selectDataTable.length === 0 || !forceObj.remark)) ||
+                    (currentStep === 1 && !forceObj.approvalHierarchy)
+                  }
+                  style={{
+                    backgroundColor: "#0075BF",
+                    borderColor: "#0075BF",
+                    color: "#fff",
+                    borderRadius: "6px",
+                    height: "32px",
+                    fontSize: "12px",
+                  }}
+                >
+                  Next
+                </Button>
+              ) : (
+                <Button
+                  key="btn-confirm"
+                  htmlType="button"
+                  onClick={handleSaveDataTable}
+                  type="primary"
+                  style={{
+                    backgroundColor: "#28a745",
+                    borderColor: "#28a745",
+                    color: "#fff",
+                    borderRadius: "6px",
+                    height: "32px",
+                    fontSize: "12px",
+                  }}
+                >
+                  Confirm
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+      </ModalCustom>
+    </div>
   );
 };
 

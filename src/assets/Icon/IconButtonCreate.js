@@ -5,12 +5,14 @@ const SVG = ({
   width = "100%",
   className = "",
   onClick = () => {},
+  ...otherProps
 }) => (
   <svg
+    {...otherProps}
     width={width}
     style={style}
     height={width}
-    className={`cursor-pointer${className}`}
+    className={`cursor-pointer ${className}`}
     onClick={onClick}
     viewBox="0 0 24 24"
     fill="none"
@@ -18,14 +20,14 @@ const SVG = ({
   >
     <path
       d="M12 5V19"
-      stroke="white"
+      stroke="#ffffff"
       strokeWidth="1.75"
       strokeLinecap="round"
       strokeLinejoin="round"
     />
     <path
       d="M12 5V19"
-      stroke="white"
+      stroke="#ffffff"
       strokeOpacity="0.2"
       strokeWidth="1.75"
       strokeLinecap="round"
@@ -33,14 +35,14 @@ const SVG = ({
     />
     <path
       d="M5 12H19"
-      stroke="white"
+      stroke="#ffffff"
       strokeWidth="1.75"
       strokeLinecap="round"
       strokeLinejoin="round"
     />
     <path
       d="M5 12H19"
-      stroke="white"
+      stroke="#ffffff"
       strokeOpacity="0.2"
       strokeWidth="1.75"
       strokeLinecap="round"

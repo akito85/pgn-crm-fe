@@ -1,35 +1,73 @@
-import React, { Fragment } from "react";
-import BaseContainer from "../../../../../../components/BaseContainer";
+import { memo, useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useLocation } from "react-router-dom";
+import { Spin } from "antd";
+
 import ServiceRequestTable from "./ServiceRequestTable";
+import ServiceRequestApprovalModal from "./ServiceRequestApprovalModal";
+import NxCardContainer from "../../../../../../components/Nx/NxCardContainer";
+import NxBaseContainer from "../../../../../../components/Nx/NxBaseContainer";
+import NotFound from "../../../../../NotFound";
+import { getGrantedAccessAccount } from "../../../../../../redux/slices/account_management/accountManagement";
 
-const ServiceRequest = () => {
-  // const dispatch = useDispatch();
+const ServiceRequest = ({ idAccount, idCustomer, type }) => {
+  const dispatch = useDispatch();
+  const location = useLocation();
 
-  // useEffect(() => {
-  //   dispatch(getAllTosPaginate({ page, pageSize }));
-  // }, [dispatch, page, pageSize]);
-  // const handleDetail = (id) => {
-  //   setModalDetail(true);
-  //   dispatch(getTosDetail(id));
-  // };
+  const { access_account } = useSelector((state) => state.accountManagement);
 
-  //   const handleOk = () => {
-  //     dispatch(inactiveMenu(id))
-  //     dispatch(getAllTosNewsPaginate({page, pageSize}))
-  //     setModalInactive(false);
-  // };
+  const [isAccessChecked, setIsAccessChecked] = useState(false);
+  const [refreshSignal, setRefreshSignal] = useState(0);
+  const [showApprovalModal, setShowApprovalModal] = useState(false);
+
+  const isAccessGranted = access_account?.isGranted === true;
+
+  const triggerRefresh = () => setRefreshSignal((prev) => prev + 1);
+
+  useEffect(() => {
+    setIsAccessChecked(false);
+    const path = location?.pathname.includes("account-standard")
+      ? "/account-management/account-standard/service-request"
+      : "/account-management/account-onetime/service-request";
+
+    dispatch(getGrantedAccessAccount(path))
+      .unwrap()
+      .then(() => setIsAccessChecked(true))
+      .catch(() => setIsAccessChecked(true));
+  }, [dispatch, location?.pathname]);
+
+  if (!isAccessChecked) {
+    return (
+      <div className="w-full flex justify-center py-10">
+        <Spin tip="Checking access..." />
+      </div>
+    );
+  }
+
+  if (!isAccessGranted) {
+    return <NotFound type={"unauthorized"} />;
+  }
 
   return (
-    <Fragment>
-      {/* <Spin spinning={loading} className={"w-full top-20"} tip={"Loading..."}> */}
-      <BaseContainer header={"SERVICE REQUEST LIST"}>
-        <div className={"w-full"}>
-          <ServiceRequestTable />
-        </div>
-      </BaseContainer>
-      {/* </Spin> */}
-    </Fragment>
+    <>
+      <NxCardContainer header={"SERVICE REQUEST"}>
+        <NxBaseContainer border>
+          <ServiceRequestTable
+            idAccount={idAccount}
+            idCustomer={idCustomer}
+            handleApproval={setShowApprovalModal}
+            refreshSignal={refreshSignal}
+          />
+        </NxBaseContainer>
+      </NxCardContainer>
+      <ServiceRequestApprovalModal
+        accountId={idAccount}
+        isOpen={showApprovalModal}
+        handleCancel={() => setShowApprovalModal(false)}
+        afterFinish={triggerRefresh}
+      />
+    </>
   );
 };
 
-export default ServiceRequest;
+export default memo(ServiceRequest);

@@ -1,6 +1,5 @@
 import React, { useEffect } from "react";
 import BreadCrumb from "../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { useSelector, useDispatch } from "react-redux";
 import { Spin } from "antd";
 import ButtonComponent from "../../../../components/ButtonComponent";
@@ -83,68 +82,66 @@ const CustomerDetail = () => {
   ];
 
   return (
-    <LayoutMenu>
-      <Spin spinning={isLoading} className={"w-full top-20"}>
-        <BreadCrumb routes={routes} />
-        <div className="w-full">
-          <CustomerHeaderDetail
-            id={id}
-            data_detail={data_customerDetail}
-            dispatch={dispatch}
-            access_account={access_account}
-          />
-        </div>
+    <Spin spinning={isLoading} className={"w-full top-20"}>
+      <BreadCrumb routes={routes} />
+      <div className="w-full">
+        <CustomerHeaderDetail
+          id={id}
+          data_detail={data_customerDetail}
+          dispatch={dispatch}
+          access_account={access_account}
+        />
+      </div>
 
-        <BaseContainer header={"HISTORY LOG INFORMATION"}>
-          <div className="w-full grid grid-cols-5 gap-5">
-            <DetailText label="Record ID">
-              {data_customerDetail?.customerId}
-            </DetailText>
-            <DetailText label="Created Date">
-              {moment(data_customerDetail?.createdDate).format(dateFormatting.dateTime)}
-            </DetailText>
-            <DetailText label="Created By">
-              {data_customerDetail?.createdBy}
-            </DetailText>
-            <DetailText label="Update Date">
-              {renderDate(data_customerDetail?.updatedDate)}
-            </DetailText>
-            <DetailText label="Updated By">
-              {data_customerDetail?.updatedBy}
-            </DetailText>
-          </div>
-        </BaseContainer>
-        <div className="my-5">
-          <CustomerDetailInformation
-            dispatch={dispatch}
-            id={id}
-            section={typeDetailSection}
-            options={tabs}
-            handleChangeOption={handleDetailSection}
-          />
+      <BaseContainer header={"HISTORY LOG INFORMATION"}>
+        <div className="w-full grid grid-cols-5 gap-5">
+          <DetailText label="Record ID">
+            {data_customerDetail?.customerId}
+          </DetailText>
+          <DetailText label="Created Date">
+            {moment(data_customerDetail?.createdDate).format(dateFormatting.dateTime)}
+          </DetailText>
+          <DetailText label="Created By">
+            {data_customerDetail?.createdBy}
+          </DetailText>
+          <DetailText label="Update Date">
+            {renderDate(data_customerDetail?.updatedDate)}
+          </DetailText>
+          <DetailText label="Updated By">
+            {data_customerDetail?.updatedBy}
+          </DetailText>
         </div>
+      </BaseContainer>
+      <div className="my-5">
+        <CustomerDetailInformation
+          dispatch={dispatch}
+          id={id}
+          section={typeDetailSection}
+          options={tabs}
+          handleChangeOption={handleDetailSection}
+        />
+      </div>
 
-        <div>
-          <div className="mb-5 flex">
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => navigate(-1)}
-              icon={
-                <LeftOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 24,
-                    justifyItems: "center",
-                  }}
-                />
-              }
-            >
-              Back
-            </ButtonComponent>
-          </div>
+      <div>
+        <div className="mb-5 flex">
+          <ButtonComponent
+            type={"submit"}
+            onClick={() => navigate(-1)}
+            icon={
+              <LeftOutlined
+                style={{
+                  color: "#fff",
+                  fontSize: 24,
+                  justifyItems: "center",
+                }}
+              />
+            }
+          >
+            Back
+          </ButtonComponent>
         </div>
-      </Spin>
-    </LayoutMenu>
+      </div>
+    </Spin>
   );
 };
 

@@ -10,7 +10,6 @@ import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import RadioTabs from "../../../../../components/RadioTabs";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import { dateFormatting } from "../../../../../utils";
 import SVGIcon from "../../../../../assets/Icon/index";
@@ -306,7 +305,11 @@ const TransactionCalenderForm = (props) => {
   const routes = [
     {
       path: "",
-      breadcrumbName: "Receipt & Collection",
+      breadcrumbName: "System Setup",
+    },
+    {
+      path: "",
+      breadcrumbName: "Master Data",
     },
     {
       path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_TRANSACTION_CALENDER,
@@ -570,7 +573,7 @@ console.log(formValue, 'form Value');
     } else if (hasOverlapping) {
       const errorBody = {
         title: "Failed",
-        description: `You can't add Criteria. Start date and enda date can't be overlap`,
+        description: `You can't add Criteria. Start date and end date can't be overlap`,
       };
       dispatch(showModalError(errorBody));
     }
@@ -788,7 +791,7 @@ console.log(formValue, 'form Value');
   };
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
       <Spin spinning={loadingForm}>
         <RadioTabs
@@ -945,7 +948,7 @@ console.log(formValue, 'form Value');
           handleOk={() => navigate(-1)}
         />
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

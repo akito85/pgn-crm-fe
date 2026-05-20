@@ -1,25 +1,25 @@
-import { useEffect,  useState, useRef } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 
-import { Steps, Button, message, Form } from "antd";
-import { LeftCircleOutlined, RightCircleOutlined, RightOutlined, WarningOutlined } from "@ant-design/icons";
+import { Button, Form, Spin } from "antd";
+import { WarningOutlined } from "@ant-design/icons";
 
-import LayoutMenu from "../../../../../../../components/SidebarMenu/LayoutMenu";
-import BreadCrumb from "../../../../../../../components/BreadCrumb";
-// import StepContents from "./StepContents";
+import StepContents from "./StepContents";
 import SVGIcon from "../../../../../../../assets/Icon/index";
-import ButtonComponent from "../../../../../../../components/ButtonComponent";
-
-// you fucking nasty using bulky moment lazy as fuck
-import moment from "moment";
+import { NxFormStepper } from "../../../../../../../components/Nx/NxFormStepNavigation";
+import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
+import NxApprovalInput from "../../../../../../../components/Nx/NxApprovalInput";
+import NxAttachmentInput from "../../../../../../../components/Nx/NxAttachmentInput";
+import NxDate from "../../../../../../../components/Nx/NxDatePicker";
+import HeaderDetail from "../../../HeaderDetail";
+import { configApp } from "../../../../../../../constants/configApp";
 
 import {
   ModalConfirm,
   ModalError,
-  ModalSuccess,
 } from "../../../../../../../components/Modal/ModalPopUp";
-import { bytesConverter } from "../../../../../../../utils/bytesConverter";
+import ConfirmationModal from "./ConfirmationModal/ConfirmationModal";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
 
 import {
@@ -30,19 +30,59 @@ import {
   getGlobalMartialStatus,
   getGlobalSex,
   getListCategoryFile,
-  updateCustomer,
+  updateCustomer
 } from "../../../../../../../redux/slices/account_management/Customer/customerAccount";
+
+import { getDetailContact } from "../../../../../../../redux/slices/account_management/MasterData/contact_slice";
+
+import {
+  getListDetailAccountContact,
+  getDetailAccountContact
+} from "../../../../../../../redux/slices/account_management/detailAccount/accountContactSlice";
+
+import {
+  getListDetailAccountAddress,
+  getListChooseAddress
+} from "../../../../../../../redux/slices/account_management/detailAccount/accountAddressSlice";
+
 import {
   getAccountStandardDetail,
-  getAccountOneTimeDetail,
+  getAccountOneTimeDetail
 } from "../../../../../../../redux/slices/account_management/accountManagement";
 
-const CreateCustomerServiceRequest = ({ type }) => {
-  const containerRef = useRef(null);
-  const [current, setCurrent] = useState(0);
-  const [scrollLeft, setScrollLeft] = useState(0);
+import {
+  getSrById,
+  getServiceRequest,
+  getServiceRequestDraft,
+  getSrApprovalHierarchies,
+  getSrApprovalHierarchy,
+  getSrTypes,
+  getSrCategories,
+  getSrSubcategories,
+  getSrChannels,
+  getSrPriorities,
+  getSrSources,
+  getSrDataRequirementTypes,
+  getSrPrerequisiteTypes,
+  getSrAttachmentCategories,
+  createServiceRequest,
+  updateServiceRequest
+} from "../../../../../../../redux/slices/account_management/detailAccount/ServiceRequestSlice";
+import { validateCreateUpdate } from "../../../../../../../redux/slices/general_slice";
+import accountManagementService from "../../../../../../../redux/services/account_management/accountManagementService";
+import moment from "moment";
+import NxBreadCrumb from "../../../../../../../components/Nx/NxBreadCrumb";
+
+const CreateCustomerServiceRequest = (props) => {
+  const location = useLocation();
+
+  // Restore step from location state if returning from prerequisite create
+  const [current, setCurrent] = useState(location?.state?.returnToStep || 0);
+  const { type } = props;
+  const isUpdate = type === "update";
 
   const dispatch = useDispatch();
+
   const {
     data_customerDetailAttachment,
     data_customerDetail,
@@ -50,23 +90,88 @@ const CreateCustomerServiceRequest = ({ type }) => {
     data_globalIdentificationType,
     data_globalSex,
     data_globalMartialStatus,
-    loading,
+    loading
   } = useSelector((state) => state.customerAccount);
 
+  const { data_accountDetail, loading: loadingAccount } = useSelector(
+    (state) => state.accountManagement
+  );
+
   const {
-    data_accountDetail,
-    loading: loadingAccount,
-  } = useSelector((state) => state.accountManagement);
+    list_srTypes,
+    list_srCategories,
+    list_srSubcategories,
+    list_srPriorities,
+    list_srChannels,
+    list_srSources,
+    list_srApprovalHierarchy,
+    detail_srApprovalHierarchy,
+    list_srPrerequisiteTypes,
+    list_srDataRequirementTypes,
+    list_srAttachmentCategories,
+    detail_serviceRequest: serviceRequestDetail,
+    detailDraft_serviceRequest: serviceRequestDetailDraft,
+    loading_createUpdateSr
+  } = useSelector((state) => state.serviceRequest);
+
+  // Map state keys to the dropdowns structure expected by child components
+  const dropdowns = {
+    serviceRequestTypes: list_srTypes,
+    serviceRequestCategories: list_srCategories,
+    serviceRequestSubcategories: list_srSubcategories,
+    serviceRequestPriorities: list_srPriorities,
+    serviceRequestChannels: list_srChannels,
+    serviceRequestSources: list_srSources,
+    serviceRequestPrerequisites: list_srPrerequisiteTypes,
+    serviceRequestDataRequirements: list_srDataRequirementTypes
+  };
+
+  const { data_detail } = useSelector((state) => state.accountContact); // Add this selector
+
+  const {
+    data: data_account_address,
+    data_country,
+    data_province,
+    data_city,
+    data_district,
+    data_subdistrict,
+    data_postalcode,
+    data_type,
+    data_business_purpose
+  } = useSelector((state) => state.accountAddress);
+
+  const { idAccount, idCustomer, accountType, id } = useMemo(() => {
+    // Prioritas 1: Ambil dari location.state (navigasi normal)
+    if (location.state) {
+      return {
+        idAccount: location.state.idAccount,
+        idCustomer: location.state.idCustomer,
+        accountType: location.state.type,
+        id: location.state.id || null
+      };
+    }
+    // Prioritas 2: Fallback ke sessionStorage (setelah reload)
+    const persistedData = sessionStorage.getItem("serviceRequestCreation");
+    if (persistedData) {
+      const parsedData = JSON.parse(persistedData);
+      return {
+        idAccount: parsedData.idAccount,
+        idCustomer: parsedData.idCustomer,
+        accountType: parsedData.type,
+        id: parsedData.id || null
+      };
+    }
+    // Default jika tidak ada data sama sekali
+    return { idAccount: null, idCustomer: null, accountType: null, id: null };
+  }, [location.state]);
 
   //declare
-  const location = useLocation();
   const [formCreate] = Form.useForm();
-  const id = location?.state?.id;
-  const idAccount = location?.state?.idAccount;
-  const idCustomer = location?.state?.idCustomer;
-  const accountType = location?.state?.type; // "standard" or "onetime"
-  // const id = 7;
-    
+  // const id = location?.state?.id;
+  // const idAccount = location?.state?.idAccount;
+  // const idCustomer = location?.state?.idCustomer;
+  // const accountType = location?.state?.type; // "standard" or "onetime"
+
   //state
   const [dataAttachment, setDataAttachment] = useState([]);
   const [data, setData] = useState({});
@@ -74,6 +179,7 @@ const CreateCustomerServiceRequest = ({ type }) => {
   const [modalSuccess, setModalSuccess] = useState(false);
   const [loadingForm, setLoadingForm] = useState(false);
   const [modalConfirm, setModalConfirm] = useState(false);
+  const [confirmationType, setConfirmationType] = useState("submit");
   const [dataConfirm, setDataConfirm] = useState({});
   const [btnConfirm, setBtnConfirm] = useState(false);
   const [modalBack, setModalBack] = useState(false);
@@ -82,34 +188,43 @@ const CreateCustomerServiceRequest = ({ type }) => {
   const [bodyError, setBodyError] = useState({});
 
   const [customerType, setCustomerType] = useState(0);
+  const [identificationDdlValue, setIdentificationDdlValue] = useState([]);
+  const [firstName, setFirstName] = useState("");
+  const [middleName, setMiddleName] = useState("");
+  const [lastName, setLastName] = useState("");
+
+  // Service Request step state objects (following StandardForm pattern)
+  const [srObj, setSrObj] = useState({}); // Service Request information
+  const [contactsData, setContactsData] = useState([]); // Contacts table
+  const [prerequisitesData, setPrerequisitesData] = useState([]); // Prerequisites table
+  const [attachmentDataSource, setAttachmentDataSource] = useState([]);
+  const [deletedAttachments, setDeletedAttachments] = useState([]);
 
   const isLoading = loading || loadingForm || loadingAccount;
 
- 
-  // const { InformationForm, AttachmentForm, ApprovalForm, ContactForm, PreRequisiteForm } = StepContents;
-  const { InformationForm, AttachmentForm, ApprovalForm, ContactForm, PreRequisiteForm } = {};
+  const { InformationForm, ContactForm, PreRequisiteForm } = StepContents;
 
   const routes = [
     {
       path: "",
-      breadcrumbName: "Account",
+      breadcrumbName: "Account"
     },
     {
       path: ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_STANDARD,
-      breadcrumbName: "Account - Standard",
+      breadcrumbName: "Account - Standard"
     },
     {
       path: ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD,
-      breadcrumbName: "Detail Account",
+      breadcrumbName: "Detail Account"
     },
     {
-      path:ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_SERVICE_REQUEST,
-      breadcrumbName: "Service Requests",
+      path: ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_SERVICE_REQUEST,
+      breadcrumbName: "Service Requests"
     },
     {
       path: "",
-      breadcrumbName: "Create",
-    },
+      breadcrumbName: "Create"
+    }
   ];
   // Fetch Account Standard/OneTime Detail
   useEffect(() => {
@@ -123,17 +238,99 @@ const CreateCustomerServiceRequest = ({ type }) => {
   }, [dispatch, idAccount, idCustomer, accountType]);
 
   useEffect(() => {
-    if (id) {
-      dispatch(getCustomerDetail(id));
+    if (idCustomer) {
+      dispatch(getCustomerDetail(idCustomer));
+      // dispatch(getDetailContact(idCustomer));
     }
-  }, [dispatch, id]);
+  }, [dispatch, idCustomer]);
+
+  useEffect(() => {
+    dispatch(
+      getListDetailAccountContact({
+        id: idAccount,
+        page: 1,
+        pageSize: 111,
+        sort: "createdDate~desc"
+      })
+    );
+
+    dispatch(getDetailAccountContact(idCustomer));
+    dispatch(
+      getListDetailAccountAddress({
+        id: idAccount,
+        search: "",
+        sort: "createdDate~desc",
+        page: 1,
+        pageSize: 999
+      })
+    );
+    // dispatch(getSrById(idAccount));
+  }, [dispatch, idAccount]);
 
   useEffect(() => {
     dispatch(getGlobalCustomerType());
     dispatch(getGlobalIdentificationType());
     dispatch(getGlobalSex());
     dispatch(getGlobalMartialStatus());
+    dispatch(getSrTypes());
+    dispatch(getSrSubcategories());
+    dispatch(getSrCategories());
+    dispatch(getSrPriorities());
+    dispatch(getSrChannels());
+    dispatch(getSrSources());
+    dispatch(getSrPrerequisiteTypes());
+    dispatch(getSrDataRequirementTypes());
+    dispatch(getSrApprovalHierarchies());
   }, [dispatch]);
+
+  // Load detail + detail-draft when in update mode
+  useEffect(() => {
+    if (isUpdate && id && idAccount) {
+      dispatch(getServiceRequest({ accountId: idAccount, id }));
+      dispatch(getServiceRequestDraft({ accountId: idAccount, id }));
+    }
+  }, [dispatch, isUpdate, id, idAccount]);
+
+  // Populate form when update detail is loaded
+  useEffect(() => {
+    if (!isUpdate) return;
+
+    const status = serviceRequestDetail?.status || "";
+    const statusApproval = serviceRequestDetail?.statusApproval || "";
+    const isActive = status.toUpperCase() === "ACTIVE";
+    const isDraftApproval = statusApproval.toUpperCase() === "DRAFT";
+    const isRejectApproval = statusApproval.toUpperCase() === "REJECT";
+
+    // Use draft data if ACTIVE record has pending changes
+    const detail =
+      isActive && (isDraftApproval || isRejectApproval)
+        ? serviceRequestDetailDraft
+        : serviceRequestDetail;
+
+    if (!detail) return;
+
+    formCreate.setFieldsValue({
+      type: detail.requestType || detail.type,
+      category: detail.requestCategory || detail.category,
+      subCategory: detail.requestSubCategory || detail.subCategory,
+      priority: detail.priority,
+      description: detail.description,
+      requestDate: detail.requestedDate ? moment(detail.requestedDate) : null,
+      serviceRequestReference: detail.reference,
+      appHierId: detail.apphierId,
+      channel: detail.channel,
+      requestSource: detail.source
+    });
+
+    if (detail.apphierId) {
+      dispatch(getSrApprovalHierarchy(detail.apphierId));
+    }
+  }, [isUpdate, serviceRequestDetail, serviceRequestDetailDraft]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleSelectHierarchy = (value, label) => {
+    formCreate.setFieldsValue({ appHierId: value, appHierName: label });
+    if (value) dispatch(getSrApprovalHierarchy(value));
+  };
 
   const handleSetData = (e) => {
     const temp = (e?.customerName || "").split(" ");
@@ -150,8 +347,11 @@ const CreateCustomerServiceRequest = ({ type }) => {
       middleName: (temp[1] || "").toUpperCase(),
       lastName: (temp[2] || "").toUpperCase(),
       customerName: (e?.customerName || "").toUpperCase(),
-      description: e?.description,
+      description: e?.description
     });
+    setFirstName((temp[0] || "").toUpperCase());
+    setMiddleName((temp[1] || "").toUpperCase());
+    setLastName((temp[2] || "").toUpperCase());
   };
 
   useEffect(() => {
@@ -162,183 +362,515 @@ const CreateCustomerServiceRequest = ({ type }) => {
   }, [data_customerDetail]);
 
   useEffect(() => {
+    if (customerType === 58) {
+      setIdentificationDdlValue(
+        data_globalIdentificationType?.filter((item) => item?.id !== 1123)
+      );
+    } else {
+      setIdentificationDdlValue(data_globalIdentificationType);
+    }
+  }, [customerType, data_globalIdentificationType]);
+
+  useEffect(() => {
     formCreate.setFieldsValue({
-      ...data,
+      customerName: `${firstName}${middleName ? ` ${middleName}` : ""}${lastName ? ` ${lastName}` : ""}`
     });
-  }, [data, formCreate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [firstName, middleName, lastName]);
+
+  useEffect(() => {
+    formCreate.setFieldsValue({
+      ...data
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data]);
+
+  // Restore wizard form data from sessionStorage when returning from prerequisite create page
+  useEffect(() => {
+    if (location?.state?.returnToStep !== undefined) {
+      try {
+        const saved = sessionStorage.getItem("srWizardFormData");
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed.requestDate) {
+            parsed.requestDate = moment(parsed.requestDate);
+          }
+          formCreate.setFieldsValue(parsed);
+          sessionStorage.removeItem("srWizardFormData");
+        }
+      } catch (_) {}
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Populate form with Account Standard/OneTime information
   useEffect(() => {
     if (data_accountDetail?.accountInformation) {
       const accountInfo = data_accountDetail.accountInformation;
+      const accountSums = data_accountDetail.accountSummary;
+
+      const premiseAddress = data_account_address?.result?.find(
+        (item) => item?.premise?.bool === true
+      );
+
       formCreate.setFieldsValue({
-        account: accountInfo?.accountId || "",
-        accountType: accountInfo?.accountType || "",
-        longitude: accountInfo?.longitude || "",
-        accountSegment: accountInfo?.accountSegment || "",
-        city: accountInfo?.city || "",
-        accountCostCenter: accountInfo?.costCenter || "",
-        subdistrict: accountInfo?.subDistrict || "",
-        meterReadingCode: accountInfo?.mrc || "",
-        district: accountInfo?.district || "",
-        accountSOR: accountInfo?.sor || "",
-        premiseAddress: accountInfo?.premiseAddress || "",
-        latitude: accountInfo?.latitude || "",
         accountGroupType: accountInfo?.accountGroupType || "",
-        country: accountInfo?.country || "",
+        srFormAccountId: accountInfo?.accountId || "",
+        srFormAccountSor: accountInfo?.sor || "",
+        srFormMeterReadingCode: accountSums?.meterReadingCodes || "",
+        srFormAccountSegment: accountInfo?.segment || "",
+        srFormAccountGroupType: accountInfo?.accountGroupType || "",
+        srFormAccountType: accountInfo?.accountType || "",
+        srFormPremiseAddress: premiseAddress?.fullAddress || "",
+        srFormDistrict: premiseAddress?.district?.name || "",
+        srFormSubdistrict: premiseAddress?.subDistrict?.name || "",
+        srFormCity: premiseAddress?.city?.name || "",
+        srFormCountry: premiseAddress?.country?.name || "",
+        srFormLatitude: premiseAddress?.latitude || "",
+        srFormLongitude: premiseAddress?.longitude || ""
       });
     }
-    console.log(data_accountDetail.accountInformation)
-  }, [data_accountDetail, formCreate]);
 
-  const urlLink = (itemId) => `/v1/dbs/api/account-info/download-attachment/${itemId}` 
-  
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    data_account_address,
+    data_accountDetail,
+    data_detail,
+    data_district,
+    data_subdistrict,
+    data_city,
+    data_country
+  ]);
+
+  const handleChangeName = (e, type) => {
+    switch (type) {
+      case "firstName":
+        setFirstName(e.target.value);
+        break;
+      case "middleName":
+        setMiddleName(e.target.value);
+        break;
+      case "lastName":
+        setLastName(e.target.value);
+        break;
+      default:
+        break;
+    }
+  };
+
+  // const urlLink = (itemId) => `/v1/dbs/api/account-info/download-attachment/${itemId}`
+
   const steps = [
     {
       title: "Service Request",
-      content: <InformationForm />,
+      content: (
+        <InformationForm
+          form={formCreate}
+          account={data_accountDetail}
+          customer={data_customerDetail}
+          dropdowns={dropdowns}
+        />
+      ),
       disabled: false
     },
     {
       title: "Contact",
-      content: <ContactForm />,
-      disabled: false
-    },    
-    {
-      title: "Pre-Requisite",
-      content: <PreRequisiteForm />,
+      content: (
+        <ContactForm
+          form={formCreate}
+          idAccount={idAccount}
+          idCustomer={idCustomer}
+          accountType={accountType}
+        />
+      ),
       disabled: false
     },
     {
-      title: "Attachment",
-      content: <AttachmentForm />,
+      title: "Pre-Requisite",
+      content: (
+        <PreRequisiteForm
+          form={formCreate}
+          account={data_accountDetail}
+          customer={data_customerDetail}
+          dropdowns={dropdowns}
+          currentStep={current}
+        />
+      ),
       disabled: false
     },
     {
       title: "Approval",
-      content: <ApprovalForm />,
+      content: (
+        <NxApprovalInput
+          form={formCreate}
+          options={list_srApprovalHierarchy}
+          hierarchyDetails={detail_srApprovalHierarchy}
+          handleSelectHierarchy={handleSelectHierarchy}
+        />
+      ),
+      disabled: false
+    },
+    {
+      title: "Attachment",
+      content: (
+        <NxAttachmentInput
+          data={attachmentDataSource}
+          updateData={setAttachmentDataSource}
+          setDeleted={setDeletedAttachments}
+          getAPICategory={getSrAttachmentCategories}
+          categoryData={list_srAttachmentCategories}
+          service={accountManagementService}
+          configApplication={configApp.ACCOUNT_SERVICE}
+        />
+      ),
       disabled: false
     }
   ];
-  
 
   const navigate = useNavigate();
+  // Field yang divalidasi FE saat klik Next (submit mode — semua required)
+  const stepFieldMap = [
+    [
+      "category",
+      "priority",
+      "requestSource",
+      "type",
+      "subCategory",
+      "channel",
+      "requestDate"
+    ],
+    [],
+    [],
+    ["appHierId"],
+    []
+  ];
+
+  // Field yang divalidasi FE saat Save as Draft — approval tidak required untuk draft
+  const stepFieldMapDraft = [
+    [
+      "category",
+      "priority",
+      "requestSource",
+      "type",
+      "subCategory",
+      "channel",
+      "requestDate"
+    ],
+    [],
+    [],
+    [], // appHierId tidak wajib untuk draft
+    []
+  ];
+
+  const stepValidationTypes = [
+    "DATA",
+    "CONTACT",
+    "PREREQUISITE",
+    "APPROVAL",
+    "ATTACHMENT"
+  ];
+
   const next = () => {
-    setCurrent(current + 1);
+    setCurrent((prevCurrent) => prevCurrent + 1);
   };
   const prev = () => {
     setCurrent(current - 1);
   };
-  const scrollRightHandler = () => {
-    if (containerRef.current) {
-      containerRef.current.scrollLeft += 250;
+
+  const buildPayload = (action = "SUBMIT", validationType = null) => {
+    const values = formCreate.getFieldsValue(true);
+    const isDraft = action === "DRAFT";
+
+    return {
+      requestType: values.type ? parseInt(values.type) : null,
+      requestCategory: values.category ? parseInt(values.category) : null,
+      requestSubCategory: values.subCategory
+        ? parseInt(values.subCategory)
+        : null,
+      priority: values.priority ? parseInt(values.priority) : null,
+      description: values.description || null,
+      requestedDate: NxDate.formatForAPI(values.requestDate),
+      reference: values.serviceRequestReference || null,
+      apphierId: values.appHierId ? parseInt(values.appHierId) : null,
+      channel: values.channel ? parseInt(values.channel) : null,
+      source: values.requestSource ? parseInt(values.requestSource) : null,
+      action,
+      isDraft,
+      validationType,
+      stepNumber: validationType
+        ? stepValidationTypes.indexOf(validationType) + 1
+        : steps.length,
+      dataRequirements: (values.srFormDataRequirements || []).map((dr) => ({
+        requirementType: dr.typeId ? parseInt(dr.typeId) : null,
+        requirementValue: dr.value || null,
+        requirementDesc: null
+      })),
+      prerequisites: (values.srFormPreRequisites || []).map((pr) => ({
+        prerequisiteId: pr.prerequisiteId,
+        prerequisiteName: pr.prerequisiteName,
+        prerequisiteComments: pr.prerequisiteComments || null,
+        ...(pr.prerequisiteStatus && {
+          prerequisiteStatus: pr.prerequisiteStatus
+        }),
+        ...(pr.prerequisiteValue && {
+          prerequisiteValue: pr.prerequisiteValue
+        }),
+        ...(pr.prerequisiteDueDate && {
+          prerequisiteDueDate: pr.prerequisiteDueDate
+        }),
+        ...(pr.prerequisiteAssignedTo && {
+          prerequisiteAssignedTo: pr.prerequisiteAssignedTo
+        })
+      }))
+    };
+  };
+
+  const validateStep = async (stepIndex, action = "SUBMIT") => {
+    const isDraft = action === "DRAFT";
+    const fieldMap = isDraft ? stepFieldMapDraft : stepFieldMap;
+    const fields = fieldMap[stepIndex] || [];
+
+    if (fields.length > 0) {
+      await formCreate.validateFields(fields);
+    }
+
+    const validationType = stepValidationTypes[stepIndex];
+    if (!validationType || !idAccount) {
+      return;
+    }
+
+    const payload = buildPayload(action, validationType);
+    await dispatch(
+      validateCreateUpdate({
+        body: payload,
+        services: accountManagementService,
+        endPoint: `/v1/dbs/api/accounts/${idAccount}/servicerequests/validate-step`,
+        type: "create"
+      })
+    ).unwrap();
+  };
+
+  const handleButtonNext = async () => {
+    try {
+      await validateStep(current);
+      next();
+    } catch (error) {
+      return;
     }
   };
-  const handleButtonNext = () => {
-    next();
-    scrollRightHandler()
-  }
-  
-  const items = steps.map((item) => ({
-    key: item.title,
-    title: item.title,
-  }));
 
-  const handleScroll = () => {
-    if (containerRef.current) {
-      setScrollLeft(containerRef.current.scrollLeft);
+  const handleOpenConfirmation = async (submitType) => {
+    try {
+      if (submitType === "draft") {
+        // Draft: selalu validasi step 1 (prevent data kosong total)
+        await formCreate.validateFields(stepFieldMapDraft[0]);
+        // Jika sedang di step lain selain step 1, validasi step saat ini juga
+        if (current !== 0) {
+          await validateStep(current, "DRAFT");
+        }
+        const payload = buildPayload("DRAFT");
+        setDataSend(payload);
+        setConfirmationType("draft");
+        setModalConfirm(true);
+      } else {
+        // Submit: validasi step saat ini + validate-create keseluruhan
+        if (current < steps.length - 1) {
+          await validateStep(current);
+        } else {
+          await validateStep(3);
+        }
+
+        const payload = buildPayload("SUBMIT");
+
+        await dispatch(
+          validateCreateUpdate({
+            body: payload,
+            services: accountManagementService,
+            endPoint: `/v1/dbs/api/accounts/${idAccount}/servicerequests/validate-create`,
+            type: "create"
+          })
+        ).unwrap();
+
+        setDataSend(payload);
+        setConfirmationType("submit");
+        setModalConfirm(true);
+      }
+    } catch (error) {
+      return;
     }
   };
 
-  const scrollLeftHandler = () => {
-    if (containerRef.current) {
-      containerRef.current.scrollLeft -= 250;
+  const handleConfirmSubmit = async () => {
+    setModalConfirm(false);
+    setLoadingForm(true);
+    const newAttachments = attachmentDataSource.filter(
+      (a) => a.dataType === "new"
+    );
+    try {
+      if (isUpdate && id) {
+        await dispatch(
+          updateServiceRequest({
+            accountId: idAccount,
+            id,
+            body: { ...dataSend, serviceRequestId: id },
+            attachments: newAttachments,
+            action: confirmationType.toUpperCase(),
+            successBodyExtra: { return: false }
+          })
+        ).unwrap();
+      } else {
+        await dispatch(
+          createServiceRequest({
+            accountId: idAccount,
+            body: dataSend,
+            attachments: newAttachments,
+            action: confirmationType.toUpperCase(),
+            successBodyExtra: { return: false }
+          })
+        ).unwrap();
+      }
+      navigate(ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD, {
+        state: {
+          idAccount,
+          idCustomer,
+          type: accountType,
+          section: "Service Request"
+        }
+      });
+    } catch (error) {
+      // thunk sudah dispatch showModalError
+    } finally {
+      setLoadingForm(false);
     }
   };
 
-  const handleSubmitForm = (value) => {
-    setModalConfirm(true);
+  const handleClear = () => {
+    formCreate.resetFields();
+
+    if (data_accountDetail?.accountInformation) {
+      const accountInfo = data_accountDetail.accountInformation;
+      const accountSums = data_accountDetail.accountSummary;
+      const premiseAddress = data_account_address?.result?.find(
+        (item) => item?.premise?.bool === true
+      );
+
+      formCreate.setFieldsValue({
+        accountGroupType: accountInfo?.accountGroupType || "",
+        srFormAccountId: accountInfo?.accountId || "",
+        srFormAccountSor: accountInfo?.sor || "",
+        srFormMeterReadingCode: accountSums?.meterReadingCodes || "",
+        srFormAccountSegment: accountInfo?.segment || "",
+        srFormAccountGroupType: accountInfo?.accountGroupType || "",
+        srFormAccountType: accountInfo?.accountType || "",
+        srFormPremiseAddress: premiseAddress?.fullAddress || "",
+        srFormDistrict: premiseAddress?.district?.name || "",
+        srFormSubdistrict: premiseAddress?.subDistrict?.name || "",
+        srFormCity: premiseAddress?.city?.name || "",
+        srFormCountry: premiseAddress?.country?.name || "",
+        srFormLatitude: premiseAddress?.latitude || "",
+        srFormLongitude: premiseAddress?.longitude || ""
+      });
+    }
   };
 
   return (
-    <LayoutMenu>
-      <BreadCrumb routes={routes} />
-      <Form
-        id="accountForm"
-        form={formCreate}
-        layout={"vertical"}
-        onFinish={handleSubmitForm}
-        // onFinishFailed={handleErrorSubmit}
-        scrollToFirstError={true}
-      >
-        {/* Step Contents */}
-        <div className="flex flex-row gap-x-6 justify-center">
-          <span className="mt-[10px]">
-            <LeftCircleOutlined style={{ fontSize: '24px', color: '#0075bf' }} onClick={scrollLeftHandler}/>
-          </span>
-          <div onScroll={handleScroll} ref={containerRef} className="overflow-x-scroll scrollStepsCstm">
-            <Steps current={current} items={items} labelPlacement="vertical" />
-          </div>
-          <span className="mt-[10px]">
-            <RightCircleOutlined style={{ fontSize: '24px', color: '#0075bf' }} onClick={scrollRightHandler}/>
-          </span>
-        </div>
-        
-        <div className="steps-content my-6">{steps[current].content}</div>
+    <>
+      <Spin spinning={isLoading}>
+        <Form
+          id="accountForm"
+          form={formCreate}
+          layout={"vertical"}
+          preserve={true}
+          onFinish={() => {
+            if (current === steps.length - 1) {
+              handleOpenConfirmation("submit");
+            }
+          }}
+          scrollToFirstError={true}
+          className="flex flex-col gap-y-4"
+        >
+          <NxBreadCrumb routes={routes} />
+          <HeaderDetail
+            data_header={["CUSTOMER INFORMATION", "ACCOUNT INFORMATION"]}
+            dispatch={dispatch}
+            idAccount={idAccount}
+            idCustomer={idCustomer}
+            type={accountType}
+            collapsible={true}
+          />
 
-        {/* Section Action Steps */}
-        <div className="steps-action my-8 flex w-full justify-between gap-x-2">
-          <ButtonComponent
-            type={"submit"}
-            icon={<SVGIcon name="IconArrowNarrowLeft" width={24} />}
-            onClick={()=>{setModalBack(true)}}
-          >
-            Back
-          </ButtonComponent>
-          <div className="flex w-full justify-end gap-x-4">
-            {current > 0 && (
-              <ButtonComponent
-                onClick={() => {
-                  prev();
-                  scrollLeftHandler();
-                }}
-                type={"submit"}
-                icon={<SVGIcon name="IconArrowNarrowLeft" width={24} />}
-              >
-                Previous
-              </ButtonComponent>
-            )}
-            {current < steps.length - 1 && (
+          <NxFormStepper
+            steps={steps}
+            current={current}
+            onPrev={prev}
+            onNext={handleButtonNext}
+          />
+
+          <div className="steps-content flex flex-col gap-y-4">{steps[current].content}</div>
+
+          {/* Section Action Steps */}
+          <NxBaseContainer border>
+            <div className="flex justify-between">
               <Button
-                onClick={handleButtonNext}
-                type="primary"
-                className="ant-btn ant-btn-submit flex w-full justify-center"
-                disabled={steps[current].disabled}
+                type={"menu"}
+                onClick={() => {
+                  setModalBack(true);
+                }}
               >
-                <span className="p-1 text-[18px] text-center">Next</span>
-                <RightOutlined
-                  style={{
-                    justifyItems: "center",
-                    fontSize: "18px",
-                    color: "#fff",
-                  }}
-                />
+                Cancel
               </Button>
-            )}
-            {current === steps.length - 1 && (
-              <ButtonComponent
-                onClick={() => message.success("Processing complete!")}
-                type={"submit"}
-                htmlType={"submit"}
-                icon={<SVGIcon name="IconArrowNarrowRight" width={24} />}
-              >
-                Save
-              </ButtonComponent>
-            )}
-          </div>
-        </div>
-      </Form>
+              <div className="flex w-full justify-end gap-x-2">
+                <Button
+                  onClick={handleClear}
+                  type={"reject"}
+                  icon={<SVGIcon name="IconButtonClear" width={14} />}
+                >
+                  {isUpdate ? "Reset" : "Clear"}
+                </Button>
+                <Button
+                  onClick={() => handleOpenConfirmation("draft")}
+                  type={"secondary"}
+                >
+                  Save as Draft
+                </Button>
+                <Button onClick={prev} type={"menu"} disabled={current < 1}>
+                  Previous
+                </Button>
+                {current < steps.length - 1 && (
+                  <Button
+                    onClick={handleButtonNext}
+                    type={"submit"}
+                    disabled={steps[current].disabled}
+                  >
+                    Next
+                  </Button>
+                )}
+                {current === steps.length - 1 && (
+                  <Button
+                    onClick={() => handleOpenConfirmation("submit")}
+                    type={"submit"}
+                    loading={loadingForm}
+                  >
+                    Save & Submit
+                  </Button>
+                )}
+              </div>
+            </div>
+          </NxBaseContainer>
+        </Form>
+      </Spin>
 
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={modalConfirm}
+        handleCancel={() => setModalConfirm(false)}
+        handleConfirm={handleConfirmSubmit}
+        form={formCreate}
+        dropdowns={dropdowns}
+        approvalTableData={detail_srApprovalHierarchy}
+        attachmentsData={attachmentDataSource}
+        type={confirmationType}
+        loading={loadingForm}
+      />
 
       {/* Modal Back */}
       <ModalConfirm
@@ -354,7 +886,20 @@ const CreateCustomerServiceRequest = ({ type }) => {
           </p>
         </div>
       </ModalConfirm>
-    </LayoutMenu>
+
+      {/* Modal Error */}
+      <ModalError
+        isOpen={modalError}
+        handleCancel={() => setModalError(false)}
+        handleOk={() => setModalError(false)}
+        width={400}
+        title={bodyError?.title || "Failed"}
+        description={
+          bodyError?.description ||
+          "Failed to create service request. Please try again."
+        }
+      />
+    </>
   );
 };
 

@@ -1,20 +1,21 @@
 import { Modal } from "antd";
-import React from "react";
 
 const ModalCustom = (props) => {
   const {
+    loading = false, // ← FIX: Default value
     isOpen,
-    handleCancel = () => {},
-    handleOk = () => {},
+    handleCancel = () => { },
+    handleOk = () => { },
     header,
     children,
     width,
     type,
     footer = [],
     centered = true,
-    closable,
+    closable = true, // ← FIX: Default true
     title,
     maxHeight,
+    hidePadding = false,
   } = props;
 
   const typeModal = (type) => {
@@ -28,8 +29,6 @@ const ModalCustom = (props) => {
               className={"rounded-tl-[5px] rounded-tr-[5px] p-4"}
             >
               <div className={"flex gap-x-1.5 items-center"}>
-                {/* <div className="p-2.5 modal-header-box rounded-sm"></div> */}
-                {/* <span className="text-primary">{header}</span> */}
                 <span
                   style={{
                     color: "#0075bf",
@@ -44,7 +43,7 @@ const ModalCustom = (props) => {
             </div>
 
             {/* content section */}
-            <div className={"flex flex-col w-full p-5"}>{children}</div>
+            <div className={`flex flex-col w-full ${hidePadding ? "" : "p-4"} ${hidePadding?.top ? "pt-0" : ""} ${hidePadding?.bottom ? "pb-0" : ""} ${hidePadding?.right ? "pr-0" : ""} ${hidePadding?.left ? "pl-0" : ""}`}>{children}</div>
           </div>
         );
       case "detail":
@@ -53,7 +52,6 @@ const ModalCustom = (props) => {
             {/* header section */}
             <div className={"rounded-tl-[5px] rounded-tr-[5px] p-4"}>
               <div className={"flex gap-x-1.5 items-center"}>
-                <div className="p-2.5 modal-header-box rounded-sm"></div>
                 <span className="text-primary uppercase font-semibold">{header}</span>
               </div>
             </div>
@@ -66,32 +64,34 @@ const ModalCustom = (props) => {
         return (
           <div className="">
             {/* header section */}
-            <div className={"rounded-tl-[5px] rounded-tr-[5px] p-4"}>
-              <div className={"flex gap-x-1.5 items-center"}>
-                <div className="p-2.5 modal-header-box rounded-sm"></div>
-                <span className="text-primary uppercase font-semibold">{header}</span>
-              </div>
+            <div
+              className="flex flex-col bg-[#F9F9F9] rounded-tl-[5px] rounded-tr-[5px] uppercase"
+              style={{ borderBottom: "1px solid #BDBDBD", padding: "16px" }}
+            >
+              <span className="text-[16px] text-primary">{header}</span>
             </div>
 
             {/* content section */}
-            <div className={"flex flex-col w-full p-6"}>{children}</div>
+            <div className={`flex flex-col w-full ${hidePadding ? "" : "p-6"}`}>{children}</div>
           </div>
         );
     }
   };
+
   return (
     <Modal
       open={isOpen}
       onOk={handleOk}
-      onCancel={handleCancel}
+      onCancel={loading ? undefined : handleCancel} // ← FIX: Prevent close saat loading
       footer={footer}
       className={type === 'confirmation' ? "modal-approve-reject" : "modal-custom"}
       centered={centered}
       width={width}
-      maskClosable={false}
-      closable={closable}
+      maskClosable={!loading} // ← FIX: Prevent click outside saat loading
+      closable={!loading && closable} // ← FIX: Hide X button saat loading
       title={title}
       maxHeight={maxHeight}
+      confirmLoading={loading} // ← FIX: Show loading di OK button (jika ada)
     >
       {typeModal(type)}
     </Modal>

@@ -1,0 +1,293 @@
+import DOMPurify from "dompurify";
+import React from 'react';
+import moment from "moment";
+import { Tooltip, Popover, Space } from "antd";
+import { dateFormatting, renderColumn } from "../../../../../../utils";
+import { getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
+import { MoreOutlined } from "@ant-design/icons";
+import SVGIcon from "../../../../../../assets/Icon/index";
+import { WARRANTY_STATUS, WARRANTY_APPROVAL_STATUS } from "../../../../../../constants/warranty";
+
+export const columnMutation = (
+  page = 1,
+  pageSize = 10,
+  searchInput,
+  searchedColumn,
+  searchText,
+  handleSearch = () => {},
+  search = {},
+  handleEdit = () => {},
+  handleDelete = () => {},
+  handleHistory = () => {},
+  handleApprove = () => {},
+  handleReject = () => {},
+  isCreate = false,
+  disabled = false,
+  isApprover = false,
+  data = [],
+  mainWarrantyId = null
+) => {
+  const columns = [
+    {
+      key: "no",
+      title: "NO",
+      isClassification: true,
+      width: 60,
+      render: (text, object, index) => (page - 1) * pageSize + index + 1,
+    },
+    {
+      key: "documentNumber",
+      title: "REFF. DOCUMENT NUMBER",
+      dataIndex: "documentNumber",
+      sorter: true,
+      ...getColumnSearchPropsUseFilteredValue(search, "documentNumber", searchInput, searchedColumn, searchText, handleSearch),
+      render: (text, record) => DOMPurify.sanitize(text || record.noDocumentMutation || record.mutationNumber || ""),
+    },
+    {
+      key: "source",
+      title: "SOURCE",
+      dataIndex: "source",
+      sorter: true,
+      ...getColumnSearchPropsUseFilteredValue(search, "source", searchInput, searchedColumn, searchText, handleSearch),
+      render: (text, record) => {
+        const sourceData = text || record?.payWarranty?.documentNumber || record?.mutationSource || "";
+        return DOMPurify.sanitize(sourceData.toUpperCase());
+      },
+    },
+    {
+      key: "type",
+      title: "TYPE",
+      dataIndex: "type",
+      sorter: true,
+      align: "center",
+      ...getColumnSearchPropsUseFilteredValue(search, "type", searchInput, searchedColumn, searchText, handleSearch),
+      render: (text, record) => DOMPurify.sanitize(text || record?.type || ""),
+    },
+    {
+      key: "category",
+      title: "CATEGORY",
+      dataIndex: "category",
+      sorter: true,
+      ...getColumnSearchPropsUseFilteredValue(search, "category", searchInput, searchedColumn, searchText, handleSearch),
+      render: (text, record) => DOMPurify.sanitize(record?.category || ""),
+    },
+    {
+      key: "date",
+      title: "DATE",
+      dataIndex: "date",
+      sorter: true,
+      render: (text, record) => {
+        const date = text || record.transactionDate || record.createdDate;
+        return date ? moment(date).format("DD MMM YY") : "";
+      },
+    },
+    {
+      key: "amount",
+      title: "AMOUNT",
+      dataIndex: "amount",
+      align: "right",
+      sorter: true,
+      render: (text, record) => {
+        return record.amount !== undefined && record.amount !== null ? record.amount.toLocaleString() : "";
+      }
+    },
+    {
+      key: "convertedCurrency",
+      title: "CONVERTED CURRENCY",
+      dataIndex: "convertedCurrency",
+      sorter: true,
+      ...getColumnSearchPropsUseFilteredValue(search, "convertedCurrency", searchInput, searchedColumn, searchText, handleSearch),
+      render: (text, record) => DOMPurify.sanitize(record.convertedCurrencyName || record.currency || (typeof text === 'string' && isNaN(Number(text)) ? text : "") || ""),
+    },
+    {
+      key: "rate",
+      title: "RATE",
+      dataIndex: "rate",
+      align: "right",
+      sorter: true,
+      render: (text) => text?.toLocaleString(),
+    },
+    {
+      key: "equivalentAmount",
+      title: "EQV. BALANCE",
+      dataIndex: "equivalentAmount",
+      align: "right",
+      sorter: true,
+      render: (text, record) => {
+        const val = record.equivalentAmount !== undefined ? record.equivalentAmount : record.eqvAmount;
+        return val !== undefined && val !== null ? val.toLocaleString() : "";
+      }
+    },
+    {
+        title: "DESCRIPTION",
+        dataIndex: "description",
+        sorter: true,
+        ...getColumnSearchPropsUseFilteredValue(search, "description", searchInput, searchedColumn, searchText, handleSearch),
+        render: (text) => (
+            <div 
+                ref={(el) => {
+                    if (el) {
+                        el.textContent = text || "-";
+                    }
+                }}
+            />
+        )
+    },
+  ];
+
+  if (!isCreate) {
+    columns.push(
+      {
+        key: "status",
+        title: "STATUS",
+        dataIndex: "status",
+        width: 150,
+        fixed: "right",
+        render: (text) => renderColumn("status", searchedColumn, searchText, text, false, "status", search),
+      },
+      {
+        key: "statusApproval",
+        title: "STATUS APPROVAL",
+        dataIndex: "approvalStatus",
+        width: 150,
+        fixed: "right",
+        render: (text) => renderColumn("statusApproval", searchedColumn, searchText, text, false, "status", search),
+      }
+    );
+  }
+
+  if (!disabled && !isApprover) {
+    // ... existing logic for requester (Edit/Delete/More)
+    columns.push({
+      title: "ACTION",
+      key: "action",
+      align: "center",
+      fixed: "right",
+      width: 120,
+      render: (record) => {
+        const isLocal = !record.id;
+        const isDraft = record.status === WARRANTY_STATUS.DRAFT;
+        const isApprDraft = record.approvalStatus === WARRANTY_APPROVAL_STATUS.DRAFT;
+        const isApprRejected = record.approvalStatus === WARRANTY_APPROVAL_STATUS.REJECTED;
+
+        const canEditOrDelete = isLocal || (isDraft && (isApprDraft || isApprRejected));
+        const isDisabled = !canEditOrDelete;
+        
+        const tooltipEdit = isDisabled ? "Update Not Allowed" : "Update";
+        const tooltipDelete = isDisabled ? "Delete Not Allowed" : "Delete";
+
+        return (
+          <div className="w-full flex justify-center items-center py-1 gap-2">
+            {isCreate ? (
+              <>
+                <Tooltip title={tooltipEdit}>
+                  <div
+                    className={isDisabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"}
+                    onClick={() => !isDisabled && handleEdit(record)}
+                  >
+                    <SVGIcon name="IconEdit" width={24} color={isDisabled ? "#C8CDD4" : "#0075BF"} />
+                  </div>
+                </Tooltip>
+                <Tooltip title={tooltipDelete}>
+                  <div
+                    className={isDisabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"}
+                    onClick={() => !isDisabled && handleDelete(record)}
+                  >
+                    <SVGIcon name="IconDelete" width={24} color={isDisabled ? "#C8CDD4" : "#BE3036"} />
+                  </div>
+                </Tooltip>
+              </>
+            ) : (
+              <>
+                <Popover
+                  trigger="click"
+                  placement="bottomRight"
+                  content={
+                    <Space direction="vertical" style={{ width: 120 }}>
+                      <div
+                        className={isDisabled ? "cursor-not-allowed opacity-50 flex items-center gap-2 p-1" : "cursor-pointer flex items-center gap-2 p-1 hover:bg-gray-100"}
+                        onClick={() => !isDisabled && handleEdit(record)}
+                      >
+                        <SVGIcon name="IconEdit" width={18} color="#ACC424" />
+                        <span className="text-sm">Update</span>
+                      </div>
+                      <div
+                        className={isDisabled ? "cursor-not-allowed opacity-50 flex items-center gap-2 p-1" : "cursor-pointer flex items-center gap-2 p-1 hover:bg-gray-100"}
+                        onClick={() => !isDisabled && handleDelete(record)}
+                      >
+                        <SVGIcon name="IconDelete" width={18} color="#BE3036" />
+                        <span className="text-sm text-[#BE3036]">Delete</span>
+                      </div>
+                    </Space>
+                  }
+                >
+                  <div className="cursor-pointer">
+                    <SVGIcon name="IconActionDropdown" width={20} color={"#0075bf"} />
+                  </div>
+                </Popover>
+                <Tooltip title="Approval History">
+                  <div
+                    className="cursor-pointer"
+                    onClick={() => handleHistory(record)}
+                  >
+                    <SVGIcon name="IconLogHistory" width={24} color="#0075bf" />
+                  </div>
+                </Tooltip>
+              </>
+            )}
+          </div>
+        );
+      },
+    });
+  }
+
+  if (isApprover) {
+    columns.push({
+      title: "ACTION",
+      key: "action",
+      align: "center",
+      fixed: "right",
+      width: 120,
+      render: (record) => {
+        const isGrouped = record.pwGroupId && mainWarrantyId && String(record.pwGroupId) === String(mainWarrantyId);
+        const showApproveReject = record.isApproval && !isGrouped;
+
+        return (
+          <div className="w-full flex justify-center items-center py-1 gap-2">
+            {showApproveReject && (
+              <>
+                <Tooltip title="Reject">
+                  <div
+                    className="cursor-pointer"
+                    onClick={() => handleReject(record)}
+                  >
+                    <SVGIcon name="IconReject" width={20} color="#D90000" />
+                  </div>
+                </Tooltip>
+                <Tooltip title="Approve">
+                  <div
+                    className="cursor-pointer"
+                    onClick={() => handleApprove(record)}
+                  >
+                    <SVGIcon name="IconApprove" width={20} color="#ACC424" />
+                  </div>
+                </Tooltip>
+              </>
+            )}
+            <Tooltip title="Approval History">
+              <div 
+                className="cursor-pointer"
+                onClick={() => handleHistory(record)}
+              >
+                <SVGIcon name="IconLogHistory" width={24} color="#0075bf" />
+              </div>
+            </Tooltip>
+          </div>
+        );
+      },
+    });
+  }
+
+
+  return columns;
+};

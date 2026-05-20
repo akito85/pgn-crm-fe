@@ -5,12 +5,14 @@ const SVG = ({
   width = "100%",
   className = "",
   onClick = () => {},
+  ...otherProps
 }) => (
   <svg
+    {...otherProps}
     width={width}
     style={style}
     height={width}
-    className={`cursor-pointer${className}`}
+    className={`cursor-pointer ${className}`}
     onClick={onClick}
     viewBox="0 0 48 48"
     fill="none"

@@ -8,7 +8,6 @@ import {
   validateError,
 } from "../general_slice";
 import { errorBody, errorCode, errorMessage } from "../../../utils";
-import { data } from "autoprefixer";
 
 const initialState = {
   loading: false,
@@ -21,16 +20,16 @@ const initialState = {
   dataType: [],
 };
 
-export  const getPaginatePartner = createAsyncThunk(
+export const getPaginatePartner = createAsyncThunk(
   "GET_ALL_PARTNER",
-  async ({ search, page, pageSize, sort }, thunkAPI) => {
+  async ({ search, page, pageSize, sort, isLoadMore }, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
       const url = `/v1/dbs/api/partner/get-list?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
       const response = await receiptCollectionHttpService.getAll(url);
-      return response.data;
+      return { ...response.data, isLoadMore: !!isLoadMore };
     } catch (error) {
       thunkAPI.dispatch(
         validateError({
@@ -298,9 +297,8 @@ export const approveOrRejectPartner = createAsyncThunk(
       if (Math.floor((error.response.data.code || 0) / 100) === 4) {
         const errorBody = {
           title: "Failed",
-          description: `Your data was not ${
-            body.action === "APPROVE" ? "approved" : "rejected"
-          }. ${message}.`,
+          description: `Your data was not ${body.action === "APPROVE" ? "approved" : "rejected"
+            }. ${message}.`,
           return: false,
         };
         thunkAPI.dispatch(showModalError(errorBody));
@@ -368,22 +366,155 @@ export const getListCategory = createAsyncThunk(
   }
 );
 
+
+export const inactivePartner = createAsyncThunk(
+  "INACTIVE_PARTNER",
+  async ({ body }, thunkAPI) => {
+    let status = body?.status === "Active" ? "Inactivate" : "Activate";
+    try {
+      const url = `/v1/dbs/api/partner/active-inactive`;
+      const response = await receiptCollectionHttpService.activationWithRemarkPost(
+        url,
+        body
+      );
+      const successMessage = {
+        title: "Successfull",
+        description: "Your data has been submitted.",
+        return: false,
+      };
+      thunkAPI.dispatch(showModalSuccess(successMessage));
+      return response.data;
+    } catch (response) {
+      thunkAPI.dispatch(
+        validateError({
+          error: errorBody(errorCode(response), status, errorMessage(response)),
+          action: "INACTIVE_PARTNER",
+          back: false,
+        })
+      );
+      return thunkAPI.rejectWithValue(response.response.data);
+    }
+  }
+);
+
+export const approveOrRejectInactivePartner = createAsyncThunk(
+  "APPROVE_OR_REJECT_FOR_INACTIVE_PARTNER",
+  async ({ body }, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/partner/approve-inactive";
+      const response =
+        await receiptCollectionHttpService.activationWithRemarkPost(url, body);
+      const message = response?.message;
+      const successMessage = {
+        title: "Successfull",
+        description: `${message}`,
+        return: true,
+      };
+      thunkAPI.dispatch(showModalSuccess(successMessage));
+      return response.data;
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
+        const errorBody = {
+          title: "Failed",
+          description: `Your data was not ${body.action === "APPROVE" ? "approved" : "rejected"
+            }. ${message}.`,
+          return: false,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error);
+    }
+  }
+);
+
+export const saveDraftPartner = createAsyncThunk(
+  "SAVE_DRAFT_PARTNER",
+  async (body, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/partner/save-draft`;
+      const data = await receiptCollectionHttpService.createData(url, body);
+      const successBody = {
+        title: "Successfull",
+        description: `Your data has been saved as draft`,
+        return: false,
+      };
+      thunkAPI.dispatch(showModalSuccess(successBody));
+      return data.data;
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      const errorBody = {
+        title: "Failed",
+        data: error.response.data.data,
+        description: `Your draft was not saved. ${message}.`,
+      };
+      thunkAPI.dispatch(showModalError(errorBody));
+      return thunkAPI.rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const getDetailDraftPartner = createAsyncThunk(
+  "GET_DETAIL_DRAFT_PARTNER",
+  async (id, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/partner/draft-detail/${id}`;
+      const response = await receiptCollectionHttpService.getDetail(url);
+      return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response);
+    }
+  }
+);
+
 const partnerSlice = createSlice({
   name: "partner",
   initialState,
   extraReducers: {
     //get all employee paginate reducer
-    [getPaginatePartner.pending]: (state, action) => {
-      state.data = action.payload;
+    [getPaginatePartner.pending]: (state) => {
       state.loading = true;
     },
     [getPaginatePartner.fulfilled]: (state, action) => {
-      state.data = action.payload;
+      const { isLoadMore, ...rest } = action.payload || {};
+      if (isLoadMore && state.data?.result) {
+        const existingIds = new Set(state.data.result.map((item) => item.id));
+        const newItems = (rest.result || []).filter((item) => !existingIds.has(item.id));
+        state.data = {
+          ...rest,
+          result: [...state.data.result, ...newItems],
+        };
+      } else {
+        state.data = rest;
+      }
       state.loading = false;
     },
     [getPaginatePartner.rejected]: (state, action) => {
-      state.data = action.payload;
-      state.loading = true;
+      state.loading = false;
     },
 
     // get type ddl
@@ -426,7 +557,7 @@ const partnerSlice = createSlice({
       state.loading = false;
     },
     [getDetailPartner.rejected]: (state) => {
-      state.loading = true;
+      state.loading = false;
     },
 
     // Get Approve Hierarchy List
@@ -470,22 +601,49 @@ const partnerSlice = createSlice({
       state.loadingProduct = false;
     },
 
-    
 
-    [approveOrRejectPartner.pending]: (state) => {
-      state.loading = true;
-    },
-    [approveOrRejectPartner.fulfilled]: (state) => {
-      state.isSuccess = true;
-      state.loading = false;
-    },
+
     [approveOrRejectPartner.rejected]: (state, action) => {
       state.isFailed = true;
       state.loading = false;
       state.message = action.payload;
     },
 
-    
+    [approveOrRejectInactivePartner.pending]: (state) => {
+      state.loading = true;
+    },
+    [approveOrRejectInactivePartner.fulfilled]: (state) => {
+      state.isSuccess = true;
+      state.loading = false;
+    },
+    [approveOrRejectInactivePartner.rejected]: (state, action) => {
+      state.isFailed = true;
+      state.loading = false;
+      state.message = action.payload;
+    },
+
+    [saveDraftPartner.pending]: (state) => {
+      state.loading = true;
+    },
+    [saveDraftPartner.fulfilled]: (state) => {
+      state.loading = false;
+    },
+    [saveDraftPartner.rejected]: (state) => {
+      state.loading = false;
+    },
+
+    [getDetailDraftPartner.pending]: (state) => {
+      state.loading = true;
+    },
+    [getDetailDraftPartner.fulfilled]: (state, action) => {
+      state.data_detail = action.payload;
+      state.loading = false;
+    },
+    [getDetailDraftPartner.rejected]: (state) => {
+      state.loading = false;
+    },
+
+
 
     // create payment item
     [createPartner.pending]: (state, action) => {
@@ -508,10 +666,12 @@ const partnerSlice = createSlice({
     },
     [updatePartner.fulfilled]: (state, action) => {
       state.data = action.payload;
-      state.isSuccess = false;
+      state.isSuccess = true;
+      state.loading = false;
     },
     [updatePartner.rejected]: (state) => {
-      state.isFailed = false;
+      state.isFailed = true;
+      state.loading = false;
     },
 
     //download
@@ -537,6 +697,18 @@ const partnerSlice = createSlice({
     },
     [createValidasiPartner.rejected]: (state, action) => {
       state.data = action.payload;
+      state.loading = false;
+    },
+
+    [inactivePartner.pending]: (state) => {
+      state.loading = true;
+    },
+    [inactivePartner.fulfilled]: (state) => {
+      state.isSuccess = true;
+      state.loading = false;
+    },
+    [inactivePartner.rejected]: (state) => {
+      state.isFailed = true;
       state.loading = false;
     },
   },

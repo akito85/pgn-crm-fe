@@ -1,38 +1,58 @@
-import { useEffect, useRef, useState } from "react";
-
-import { Form, Button, Tooltip, Input, DatePicker } from "antd";
-import SVGIcon from "../../../../../../../../../assets/Icon/index";
-
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Form, Button } from "antd";
 import InputComponent from "../../../../../../../../../components/InputComponent";
-import ModalCustom from "../../../../../../../../../components/Modal/ModalCustom";
-import NxPanel from "../../../../../../../../../components/Nx/NxPanel";
-import { dateFormatting, requiredMessage } from "../../../../../../../../../utils";
-
+import {
+  dateFormatting,
+  requiredMessage
+} from "../../../../../../../../../utils";
 import moment from "moment";
-import DateComponent from "../../../../../../../../../components/DateComponent";
-import { FilterOutlined } from "@ant-design/icons";
-import Highlighter from "react-highlight-words";
-import { getMdAccountStandard } from "../../../../../../../../../redux/slices/account_management/detailAccount/MultiDestinationSlice";
 import { useDispatch, useSelector } from "react-redux";
-// import TablePaginationNew from "../../../../../../../../../components/TablePaginationNew";
-import { TablePaginationNew } from "poc-table-dragandrop";
+import NxModal from "../../../../../../../../../components/Nx/NxModal";
+import NxBaseContainer from "../../../../../../../../../components/Nx/NxBaseContainer";
+import NxTable from "../../../../../../../../../components/Nx/NxTable";
+import NxDetailText from "../../../../../../../../../components/Nx/NxDetailText";
+import NxDate from "../../../../../../../../../components/Nx/NxDatePicker";
+import { getMdAccounts } from "../../../../../../../../../redux/slices/account_management/detailAccount/MultiDestinationSlice";
+import { getAccountStandardColumns } from "./getAccountStandardColumns";
 
 export default function InfoMultiDestination({
   accountId,
   setAccount,
-  className,
+  form,
+  isUpdate,
+  isDraft,
+  formView = true
 }) {
+  const account = Form.useWatch("account", form);
+  const accountSor = Form.useWatch("accountSor", form);
+  const accountCostCenter = Form.useWatch("accountCostCenter", form);
+  const meterReadingCode = Form.useWatch("meterReadingCode", form);
+  const accountSegment = Form.useWatch("accountSegment", form);
+  const accountGroupType = Form.useWatch("accountGroupType", form);
+  const accountType = Form.useWatch("accountType", form);
+  const premiseAddress = Form.useWatch("premiseAddress", form);
+  const subDistrict = Form.useWatch("subDistrict", form);
+  const district = Form.useWatch("district", form);
+  const city = Form.useWatch("city", form);
+  const province = Form.useWatch("province", form);
+  const country = Form.useWatch("country", form);
+  const longitude = Form.useWatch("longitude", form);
+  const latitude = Form.useWatch("latitude", form);
+  const startDate = Form.useWatch("startDate", form);
+  const endDate = Form.useWatch("endDate", form);
+  const description = Form.useWatch("description", form);
   const dispatch = useDispatch();
 
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [loadMoreSize] = useState(20);
   const [search, setSearch] = useState({});
   const [sort, setSort] = useState("");
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
-  const [totalElement, setTotalElement] = useState(0);
   const searchInput = useRef(null);
-                                                                                                                                                                                                                                                                                                                                      
+  const [filters, setFilters] = useState([]);
+  const [filterRules, setFilterRules] = useState([]);
+
   const onSort = (_, __, sort) => {
     const dataSort = sort.order
       ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
@@ -41,28 +61,17 @@ export default function InfoMultiDestination({
   };
 
   const [isOpen, setIsOpen] = useState(false);
-  
-  const { data_mdAccountStandard } = useSelector(
+
+  const { list_mdAccount, pagination_listMdAccount, loading_listMdAccount } = useSelector(
     (state) => state.multiDestination
   );
-  
-  const handleOk = () => {
-    console.log("ok")
-  }
 
   const handleCancel = () => {
-    setIsOpen(false)
-  }
+    setIsOpen(false);
+  };
 
   const handleClose = () => {
-    setIsOpen(false)
-  }
-
-  const renderDate = (date) => {
-    if (date) {
-      return moment(date).format("DD MMM YYYY HH:mm:ss");
-    }
-    return "";
+    setIsOpen(false);
   };
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -75,654 +84,389 @@ export default function InfoMultiDestination({
       }
       return {
         ...prevState,
-        [dataIndex]: selectedKeys[0],
+        [dataIndex]: selectedKeys[0]
       };
     });
   };
 
-  const handleChangeSize = (pageChange, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
-    setPage(tempPage);
-    setPageSize(pageSizeChange);
+  const handleLoadMore = async () => {
+    const nextPage = page + 1;
+    const totalPage = pagination_listMdAccount?.totalPage || 0;
+
+    if (nextPage <= totalPage) {
+      const body = {
+        searchs: search,
+        page: nextPage,
+        size: loadMoreSize,
+        sort,
+        filters,
+        filterRules,
+      }
+
+      await dispatch(
+        getMdAccounts({
+          body,
+          isLoadMore: true,
+          id: accountId
+        })
+      ).unwrap();
+    }
+    setPage(nextPage);
   };
 
-  const getColumnSearchProps = (dataIndex, type) => ({
-    filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }) => {
-      const onDataChange = (value, dateString) => {
-        setSelectedKeys(dateString ? [dateString] : []);
-        handleSearch(dateString ? [dateString] : [], confirm, dataIndex);
-      };
-      return (
-        <div
-          style={{
-            padding: 8,
-          }}
-          onKeyDown={(e) => e.stopPropagation()}
-        >
-          {type === "date" ? (
-            <DatePicker onChange={onDataChange} />
-          ) : (
-            <Input
-              ref={searchInput}
-              placeholder={`Search`}
-              value={selectedKeys[0]}
-              onChange={(e) =>
-                setSelectedKeys(e.target.value ? [e.target.value] : [])
-              }
-              onPressEnter={() => {
-                handleSearch(selectedKeys, confirm, dataIndex);
-              }}
-              style={{
-                marginBottom: 8,
-                display: "block",
-              }}
-            />
-          )}
-        </div>
-      );
-    },
-    filterIcon: (filtered) => (
-      <FilterOutlined
-        style={{
-          color: filtered ? "#1890ff" : undefined,
-        }}
-      />
-    ),
-    onFilterDropdownOpenChange: (visible) => {
-      if (visible) {
-        setTimeout(() => searchInput.current?.select(), 5000);
+  useEffect(() => {
+    if (formView) {
+      const body = {
+        page,
+        size: loadMoreSize,
+        sort,
+        searchs: search,
+        filters,
+        filterRules,
       }
-    },
-    render: (text) =>
-      searchedColumn === dataIndex ? (
-        <Highlighter
-          highlightStyle={{
-            backgroundColor: "#ffc069",
-            padding: 0,
-          }}
-          searchWords={
-            type === "date"
-              ? moment([searchText]).format(dateFormatting.dateFormal)
-              : [searchText]
-          }
-          autoEscape
-          textToHighlight={text ? text.toString() : ""}
-        />
-      ) : (
-        text || ""
-      ),
-  });
 
-  useEffect(() => {
-    const reqSearch = encodeURIComponent(JSON.stringify(search));
-    dispatch(getMdAccountStandard({ page, pageSize, sort, search: reqSearch, id: accountId }));
-  }, [page, pageSize, sort, search]);
-
-  useEffect(() => {
-    if (
-      data_mdAccountStandard && 
-      data_mdAccountStandard.result &&
-      data_mdAccountStandard.result.length > 0
-    ) {
-      setTotalElement(data_mdAccountStandard?.page?.totalElements);
+      dispatch(
+        getMdAccounts({
+          body,
+          id: accountId,
+          isLoadMore: false
+        })
+      );
     }
-  }, [data_mdAccountStandard]);
+  }, [sort, search, filters, filterRules]);
 
-  // Sanitize pagination values to prevent NaN
-  // Modify
-  const sanitizedPage = Number(page) > 0 ? Number(page) : 1;
-  const sanitizedPageSize = Number(pageSize) > 0 ? Number(pageSize) : 10;
-  const sanitizedTotalElement = Number(totalElement) > 0 ? Number(totalElement) : (data_mdAccountStandard?.result?.length || 0);
+  const baseColumns = useMemo(
+    () =>
+      getAccountStandardColumns(
+        search,
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        setAccount,
+        setIsOpen
+      ),
+    [search, searchText, searchedColumn]
+  );
 
-  const columnMain = [
-    {
-      title: "NO",
-      width: 80,
-      align: "center",
-      dataIndex: "no",
-    },
-    {
-      title: "CUSTOMER NUMBER",
-      dataIndex: "customerNumber",
-      width: 200,
-      sorter: true,
-      ...getColumnSearchProps("customerNumber"),
-    },
-    {
-      title: "IDENTIFICATION TYPE",
-      dataIndex: "customerIdentificationType",
-      width: 200,
-      sorter: true,
-      ...getColumnSearchProps("customerIdentificationType"),
-    },
-    {
-      title: "CUSTOMER IDENTIFICATION NUMBER",
-      dataIndex: "customerIdentificationNumber",
-      width: 220,
-      sorter: true,
-      ...getColumnSearchProps("customerIdentificationNumber"),
-    },
-    {
-      title: "CUSTOMER NAME",
-      dataIndex: "customerName",
-      width: 200,
-      sorter: true,
-      ...getColumnSearchProps("customerName"),
-    },
-    {
-      title: "CUSTOMER TYPE",
-      dataIndex: "customerType",
-      width: 160,
-      sorter: true,
-      ...getColumnSearchProps("customerType"),
-    },
-    {
-      title: "ACCOUNT NUMBER",
-      dataIndex: "accountNumber",
-      width: 250,
-      sorter: true,
-      ...getColumnSearchProps("accountNumber"),
-    },
-    {
-      title: "ACCOUNT NAME",
-      dataIndex: "accountName",
-      width: 250,
-      sorter: true,
-      ...getColumnSearchProps("accountName"),
-    },
-    {
-      title: "CATEGORY",
-      dataIndex: "accountCategory",
-      width: 200,
-      sorter: true,
-      ...getColumnSearchProps("accountCategory"),
-    },
-    {
-      title: "SOR",
-      dataIndex: "sor",
-      width: 200,
-      sorter: true,
-      ...getColumnSearchProps("sor"),
-    },
-    {
-      title: "COST CENTER",
-      dataIndex: "costCenter",
-      width: 200,
-      sorter: true,
-      ...getColumnSearchProps("costCenter"),
-    },
-    {
-      title: "METER READING CODES",
-      dataIndex: "meterReadingCode",
-      width: 200,
-      sorter: true,
-      ...getColumnSearchProps("meterReadingCode"),
-    },
-    {
-      title: "CUSTOMER MANAGEMENT",
-      dataIndex: "customerManagement",
-      width: 200,
-      sorter: true,
-      ...getColumnSearchProps("customerManagement"),
-    },
-    {
-      title: "CLASSIFICATION TYPE",
-      dataIndex: "classificationType",
-      width: 200,
-      sorter: true,
-      ...getColumnSearchProps("classificationType"),
-    },
-    {
-      title: "SEGMENT",
-      dataIndex: "accountSegment",
-      width: 200,
-      sorter: true,
-      ...getColumnSearchProps("accountSegment"),
-    },
-    {
-      title: "ACCOUNT GROUP TYPE",
-      dataIndex: "accountGroupType",
-      width: 200,
-      sorter: true,
-      ...getColumnSearchProps("accountGroupType"),
-    },
-    {
-      title: "PREMISE ADDRESS",
-      dataIndex: "premiseAddress",
-      width: 200,
-      sorter: true,
-      ...getColumnSearchProps("premiseAddress"),
-    },
-    {
-      title: "SUBDISTRICT",
-      dataIndex: "subdistrict",
-      width: 200,
-      sorter: true,
-      ...getColumnSearchProps("subdistrict"),
-    },
-    {
-      title: "DISTRICT",
-      dataIndex: "district",
-      width: 200,
-      sorter: true,
-      ...getColumnSearchProps("district"),
-    },
-    {
-      title: "CITY",
-      dataIndex: "city",
-      width: 200,
-      sorter: true,
-      ...getColumnSearchProps("city"),
-    },
-    {
-      title: "COUNTRY",
-      dataIndex: "country",
-      width: 200,
-      sorter: true,
-      ...getColumnSearchProps("country"),
-    },
-    {
-      title: "LONGITUDE",
-      dataIndex: "longitude",
-      width: 200,
-      sorter: true,
-      ...getColumnSearchProps("longitude"),
-    },
-    {
-      title: "LATITUDE",
-      dataIndex: "latitude",
-      width: 200,
-      sorter: true,
-      ...getColumnSearchProps("latitude"),
-    },
-    {
-      title: "START DATE",
-      dataIndex: "startDate",
-      width: 200,
-      sorter: true,
-      ...getColumnSearchProps("startDate"),
-    },
-    {
-      title: "END DATE",
-      dataIndex: "endDate",
-      width: 200,
-      sorter: true,
-      ...getColumnSearchProps("endDate"),
-    },
-    {
-      title: "ACTION",
-      align: "center",
-      width: 120,
-      fixed: "right",
-      render: (v, r, i) => {
-        return (
-          <div className="flex w-full justify-center gap-4">
-            <Tooltip title="Select">
-              <div className="pt-1 cursor-pointer">
-                <SVGIcon
-                  name="IconActionCreate"
-                  color={"#0075bf"}
-                  width={20}
-                  onClick={() => {
-                    setAccount({
-                      objectId: r?.accountId,
-                      accountNumber: r?.accountNumber,
-                      accountName: r?.accountName,
-                      accountSor: r?.sor,
-                      accountCostCenter: r?.costCenter,
-                      meterReadingCode: r?.meterReadingCode,
-                      accountSegment: r?.accountSegment,
-                      accountGroupType: r?.accountGroupType,
-                      accountType: r?.accountType,
-                      premiseAddress: r?.premiseAddress,
-                      subdistrict: r?.subdistrict,
-                      district: r?.district,
-                      city: r?.city,
-                      country: r?.country,
-                      longitude: r?.longitude,
-                      latitude: r?.latitude,
-                    })
-                    setIsOpen(false);
-                  }}
-                />
-              </div>
-            </Tooltip>
-          </div>
-        );
-      },
-    },
-  ]
+  const allColumns = useMemo(() => {
+    const columnsWithKeys = [...baseColumns].map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title
+    }));
+    return columnsWithKeys;
+  }, [baseColumns]);
 
-  return(
-    <div className={className}>
-      <NxPanel title={"MULTI DESTINATION INFORMATION"} removeBottomMargin>
-        <div className="w-full grid grid-cols-3 gap-4 mb-4">
-          <div className="flex gap-2 items-end">
-            <Form.Item name={"objectId"} hidden>
-              <Input />
-            </Form.Item>
+  const columnDefinitions = useMemo(() => {
+    return allColumns.map((col) => ({
+      key: col.key || col.dataIndex || col.title,
+      title: col.title
+    }));
+  }, [allColumns]);
 
+  const currentData = useMemo(
+    () => list_mdAccount,
+    [list_mdAccount]
+  );
+
+  const hasMore =
+    currentData.length < (pagination_listMdAccount?.totalElement || 0);
+
+  const dataSourceWithKeys = useMemo(() => {
+    if (!currentData || currentData.length === 0) return [];
+
+    return currentData.map((item, index) => ({
+      ...item,
+      key: `${item.id}-${index}`
+    }));
+  }, [currentData]);
+
+  if (!formView) {
+    return (
+      <div className="w-full flex flex-col gap-4">
+        <div className="w-full grid grid-cols-3 gap-4">
+          <NxDetailText label="Account">{account}</NxDetailText>
+          <NxDetailText label="Account SOR">{accountSor}</NxDetailText>
+          <NxDetailText label="Account Cost Center">
+            {accountCostCenter}
+          </NxDetailText>
+          <NxDetailText label="Meter Reading Code">
+            {meterReadingCode}
+          </NxDetailText>
+          <NxDetailText label="Account Segment">{accountSegment}</NxDetailText>
+          <NxDetailText label="Account Group Type">
+            {accountGroupType}
+          </NxDetailText>
+          <NxDetailText label="Account Type">{accountType}</NxDetailText>
+          <NxDetailText label="Premise Address">{premiseAddress}</NxDetailText>
+          <NxDetailText label="Subdistrict">{subDistrict}</NxDetailText>
+          <NxDetailText label="District">{district}</NxDetailText>
+          <NxDetailText label="City">{city}</NxDetailText>
+          <NxDetailText label="Province">{province}</NxDetailText>
+          <NxDetailText label="Country">{country}</NxDetailText>
+          <NxDetailText label="Longitude">{longitude}</NxDetailText>
+          <NxDetailText label="Latitude">{latitude}</NxDetailText>
+          <NxDetailText label="Start Date">
+            {NxDate.formatDate(startDate, dateFormatting.date)}
+          </NxDetailText>
+          <NxDetailText label="End Date">
+            {NxDate.formatDate(endDate, dateFormatting.date)}
+          </NxDetailText>
+        </div>
+        <div className="w-full">
+          <NxDetailText label="Description">{description}</NxDetailText>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-y-4">
+      <div className="w-full grid grid-cols-3 gap-4">
+        <Form.Item label={"Account"} required className="no-margin-form">
+          <div className="flex gap-x-1">
             <Form.Item
               key="account"
               name={"account"}
-              label={"Account"}
-              className="no-margin-form"
               rules={[
                 {
                   message: requiredMessage("Account"),
-                  required: true,
+                  required: true
                 }
               ]}
+              noStyle
             >
               <InputComponent disabled />
             </Form.Item>
             <Button
-              type="primary"
-              className="h-9 px-4 justify-center items-center"
-              style={{
-                backgroundColor: "#0075bf",
-                borderColor: "#0075bf",
-                borderRadius: "5px",
-                minWidth: "112px",
-              }}
+              type="submit"
               onClick={() => {
-                // Add your select logic here
-                setIsOpen(true)
+                setIsOpen(true);
               }}
+              className="w-[120px]"
+              disabled={!isDraft && isUpdate}
             >
               Select
             </Button>
           </div>
+        </Form.Item>
 
-          <Form.Item
-            key="accountSor"
-            name={"accountSor"}
-            label={"Account SOR"}
-            className="no-margin-form"
-            rules={[
-              {
-                message: requiredMessage("Account SOR"),
-                required: true,
-              }
-            ]}
-          >
-            <InputComponent disabled />
-          </Form.Item>
+        <Form.Item
+          key="accountSor"
+          name={"accountSor"}
+          label={"Account SOR"}
+          className="no-margin-form"
+        >
+          <InputComponent disabled />
+        </Form.Item>
 
-          <Form.Item
-            key="accountCostCenter"
-            name={"accountCostCenter"}
-            label={"Account Cost Center"}
-            className="no-margin-form"
-            rules={[
-              {
-                message: requiredMessage("Account Cost Center"),
-                required: true,
-              }
-            ]}
-          >
-            <InputComponent disabled />
-          </Form.Item>
+        <Form.Item
+          key="accountCostCenter"
+          name={"accountCostCenter"}
+          label={"Account Cost Center"}
+          className="no-margin-form"
+        >
+          <InputComponent disabled />
+        </Form.Item>
 
-          <Form.Item
-            key="meterReadingCode"
-            name={"meterReadingCode"}
-            label={"Meter Reading Code"}
-            className="no-margin-form"
-            rules={[
-              {
-                message: requiredMessage("Meter Reading Code"),
-                required: true,
-              }
-            ]}
-          >
-            <InputComponent disabled />
-          </Form.Item>
+        <Form.Item
+          key="meterReadingCode"
+          name={"meterReadingCode"}
+          label={"Meter Reading Code"}
+          className="no-margin-form"
+        >
+          <InputComponent disabled />
+        </Form.Item>
 
-          <Form.Item
-            key="accountSegment"
-            name={"accountSegment"}
-            label={"Account Segment"}
-            className="no-margin-form"
-            rules={[
-              {
-                message: requiredMessage("Account Segment"),
-                required: true,
-              }
-            ]}
-          >
-            <InputComponent disabled />
-          </Form.Item>
+        <Form.Item
+          key="accountSegment"
+          name={"accountSegment"}
+          label={"Account Segment"}
+          className="no-margin-form"
+        >
+          <InputComponent disabled />
+        </Form.Item>
 
-          <Form.Item
-            key="accountGroupType"
-            name={"accountGroupType"}
-            label={"Account Group Type"}
-            className="no-margin-form"
-            rules={[
-              {
-                message: requiredMessage("Account Group Type"),
-                required: true,
-              }
-            ]}
-          >
-            <InputComponent disabled />
-          </Form.Item>
+        <Form.Item
+          key="accountGroupType"
+          name={"accountGroupType"}
+          label={"Account Group Type"}
+          className="no-margin-form"
+        >
+          <InputComponent disabled />
+        </Form.Item>
 
-          <Form.Item
-            key="accountType"
-            name={"accountType"}
-            label={"Account Type"}
-            className="no-margin-form"
-            rules={[
-              {
-                message: requiredMessage("Account Type"),
-                required: true,
-              }
-            ]}
-          >
-            <InputComponent disabled />
-          </Form.Item>
+        <Form.Item
+          key="accountType"
+          name={"accountType"}
+          label={"Account Type"}
+          className="no-margin-form"
+        >
+          <InputComponent disabled />
+        </Form.Item>
 
-          <Form.Item
-            key="premiseAddress"
-            name={"premiseAddress"}
-            label={"Premise Address"}
-            className="no-margin-form"
-            rules={[
-              {
-                message: requiredMessage("Premise Address"),
-                // required: true,
-              }
-            ]}
-          >
-            <InputComponent disabled />
-          </Form.Item>
+        <Form.Item
+          key="premiseAddress"
+          name={"premiseAddress"}
+          label={"Premise Address"}
+          className="no-margin-form"
+        >
+          <InputComponent disabled />
+        </Form.Item>
 
-          <Form.Item
-            key="subdistrict"
-            name={"subdistrict"}
-            label={"Subdistrict"}
-            className="no-margin-form"
-            rules={[
-              {
-                message: requiredMessage("Subdistrict"),
-                // required: true,
-              }
-            ]}
-          >
-            <InputComponent disabled />
-          </Form.Item>
+        <Form.Item
+          key="subDistrict"
+          name={"subDistrict"}
+          label={"Subdistrict"}
+          className="no-margin-form"
+        >
+          <InputComponent disabled />
+        </Form.Item>
 
-          <Form.Item
-            key="district"
-            name={"district"}
-            label={"District"}
-            className="no-margin-form"
-            rules={[
-              {
-                message: requiredMessage("District"),
-                // required: true,
-              }
-            ]}
-          >
-            <InputComponent disabled />
-          </Form.Item>
+        <Form.Item
+          key="district"
+          name={"district"}
+          label={"District"}
+          className="no-margin-form"
+        >
+          <InputComponent disabled />
+        </Form.Item>
 
-          <Form.Item
-            key="city"
-            name={"city"}
-            label={"City"}
-            className="no-margin-form"
-            rules={[
-              {
-                message: requiredMessage("City"),
-                // required: true,
-              }
-            ]}
-          >
-            <InputComponent disabled />
-          </Form.Item>
+        <Form.Item
+          key="city"
+          name={"city"}
+          label={"City"}
+          className="no-margin-form"
+        >
+          <InputComponent disabled />
+        </Form.Item>
 
-          <Form.Item
-            key="country"
-            name={"country"}
-            label={"Country"}
-            className="no-margin-form"
-            rules={[
-              {
-                message: requiredMessage("Country"),
-                // required: true,
-              }
-            ]}
-          >
-            <InputComponent disabled />
-          </Form.Item>
+        <Form.Item
+          key="province"
+          name={"province"}
+          label={"Province"}
+          className="no-margin-form"
+        >
+          <InputComponent disabled />
+        </Form.Item>
 
-          <Form.Item
-            key="longitude"
-            name={"longitude"}
-            label={"Longitude"}
-            className="no-margin-form"
-            rules={[
-              {
-                message: requiredMessage("Longitude"),
-                // required: true,
-              }
-            ]}
-          >
-            <InputComponent disabled />
-          </Form.Item>
+        <Form.Item
+          key="country"
+          name={"country"}
+          label={"Country"}
+          className="no-margin-form"
+        >
+          <InputComponent disabled />
+        </Form.Item>
 
-          <Form.Item
-            key="latitude"
-            name={"latitude"}
-            label={"Latitude"}
-            className="no-margin-form"
-            rules={[
-              {
-                message: requiredMessage("Latitude"),
-                // required: true,
-              }
-            ]}
-          >
-            <InputComponent disabled />
-          </Form.Item>
-        </div>
+        <Form.Item
+          key="longitude"
+          name={"longitude"}
+          label={"Longitude"}
+          className="no-margin-form"
+        >
+          <InputComponent disabled />
+        </Form.Item>
 
-        <div className="w-full grid grid-cols-3 gap-4">
-          <Form.Item
-            key="startDate"
-            name={"startDate"}
-            label={"Start Date"}
-            rules={[
-              {
-                message: requiredMessage("Start Date"),
-                required: true,
-              },
-            ]}
-            className="no-margin-form"
-            getValueFromEvent={(dateMoment) => dateMoment ? dateMoment.format(dateFormatting.f_date) : null}
-            getValueProps={(dateString) => ({
-              value: dateString ? moment(dateString, dateFormatting.f_date) : null
-            })}
-          >
-            <DateComponent />
-          </Form.Item>
+        <Form.Item
+          key="latitude"
+          name={"latitude"}
+          label={"Latitude"}
+          className="no-margin-form"
+        >
+          <InputComponent disabled />
+        </Form.Item>
+        <Form.Item
+          key="startDate"
+          name={"startDate"}
+          label={"Start Date"}
+          rules={[
+            {
+              message: requiredMessage("Start Date"),
+              required: true
+            }
+          ]}
+          className="no-margin-form"
+          getValueProps={(value) => ({
+            value: value && moment(value)
+          })}
+        >
+          <NxDate
+            disabled={!isDraft && isUpdate}
+            onChange={date => {
+              if (date && endDate && date.isAfter(endDate, "day"))
+                form.resetFields(["endDate"])
+            }}
+          />
+        </Form.Item>
 
-          <Form.Item
-            key="endDate"
-            name={"endDate"}
-            label={"End Date"}
-            className="no-margin-form"
-            getValueFromEvent={(dateMoment) => dateMoment ? dateMoment.format(dateFormatting.f_date) : null}
-            getValueProps={(dateString) => ({
-              value: dateString ? moment(dateString, dateFormatting.f_date) : null
-            })}
-          >
-            <DateComponent />
-          </Form.Item>
-        </div>
+        <Form.Item
+          key="endDate"
+          name={"endDate"}
+          label={"End Date"}
+          className="no-margin-form"
+          getValueProps={(value) => ({
+            value: value && moment(value)
+          })}
+        >
+          <NxDate
+            dateDisable={(current) => {
+              if (!moment.isMoment(current)) return false;
+              return current.isBefore(startDate, "day");
+            }}
+          />
+        </Form.Item>
+      </div>
 
-        <div className="w-full my-5">
-          <Form.Item
-            key="description"
-            name={"description"}
-            label={"Description"}
-            className="no-margin-form"
-          >
-            <InputComponent
-              type={"textarea"}
-              rows={4}
-              placeholder="Asset meter baru PGN"
-              maxLength={255}
-            />
-          </Form.Item>
-        </div>
-      </NxPanel>
+      <div className="w-full">
+        <Form.Item
+          key="description"
+          name={"description"}
+          label={"Description"}
+          className="no-margin-form"
+        >
+          <InputComponent
+            type={"textarea"}
+            rows={4}
+            maxLength={255}
+            disabled={!isDraft && isUpdate}
+          />
+        </Form.Item>
+      </div>
 
-      <ModalCustom
+      <NxModal
         isOpen={isOpen}
         handleCancel={handleCancel}
-        handleOk={handleOk}
-        header={"CHOOSE ACCOUNT"}
+        title={"CHOOSE ACCOUNT"}
         width={1100}
-        type={"custom"}
+        type={"confirmation"}
         footer={[
           <Button key="close" onClick={handleClose}>
             Close
-          </Button>,
+          </Button>
         ]}
       >
-        {/* <TablePaginationNew
-          dataSource={data_mdAccountStandard?.result?.map((item, idx) => ({
-            ...item,
-            key: item.id || idx,
-          }))}
-          totalData={sanitizedTotalElement}
-          current={sanitizedPage}
-          pageSize={sanitizedPageSize}
-          onSort={onSort}
-          tableScrolled={{ y: 525, x: 3000 }}
-          columns={columnMain}
-          onChange={handleChangeSize}
-        /> */}
-        <TablePaginationNew
-          dataSource={data_mdAccountStandard?.result?.map((item, index) => ({
-            ...item,
-            key: item.id || index,
-            no: (sanitizedPage - 1) * sanitizedPageSize + index + 1,
-          }))}
-          totalData={sanitizedTotalElement}
-          current={sanitizedPage}
-          pageSize={sanitizedPageSize}
-          onChange={handleChangeSize}
-          onSort={onSort}
-          columns={columnMain}
-          tableScrolled={{ y: 525, x: 3000 }}
-          enableDragColumn={true}
-        />
-      </ModalCustom>
+        <div className="p-4">
+          <NxBaseContainer border>
+            <NxTable
+              idTable="multi-destination-account-standard"
+              dataSource={dataSourceWithKeys}
+              totalData={pagination_listMdAccount.totalElement || 0}
+              current={page}
+              tableScrolled={{ x: 3000 }}
+              onSort={onSort}
+              columns={allColumns}
+              usePagination={false}
+              useInfiniteScroll
+              hasMore={hasMore}
+              onLoadMore={handleLoadMore}
+              loadMoreThreshold={20}
+              columnDefinitions={columnDefinitions}
+              loading={loading_listMdAccount}
+            />
+          </NxBaseContainer>
+        </div>
+      </NxModal>
     </div>
-  )
+  );
 }

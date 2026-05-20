@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import { Spin, Tooltip, Tabs, Modal } from "antd";
 import { WarningOutlined } from "@ant-design/icons";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useLocation } from "react-router-dom";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
 import { useMonitoringList } from "./useMonirotingList";
 import { useDispatch, useSelector } from "react-redux";
@@ -16,9 +16,10 @@ import {
   getListUsagePaginate,
   getListBatchPaginate,
   deleteBatch,
+  getSingleBatch,
+  clearUpdatedBatchIds,
 } from "../../../../redux/slices/rating_billing_invoice/monitoring_usage";
 import { usePrevLocContext } from "../../../../utils/usePrevLoc";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import SVGIcon from "../../../../assets/Icon/index";
@@ -32,12 +33,13 @@ import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 
 const MonitoringUsagePage = () => {
   // Selector
-  const { data_approval_history } = useSelector(
-    (state) => state.monitoring_usage
+  const { data_approval_history, updatedBatchIds } = useSelector(
+    (state) => state.monitoring_usage,
   );
 
   // Declaration
   const dispatch = useDispatch();
+  const location = useLocation();
   const { path } = usePrevLocContext();
   const searchInput = useRef(null);
   const [tabHeader, setTabHeader] = useState("Usage List");
@@ -53,6 +55,7 @@ const MonitoringUsagePage = () => {
     onClickApproval,
     data_approval,
     handleDownload,
+    handleDownloadBatch,
     search,
     setSearch,
     setSearchText,
@@ -70,12 +73,30 @@ const MonitoringUsagePage = () => {
   const [modalApprovalHistory, setModalApprovalHistory] = useState(false);
   const [dataTableSelect, setDataTableSelect] = useState([]);
   const [dataApprovalHistory, setDataApprovalHistory] = useState({});
-  const [fixedColumns, setFixedColumns] = useState(() => ({
-    left: ["no"],
-    right: ["action", "status"],
-  }));
+  const [fixedColumns, setFixedColumns] = useState(() => {
+    try {
+      const saved = localStorage.getItem("monitoringUsageFixedColumns");
+      return saved ? JSON.parse(saved) : { left: ["no"], right: ["action", "status"] };
+    } catch (e) {
+      return { left: ["no"], right: ["action", "status"] };
+    }
+  });
+
+  // Save fixedColumns to localStorage when changed
+  useEffect(() => {
+    try {
+      localStorage.setItem("monitoringUsageFixedColumns", JSON.stringify(fixedColumns));
+    } catch (e) {
+      // ignore storage errors
+    }
+  }, [fixedColumns]);
 
   useEffect(() => {
+    if (location?.state?.defaultTab) {
+      setTabHeader(location.state.defaultTab);
+      return;
+    }
+
     if (
       path &&
       path?.pathname?.includes("/rating-billing/monitoring-usage/view")
@@ -84,7 +105,7 @@ const MonitoringUsagePage = () => {
     } else {
       setTabHeader("Usage List");
     }
-  }, [path]);
+  }, [path, location]);
 
   useEffect(() => {
     if (data_approval_history?.dataApprover) {
@@ -97,6 +118,20 @@ const MonitoringUsagePage = () => {
       setDataApprovalHistory({});
     }
   }, [data_approval_history]);
+
+  // Fetch updated batches ketika kembali ke list
+  useEffect(() => {
+    if (
+      updatedBatchIds &&
+      updatedBatchIds.length > 0 &&
+      tabHeader === "Batch List"
+    ) {
+      // Fetch setiap batch yang di-update
+      updatedBatchIds.forEach((batchId) => {
+        dispatch(getSingleBatch(batchId));
+      });
+    }
+  }, [dispatch, updatedBatchIds, tabHeader]);
 
   const handleApprovalHistory = async (record) => {
     try {
@@ -115,11 +150,10 @@ const MonitoringUsagePage = () => {
       okText: "Delete",
       okType: "danger",
       cancelText: "Cancel",
+      centered: true,
       onOk: async () => {
         try {
           await dispatch(deleteBatch(record?.batchId)).unwrap();
-          // No need to refresh, Redux will automatically update the state
-          // The reducer already handles removing the deleted batch from the list
         } catch (error) {
           console.error("Error deleting batch:", error);
         }
@@ -160,56 +194,68 @@ const MonitoringUsagePage = () => {
     }
   };
 
-  const grantAccessButton = [
-    {
-      action: "Download",
-      render: (
-        <ButtonComponent
-          type={"submit"}
-          border={false}
-          icon={<SVGIcon name="IconButtonDownload" width={20} />}
-          onClick={() => {
-            handleDownload();
-          }}
-        >
-          Download List
-        </ButtonComponent>
-      ),
-    },
-    {
-      action: "Approval",
-      render: (
-        <ButtonComponent
-          icon={
-            <SVGIcon name="IconRequestApproval" color={"#FFFFFF"} width={20} />
-          }
-          type={"submit"}
-          border={false}
-          onClick={() => {
-            onClickApproval();
-            setModalApproval(true);
-            setDataTableSelect(data_approval);
-          }}
-        >
-          Approval
-        </ButtonComponent>
-      ),
-    },
-    {
-      action: "Upload",
-      render: (
-        <NavLink to={RBI_ROUTES.MONITORING_USAGE_UPLOAD}>
+  const grantAccessButton = useMemo(() => {
+    const isUsageList = tabHeader === "Usage List";
+
+    return [
+      {
+        action: "Download",
+        render: (
           <ButtonComponent
-            icon={<SVGIcon name="IconUpload" color={"#FFFFFF"} width={17} />}
             type={"submit"}
             border={false}
+            icon={<SVGIcon name="IconButtonDownload" width={20} />}
+            onClick={() => {
+              if (isUsageList) {
+                handleDownload();
+              } else {
+                handleDownloadBatch();
+              }
+            }}
           >
-            Upload Usage
+            Download List
           </ButtonComponent>
-        </NavLink>
-      ),
-    },
-  ];
+        ),
+      },
+      {
+        action: "Approval",
+        render: (
+          <ButtonComponent
+            icon={
+              <SVGIcon
+                name="IconRequestApproval"
+                color={"#FFFFFF"}
+                width={20}
+              />
+            }
+            type={"submit"}
+            border={false}
+            onClick={() => {
+              onClickApproval();
+              setModalApproval(true);
+              setDataTableSelect(data_approval);
+            }}
+          >
+            Approval
+          </ButtonComponent>
+        ),
+      },
+      {
+        action: "Upload",
+        render: (
+          <NavLink to={RBI_ROUTES.MONITORING_USAGE_UPLOAD}>
+            <ButtonComponent
+              icon={<SVGIcon name="IconUpload" color={"#FFFFFF"} width={17} />}
+              type={"submit"}
+              border={false}
+            >
+              Upload Usage
+            </ButtonComponent>
+          </NavLink>
+        ),
+      },
+    ];
+  }, [tabHeader, handleDownload, handleDownloadBatch]);
 
   const grantAccessUsage = [
     {
@@ -232,7 +278,7 @@ const MonitoringUsagePage = () => {
 
   const columnActionUsage = useColumnActionPermission(
     ["history"],
-    grantAccessUsage
+    grantAccessUsage,
   ).map((col) => ({
     ...col,
     width: 80,
@@ -269,9 +315,9 @@ const MonitoringUsagePage = () => {
             </Link>
 
             <Tooltip
-              // title={
-              //   isDraft ? "Delete Batch" : "Cannot delete (Status not Draft)"
-              // }
+            // title={
+            //   isDraft ? "Delete Batch" : "Cannot delete (Status not Draft)"
+            // }
             >
               <div
                 style={{
@@ -303,6 +349,7 @@ const MonitoringUsagePage = () => {
                   name="IconDelete"
                   width={20}
                   color={isDraft ? undefined : "#C0BEC6"}
+                  className={"cursor-not-allowed"}
                 />
               </div>
             </Tooltip>
@@ -359,7 +406,7 @@ const MonitoringUsagePage = () => {
         pageSize: 100,
         sort,
         isLoadMore: false,
-      })
+      }),
     );
     setPage(1);
   };
@@ -372,14 +419,14 @@ const MonitoringUsagePage = () => {
         pageSize: 100,
         sort,
         isLoadMore: false,
-      })
+      }),
     );
     setPage(1);
   };
 
   return (
-    <Spin spinning={loading}>
-      <LayoutMenu>
+    <>
+      <div>
         <BreadCrumb routes={routes} />
 
         <CardContainer
@@ -415,6 +462,8 @@ const MonitoringUsagePage = () => {
                   onLoadMore={handleLoadMore}
                   hasMore={hasMoreUsage}
                   loadMoreThreshold={20}
+                  showRefresh={true}
+                  onRefresh={handleListRefresh}
                 />
               </div>
             </Tabs.TabPane>
@@ -437,12 +486,14 @@ const MonitoringUsagePage = () => {
                   onLoadMore={handleLoadMore}
                   hasMore={hasMoreBatch}
                   loadMoreThreshold={20}
+                  showRefresh={true}
+                  onRefresh={handleBatchListRefresh}
                 />
               </div>
             </Tabs.TabPane>
           </Tabs>
         </CardContainer>
-      </LayoutMenu>
+      </div>
 
       {modalApproval ? (
         <ModalApprovalUsage
@@ -461,7 +512,7 @@ const MonitoringUsagePage = () => {
         dataApprover={dataApprovalHistory?.dataApprover}
         dataHistory={dataApprovalHistory?.dataHistory}
       />
-    </Spin>
+    </>
   );
 };
 

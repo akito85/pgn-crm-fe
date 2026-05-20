@@ -81,7 +81,7 @@ const getDetailByIdBody = async (url, id) => {
     const response = await axios.get(
       baseUrl + url,
       { id: id },
-      { headers: buildHeaders(baseUrl) }
+      { headers: buildHeaders(baseUrl) },
     );
     return response?.data;
   } catch (error) {
@@ -109,21 +109,23 @@ const downloadData = async (url, customBaseUrl) => {
       headers: tokenHeader(),
       responseType: "blob",
     });
-    if (hasValue(response.headers?.get("content-disposition"))) {
-      const rawFilename = response.headers
-        .get("content-disposition")
-        .split(";")
-        .find((n) => n.includes("filename="))
-        .replace("filename=", "")
-        .trim();
+    if (hasValue(response.headers?.["content-disposition"])) {
+      const contentDisposition = response.headers["content-disposition"];
+      let filename = "download.xlsx";
+      
+      const utf8Match = contentDisposition.match(/filename\*=UTF-8''(.+)/i);
+      if (utf8Match) {
+        filename = decodeURIComponent(utf8Match[1]);
+      } else {
+        const filenameMatch = contentDisposition.match(/filename="?([^"]+)"?/i);
+        if (filenameMatch) {
+          filename = filenameMatch[1];
+        }
+      }
+      
+      filename = filename.replace(/['"]/g, "").replace(/_+$/, "");
 
-      // Remove quotes and trailing underscore
-      const filename = rawFilename.replace(/['"]/g, "").replace(/_+$/, "");
-
-      console.log("📥 [downloadData] Raw filename:", rawFilename);
-      console.log("📥 [downloadData] Cleaned filename:", filename);
-
-      const blob = await response?.data;
+      const blob = response.data;
       FileSaver.saveAs(blob, filename);
     } else if (errorCode(response) === 204) {
       throw response;
@@ -230,6 +232,20 @@ const deleteData = async (url) => {
   }
 };
 
+const deleteDataWithBody = async (url, body) => {
+  try {
+    const baseUrl = configApp.RATING_BILLING_SERVICE;
+
+    const response = await axios.delete(baseUrl + url, {
+      headers: buildHeaders(baseUrl),
+      data: body,
+    });
+    return response?.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 const activationWithRemark = async (url, body, customBaseUrl = null) => {
   try {
     const baseUrl = customBaseUrl || configApp.RATING_BILLING_SERVICE;
@@ -257,17 +273,19 @@ const activationRemarkWithPut = async (url, body) => {
 };
 
 //upload attachment
-const uploadAttachment = async (url, body, onProgress, customBaseUrl) => {
+const uploadAttachment = async (url, body, onProgress = () => {}, customBaseUrl) => {
   try {
     const baseUrl = customBaseUrl || configApp.RATING_BILLING_SERVICE;
 
     const response = await axios.post(baseUrl + url, body, {
       headers: buildHeaders(baseUrl, { "Content-Type": "multipart/form-data" }),
       onUploadProgress: (progressEvent) => {
-        const percentCompleted = Math.round(
-          (progressEvent.loaded * 100) / progressEvent.total
-        );
-        onProgress(percentCompleted);
+        if (onProgress && typeof onProgress === "function") {
+          const percentCompleted = Math.round(
+            (progressEvent.loaded * 100) / progressEvent.total,
+          );
+          onProgress(percentCompleted);
+        }
       },
     });
     return response?.data;
@@ -361,7 +379,7 @@ const previewOrDownloadData = async (url, params, customBaseUrl) => {
 const downloadXlsx = async (
   url,
   fallbackFilename = "download",
-  customBaseUrl
+  customBaseUrl,
 ) => {
   try {
     const baseUrl = customBaseUrl || configApp.RATING_BILLING_SERVICE;
@@ -471,6 +489,7 @@ const ratingBillingHttpService = {
   updateData,
   activationWithRemark,
   deleteData,
+  deleteDataWithBody,
   getWithBody,
   getListPagination,
   downloadData,

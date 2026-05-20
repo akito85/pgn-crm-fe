@@ -6,12 +6,14 @@ import {
 } from "antd";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import BaseContainer from "../../../../../components/BaseContainer";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
+import CardContainer from "../../../../../components/CardContainer";
 import SVGIcon from "../../../../../assets/Icon/index";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import TablePagination from "../../../../../components/TablePagination";
+import TableRBI from "../../../../../components/TableRBI";
 import {
   DownloadOutlined,
+  EyeOutlined
 } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
 import {
@@ -102,7 +104,11 @@ const ViewPaymentItem = () => {
   const routes = [
     {
       path: "",
-      breadcrumbName: "Receipt & Collection",
+      breadcrumbName: "System Setup",
+    },
+    {
+      path: "",
+      breadcrumbName: "Master Data",
     },
     {
       path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_PAYMENT_ITEM,
@@ -164,12 +170,12 @@ const ViewPaymentItem = () => {
   const handleApprovalHistory = async (data) => {
     try {
       setBody(data);
-     await dispatch(getApprovalHistory(data))?.unwrap();
+      await dispatch(getApprovalHistory(data))?.unwrap();
       setOpenModalHistory(true);
-      
+
     } catch (error) {
       setOpenModalHistory(false);
-      
+
     }
   };
 
@@ -178,6 +184,7 @@ const ViewPaymentItem = () => {
       title: "NO",
       width: 60,
       align: "center",
+      isClassification: true,
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {
@@ -479,7 +486,7 @@ const ViewPaymentItem = () => {
                   icon={<SVGIcon name="IconDetail" width={24} />}
                   border={false}
                 /> */}
-              <SVGIcon name="IconDetail" width={24} />
+              <EyeOutlined width={24} />
             </Link>
           </Tooltip>
         );
@@ -490,9 +497,9 @@ const ViewPaymentItem = () => {
       type: "table",
       render: (record, data_length) => {
         const isEditable =
-        record.status === "Draft" && record.statusApproval === "Rejected" 
-          // (record.statusApproval === "Waiting Approval" && record.status === "Draft") ||
-          // (record.status !== "Active" && record.statusApproval !== "Approved") 
+          record.status === "Draft" && record.statusApproval === "Rejected"
+        // (record.statusApproval === "Waiting Approval" && record.status === "Draft") ||
+        // (record.status !== "Active" && record.statusApproval !== "Approved") 
 
         return (
           data_length > 3 ? (
@@ -503,7 +510,7 @@ const ViewPaymentItem = () => {
               <ButtonComponent
                 className="gap-5 w-full"
                 icon={
-                  <SVGIcon name="IconEdit" width={24} color={isEditable? "#0075bf" : "#8D91A0"} />
+                  <SVGIcon name="IconEdit" width={24} color={isEditable ? "#0075bf" : "#8D91A0"} />
                 }
                 border={false}
                 disabled={!isEditable}
@@ -539,13 +546,13 @@ const ViewPaymentItem = () => {
       render: (record, data_length) => {
         const statusLowerCase = record?.status?.toLowerCase()
         const isActivateOrInactivate =
-        (record.statusApproval === "Approved" &&
-          record.status === "Active") ||
-        (record.statusApproval === "Draft" && record.status === "Active") ||
-        (record.statusApproval === "Rejected" &&
-          record.status === "Active") ||
-        (record.statusApproval === "Waiting Approval" &&
-          record.status === "Active");
+          (record.statusApproval === "Approved" &&
+            record.status === "Active") ||
+          (record.statusApproval === "Draft" && record.status === "Active") ||
+          (record.statusApproval === "Rejected" &&
+            record.status === "Active") ||
+          (record.statusApproval === "Waiting Approval" &&
+            record.status === "Active");
         return (
           data_length > 3 ?
             <ButtonComponent
@@ -597,7 +604,7 @@ const ViewPaymentItem = () => {
                   }}
                   checked={record?.status !== "Active"}
                   disabled={record?.status !== "Active"}
-                  // disabled={disabledActionByStatus('paymentActivate', record?.status, record?.statusApproval)}
+                // disabled={disabledActionByStatus('paymentActivate', record?.status, record?.statusApproval)}
                 />
               </div>
             </Tooltip>
@@ -655,14 +662,22 @@ const ViewPaymentItem = () => {
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
-        <Toolbar items={itemActions} />
-        <BaseContainer header={"PAYMENT METHOD LIST"}>
-          <TablePagination
+        <CardContainer header={
+          <div className="flex -my-4 justify-between items-center">
+            <p className="mt-[15px] font-bold">PAYMENT METHOD LIST</p>
+            <div className="flex gap-2">
+              <Toolbar items={itemActions} />
+            </div>
+          </div>
+        }>
+          <TableRBI
             dataSource={data?.result}
             pageSize={pageSize}
+            showExport={true}
+            handleDownload={handleDownload}
             // columns={columns}
             columns={[
               ...columns,
@@ -677,11 +692,11 @@ const ViewPaymentItem = () => {
             totalData={data?.page?.totalElements}
             onSort={onSort}
             tableScrolled={{
-              x: 2500,
+              x: "max-content",
               y: 525,
             }}
           />
-        </BaseContainer>
+        </CardContainer>
 
         <ModalInactivateWithHierarchy
           dispatch={dispatch}
@@ -707,7 +722,7 @@ const ViewPaymentItem = () => {
       </Spin>
       {/* modal try again */}
       {renderModal()}
-    </LayoutMenu>
+    </>
   );
 };
 

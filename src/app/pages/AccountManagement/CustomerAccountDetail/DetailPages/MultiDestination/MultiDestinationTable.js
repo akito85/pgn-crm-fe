@@ -1,539 +1,266 @@
-import { Badge, Button, Checkbox, Tooltip } from "antd";
-import SVGIcon from "../../../../../../assets/Icon/index";
-import moment from "moment";
-import { dateFormatting, toTitleCase } from "../../../../../../utils";
-import StatusComponent from "../../../../../../components/StatusComponent";
-import { Link, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../routes/account_management/customer_account_routes";
 import { useColumnActionPermission } from "../../../../../../components/ColumnActionPermission";
-import ButtonComponent from "../../../../../../components/ButtonComponent";
 import Toolbar from "../../../../../../components/Toolbar";
-import { CheckOutlined, DownloadOutlined, FilterOutlined, PlusOutlined } from "@ant-design/icons";
-import { TablePaginationNew } from "poc-table-dragandrop";
-import { useEffect } from "react";
+import NxTable from "../../../../../../components/Nx/NxTable";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { getMultiDestinationColumns } from "./getMultiDestinationColumns";
+import { nxGetAccountActions } from "../../../../../../components/Nx/NxGetAccountActions";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  getMultiDestinations,
+  downloadMultiDestination
+} from "../../../../../../redux/slices/account_management/detailAccount/MultiDestinationSlice";
 
+/**
+ * Multi destination list table (container + presentational component).
+ * Owns search, pagination, sort, filter, and download state/logic.
+ * The parent (`MultiDestination`) is responsible only for modals and permissions.
+ *
+ * @param {object}   props
+ * @param {number}   [props.accountId=0]                  - Account ID
+ * @param {number}   [props.customerId=0]                 - Customer ID
+ * @param {Function} [props.handleInactivateModal]        - Opens the inactivate confirmation modal
+ * @param {Function} [props.handleApprovalHistoryModal]   - Opens the approval history modal
+ * @param {Function} [props.handleApproval]               - Triggers the approval action
+ * @param {number}   [props.refreshSignal=0]              - Increment to trigger a page-0 refresh from the parent
+ */
 const MultiDestinationTable = ({
-  data = [],
-  idAccount = 0,
-  idCustomer = 0,
-  handleChange = {},
-  handleChangeSize = {},
-  totalElement = {},
-  page = {},
-  pageSize = {},
-  onSort = {},
-  getColumnSearchProps = () => {},
-  rowSelection,
-  isApproval = false,
+  accountId,
+  customerId,
   handleInactivateModal = () => {},
   handleApprovalHistoryModal = () => {},
-  handleIsApproval = () => {},
-  handleDownload = () => {},
-  tempFilters = [],
-  setShowFilterModal = () => {},
+  handleApproval = () => {},
+  refreshSignal = 0,
 }) => {
+  // --- Hooks ---
+  const location = useLocation();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const {
+    list_multiDestination: dataSource,
+    pagination_listMd: pagination,
+    loading_listMd: loading,
+  } = useSelector((state) => state.multiDestination);
 
-  const columns = [
-    {
-      title: "NO",
-      align: "center",
-      dataIndex: "no",
-      width: 100,
-    },
-    {
-      title: "MULTI DESTINATION",
-      dataIndex: "id",
-      width: 250,
-      sorter: true,
-      ...getColumnSearchProps("id"),
-    },
-    {
-      title: "CUSTOMER NUMBER",
-      dataIndex: "customerNumber",
-      width: 250,
-      sorter: true,
-      ...getColumnSearchProps("customerNumber"),
-    },
-    {
-      title: "IDENTIFICATION TYPE",
-      dataIndex: "identificationType",
-      width: 250,
-      sorter: true,
-      align: "center",
-      ...getColumnSearchProps("identificationType"),
-    },
-    {
-      title: "CUSTOMER IDENTIFICATION NUMBER",
-      dataIndex: "customerIdentificationNumber",
-      width: 250,
-      sorter: true,
-      align: "center",
-      ...getColumnSearchProps("customerIdentificationNumber"),
-    },
-    {
-      title: "CUSTOMER NAME",
-      dataIndex: "customerName",
-      width: 250,
-      sorter: true,
-      align: "center",
-      ...getColumnSearchProps("customerName"),
-    },
-    {
-      title: "CUSTOMER TYPE",
-      dataIndex: "customerType",
-      width: 250,
-      sorter: true,
-      align: "center",
-      ...getColumnSearchProps("customerType"),
-    },
-    {
-      title: "ACCOUNT NUMBER",
-      dataIndex: "accountNumber",
-      width: 250,
-      sorter: true,
-      align: "center",
-      ...getColumnSearchProps("accountNumber"),
-    },
-    {
-      title: "ACCOUNT NAME",
-      dataIndex: "accountName",
-      width: 250,
-      sorter: true,
-      align: "center",
-      ...getColumnSearchProps("accountName"),
-    },
-    {
-      title: "CATEGORY",
-      dataIndex: "category",
-      width: 250,
-      sorter: true,
-      align: "center",
-      ...getColumnSearchProps("category"),
-    },
-    {
-      title: "SOR",
-      dataIndex: "sor",
-      width: 250,
-      sorter: true,
-      align: "center",
-      ...getColumnSearchProps("sor"),
-    },
-    {
-      title: "COST CENTER",
-      dataIndex: "costCenter",
-      width: 250,
-      sorter: true,
-      align: "center",
-      ...getColumnSearchProps("costCenter"),
-    },
-    {
-      title: "METER READING CODES",
-      dataIndex: "meterReadingCodes",
-      width: 250,
-      sorter: true,
-      align: "center",
-      ...getColumnSearchProps("meterReadingCodes"),
-    },
-    {
-      title: "CUSTOMER MANAGEMENT",
-      dataIndex: "customerManagement",
-      width: 250,
-      sorter: true,
-      align: "center",
-      ...getColumnSearchProps("customerManagement"),
-    },
-    {
-      title: "CLASSIFICATION TYPE",
-      dataIndex: "classificationType",
-      width: 250,
-      sorter: true,
-      align: "center",
-      ...getColumnSearchProps("classificationType"),
-    },
-    {
-      title: "SEGMENT",
-      dataIndex: "segment",
-      width: 250,
-      sorter: true,
-      align: "center",
-      ...getColumnSearchProps("segment"),
-    },
-    {
-      title: "ACCOUNT GROUP TYPE",
-      dataIndex: "accountGroupType",
-      width: 250,
-      sorter: true,
-      align: "center",
-      ...getColumnSearchProps("accountGroupType"),
-    },
-    {
-      title: "PREMISE ADDRESS",
-      dataIndex: "premiseAddress",
-      width: 250,
-      sorter: true,
-      align: "center",
-      ...getColumnSearchProps("premiseAddress"),
-    },
-    {
-      title: "SUBDISTRICT",
-      dataIndex: "subDistrict",
-      width: 250,
-      sorter: true,
-      align: "center",
-      ...getColumnSearchProps("subDistrict"),
-    },
-    {
-      title: "DISTRICT",
-      dataIndex: "district",
-      width: 250,
-      sorter: true,
-      align: "center",
-      ...getColumnSearchProps("district"),
-    },
-    {
-      title: "CITY",
-      dataIndex: "city",
-      width: 250,
-      sorter: true,
-      align: "center",
-      ...getColumnSearchProps("city"),
-    },
-    {
-      title: "COUNTRY",
-      dataIndex: "country",
-      width: 250,
-      sorter: true,
-      align: "center",
-      ...getColumnSearchProps("country"),
-    },
-    {
-      title: "LONGITUDE",
-      dataIndex: "longitude",
-      width: 250,
-      sorter: true,
-      align: "center",
-      ...getColumnSearchProps("longitude"),
-    },
-    {
-      title: "LATITUDE",
-      dataIndex: "latitude",
-      width: 250,
-      sorter: true,
-      align: "center",
-      ...getColumnSearchProps("latitude"),
-    },
-    {
-      title: "START DATE",
-      dataIndex: "startDate",
-      width: 250,
-      sorter: true,
-      align: "center",
-      ...getColumnSearchProps("startDate", "date"),
-    },
-    {
-      title: "END DATE",
-      dataIndex: "endDate",
-      width: 250,
-      sorter: true,
-      align: "center",
-      ...getColumnSearchProps("endDate", "date"),
-    },
-    {
-      title: "STATUS APPROVAL",
-      dataIndex: "statusApproval",
-      width: 300,
-      sorter: true,
-      align: "center",
-      fixed: "right",
-      ...getColumnSearchProps("statusApproval"),
-      render: (status) => {
-        const displayText = {
-          "approved": "Approved",
-          "waitingApproval": "Waiting Approval",
-          "pending": "Pending",
-          "rejected": "Rejected",
-          "WAITING_APPROVAL": "Waiting Approval"
-        };
-        return (
-          <div className="flex justify-center">
-            <StatusComponent colour={status}>
-              {displayText[status] || toTitleCase(String(status || "")) || "-"}
-            </StatusComponent>
-          </div>
-        );
-      },
-    },
-    {
-      title: "STATUS",
-      dataIndex: "status",
-      sorter: true,
-      fixed: "right",
-      width: 150,
-      ...getColumnSearchProps("status"),
-      render: (status) => {
-        const displayText = {
-          "active": "Active",
-          "inactive": "Inactive",
-        };
+  // --- Derived values ---
+  const isStandard = location.pathname.includes("account-standard");
+  const isOneTime = location.pathname.includes("account-onetime");
 
-        return (
-          <div className={" flex justify-center"}>
-            <StatusComponent colour={status}>
-              {displayText[status] || toTitleCase(String(status || "")) || "-"}
-            </StatusComponent>
-          </div>
-        )
-      },
-    },
-  ];
+  const totalElement = pagination.totalElement;
+  const hasMore = dataSource.length < (totalElement || 0);
 
-  const itemActions = [
-    {
-      action: "Download",
-      render: (
-        <ButtonComponent
-          type={"submit"}
-          onClick={handleDownload}
-          icon={
-            <DownloadOutlined
-              style={{
-                color: "#fff",
-                fontSize: 20,
-              }}
-            />
-          }
-          style={{
-            backgroundColor: "#0075bf",
-            color: "#fff",
-            borderColor: "#0075bf",
-            border: "1px solid #0075bf",
-            borderRadius: "5px",
-            height: "48px"
-          }}
-        >
-          Download List
-        </ButtonComponent>
-      )
-    },
-    {
-      action: "Approve",
-      render: (
-        <ButtonComponent
-          type={"submit"}
-          onClick={() => handleIsApproval(true)}
-          icon={
-            <CheckOutlined
-              style={{
-                color: "#fff",
-                fontSize: 20,
-              }}
-            />
-          }
-          style={{
-            backgroundColor: "#0075bf",
-            color: "#fff",
-            borderColor: "#0075bf",
-            border: "1px solid #0075bf",
-            borderRadius: "5px",
-            height: "48px"
-          }}
-        >
-          Approval
-        </ButtonComponent>
-      )
-    },
-    {
-      action: "Create",
-      render: (
-        <Link to={ACCOUNT_MANAGEMENT_ROUTES.CREATE_MULTI_DESTINATION} state={{
-          idAccount,
-          idCustomer,
-        }}>
-          <ButtonComponent
-            type={"submit"}
-            icon={
-              <PlusOutlined
-                style={{
-                  color: "#fff",
-                  fontSize: 20,
-                }}
-              />
-            }
-            style={{
-              backgroundColor: "#0075bf",
-              color: "#fff",
-              borderColor: "#0075bf",
-              border: "1px solid #0075bf",
-              borderRadius: "5px",
-              height: "48px"
-            }}
-          >
-            Create
-          </ButtonComponent>
-        </Link>
-      )
-    },
-    {
-      action: 'View',
-      type: 'table',
-      render: (r, data_length) => {
-        return (
-          <Link to={ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_MULTI_DESTINATION} state={{
-            idMd: r.id,
-            idAccount,
-            idCustomer,
-          }}>
-            <Tooltip title="Detail">
-              <div className="pt-1">
-                <SVGIcon
-                  name="IconDetail"
-                  color={"#0075bf"}
-                  width={24}
-                />
-              </div>
-            </Tooltip>
-          </Link>
-        )
+  // --- State ---
+  const searchInput = useRef(null);
+  const [page, setPage] = useState(0);
+  const [loadMoreSize] = useState(20);
+  const [searchedColumn, setSearchedColumn] = useState("");
+  const [searchText, setSearchText] = useState("");
+  const [sort, setSort] = useState("");
+  const [search, setSearch] = useState({});
+  const [filters, setFilters] = useState([]);
+  const [filterRules, setFilterRules] = useState([]);
+
+  // --- Handlers ---
+  const handleRefresh = () => {
+    const body = {
+      page: 0,
+      size: loadMoreSize,
+      sort,
+      searchs: search,
+      filters,
+      filterRules,
+    };
+
+    dispatch(getMultiDestinations({ id: accountId, body, isLoadMore: false }));
+    setPage(0);
+  };
+
+  /**
+   * @param {string[]} selectedKeys
+   * @param {() => {}} confirm
+   * @param {string} dataIndex
+   */
+  const handleSearch = (selectedKeys, confirm, dataIndex) => {
+    confirm();
+    setSearchText(selectedKeys[0]);
+    setSearchedColumn(dataIndex);
+    setSearch((prevState) => {
+      if (prevState[dataIndex] !== selectedKeys[0]) {
+        setPage(0);
       }
-    },
-    {
-      action: 'Update',
-      type: 'table',
-      render: (r, data_length) => {
-        return (
-          <Button
-            type="text"
-            style={{ padding: 0, height: 'auto', border: 'none' }}
-            onClick={() => navigate(ACCOUNT_MANAGEMENT_ROUTES.UPDATE_MULTI_DESTINATION, { state: {
-              idMd: r.id,
-              idAccount,
-              idCustomer,
-            }})}
-            disabled={r.statusApproval === "WAITING_APPROVAL" || r.status === "INACTIVE"}
-          >
-            <Tooltip title="Update">
-              <div className="pt-1">
-                <SVGIcon
-                  name="IconUpdateAction"
-                  color={"#0075bf"}
-                  width={24}
-                />
-              </div>
-            </Tooltip>
-          </Button>
-        )
-      }
-    },
-    {
-      action: 'Inactivate',
-      type: 'table',
-      render: (r, data_length) => {
-        return (
-          <Tooltip
-            title="Inactivate"
-          >
-            <Checkbox
-              className="inactive-check"
-              disabled={r?.status === "ACTIVE" ? false : true}
-              checked={r?.status === "ACTIVE" ? false : true}
-              onClick={() => handleInactivateModal(true, r?.id, r?.appHierId, r?.relatedAccountNumber)}
-            />
-          </Tooltip>
-        )
-      }
-    },
-    {
-      action: 'History',
-      type: 'table',
-      render: (r, data_length) => {
-        return (
-          <Tooltip title="History">
-            <div className="pt-1">
-              <SVGIcon
-                name="IconLogHistory"
-                color={"#0075bf"}
-                width={24}
-                onClick={() => handleApprovalHistoryModal(true, r?.id)}
-              />
-            </div>
-          </Tooltip>
-        )
-      }
+      return {
+        ...prevState,
+        [dataIndex]: selectedKeys[0],
+      };
+    });
+  };
+
+  /**
+   * @param {*} _
+   * @param {*} __
+   * @param {import("antd/lib/table/interface").SorterResult} sort
+   */
+  const onSort = (_, __, sort) => {
+    const dataSort = sort.order
+      ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
+      : "";
+    setSort(dataSort);
+  };
+
+  /**
+   * Loads the next page of records and appends them to the existing list.
+   */
+  const handleLoadMore = async () => {
+    const nextPage = page + 1;
+    const totalPage = pagination.totalPage || 0;
+
+    if (nextPage <= totalPage) {
+      const body = {
+        page: nextPage,
+        size: loadMoreSize,
+        sort,
+        searchs: search,
+        filters,
+        filterRules,
+      };
+
+      await dispatch(
+        getMultiDestinations({ id: accountId, body, isLoadMore: true })
+      ).unwrap();
     }
-  ];
+    setPage(nextPage);
+  };
+
+  /**
+   * Dispatches a download action for the current filtered/sorted view.
+   */
+  const handleDownload = () => {
+    const body = {
+      sort,
+      filters,
+      filterRules,
+      searchs: search,
+    };
+
+    dispatch(downloadMultiDestination({ body, id: accountId }));
+  };
+
+  // --- Effects ---
+  // Re-fetch page 0 whenever sort or search changes.
+  useEffect(() => {
+    const body = {
+      page: 0,
+      size: loadMoreSize,
+      sort,
+      searchs: search,
+      filters,
+      filterRules,
+    };
+
+    setPage(0);
+    dispatch(getMultiDestinations({ id: accountId, body, isLoadMore: false }));
+  }, [sort, search, filters, filterRules]);
+
+  // Trigger a page-0 refresh when the parent signals it (e.g. after inactivate/approval).
+  useEffect(() => {
+    if (refreshSignal > 0) handleRefresh();
+  }, [refreshSignal]);
+
+  // --- Column configuration ---
+  const itemActions = nxGetAccountActions({
+    handleView: ({ id }) => navigate(
+      isStandard ?
+        ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_MULTI_DESTINATION :
+      isOneTime ?
+        ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_MULTI_DESTINATION_ONETIME :
+        "",
+      {
+        state: {
+          idAccount: accountId,
+          idCustomer: customerId,
+          id,
+        }
+      }
+    ),
+    handleCreate: () => navigate(
+      isStandard ?
+        ACCOUNT_MANAGEMENT_ROUTES.CREATE_MULTI_DESTINATION :
+      isOneTime ?
+        ACCOUNT_MANAGEMENT_ROUTES.CREATE_MULTI_DESTINATION_ONETIME :
+        "",
+      {
+        state: {
+          idAccount: accountId,
+          idCustomer: customerId,
+        }
+      }
+    ),
+    handleUpdate: ({ id, status, statusApproval }) => navigate(
+      isStandard ?
+        ACCOUNT_MANAGEMENT_ROUTES.UPDATE_MULTI_DESTINATION :
+      isOneTime ?
+        ACCOUNT_MANAGEMENT_ROUTES.UPDATE_MULTI_DESTINATION_ONETIME :
+        "",
+      {
+        state: {
+          idAccount: accountId,
+          idCustomer: customerId,
+          id,
+          status,
+          statusApproval,
+        }
+      }
+    ),
+    handleApproval,
+    handleApprovalHistory: ({ id }) => handleApprovalHistoryModal(true, id),
+    handleDownload,
+    handleInactivate: ({ id, accountNumber }) => handleInactivateModal(true, id, accountNumber),
+  });
+
+  const actionCols = useColumnActionPermission(["Inactivate", "View", "Update", "History"], itemActions, "View", "table").map(
+    (col) => ({
+      ...col,
+      width: 70,
+      align: "center",
+      fixed: "right",
+    })
+  );
+
+  const baseColumns = useMemo(() =>
+    getMultiDestinationColumns({
+      search,
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch
+    }),
+  [search, searchText, searchedColumn]);
+
+  const columns = useMemo(() => {
+    return [...baseColumns, ...actionCols].map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title,
+    }));
+  }, [baseColumns, actionCols]);
 
   return (
-    <div className="flex flex-col gap-y-6">
-      {!isApproval && (
-        <div className="flex justify-between items-center gap-5 mb-5">
-          <Badge count={tempFilters.length}>
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => setShowFilterModal(true)}
-              icon={
-                <FilterOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 20,
-                  }}
-                />
-              }
-              style={{
-                backgroundColor: "#0075bf",
-                color: "#fff",
-                borderColor: "#0075bf",
-                border: "1px solid #0075bf",
-                width: "128px",
-                height: "48px",
-                borderRadius: "5px"
-              }}
-            >
-              Filters
-            </ButtonComponent>
-          </Badge>
-          <Toolbar items={itemActions} type="detail" />
-        </div>
-      )}
-      {/* <TablePagination
-        dataSource={data}
+    <div className="flex flex-col gap-y-4">
+      <Toolbar items={itemActions} type="detail" />
+      <NxTable
+        idTable="multi-destination-table"
+        dataSource={dataSource}
         totalData={totalElement}
         current={page}
-        pageSize={pageSize}
-        onChange={handleChange}
-        onSizeChanger={handleChangeSize}
-        tableScrolled={{ y: 400, x: 2000 }}
+        tableScrolled={{ x: dataSource.length ? "max-content" : 4000 }}
         onSort={onSort}
-        columns={[
-          ...columns,
-          ...useColumnActionPermission(
-            ["Inactivate", "View", "Update", "History"],
-            itemActions,
-            "View",
-            "detail"
-          )
-        ]}
-        rowSelection={rowSelection}
-      /> */}
-      <TablePaginationNew
-        dataSource={data}
-        totalData={totalElement}
-        current={page}
-        pageSize={pageSize}
-        onChange={handleChangeSize}
-        tableScrolled={{ y: 400, x: 2000 }}
-        onSort={onSort}
-        columns={[
-          ...columns,
-          ...useColumnActionPermission(
-            ["Inactivate", "View", "Update", "History"],
-            itemActions,
-            "View",
-            "detail"
-          )
-        ]}
-        rowSelection={rowSelection}
-        enableDragColumn={!isApproval}
+        columns={columns}
+        usePagination={false}
+        useInfiniteScroll={true}
+        hasMore={hasMore}
+        onLoadMore={handleLoadMore}
+        loadMoreThreshold={20}
+        loading={loading}
       />
     </div>
   );

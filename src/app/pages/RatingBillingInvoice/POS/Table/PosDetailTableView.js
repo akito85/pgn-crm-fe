@@ -68,7 +68,9 @@ const sorter = (fieldSort, a, b) => {
         //     ? tempValue[0].replace(/\B(?=(\d{3})+(?!\d))/g, thousandSeparator) +
         //       descimal
         //     : "";
-        return obj[fieldSort] ? (obj[fieldSort] || 0)?.toString()?.toLowerCase() : "0" ;
+        return obj[fieldSort]
+          ? (obj[fieldSort] || 0)?.toString()?.toLowerCase()
+          : "0";
 
       default:
         return obj[fieldSort]?.toLowerCase();
@@ -89,11 +91,13 @@ const sorter = (fieldSort, a, b) => {
       case "total":
       case "totalEqvIdr":
       case "totalEqvUsd":
-        return Math.sign(parseInt(a.replace(/,/g, '')) - parseInt(b.replace(/,/g, '')))
+        return Math.sign(
+          parseInt(a.replace(/,/g, "")) - parseInt(b.replace(/,/g, "")),
+        );
       default:
         return a.localeCompare(b);
     }
-  }
+  };
 
   return handleCompare(fa, fb);
 };
@@ -111,13 +115,61 @@ const columnDetail = (
   handleUpdate = () => {},
   onFilter,
   sorter,
-  data = []
+  data = [],
 ) => {
   const column = [
     {
       title: "NO",
       width: 60,
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
+    },
+    {
+      title: "LINE NUMBER",
+      dataIndex: "lineNumber",
+      sorter: true,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "lineNumber",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+      ),
+      render: (text) =>
+        renderColumn(
+          "lineNumber",
+          hasValue(search["lineNumber"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
+    },
+    {
+      title: "SOURCE",
+      dataIndex: "source",
+      sorter: true,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "source",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+      ),
+      render: (text) =>
+        renderColumn(
+          "source",
+          hasValue(search["source"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "TYPE",
@@ -139,7 +191,7 @@ const columnDetail = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -149,7 +201,31 @@ const columnDetail = (
           text,
           false,
           "input",
-          search
+          search,
+        ),
+    },
+    {
+      title: "ITEM CODE",
+      dataIndex: "itemId",
+      sorter: true,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "itemId",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+      ),
+      render: (text) =>
+        renderColumn(
+          "itemId",
+          hasValue(search["itemId"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
         ),
     },
     {
@@ -172,7 +248,7 @@ const columnDetail = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -182,7 +258,55 @@ const columnDetail = (
           text,
           false,
           "input",
-          search
+          search,
+        ),
+    },
+    {
+      title: "QUANTITY",
+      dataIndex: "quantity",
+      sorter: true,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "quantity",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+      ),
+      render: (text) =>
+        renderColumn(
+          "quantity",
+          hasValue(search["quantity"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
+    },
+    {
+      title: "UOM",
+      dataIndex: "uom",
+      sorter: true,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "uom",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+      ),
+      render: (text) =>
+        renderColumn(
+          "uom",
+          hasValue(search["uom"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
         ),
     },
     {
@@ -205,7 +329,7 @@ const columnDetail = (
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -215,41 +339,32 @@ const columnDetail = (
           text,
           false,
           "input",
-          search
+          search,
         ),
     },
     {
-      title: "QUANTITY",
-      dataIndex: "quantity",
+      title: "PRICE CODE",
+      dataIndex: "priceCode",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
-        "quantity",
+        "priceCode",
         searchInput,
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
-          "quantity",
-          hasValue(search["quantity"]),
+          "priceCode",
+          hasValue(search["priceCode"]),
           searchText,
           text,
           false,
           "input",
-          search
+          search,
         ),
-      // onFilter: (value, record) => onFilter("quantity", value, record),
-      // sorter: (a, b) => sorter("quantity", a, b),
-      // ...getColumnSearchPropsPaging(
-      //   "quantity",
-      //   searchInput,
-      //   searchedColumn,
-      //   searchText,
-      //   handleSearch
-      // ),
     },
     {
       title: "PRICE",
@@ -272,7 +387,7 @@ const columnDetail = (
           separatorCurrency(text), //text to search
           false,
           "input",
-          search
+          search,
         ),
       // onFilter: (value, record) => onFilter("price", value, record),
       // sorter: (a, b) => sorter("price", a, b),
@@ -347,7 +462,7 @@ const columnDetail = (
           separatorCurrency(text), //text to search
           false,
           "input",
-          search
+          search,
         ),
       // onFilter: (value, record) => onFilter("amount", value, record),
       // sorter: (a, b) => sorter("amount", a, b),
@@ -402,347 +517,6 @@ const columnDetail = (
       // },
     },
     {
-      title: "REFERENCE",
-      dataIndex: "referenceName",
-      // sorter: true,
-      // ...getColumnSearchPropsPaging(
-      //   "reference",
-      //   searchInput,
-      //   searchedColumn,
-      //   searchText,
-      //   handleSearch,
-      //   true
-      // ),
-      align: searchedColumn !== "" ? "left" : "center",
-      ellipsis: {
-        showTitle: false,
-      },
-      render: (v, r, i) => {
-        let text;
-        // if (searchedColumn !== "") {
-        //   text = r.referenceName;
-        //   return (
-        //     <Highlighter
-        //       highlightStyle={{
-        //         backgroundColor: "#ffc069",
-        //         padding: 0,
-        //       }}
-        //       searchWords={[searchText]}
-        //       autoEscape
-        //       textToHighlight={text ? text.toString() : ""}
-        //     />
-        //   );
-        // } else {
-        text =
-          // data.findIndex(
-          //   (item) => parseInt(item.itemId) === parseInt(r.reference)
-          // ) !== -1
-          //   ? (page - 1) * pageSize +
-          data.findIndex(
-            (item) => parseInt(item.itemId) === parseInt(r.reference)
-          ) + 1;
-        // : r.referenceName;
-        if (text) {
-          return text;
-        }
-        return "";
-        // }
-      },
-    },
-    {
-      title: "UOM",
-      dataIndex: "uom",
-      sorter: true,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "uom",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) =>
-        renderColumn(
-          "uom",
-          hasValue(search["uom"]),
-          searchText,
-          text,
-          false,
-          "input",
-          search
-        ),
-      // onFilter: (value, record) => onFilter("uom", value, record),
-      // sorter: (a, b) => sorter("uom", a, b),
-      // ...getColumnSearchPropsPaging(
-      //   "uom",
-      //   searchInput,
-      //   searchedColumn,
-      //   searchText,
-      //   handleSearch
-      // ),
-    },
-    {
-      title: "POS NUMBER",
-      dataIndex: "posNumber",
-      sorter: true,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "posNumber",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) =>
-        renderColumn(
-          "posNumber",
-          hasValue(search["posNumber"]),
-          searchText,
-          text,
-          false,
-          "input",
-          search
-        ),
-      // onFilter: (value, record) => onFilter("posNumber", value, record),
-      // sorter: (a, b) => sorter("posNumber", a, b),
-      // ...getColumnSearchPropsPaging(
-      //   "posNumber",
-      //   searchInput,
-      //   searchedColumn,
-      //   searchText,
-      //   handleSearch
-      // ),
-    },
-    {
-      title: "AMOUNT EQV IDR",
-      dataIndex: "amountEqvIdr",
-      sorter: true,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "amountEqvIdr",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true,
-      ),
-      render: (text) =>
-        renderColumn(
-          "amountEqvIdr",
-          hasValue(search["amountEqvIdr"]),
-          searchText,
-          separatorCurrency(text), //text to search
-          false,
-          "input",
-          search
-        ),
-      // onFilter: (value, record) => onFilter("amountEqvIdr", value, record),
-      // sorter: (a, b) => sorter("amountEqvIdr", a, b),
-      // ...getColumnSearchPropsPaging(
-      //   "amountEqvIdr",
-      //   searchInput,
-      //   searchedColumn,
-      //   searchText,
-      //   handleSearch,
-      //   true
-      // ),
-      // render: (text, record) => {
-      //   if (typeof text === "string") {
-      //     return text;
-      //   } else {
-      //     const tempValue = text ? (text + "").split(".") : [];
-      //     const thousandSeparator = ".";
-      //     const decimalSeparator = ",";
-      //     const descimal = tempValue[1]
-      //       ? `${decimalSeparator}${tempValue[1]}`
-      //       : `${decimalSeparator}00`;
-      //     const value =
-      //       tempValue.length > 0
-      //         ? tempValue[0].replace(
-      //             /\B(?=(\d{3})+(?!\d))/g,
-      //             thousandSeparator
-      //           ) + descimal
-      //         : "";
-      //     if (searchedColumn === "value") {
-      //       const highlight = (
-      //         <Highlighter
-      //           highlightStyle={{
-      //             backgroundColor: "#ffc069",
-      //             padding: 0,
-      //           }}
-      //           searchWords={[searchText]}
-      //           autoEscape
-      //           textToHighlight={value || ""}
-      //         />
-      //       );
-      //       if (value) {
-      //         return highlight;
-      //       }
-      //       return highlight;
-      //     } else {
-      //       if (value) {
-      //         return value;
-      //       }
-      //       return "" || 0;
-      //     }
-      //   }
-      // },
-    },
-    {
-      title: "AMOUNT EQV USD",
-      dataIndex: "amountEqvUsd",
-      sorter: true,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "amountEqvUsd",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true,
-      ),
-      render: (text) =>
-        renderColumn(
-          "amountEqvUsd",
-          hasValue(search["amountEqvUsd"]),
-          searchText,
-          separatorCurrency(text), //text to search
-          false,
-          "input",
-          search
-        ),
-      // onFilter: (value, record) => onFilter("amountEqvUsd", value, record),
-      // sorter: (a, b) => sorter("amountEqvUsd", a, b),
-      // ...getColumnSearchPropsPaging(
-      //   "amountEqvUsd",
-      //   searchInput,
-      //   searchedColumn,
-      //   searchText,
-      //   handleSearch,
-      //   true
-      // ),
-      // render: (text, record) => {
-      //   if (typeof text === "string") {
-      //     return text;
-      //   } else {
-      //     const tempValue = text ? (text + "").split(".") : [];
-      //     const thousandSeparator = ",";
-      //     const decimalSeparator = ".";
-      //     const descimal = tempValue[1]
-      //       ? `${decimalSeparator}${tempValue[1]}`
-      //       : `${decimalSeparator}00`;
-      //     const value =
-      //       tempValue.length > 0
-      //         ? tempValue[0].replace(
-      //             /\B(?=(\d{3})+(?!\d))/g,
-      //             thousandSeparator
-      //           ) + descimal
-      //         : "";
-      //     if (searchedColumn === "value") {
-      //       const highlight = (
-      //         <Highlighter
-      //           highlightStyle={{
-      //             backgroundColor: "#ffc069",
-      //             padding: 0,
-      //           }}
-      //           searchWords={[searchText]}
-      //           autoEscape
-      //           textToHighlight={value || ""}
-      //         />
-      //       );
-      //       if (value) {
-      //         return Number(highlight).toFixed(2);
-      //       }
-      //       return highlight;
-      //     } else {
-      //       if (value) {
-      //         // console.log(typeof value, "value");
-      //         return Number(value).toFixed(2);
-      //       }
-      //       return "" || 0;
-      //     }
-      //   }
-      // },
-    },
-    {
-      title: "AMOUNT IDR ( TAX PURPOSE )",
-      dataIndex: "eqvIdr",
-      sorter: true,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "eqvIdr",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true,
-      ),
-      render: (text) =>
-        renderColumn(
-          "eqvIdr",
-          hasValue(search["eqvIdr"]),
-          searchText,
-          separatorCurrency(text), //text to search
-          false,
-          "input",
-          search
-        ),
-      // onFilter: (value, record) => onFilter("eqvIdr", value, record),
-      // sorter: (a, b) => sorter("eqvIdr", a, b),
-      // ...getColumnSearchPropsPaging(
-      //   "eqvIdr",
-      //   searchInput,
-      //   searchedColumn,
-      //   searchText,
-      //   handleSearch,
-      //   true
-      // ),
-      // render: (text, record) => {
-      //   if (typeof text === "string") {
-      //     return text;
-      //   } else {
-      //     const tempValue = text ? (text + "").split(".") : [];
-      //     const thousandSeparator = ",";
-      //     const decimalSeparator = ".";
-      //     const descimal = tempValue[1]
-      //       ? `${decimalSeparator}${tempValue[1]}`
-      //       : `${decimalSeparator}00`;
-      //     const value =
-      //       tempValue.length > 0
-      //         ? tempValue[0].replace(
-      //             /\B(?=(\d{3})+(?!\d))/g,
-      //             thousandSeparator
-      //           ) + descimal
-      //         : "";
-      //     if (searchedColumn === "value") {
-      //       const highlight = (
-      //         <Highlighter
-      //           highlightStyle={{
-      //             backgroundColor: "#ffc069",
-      //             padding: 0,
-      //           }}
-      //           searchWords={[searchText]}
-      //           autoEscape
-      //           textToHighlight={value || ""}
-      //         />
-      //       );
-      //       if (value) {
-      //         return highlight;
-      //       }
-      //       return highlight;
-      //     } else {
-      //       if (value) {
-      //         // console.log(typeof value, "value");
-      //         return value;
-      //       }
-      //       return "";
-      //     }
-      //   }
-      // },
-    },
-    {
       title: "DISCOUNT",
       dataIndex: "discount",
       sorter: true,
@@ -763,67 +537,16 @@ const columnDetail = (
           separatorCurrency(text), //text to search
           false,
           "input",
-          search
+          search,
         ),
-      // onFilter: (value, record) => onFilter("discount", value, record),
-      // sorter: (a, b) => sorter("discount", a, b),
-      // ...getColumnSearchPropsPaging(
-      //   "discount",
-      //   searchInput,
-      //   searchedColumn,
-      //   searchText,
-      //   handleSearch,
-      //   true
-      // ),
-      // render: (text, record) => {
-      //   if (typeof text === "string") {
-      //     return text;
-      //   } else {
-      //     const tempValue = text ? (text + "").split(".") : [];
-      //     const thousandSeparator = recor== "IDR" ? "." : ",";
-      //     const decimalSeparator = recor== "IDR" ? "," : ".";
-      //     const descimal = tempValue[1]
-      //       ? `${decimalSeparator}${tempValue[1]}`
-      //       : `${decimalSeparator}00`;
-      //     const value =
-      //       tempValue.length > 0
-      //         ? tempValue[0].replace(
-      //             /\B(?=(\d{3})+(?!\d))/g,
-      //             thousandSeparator
-      //           ) + descimal
-      //         : "";
-      //     if (searchedColumn === "value") {
-      //       const highlight = (
-      //         <Highlighter
-      //           highlightStyle={{
-      //             backgroundColor: "#ffc069",
-      //             padding: 0,
-      //           }}
-      //           searchWords={[searchText]}
-      //           autoEscape
-      //           textToHighlight={value || ""}
-      //         />
-      //       );
-      //       if (value) {
-      //         return highlight;
-      //       }
-      //       return highlight;
-      //     } else {
-      //       if (value) {
-      //         return value;
-      //       }
-      //       return "" || 0;
-      //     }
-      //   }
-      // },
     },
     {
-      title: "TOTAL",
-      dataIndex: "total",
+      title: "TOTAL AMOUNT",
+      dataIndex: "totalAmount",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
-        "total",
+        "totalAmount",
         searchInput,
         searchedColumn,
         searchText,
@@ -832,280 +555,422 @@ const columnDetail = (
       ),
       render: (text) =>
         renderColumn(
-          "total",
-          hasValue(search["total"]),
+          "totalAmount",
+          hasValue(search["totalAmount"]),
           searchText,
           separatorCurrency(text), //text to search
           false,
           "input",
-          search
+          search,
         ),
-      // onFilter: (value, record) => onFilter("total", value, record),
-      // sorter: (a, b) => sorter("total", a, b),
-      // ...getColumnSearchPropsPaging(
-      //   "total",
-      //   searchInput,
-      //   searchedColumn,
-      //   searchText,
-      //   handleSearch,
-      //   true
-      // ),
-      // render: (text, record) => {
-      //   if (typeof text === "string") {
-      //     return text;
-      //   } else {
-      //     const tempValue = text ? (text + "").split(".") : [];
-      //     const thousandSeparator = recor== "IDR" ? "." : ",";
-      //     const decimalSeparator = record?.currency === "IDR" ? "," : ".";
-      //     const descimal = tempValue[1]
-      //       ? `${decimalSeparator}${tempValue[1]}`
-      //       : `${decimalSeparator}00`;
-      //     const value =
-      //       tempValue.length > 0
-      //         ? tempValue[0].replace(
-      //             /\B(?=(\d{3})+(?!\d))/g,
-      //             thousandSeparator
-      //           ) + descimal
-      //         : "";
-      //     if (searchedColumn === "value") {
-      //       const highlight = (
-      //         <Highlighter
-      //           highlightStyle={{
-      //             backgroundColor: "#ffc069",
-      //             padding: 0,
-      //           }}
-      //           searchWords={[searchText]}
-      //           autoEscape
-      //           textToHighlight={value || ""}
-      //         />
-      //       );
-      //       if (value) {
-      //         return highlight;
-      //       }
-      //       return highlight;
-      //     } else {
-      //       if (value) {
-      //         return value;
-      //       }
-      //       return "" || 0;
-      //     }
-      //   }
-      // },
     },
     {
-      title: "TOTAL EQUIVALENT IDR",
-      dataIndex: "totalEqvIdr",
+      title: "VAT BASIS",
+      dataIndex: "vatBasis",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
-        "totalEqvIdr",
+        "vatBasis",
         searchInput,
         searchedColumn,
         searchText,
         handleSearch,
         true,
-        "currency",
       ),
       render: (text) =>
         renderColumn(
-          "totalEqvIdr",
-          hasValue(search["totalEqvIdr"]),
+          "vatBasis",
+          hasValue(search["vatBasis"]),
           searchText,
           separatorCurrency(text), //text to search
           false,
           "input",
-          search
+          search,
         ),
-      // onFilter: (value, record) => onFilter("totalEqvIdr", value, record),
-      // sorter: (a, b) => sorter("totalEqvIdr", a, b),
-      // ...getColumnSearchPropsPaging(
-      //   "totalEqvIdr",
-      //   searchInput,
-      //   searchedColumn,
-      //   searchText,
-      //   handleSearch,
-      //   true
-      // ),
-      // render: (text, record) => {
-      //   if (typeof text === "string") {
-      //     return text;
-      //   } else {
-      //     const tempValue = text ? (text + "").split(".") : [];
-      //     const thousandSeparator = ".";
-      //     const decimalSeparator = ",";
-      //     const descimal = tempValue[1]
-      //       ? `${decimalSeparator}${tempValue[1]}`
-      //       : `${decimalSeparator}00`;
-      //     const value =
-      //       tempValue.length > 0
-      //         ? tempValue[0].replace(
-      //             /\B(?=(\d{3})+(?!\d))/g,
-      //             thousandSeparator
-      //           ) + descimal
-      //         : "";
-      //     if (searchedColumn === "value") {
-      //       const highlight = (
-      //         <Highlighter
-      //           highlightStyle={{
-      //             backgroundColor: "#ffc069",
-      //             padding: 0,
-      //           }}
-      //           searchWords={[searchText]}
-      //           autoEscape
-      //           textToHighlight={value || ""}
-      //         />
-      //       );
-      //       if (value) {
-      //         return highlight;
-      //       }
-      //       return highlight;
-      //     } else {
-      //       if (value) {
-      //         return value;
-      //       }
-      //       return "" || 0;
-      //     }
-      //   }
-      // },
     },
     {
-      title: "TOTAL EQUIVALENT USD",
-      dataIndex: "totalEqvUsd",
+      title: "VAT BASIS EQV",
+      dataIndex: "vatBasisEqv",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
-        "totalEqvUsd",
+        "vatBasisEqv",
         searchInput,
         searchedColumn,
         searchText,
         handleSearch,
         true,
-        "currency",
       ),
       render: (text) =>
         renderColumn(
-          "totalEqvUsd",
-          hasValue(search["totalEqvUsd"]),
+          "vatBasisEqv",
+          hasValue(search["vatBasisEqv"]),
           searchText,
           separatorCurrency(text), //text to search
           false,
           "input",
-          search
+          search,
         ),
-      // onFilter: (value, record) => onFilter("totalEqvUsd", value, record),
-      // sorter: (a, b) => sorter("totalEqvUsd", a, b),
-      // ...getColumnSearchPropsPaging(
-      //   "totalEqvUsd",
-      //   searchInput,
-      //   searchedColumn,
-      //   searchText,
-      //   handleSearch,
-      //   true
-      // ),
-      // render: (text, record) => {
-      //   if (typeof text === "string") {
-      //     return text;
-      //   } else {
-      //     const tempValue = text ? (text + "").split(".") : [];
-      //     const thousandSeparator = ",";
-      //     const decimalSeparator = ".";
-      //     const descimal = tempValue[1]
-      //       ? `${decimalSeparator}${tempValue[1]}`
-      //       : `${decimalSeparator}00`;
-      //     const value =
-      //       tempValue.length > 0
-      //         ? tempValue[0].replace(
-      //             /\B(?=(\d{3})+(?!\d))/g,
-      //             thousandSeparator
-      //           ) + descimal
-      //         : "";
-      //     if (searchedColumn === "value") {
-      //       const highlight = (
-      //         <Highlighter
-      //           highlightStyle={{
-      //             backgroundColor: "#ffc069",
-      //             padding: 0,
-      //           }}
-      //           searchWords={[searchText]}
-      //           autoEscape
-      //           textToHighlight={value || ""}
-      //         />
-      //       );
-      //       if (value) {
-      //         return Number(highlight).toFixed(2);
-      //       }
-      //       return highlight;
-      //     } else {
-      //       if (value) {
-      //         return Number(value).toFixed(2);
-      //       }
-      //       return "" || 0;
-      //     }
-      //   }
-      // },
     },
     {
-      title: "REMARK",
-      dataIndex: "remark",
+      title: "VAT RATE",
+      dataIndex: "vatRate",
       sorter: true,
-      ellipsis: {
-        showTitle: false,
-      },
       ...getColumnSearchPropsUseFilteredValue(
         search,
-        "remark",
+        "vatRate",
         searchInput,
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
-          "remark",
-          hasValue(search["remark"]),
+          "vatRate",
+          hasValue(search["vatRate"]),
           searchText,
-          text,
-          true,
+          separatorCurrency(text), //text to search
+          false,
           "input",
-          search
+          search,
         ),
-      // onFilter: (value, record) => onFilter("remark", value, record),
-      // sorter: (a, b) => sorter("remark", a, b),
-      // ...getColumnSearchPropsPaging(
-      //   "remark",
-      //   searchInput,
-      //   searchedColumn,
-      //   searchText,
-      //   handleSearch,
-      //   true
-      // ),
-      // render: (text) => {
-      //   if (searchedColumn === "remark") {
-      //     return (
-      //       <Tooltip placement="topLeft" title={text}>
-      //         <Highlighter
-      //           highlightStyle={{
-      //             backgroundColor: "#ffc069",
-      //             padding: 0,
-      //           }}
-      //           searchWords={[searchText]}
-      //           autoEscape
-      //           textToHighlight={text ? text.toString() : ""}
-      //         />
-      //       </Tooltip>
-      //     );
-      //   } else {
-      //     if (text) {
-      //       return (
-      //         <Tooltip placement="topLeft" title={text}>
-      //           {text}
-      //         </Tooltip>
-      //       );
-      //     }
-      //     return "";
-      //   }
-      // },
+    },
+    {
+      title: "VAT CODE",
+      dataIndex: "vatCode",
+      sorter: true,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "vatCode",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+      ),
+      render: (text) =>
+        renderColumn(
+          "vatCode",
+          hasValue(search["vatCode"]),
+          searchText,
+          separatorCurrency(text), //text to search
+          false,
+          "input",
+          search,
+        ),
+    },
+    {
+      title: "VAT",
+      dataIndex: "vat",
+      sorter: true,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "vat",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+      ),
+      render: (text) =>
+        renderColumn(
+          "vat",
+          hasValue(search["vat"]),
+          searchText,
+          separatorCurrency(text), //text to search
+          false,
+          "input",
+          search,
+        ),
+    },
+    {
+      title: "VAT EQV",
+      dataIndex: "vatEqv",
+      sorter: true,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "vatEqv",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+      ),
+      render: (text) =>
+        renderColumn(
+          "vatEqv",
+          hasValue(search["vatEqv"]),
+          searchText,
+          separatorCurrency(text), //text to search
+          false,
+          "input",
+          search,
+        ),
+    },
+    {
+      title: "WITHHOLDING VAT CODE",
+      dataIndex: "withholdingVatCode",
+      sorter: true,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "withholdingVatCode",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+      ),
+      render: (text) =>
+        renderColumn(
+          "withholdingVatCode",
+          hasValue(search["withholdingVatCode"]),
+          searchText,
+          separatorCurrency(text), //text to search
+          false,
+          "input",
+          search,
+        ),
+    },
+    {
+      title: "WITHHOLDING VAT RATE",
+      dataIndex: "withholdingVatRate",
+      sorter: true,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "withholdingVatRate",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+      ),
+      render: (text) =>
+        renderColumn(
+          "withholdingVatRate",
+          hasValue(search["withholdingVatRate"]),
+          searchText,
+          separatorCurrency(text), //text to search
+          false,
+          "input",
+          search,
+        ),
+    },
+    {
+      title: "WITHHOLDING TAX",
+      dataIndex: "withholdingTax",
+      sorter: true,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "withholdingTax",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+      ),
+      render: (text) =>
+        renderColumn(
+          "withholdingTax",
+          hasValue(search["withholdingTax"]),
+          searchText,
+          separatorCurrency(text), //text to search
+          false,
+          "input",
+          search,
+        ),
+    },
+    {
+      title: "VAT EXCHANGE RATE TYPE",
+      dataIndex: "vatExchangeRateType",
+      sorter: true,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "vatExchangeRateType",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+      ),
+      render: (text) =>
+        renderColumn(
+          "vatExchangeRateType",
+          hasValue(search["vatExchangeRateType"]),
+          searchText,
+          separatorCurrency(text), //text to search
+          false,
+          "input",
+          search,
+        ),
+    },
+    {
+      title: "VAT EXCHANGE RATE DATE",
+      dataIndex: "vatExchangeRateDate",
+      sorter: true,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "vatExchangeRateDate",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+      ),
+      render: (text) =>
+        renderColumn(
+          "vatExchangeRateDate",
+          hasValue(search["vatExchangeRateDate"]),
+          searchText,
+          separatorCurrency(text), //text to search
+          false,
+          "input",
+          search,
+        ),
+    },
+    {
+      title: "VAT EXCHANGE RATE",
+      dataIndex: "vatExchangeRate",
+      sorter: true,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "vatExchangeRate",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+      ),
+      render: (text) =>
+        renderColumn(
+          "vatExchangeRate",
+          hasValue(search["vatExchangeRate"]),
+          searchText,
+          separatorCurrency(text), //text to search
+          false,
+          "input",
+          search,
+        ),
+    },
+    {
+      title: "CONVERTED CURRENCY",
+      dataIndex: "convertedCurrency",
+      sorter: true,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "convertedCurrency",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+      ),
+      render: (text) =>
+        renderColumn(
+          "convertedCurrency",
+          hasValue(search["convertedCurrency"]),
+          searchText,
+          separatorCurrency(text), //text to search
+          false,
+          "input",
+          search,
+        ),
+    },
+    {
+      title: "TOTAL AMOUNT EQV",
+      dataIndex: "totalAmountEqv",
+      sorter: true,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "totalAmountEqv",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+      ),
+      render: (text) =>
+        renderColumn(
+          "totalAmountEqv",
+          hasValue(search["totalAmountEqv"]),
+          searchText,
+          separatorCurrency(text), //text to search
+          false,
+          "input",
+          search,
+        ),
+    },
+    {
+      title: "RATE TYPE",
+      dataIndex: "rateType",
+      sorter: true,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "rateType",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+      ),
+      render: (text) =>
+        renderColumn(
+          "rateType",
+          hasValue(search["rateType"]),
+          searchText,
+          separatorCurrency(text), //text to search
+          false,
+          "input",
+          search,
+        ),
+    },
+    {
+      title: "RATE DATE",
+      dataIndex: "rateDate",
+      sorter: true,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "rateDate",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+      ),
+      render: (text) =>
+        renderColumn(
+          "rateDate",
+          hasValue(search["rateDate"]),
+          searchText,
+          separatorCurrency(text), //text to search
+          false,
+          "input",
+          search,
+        ),
+    },
+    {
+      title: "RATE",
+      dataIndex: "rate",
+      sorter: true,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "rate",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+      ),
+      render: (text) =>
+        renderColumn(
+          "rate",
+          hasValue(search["rate"]),
+          searchText,
+          separatorCurrency(text), //text to search
+          false,
+          "input",
+          search,
+        ),
     },
     {
       title: "ACTION",
@@ -1183,12 +1048,12 @@ const columnDetail = (
         column.title !== "AMOUNT EQV IDR" &&
         column.title !== "AMOUNT EQV USD" &&
         column.title !== "EQV IDR ( TAX PURPOSE )" &&
-        column.title !== "POS NUMBER"
+        column.title !== "POS NUMBER",
     );
   } else if (type === "confirm") {
     //confirm
     return column.filter(
-      (column) => column.title !== "ACTION" && column.title !== "POS NUMBER"
+      (column) => column.title !== "ACTION" && column.title !== "POS NUMBER",
     );
   } else if (type === "calculate") {
     return column.filter((column) => column.title !== "POS NUMBER");
@@ -1246,7 +1111,7 @@ const PosDetailTableView = ({
           handleUpdate,
           onFilter,
           sorter,
-          dataTemp
+          dataTemp,
         )}
       />
     </Fragment>

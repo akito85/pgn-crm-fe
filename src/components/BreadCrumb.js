@@ -4,7 +4,8 @@ import { RightOutlined } from "@ant-design/icons";
 
 const BreadCrumb = ({ routes }) => {
   function itemRender(route, params, routes, paths) {
-    return <NavLink to={route.path}>{route.breadcrumbName}</NavLink>;
+    if (!route.path) return <span>{route.breadcrumbName}</span>;
+    return <NavLink to={route.path} state={route.state}>{route.breadcrumbName}</NavLink>;
   }
 
   return (

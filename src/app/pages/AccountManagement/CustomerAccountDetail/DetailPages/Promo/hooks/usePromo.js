@@ -3,8 +3,8 @@
  * Custom hook for promo operations under Account Management
  */
 
-import { useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useCallback } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import {
   fetchValidPromoList,
   fetchValidPromoDetail,
@@ -14,6 +14,7 @@ import {
   fetchPromoConditionDetail,
   fetchPromoHistoryList,
   fetchPromoHistoryDetail,
+  fetchPromoHistoryDetailDetail,
   downloadValidPromoList,
   downloadPromoCriteriaList,
   downloadPromoConditionList,
@@ -23,6 +24,7 @@ import {
   clearPromoCriteriaDetail,
   clearPromoConditionDetail,
   clearPromoHistoryDetail,
+  clearPromoHistoryDetailDetail,
   selectValidPromoList,
   selectValidPromoDetail,
   selectPromoCriteriaList,
@@ -31,12 +33,13 @@ import {
   selectPromoConditionDetail,
   selectPromoHistoryList,
   selectPromoHistoryDetail,
+  selectPromoHistoryDetailDetail,
   selectAdvancedSearchMetadata,
-} from '../store/slices/promoSlice';
+} from "../store/slices/promoSlice";
 
 export const usePromo = () => {
   const dispatch = useDispatch();
-  
+
   // Selectors
   const validPromoList = useSelector(selectValidPromoList);
   const validPromoDetail = useSelector(selectValidPromoDetail);
@@ -46,18 +49,19 @@ export const usePromo = () => {
   const promoConditionDetail = useSelector(selectPromoConditionDetail);
   const promoHistoryList = useSelector(selectPromoHistoryList);
   const promoHistoryDetail = useSelector(selectPromoHistoryDetail);
+  const promoHistoryDetailDetail = useSelector(selectPromoHistoryDetailDetail);
   const advancedSearchMetadata = useSelector(selectAdvancedSearchMetadata);
 
   // ==================== VALID PROMO OPERATIONS ====================
-  
+
   /**
    * Load valid promo list
    */
   const loadValidPromoList = useCallback(
-    (params = {}, advancedSearch = null) => {
-      dispatch(fetchValidPromoList({ params, advancedSearch }));
+    (params = {}, payload = null) => {
+      dispatch(fetchValidPromoList({ params, payload }));
     },
-    [dispatch]
+    [dispatch],
   );
 
   /**
@@ -67,7 +71,7 @@ export const usePromo = () => {
     (promoId) => {
       dispatch(fetchValidPromoDetail(promoId));
     },
-    [dispatch]
+    [dispatch],
   );
 
   /**
@@ -77,7 +81,7 @@ export const usePromo = () => {
     (params = {}, advancedSearch = null) => {
       dispatch(downloadValidPromoList({ params, advancedSearch }));
     },
-    [dispatch]
+    [dispatch],
   );
 
   /**
@@ -96,7 +100,7 @@ export const usePromo = () => {
     (params = {}, advancedSearch = null) => {
       dispatch(fetchPromoCriteriaList({ params, advancedSearch }));
     },
-    [dispatch]
+    [dispatch],
   );
 
   /**
@@ -106,7 +110,7 @@ export const usePromo = () => {
     (criteriaId) => {
       dispatch(fetchPromoCriteriaDetail(criteriaId));
     },
-    [dispatch]
+    [dispatch],
   );
 
   /**
@@ -116,7 +120,7 @@ export const usePromo = () => {
     (params = {}, advancedSearch = null) => {
       dispatch(downloadPromoCriteriaList({ params, advancedSearch }));
     },
-    [dispatch]
+    [dispatch],
   );
 
   /**
@@ -135,7 +139,7 @@ export const usePromo = () => {
     (params = {}, advancedSearch = null) => {
       dispatch(fetchPromoConditionList({ params, advancedSearch }));
     },
-    [dispatch]
+    [dispatch],
   );
 
   /**
@@ -145,7 +149,7 @@ export const usePromo = () => {
     (conditionId) => {
       dispatch(fetchPromoConditionDetail(conditionId));
     },
-    [dispatch]
+    [dispatch],
   );
 
   /**
@@ -155,7 +159,7 @@ export const usePromo = () => {
     (params = {}, advancedSearch = null) => {
       dispatch(downloadPromoConditionList({ params, advancedSearch }));
     },
-    [dispatch]
+    [dispatch],
   );
 
   /**
@@ -171,10 +175,10 @@ export const usePromo = () => {
    * Load promo history list
    */
   const loadPromoHistoryList = useCallback(
-    (params = {}, advancedSearch = null) => {
-      dispatch(fetchPromoHistoryList({ params, advancedSearch }));
+    (params = {}, payload = null) => {
+      dispatch(fetchPromoHistoryList({ params, payload }));
     },
-    [dispatch]
+    [dispatch],
   );
 
   /**
@@ -184,7 +188,19 @@ export const usePromo = () => {
     (billingCode, accountId) => {
       dispatch(fetchPromoHistoryDetail({ billingCode, accountId }));
     },
-    [dispatch]
+    [dispatch],
+  );
+
+  /**
+   * Load promo history detail detail
+   */
+  const loadPromoHistoryDetailDetail = useCallback(
+    (billingCode, detailId, accountId) => {
+      dispatch(
+        fetchPromoHistoryDetailDetail({ billingCode, detailId, accountId }),
+      );
+    },
+    [dispatch],
   );
 
   /**
@@ -194,7 +210,7 @@ export const usePromo = () => {
     (params = {}, advancedSearch = null) => {
       dispatch(downloadPromoHistoryList({ params, advancedSearch }));
     },
-    [dispatch]
+    [dispatch],
   );
 
   /**
@@ -202,6 +218,13 @@ export const usePromo = () => {
    */
   const clearPromoHistory = useCallback(() => {
     dispatch(clearPromoHistoryDetail());
+  }, [dispatch]);
+
+  /**
+   * Clear promo history detail detail
+   */
+  const clearDetailOfPromoHistory = useCallback(() => {
+    dispatch(clearPromoHistoryDetailDetail());
   }, [dispatch]);
 
   // ==================== ADVANCED SEARCH ====================
@@ -223,6 +246,7 @@ export const usePromo = () => {
     promoConditionDetail,
     promoHistoryList,
     promoHistoryDetail,
+    promoHistoryDetailDetail,
     advancedSearchMetadata,
 
     // Valid Promo Actions
@@ -246,8 +270,10 @@ export const usePromo = () => {
     // History Actions
     loadPromoHistoryList,
     loadPromoHistoryDetail,
+    loadPromoHistoryDetailDetail,
     downloadPromoHistory,
     clearPromoHistory,
+    clearDetailOfPromoHistory,
 
     // Advanced Search Actions
     loadAdvancedSearchMetadata,

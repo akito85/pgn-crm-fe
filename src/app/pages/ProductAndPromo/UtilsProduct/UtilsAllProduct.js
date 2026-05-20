@@ -103,13 +103,18 @@ export const handleDataTypeExist = (
   switch (status) {
     case "ACTIVE":
       if (statusApproval === "DRAFT") {
-        return (dataCompare || [])?.some(
+        const matchingApproved = (dataCompare || []).find(
           (item) => item[idCompare] === dataDetail[idName]
-        )
-          ? { dataType: "exist" }
-          : null;
+        );
+        if (matchingApproved) {
+          return {
+            dataType: "exist",
+            approvedStatus: matchingApproved.status,
+          };
+        }
+        return null;
       } else {
-        return { dataType: "exist" }; // for active & approve
+        return { dataType: "exist", approvedStatus: dataDetail.status }; // for active & approve
       }
     case "DRAFT":
       return null;

@@ -24,6 +24,7 @@ import { useEffect } from "react";
 import SVGIcon from "../../../../../../assets/Icon/index";
 import { dateFormatting, hasValue } from "../../../../../../utils";
 import InputComponent from "../../../../../../components/InputComponent";
+
 const EditableCell = ({
   editing,
   dataIndex,
@@ -39,15 +40,18 @@ const EditableCell = ({
   required,
   disableDate,
   onCellClicked,
+  onDropdownVisibleChange,
+  onSearch,
+  searchValue,
+  selectLoading,
   onInput,
   maxLength,
   form,
   startDateLock,
   endDateLock,
+  disabledColumns = [],
   ...restProps
 }) => {
-  // const [form] = Form.useForm();
-  // const [visiblePassword, setVisiblePassword] = useState(false);
   const key = record?.key || 0;
   const encrypt = record?.encrypt;
   const rules = () => {
@@ -65,36 +69,50 @@ const EditableCell = ({
   };
 
   const handleDisableDate = (current) => {
-    if (dataIndex === 'endDate') {
-        if (hasValue(startDateLock) && hasValue(endDateLock) && hasValue(form.getFieldValue('startDate')) === false) {
-            return current < moment(startDateLock) || current > moment(endDateLock).add(1, "days")
-        } else if (hasValue(form.getFieldValue('startDate')) && hasValue(endDateLock)) {
-            return current && (moment(form.getFieldValue('startDate')) > current || current > moment(endDateLock).add(1, "days"));
-        } else if (hasValue(form.getFieldValue('startDate'))) {
-            return moment(form.getFieldValue().startDate) > current
-        } else {
-            return null;
-        }
+    if (!current) return false;
+    const currentStart = current.clone().startOf("day");
+
+    if (dataIndex === "endDate") {
+      const selectedStartDate = form.getFieldValue("startDate");
+      const limitStart = hasValue(selectedStartDate)
+        ? moment(selectedStartDate).startOf("day")
+        : hasValue(startDateLock)
+          ? moment(startDateLock).startOf("day")
+          : null;
+
+      const limitEnd = hasValue(endDateLock)
+        ? moment(endDateLock).startOf("day")
+        : null;
+
+      if (limitStart && currentStart.isBefore(limitStart)) return true;
+      if (limitEnd && currentStart.isAfter(limitEnd)) return true;
+      return false;
     } else if (dataIndex === "startDate") {
-      if(hasValue(endDateLock)){
-        return moment(startDateLock) >= current || current > moment(endDateLock).add(1, "days")
-      } else {
-        return moment(startDateLock) > current;
-      }
+      const limitStart = hasValue(startDateLock)
+        ? moment(startDateLock).startOf("day")
+        : null;
+      const limitEnd = hasValue(endDateLock)
+        ? moment(endDateLock).startOf("day")
+        : null;
+
+      if (limitStart && currentStart.isBefore(limitStart)) return true;
+      if (limitEnd && currentStart.isAfter(limitEnd)) return true;
+      return false;
     } else {
-      return moment().add(-1, "days") >= current;
+      return currentStart.isBefore(moment().startOf("day"));
     }
   };
 
   const handleDisabledColumn = (dataIndex, record = null) => {
-    if(dataIndex === "categoryName" || dataIndex === "itemName"){
+    if (disabledColumns.includes(dataIndex)) return true;
+    if (dataIndex === "categoryName" || dataIndex === "itemName") {
       return record?.dataType === "exist" ? true : false;
     } else {
-      return false
+      return false;
     }
-  }
+  };
 
-  const getInputNode = (inputType, options) => {
+  const getInputNode = (inputType, options, searchValue) => {
     switch (inputType) {
       case "text":
         return <InputComponent />;
@@ -137,14 +155,24 @@ const EditableCell = ({
         return (
           <Select
             disabled={handleDisabledColumn(dataIndex, record)}
-            onChange={onCellClicked}
+            loading={selectLoading}
+            onChange={(val) => onCellClicked && onCellClicked(val, form)}
+            onDropdownVisibleChange={(open) =>
+              onDropdownVisibleChange && onDropdownVisibleChange(open, form)
+            }
+            onSearch={(input) => onSearch && onSearch(input)}
+            searchValue={searchValue}
             showSearch
             optionFilterProp="children"
             allowClear
-            filterOption={(input, option) =>
-              (option?.children ?? "")
-                .toLowerCase()
-                .includes(input.toLowerCase())
+            autoClearSearchValue={false}
+            filterOption={
+              onSearch
+                ? false
+                : (input, option) =>
+                  (option?.children ?? "")
+                    .toLowerCase()
+                    .includes(input.toLowerCase())
             }
           >
             {options?.map((option) => (
@@ -186,11 +214,23 @@ const EditableCell = ({
         return <Input type={showPassword[key] ? "password" : "text"} />;
       case "description":
         return <Input.TextArea rows={1} maxLength={255} />;
+      case "description_readonly":
+        return (
+          <Input.TextArea
+            rows={1}
+            disabled
+            style={{
+              backgroundColor: "#f5f5f5",
+              color: "#595959",
+              cursor: "not-allowed",
+            }}
+          />
+        );
       default:
         return <InputComponent />;
     }
   };
-  const inputNode = getInputNode(inputType, options);
+  const inputNode = getInputNode(inputType, options, searchValue);
 
   if (
     dataIndex === "operation" ||
@@ -243,13 +283,12 @@ const DynamicTableInlineBilling = ({
   subHeader,
   header,
   regex,
-  // required,
   useDynamicAction = false,
   action,
   useSelect = false,
   usePagination = false,
-  onChangePage = () => {},
-  onSizeChanger = () => {},
+  onChangePage = () => { },
+  onSizeChanger = () => { },
   pageSize,
   current,
   totalData,
@@ -265,16 +304,20 @@ const DynamicTableInlineBilling = ({
   handleValidate,
   messageValidate,
   actionFix,
-  setInserted = () => {},
-  isDynamicEditable = false, // for dependency action
-  unFilterUpdatedlist = () => {},
+  setInserted = () => { },
+  isDynamicEditable = false,
+  unFilterUpdatedlist = () => { },
   startDateLock = null,
   endDateLock = null,
-  setModalRequired = () => {},
-  handleValidateUpdate = () => {}
+  setModalRequired = () => { },
+  handleValidateUpdate = () => { },
+  onCancelEdit = null,
+  defaultNewRowValues = {},
+  disabledColumns = [],
+  allowDeleteExisting = false,
+  glAccountSearchValue = "",
 }) => {
   const [form] = Form.useForm();
-  // const [data, setData] = useState([]);
   const [editingKey, setEditingKey] = useState("");
   const [storedDate, setStoredData] = useState(false);
   const [isInsert, setIsInsert] = useState(false);
@@ -284,16 +327,6 @@ const DynamicTableInlineBilling = ({
   const [isSame, setIsSame] = useState(false);
   const [isValid, setIsValid] = useState(true);
 
-  // useEffect(() => {
-  //   if (mode === "update") {
-  //     setData(
-  //       tableData?.map((row, index) => ({ ...row, key: index.toString() }))
-  //     );
-  //   } else {
-  //     setData(tableData);
-  //   }
-  // }, [mode, tableData]);
-
   useEffect(() => {
     if (isInsert === true) {
       setInserted(true);
@@ -301,6 +334,16 @@ const DynamicTableInlineBilling = ({
       setInserted(false);
     }
   }, [isInsert, setInserted]);
+
+  useEffect(() => {
+    if (onCancelEdit) {
+      onCancelEdit(() => {
+        if (editingKey !== "") {
+          cancel(editingKey);
+        }
+      });
+    }
+  }, [editingKey, statusAction]);
 
   const edit = (record, field) => {
     unFilterUpdatedlist(record);
@@ -314,10 +357,10 @@ const DynamicTableInlineBilling = ({
     setStatusAction("edit");
     setIsInsert(true);
   };
+
   const cancel = (key) => {
     if (statusAction === "add") {
       const newData = tableData.filter((item) => item.key !== key);
-      onDataChange(newData);
       onDataChange(newData);
     }
     setEditingKey("");
@@ -335,7 +378,7 @@ const DynamicTableInlineBilling = ({
     });
   };
 
-  const save = async (key) => {
+  const executeSave = async (key) => {
     try {
       const row = await form.validateFields();
       const newData = [...tableData];
@@ -345,7 +388,15 @@ const DynamicTableInlineBilling = ({
         dataValid = handleValidate(row, statusAction);
       }
       if (dataValid) {
-        if (checkInputBy === undefined && handleValidateUpdate([...tableData], {...row, key:key}, statusAction, header?.includes("DETAIL"))) {
+        if (
+          checkInputBy === undefined &&
+          handleValidateUpdate(
+            [...tableData],
+            { ...row, key: key },
+            statusAction,
+            header?.includes("DETAIL"),
+          )
+        ) {
           const item = newData[index];
           const updatedRow = {
             ...item,
@@ -366,48 +417,38 @@ const DynamicTableInlineBilling = ({
           setStatusAction("");
           form.resetFields();
           setIsValid(true);
-        } 
-        // else if (
-        //   newData.filter((item) => item[checkInputBy] === row[checkInputBy])
-        //     .length > 0 &&
-        //   statusAction === "add"
-        // ) {
-        //   // setIsSame(true);
-        // } 
-        // else {
-        //   //new data
-        //   if (index > -1) {
-        //     const item = newData[index];
-        //     const updatedRow = { ...item, ...row };
-        //     newData.splice(index, 1, updatedRow);
-        //     // setData(newData);
-        //     setEditingKey("");
-        //     onDataChange(newData, row);
-        //   } else {
-        //     //update
-        //     newData.push(row);
-        //     // setData(newData);
-        //     onDataChange(newData, row);
-        //     setEditingKey("");
-        //   }
-        //   setStoredData(false);
-        //   // onDataChange([...newData]);
-        //   form.resetFields();
-        //   setStatusAction("");
-        //   setIsSame(false);
-        //   setIsValid(true);
-        // }
+        }
         setIsInsert(false);
-      } 
-      // else {
-      //   setIsValid(false);
-      // }
+      }
     } catch (errInfo) {
       console.log("Validate Failed:", errInfo);
     }
   };
+
+  const save = async (key) => {
+    const requiredHiddenCols = cols.filter(
+      (col) => col.required === true && optionSelectedCol.includes(col.title),
+    );
+
+    if (requiredHiddenCols.length > 0) {
+      setOptionSelectedCol((prev) =>
+        prev.filter(
+          (title) => !requiredHiddenCols.some((col) => col.title === title),
+        ),
+      );
+      setTimeout(() => {
+        executeSave(key);
+      }, 50);
+    } else {
+      executeSave(key);
+    }
+  };
+
   const addRow = () => {
     form.resetFields();
+    if (Object.keys(defaultNewRowValues).length > 0) {
+      form.setFieldsValue(defaultNewRowValues);
+    }
     setStoredData(true);
     setIsInsert(true);
     setStatusAction("add");
@@ -416,10 +457,9 @@ const DynamicTableInlineBilling = ({
       ...(header.includes("DETAIL")
         ? { rMappingId: null }
         : { rCategoryId: null }),
-      // status: "ACTIVE",
     };
-    onDataChange([...tableData, newRow], newRow);
-    // onDataChange((prevData) => [...prevData, newRow]);
+    const newData = [...tableData, newRow];
+    onDataChange(newData, newRow);
     setEditingKey(newRow.key);
   };
 
@@ -432,13 +472,12 @@ const DynamicTableInlineBilling = ({
           key: (index + 1).toString(),
         };
       });
-    // onDataChange(newData);
     onDataChange(newData);
     setStoredData(false);
     setIsInsert(false);
   };
+
   const renderDelete = (record) => {
-    // return record.status === "ACTIVE" || record.status === "INACTIVE" ? (
     return record.id ? (
       <ButtonComponent
         disabled
@@ -448,57 +487,42 @@ const DynamicTableInlineBilling = ({
     ) : (
       <Tooltip title="Delete">
         <div
-          className={`flex justify-center${
-            editingKey !== "" ||
+          className={`flex justify-center${editingKey !== "" ||
             isDynamicEditable ||
-            record?.dataType === "exist"
-              ? " cursor-not-allowed"
-              : ""
-          }`}
+            (!allowDeleteExisting && record?.dataType === "exist")
+            ? " cursor-not-allowed"
+            : ""
+            }`}
         >
           <SVGIcon
             name="IconDelete"
             color={
               editingKey !== "" ||
-              isDynamicEditable ||
-              record?.dataType === "exist"
+                isDynamicEditable ||
+                (!allowDeleteExisting && record?.dataType === "exist")
                 ? "#8D91A0"
                 : "#D90000"
             }
-            width={24}
             className={
               editingKey !== "" ||
-              isDynamicEditable ||
-              record?.dataType === "exist"
+                isDynamicEditable ||
+                (!allowDeleteExisting && record?.dataType === "exist")
                 ? "disabled"
                 : undefined
             }
+            width={24}
             onClick={
               (editingKey === "" || !isDynamicEditable) &&
-              record?.dataType !== "exist"
+                (allowDeleteExisting || record?.dataType !== "exist")
                 ? () => deleteRow(record.key)
                 : undefined
             }
           />
         </div>
       </Tooltip>
-      // <ButtonComponent
-      //   onClick={() => deleteRow(record.key)}
-      //   disabled={editingKey !== "" || isDynamicEditable}
-      //   icon={
-      //     <SVGIcon
-      //       name="IconDelete"
-      //       width={24}
-      //       color={
-      //         editingKey !== "" || isDynamicEditable ? "#8D91A0" : "#D90000"
-      //       }
-      //     />
-      //     // <DeleteOutlined style={{ fontSize: "24px", color: "#c81912" }} />
-      //   }
-      //   border={false}
-      // />
     );
   };
+
   const columns = [
     ...cols,
     {
@@ -509,7 +533,6 @@ const DynamicTableInlineBilling = ({
       render: (_, record) => {
         const editable = record.key === editingKey;
         return (
-          // rendering button
           <Space className="my-2 gap-2">
             {useDynamicAction ? (
               action(record, editable)
@@ -549,7 +572,6 @@ const DynamicTableInlineBilling = ({
                             />
                           }
                           border={false}
-                          // onClick={() => onDetail(record?.id)}
                         >
                           <span className={"text-[#C0BEC6]"}> Detail</span>
                         </ButtonComponent>
@@ -584,7 +606,6 @@ const DynamicTableInlineBilling = ({
                     border={false}
                   />
                 </Popover>
-                {/* {record.status === "ACTIVE" || record.status === "INACTIVE" ? ( */}
                 {record.id ? (
                   <ButtonComponent
                     disabled
@@ -614,56 +635,32 @@ const DynamicTableInlineBilling = ({
                 {actionButton?.includes("update") && (
                   <Tooltip title="Update">
                     <div
-                      className={`flex justify-center${
-                        editingKey !== "" || isDynamicEditable 
-                        // || record?.dataType === "exist"
-                          ? " cursor-not-allowed"
-                          : ""
-                      }`}
+                      className={`flex justify-center${editingKey !== "" || isDynamicEditable
+                        ? " cursor-not-allowed"
+                        : ""
+                        }`}
                     >
                       <SVGIcon
                         name="IconEdit"
                         color={
-                          editingKey !== "" ||
-                          isDynamicEditable 
-                          // ||record?.dataType === "exist"
+                          editingKey !== "" || isDynamicEditable
                             ? "#8D91A0"
                             : "#ACC424"
                         }
                         className={
-                          editingKey !== "" ||
-                          isDynamicEditable 
-                          // ||record?.dataType === "exist"
+                          editingKey !== "" || isDynamicEditable
                             ? "disabled"
                             : undefined
                         }
                         width={24}
                         onClick={
                           editingKey === "" || !isDynamicEditable
-                          // (editingKey === "" || !isDynamicEditable) 
-                          // && record?.dataType !== "exist"
                             ? () => edit(record)
                             : undefined
                         }
                       />
                     </div>
                   </Tooltip>
-                  // <ButtonComponent
-                  //   onClick={() => edit(record)}
-                  //   disabled={editingKey !== "" || isDynamicEditable}
-                  //   icon={
-                  //     <SVGIcon
-                  //       name="IconEdit"
-                  //       width={24}
-                  //       color={
-                  //         editingKey !== "" || isDynamicEditable
-                  //           ? "#8D91A0"
-                  //           : "#ACC424"
-                  //       }
-                  //     />
-                  //   }
-                  //   border={false}
-                  // />
                 )}
 
                 {actionButton?.includes("inactive") && (
@@ -684,15 +681,13 @@ const DynamicTableInlineBilling = ({
 
                 {actionButton?.includes("delete") && renderDelete(record)}
 
-                {/* create detail */}
                 {actionButton?.includes("create") && (
                   <Tooltip title="Create Detail">
                     <div
-                      className={`flex justify-center${
-                        editingKey !== "" || isDynamicEditable
-                          ? " cursor-not-allowed"
-                          : ""
-                      }`}
+                      className={`flex justify-center${editingKey !== "" || isDynamicEditable
+                        ? " cursor-not-allowed"
+                        : ""
+                        }`}
                     >
                       <SVGIcon
                         name="IconActionCreate"
@@ -703,29 +698,13 @@ const DynamicTableInlineBilling = ({
                         }
                         width={24}
                         onClick={
-                          editingKey === "" || !isDynamicEditable
+                          editingKey === "" && !isDynamicEditable
                             ? () => onCreate(record)
                             : undefined
                         }
                       />
                     </div>
                   </Tooltip>
-                  // <ButtonComponent
-                  //   onClick={() => onCreate(record)}
-                  //   icon={
-                  //     <SVGIcon
-                  //       name="IconActionCreate"
-                  //       color={
-                  //         editingKey !== "" || isDynamicEditable
-                  //           ? "#8D91A0"
-                  //           : "#0075bf"
-                  //       }
-                  //       width={24}
-                  //     />
-                  //   }
-                  //   border={false}
-                  //   disabled={editingKey !== "" || isDynamicEditable}
-                  // />
                 )}
               </div>
             )}
@@ -752,143 +731,128 @@ const DynamicTableInlineBilling = ({
   };
 
   return useContainer === true ? (
-    <BaseContainer header={header} subHeader={subHeader}>
-      <div className={"w-full flex flex-col gap-4"}>
-        <div className={"w-full flex justify-end"}>
-          {showCreateButton && (
-            <ButtonComponent
-              onClick={() => {
-                if (storedDate === false && startDateLock) {
-                  addRow();
-                } else {
-                  if (!startDateLock) {
-                    setModalRequired(true);
-                  }
-                }
-              }}
-              type={"submit"}
-              border={false}
-              icon={<PlusOutlined style={{ fontSize: "24px" }} />}
-              disabled={isDynamicEditable}
-            >
-              Create
-            </ButtonComponent>
-          )}
-        </div>
-        {useSelect || usePagination ? (
-          <div className={"w-full flex mb-5 gap-2 justify-between"}>
-            {useSelect ? (
-              <Select
-                mode="multiple"
-                placeholder="Show All Column"
-                className={"w-2/6"}
-                maxTagCount={3}
-                onChange={handleDisplayColumn}
-              >
-                {columns
-                  .map((col) => (
-                    <Select.Option
-                      key={col.title}
-                      value={col.title}
-                      disabled={
-                        optionSelectedCol.length > 3
-                          ? optionSelectedCol.includes(col.title)
-                            ? false
-                            : true
-                          : false
-                      }
-                    >
-                      {col.title}
-                    </Select.Option>
-                  ))
-                  .splice(1)}
-              </Select>
-            ) : null}
-            {/* {usePagination ? (
-              <Pagination
-                total={totalData}
-                className={"pr-1"}
-                showSizeChanger
-                current={current}
-                pageSize={pageSize}
-                onChange={onChangePage}
-                onShowSizeChange={onSizeChanger}
-                showTotal={(total, range) =>
-                  `Showing ${range[0]} to ${range[1]} of ${total} records`
-                }
-              />
-            ) : null} */}
-          </div>
-        ) : null}
-        <Form form={form} component={false}>
-          <Table
-            dataSource={tableData}
-            columns={filterColumn(
-              columns.map((col) => {
-                return {
-                  ...col,
-                  onCell: (record) => ({
-                    record,
-                    inputType: col.inputType,
-                    dataIndex: col.dataIndex,
-                    title: col.title,
-                    editing: isEditing(record),
-                    options: col.options,
-                    onCellClicked: col.onClick,
-                    showPassword: visiblePassword,
-                    handlePassword: handleVisiblePassword,
-                    regex: regex,
-                    required: col.required,
-                    disableDate,
-                    form: form,
-                    onInput: col.onInput,
-                    maxLength: col.maxLength,
-                    startDateLock,
-                    endDateLock
-                  }),
-                };
-              })
-            )}
-            rowClassName={(record) => (isEditing(record) ? "editable-row" : "")}
-            components={{
-              body: {
-                cell: EditableCell,
-              },
+    <div className={"w-full flex flex-col gap-4"}>
+      <div className={"w-full flex justify-end"}>
+        {showCreateButton && (
+          <ButtonComponent
+            onClick={() => {
+              if (!startDateLock) {
+                setModalRequired(true);
+              } else if (storedDate === false) {
+                addRow();
+              }
             }}
-            pagination={{
-              position: ["topRight"],
-              current: current,
-              pageSize: pageSize,
-              onChange: onChangePage,
-              className: "pr-1 w-3/4",
-              style: { marginLeft: "auto", marginRight: 0 },
-              showSizeChanger: true,
-              showTotal: (total, range) =>
-                `Showing ${range[0]} to ${range[1]} of ${total} records`,
-            }}
-            scroll={scrollTable}
-            tableLayout="fixed"
-            bordered
-            // onChange={onSort}
-            // pagination={false}
-          />
-        </Form>
-        {isSame && (
-          <div className={"w-full flex mb-5 gap-2 justify-between"}>
-            <span className="font-bold text-red-700">
-              {checkNameColumn} is exist
-            </span>
-          </div>
+            type={"submit"}
+            border={false}
+            icon={<PlusOutlined style={{ fontSize: "24px" }} />}
+            disabled={isDynamicEditable || storedDate}
+          >
+            Create
+          </ButtonComponent>
         )}
-        {!isValid ? (
-          <div className={"w-full flex mb-5 gap-2 justify-between"}>
-            <span className="font-bold text-red-700">
-              {messageValidate || "data cannot save"}
-            </span>
-          </div>
-        ) : null}
       </div>
-    </BaseContainer>
+      {useSelect || usePagination ? (
+        <div className={"w-full flex mb-5 gap-2 justify-between"}>
+          {useSelect ? (
+            <Select
+              mode="multiple"
+              placeholder="Show All Column"
+              className={"w-2/6"}
+              maxTagCount={3}
+              onChange={handleDisplayColumn}
+            >
+              {columns
+                .map((col) => (
+                  <Select.Option
+                    key={col.title}
+                    value={col.title}
+                    disabled={
+                      optionSelectedCol.length > 3
+                        ? optionSelectedCol.includes(col.title)
+                          ? false
+                          : true
+                        : false
+                    }
+                  >
+                    {col.title}
+                  </Select.Option>
+                ))
+                .splice(1)}
+            </Select>
+          ) : null}
+        </div>
+      ) : null}
+      <Form form={form} component={false}>
+        <Table
+          dataSource={tableData}
+          columns={filterColumn(
+            columns.map((col) => {
+              return {
+                ...col,
+                onCell: (record) => ({
+                  record,
+                  inputType: col.inputType,
+                  dataIndex: col.dataIndex,
+                  title: col.title,
+                  editing: isEditing(record),
+                  options: col.options,
+                  onCellClicked: col.onClick,
+                  onDropdownVisibleChange: col.onDropdownVisibleChange,
+                  onSearch: col.onSearch,
+                  searchValue: col.searchValue,
+                  selectLoading: col.loading,
+                  showPassword: visiblePassword,
+                  handlePassword: handleVisiblePassword,
+                  regex: regex,
+                  required: col.required,
+                  disableDate,
+                  form: form,
+                  onInput: col.onInput,
+                  maxLength: col.maxLength,
+                  startDateLock,
+                  endDateLock,
+                  disabledColumns,
+                }),
+              };
+            }),
+          )}
+          rowClassName={(record) => (isEditing(record) ? "editable-row" : "")}
+          components={{
+            body: {
+              cell: EditableCell,
+            },
+          }}
+          pagination={{
+            position: ["topRight"],
+            current: current,
+            pageSize: pageSize,
+            onChange: onChangePage,
+            className: "pr-1 w-3/4",
+            style: { marginLeft: "auto", marginRight: 0 },
+            showSizeChanger: true,
+            showTotal: (total, range) =>
+              `Showing ${range[0]} to ${range[1]} of ${total} records`,
+          }}
+          scroll={scrollTable}
+          tableLayout="fixed"
+          bordered
+        />
+      </Form>
+      {isSame && (
+        <div className={"w-full flex mb-5 gap-2 justify-between"}>
+          <span className="font-bold text-red-700">
+            {checkNameColumn} is exist
+          </span>
+        </div>
+      )}
+      {!isValid ? (
+        <div className={"w-full flex mb-5 gap-2 justify-between"}>
+          <span className="font-bold text-red-700">
+            {messageValidate || "data cannot save"}
+          </span>
+        </div>
+      ) : null}
+    </div>
   ) : (
     <>
       {useSelect || usePagination ? (
@@ -962,9 +926,10 @@ const DynamicTableInlineBilling = ({
                   onInput: col.onInput,
                   maxLength: col.maxLength,
                   startDateLock,
+                  disabledColumns,
                 }),
               };
-            })
+            }),
           )}
           rowClassName={(record) => (isEditing(record) ? "editable-row" : "")}
           components={{

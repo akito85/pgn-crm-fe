@@ -205,7 +205,7 @@ const ModalApprovalEFaktur = ({
         title: "FAKTUR CODE",
         dataIndex: "efakturNo",
         width: 150,
-        render: (text) => text || "-",
+        render: (text) => text || " ",
       },
       {
         key: "efakturType",
@@ -233,28 +233,28 @@ const ModalApprovalEFaktur = ({
         title: "BILLING CODE",
         dataIndex: "billingCode",
         width: 150,
-        render: (text) => text || "-",
+        render: (text) => text || " ",
       },
       {
         key: "invoiceNumber",
         title: "INVOICE NUMBER",
         dataIndex: "invoiceNumber",
         width: 150,
-        render: (text) => text || "-",
+        render: (text) => text || " ",
       },
       {
         key: "accountNumber",
         title: "ACCOUNT NUMBER",
         dataIndex: "accountNumber",
         width: 150,
-        render: (text) => text || "-",
+        render: (text) => text || " ",
       },
       {
         key: "accountName",
         title: "ACCOUNT NAME",
         dataIndex: "accountName",
         width: 200,
-        render: (text) => text || "-",
+        render: (text) => text || " ",
       },
       {
         key: "efakturDate",
@@ -277,14 +277,14 @@ const ModalApprovalEFaktur = ({
         title: "CUSTOMER NUMBER",
         dataIndex: "customerNumber",
         width: 160,
-        render: (text) => text || "-",
+        render: (text) => text || " ",
       },
       {
         key: "customerName",
         title: "CUSTOMER",
         dataIndex: "customerName",
         width: 250,
-        render: (text) => text || "-",
+        render: (text) => text || " ",
       },
       {
         key: "billingPeriod",
@@ -292,7 +292,7 @@ const ModalApprovalEFaktur = ({
         dataIndex: "billingPeriod",
         width: 120,
         align: "center",
-        render: (text) => text || "-",
+        render: (text) => text || " ",
       },
       {
         key: "invoiceDate",
@@ -301,7 +301,7 @@ const ModalApprovalEFaktur = ({
         width: 120,
         align: "center",
         render: (text) => {
-          if (!text) return "-";
+          if (!text) return " ";
           const date = new Date(text);
           return date.toLocaleDateString("id-ID", {
             day: "2-digit",
@@ -349,7 +349,7 @@ const ModalApprovalEFaktur = ({
         width: 180,
         align: "center",
         render: (status) => {
-          if (!status) return "-";
+          if (!status) return " ";
           
           const displayStatus = status.toUpperCase();
           const statusLabel = displayStatus.replace(/_/g, " ");
@@ -370,7 +370,7 @@ const ModalApprovalEFaktur = ({
         width: 200,
         align: "center",
         render: (status) => {
-          if (!status) return "-";
+          if (!status) return " ";
           
           const displayStatus = status.toUpperCase();
           const statusLabel = displayStatus.replace(/_/g, " ");
@@ -389,28 +389,28 @@ const ModalApprovalEFaktur = ({
         title: "REMARK",
         dataIndex: "remark",
         width: 200,
-        render: (text) => text || "-",
+        render: (text) => text || " ",
       },
       {
         key: "reasonCanceled",
         title: "REASON CANCELED",
         dataIndex: "reasonCanceled",
         width: 250,
-        render: (text) => text || "-",
+        render: (text) => text || " ",
       },
       {
         key: "reasonReplacement",
         title: "REASON REPLACEMENT",
         dataIndex: "reasonReplacement",
         width: 250,
-        render: (text) => text || "-",
+        render: (text) => text || " ",
       },
       {
         key: "requestedBy",
         title: "REQUESTED BY",
         dataIndex: ["approvalDetail", "requestedBy"],
         width: 180,
-        render: (text) => text || "-",
+        render: (text) => text || " ",
       },
       {
         key: "requestedDate",
@@ -419,7 +419,7 @@ const ModalApprovalEFaktur = ({
         width: 180,
         align: "center",
         render: (text) => {
-          if (!text) return "-";
+          if (!text) return " ";
           const date = new Date(text);
           return date.toLocaleDateString("id-ID", {
             day: "2-digit",
@@ -435,7 +435,7 @@ const ModalApprovalEFaktur = ({
         title: "APPROVAL REMARKS",
         dataIndex: ["approvalDetail", "remarks"],
         width: 200,
-        render: (text) => text || "-",
+        render: (text) => text || " ",
       },
     ],
     [page, pageSize]
@@ -544,6 +544,7 @@ const ModalApprovalEFaktur = ({
               <Select.Option value="replacement">Replacement</Select.Option>
               <Select.Option value="cancellation">Cancellation</Select.Option>
               <Select.Option value="manual_upload">Manual Upload</Select.Option>
+              <Select.Option value="sync">Sync</Select.Option>
             </Select>
           </div>
 

@@ -20,14 +20,17 @@ import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOr
 import { columnsRecalculate } from "./Table/TableRecalculate";
 import { columnsCalculation } from "./Table/TableCalculation";
 import CardContainer from "../../../../../components/CardContainer";
+import CollapsibleContainer from "../../../../../components/CollapsibleContainer";
+import DetailLog from "./DetailLog";
 
-const DetailInformation = ({ data, tabHeader }) => {
+const DetailInformation = ({ data }) => {
   // Selector
   const {
     list_calculation_result,
     list_calculation_no_paging,
     list_calculation_log,
     loading,
+    loadingResult,
     loadingModal,
   } = useSelector((state) => state.rbi_calculation);
 
@@ -60,6 +63,7 @@ const DetailInformation = ({ data, tabHeader }) => {
   const [searchedColumnCal, setSearchedColumnCal] = useState("");
 
   const [activeTab, setActiveTab] = useState("rating");
+  const [infoActiveTab, setInfoActiveTab] = useState("list");
 
   const [fixedColumns, setFixedColumns] = useState(() => ({
     left: ["no"],
@@ -76,11 +80,11 @@ const DetailInformation = ({ data, tabHeader }) => {
         search: encodeURIComponent(JSON.stringify({})),
       })
     );
-  }, [tabHeader, data?.calCode, dispatch]);
+  }, [data?.calCode, dispatch]);
 
   // Initial fetch dengan 100 data
   useEffect(() => {
-    if (tabHeader === "Calculation Information" && data?.calCode && activeTab) {
+    if (data?.calCode && activeTab) {
       const reqSearch = encodeURIComponent(JSON.stringify(search));
       dispatch(
         getDetailCalculationResult({
@@ -95,10 +99,10 @@ const DetailInformation = ({ data, tabHeader }) => {
       );
       setPage(1);
     }
-  }, [activeTab, dispatch, data, search, sort, tabHeader]);
+  }, [activeTab, dispatch, data, search, sort]);
 
   useEffect(() => {
-    if (tabHeader === "Calculation Information" && data?.calCode && activeTab) {
+    if (data?.calCode && activeTab) {
       dispatch(
         getDetailCalculationResultNoPaging({
           calCode: data?.calCode,
@@ -241,13 +245,6 @@ const DetailInformation = ({ data, tabHeader }) => {
   const hasMore =
     (list_calculation_result?.result?.length || 0) <
     (list_calculation_result?.page?.totalElements || 0);
-
-  // change table recalculate modal
-  const handleChangePageCal = (pageCal, pageSizeChangeCal) => {
-    const tempPage = pageSizeCal !== pageSizeChangeCal ? 1 : pageCal;
-    setPageCal(tempPage);
-    setPageSizeCal(pageSizeChangeCal);
-  };
 
   const handleForceObj = (e, type) => {
     let result;
@@ -525,25 +522,6 @@ const DetailInformation = ({ data, tabHeader }) => {
       });
   };
 
-  const renderStatus = (index) => {
-    let text;
-    switch (index) {
-      case "INPROGRESS":
-        text = "In Progress";
-        break;
-      default:
-        text = index
-          ? index.charAt(0).toUpperCase() + index.slice(1).toLowerCase()
-          : index;
-        break;
-    }
-    if (text) {
-      return text;
-    } else {
-      return "";
-    }
-  };
-
   // Prepare columns dengan key yang konsisten
   const calculationColumns = useMemo(() => {
     const cols = columnsCalculation(
@@ -572,8 +550,8 @@ const DetailInformation = ({ data, tabHeader }) => {
   return (
     <>
       <Spin spinning={loadingModal}>
-        {/* Calculation Information */}
-        <div className="-mt-6">
+        <div>
+          {/* Card 1: CALCULATION INFORMATION with internal tabs */}
           <CardContainer
             header={
               <div className="flex -my-4 justify-between items-center">
@@ -581,92 +559,88 @@ const DetailInformation = ({ data, tabHeader }) => {
               </div>
             }
           >
-            <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-x-8 gap-y-2 sm:gap-y-1">
-              <DetailText label={"Calculation Code"}>
-                {data?.calCode}
-              </DetailText>
-              <DetailText label={"Type"}>{data?.calculationType}</DetailText>
-              <DetailText label={"Billing Cycle"}>
-                {data?.billingCycle}
-              </DetailText>
-              <DetailText label={"Billing Period"}>
-                {data?.billingPeriod}
-              </DetailText>
+            <Tabs
+              activeKey={infoActiveTab}
+              onChange={setInfoActiveTab}
+              items={[
+                {
+                  key: "list",
+                  label: "Calculation List",
+                  children: (
+                    <>
+                      <CollapsibleContainer
+                        header="INPUT PARAMETER INFORMATION"
+                        border
+                        defaultOpen
+                      >
+                        <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-x-8 gap-y-2 sm:gap-y-1 pt-2">
+                          <DetailText label={"Billing Cycle"}>
+                            {data?.billingCycle}
+                          </DetailText>
+                          <DetailText label={"Billing Period"}>
+                            {data?.billingPeriod}
+                          </DetailText>
+                          <DetailText label={"Calculation Type"}>
+                            {data?.calculationType}
+                          </DetailText>
+                          <DetailText label={"Service Type"}>
+                            {data?.serviceType}
+                          </DetailText>
+                          <DetailText label={"SOR"}>{data?.sor}</DetailText>
+                          <DetailText label={"Cost Center"}>
+                            {data?.costCenter}
+                          </DetailText>
+                          <DetailText label={"Meter Reading Code"}>
+                            {data?.meterReadingCode}
+                          </DetailText>
+                          <DetailText label={"Account Segment"}>
+                            {data?.accGroupSegment}
+                          </DetailText>
+                          <DetailText label={"Account Group Type"}>
+                            {data?.accGroupType}
+                          </DetailText>
+                          <DetailText label={"Specific Customer Account"}>
+                            {data?.specCustacc}
+                          </DetailText>
+                        </div>
+                      </CollapsibleContainer>
 
-              <DetailText label={"Total Customer"}>
-                {data?.totalCustomer}
-              </DetailText>
-              <DetailText label={"Total Success"}>
-                {data?.totalSucceed}
-              </DetailText>
-              <DetailText label={"Total Progress"}>
-                {data?.totalProgress}
-              </DetailText>
-              <DetailText label={"Total Failed"}>
-                {data?.totalFailed}
-              </DetailText>
-
-              <DetailText label={"Generate Date"}>
-                {data?.generateDate}
-              </DetailText>
-              <DetailText label={"Completion Date"}>
-                {data?.completionDate
-                  ? moment(data.completionDate).format("DD MMM YYYY HH:mm:ss")
-                  : ""}
-              </DetailText>
-              <DetailText label={"Status"}>
-                {renderStatus(data?.status)}
-              </DetailText>
-            </div>
+                      <CollapsibleContainer
+                        header="SCHEDULE INFORMATION"
+                        border
+                        defaultOpen
+                        className="mt-2"
+                      >
+                        <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-2 sm:gap-y-1 pt-2">
+                          <DetailText label={"Type"}>
+                            {data?.scheduleType}
+                          </DetailText>
+                          <div className="col-span-3">
+                            <DetailText label={"Remark"}>
+                              {data?.remark}
+                            </DetailText>
+                          </div>
+                        </div>
+                      </CollapsibleContainer>
+                    </>
+                  ),
+                },
+                {
+                  key: "log",
+                  label: "Calculation Log",
+                  children: (
+                    <DetailLog
+                      data={data}
+                      tabHeader="Calculation Log"
+                      showCard={false}
+                    />
+                  ),
+                },
+              ]}
+            />
           </CardContainer>
 
-          {/* Parameter Information */}
-          <CardContainer
-            header={
-              <div className="flex -my-4 justify-between items-center">
-                <p className="mt-[15px]">PARAMETER INFORMATION</p>
-              </div>
-            }
-          >
-            <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-2 sm:gap-y-1">
-              <DetailText label={"Service Type"}>
-                {data?.serviceType}
-              </DetailText>
-              <DetailText label={"SOR"}>{data?.sor}</DetailText>
-              <DetailText label={"Cost Center"}>{data?.costCenter}</DetailText>
-              <DetailText label={"Meter Reading Code"}>
-                {data?.meterReadingCode}
-              </DetailText>
-
-              <DetailText label={"Account Segment"}>
-                {data?.accGroupSegment}
-              </DetailText>
-              <DetailText label={"Account Group Type"}>
-                {data?.accGroupType}
-              </DetailText>
-              <DetailText label={"Specific Customer"}>
-                {data?.specCustacc}
-              </DetailText>
-            </div>
-          </CardContainer>
-
-          {/* Schedule Information */}
-          <CardContainer
-            header={
-              <div className="flex -my-4 justify-between items-center">
-                <p className="mt-[15px]">SCHEDULE INFORMATION</p>
-              </div>
-            }
-          >
-            <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-2 sm:gap-y-1">
-              <DetailText label={"Type"}>{data?.scheduleType}</DetailText>
-              <div className="col-span-3">
-                <DetailText label={"Remark"}>{data?.remark}</DetailText>
-              </div>
-            </div>
-          </CardContainer>
-
-          {/* Calculation Result */}
+          {/* Card 2: CALCULATION RESULT */}
           <CardContainer
             header={
               <div className="flex -my-4 justify-between items-center">
@@ -713,7 +687,7 @@ const DetailInformation = ({ data, tabHeader }) => {
                 columnDefinitions={columnDefinitions}
                 fixedColumns={fixedColumns}
                 setFixedColumns={setFixedColumns}
-                loading={loading}
+                loading={loadingResult}
                 showExport={false}
                 usePagination={false}
                 useInfiniteScroll={true}
@@ -724,7 +698,7 @@ const DetailInformation = ({ data, tabHeader }) => {
             </div>
           </CardContainer>
 
-          {/* History Log Information */}
+          {/* Card 3: HISTORY LOG INFORMATION */}
           <CardContainer
             header={
               <div className="flex -my-4 justify-between items-center">

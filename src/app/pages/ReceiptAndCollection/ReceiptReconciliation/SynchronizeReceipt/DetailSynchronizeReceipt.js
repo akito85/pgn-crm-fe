@@ -6,7 +6,6 @@ import { Input } from "antd";
 import CardContainer from "../../../../../components/CardContainer";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import DetailText from "../../../../../components/DetailText";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import TableRBI from "../../../../../components/TableRBI";
 import moment from "moment";
@@ -40,13 +39,13 @@ for (let i = 0; i < 100; i++) {
     accountName: `0000${randomAccount}`,
     syncDateTime: "2023-01-06T04:01:40.892Z",
     accountSegment: `RT`,
-    accountGroupType: `GOLD`, 
-    meterReadingCode: `41-Jakarta`, 
-    accountType: `JRG`, 
-    accountStatus: `REGISTERED`, 
-    customerManagement: `Analyst City Gas CM and TS Area Bogor 1`, 
-    corporateCustomer: `N`, 
-    amount: 90000000, 
+    accountGroupType: `GOLD`,
+    meterReadingCode: `41-Jakarta`,
+    accountType: `JRG`,
+    accountStatus: `REGISTERED`,
+    customerManagement: `Analyst City Gas CM and TS Area Bogor 1`,
+    corporateCustomer: `N`,
+    amount: 90000000,
     amountEquivalent: randomAmountEquivalent
   });
 }
@@ -291,7 +290,7 @@ const DetailSynchronizeReceipt = () => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       {/* <Spin spinning={loading}> */}
       <BreadCrumb routes={routes} />
 
@@ -299,12 +298,12 @@ const DetailSynchronizeReceipt = () => {
         <div className="w-full grid grid-cols-3 gap-3">
           <DetailText label="SYNC ID">{data_detail?.syncId}</DetailText>
           <DetailText label="Sync Date Time">{data_detail?.syncDateTime
-              ? moment(data_detail.syncDateTime).format(dateFormat)
-              : "-"}</DetailText>
+            ? moment(data_detail.syncDateTime).format(dateFormat)
+            : "-"}</DetailText>
           <DetailText label="Total Receipt">{data_detail?.totalReceipt}</DetailText>
           <DetailText label="Currency">{data_detail?.currency}</DetailText>
           <DetailText label="Total Amount">
-          <NumericFormat
+            <NumericFormat
               displayType="text"
               value={data_detail?.totalAmount}
               className="text-right"
@@ -330,7 +329,7 @@ const DetailSynchronizeReceipt = () => {
             // totalData={data?.page?.totalElements}
             onSort={onSort}
             tableScrolled={{
-              x: 5000,
+              x: "max-content",
               y: 300,
             }}
           />
@@ -356,7 +355,7 @@ const DetailSynchronizeReceipt = () => {
       </div>
 
       {/* </Spin> */}
-    </LayoutMenu>
+    </>
   );
 };
 

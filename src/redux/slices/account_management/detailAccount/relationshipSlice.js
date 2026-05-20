@@ -7,233 +7,236 @@ import {
 } from "../../general_slice";
 
 const initialState = {
-  data_relationship: {},
-  data_relationshipDetail: {},
-  data_relationshipType: [],
-  data_relationshipCategory: [],
-  data_attachmentCategory: [],
-  data_attachmentList: [],
-  data_accountList: {},
-  data_relatedObjectList: {},
+  // --- List ---
+  loading_listRelationship: false,
+  list_relationship: [],
+  pagination_listRelationship: {
+    totalPages: 0,
+    totalElements: 0,
+    currentPage: 0,
+    pageSize: 20,
+  },
+
+  // --- Approval List ---
+  loading_listRelationshipApproval: false,
+  list_relationshipApproval: [],
+  pagination_listRelationshipApproval: {
+    totalPages: 0,
+    totalElements: 0,
+    currentPage: 0,
+    pageSize: 20,
+  },
+
+  // --- Detail ---
+  loading_detailRelationship: false,
+  detail_relationship: {},
+  loading_detailDraftRelationship: false,
+  detailDraft_relationship: {},
+
+  // --- Create / Update ---
+  loading_createUpdateRelationship: false,
+
+  // --- Approve / Reject ---
+  loading_approveRejectRelationship: false,
+  loading_approveRelationship: false,
+  loading_rejectRelationship: false,
+
+  // --- Inactivate ---
+  loading_inactivateRelationship: false,
+
+  // --- Form Options ---
+  loading_listRelationshipType: false,
+  list_relationshipType: [],
+  loading_listRelationshipCategory: false,
+  list_relationshipCategory: [],
+  loading_listRelationshipApprovalHierarchy: false,
+  list_relationshipApprovalHierarchy: [],
+  loading_detailRelationshipApprovalHierarchy: false,
+  detail_relationshipApprovalHierarchy: [],
+  loading_listRelationshipAttachmentCategory: false,
+  list_relationshipAttachmentCategory: [],
+
+  // --- Related Object ---
+  loading_listRelatedObject: false,
+  list_relatedObject: [],
+  pagination_listRelatedObject: {
+    totalPages: 0,
+    totalElements: 0,
+    currentPage: 0,
+    pageSize: 20,
+  },
+
+  // --- History ---
+  loading_relationshipApprovalHistory: false,
+  detail_relationshipApprovalHistory: {},
+
+  // --- Dynamic Search ---
   data_globalTypeCondition: [],
   data_globalTypeOperator: [],
   data_globalTypeColumn: [],
-  data_approvalHierarchies: [],
-  data_approvalHierarchyDetail: [],
-  data_approvalHistory: {},
-  loading: false,
-  loadingDetail: false,
-  loadingType: false,
-  loadingCategory: false,
-  loadingApprovalHierarchies: false,
-  loadingApprovalHierarchyDetail: false,
-  loadingRelatedObject: false,
-  loadingApprovalHistory: false,
 };
 
-// Get Relationship List
-export const getRelationshipList = createAsyncThunk(
-  "GET_RELATIONSHIP_LIST",
-  async ({ idAccount, page, pageSize, sort, search }, thunkAPI) => {
+// Get Relationship List (POST)
+export const getRelationships = createAsyncThunk(
+  "GET_RELATIONSHIPS",
+  async ({ accountId, page, pageSize, sort, search, body, isLoadMore }, thunkAPI) => {
     try {
-      const searchParam = search ? `&searchs=${search}` : "";
-      const sortParam = sort ? `&sort=${sort}` : "";
-      const url = `/v1/dbs/api/accounts/${idAccount}/relationships?page=${page - 1}&size=${pageSize}${sortParam}${searchParam}`;
-      const response = await accountManagementService.getPagination(url);
-      return response?.data;
-    } catch (error) {
-      thunkAPI.dispatch(
-        validateError({ error: error, action: "GET_RELATIONSHIP_LIST" })
-      );
-      return thunkAPI.rejectWithValue(error);
-    }
-  }
-);
-
-// Get Relationship List with Advanced Filter (POST)
-export const getRelationshipListAdvanced = createAsyncThunk(
-  "GET_RELATIONSHIP_LIST_ADVANCED",
-  async ({ idAccount, page, pageSize, sort, search, body }, thunkAPI) => {
-    try {
-      // empty string for default sort
       const sortParam = sort === undefined || sort === "" ? "" : sort;
-      const url = `/v1/dbs/api/accounts/${idAccount}/relationships`;
+      const url = `/v1/dbs/api/accounts/${accountId}/relationships`;
       const requestBody = {
         ...body,
         page,
         size: pageSize,
         sort: sortParam,
+        listType: "all",
       };
       const response = await accountManagementService.updateDataWithMethodPost(url, requestBody);
-      return response?.data;
+      return {
+        ...response?.data,
+        isLoadMore,
+      };
     } catch (error) {
-      thunkAPI.dispatch(
-        validateError({ error: error, action: "GET_RELATIONSHIP_LIST_ADVANCED" })
-      );
+      return thunkAPI.rejectWithValue(error);
+    }
+  }
+);
+
+export const getRelationshipApprovals = createAsyncThunk(
+  "GET_RELATIONSHIP_APPROVALS",
+  async ({ accountId, page, pageSize, sort, search, body, isLoadMore }, thunkAPI) => {
+    try {
+      const sortParam = sort === undefined || sort === "" ? "" : sort;
+      const url = `/v1/dbs/api/accounts/${accountId}/relationships`;
+      const requestBody = {
+        ...body,
+        page,
+        size: pageSize,
+        sort: sortParam,
+        listType: "approval",
+      };
+      const response = await accountManagementService.updateDataWithMethodPost(url, requestBody);
+      return {
+        ...response?.data,
+        isLoadMore,
+      };
+    } catch (error) {
       return thunkAPI.rejectWithValue(error);
     }
   }
 );
 
 // Get Relationship Detail
-export const getRelationshipDetail = createAsyncThunk(
-  "GET_RELATIONSHIP_DETAIL",
-  async ({ idAccount, idRelationship }, thunkAPI) => {
+export const getRelationship = createAsyncThunk(
+  "GET_RELATIONSHIP",
+  async ({ accountId, idRelationship }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${idAccount}/relationships/${idRelationship}`;
+      const url = `/v1/dbs/api/accounts/${accountId}/relationships/${idRelationship}`;
       const response = await accountManagementService.getDetail(url);
       return response?.data;
     } catch (error) {
-      thunkAPI.dispatch(
-        validateError({ error: error, action: "GET_RELATIONSHIP_DETAIL" })
-      );
       return thunkAPI.rejectWithValue(error);
     }
   }
 );
 
-// Get Relationship Type Options
-export const getRelationshipType = createAsyncThunk(
-  "GET_RELATIONSHIP_TYPE",
-  async ({ idAccount }, thunkAPI) => {
+// Get Relationship Detail Draft
+export const getRelationshipDraft = createAsyncThunk(
+  "GET_RELATIONSHIP_DRAFT",
+  async ({ accountId, idRelationship }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${idAccount}/relationships/relationship-type`;
+      const url = `/v1/dbs/api/accounts/${accountId}/relationships/detail-draft/${idRelationship}`;
+      const response = await accountManagementService.getDetail(url);
+      return response?.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+// Get Relationship Type Options
+export const getRelationshipTypes = createAsyncThunk(
+  "GET_RELATIONSHIP_TYPES",
+  async ({ accountId }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/accounts/${accountId}/relationships/relationship-type`;
       const response = await accountManagementService.getAll(url);
       return response?.data;
     } catch (error) {
-      thunkAPI.dispatch(
-        validateError({ error: error, action: "GET_RELATIONSHIP_TYPE" })
-      );
       return thunkAPI.rejectWithValue(error);
     }
   }
 );
 
 // Get Relationship Category Options
-export const getRelationshipCategory = createAsyncThunk(
-  "GET_RELATIONSHIP_CATEGORY",
-  async ({ idAccount }, thunkAPI) => {
+export const getRelationshipCategories = createAsyncThunk(
+  "GET_RELATIONSHIP_CATEGORIES",
+  async ({ accountId }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${idAccount}/relationships/relationship-category`;
+      const url = `/v1/dbs/api/accounts/${accountId}/relationships/relationship-category`;
       const response = await accountManagementService.getAll(url);
       return response?.data;
     } catch (error) {
-      thunkAPI.dispatch(
-        validateError({ error: error, action: "GET_RELATIONSHIP_CATEGORY" })
-      );
       return thunkAPI.rejectWithValue(error);
     }
   }
 );
 
 // Get Approval Hierarchies
-export const getApprovalHierarchies = createAsyncThunk(
-  "GET_APPROVAL_HIERARCHIES",
-  async ({ idAccount }, thunkAPI) => {
+export const getRelationshipApprovalHierarchies = createAsyncThunk(
+  "GET_RELATION_APPROVAL_HIERARCHIES",
+  async (_, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${idAccount}/relationships/approval-hierarchies`;
+      const url = `/v1/dbs/api/accounts/relationships/approval-hierarchies`;
       const response = await accountManagementService.getAll(url);
       return response?.data;
     } catch (error) {
-      thunkAPI.dispatch(
-        validateError({ error: error, action: "GET_APPROVAL_HIERARCHIES" })
-      );
       return thunkAPI.rejectWithValue(error);
     }
   }
 );
 
 // Get Approval Hierarchy Detail
-export const getApprovalHierarchyDetail = createAsyncThunk(
-  "GET_APPROVAL_HIERARCHY_DETAIL",
-  async ({ idAccount, appHierId }, thunkAPI) => {
+export const getRelationshipApprovalHierarchy = createAsyncThunk(
+  "GET_RELATIONSHIP_APPROVAL_HIERARCHY",
+  async (appHierId, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${idAccount}/relationships/approval-hierarchy/${appHierId}`;
+      const url = `/v1/dbs/api/accounts/relationships/approval-hierarchy/${appHierId}`;
       const response = await accountManagementService.getAll(url);
       return response?.data;
     } catch (error) {
-      thunkAPI.dispatch(
-        validateError({ error: error, action: "GET_APPROVAL_HIERARCHY_DETAIL" })
-      );
       return thunkAPI.rejectWithValue(error);
     }
   }
 );
 
 // Get Approval History
-export const getApprovalHistory = createAsyncThunk(
-  "GET_APPROVAL_HISTORY",
-  async ({ idAccount, relationshipId }, thunkAPI) => {
+export const getRelationshipApprovalHistory = createAsyncThunk(
+  "GET_RELATIONSHIP_APPROVAL_HISTORY",
+  async ({ accountId, relationshipId }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${idAccount}/relationships/approval-history/${relationshipId}`;
+      const url = `/v1/dbs/api/accounts/${accountId}/relationships/approval-history/${relationshipId}`;
       const response = await accountManagementService.getAll(url);
-      return response?.data;
+      return Array.isArray(response.data) ? null : response.data;
     } catch (error) {
-      thunkAPI.dispatch(
-        validateError({ error: error, action: "GET_APPROVAL_HISTORY" })
-      );
       return thunkAPI.rejectWithValue(error);
     }
   }
 );
 
-
-
-// Get Relationship Search Column
-export const getRelationshipColumnApi = createAsyncThunk(
-  "GET_RELATIONSHIP_COLUMN_API",
-  async (_, thunkAPI) => {
+export const inactivateRelationship = createAsyncThunk(
+  "INACTIVATE_RELATIONSHIP",
+  async ({ accountId, body }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/relationships/list-search-column`;
-      const response = await accountManagementService.getAll(url);
-      return response?.data;
-    } catch (error) {
-      return thunkAPI.rejectWithValue(error?.response);
-    }
-  }
-);
+      const url = `/v1/dbs/api/accounts/${accountId}/relationships/inactive`;
+      const response = await accountManagementService.activationWithRemark(url, body);
 
-// Get Relationship Search Condition
-export const getRelationshipConditionApi = createAsyncThunk(
-  "GET_RELATIONSHIP_CONDITION_API",
-  async (_, thunkAPI) => {
-    try {
-      const url = `/v1/dbs/api/relationships/list-search-condition`;
-      const response = await accountManagementService.getAll(url);
-      return response?.data;
-    } catch (error) {
-      return thunkAPI.rejectWithValue(error?.response);
-    }
-  }
-);
-
-// Get Relationship Search Operator
-export const getRelationshipOperatorApi = createAsyncThunk(
-  "GET_RELATIONSHIP_OPERATOR_API",
-  async (_, thunkAPI) => {
-    try {
-      const url = `/v1/dbs/api/relationships/list-search-operator`;
-      const response = await accountManagementService.getAll(url);
-      return response?.data;
-    } catch (error) {
-      return thunkAPI.rejectWithValue(error?.response);
-    }
-  }
-);
-
-// Activate/Inactivate Relationship
-export const activateRelationship = createAsyncThunk(
-  "ACTIVATE_RELATIONSHIP",
-  async ({ idAccount, idRelationship, status }, thunkAPI) => {
-    try {
-      const url = `/v1/dbs/api/accounts/${idAccount}/relationships/${idRelationship}/${status}`;
-      const response = await accountManagementService.updateData(url, {});
-      const successMessage = {
-        title: "Successful",
-        description: `Relationship has been ${status === "activate" ? "activated" : "inactivated"}.`,
+      const successBody = {
+        title: `Successful`,
+        description: `Your data has been submitted`,
+        return: false,
       };
-      thunkAPI.dispatch(showModalSuccess(successMessage));
-      return response?.data;
+      thunkAPI.dispatch(showModalSuccess(successBody));
+      return response.data;
     } catch (error) {
       const message =
         (error.response &&
@@ -241,46 +244,20 @@ export const activateRelationship = createAsyncThunk(
           error.response.data.message) ||
         error.message ||
         error.toString();
-      const errorBody = {
-        title: "Failed",
-        description: `Failed to ${status === "activate" ? "activate" : "inactivate"} relationship: ${message}`,
-      };
-      thunkAPI.dispatch(showModalError(errorBody));
-      return thunkAPI.rejectWithValue(error);
-    }
-  }
-);
-
-// Toggle Relationship Status (Active/Inactive)
-export const toggleRelationshipStatus = createAsyncThunk(
-  "TOGGLE_RELATIONSHIP_STATUS",
-  async ({ relationshipId, remarks }, thunkAPI) => {
-    try {
-      const url = `/v1/dbs/api/account/relationships/active-inactive`;
-      const payload = {
-        relationshipId,
-        remarks,
-      };
-      const response = await accountManagementService.updateData(url, payload);
-      const successMessage = {
-        title: "Successful",
-        description: "Relationship status has been updated successfully.",
-      };
-      thunkAPI.dispatch(showModalSuccess(successMessage));
-      return response?.data;
-    } catch (error) {
-      const message =
-        (error.response &&
-          error.response.data &&
-          error.response.data.message) ||
-        error.message ||
-        error.toString();
-      const errorBody = {
-        title: "Failed",
-        description: `Failed to update relationship status: ${message}`,
-      };
-      thunkAPI.dispatch(showModalError(errorBody));
-      return thunkAPI.rejectWithValue(error);
+      if (Math.floor((error.response?.data?.code || 0) / 100) === 4) {
+        const errorBody = {
+          title: "Failed",
+          description: `Your data was not submitted. ${message}.`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `Your data was not submitted. An unknown error occured.`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error?.response);
     }
   }
 );
@@ -288,18 +265,15 @@ export const toggleRelationshipStatus = createAsyncThunk(
 // Create Relationship
 export const createRelationship = createAsyncThunk(
   "CREATE_RELATIONSHIP",
-  async ({ idAccount, payload, attachments = [] }, thunkAPI) => {
+  async ({ accountId, payload, attachments = [] }, thunkAPI) => {
     try {
-      // 1. Create relationship first
-      const url = `/v1/dbs/api/accounts/${idAccount}/relationships/create`;
+      const url = `/v1/dbs/api/accounts/${accountId}/relationships/create`;
       const response = await accountManagementService.createData(url, payload);
 
-      // 2. Get ID from response
       const { id } = response?.data || {};
 
-      // 3. Upload all attachments with refId
       if (id && attachments.length > 0) {
-        const uploadUrl = `/v1/dbs/api/accounts/${idAccount}/relationships/upload-attachment`;
+        const uploadUrl = `/v1/dbs/api/accounts/${accountId}/relationships/upload-attachment`;
         const uploadPromises = attachments.map((attachment) =>
           accountManagementService.uploadAttachment(uploadUrl, {
             files: attachment.file,
@@ -312,7 +286,8 @@ export const createRelationship = createAsyncThunk(
 
       const successMessage = {
         title: "Successful",
-        description: `Relationship has been ${payload?.action === "DRAFT" ? 'drafted' : 'submitted'}.`,
+        description: `Relationship has been ${payload?.action === "draft" ? 'drafted' : 'submitted'}.`,
+        return: false,
       };
       thunkAPI.dispatch(showModalSuccess(successMessage));
       return response?.data;
@@ -325,7 +300,7 @@ export const createRelationship = createAsyncThunk(
         error.toString();
       const errorBody = {
         title: "Failed",
-        description: `Relationship was not ${payload?.action === "DRAFT" ? 'drafted' : 'submitted'}. ${message}`,
+        description: `Relationship was not ${payload?.action === "draft" ? 'drafted' : 'submitted'}. ${message}`,
       };
       thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(error);
@@ -336,15 +311,13 @@ export const createRelationship = createAsyncThunk(
 // Update Relationship
 export const updateRelationship = createAsyncThunk(
   "UPDATE_RELATIONSHIP",
-  async ({ idAccount, idRelationship, payload, attachments = [] }, thunkAPI) => {
+  async ({ accountId, idRelationship, payload, attachments = [] }, thunkAPI) => {
     try {
-      // 1. Update relationship first
-      const url = `/v1/dbs/api/accounts/${idAccount}/relationships/${idRelationship}`;
+      const url = `/v1/dbs/api/accounts/${accountId}/relationships/${idRelationship}`;
       const response = await accountManagementService.updateData(url, payload);
 
-      // 2. Upload new attachments only (filter out existing ones)
       if (attachments.length > 0) {
-        const uploadUrl = `/v1/dbs/api/accounts/${idAccount}/relationships/upload-attachment`;
+        const uploadUrl = `/v1/dbs/api/accounts/${accountId}/relationships/upload-attachment`;
         const uploadPromises = attachments.map((attachment) =>
           accountManagementService.uploadAttachment(uploadUrl, {
             files: attachment.file,
@@ -357,7 +330,8 @@ export const updateRelationship = createAsyncThunk(
 
       const successMessage = {
         title: "Successful",
-        description: `Relationship has been ${payload?.action === "DRAFT" ? 'drafted' : 'submitted'}.`,
+        description: `Relationship has been ${payload?.action === "draft" ? 'drafted' : 'submitted'}.`,
+        return: false,
       };
       thunkAPI.dispatch(showModalSuccess(successMessage));
       return response?.data;
@@ -370,7 +344,7 @@ export const updateRelationship = createAsyncThunk(
         error.toString();
       const errorBody = {
         title: "Failed",
-        description: `Relationship was not ${payload?.action === "DRAFT" ? 'drafted' : 'submitted'}. ${message}`,
+        description: `Relationship was not ${payload?.action === "draft" ? 'drafted' : 'submitted'}. ${message}`,
       };
       thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(error);
@@ -379,142 +353,38 @@ export const updateRelationship = createAsyncThunk(
 );
 
 // Get Attachment Category
-export const getAttachmentCategory = createAsyncThunk(
-  "GET_ATTACHMENT_CATEGORY",
-  async ({ idAccount }, thunkAPI) => {
+export const getRelationshipAttachmentCategories = createAsyncThunk(
+  "GET_RELATIONSHIP_ATTACHMENT_CATEGORIES",
+  async (_, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${idAccount}/relationships/attachment-category`;
+      const url = `/v1/dbs/api/accounts/relationships/attachment-category`;
       const response = await accountManagementService.getAll(url);
       return response?.data;
     } catch (error) {
-      thunkAPI.dispatch(
-        validateError({ error: error, action: "GET_ATTACHMENT_CATEGORY" })
-      );
-      return thunkAPI.rejectWithValue(error);
-    }
-  }
-);
-
-// Upload Attachment
-export const uploadAttachment = createAsyncThunk(
-  "UPLOAD_ATTACHMENT",
-  async ({ idAccount, payload }, thunkAPI) => {
-    try {
-      const url = `/v1/dbs/api/accounts/${idAccount}/relationships/upload-attachment`;
-      const response = await accountManagementService.uploadAttachment(
-        url,
-        payload
-      );
-      return response?.data;
-    } catch (error) {
-      const message =
-        (error.response &&
-          error.response.data &&
-          error.response.data.message) ||
-        error.message ||
-        error.toString();
-      const errorBody = {
-        title: "Failed",
-        description: `Failed to upload attachment: ${message}`,
-      };
-      thunkAPI.dispatch(showModalError(errorBody));
-      return thunkAPI.rejectWithValue(error);
-    }
-  }
-);
-
-// Get Attachment List
-export const getAttachmentList = createAsyncThunk(
-  "GET_ATTACHMENT_LIST",
-  async ({ idAccount, idRelationship }, thunkAPI) => {
-    try {
-      const url = `/v1/dbs/api/accounts/${idAccount}/relationships/list-attachment/${idRelationship}`;
-      const response = await accountManagementService.getAll(url);
-      return response?.data;
-    } catch (error) {
-      thunkAPI.dispatch(
-        validateError({ error: error, action: "GET_ATTACHMENT_LIST" })
-      );
-      return thunkAPI.rejectWithValue(error);
-    }
-  }
-);
-
-// Download Attachment
-export const downloadAttachment = createAsyncThunk(
-  "DOWNLOAD_ATTACHMENT",
-  async ({ idAccount, idFile, urlFile1, fileName }, thunkAPI) => {
-    try {
-      // craft url if urlFile1 is not provided, else use urlFile1
-      const url = urlFile1 || `/v1/dbs/api/accounts/${idAccount}/relationships/download-attachment/${idFile}`;
-      const response = await accountManagementService.downloadData(url);
-      return response;
-    } catch (error) {
-      const message =
-        (error.response &&
-          error.response.error &&
-          error.response.error.message) ||
-        error.message ||
-        error.toString();
-
-      const errorBody = {
-        title: "Download Failed",
-        description: `Failed to download file "${fileName || 'Unknown'}". ${error.response.error.message}`,
-      };
-      thunkAPI.dispatch(showModalError(errorBody));
-      return thunkAPI.rejectWithValue(error);
-    }
-  }
-);
-
-// Get All Accounts
-export const getAllAccounts = createAsyncThunk(
-  "GET_ALL_ACCOUNTS",
-  async ({ page, size, search }, thunkAPI) => {
-    try {
-      // url example: /v1/dbs/api/account/list?page=1&size=1
-      // Note: Assuming page coming from UI is 1-based. If API is 0-based, we might need page-1.
-      // However, user specifically asked for page=1 in the URL.
-      // I'll stick to passing 'page' directly for now, or check if I should do page-1.
-      // Most of the other thunks in this file do page-1.
-      // "page=${page - 1}"
-      // I will assume consistency with other thunks and use page - 1 if the input `page` is 1-based from AntD.
-
-      const searchParam = search ? `&searchs=${search}` : "";
-      const url = `/v1/dbs/api/account/list?page=${page}&size=${size}${searchParam}`;
-      const response = await accountManagementService.getPagination(url);
-      return response?.data;
-    } catch (error) {
-      thunkAPI.dispatch(
-        validateError({ error: error, action: "GET_ALL_ACCOUNTS" })
-      );
       return thunkAPI.rejectWithValue(error);
     }
   }
 );
 
 // Get Related Object Data (Customer or Account based on relationship type)
-export const getRelatedObjectData = createAsyncThunk(
-  "GET_RELATED_OBJECT_DATA",
-  async ({ idAccount, page, size, relationshipType, relationshipCategory }, thunkAPI) => {
+export const getRelatedObjects = createAsyncThunk(
+  "GET_RELATED_OBJECTS",
+  async ({ accountId, relationshipType, relationshipCategory, body, isLoadMore }, thunkAPI) => {
     try {
-      const pageParam = page ? page - 1 : 0; // Convert to 0-based
-      const sizeParam = size || 10;
-      const typeParam = relationshipType
-        ? `&relationshipType=${relationshipType
-          .trim()
-          .toUpperCase()
-          .replace(/\s+/g, "_")}`
-        : "";
-      const categoryParam = relationshipCategory ? `&relationshipCategory=${relationshipCategory?.toUpperCase()}` : "";
+      const queryParams = new URLSearchParams();
 
-      const url = `/v1/dbs/api/accounts/${idAccount}/relationships/related-object-data?page=${pageParam}&size=${sizeParam}${typeParam}${categoryParam}`;
-      const response = await accountManagementService.getPagination(url);
-      return response?.data;
+      if (relationshipType) queryParams.append("relationshipType", relationshipType);
+      if (relationshipCategory) queryParams.append("relationshipCategory", relationshipCategory);
+
+      let url = `/v1/dbs/api/accounts/${accountId}/relationships/related-object-data`;
+      if (queryParams.toString().length) url += `?${queryParams.toString()}`;
+
+      const response = await accountManagementService.updateDataWithMethodPost(url, body);
+      return {
+        ...response?.data,
+        isLoadMore,
+      };
     } catch (error) {
-      thunkAPI.dispatch(
-        validateError({ error: error, action: "GET_RELATED_OBJECT_DATA" })
-      );
       return thunkAPI.rejectWithValue(error);
     }
   }
@@ -523,9 +393,9 @@ export const getRelatedObjectData = createAsyncThunk(
 // Approve or Reject Relationship
 export const approveOrRejectRelationship = createAsyncThunk(
   "APPROVE_OR_REJECT_RELATIONSHIP",
-  async ({ idAccount, body, action }, thunkAPI) => {
+  async ({ accountId, body, action }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${idAccount}/relationships/approve`;
+      const url = `/v1/dbs/api/accounts/${accountId}/relationships/approve`;
       const response = await accountManagementService.activationWithRemark(url, body, {
         headers: {
           "Accept": "application/json"
@@ -562,12 +432,104 @@ export const approveOrRejectRelationship = createAsyncThunk(
   }
 );
 
+// Approve or Reject Inactive Relationship
+export const approveOrRejectInactiveRelationship = createAsyncThunk(
+  "APPROVE_OR_REJECT_INACTIVE_RELATIONSHIP",
+  async ({ accountId, body, action }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/accounts/${accountId}/relationships/approve-inactive`;
+      const response = await accountManagementService.activationWithRemark(url, body, {
+        headers: {
+          "Accept": "application/json"
+        }
+      });
+
+      const successBody = {
+        title: `Successful`,
+        description: `Your data has been ${action === "APPROVE" ? 'approved' : 'rejected'}.`,
+        return: false,
+      };
+      thunkAPI.dispatch(showModalSuccess(successBody));
+      return response.data;
+    } catch (error) {
+      let message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+
+      if (Math.floor((error.response?.data?.code || 0) / 100) !== 4)
+        message = "An unknown error occurred";
+
+      const errorBody = {
+        title: "Failed",
+        description: `Your data was not ${action === "APPROVE" ? 'approved' : 'rejected'}. ${message}.`,
+      };
+
+      thunkAPI.dispatch(showModalError(errorBody));
+
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+// Approve or Reject All Relationship (active + inactive in one dispatch)
+export const approveOrRejectAllRelationship = createAsyncThunk(
+  "APPROVE_OR_REJECT_ALL_RELATIONSHIP",
+  async ({ accountId, body, inactiveBody, action }, thunkAPI) => {
+    try {
+      const approveUrl = `/v1/dbs/api/accounts/${accountId}/relationships/approve`;
+      const approveInactiveUrl = `/v1/dbs/api/accounts/${accountId}/relationships/approve-inactive`;
+
+      await Promise.all(
+        [
+          body && body.length > 0
+            ? accountManagementService.activationWithRemark(approveUrl, body, {
+                headers: { Accept: "application/json" },
+              })
+            : null,
+          inactiveBody && inactiveBody.length > 0
+            ? accountManagementService.activationWithRemark(approveInactiveUrl, inactiveBody, {
+                headers: { Accept: "application/json" },
+              })
+            : null,
+        ].filter(Boolean)
+      );
+
+      const successBody = {
+        title: "Successful",
+        description: `Your data has been ${action === "APPROVE" ? "approved" : "rejected"}.`,
+        return: false,
+      };
+      thunkAPI.dispatch(showModalSuccess(successBody));
+      return { body, inactiveBody, action };
+    } catch (error) {
+      let message =
+        (error.response && error.response.data && error.response.data.message) ||
+        error.message ||
+        error.toString();
+
+      if (Math.floor((error.response?.data?.code || 0) / 100) !== 4)
+        message = "An unknown error occurred";
+
+      const errorBody = {
+        title: "Failed",
+        description: `Your data was not ${action === "APPROVE" ? "approved" : "rejected"}. ${message}.`,
+      };
+
+      thunkAPI.dispatch(showModalError(errorBody));
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
 // Download Relationship to Excel
 export const downloadRelationship = createAsyncThunk(
   "DOWNLOAD_RELATIONSHIP",
-  async ({ idAccount, body }, thunkAPI) => {
+  async ({ accountId, body }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${idAccount}/relationships/export-excel`;
+      const url = `/v1/dbs/api/accounts/${accountId}/relationships/export-excel`;
       const response = await accountManagementService.downloadDataAdvanced(url, body);
       return response;
     } catch (error) {
@@ -582,261 +544,306 @@ const relationshipSlice = createSlice({
   initialState,
   extraReducers: {
     // Get Relationship List
-    [getRelationshipList.pending]: (state) => {
-      state.loading = true;
+    [getRelationships.pending]: (state, action) => {
+      if (!action.meta.arg?.isLoadMore) {
+        state.loading_listRelationship = true;
+      }
     },
-    [getRelationshipList.fulfilled]: (state, action) => {
-      state.data_relationship = action.payload;
-      state.loading = false;
+    [getRelationships.fulfilled]: (state, action) => {
+      state.loading_listRelationship = false;
+      const { result, page, isLoadMore } = action.payload;
+
+      if (Array.isArray(result)) {
+        if (isLoadMore) {
+          const currentIds = new Set(state.list_relationship.map((item) => item.id));
+          const filteredResult = result.filter((resultItem) => !currentIds.has(resultItem.id));
+
+          state.list_relationship = [
+            ...state.list_relationship,
+            ...filteredResult,
+          ];
+        } else {
+          state.list_relationship = result;
+        }
+      }
+
+      state.pagination_listRelationship = {
+        totalPages: page?.totalPages || 0,
+        totalElements: page?.totalElements || 0,
+        currentPage: page?.number || 0,
+        pageSize: page?.size || 20,
+      };
     },
-    [getRelationshipList.rejected]: (state) => {
-      state.loading = false;
+    [getRelationships.rejected]: (state, action) => {
+      state.loading_listRelationship = false;
+
+      if (!action.meta.arg?.isLoadMore) {
+        state.list_relationship = [];
+        state.pagination_listRelationship = {
+          totalPages: 0,
+          totalElements: 0,
+          currentPage: 0,
+          pageSize: 20,
+        };
+      }
     },
 
-    // Get Relationship List Advanced
-    [getRelationshipListAdvanced.pending]: (state) => {
-      state.loading = true;
+    // Get Relationship Approval List
+    [getRelationshipApprovals.pending]: (state, action) => {
+      if (!action.meta.arg?.isLoadMore) {
+        state.loading_listRelationshipApproval = true;
+      }
     },
-    [getRelationshipListAdvanced.fulfilled]: (state, action) => {
-      state.data_relationship = action.payload;
-      state.loading = false;
+    [getRelationshipApprovals.fulfilled]: (state, action) => {
+      state.loading_listRelationshipApproval = false;
+      const { result, page, isLoadMore } = action.payload;
+
+      if (Array.isArray(result)) {
+        if (isLoadMore) {
+          const currentIds = new Set(state.list_relationshipApproval.map((item) => item.id));
+          const filteredResult = result.filter((resultItem) => !currentIds.has(resultItem.id));
+
+          state.list_relationshipApproval = [
+            ...state.list_relationshipApproval,
+            ...filteredResult,
+          ];
+        } else {
+          state.list_relationshipApproval = result;
+        }
+      }
+
+      state.pagination_listRelationshipApproval = {
+        totalPages: page?.totalPages || 0,
+        totalElements: page?.totalElements || 0,
+        currentPage: page?.number || 0,
+        pageSize: page?.size || 20,
+      };
     },
-    [getRelationshipListAdvanced.rejected]: (state) => {
-      state.loading = false;
+    [getRelationshipApprovals.rejected]: (state, action) => {
+      state.loading_listRelationshipApproval = false;
+
+      if (!action.meta.arg?.isLoadMore) {
+        state.list_relationshipApproval = [];
+        state.pagination_listRelationshipApproval = {
+          totalPages: 0,
+          totalElements: 0,
+          currentPage: 0,
+          pageSize: 20,
+        };
+      }
     },
 
     // Get Relationship Detail
-    [getRelationshipDetail.pending]: (state) => {
-      state.loadingDetail = true;
+    [getRelationship.pending]: (state) => {
+      state.loading_detailRelationship = true;
     },
-    [getRelationshipDetail.fulfilled]: (state, action) => {
-      state.data_relationshipDetail = action.payload;
-      state.loadingDetail = false;
+    [getRelationship.fulfilled]: (state, action) => {
+      state.detail_relationship = action.payload.result || {};
+      state.loading_detailRelationship = false;
     },
-    [getRelationshipDetail.rejected]: (state) => {
-      state.loadingDetail = false;
+    [getRelationship.rejected]: (state) => {
+      state.loading_detailRelationship = false;
+    },
+
+    // Get Relationship Detail Draft
+    [getRelationshipDraft.pending]: (state) => {
+      state.loading_detailDraftRelationship = true;
+    },
+    [getRelationshipDraft.fulfilled]: (state, action) => {
+      state.detailDraft_relationship = action.payload.result || {};
+      state.loading_detailDraftRelationship = false;
+    },
+    [getRelationshipDraft.rejected]: (state) => {
+      state.detailDraft_relationship = {};
+      state.loading_detailDraftRelationship = false;
     },
 
     // Get Relationship Type
-    [getRelationshipType.pending]: (state) => {
-      state.loadingType = true;
+    [getRelationshipTypes.pending]: (state) => {
+      state.loading_listRelationshipType = true;
     },
-    [getRelationshipType.fulfilled]: (state, action) => {
-      state.data_relationshipType = action.payload;
-      state.loadingType = false;
+    [getRelationshipTypes.fulfilled]: (state, action) => {
+      state.list_relationshipType= action.payload;
+      state.loading_listRelationshipType = false;
     },
-    [getRelationshipType.rejected]: (state) => {
-      state.loadingType = false;
+    [getRelationshipTypes.rejected]: (state) => {
+      state.loading_listRelationshipType = false;
     },
 
     // Get Relationship Category
-    [getRelationshipCategory.pending]: (state) => {
-      state.loadingCategory = true;
+    [getRelationshipCategories.pending]: (state) => {
+      state.loading_listRelationshipCategory = true;
     },
-    [getRelationshipCategory.fulfilled]: (state, action) => {
-      state.data_relationshipCategory = action.payload;
-      state.loadingCategory = false;
+    [getRelationshipCategories.fulfilled]: (state, action) => {
+      state.list_relationshipCategory = action.payload;
+      state.loading_listRelationshipCategory = false;
     },
-    [getRelationshipCategory.rejected]: (state) => {
-      state.loadingCategory = false;
+    [getRelationshipCategories.rejected]: (state) => {
+      state.loading_listRelationshipCategory = false;
     },
 
     // Get Approval Hierarchies
-    [getApprovalHierarchies.pending]: (state) => {
-      state.loadingApprovalHierarchies = true;
+    [getRelationshipApprovalHierarchies.pending]: (state) => {
+      state.loading_listRelationshipApprovalHierarchy = true;
     },
-    [getApprovalHierarchies.fulfilled]: (state, action) => {
-      state.data_approvalHierarchies = action.payload;
-      state.loadingApprovalHierarchies = false;
+    [getRelationshipApprovalHierarchies.fulfilled]: (state, action) => {
+      state.list_relationshipApprovalHierarchy = action.payload;
+      state.loading_listRelationshipApprovalHierarchy = false;
     },
-    [getApprovalHierarchies.rejected]: (state) => {
-      state.loadingApprovalHierarchies = false;
+    [getRelationshipApprovalHierarchies.rejected]: (state) => {
+      state.loading_listRelationshipApprovalHierarchy = false;
     },
 
     // Get Approval Hierarchy Detail
-    [getApprovalHierarchyDetail.pending]: (state) => {
-      state.loadingApprovalHierarchyDetail = true;
+    [getRelationshipApprovalHierarchy.pending]: (state) => {
+      state.detail_relationshipApprovalHierarchy = [];
+      state.loading_detailRelationshipApprovalHierarchy = true;
     },
-    [getApprovalHierarchyDetail.fulfilled]: (state, action) => {
-      state.data_approvalHierarchyDetail = action.payload;
-      state.loadingApprovalHierarchyDetail = false;
+    [getRelationshipApprovalHierarchy.fulfilled]: (state, action) => {
+      state.detail_relationshipApprovalHierarchy = action.payload;
+      state.loading_detailRelationshipApprovalHierarchy = false;
     },
-    [getApprovalHierarchyDetail.rejected]: (state) => {
-      state.loadingApprovalHierarchyDetail = false;
-    },
-
-    // Get Relationship Search Column
-    [getRelationshipColumnApi.pending]: (state) => {
-      state.loading = true;
-    },
-    [getRelationshipColumnApi.fulfilled]: (state, action) => {
-      state.data_globalTypeColumn = action.payload;
-      state.loading = false;
-    },
-    [getRelationshipColumnApi.rejected]: (state) => {
-      state.loading = false;
+    [getRelationshipApprovalHierarchy.rejected]: (state) => {
+      state.loading_detailRelationshipApprovalHierarchy = false;
     },
 
-    // Get Relationship Search Operator
-    [getRelationshipOperatorApi.pending]: (state) => {
-      state.loading = true;
+    // Inactivate Relationship
+    [inactivateRelationship.pending]: (state) => {
+      state.loading_inactivateRelationship = true;
     },
-    [getRelationshipOperatorApi.fulfilled]: (state, action) => {
-      state.data_globalTypeOperator = action.payload;
-      state.loading = false;
+    [inactivateRelationship.fulfilled]: (state) => {
+      state.loading_inactivateRelationship = false;
     },
-    [getRelationshipOperatorApi.rejected]: (state) => {
-      state.loading = false;
-    },
-
-    // Get Relationship Search Condition
-    [getRelationshipConditionApi.pending]: (state) => {
-      state.loading = true;
-    },
-    [getRelationshipConditionApi.fulfilled]: (state, action) => {
-      state.data_globalTypeCondition = action.payload;
-      state.loading = false;
-    },
-    [getRelationshipConditionApi.rejected]: (state) => {
-      state.loading = false;
-    },
-
-    // Activate Relationship
-    [activateRelationship.pending]: (state) => {
-      state.loading = true;
-    },
-    [activateRelationship.fulfilled]: (state) => {
-      state.loading = false;
-    },
-    [activateRelationship.rejected]: (state) => {
-      state.loading = false;
-    },
-
-    // Toggle Relationship Status
-    [toggleRelationshipStatus.pending]: (state) => {
-      state.loading = true;
-    },
-    [toggleRelationshipStatus.fulfilled]: (state) => {
-      state.loading = false;
-    },
-    [toggleRelationshipStatus.rejected]: (state) => {
-      state.loading = false;
+    [inactivateRelationship.rejected]: (state) => {
+      state.loading_inactivateRelationship = false;
     },
 
     // Create Relationship
     [createRelationship.pending]: (state) => {
-      state.loading = true;
+      state.loading_createUpdateRelationship = true;
     },
     [createRelationship.fulfilled]: (state) => {
-      state.loading = false;
+      state.loading_createUpdateRelationship = false;
     },
     [createRelationship.rejected]: (state) => {
-      state.loading = false;
+      state.loading_createUpdateRelationship = false;
     },
 
     // Update Relationship
     [updateRelationship.pending]: (state) => {
-      state.loading = true;
+      state.loading_createUpdateRelationship = true;
     },
     [updateRelationship.fulfilled]: (state) => {
-      state.loading = false;
+      state.loading_createUpdateRelationship = false;
     },
     [updateRelationship.rejected]: (state) => {
-      state.loading = false;
+      state.loading_createUpdateRelationship = false;
     },
 
     // Get Attachment Category
-    [getAttachmentCategory.pending]: (state) => {
-      state.loading = true;
+    [getRelationshipAttachmentCategories.pending]: (state) => {
+      state.loading_listRelationshipAttachmentCategory = true;
     },
-    [getAttachmentCategory.fulfilled]: (state, action) => {
-      state.data_attachmentCategory = action.payload;
-      state.loading = false;
+    [getRelationshipAttachmentCategories.fulfilled]: (state, action) => {
+      state.list_relationshipAttachmentCategory = action.payload;
+      state.loading_listRelationshipAttachmentCategory = false;
     },
-    [getAttachmentCategory.rejected]: (state) => {
-      state.loading = false;
-    },
-
-    // Upload Attachment
-    [uploadAttachment.pending]: (state) => {
-      state.loading = true;
-    },
-    [uploadAttachment.fulfilled]: (state) => {
-      state.loading = false;
-    },
-    [uploadAttachment.rejected]: (state) => {
-      state.loading = false;
-    },
-
-    // Get Attachment List
-    [getAttachmentList.pending]: (state) => {
-      state.loading = true;
-    },
-    [getAttachmentList.fulfilled]: (state, action) => {
-      const payload = action.payload;
-      state.data_attachmentList = payload?.data?.result || payload?.result || payload || [];
-      state.loading = false;
-    },
-    [getAttachmentList.rejected]: (state) => {
-      state.loading = false;
-    },
-
-    // Get All Accounts (Choose Related)
-    [getAllAccounts.pending]: (state) => {
-      state.loading = true;
-    },
-    [getAllAccounts.fulfilled]: (state, action) => {
-      state.data_accountList = action.payload;
-      state.loading = false;
-    },
-    [getAllAccounts.rejected]: (state) => {
-      state.loading = false;
+    [getRelationshipAttachmentCategories.rejected]: (state) => {
+      state.loading_listRelationshipAttachmentCategory = false;
     },
 
     // Get Related Object Data
-    [getRelatedObjectData.pending]: (state) => {
-      state.loadingRelatedObject = true;
+    [getRelatedObjects.pending]: (state, action) => {
+      if (!action.meta.arg?.isLoadMore) {
+        state.loading_listRelatedObject = true;
+      }
     },
-    [getRelatedObjectData.fulfilled]: (state, action) => {
-      state.data_relatedObjectList = action.payload;
-      state.loadingRelatedObject = false;
-    },
-    [getRelatedObjectData.rejected]: (state) => {
-      state.loadingRelatedObject = false;
-    },
+    [getRelatedObjects.fulfilled]: (state, action) => {
+      state.loading_listRelatedObject = false;
+      const { result, page, isLoadMore } = action.payload;
 
-    // Download Attachment
-    [downloadAttachment.pending]: (state) => {
-      state.loading = true;
+      if (Array.isArray(result)) {
+        if (isLoadMore) {
+          const currentIds = new Set(state.list_relatedObject.map((item) => item.accountId || item.customerId));
+          const filteredResult = result.filter(
+            (resultItem) => !currentIds.has(resultItem.accountId || resultItem.customerId)
+          );
+          state.list_relatedObject = [
+            ...state.list_relatedObject,
+            ...filteredResult,
+          ];
+        } else {
+          state.list_relatedObject = result;
+        }
+      }
+
+      state.pagination_listRelatedObject = {
+        totalPages: page?.totalPages || 0,
+        totalElements: page?.totalElements || 0,
+        currentPage: page?.number || 0,
+        pageSize: page?.size || 20,
+      };
     },
-    [downloadAttachment.fulfilled]: (state) => {
-      state.loading = false;
-    },
-    [downloadAttachment.rejected]: (state) => {
-      state.loading = false;
+    [getRelatedObjects.rejected]: (state, action) => {
+      state.loading_listRelatedObject = false;
+
+      if (!action.meta.arg?.isLoadMore) {
+        state.list_relatedObject = [];
+        state.pagination_listRelatedObject = {
+          totalPages: 0,
+          totalElements: 0,
+          currentPage: 0,
+          pageSize: 20,
+        };
+      }
     },
 
     // Get Approval History
-    [getApprovalHistory.pending]: (state) => {
-      state.loadingApprovalHistory = true;
+    [getRelationshipApprovalHistory.pending]: (state) => {
+      state.loading_relationshipApprovalHistory = true;
     },
-    [getApprovalHistory.fulfilled]: (state, action) => {
-      state.data_approvalHistory = action.payload;
-      state.loadingApprovalHistory = false;
+    [getRelationshipApprovalHistory.fulfilled]: (state, action) => {
+      state.detail_relationshipApprovalHistory = action.payload;
+      state.loading_relationshipApprovalHistory = false;
     },
-    [getApprovalHistory.rejected]: (state) => {
-      state.loadingApprovalHistory = false;
+    [getRelationshipApprovalHistory.rejected]: (state) => {
+      state.loading_relationshipApprovalHistory = false;
     },
 
     // Approve or Reject Relationship
     [approveOrRejectRelationship.pending]: (state) => {
-      state.loading = true;
+      state.loading_approveRejectRelationship = true;
     },
     [approveOrRejectRelationship.fulfilled]: (state) => {
-      state.loading = false;
+      state.loading_approveRejectRelationship = false;
     },
     [approveOrRejectRelationship.rejected]: (state) => {
-      state.loading = false;
+      state.loading_approveRejectRelationship = false;
+    },
+
+    // Approve or Reject Inactive Relationship
+    [approveOrRejectInactiveRelationship.pending]: (state) => {
+      state.loading_approveRejectRelationship = true;
+    },
+    [approveOrRejectInactiveRelationship.fulfilled]: (state) => {
+      state.loading_approveRejectRelationship = false;
+    },
+    [approveOrRejectInactiveRelationship.rejected]: (state) => {
+      state.loading_approveRejectRelationship = false;
+    },
+
+    // Approve or Reject All Relationship (combined)
+    [approveOrRejectAllRelationship.pending]: (state, action) => {
+      if (action.meta.arg?.action === "APPROVE") state.loading_approveRelationship = true;
+      else if (action.meta.arg?.action === "REJECT") state.loading_rejectRelationship = true;
+    },
+    [approveOrRejectAllRelationship.fulfilled]: (state, action) => {
+      if (action.meta.arg?.action === "APPROVE") state.loading_approveRelationship = false;
+      else if (action.meta.arg?.action === "REJECT") state.loading_rejectRelationship = false;
+    },
+    [approveOrRejectAllRelationship.rejected]: (state, action) => {
+      if (action.meta.arg?.action === "APPROVE") state.loading_approveRelationship = false;
+      else if (action.meta.arg?.action === "REJECT") state.loading_rejectRelationship = false;
     },
   },
 });

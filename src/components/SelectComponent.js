@@ -21,18 +21,22 @@ const SelectComponent = ({
   onDeselect = () => { },
   onClear = () => { },
   onPopupScroll = () => { },
-  className, // Tambahkan ini
-  style: customStyle, // Tambahkan ini
+  onSearch = () => { },
+  filterOption,
+  showSearch = true,
+  className,
+  style: customStyle,
+  ...restProps
 }) => {
   const wrapper = "flex flex-col";
   const style = {
     width: width || "auto",
     borderRadius: "6px",
     boxShadow: "0 1px 2px 0 rgb(0 0 0 / 0.05)",
-    ...customStyle, // Merge dengan custom style
+    ...customStyle,
   };
 
-  const filterOption = (input, option) => {
+  const defaultFilterOption = (input, option) => {
     if (options) {
       return option?.label?.toLowerCase()?.includes(input?.toLowerCase());
     } else if (Array?.isArray(option?.children)) {
@@ -48,15 +52,16 @@ const SelectComponent = ({
       <InputLabel text={label} mandatory={mandatory}></InputLabel>
       <Select
         onPopupScroll={onPopupScroll}
-        showSearch
+        showSearch={showSearch}
         optionFilterProp="children"
-        filterOption={filterOption}
+        filterOption={filterOption !== undefined ? filterOption : defaultFilterOption}
         labelInValue={labelInValue}
         value={value ? value : undefined}
         style={style}
-        className={className} // Tambahkan ini
+        className={className}
         placeholder={placeholder}
         onChange={onChange}
+        onSearch={onSearch}
         mode={mode}
         tagRender={tagRender}
         disabled={disabled}
@@ -67,6 +72,7 @@ const SelectComponent = ({
         onSelect={onSelect}
         onDeselect={onDeselect}
         onClear={onClear}
+        {...restProps}
       >
         {children}
       </Select>

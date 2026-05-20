@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import moment from "moment";
 
 import { useDispatch, useSelector } from "react-redux";
-import { Tooltip } from "antd";
+import { Spin, Tooltip } from "antd";
 import { EyeOutlined } from "@ant-design/icons";
 import FileSaver from "file-saver";
 import axios from "axios";
@@ -13,7 +13,7 @@ import { bytesConverter } from "../../../../../../../../utils/bytesConverter";
 import { previewFileAttachment } from "../../../../../../../../utils/previewFileAttachment";
 import ButtonComponent from "../../../../../../../../components/ButtonComponent";
 import ModalAttachment from "./ModalAttachment";
-import TablePagination from "../../../../../../../../components/TablePagination";
+import NxCardContainer from "../../../../../../../../components/Nx/NxCardContainer";
 // import { getSelectCategory } from "../../../../../../../../redux/slices/product_promo/PricingRule/PricingRuleSlice";
 import SVGIcon from "../.././../../../../../../assets/Icon/index";
 import {
@@ -23,16 +23,17 @@ import {
 import { getColumnSearchProps } from "../../../../../../../../utils/getColumnSearchProps";
 import { configApp } from "../../../../../../../../constants/configApp";
 import accountPromoHttpService from "../../../../../../../../redux/services/account_management/accountManagementService";
+import NxTable from "../../../../../../../../components/Nx/NxTable";
 
 const columnAttachment = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => {},
-  handleDelete = () => {},
-  previewFileAttachment = () => {},
-  previewFile = () => {},
-  handleShow = () => {},
+  handleSearch = () => { },
+  handleDelete = () => { },
+  previewFileAttachment = () => { },
+  previewFile = () => { },
+  handleShow = () => { },
   type
 ) => {
   const res = [
@@ -118,11 +119,11 @@ const columnAttachment = (
     {
       title: "ACTION",
       align: "center",
-      width: 120,
+      width: 100,
       fixed: "right",
       render: (v, r, i) => {
         return (
-          <div className="flex w-full justify-center gap-6">
+          <div className="flex w-full justify-center gap-2">
             <Tooltip title="Preview">
               <EyeOutlined
                 // onClick={
@@ -131,14 +132,14 @@ const columnAttachment = (
                 //     : () => previewFile(r.urlFile1)
                 // }
                 onClick={() => handleShow(r)}
-                style={{ fontSize: "24px", color: "#0075bf" }}
+                style={{ fontSize: "20px"}}
               />
             </Tooltip>
 
             <Tooltip title="Delete">
               <SVGIcon
                 name="IconDelete"
-                width={24}
+                width={20}
                 className={
                   r.type === "exist" ? "disabled cursor-not-allowed" : undefined
                 }
@@ -153,13 +154,13 @@ const columnAttachment = (
   ];
   return type !== "detail"
     ? res.filter(
-        (column) =>
-          column.dataIndex !== "uploadBy" && column.dataIndex !== "uploadDate"
-      )
+      (column) =>
+        column.dataIndex !== "uploadBy" && column.dataIndex !== "uploadDate"
+    )
     : res;
 };
 
-const Attachment = ({ data = [], updateData = () => {}, type }) => {
+const Attachment = ({ data = [], updateData = () => { }, type }) => {
   // Declaration
   const searchInput = useRef(null);
   const dispatch = useDispatch();
@@ -168,8 +169,8 @@ const Attachment = ({ data = [], updateData = () => {}, type }) => {
 
   // State
   const [modalUpload, setModalUpload] = useState(false);
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [page] = useState(1);
+  const [pageSize] = useState(10);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [fieldSort, setFieldSort] = useState("");
@@ -193,11 +194,6 @@ const Attachment = ({ data = [], updateData = () => {}, type }) => {
     setSearchedColumn(selectedKeys[0] ? dataIndex : "");
   };
 
-  const handleChangeAttachment = (pageChange, pageSizeChange) => {
-    setPage(pageSize !== pageSizeChange ? 1 : pageChange);
-    setPageSize(pageSizeChange);
-  };
-
   const handleDelete = (record) => {
     updateData((prevState) => {
       const temp = prevState.filter((detail) => detail.key !== record.key);
@@ -215,11 +211,12 @@ const Attachment = ({ data = [], updateData = () => {}, type }) => {
     const handleDataSort = (obj) => {
       switch (fieldSort) {
         case "startDate":
-        case "endDate":
+        case "endDate": {
           const date = obj[fieldSort]
             ? moment(obj[fieldSort]).format("DD MMM YYYY")
             : "";
           return date.toString().toLowerCase();
+        }
         default:
           return obj[fieldSort].toString().toLowerCase();
       }
@@ -277,44 +274,42 @@ const Attachment = ({ data = [], updateData = () => {}, type }) => {
     }
   };
   return (
-    // <BaseContainer header={"Attachment Information"}>
-    <div>
-      <div className="pt-8 pb-4">
-        <h3 className="text-primary text-xs font-bold uppercase">ATTACHMENT</h3>
-      </div>
-      <div className="flex flex-col w-full gap-2">
-        <div>
-          <p className="text-[13px] mb-0 text-dg-grey-dark">
-            Attach File:
-            {
-              <span className={"pl-1"} style={{ color: "red" }}>
-                *
-              </span>
-            }
-          </p>
-          <div className="flex flex-row gap-2 items-center">
-            <ButtonComponent
-              fontSizeClassname="text-[11px]"
-              size="small"
-              type="default"
-              onClick={() => setModalUpload(true)}
-            >
-              Choose File
-            </ButtonComponent>
-            <p className="text-[11px] text-dg-grey-dark mb-0">
-              No file choosen
+    <NxCardContainer header={"ATTACHMENT"}>
+      <Spin spinning={loadingDownload}>
+        <div className="flex flex-col gap-y-4">
+        {/* UPLOAD ATTACHMENT SECTION */}
+        <div className="flex flex-col w-full gap-2">
+          <div className="flex flex-col gap-y-1 justify-start">
+            <p className="text-[13px] mb-0 text-dg-grey-dark">
+              Attach File:
+              {
+                <span className={"pl-1"} style={{ color: "red" }}>
+                  *
+                </span>
+              }
             </p>
+            <div className="flex flex-row gap-2 items-center">
+              <ButtonComponent
+                fontSizeClassname="text-[11px]"
+                size="small"
+                type="default"
+                onClick={() => setModalUpload(true)}
+              >
+                Choose File
+              </ButtonComponent>
+              {!data.length && (
+                <p className="text-[11px] text-dg-grey-dark mb-0">
+                  No file choosen
+                </p>
+              )}
+            </div>
           </div>
         </div>
 
-        <div className="pt-[30px]">
-          <TablePagination
-            dataSource={filterDataByPage()}
-            totalData={data?.length}
-            current={page}
-            pageSize={pageSize}
-            onChange={handleChangeAttachment}
-            onSizeChanger={handleChangeAttachment}
+        {/* ATTACHMENT LIST TABLE */}
+        <div className="pt-2">
+          <NxTable
+            idTable="sa-create-attachment-table"
             columns={columnAttachment(
               searchInput,
               searchedColumn,
@@ -326,10 +321,22 @@ const Attachment = ({ data = [], updateData = () => {}, type }) => {
               handleShow,
               type
             )}
+            dataSource={filterDataByPage()}
+            totalData={data?.length}
+            tableScrolled={{
+              y: 300,
+              x: 1500,
+            }}
+            // current={page}
+            // pageSize={pageSize}
+            // onChange={handleChangeAttachment}
+            // onSizeChanger={handleChangeAttachment}
             onSort={onSort}
+            usePagination={false}
           />
         </div>
-      </div>
+        </div>
+      </Spin>
 
       <ModalAttachment
         openUpload={modalUpload}
@@ -343,7 +350,7 @@ const Attachment = ({ data = [], updateData = () => {}, type }) => {
         }
         withLink
       />
-    </div>
+    </NxCardContainer>
   );
 };
 

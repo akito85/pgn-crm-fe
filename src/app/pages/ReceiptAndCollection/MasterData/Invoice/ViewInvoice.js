@@ -1,11 +1,10 @@
-import  { useEffect, useRef, useState } from "react";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
+import { useEffect, useRef, useState } from "react";
 import { Spin } from "antd";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  getInvoicePagging,downloadInvoice
+  getInvoicePagging, downloadInvoice
 } from "../../../../../redux/slices/receipt_collection/invoice";
 import BaseContainer from "../../../../../components/BaseContainer";
 import CardContainer from "../../../../../components/CardContainer";
@@ -23,7 +22,11 @@ import {
 const routes = [
   {
     path: "",
-    breadcrumbName: "Receipt & Collection",
+    breadcrumbName: "System Setup",
+  },
+  {
+    path: "",
+    breadcrumbName: "Master Data",
   },
   {
     path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_INVOICE,
@@ -49,7 +52,7 @@ const ViewInvoice = () => {
   const [sort, setSort] = useState("");
   const { data: dataUser = {} } = useSelector((state) => state.profile);
   const [fixedColumns, setFixedColumns] = useState({
-    left: ["no"], 
+    left: ["no"],
     right: ["action"],
   });
 
@@ -63,20 +66,30 @@ const ViewInvoice = () => {
   };
 
   const handleDownload = () => {
-      dispatch(
-        downloadInvoice({
-          page,
-          pageSize,
-          search: encodeURIComponent(JSON.stringify(search)),
-          sort,
-        })
-      );
-    };
-  
+    dispatch(
+      downloadInvoice({
+        page,
+        pageSize,
+        search: encodeURIComponent(JSON.stringify(search)),
+        sort,
+      })
+    );
+  };
+
 
   const itemsActionView = () => [
     {
-      action: "Download"
+      action: "Download",
+      render: (
+        <ButtonComponent
+          onClick={handleDownload}
+          type={"submit"}
+          border={false}
+          icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
+        >
+          Download List
+        </ButtonComponent>
+      ),
     }
   ];
 
@@ -119,7 +132,7 @@ const ViewInvoice = () => {
     setPage(tempPage);
     setPageSize(pageSizeChange);
   };
-  
+
   const onSort = (_, __, sort) => {
     const dataSort = sort.order
       ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
@@ -128,7 +141,7 @@ const ViewInvoice = () => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       <Spin
         spinning={loading || false}
         className={"w-full top-20"}
@@ -150,7 +163,7 @@ const ViewInvoice = () => {
               pageSize={pageSize}
               loading={loading}
               tableScrolled={{ y: 525, x: "max-content" }}
-              
+
               onChange={handleChangePage}
               onSizeChanger={handleSizeChange}
               onSort={onSort}
@@ -177,15 +190,15 @@ const ViewInvoice = () => {
                   itemsActionView(dataUser)
                 ),
               ]}
-              
+
               // Tambahan: Jika ingin menggunakan Advance Search
               onAdvanceSearch={(searchData) => setSearch(searchData)}
             />
           </CardContainer>
         </div>
-        
+
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

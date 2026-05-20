@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import moment from "moment";
 
 import { useDispatch, useSelector } from "react-redux";
@@ -13,13 +13,15 @@ import { bytesConverter } from "../../../../../../../../utils/bytesConverter";
 import { previewFileAttachment } from "../../../../../../../../utils/previewFileAttachment";
 import ButtonComponent from "../../../../../../../../components/ButtonComponent";
 import ModalAttachment from "./ModalAttachment";
-import TablePagination from "../../../../../../../../components/TablePagination";
 // import { getSelectCategory } from "../../../../../../../../redux/slices/product_promo/PricingRule/PricingRuleSlice";
 import SVGIcon from "../.././../../../../../../assets/Icon/index"
 import { getListCategoryAttachment, getGlobalPropertiesAttachment } from "../../../../../../../../redux/slices/account_management/detailAccount/serviceAgreementSlice";
 import { getColumnSearchProps } from "../../../../../../../../utils/getColumnSearchProps";
 import { configApp } from "../../../../../../../../constants/configApp";
 import accountPromoHttpService from "../../../../../../../../redux/services/account_management/accountManagementService";
+import NxCardContainer from "../../../../../../../../components/Nx/NxCardContainer";
+import NxTable from "../../../../../../../../components/Nx/NxTable";
+import NxBaseContainer from "../../../../../../../../components/Nx/NxBaseContainer";
 
 
 const columnAttachment = (
@@ -28,17 +30,19 @@ const columnAttachment = (
   searchText,
   handleSearch = () => {},
   handleDelete = () => {},
-  previewFileAttachment = () => {},
-  previewFile = () => {},
   handleShow = () => {},
-  type
+  type,
+  saStatus
 ) => {
+  const isExistingAttachment = (record) =>
+    record?.dataType === "exist" || record?.type === "exist";
+
   const res = [
     {
       title: "NO",
       width: 60,
       align: "center",
-      render: (text, object, index) => index + 1,
+      render: (_, __, index) => index + 1,
     },
     {
       sorter: true,
@@ -109,7 +113,7 @@ const columnAttachment = (
         searchText,
         handleSearch
       ),
-      render: (fileSize, r, i) => (
+      render: (fileSize, r) => (
         <span>{r?.type === "new" ? fileSize : bytesConverter(fileSize)}
         </span>
       ),
@@ -117,11 +121,14 @@ const columnAttachment = (
     {
       title: "ACTION",
       align: "center",
-      width: 120,
+      width: 100,
       fixed: "right",
-      render: (v, r, i) => {
+      render: (_, r) => {
+        const isExisting = isExistingAttachment(r);
+        const shouldHideDelete = saStatus === "ACTIVE" && isExisting;
+
         return (
-          <div className="flex w-full justify-center gap-6">
+          <div className="flex w-full justify-center gap-2">
             <Tooltip title="Preview">
               <EyeOutlined
                 // onClick={
@@ -134,16 +141,19 @@ const columnAttachment = (
               />
             </Tooltip>
 
-            <Tooltip title="Delete">
-              <SVGIcon
-                name="IconDelete"
-                width={24}
-                className={
-                  r.type === "exist" ? "disabled cursor-not-allowed" : undefined
-                }
-                onClick={r.type !== "exist" ? () => handleDelete(r) : undefined}
-              />
-            </Tooltip>
+            {!shouldHideDelete && (
+              <Tooltip title="Delete">
+                <SVGIcon
+                  name="IconDelete"
+                  width={24}
+                  color="#1976D2"
+                  className={
+                    isExisting ? "disabled cursor-not-allowed" : undefined
+                  }
+                  onClick={!isExisting ? () => handleDelete(r) : undefined}
+                />
+              </Tooltip>
+            )}
           </div>
         );
       },
@@ -158,7 +168,7 @@ const columnAttachment = (
     : res;
 };
 
-const Attachment = ({ data = [], updateData = () => {}, type }) => {
+const Attachment = ({ data = [], updateData = () => {}, type, saStatus }) => {
 
   // Declaration
   const searchInput = useRef(null);
@@ -168,13 +178,12 @@ const Attachment = ({ data = [], updateData = () => {}, type }) => {
 
   // State
   const [modalUpload, setModalUpload] = useState(false);
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const page = 1;
+  const pageSize = 20;
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [fieldSort, setFieldSort] = useState("");
   const [orderSort, setOrderSort] = useState("");
-  const [loadingDownload, setLoadingDownload] = useState(false);
 
   // Selector
   const { data_category_attachment, dataGlobalPropAttachment } = useSelector((state) => state.accountServiceAgreement);
@@ -189,11 +198,6 @@ const Attachment = ({ data = [], updateData = () => {}, type }) => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(selectedKeys[0] ? dataIndex : "");
-  };
-
-  const handleChangeAttachment = (pageChange, pageSizeChange) => {
-    setPage(pageSize !== pageSizeChange ? 1 : pageChange);
-    setPageSize(pageSizeChange);
   };
 
   const handleDelete = (record) => {
@@ -213,11 +217,12 @@ const Attachment = ({ data = [], updateData = () => {}, type }) => {
     const handleDataSort = (obj) => {
       switch (fieldSort) {
         case "startDate":
-        case "endDate":
+        case "endDate": {
           const date = obj[fieldSort]
             ? moment(obj[fieldSort]).format("DD MMM YYYY")
             : "";
           return date.toString().toLowerCase();
+        }
         default:
           return obj[fieldSort].toString().toLowerCase();
       }
@@ -248,10 +253,6 @@ const Attachment = ({ data = [], updateData = () => {}, type }) => {
     }
   };
 
-  const previewFile = (urlFile) => {
-    window.open("http://" + urlFile);
-  };
-
   const handleShow = async (r) => {
     if (r.dataType !== "exist") {
       if (r.fileType.includes("application/vnd")) {
@@ -263,13 +264,11 @@ const Attachment = ({ data = [], updateData = () => {}, type }) => {
       if ((r.fileType || r.type).includes("application/vnd")) {
         dispatch(service.downloadData(r.urlFile1));
       } else {
-        setLoadingDownload(true);
         const response = await axios.get(configApplication + r.urlFile1, {
           headers: tokenHeader(),
           responseType: "blob",
         });
         const base64 = await getBase64(response.data);
-        setLoadingDownload(false);
         previewFileAttachment(base64);
       }
     }
@@ -277,57 +276,64 @@ const Attachment = ({ data = [], updateData = () => {}, type }) => {
 
   return (
     // <BaseContainer header={"Attachment Information"}>
-    <div>
-      <div className="pt-8 pb-4"><h3 className="text-primary text-xs font-bold uppercase">ATTACHMENT</h3></div>
-      <div className="flex flex-col w-full gap-2">
-        <div>
-        <p className="text-[13px] mb-0 text-dg-grey-dark">
-              Attach File:
-              {(
-                <span className={"pl-1"} style={{ color: "red" }}>
-                  *
-                </span>
-              )}
-            </p>
-          <div className="flex flex-row gap-2 items-center">
-            <ButtonComponent
-              fontSizeClassname="text-[11px]"
-              size="small"
-              type="default"
-              onClick={() => setModalUpload(true)}
-            >
-              Choose File
-            </ButtonComponent>
-            <p className="text-[11px] text-dg-grey-dark mb-0">
-              No file choosen
-            </p>
+    <NxCardContainer header={"ATTACHMENT"}>
+      <NxBaseContainer border>
+        <div className="flex flex-col gap-y-4">
+          <div className="flex flex-col w-full gap-2">
+            <div className="gap-y-1 justify-start">
+              <div>
+                <p className="text-[13px] mb-1 text-dg-grey-dark">
+                    Attach File:
+                    {(
+                      <span className={"pl-1"} style={{ color: "red" }}>
+                        *
+                      </span>
+                    )}
+                </p>
+              </div>
+              <div className="flex flex-row gap-2 items-center">
+                <ButtonComponent
+                  fontSizeClassname="text-[11px]"
+                  size="small"
+                  type="default"
+                  onClick={() => setModalUpload(true)}
+                >
+                  Choose File
+                </ButtonComponent>
+                <p className="text-[11px] text-dg-grey-dark mb-0">
+                  No file choosen
+                </p>
+              </div>
+            </div>
           </div>
-        </div>
-
-        <div className="pt-[30px]">
-          <TablePagination
+          <NxTable
+            idTable="sa-update-attachment-table"
+            columns={
+              columnAttachment(
+                searchInput,
+                searchedColumn,
+                searchText,
+                handleSearch,
+                handleDelete,
+                handleShow,
+                type,
+                saStatus
+              )
+            }
             dataSource={filterDataByPage()}
             totalData={data?.length}
-            current={page}
-            pageSize={pageSize}
-            onChange={handleChangeAttachment}
-            onSizeChanger={handleChangeAttachment}
-            columns={columnAttachment(
-              searchInput,
-              searchedColumn,
-              searchText,
-              handleSearch,
-              handleDelete,
-              previewFileAttachment,
-              previewFile,
-              handleShow,
-              type
-            )}
+            tableScrolled={{
+              x: "max-content",
+              y: 400
+            }}
+            usePagination={false}
             onSort={onSort}
+            showAdvanceSearch={false}
+            showSearchBar={false}
+            useInfiniteScroll={true}
           />
         </div>
-      </div>
-
+      </NxBaseContainer>
       <ModalAttachment
         openUpload={modalUpload}
         updateData={updateData}
@@ -340,7 +346,24 @@ const Attachment = ({ data = [], updateData = () => {}, type }) => {
         }
         withLink
       />
-    </div>
+    </NxCardContainer>
+    // <div>
+    //   <div className="pt-8 pb-4"><h3 className="text-primary text-xs font-bold uppercase">ATTACHMENT</h3></div>
+      
+
+    //   <ModalAttachment
+    //     openUpload={modalUpload}
+    //     updateData={updateData}
+    //     categoryOptions={data_category_attachment}
+    //     handleCancel={() => setModalUpload(false)}
+    //     valueGuard={
+    //       configApplication === configApp.MASTER_MANAGEMENT
+    //         ? dataGlobalPropAttachment
+    //         : {}
+    //     }
+    //     withLink
+    //   />
+    // </div>
     // </BaseContainer>
   );
 };

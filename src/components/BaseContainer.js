@@ -7,14 +7,15 @@ const BaseContainer = ({
   type,
   element,
   border = false,
+  className="",
 }) => {
   // Determine class based on border prop
   const containerClass = border
-    ? "bg-white rounded-lg w-full px-[10px] pt-[10px] pb-[0px]"
+    ? `bg-white rounded-lg w-full px-[10px] pt-[10px] pb-[0px] ${className}`
     : "drop-shadow-md bg-white rounded-lg w-full mt-[30px] p-[20px]";
 
   // Use inline style for border to ensure visibility
-  const containerStyle = border ? { border: "1px solid #BDBDBD" } : {};
+  const containerStyle = border ? { border: "1px solid #C8CDD4" } : {};
 
   return (
     <div className={containerClass} style={containerStyle}>

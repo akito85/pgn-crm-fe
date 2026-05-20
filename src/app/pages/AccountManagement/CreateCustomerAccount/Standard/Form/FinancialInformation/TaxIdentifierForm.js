@@ -137,6 +137,10 @@ const TaxIdentifierForm = ({
     }
   }, [tiObj]);
 
+  useEffect(() => {
+    form.setFieldValue("relatedAccountId", accountNumber)
+  }, [accountNumber])
+
   // Search Column Table
   const getColumnSearchProps = (dataIndex, type) => ({
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }) => {
@@ -446,25 +450,24 @@ const TaxIdentifierForm = ({
       </span>
 
       <div className="w-full grid grid-cols-3 gap-2 pt-[30px]">
-        <Form.Item label={"Account Number"} name={"relatedAccountId"}>
-          <div className="flex flex-row">
-            <Input.Group compact>
+        <Form.Item label={"Account Number"}>  
+          <Input.Group compact>
+            <Form.Item name={"relatedAccountId"} noStyle>
               <InputComponent
-                value={accountNumber}
                 onChange={(e) => {
-                  handleChangesReset(e.target.value);
+                  handleChangesReset(e.target.value)
                 }}
               />
-              <Button
-                type="primary"
-                onClick={() => {
-                  setModalChoose(true);
-                }}
-              >
-                Choose
-              </Button>
-            </Input.Group>
-          </div>
+            </Form.Item>
+            <Button
+              type="primary"
+              onClick={() => {
+                setModalChoose(true);
+              }}
+            >
+              Choose
+            </Button>
+          </Input.Group>
         </Form.Item>
         <Form.Item label={"Customer Name"} name={"customerNameTI"}>
           <InputComponent disabled />

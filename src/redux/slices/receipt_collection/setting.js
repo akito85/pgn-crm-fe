@@ -1,5 +1,4 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import thunk from "redux-thunk";
 import receiptCollectionHttpService from "../../services/receiptCollectionHttpService";
 import {
   setBodyError,
@@ -8,7 +7,6 @@ import {
   validateError,
 } from "../general_slice";
 import { errorBody, errorCode, errorMessage } from "../../../utils";
-import { data } from "autoprefixer";
 
 const initialState = {
   loading: false,
@@ -18,27 +16,24 @@ const initialState = {
   dataListAppHierDetail: [],
   dataListCategory: [],
   dataApprovalHistory: [],
-  dataType: [],
-  dataPartnerList: [],
-  dataCollectionAgentList: [],
-  dataPaymentChannelList: [],
+  dataMappingList: [],
 };
 
-export const getPaginateSetting = createAsyncThunk(
-  "GET_ALL_SETTINGS",
-  async ({ search, page, pageSize, sort }, thunkAPI) => {
+export const getPaginatePayChannelConfig = createAsyncThunk(
+  "GET_ALL_PAY_CHANNEL_CONFIG",
+  async ({ search, page, pageSize, sort, isLoadMore }, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
       const url = `/v1/dbs/api/settings/get-list?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
       const response = await receiptCollectionHttpService.getAll(url);
-      return response.data;
+      return { data: response.data, isLoadMore };
     } catch (error) {
       thunkAPI.dispatch(
         validateError({
           error: error,
-          action: "GET_ALL_SETTINGS_PAGING",
+          action: "GET_ALL_PAY_CHANNEL_CONFIG",
           back: false,
         })
       );
@@ -47,26 +42,20 @@ export const getPaginateSetting = createAsyncThunk(
   }
 );
 
-export const getTypeDDL = createAsyncThunk(
-  "GET_LIST_TYPE",
+export const getListMappingDDL = createAsyncThunk(
+  "GET_LIST_MAPPING_DDL",
   async (thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/settings/list-type`;
+      const url = `/v1/dbs/api/settings/get-mapping-ddl`;
       const data = await receiptCollectionHttpService.getAll(url);
       return data;
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
-      if (
-        error?.response?.data?.code === 500 ||
-        error?.response?.data?.code === 419
-      ) {
+      if (error?.response?.data?.code === 500 || error?.response?.data?.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
       } else {
-        const errorBody = {
-          title: "Failed",
-          description: `${message}`,
-        };
+        const errorBody = { title: "Failed", description: `${message}` };
         thunkAPI.dispatch(showModalError(errorBody));
       }
       return thunkAPI.rejectWithValue(error.response);
@@ -74,8 +63,8 @@ export const getTypeDDL = createAsyncThunk(
   }
 );
 
-export const createValidasiSetting = createAsyncThunk(
-  "CREATE_MASTER_SETTINGS_VALIDASI",
+export const createValidasiPayChannelConfig = createAsyncThunk(
+  "CREATE_PAY_CHANNEL_CONFIG_VALIDASI",
   async (body, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/settings/validate-create-update`;
@@ -83,16 +72,9 @@ export const createValidasiSetting = createAsyncThunk(
       return data.data;
     } catch (error) {
       const message =
-        (error.response &&
-          error.response.data &&
-          error.response.data.message) ||
-        error.message ||
-        error.toString();
-      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
-        const errorBody = {
-          title: "Failed",
-          description: `${message}.`,
-        };
+        error.response?.data?.message || error.message || error.toString();
+      if (Math.floor(((error.response?.data?.code || 0) / 100)) === 4) {
+        const errorBody = { title: "Failed", description: `${message}.` };
         thunkAPI.dispatch(showModalError(errorBody));
       }
       return thunkAPI.rejectWithValue(error);
@@ -100,8 +82,8 @@ export const createValidasiSetting = createAsyncThunk(
   }
 );
 
-export const getDownloadSetting = createAsyncThunk(
-  "DOWNLOAD_SETTINGS",
+export const getDownloadPayChannelConfig = createAsyncThunk(
+  "DOWNLOAD_PAY_CHANNEL_CONFIG",
   async ({ search, page, pageSize, sort }, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
@@ -110,21 +92,21 @@ export const getDownloadSetting = createAsyncThunk(
       const url = `/v1/dbs/api/settings/download-filter?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
       const response = await receiptCollectionHttpService.downloadData(url);
       return response.data;
-    } catch (response) {
+    } catch (error_) {
       thunkAPI.dispatch(
         validateError({
-          error: response,
-          action: "DOWNLOAD_SETTINGS",
+          error: error_,
+          action: "DOWNLOAD_PAY_CHANNEL_CONFIG",
           back: false,
         })
       );
-      return thunkAPI.rejectWithValue(response.response);
+      return thunkAPI.rejectWithValue(error_?.response);
     }
   }
 );
 
-export const inactiveSetting = createAsyncThunk(
-  "INACTIVE_SETTINGS",
+export const inactivePayChannelConfig = createAsyncThunk(
+  "INACTIVE_PAY_CHANNEL_CONFIG",
   async ({ body }, thunkAPI) => {
     let status = body?.status === "Active" ? "Inactivate" : "Activate";
     try {
@@ -140,83 +122,92 @@ export const inactiveSetting = createAsyncThunk(
       };
       thunkAPI.dispatch(showModalSuccess(successMessage));
       return response.data;
-    } catch (response) {
+    } catch (error) {
       thunkAPI.dispatch(
         validateError({
-          error: errorBody(errorCode(response), status, errorMessage(response)),
-          action: "CREATE_SETTINGS",
+          error: errorBody(errorCode(error), status, errorMessage(error)),
+          action: "INACTIVE_PAY_CHANNEL_CONFIG",
           back: false,
         })
       );
-      return thunkAPI.rejectWithValue(response.response.data);
+      return thunkAPI.rejectWithValue(error.response?.data || error);
     }
   }
 );
 
 
-export const createSetting = createAsyncThunk(
-  "CREATE_SETTINGS",
+export const createPayChannelConfig = createAsyncThunk(
+  "CREATE_PAY_CHANNEL_CONFIG",
   async (body, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/settings/create-update`;
       const data = await receiptCollectionHttpService.createData(url, body);
-      // const successBody = {
-      //   title: "Successfull",
-      //   description: `Your data has been created`,
-      // };
-      // thunkAPI.dispatch(showModalSuccess(successBody));
       return data.data;
     } catch (error) {
       const message =
-        (error.response &&
-          error.response.data &&
-          error.response.data.message) ||
-        error.message ||
-        error.toString();
+        error.response?.data?.message || error.message || error.toString();
       const errorBody = {
         title: "Failed",
-        data: error.response.data.data,
+        data: error.response?.data?.data,
         description: `Your data was not created. ${message}.`,
       };
       thunkAPI.dispatch(showModalError(errorBody));
-      return thunkAPI.rejectWithValue(error.response.data);
+      return thunkAPI.rejectWithValue(error.response?.data || error);
     }
   }
 );
 
-export const updateSetting = createAsyncThunk(
-  "UPDATE_SETTINGS",
+export const updatePayChannelConfig = createAsyncThunk(
+  "UPDATE_PAY_CHANNEL_CONFIG",
   async (body, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/settings/create-update`;
       const data = await receiptCollectionHttpService.updateDataPost(url, body);
-      // const successBody = {
-      //   title: "Successfull",
-      //   description: `Your data has been updated`,
-      // };
-      // thunkAPI.dispatch(showModalSuccess(successBody));
       return data.data;
     } catch (error) {
       const message =
-        (error.response &&
-          error.response.data &&
-          error.response.data.message) ||
-        error.message ||
-        error.toString();
+        error.response?.data?.message || error.message || error.toString();
       const errorBody = {
         title: "Failed",
-        data: error.response.data.data,
-        code: error.response.data.code,
+        data: error.response?.data?.data,
+        code: error.response?.data?.code,
         description: `Your data was not updated. ${message}. Please try again.`,
       };
       thunkAPI.dispatch(showModalError(errorBody));
-      return thunk.rejectWithValue(error.response.data);
+      return thunkAPI.rejectWithValue(error.response?.data || error);
     }
   }
 );
 
-export const getDetailSetting = createAsyncThunk(
-  "GET_DETAIL_SETTINGS",
+export const saveDraftPayChannelConfig = createAsyncThunk(
+  "SAVE_DRAFT_PAY_CHANNEL_CONFIG",
+  async (body, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/settings/save-draft`;
+      const data = await receiptCollectionHttpService.createData(url, body);
+      const successBody = {
+        title: "Successfull",
+        description: `Your data has been saved as draft`,
+        return: false,
+      };
+      thunkAPI.dispatch(showModalSuccess(successBody));
+      return data.data;
+    } catch (error) {
+      const message =
+        error.response?.data?.message || error.message || error.toString();
+      const errorBody = {
+        title: "Failed",
+        data: error.response?.data?.data,
+        description: `Your draft was not saved. ${message}.`,
+      };
+      thunkAPI.dispatch(showModalError(errorBody));
+      return thunkAPI.rejectWithValue(error.response?.data || error);
+    }
+  }
+);
+
+export const getDetailPayChannelConfig = createAsyncThunk(
+  "GET_DETAIL_PAY_CHANNEL_CONFIG",
   async (id, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/settings/detail-get/${id}`;
@@ -225,16 +216,31 @@ export const getDetailSetting = createAsyncThunk(
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
-      if (
-        error?.response?.data?.code === 500 ||
-        error?.response?.data?.code === 419
-      ) {
+      if (error?.response?.data?.code === 500 || error?.response?.data?.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
       } else {
-        const errorBody = {
-          title: "Failed",
-          description: `${message}`,
-        };
+        const errorBody = { title: "Failed", description: `${message}` };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response);
+    }
+  }
+);
+
+export const getDetailDraftPayChannelConfig = createAsyncThunk(
+  "GET_DETAIL_DRAFT_PAY_CHANNEL_CONFIG",
+  async (id, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/settings/detail-draft/${id}`;
+      const response = await receiptCollectionHttpService.getDetail(url);
+      return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (error?.response?.data?.code === 500 || error?.response?.data?.code === 419) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = { title: "Failed", description: `${message}` };
         thunkAPI.dispatch(showModalError(errorBody));
       }
       return thunkAPI.rejectWithValue(error.response);
@@ -244,8 +250,8 @@ export const getDetailSetting = createAsyncThunk(
 
 
 
-export const getAllApprovalList = createAsyncThunk(
-  "GET_ALL_APPROVAL_LIST_METHOD",
+export const getAllApprovalListPayChannelConfig = createAsyncThunk(
+  "GET_ALL_APPROVAL_LIST_METHOD_PAY_CHANNEL_CONFIG",
   async (thunkAPI) => {
     try {
       const url = `/v1/dbs/api/apphier/get-list-approval-hierarchies`;
@@ -254,16 +260,10 @@ export const getAllApprovalList = createAsyncThunk(
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
-      if (
-        error?.response?.data?.code === 500 ||
-        error?.response?.data?.code === 419
-      ) {
+      if (error?.response?.data?.code === 500 || error?.response?.data?.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
       } else {
-        const errorBody = {
-          title: "Failed",
-          description: `${message}`,
-        };
+        const errorBody = { title: "Failed", description: `${message}` };
         thunkAPI.dispatch(showModalError(errorBody));
       }
       return thunkAPI.rejectWithValue(error.response);
@@ -271,21 +271,8 @@ export const getAllApprovalList = createAsyncThunk(
   }
 );
 
-// export const getApprovalHistory = createAsyncThunk(
-//   "GET_APPROVAL_HISTORY_METHOD",
-//   async (id, thunkAPI) => {
-//     try {
-//       const url = `/v1/dbs/api/payment/item/approval-history-get/${id}`;
-//       const response = await receiptCollectionHttpService.getDetail(url);
-//       return response.data;
-//     } catch (error) {
-//       return thunkAPI.rejectWithValue(error?.response);
-//     }
-//   }
-// );
-
-export const getApprovalHistory = createAsyncThunk(
-  "GET_APPROVAL_HISTORY_METHOD",
+export const getApprovalHistoryPayChannelConfig = createAsyncThunk(
+  "GET_APPROVAL_HISTORY_METHOD_PAY_CHANNEL_CONFIG",
   async (id, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/settings/approval-history-get/${id}`;
@@ -295,7 +282,7 @@ export const getApprovalHistory = createAsyncThunk(
       thunkAPI.dispatch(
         validateError({
           error: error,
-          action: "GET_APPROVAL_HISTORY",
+          action: "GET_APPROVAL_HISTORY_PAY_CHANNEL_CONFIG",
           back: false,
         })
       );
@@ -304,15 +291,12 @@ export const getApprovalHistory = createAsyncThunk(
   }
 );
 
-
-
-export const approveOrRejectSetting = createAsyncThunk(
-  "APPROVE_OR_REJECT_SETTINGS",
+export const approveOrRejectPayChannelConfig = createAsyncThunk(
+  "APPROVE_OR_REJECT_PAY_CHANNEL_CONFIG",
   async ({ body }, thunkAPI) => {
     try {
       const url = "/v1/dbs/api/settings/approve-reject";
-      const response =
-        await receiptCollectionHttpService.activationWithRemarkPost(url, body);
+      const response = await receiptCollectionHttpService.activationWithRemarkPost(url, body);
       const message = response?.message;
       const successMessage = {
         title: "Successfull",
@@ -323,16 +307,11 @@ export const approveOrRejectSetting = createAsyncThunk(
       return response.data;
     } catch (error) {
       const message =
-        (error.response &&
-          error.response.data &&
-          error.response.data.message) ||
-        error.message ||
-        error.toString();
-      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
+        error.response?.data?.message || error.message || error.toString();
+      if (Math.floor((error.response?.data?.code || 0) / 100) === 4) {
         const errorBody = {
           title: "Failed",
-          description: `Your data was not ${body.action === "APPROVE" ? "approved" : "rejected"
-            }. ${message}.`,
+          description: `Your data was not ${body.action === "APPROVE" ? "approved" : "rejected"}. ${message}.`,
           return: false,
         };
         thunkAPI.dispatch(showModalError(errorBody));
@@ -342,8 +321,8 @@ export const approveOrRejectSetting = createAsyncThunk(
   }
 );
 
-export const getListApprovalById = createAsyncThunk(
-  "GET_LIST_APPROVAL_BY_ID_METHOD",
+export const getListApprovalByIdPayChannelConfig = createAsyncThunk(
+  "GET_LIST_APPROVAL_BY_ID_METHOD_PAY_CHANNEL_CONFIG",
   async ({ id }, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/apphier/get-approval-hierarchies/${id}`;
@@ -352,16 +331,10 @@ export const getListApprovalById = createAsyncThunk(
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
-      if (
-        error?.response?.data?.code === 500 ||
-        error?.response?.data?.code === 419
-      ) {
+      if (error?.response?.data?.code === 500 || error?.response?.data?.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
       } else {
-        const errorBody = {
-          title: "Failed",
-          description: `${message}`,
-        };
+        const errorBody = { title: "Failed", description: `${message}` };
         thunkAPI.dispatch(showModalError(errorBody));
       }
       return thunkAPI.rejectWithValue(error.response);
@@ -369,8 +342,8 @@ export const getListApprovalById = createAsyncThunk(
   }
 );
 
-export const getListCategory = createAsyncThunk(
-  "GET_LIST_CATEGORY",
+export const getListCategoryPayChannelConfig = createAsyncThunk(
+  "GET_LIST_CATEGORY_PAY_CHANNEL_CONFIG",
   async (thunkAPI) => {
     try {
       const url = "/v1/dbs/api/attachment/list-category";
@@ -383,16 +356,10 @@ export const getListCategory = createAsyncThunk(
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
-      if (
-        error?.response?.data?.code === 500 ||
-        error?.response?.data?.code === 419
-      ) {
+      if (error?.response?.data?.code === 500 || error?.response?.data?.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
       } else {
-        const errorBody = {
-          title: "Failed",
-          description: `${message}`,
-        };
+        const errorBody = { title: "Failed", description: `${message}` };
         thunkAPI.dispatch(showModalError(errorBody));
       }
       return thunkAPI.rejectWithValue(error.response);
@@ -400,13 +367,12 @@ export const getListCategory = createAsyncThunk(
   }
 );
 
-export const approveOrRejectInactive = createAsyncThunk(
-  "APPROVE_OR_REJECT_FOR_INACTIVE_SETTINGS",
+export const approveOrRejectInactivePayChannelConfig = createAsyncThunk(
+  "APPROVE_OR_REJECT_FOR_INACTIVE_PAY_CHANNEL_CONFIG",
   async ({ body }, thunkAPI) => {
     try {
       const url = "/v1/dbs/api/settings/approve-inactive";
-      const response =
-        await receiptCollectionHttpService.activationWithRemarkPost(url, body);
+      const response = await receiptCollectionHttpService.activationWithRemarkPost(url, body);
       const message = response?.message;
       const successMessage = {
         title: "Successfull",
@@ -417,16 +383,11 @@ export const approveOrRejectInactive = createAsyncThunk(
       return response.data;
     } catch (error) {
       const message =
-        (error.response &&
-          error.response.data &&
-          error.response.data.message) ||
-        error.message ||
-        error.toString();
-      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
+        error.response?.data?.message || error.message || error.toString();
+      if (Math.floor((error.response?.data?.code || 0) / 100) === 4) {
         const errorBody = {
           title: "Failed",
-          description: `Your data was not ${body.action === "APPROVE" ? "approved" : "rejected"
-            }. ${message}.`,
+          description: `Your data was not ${body.action === "APPROVE" ? "approved" : "rejected"}. ${message}.`,
           return: false,
         };
         thunkAPI.dispatch(showModalError(errorBody));
@@ -436,408 +397,199 @@ export const approveOrRejectInactive = createAsyncThunk(
   }
 );
 
-
-
-export const getPartnerList = createAsyncThunk(
-  "GET_LIST_PARTNER",
-  async (thunkAPI) => {
-    try {
-      const url = `/v1/dbs/api/partner/list`;
-      const data = await receiptCollectionHttpService.getAll(url);
-      return data
-    } catch (error) {
-      const message =
-        error?.response?.data?.message || error?.message || error?.toString();
-      if (
-        error?.response?.data?.code === 500 ||
-        error?.response?.data?.code === 419
-      ) {
-        thunkAPI.dispatch(setBodyError(error));
-      } else {
-        const errorBody = {
-          title: "Failed",
-          description: `${message}`,
-        };
-        thunkAPI.dispatch(showModalError(errorBody));
-      }
-      return thunkAPI.rejectWithValue(error.response);
-    }
-  }
-);
-
-export const getCollectionAgentList = createAsyncThunk(
-  "GET_LIST_COLLECTION_AGENT",
-  async (thunkAPI) => {
-    try {
-      const url = `/v1/dbs/api/collecting-agent/list`;
-      const data = await receiptCollectionHttpService.getAll(url);
-      return data
-    } catch (error) {
-      const message =
-        error?.response?.data?.message || error?.message || error?.toString();
-      if (
-        error?.response?.data?.code === 500 ||
-        error?.response?.data?.code === 419
-      ) {
-        thunkAPI.dispatch(setBodyError(error));
-      } else {
-        const errorBody = {
-          title: "Failed",
-          description: `${message}`,
-        };
-        thunkAPI.dispatch(showModalError(errorBody));
-      }
-      return thunkAPI.rejectWithValue(error.response);
-    }
-  }
-);
-
-
-export const getPaymentChannelList = createAsyncThunk(
-  "GET_LIST_PAYMENT_CHANNEL",
-  async (thunkAPI) => {
-    try {
-      const url = `/v1/dbs/api/payment-channel/list`;
-      const data = await receiptCollectionHttpService.getAll(url);
-      return data
-    } catch (error) {
-      const message =
-        error?.response?.data?.message || error?.message || error?.toString();
-      if (
-        error?.response?.data?.code === 500 ||
-        error?.response?.data?.code === 419
-      ) {
-        thunkAPI.dispatch(setBodyError(error));
-      } else {
-        const errorBody = {
-          title: "Failed",
-          description: `${message}`,
-        };
-        thunkAPI.dispatch(showModalError(errorBody));
-      }
-      return thunkAPI.rejectWithValue(error.response);
-    }
-  }
-);
-
-
-export const getPaymentChannelListByCa = createAsyncThunk(
-  "GET_LIST_PAYMENT_CHANNEL_BY_CA",
-  async (caCode,thunkAPI) => {
-    try {
-      const url = `/v1/dbs/api/payment-channel/list-by-ca/${caCode}`;
-      const data = await receiptCollectionHttpService.getAll(url);
-      return data
-    } catch (error) {
-      const message =
-        error?.response?.data?.message || error?.message || error?.toString();
-      if (
-        error?.response?.data?.code === 500 ||
-        error?.response?.data?.code === 419
-      ) {
-        thunkAPI.dispatch(setBodyError(error));
-      } else {
-        const errorBody = {
-          title: "Failed",
-          description: `${message}`,
-        };
-        thunkAPI.dispatch(showModalError(errorBody));
-      }
-      return thunkAPI.rejectWithValue(error.response);
-    }
-  }
-);
-
-
-export const getPartnerListByCa = createAsyncThunk(
-  "GET_LIST_PARTNER_BY_CA",
-  async (caCode,thunkAPI) => {
-    try {
-      const url = `/v1/dbs/api/partner/list-by-ca/${caCode}`;
-      const data = await receiptCollectionHttpService.getAll(url);
-      return data
-    } catch (error) {
-      const message =
-        error?.response?.data?.message || error?.message || error?.toString();
-      if (
-        error?.response?.data?.code === 500 ||
-        error?.response?.data?.code === 419
-      ) {
-        thunkAPI.dispatch(setBodyError(error));
-      } else {
-        const errorBody = {
-          title: "Failed",
-          description: `${message}`,
-        };
-        thunkAPI.dispatch(showModalError(errorBody));
-      }
-      return thunkAPI.rejectWithValue(error.response);
-    }
-  }
-);
-
+// Naming aliases for consistency without breaking existing imports.
+export const fetchPayChannelConfigList = getPaginatePayChannelConfig;
+export const fetchMappingDDL = getListMappingDDL;
+export const validatePayChannelConfig = createValidasiPayChannelConfig;
+export const fetchPayChannelConfigDetail = getDetailPayChannelConfig;
+export const fetchPayChannelConfigDraft = getDetailDraftPayChannelConfig;
 
 const settingSlice = createSlice({
   name: "setting",
   initialState,
   extraReducers: {
-    //get all employee paginate reducer
-    [getPaginateSetting.pending]: (state, action) => {
-      state.data = action.payload;
+    [getPaginatePayChannelConfig.pending]: (state) => {
       state.loading = true;
     },
-    [getPaginateSetting.fulfilled]: (state, action) => {
-      state.data = action.payload;
+    [getPaginatePayChannelConfig.fulfilled]: (state, action) => {
+      if (action.payload.isLoadMore) {
+        state.data = {
+          ...action.payload.data,
+          result: [...(state.data?.result || []), ...(action.payload.data.result || [])],
+        };
+      } else {
+        state.data = action.payload.data;
+      }
       state.loading = false;
     },
-    [getPaginateSetting.rejected]: (state, action) => {
-      state.data = action.payload;
-      state.loading = true;
-    },
-
-    // get type ddl
-    [getTypeDDL.pending]: (state, action) => {
-      state.loading = true;
-      state.dataType = action.payload;
-    },
-    [getTypeDDL.fulfilled]: (state, action) => {
-      state.dataType = action.payload;
-      state.loading = false;
-    },
-    [getTypeDDL.rejected]: (state, action) => {
-      state.dataType = action.payload;
+    [getPaginatePayChannelConfig.rejected]: (state) => {
       state.loading = false;
     },
 
-    /** Get Approval History */
-    [getApprovalHistory.pending]: (state, action) => {
-      state.loadingCalender = true;
-      state.dataApprovalHistory = action.payload;
+    [getListMappingDDL.pending]: (state, action) => {
       state.loading = true;
+      state.dataMappingList = action.payload;
     },
-    [getApprovalHistory.fulfilled]: (state, action) => {
-      state.dataApprovalHistory = action.payload;
-      state.loadingCalender = false;
+    [getListMappingDDL.fulfilled]: (state, action) => {
+      state.dataMappingList = action.payload;
       state.loading = false;
     },
-    [getApprovalHistory.rejected]: (state, action) => {
-      state.dataApprovalHistory = action.payload;
-      state.loadingCalender = false;
+    [getListMappingDDL.rejected]: (state, action) => {
+      state.dataMappingList = action.payload;
       state.loading = false;
     },
 
-    // get detail
-    [getDetailSetting.pending]: (state) => {
+    [getApprovalHistoryPayChannelConfig.pending]: (state, action) => {
+      state.dataApprovalHistory = action.payload;
       state.loading = true;
     },
-    [getDetailSetting.fulfilled]: (state, action) => {
+    [getApprovalHistoryPayChannelConfig.fulfilled]: (state, action) => {
+      state.dataApprovalHistory = action.payload;
+      state.loading = false;
+    },
+    [getApprovalHistoryPayChannelConfig.rejected]: (state, action) => {
+      state.dataApprovalHistory = action.payload;
+      state.loading = false;
+    },
+
+    [getDetailPayChannelConfig.pending]: (state) => {
+      state.loading = true;
+    },
+    [getDetailPayChannelConfig.fulfilled]: (state, action) => {
       state.data_detail = action.payload;
       state.loading = false;
     },
-    [getDetailSetting.rejected]: (state) => {
-      state.loading = true;
+    [getDetailPayChannelConfig.rejected]: (state) => {
+      state.loading = false;
     },
 
-    // Get Approve Hierarchy List
-    [getAllApprovalList.pending]: (state, action) => {
+    [getDetailDraftPayChannelConfig.pending]: (state) => {
+      state.loading = true;
+    },
+    [getDetailDraftPayChannelConfig.fulfilled]: (state, action) => {
+      state.data_detail = action.payload;
+      state.loading = false;
+    },
+    [getDetailDraftPayChannelConfig.rejected]: (state) => {
+      state.loading = false;
+    },
+
+    [getAllApprovalListPayChannelConfig.pending]: (state, action) => {
       state.loading = true;
       state.dataListAppHierId = action.payload;
     },
-    [getAllApprovalList.fulfilled]: (state, action) => {
+    [getAllApprovalListPayChannelConfig.fulfilled]: (state, action) => {
       state.dataListAppHierId = action.payload;
       state.loading = false;
     },
-    [getAllApprovalList.rejected]: (state, action) => {
+    [getAllApprovalListPayChannelConfig.rejected]: (state, action) => {
       state.dataListAppHierId = action.payload;
       state.loading = false;
     },
 
-    // Get List Approval By Id
-    [getListApprovalById.pending]: (state, action) => {
+    [getListApprovalByIdPayChannelConfig.pending]: (state, action) => {
       state.loading = true;
       state.dataListAppHierDetail = action.payload;
     },
-    [getListApprovalById.fulfilled]: (state, action) => {
+    [getListApprovalByIdPayChannelConfig.fulfilled]: (state, action) => {
       state.dataListAppHierDetail = action.payload;
       state.loading = false;
     },
-    [getListApprovalById.rejected]: (state, action) => {
+    [getListApprovalByIdPayChannelConfig.rejected]: (state, action) => {
       state.dataListAppHierDetail = action.payload;
       state.loading = false;
     },
-    /** Get List Category */
-    [getListCategory.pending]: (state, action) => {
+
+    [getListCategoryPayChannelConfig.pending]: (state, action) => {
       state.dataListCategory = action.payload;
-      state.loadingProduct = true;
+      state.loading = true;
     },
-    [getListCategory.fulfilled]: (state, action) => {
+    [getListCategoryPayChannelConfig.fulfilled]: (state, action) => {
       state.dataListCategory = action.payload;
-      state.loadingProduct = false;
+      state.loading = false;
     },
-    [getListCategory.rejected]: (state, action) => {
+    [getListCategoryPayChannelConfig.rejected]: (state, action) => {
       state.dataListCategory = action.payload;
-      state.loadingProduct = false;
+      state.loading = false;
     },
 
-
-
-    [approveOrRejectSetting.pending]: (state) => {
+    [approveOrRejectPayChannelConfig.pending]: (state) => {
       state.loading = true;
     },
-    [approveOrRejectSetting.fulfilled]: (state) => {
-      state.isSuccess = true;
+    [approveOrRejectPayChannelConfig.fulfilled]: (state) => {
       state.loading = false;
     },
-    [approveOrRejectSetting.rejected]: (state, action) => {
-      state.isFailed = true;
+    [approveOrRejectPayChannelConfig.rejected]: (state) => {
       state.loading = false;
-      state.message = action.payload;
     },
 
-    [approveOrRejectInactive.pending]: (state) => {
+    [approveOrRejectInactivePayChannelConfig.pending]: (state) => {
       state.loading = true;
     },
-    [approveOrRejectInactive.fulfilled]: (state) => {
-      state.isSuccess = true;
+    [approveOrRejectInactivePayChannelConfig.fulfilled]: (state) => {
       state.loading = false;
     },
-    [approveOrRejectInactive.rejected]: (state, action) => {
-      state.isFailed = true;
+    [approveOrRejectInactivePayChannelConfig.rejected]: (state) => {
       state.loading = false;
-      state.message = action.payload;
     },
 
-
-
-    // create payment item
-    [createSetting.pending]: (state, action) => {
-      state.data = action.payload;
+    [createPayChannelConfig.pending]: (state) => {
       state.loading = true;
     },
-    [createSetting.fulfilled]: (state, action) => {
-      state.data = action.payload;
+    [createPayChannelConfig.fulfilled]: (state) => {
       state.loading = false;
     },
-    [createSetting.rejected]: (state, action) => {
-      state.data = action.payload;
+    [createPayChannelConfig.rejected]: (state) => {
       state.loading = false;
     },
 
-    // update payment
-    [updateSetting.pending]: (state, action) => {
-      state.data = action.payload;
+    [updatePayChannelConfig.pending]: (state) => {
       state.loading = true;
     },
-    [updateSetting.fulfilled]: (state, action) => {
-      state.data = action.payload;
-      state.isSuccess = false;
-    },
-    [updateSetting.rejected]: (state) => {
-      state.isFailed = false;
-    },
-
-    //download
-    [getDownloadSetting.fulfilled]: (state, action) => {
-      state.data_download = action.payload;
-      // state.isSuccess = true;
+    [updatePayChannelConfig.fulfilled]: (state) => {
       state.loading = false;
     },
-    [getDownloadSetting.rejected]: (state, action) => {
-      state.isFailed = true;
-      state.data_download = action.payload;
+    [updatePayChannelConfig.rejected]: (state) => {
       state.loading = false;
     },
 
-    //validasi create payment method
-    [createValidasiSetting.pending]: (state, action) => {
-      state.data = action.payload;
+    [getDownloadPayChannelConfig.pending]: (state) => {
       state.loading = true;
     },
-    [createValidasiSetting.fulfilled]: (state, action) => {
-      state.data = action.payload;
+    [getDownloadPayChannelConfig.fulfilled]: (state) => {
       state.loading = false;
     },
-    [createValidasiSetting.rejected]: (state, action) => {
-      state.data = action.payload;
+    [getDownloadPayChannelConfig.rejected]: (state) => {
       state.loading = false;
     },
 
-
-
-    [inactiveSetting.pending]: (state) => {
+    [createValidasiPayChannelConfig.pending]: (state) => {
       state.loading = true;
     },
-    [inactiveSetting.fulfilled]: (state) => {
-      state.isSuccess = true;
+    [createValidasiPayChannelConfig.fulfilled]: (state) => {
       state.loading = false;
     },
-    [inactiveSetting.rejected]: (state) => {
-      state.isFailed = true;
-      state.loading = false;
-    },
-
-    [getPartnerList.pending]: (state, action) => {
-      state.loading = true;
-      state.dataPartnerList = action.payload;
-    },
-    [getPartnerList.fulfilled]: (state, action) => {
-      state.dataPartnerList = action.payload;
-      state.loading = false;
-    },
-    [getPartnerList.rejected]: (state, action) => {
-      state.dataPartnerList = action.payload;
+    [createValidasiPayChannelConfig.rejected]: (state) => {
       state.loading = false;
     },
 
-    [getPartnerListByCa.pending]: (state, action) => {
+    [inactivePayChannelConfig.pending]: (state) => {
       state.loading = true;
-      state.dataPartnerList = action.payload;
     },
-    [getPartnerListByCa.fulfilled]: (state, action) => {
-      state.dataPartnerList = action.payload;
+    [inactivePayChannelConfig.fulfilled]: (state) => {
       state.loading = false;
     },
-    [getPartnerListByCa.rejected]: (state, action) => {
-      state.dataPartnerList = action.payload;
+    [inactivePayChannelConfig.rejected]: (state) => {
       state.loading = false;
     },
 
-    [getCollectionAgentList.pending]: (state, action) => {
+    [saveDraftPayChannelConfig.pending]: (state) => {
       state.loading = true;
-      state.dataCollectionAgentList = action.payload;
     },
-    [getCollectionAgentList.fulfilled]: (state, action) => {
-      state.dataCollectionAgentList = action.payload;
+    [saveDraftPayChannelConfig.fulfilled]: (state) => {
       state.loading = false;
     },
-    [getCollectionAgentList.rejected]: (state, action) => {
-      state.dataCollectionAgentList = action.payload;
-      state.loading = false;
-    },
-
-    [getPaymentChannelList.pending]: (state, action) => {
-      state.loading = true;
-      state.dataPaymentChannelList = action.payload;
-    },
-    [getPaymentChannelList.fulfilled]: (state, action) => {
-      state.dataPaymentChannelList = action.payload;
-      state.loading = false;
-    },
-    [getPaymentChannelList.rejected]: (state, action) => {
-      state.dataPaymentChannelList = action.payload;
-      state.loading = false;
-    },
-
-    [getPaymentChannelListByCa.pending]: (state, action) => {
-      state.loading = true;
-      state.dataPaymentChannelList = action.payload;
-    },
-    [getPaymentChannelListByCa.fulfilled]: (state, action) => {
-      state.dataPaymentChannelList = action.payload;
-      state.loading = false;
-    },
-    [getPaymentChannelListByCa.rejected]: (state, action) => {
-      state.dataPaymentChannelList = action.payload;
+    [saveDraftPayChannelConfig.rejected]: (state) => {
       state.loading = false;
     },
 

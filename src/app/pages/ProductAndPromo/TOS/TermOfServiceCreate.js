@@ -3,7 +3,6 @@ import { Form, Spin, Select } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import BreadCrumb from "../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { PRODUCT_PROMO_ROUTES } from "../../../../routes/product_promo/pp_routes";
 import BaseContainer from "../../../../components/BaseContainer";
 import InputComponent from "../../../../components/InputComponent";
@@ -396,7 +395,7 @@ const TermOfServiceCreate = () => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
@@ -612,7 +611,7 @@ const TermOfServiceCreate = () => {
           </ModalError>
         ) : null}
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

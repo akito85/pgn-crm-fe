@@ -755,6 +755,15 @@ const ContactForm = ({
     setModalError(false);
     setBodyError({});
   };
+
+  useEffect(() => {
+    if (Array.isArray(contactTable)) {
+      for (const [index, contact] of contactTable.entries()) {
+        form.setFieldValue(`contact${index+1}`, contact.contactName);
+      }
+    }
+  }, [contactTable])
+
   return (
     <div>
       <span className="text-primary uppercase font-bold mt-[60px]">
@@ -762,34 +771,32 @@ const ContactForm = ({
       </span>
 
       <div className="w-full grid grid-cols-3 gap-2 pt-[30px]">
-        <Form.Item
-          label={"Contact 1"}
-          name={"contact1"}
-          rules={[
-            {
-              required: true,
-              message: "Please input your Contact!",
-            },
-          ]}
-          valuePropName={contactTable?.map((a) => a.contactName)[0]}
-        >
-          <div className="flex flex-row">
-            <Input.Group compact>
+        <Form.Item label={"Contact 1"} required>
+          <Input.Group compact>
+            <Form.Item
+              name={"contact1"}
+              rules={[
+                {
+                  required: true,
+                  message: "Please input your Contact!",
+                },
+              ]}
+              noStyle
+            >
               <InputComponent
                 disabled={true}
-                value={contactTable?.map((a) => a.contactName)[0]}
               />
-              <Button
-                type="primary"
-                onClick={() => {
-                  setKeyModal(1);
-                  setModalChooseContact(true);
-                }}
-              >
-                Choose
-              </Button>
-            </Input.Group>
-          </div>
+            </Form.Item>
+            <Button
+              type="primary"
+              onClick={() => {
+                setKeyModal(1);
+                setModalChooseContact(true);
+              }}
+            >
+              Choose
+            </Button>
+          </Input.Group>
         </Form.Item>
 
         <Form.Item
@@ -849,33 +856,32 @@ const ContactForm = ({
       </span>
 
       <div className="w-full grid grid-cols-3 gap-2 pt-[30px]">
-        <Form.Item
-          label={"Contact 2"}
-          valuePropName={contactTable?.map((a) => a.contactName)[1]}
-        >
-          <div className="flex flex-row">
-            <Input.Group compact>
+        <Form.Item label={"Contact 2"}>
+          <Input.Group compact>
+            <Form.Item
+              name={"contact2"}
+              noStyle
+            >
               <InputComponent
-                value={contactTable?.map((a) => a.contactName)[1]}
                 // disabled={
                 //   !contactTable?.map((a) => a.overview)[0] ? true : false
                 // }
                 disabled={true}
               />
-              <Button
-                type="primary"
-                onClick={() => {
-                  setKeyModal(2);
-                  setModalChooseContact(true);
-                }}
-                disabled={
-                  !contactTable?.map((a) => a.overview)[0] ? true : false
-                }
-              >
-                Choose
-              </Button>
-            </Input.Group>
-          </div>
+            </Form.Item>
+            <Button
+              type="primary"
+              onClick={() => {
+                setKeyModal(2);
+                setModalChooseContact(true);
+              }}
+              disabled={
+                !contactTable?.map((a) => a.overview)[0] ? true : false
+              }
+            >
+              Choose
+            </Button>
+          </Input.Group>
         </Form.Item>
 
         <Form.Item
@@ -935,33 +941,32 @@ const ContactForm = ({
       </span>
 
       <div className="w-full grid grid-cols-3 gap-2 pt-[30px]">
-        <Form.Item
-          label={"Contact 3"}
-          valuePropName={contactTable?.map((a) => a.contactName)[2]}
-        >
-          <div className="flex flex-row">
-            <Input.Group compact>
+        <Form.Item label={"Contact 3"}>
+          <Input.Group compact>
+            <Form.Item
+              name={"contact3"}
+              noStyle
+            >
               <InputComponent
-                value={contactTable?.map((a) => a.contactName)[2]}
                 // disabled={
                 //   !contactTable?.map((a) => a.overview)[1] ? true : false
                 // }
                 disabled={true}
               />
-              <Button
-                type="primary"
-                onClick={() => {
-                  setKeyModal(3);
-                  setModalChooseContact(true);
-                }}
-                disabled={
-                  !contactTable?.map((a) => a.overview)[1] ? true : false
-                }
-              >
-                Choose
-              </Button>
-            </Input.Group>
-          </div>
+            </Form.Item>
+            <Button
+              type="primary"
+              onClick={() => {
+                setKeyModal(3);
+                setModalChooseContact(true);
+              }}
+              disabled={
+                !contactTable?.map((a) => a.overview)[1] ? true : false
+              }
+            >
+              Choose
+            </Button>
+          </Input.Group>
         </Form.Item>
 
         <Form.Item
@@ -1021,33 +1026,32 @@ const ContactForm = ({
       </span>
 
       <div className="w-full grid grid-cols-3 gap-2 pt-[30px]">
-        <Form.Item
-          label={"Contact 4"}
-          valuePropName={contactTable?.map((a) => a.contactName)[3]}
-        >
-          <div className="flex flex-row">
-            <Input.Group compact>
+        <Form.Item label={"Contact 4"}>
+          <Input.Group compact>
+            <Form.Item
+              name={"contact4"}
+              noStyle
+            >
               <InputComponent
-                value={contactTable?.map((a) => a.contactName)[3]}
                 // disabled={
                 //   !contactTable?.map((a) => a.overview)[2] ? true : false
                 // }
                 disabled={true}
               />
-              <Button
-                type="primary"
-                onClick={() => {
-                  setKeyModal(4);
-                  setModalChooseContact(true);
-                }}
-                disabled={
-                  !contactTable?.map((a) => a.overview)[2] ? true : false
-                }
-              >
-                Choose
-              </Button>
-            </Input.Group>
-          </div>
+            </Form.Item>
+            <Button
+              type="primary"
+              onClick={() => {
+                setKeyModal(4);
+                setModalChooseContact(true);
+              }}
+              disabled={
+                !contactTable?.map((a) => a.overview)[2] ? true : false
+              }
+            >
+              Choose
+            </Button>
+          </Input.Group>
         </Form.Item>
 
         <Form.Item
@@ -1161,8 +1165,8 @@ const ContactForm = ({
       {/* Modal Create Contact */}
       {
       modalCreateContact ||
-      dataTableDetail === [] ||
-      selectDataRecord === {} ? (
+      !dataTableDetail.length ||
+      !Object.entries(selectDataRecord).length ? (
         <ModalCustom
           isOpen={modalCreateContact}
           type="confirmation"
@@ -1209,6 +1213,7 @@ const ContactForm = ({
             form={formContact}
             onFinish={handleAdd}
             id={"formContact"}
+            scrollToFirstError={{ behavior: "smooth", block: "center" }}
           >
             <span className="text-primary uppercase font-bold">
               CONTACT INFORMATION

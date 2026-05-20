@@ -2,27 +2,25 @@ import {
   LeftOutlined,
   WarningOutlined,
 } from "@ant-design/icons";
-import { Form,Spin } from "antd";
-import moment from "moment";
-import  { useEffect,  useState } from "react";
+import { Form, Spin, Input } from "antd";
+import { useEffect, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import RadioTabs from "../../../../../components/RadioTabs";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
+import { FormStepper, FormFooter } from "../../../../../components/FormStepNavigation";
+import SectionCard from "../../../../../components/SectionCard";
+import CardContainerNoBorder from "../../../../../components/CardContainerNoBorder";
 import {
   getTypeDDL,
-  createSetting,
-  createValidasiSetting,
+  getPeriodDDL,
   getAllApprovalList,
-  getDetailSetting,
+  getDetailDeduction,
   getListApprovalById,
   getListCategory,
-  updateSetting,
-} from "../../../../../redux/slices/receipt_collection/setting";
+  createDeduction as saveDeduction,
+} from "../../../../../redux/slices/receipt_collection/deduction";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
-import { dateFormatting } from "../../../../../utils";
 import DeductionForm from "./DeductionForm";
 import SVGIcon from "../../../../../assets/Icon/index";
 import { ModalConfirm } from "../../../../../components/Modal/ModalPopUp";
@@ -38,22 +36,30 @@ import { bytesConverter } from "../../../../../utils/bytesConverter";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
 import { configApp } from "../../../../../constants/configApp";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
+import ModalSearchCustomer from "./ModalSearchCustomer";
+import TableRBI from "../../../../../components/TableRBI";
+import { getCustomerListColumns } from "./CustomerColumns";
 
-const ListFormSettings = (props) => {
+const ListFormDeduction = (props) => {
   const { type } = props;
   const {
     data_detail,
     dataListAppHierId,
     dataListAppHierDetail,
     loading,
+    loadingDetail,
+    loadingType,
+    loadingPeriod,
+    loadingAppHier,
     dataType,
-  } = useSelector((state) => state.receiptSetting);
+    dataPeriod,
+  } = useSelector((state) => state.deduction);
 
   // Declaration
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [form] = Form.useForm();
-  const formValue = form.getFieldsValue();
+  const approvalHierarchy = Form.useWatch("approvalHierarchy", form);
   const location = useLocation();
   const { id } = location?.state || {};
   const [listDataAttachment, setListDataAttachment] = useState([]);
@@ -62,26 +68,36 @@ const ListFormSettings = (props) => {
   const [modalBack, setModalBack] = useState(false);
   const [appHierOptions, setAppHierOptions] = useState([]);
   const [appHierDataDetail, setAppHierDataDetail] = useState([]);
-  const [loadingForm, setLoadingForm] = useState(loading);
+  const [loadingSave, setLoadingSave] = useState(false);
+  const [loadingDraft, setLoadingDraft] = useState(false);
+  const [current, setCurrent] = useState(0);
+  const [sendBody, setSendBody] = useState();
+  const [tabData, setTabData] = useState([
+    { value: "Deduction", paramValue: ["deductionPeriod", "type", "deductionDate"] },
+    { value: "Approval", paramValue: ["apphierId"] },
+    { value: "Attachment" },
+  ]);
 
-  
+  const steps = [
+    { title: "DEDUCTION", value: "Deduction" },
+    { title: "APPROVAL", value: "Approval" },
+    { title: "ATTACHMENT", value: "Attachment" },
+  ];
 
-  
-
-  
+  // Customer List State
+  const [customerList, setCustomerList] = useState([]);
+  const [modalSearchCustomer, setModalSearchCustomer] = useState(false);
 
   useEffect(() => {
     if (id && type === "update") {
-      dispatch(getDetailSetting(id));
+      dispatch(getDetailDeduction(id));
     }
   }, [dispatch, id, type]);
-
-
- 
 
   useEffect(() => {
     dispatch(getAllApprovalList());
     dispatch(getTypeDDL());
+    dispatch(getPeriodDDL());
   }, [dispatch]);
 
   useEffect(() => {
@@ -93,7 +109,7 @@ const ListFormSettings = (props) => {
       setAppHierOptions(tempAppHier);
     }
   }, [dataListAppHierId]);
-  
+
   useEffect(() => {
     if (selectedHierarchy && selectedHierarchy !== 0) {
       dispatch(getListApprovalById({ id: selectedHierarchy }));
@@ -118,142 +134,73 @@ const ListFormSettings = (props) => {
 
   useEffect(() => {
     if (
-      formValue.approvalHierarchy &&
+      approvalHierarchy &&
       !appHierOptions
         .map((item) => item.value)
-        .includes(formValue.approvalHierarchy)
+        .includes(approvalHierarchy)
     ) {
       form.setFieldsValue({ approvalHierarchy: null });
       setSelectedHierarchy(null);
     }
-  }, [formValue, appHierOptions, form]);
+  }, [approvalHierarchy, appHierOptions, form]);
 
   useEffect(() => {
-    if (id  && data_detail) {
-
-      form.setFieldsValue({
-        id: data_detail?.settings.id,
-        dateStart: data_detail?.settings?.dateStart ?? "",
-        dateEnd: data_detail?.settings?.dateEnd ?? "",
-        hourStart: data_detail?.settings?.hourStart ?? "",
-        hourEnd: data_detail?.settings?.hourEnd ?? "",
-        minuteStart: data_detail?.settings?.minuteStart ?? "",
-        minuteEnd: data_detail?.settings?.minuteEnd ?? "",
-        caCode: data_detail?.settings?.caCode ?? "",
-        partnerCode: data_detail?.settings?.partnerCode ?? "",
-        ciCode: data_detail?.settings?.ciCode ?? "",
-        type: data_detail?.settings?.type,
-        apphierId: data_detail?.settings?.appHierId,
-      });
-
-      setSelectedHierarchy(data_detail?.settings?.appHierId);
-
-      setListDataAttachment(
-        (data_detail?.attachmentDtoList || []).map((attachData) => ({
-          ...attachData,
-          fileSize: bytesConverter(attachData.fileSize || 0),
-          dataType: "exist",
-        }))
-      );
+    if (id && data_detail) {
+      // Map details to form logic here if needed for update
     }
   }, [data_detail, id]);
 
-  // Define tabData before using it in useState
-
-  const [tabData, setTabData] = useState([
-    { value: "Deduction", paramValue: ["dateStart",
-                                      "dateEnd",
-                                      "hourStart",
-                                      "hourEnd",
-                                      "minuteStart",
-                                      "minuteEnd",
-                                      "caCode",
-                                      "partnerCode",
-                                      "ciCode",
-                                      "type"
-                                     ] },
-    { value: "Approval", paramValue: ["apphierId"] },
-    { value: "Attachment" },
-  ]);
-
-  const [valuePage, setValuePage] = useState(tabData[0].value);
-  const [sendBody, setSendBody] = useState();
-  const onChange = (e) => {
-    setValuePage(e.target.value);
+  const next = () => {
+    if (current === 0) {
+      form.validateFields([
+        "deductionPeriod",
+        "type",
+        "deductionDate",
+        "description"
+      ]).then(() => {
+        setCurrent(current + 1);
+      }).catch((e) => {
+        // Validation handled by form UI
+      });
+      return;
+    }
+    if (current === 1) {
+      if (!selectedHierarchy) {
+        dispatch(showModalError({ title: "Warning", description: "Approval Hierarchy is mandatory", return: false }));
+        return;
+      }
+      setCurrent(current + 1);
+      return;
+    }
+    setCurrent(current + 1);
   };
 
-  useEffect(() => {
-    if (
-      formValue.apphierId &&
-      !appHierOptions.map((item) => item.value).includes(formValue.apphierId)
-    ) {
-      form.setFieldsValue({ apphierId: null });
-      setSelectedHierarchy(null);
-    }
-  }, [formValue, appHierOptions, form]);
+  const prev = () => {
+    if (current > 0) setCurrent(current - 1);
+  };
 
-  
+  const onBack = () => {
+    setModalBack(true);
+  };
 
   const handleSubmitForm = (formValue) => {
-      const dataValue = {
-        dateStart: formValue.dateStart,
-        dateEnd: formValue.dateEnd,
-        hourStart: formValue.hourStart,
-        hourEnd: formValue.hourEnd,
-        minuteStart: formValue.minuteStart,
-        minuteEnd: formValue.minuteEnd,
-        caCode: formValue.caCode,
-        partnerCode: formValue.partnerCode,
-        ciCode: formValue.ciCode,
-        type: formValue.type,
-        apphierId: formValue.apphierId,
-      };
+    const dataValue = {
+      ...formValue,
+      customerList: customerList
+    };
 
-      setSendBody(dataValue);
-      const bodyValidasiUpdate = {
-        ...dataValue,
-        id: data_detail?.settings?.id,
-      };
-      if (type !== "update") {
-        dispatch(createValidasiSetting(dataValue))
-          .unwrap()
-          .then(async (data) => {
-            const sukses = data?.success;
-            if (sukses === false) {
-              setModalConfirm(false);
-            }
-            setModalConfirm(true);
-          });
-      }else{
-        dispatch(createValidasiSetting(bodyValidasiUpdate))
-          .unwrap()
-          .then(async (data) => {
-            const sukses = data?.success;
-            if (sukses === false) {
-              setModalConfirm(false);
-            }
-            setModalConfirm(true);
-            setSendBody(bodyValidasiUpdate)
-          });
-      }
-      
+    setSendBody(dataValue);
+    setModalConfirm(true);
+    // Logic for create/update API call would go here
   };
 
-  
   const handleCancelModalConfirm = () => {
     setModalConfirm(false);
   };
 
   // Validation Button Back
   const handleBack = () => {
-    if (
-      form.getFieldValue() === null ||
-      Object.keys(form.getFieldValue()).length === 0
-    ) {
-      navigate(-1);
-    } else {
-      setModalBack(true);
-    }
+    setModalBack(true);
   };
 
   const handleClear = () => {
@@ -261,8 +208,10 @@ const ListFormSettings = (props) => {
       form.resetFields();
       setSelectedHierarchy("");
       setListDataAttachment([]);
+      setCustomerList([]);
+      setCurrent(0);
     } else {
-      dispatch(getDetailSetting(id));
+      // Logic for reset update
     }
   };
 
@@ -299,7 +248,7 @@ const ListFormSettings = (props) => {
     },
     {
       path: "",
-      breadcrumbName: "Payment Warranty",
+      breadcrumbName: "Payment  Guarantee",
     },
     {
       path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_DEDUCTION,
@@ -307,205 +256,264 @@ const ListFormSettings = (props) => {
     },
     {
       path: RECEIPT_AND_COLLECTION_ROUTES.CREATE_DEDUCTION,
-      breadcrumbName: `${type === "create" ? "Create" : "Update"}`,
+      breadcrumbName: `${type === "create" ? "Create Deduction" : "Update Deduction"}`,
     },
   ];
-  
 
-  //kriim bodyy
+
+  const uploadFiles = async (id) => {
+    const filterDataAttach = listDataAttachment.filter(
+      (item) => item.dataType !== "exist"
+    );
+
+    const failedUploads = [];
+
+    for (let i = 0; i < filterDataAttach.length; i++) {
+      const element = filterDataAttach[i];
+      const body = {
+        referensiId: id,
+        files: element.file,
+        category: "WARRANTY_DEDUCTION",
+        fileCategoryId: element.fileCategoryId,
+      };
+
+      try {
+        await receiptCollectionHttpService.uploadImage(
+          `/v1/dbs/api/attachment/upload/v1`,
+          body
+        );
+      } catch (error) {
+        console.error(`Failed to upload file ${i + 1}:`, error);
+        failedUploads.push(element);
+      }
+    }
+
+    if (failedUploads.length > 0) {
+      dispatch(
+        showModalError({
+          title: "Upload Warning",
+          description: `${failedUploads.length} file(s) failed to upload. Please try again.`,
+          return: false,
+        })
+      );
+    }
+
+    return failedUploads;
+  };
+
   const handleSave = async () => {
-    setModalConfirm(false);
-    const successMessageCreate = {
-      title: "Successfull",
-      description: `Your data has been submited`,
-      return: true,
+    setLoadingSave(true);
+
+    const body = {
+      ...sendBody,
+      appHierId: selectedHierarchy,
+      type: sendBody?.type?.toString(),
+      deductionPeriod: sendBody?.deductionPeriod?.toString(),
     };
 
-    const successMessageUpdate = {
-      title: "Successfull",
-      description: `Your data has been submited`,
-      return: true,
-    };
+    try {
+      const data = await dispatch(saveDeduction(body)).unwrap();
+      const id = data?.id;
 
-    if (type === "update") {
-      dispatch(updateSetting(sendBody))
-        .unwrap()
-        .then(async () => {
-          const id = data_detail?.settings?.id;
-          setLoadingForm(true);
-          const filterDataAttach = listDataAttachment.filter(
-            (item) => item.dataType !== "exist"
-          );
-          for (let icon = 0; icon < filterDataAttach.length; icon++) {
-            const element = filterDataAttach[icon];
-            const body = {
-              referensiId: data_detail?.settings?.id,
-              files: element.file,
-              category: "RECEIPT_SETTING",
-              fileCategoryId: element.fileCategoryId,
-            };
-            const response = await receiptCollectionHttpService.uploadImage(
-              `/v1/dbs/api/attachment/upload/v1`,
-              body
-            );
-          }
-          setLoadingForm(false);
-          handleCancelModalConfirm();
-          form.resetFields();
-          setSelectedHierarchy("");
-          setListDataAttachment([]);
-          dispatch(showModalSuccess(successMessageUpdate));
-          handleClear();
-        })
-        .catch((error) => {
-          if (Math.floor((error.response.data.code || 0) / 100) === 5) {
-            const message =
-              (error.response &&
-                error.response.data &&
-                error.response.data.message) ||
-              error.message ||
-              error.toString();
-            dispatch(showModalError(message));
-          }
-        });
-    } else {
-      dispatch(createSetting(sendBody))
-        .unwrap()
-        .then(async (data) => {
-          let id = data.id;
-          setLoadingForm(true);
-          for (let icon = 0; icon < listDataAttachment.length; icon++) {
-            const element = listDataAttachment[icon];
+      if (id) {
+        await uploadFiles(id);
+      }
 
-            const body = {
-              files: element.file,
-              fileCategoryId: element.fileCategoryId,
-              referensiId: id,
-              category: "RECEIPT_SETTING",
-            };
-            const response = await receiptCollectionHttpService.uploadImage(
-              `/v1/dbs/api/attachment/upload/v1`,
-              body
-            );
-          }
-          setLoadingForm(false);
-          handleCancelModalConfirm();
-          handleClear();
-          dispatch(showModalSuccess(successMessageCreate));
+      setModalConfirm(false);
+      dispatch(
+        showModalSuccess({
+          title: "Successful",
+          description: "Your data has been submitted",
+          return: false,
         })
-        .catch((error) => {
-          if (Math.floor((error.response.data.code || 0) / 100) === 5) {
-            const message =
-              (error.response &&
-                error.response.data &&
-                error.response.data.message) ||
-              error.message ||
-              error.toString();
-            dispatch(showModalError(message));
-          }
-        });
+      );
+      navigate(RECEIPT_AND_COLLECTION_ROUTES.VIEW_DEDUCTION);
+    } catch (error) {
+      dispatch(
+        showModalError({
+          title: "Failed",
+          description: "Failed to submit data. Please try again.",
+          return: false,
+        })
+      );
+    } finally {
+      setLoadingSave(false);
     }
   };
 
+  const handleSaveDraft = async () => {
+    setLoadingDraft(true);
+    const values = form.getFieldsValue();
+    const body = {
+      ...values,
+      customerList: customerList,
+      appHierId: selectedHierarchy,
+      isDraft: true,
+      type: values?.type?.toString(),
+      deductionPeriod: values?.deductionPeriod?.toString(),
+    };
+
+    try {
+      const data = await dispatch(saveDeduction(body)).unwrap();
+      const id = data?.id;
+
+      if (id) {
+        await uploadFiles(id);
+      }
+
+      dispatch(
+        showModalSuccess({
+          title: "Successful",
+          description: "Draft has been saved",
+          return: false,
+        })
+      );
+      navigate(RECEIPT_AND_COLLECTION_ROUTES.VIEW_DEDUCTION);
+    } catch (error) {
+      dispatch(
+        showModalError({
+          title: "Failed",
+          description: "Failed to save draft. Please try again.",
+          return: false,
+        })
+      );
+    } finally {
+      setLoadingDraft(false);
+    }
+  };
+
+  const handleCustomerAmountChange = (id, value) => {
+    const updatedList = customerList.map(item => {
+      if (item.id === id) {
+        return { ...item, amount: value };
+      }
+      return item;
+    });
+    setCustomerList(updatedList);
+  };
+
+  const handleDeleteCustomer = (id) => {
+    const updatedList = customerList.filter(item => item.id !== id);
+    setCustomerList(updatedList);
+  };
+
+  const customerColumns = useMemo(() => {
+    return getCustomerListColumns({
+      actionType: "delete",
+      onDelete: handleDeleteCustomer,
+      amountRender: (text, record) => (
+        <Input
+          placeholder="Placeholder"
+          value={text}
+          onChange={(e) => handleCustomerAmountChange(record.id, e.target.value)}
+        />
+      )
+    });
+  }, [customerList]);
+
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
-      <Spin spinning={loadingForm}>
-        <RadioTabs
-          data={tabData}
-          onChange={onChange}
-          currentPosition={valuePage}
+      <Spin spinning={loading || loadingDetail || loadingType || loadingPeriod || loadingAppHier || loadingSave || loadingDraft}>
+        <FormStepper 
+          steps={steps} 
+          current={current} 
+          onPrev={prev} 
+          onNext={next} 
         />
         <Form
           layout="vertical"
           form={form}
           onFinish={handleSubmitForm}
           onFinishFailed={handleError}
+          preserve={true}
         >
-          <div
-            style={{
-              display: valuePage !== tabData[0].value ? "none" : undefined,
-            }}
+          <CardContainerNoBorder 
+            header={type === "create" ? "CREATE DEDUCTION INFORMATION" : "UPDATE DEDUCTION INFORMATION"}
+            collapsible={true}
+            defaultExpanded={true}
+            noPadding={true}
           >
-            <DeductionForm
-              dataType={dataType}
-              form={form}
-            />
-          </div>
-          <div
-            style={{
-              display: valuePage !== tabData[1].value ? "none" : undefined,
-            }}
-          >
-            <BaseContainer header={"APPROVAL INFORMATION"}>
-              <ApprovalComponentGeneral
-                dataTable={appHierDataDetail}
-                dataOption={appHierOptions}
-                selectedHierarchy={selectedHierarchy}
-                updateSelectedHierarchy={setSelectedHierarchy}
-              />
-            </BaseContainer>
-          </div>
-          <div
-            style={{
-              display: valuePage !== tabData[2].value ? "none" : undefined,
-            }}
-          >
-            <BaseContainer header={"ATTACHMENT INFORMATION"}>
-              <AttachmentComponent
-                type={type}
-                data={listDataAttachment}
-                updateData={setListDataAttachment}
-                typeSelector="receiptSetting"
-                dispatch={dispatch}
-                getAPICategory={getListCategory}
-                service={receiptCollectionHttpService}
-                configApplication={configApp.PAYMENT_SERVICE}
-                typeRBI={"data"}
-              />
-            </BaseContainer>
-          </div>
-          <div className="flex w-full justify-between align-middle my-3">
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => handleBack()}
-              icon={
-                <LeftOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 24,
-                    justifyItems: "center",
-                  }}
-                />
-              }
+            <div
+              style={{
+                display: current !== 0 ? "none" : undefined,
+                padding: "16px"
+              }}
             >
-              Back
-            </ButtonComponent>
-            <div className="flex align-middle gap-3">
-              <ButtonComponent
-                icon={
-                  <SVGIcon
-                    name={
-                      type === "update" ? `IconButtonReset` : `IconButtonClear`
-                    }
-                    width={24}
-                  />
-                }
-                type="submit"
-                onClick={handleClear}
-              >
-                {type === "update" ? "Reset" : "Clear"}
-              </ButtonComponent>
-              <ButtonComponent
-                htmlType="submit"
-                type="submit"
-              // onClick={() => setModalConfirm(true)}
-              // disabled={disableSubmit}
-              >
-                Save & Submit
-              </ButtonComponent>
+              <SectionCard title="DEDUCTION INFORMATION">
+                <DeductionForm
+                  dataType={dataType}
+                  dataPeriod={dataPeriod}
+                  form={form}
+                  isEmbedded={true}
+                />
+              </SectionCard>
+
+              <SectionCard title="CUSTOMER INFORMATION">
+                <div className="flex justify-end mb-4">
+                  <ButtonComponent isPrimary onClick={() => setModalSearchCustomer(true)}>
+                    Search Customer
+                  </ButtonComponent>
+                </div>
+                <TableRBI
+                  columns={customerColumns}
+                  dataSource={customerList.map((item, index) => ({ ...item, key: item.id || index }))}
+                  rowKey="key"
+                  usePagination={false}
+                  tableScrolled={{ x: 1700 }}
+                />
+              </SectionCard>
             </div>
-          </div>
+
+            <div
+              style={{
+                display: current !== 1 ? "none" : undefined,
+                padding: "16px"
+              }}
+            >
+              <SectionCard title="APPROVAL INFORMATION">
+                <ApprovalComponentGeneral
+                  dataTable={appHierDataDetail}
+                  dataOption={appHierOptions}
+                  selectedHierarchy={selectedHierarchy}
+                  updateSelectedHierarchy={setSelectedHierarchy}
+                />
+              </SectionCard>
+            </div>
+
+            <div
+              style={{
+                display: current !== 2 ? "none" : undefined,
+                padding: "16px"
+              }}
+            >
+              <SectionCard title="ATTACHMENT INFORMATION">
+                <AttachmentComponent
+                  type={type}
+                  data={listDataAttachment}
+                  updateData={setListDataAttachment}
+                  typeSelector="deduction"
+                  dispatch={dispatch}
+                  getAPICategory={getListCategory}
+                  service={receiptCollectionHttpService}
+                  configApplication={configApp.PAYMENT_SERVICE}
+                  typeRBI={"data"}
+                />
+              </SectionCard>
+            </div>
+          </CardContainerNoBorder>
+
+          <FormFooter
+            current={current}
+            totalSteps={steps.length}
+            onPrev={prev}
+            onNext={next}
+            onCancel={onBack}
+            onClear={handleClear}
+            onSaveDraft={handleSaveDraft}
+            onSubmit={() => form.submit()}
+            type={type}
+          />
         </Form>
       </Spin>
       <ModalCustom
@@ -519,20 +527,28 @@ const ListFormSettings = (props) => {
             <ButtonComponent onClick={handleCancelModalConfirm} type="default">
               Cancel
             </ButtonComponent>
-            <ButtonComponent type="submit" onClick={handleSave}>
+            <ButtonComponent 
+              className="!bg-[#28a745] !border-[#28a745] hover:!bg-[#218838]"
+              isPrimary 
+              onClick={handleSave}
+              loading={loadingSave}
+            >
               Confirm
             </ButtonComponent>
           </div>
         }
       >
-        <ContentModalConfirm
-          data={sendBody}
-          tabData={tabData}
-          listDataAttachment={listDataAttachment}
-          listDataAppHierDetail={appHierDataDetail}
-          dataOption={appHierOptions}
-          selectedHierarchy={selectedHierarchy}
-        />
+        <div className="p-4">
+          <ContentModalConfirm
+            data={sendBody}
+            listDataAttachment={listDataAttachment}
+            listDataAppHierDetail={appHierDataDetail}
+            tabData={tabData}
+            dataOption={appHierOptions}
+            selectedHierarchy={selectedHierarchy}
+            typeSelector="deduction"
+          />
+        </div>
       </ModalCustom>
 
       {/* Modal Back*/}
@@ -549,8 +565,19 @@ const ListFormSettings = (props) => {
           </p>
         </div>
       </ModalConfirm>
-    </LayoutMenu>
+
+      <ModalSearchCustomer
+        isOpen={modalSearchCustomer}
+        onClose={() => setModalSearchCustomer(false)}
+        onConfirm={(selectedRecords) => {
+          // Avoid duplicates
+          const uniqueRecords = selectedRecords.filter(record => !customerList.some(existing => existing.id === record.id));
+          setCustomerList([...customerList, ...uniqueRecords]);
+        }}
+      />
+
+    </>
   );
 };
 
-export default ListFormSettings;
+export default ListFormDeduction;

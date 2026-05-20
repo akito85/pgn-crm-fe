@@ -6,11 +6,9 @@ import { Spin } from "antd";
 import moment from "moment";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import RadioTabs from "../../../../../components/RadioTabs";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
-import BaseContainer from "../../../../../components/BaseContainer";
 import DetailSection from "./Utils/DetailSection";
 import { ModalError } from "../../../../../components/Modal/ModalPopUp";
 import SVGIcon from "../../../../../assets/Icon/index";
@@ -23,13 +21,15 @@ import {
   getDetailDraftBillingBucket,
   approveRejectBillingBucket,
   approveRejectInactiveBillingBucket,
+  approveRejectActivatedBillingBucket,
 } from "../../../../../redux/slices/rating_billing_invoice/MasterData/billingBucket";
 import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrReject";
+import CardContainer from "../../../../../components/CardContainer";
 
 const BillingBucketDetail = () => {
   // Selector
   const { loading, data_detail, data_detail_draft } = useSelector(
-    (state) => state.billing_bucket
+    (state) => state.billing_bucket,
   );
 
   // Declaration
@@ -70,6 +70,10 @@ const BillingBucketDetail = () => {
   });
   const showButtonApproval =
     bodyApproval.isApprover !== null && bodyApproval.isApprover;
+  const isInactiveApproval =
+    bodyApproval.approvalType === "INACTIVE_BILLING_BUCKET";
+  const isActivatedApproval =
+    bodyApproval.approvalType === "ACTIVATED_BILLING_BUCKET";
 
   // Use Effect
   useEffect(() => {
@@ -96,19 +100,18 @@ const BillingBucketDetail = () => {
         (item) => {
           return {
             billingItem: item.billingItem.value,
-            currency: item.currency.value,
+            groups: item.groups,
+            groupSequence: item.groupSequence,
             sequence: item.sequence,
             startDate: item.startDate,
             endDate: item.endDate,
-            description: item.description,
-            priority: item.priority,
             id: item.id,
             createdDate: item.createdDate,
             createdBy: item.createdBy,
             updatedDate: item.updatedDate,
             updatedBy: item.updatedBy,
           };
-        }
+        },
       );
 
       // Data Attachment Information
@@ -131,7 +134,7 @@ const BillingBucketDetail = () => {
               : "",
             dataType: "exist",
           };
-        }
+        },
       );
 
       // Data Criteria Information
@@ -194,7 +197,7 @@ const BillingBucketDetail = () => {
       data_detail &&
       (!data_detail?.approvalInformation?.approvalType ||
         data_detail?.approvalInformation?.approvalType !==
-          "INACTIVE_BILLING_BUCKET")
+        "INACTIVE_BILLING_BUCKET")
     ) {
       // Criteria Data Select
       const criteriaSelect = (data_detail_draft?.criteria || []).map((item) => {
@@ -264,12 +267,11 @@ const BillingBucketDetail = () => {
         data_detail_draft?.billingBucketDetail?.map((item) => {
           return {
             billingItem: item.billingItem.value,
-            currency: item.currency.value,
+            groups: item.groups,
+            groupSequence: item.groupSequence,
             sequence: item.sequence,
             startDate: item.startDate,
             endDate: item.endDate,
-            description: item.description,
-            priority: item.priority,
           };
         });
 
@@ -305,7 +307,7 @@ const BillingBucketDetail = () => {
       breadcrumbName: "Billing Bucket",
     },
     {
-      path: RBI_ROUTES.BILLING_BUCKET_DETAIL,
+      path: "",
       breadcrumbName: "Detail Billing Bucket",
     },
   ];
@@ -336,7 +338,7 @@ const BillingBucketDetail = () => {
         );
       case "Attachment":
         return (
-          <BaseContainer header={"Attachment Information"}>
+          <CardContainer header={"Attachment Information"}>
             <AttachmentComponent
               type={"detail"}
               data={listDataAttachment}
@@ -345,7 +347,7 @@ const BillingBucketDetail = () => {
               service={ratingBillingHttpService}
               configApplication={configApp.RATING_BILLING_SERVICE}
             />
-          </BaseContainer>
+          </CardContainer>
         );
       default:
         return <></>;
@@ -369,24 +371,29 @@ const BillingBucketDetail = () => {
 
   // handle Confirm
   const handleConfirm = (res, handleClear) => {
-    setModalConfirm(false);
     const data = {
       id: id,
       description: res.remark,
       approvalId: bodyApproval.tAppId,
       action: approveOrReject.toUpperCase(),
     };
-    dispatch(
-      bodyApproval.approvalType === "INACTIVE_BILLING_BUCKET"
-        ? approveRejectInactiveBillingBucket({
-            body: data,
-          })
+    const approvalAction = isInactiveApproval
+      ? approveRejectInactiveBillingBucket({
+        body: data,
+      })
+      : isActivatedApproval
+        ? approveRejectActivatedBillingBucket({
+          body: data,
+        })
         : approveRejectBillingBucket({
-            body: data,
-          })
+          body: data,
+        });
+    return dispatch(
+      approvalAction
     )
       .unwrap()
       .then(() => {
+        setModalConfirm(false);
         handleClear();
         dispatch(getDetailDraftBillingBucket(id));
         dispatch(getDetailBillingBucket(id));
@@ -406,21 +413,24 @@ const BillingBucketDetail = () => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
         <div className="flex flex-col w-full gap-4">
           {bodyApproval.isApprover &&
             bodyApproval.approvalType &&
-            bodyApproval.approvalType === "INACTIVE_BILLING_BUCKET" && (
-              <BaseContainer header={"inactive request information"}>
+            (isInactiveApproval || isActivatedApproval) && (
+              <CardContainer
+                header={`${isActivatedApproval ? "activate" : "inactive"
+                  } request information`}
+              >
                 <div className="w-full grid grid-cols-4 gap-3">
                   <DetailText label={"Requested Date"}>
                     {bodyApproval.approvalDetail.requestedDate
                       ? moment(
-                          bodyApproval.approvalDetail.requestedDate
-                        ).format(dateFormatting.date)
+                        bodyApproval.approvalDetail.requestedDate
+                      ).format(dateFormatting.date)
                       : ""}
                   </DetailText>
                   <DetailText label={"Requested By"}>
@@ -430,7 +440,7 @@ const BillingBucketDetail = () => {
                     {bodyApproval.approvalDetail.remarks}
                   </DetailText>
                 </div>
-              </BaseContainer>
+              </CardContainer>
             )}
           <RadioTabs
             data={listSectionInfo}
@@ -440,20 +450,8 @@ const BillingBucketDetail = () => {
           {layout(valuePage)}
         </div>
 
-        <div className="flex mt-[30px]">
-          <ButtonComponent
-            type={"submit"}
-            onClick={() => navigate(-1)}
-            icon={
-              <LeftOutlined
-                style={{
-                  color: "#fff",
-                  fontSize: 24,
-                  justifyItems: "center",
-                }}
-              />
-            }
-          >
+        <div className="flex mt-[10px]">
+          <ButtonComponent type={"submit"} onClick={() => navigate(-1)}>
             Back
           </ButtonComponent>
 
@@ -504,14 +502,13 @@ const BillingBucketDetail = () => {
               <SVGIcon name="IconFailed" width={48} />
               <p className="text-[18px] font-bold">{"Failed"}</p>
             </div>
-            <p className="pl-[70px]">{`Your data was not ${
-              approveOrReject === "Approve" ? "Approved" : "Rejected"
-            }. ${bodyError.message}.`}</p>
+            <p className="pl-[70px]">{`Your data was not ${approveOrReject === "Approve" ? "Approved" : "Rejected"
+              }. ${bodyError.message}.`}</p>
             <p className="pl-[70px]">Please try again.</p>
           </div>
         </ModalError>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

@@ -2,11 +2,10 @@ import { useEffect, useState } from "react";
 import moment from "moment";
 import { Spin } from "antd";
 import { LeftOutlined } from "@ant-design/icons";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
 import RadioTabs from "../../../../../components/RadioTabs";
-import BaseContainer from "../../../../../components/BaseContainer";
+
 import DetailSectionTaxCode from "./Utils/DetailSection";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -16,6 +15,7 @@ import {
   getDetailTaxCode,
   approvalRejectTaxCode,
   approvalInactiveTaxCode,
+  approvalActivatedTaxCode,
 } from "../../../../../redux/slices/rating_billing_invoice/MasterData/taxCode";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
@@ -25,6 +25,7 @@ import DetailText from "../../../../../components/DetailText";
 import SVGIcon from "../../../../../assets/Icon/index";
 import { ModalError } from "../../../../../components/Modal/ModalPopUp";
 import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrReject";
+import CardContainer from "../../../../../components/CardContainer";
 
 const TaxCodeDetail = () => {
   // Selector
@@ -33,7 +34,7 @@ const TaxCodeDetail = () => {
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const id = useLocation().state.id;
+  const id = useLocation().state?.id;
 
   const [bodyError, setBodyError] = useState({});
   const [modalConfirm, setModalConfirm] = useState(false);
@@ -84,7 +85,7 @@ const TaxCodeDetail = () => {
       breadcrumbName: "Tax Code",
     },
     {
-      path: RBI_ROUTES.TAX_CODE_DETAIL,
+      path: "",
       breadcrumbName: "Detail Tax Code",
     },
   ];
@@ -177,7 +178,7 @@ const TaxCodeDetail = () => {
             updatedDate: data.updatedDate,
             updatedBy: data.updatedBy,
           };
-        }
+        },
       );
       setListDataDetail(dataConditionList);
       setListDataCriteria(dataCriteriaList);
@@ -204,7 +205,9 @@ const TaxCodeDetail = () => {
       data_detail_draft?.taxCodeId === data_detail?.taxCodeId &&
       data_detail &&
       (!data_detail?.approvalDto?.approvalType ||
-        data_detail?.approvalDto?.approvalType !== "INACTIVE_TAX_CODE")
+        !["INACTIVE_TAX_CODE", "ACTIVATED_TAX_CODE"].includes(
+          data_detail?.approvalDto?.approvalType,
+        ))
     ) {
       const criteriaSelect = (data_detail_draft?.taxCodeCriteriaDtos || []).map(
         (item) => {
@@ -212,7 +215,7 @@ const TaxCodeDetail = () => {
             id: item.id,
             criteria: item.criteria,
           };
-        }
+        },
       );
 
       const mappingCriteria = criteriaSelect?.map((a) => a.criteria);
@@ -326,7 +329,7 @@ const TaxCodeDetail = () => {
         );
       case "Attachment":
         return (
-          <BaseContainer header={"Attachment Information"}>
+          <CardContainer header={"Attachment Information"}>
             <AttachmentComponent
               type={"detail"}
               data={listDataAttachment}
@@ -335,7 +338,7 @@ const TaxCodeDetail = () => {
               service={ratingBillingHttpService}
               configApplication={configApp.RATING_BILLING_SERVICE}
             />
-          </BaseContainer>
+          </CardContainer>
         );
       default:
         return <></>;
@@ -358,7 +361,6 @@ const TaxCodeDetail = () => {
   };
 
   const handleConfirm = (res, handleClear) => {
-    setModalConfirm(false);
     const data = {
       id: id,
       description: res.remark,
@@ -366,17 +368,22 @@ const TaxCodeDetail = () => {
       action: approveOrReject.toUpperCase(),
     };
 
-    dispatch(
+    return dispatch(
       bodyApproval.approvalType === "INACTIVE_TAX_CODE"
         ? approvalInactiveTaxCode({
             body: data,
           })
-        : approvalRejectTaxCode({
-            body: data,
-          })
+        : bodyApproval.approvalType === "ACTIVATED_TAX_CODE"
+          ? approvalActivatedTaxCode({
+              body: data,
+            })
+          : approvalRejectTaxCode({
+              body: data,
+            }),
     )
       .unwrap()
       .then(() => {
+        setModalConfirm(false);
         handleClear();
         dispatch(getDetailDraftTaxCode(id));
         dispatch(getDetailTaxCode(id));
@@ -393,19 +400,26 @@ const TaxCodeDetail = () => {
           setModalErrorServer(true);
         }
       });
-    console.log(data);
   };
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
         <div className="flex flex-col w-full gap-4">
           {bodyApproval.isApprover &&
             bodyApproval.approvalType &&
-            bodyApproval.approvalType === "INACTIVE_TAX_CODE" && (
-              <BaseContainer header={"inactive request information"}>
+            ["INACTIVE_TAX_CODE", "ACTIVATED_TAX_CODE"].includes(
+              bodyApproval.approvalType,
+            ) && (
+              <CardContainer
+                header={
+                  bodyApproval.approvalType === "ACTIVATED_TAX_CODE"
+                    ? "activate request information"
+                    : "inactive request information"
+                }
+              >
                 <div className="w-full grid grid-cols-4 gap-3">
                   <DetailText label={"Requested Date"}>
                     {bodyApproval.approvalDetail.requestedDate}
@@ -417,7 +431,7 @@ const TaxCodeDetail = () => {
                     {bodyApproval.approvalDetail.remarks}
                   </DetailText>
                 </div>
-              </BaseContainer>
+              </CardContainer>
             )}
           <RadioTabs
             data={listSectionInfo}
@@ -427,20 +441,8 @@ const TaxCodeDetail = () => {
           {layout(valuePage)}
         </div>
 
-        <div className="flex my-[30px]">
-          <ButtonComponent
-            type={"submit"}
-            onClick={() => navigate(-1)}
-            icon={
-              <LeftOutlined
-                style={{
-                  color: "#fff",
-                  fontSize: 24,
-                  justifyItems: "center",
-                }}
-              />
-            }
-          >
+        <div className="flex my-[10px]">
+          <ButtonComponent type={"submit"} onClick={() => navigate(-1)}>
             Back
           </ButtonComponent>
 
@@ -490,14 +492,13 @@ const TaxCodeDetail = () => {
               <SVGIcon name="IconFailed" width={48} />
               <p className="text-[18px] font-bold">{"Failed"}</p>
             </div>
-            <p className="pl-[70px]">{`Your data was not ${
-              approveOrReject === "Approve" ? "Approved" : "Rejected"
-            }. ${bodyError.message}.`}</p>
+            <p className="pl-[70px]">{`Your data was not ${approveOrReject === "Approve" ? "Approved" : "Rejected"
+              }. ${bodyError.message}.`}</p>
             <p className="pl-[70px]">Please try again.</p>
           </div>
         </ModalError>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 export default TaxCodeDetail;

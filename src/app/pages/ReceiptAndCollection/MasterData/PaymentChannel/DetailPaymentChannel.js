@@ -1,18 +1,18 @@
 import moment from "moment";
-import BaseContainer from "../../../../../components/BaseContainer";
+import DetailSection from "../../../../../components/DetailSection";
 import DetailText from "../../../../../components/DetailText";
 import { dateFormatting } from "../../../../../utils";
 
-const DetailPaymentChannel = ({ data_detail,  data_req }) => {
+const DetailPaymentChannel = ({ data_detail, data_req }) => {
 
-  
+
   return (
     <div>
-      {data_req?.isApprover &&
-      data_req?.approvalType &&
-      data_req?.approvalType === "INACTIVE_PAYMENT_METHOD" ? (
-        <BaseContainer header={"INACTIVE REQUEST INFORMATION"}>
-          <div className="grid grid-cols-4 w-full">
+      {data_req?.isValidated &&
+        data_req?.approvalType &&
+        data_req?.approvalType === "INACTIVE_PAYMENT_CHANNEL" ? (
+        <DetailSection header={"INACTIVE REQUEST INFORMATION"}>
+          <div className="grid grid-cols-5 w-full gap-4">
             <DetailText label={"Requested Date"}>
               {data_req?.requestedDate
                 ? moment(data_req?.requestedDate).format("DD MMM YYYY HH:mm:ss")
@@ -23,16 +23,20 @@ const DetailPaymentChannel = ({ data_detail,  data_req }) => {
             </DetailText>
             <DetailText label={"Remark"}>{data_req?.remarks}</DetailText>
           </div>
-        </BaseContainer>
+        </DetailSection>
       ) : null}
-      <BaseContainer header={"PAYMENT CHANNEL INFORMATION"}>
-        <div className="w-full grid grid-cols-3 gap-3">
-          <DetailText label="Payment Channel Code">
+      <DetailSection header={"DELIVERY CHANNEL INFORMATION"}>
+        <div className="w-full grid grid-cols-5 gap-4">
+          <DetailText label="Delivery Channel Code">
             {data_detail?.ciCode}
           </DetailText>
           <DetailText label="Name">
             {data_detail?.name}
           </DetailText>
+          <DetailText label="Category">
+            {data_detail?.category}
+          </DetailText>
+
           <DetailText label="Eff Start Date">
             {moment(data_detail?.effStartDate).format(dateFormatting.date)}
           </DetailText>
@@ -41,23 +45,17 @@ const DetailPaymentChannel = ({ data_detail,  data_req }) => {
               ? moment(data_detail?.effEndDate).format(dateFormatting.date)
               : ""}
           </DetailText>
-          {/* <DetailText label="Status">{data_detail?.status}</DetailText> */}
+          <DetailText label="Status">
+            {data_detail?.status}
+          </DetailText>
           <DetailText label="Status Approval">
             {data_detail?.statusApproval}
           </DetailText>
-            <DetailText label="Category">
-              {data_detail?.category}
-            </DetailText>
-          <div className="col-span-3">
-            <DetailText label="Type">
-              {data_detail?.type}
-            </DetailText>
-          </div>
         </div>
-      </BaseContainer>
+      </DetailSection>
 
-      <BaseContainer header={"LOG INFORMATION"}>
-        <div className="w-full grid grid-cols-5">
+      <DetailSection header={"HISTORY LOG INFORMATION"}>
+        <div className="w-full grid grid-cols-5 gap-4">
           <DetailText label={"Record ID"}>{data_detail?.id}</DetailText>
           <DetailText label={"Created Date"}>
             {moment(data_detail?.createdDate).format("DD MMM YYYY HH:mm:ss")}
@@ -70,7 +68,7 @@ const DetailPaymentChannel = ({ data_detail,  data_req }) => {
           </DetailText>
           <DetailText label={"Updated By"}>{data_detail?.updatedBy}</DetailText>
         </div>
-      </BaseContainer>
+      </DetailSection>
     </div>
   );
 };

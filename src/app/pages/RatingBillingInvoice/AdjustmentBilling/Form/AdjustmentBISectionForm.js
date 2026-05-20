@@ -12,7 +12,6 @@ import {
   getListDetailType,
   getListItem,
 } from "../../../../../redux/slices/rating_billing_invoice/adjustmentBilling";
-import TablePaginationNew from "../../../../../components/TablePaginationNew";
 import CardComponent from "../../../../../components/Card/CardComponent";
 import DetailText from "../../../../../components/DetailText";
 import { dateFormatting } from "../../../../../utils";
@@ -30,10 +29,12 @@ const AdjustmentBISectionForm = ({
   showAction,
   showCreateButtonInHeader = false,
   onCreateClick,
+  canCreate = true,
+  createBlockedMessage = "",
 }) => {
   // Selector
-  const { dataListItem, dataDetailType } = useSelector(
-    (state) => state.adjustmentBilling
+  const { dataDetailType, dataBillingItemList } = useSelector(
+    (state) => state.adjustmentBilling,
   );
 
   // Declaration
@@ -64,15 +65,9 @@ const AdjustmentBISectionForm = ({
   }, [dispatch]);
 
   useEffect(() => {
-    if (dataInvoice?.billingCode) {
-      dispatch(getListItem(dataInvoice?.billingCode));
-    }
-  }, [dispatch, dataInvoice?.billingCode]);
-
-  useEffect(() => {
     if (dataItem) {
-      const dataListItemDetail = dataListItem?.data?.find(
-        (a) => a.billingItem === dataItem
+      const dataListItemDetail = dataBillingItemList?.find(
+        (a) => (a.item || a.billingItem) === dataItem,
       );
 
       formDetail.setFieldsValue({
@@ -95,14 +90,14 @@ const AdjustmentBISectionForm = ({
         "totalAmountEqvUsd",
       ]);
     }
-  }, [dataItem, formDetail]);
+  }, [dataItem, formDetail, dataBillingItemList]);
 
   // Calculation Total Amount
   useEffect(() => {
     let newTotalAmount = formDetail.getFieldValue().amount;
     let currency = formDetail.getFieldValue().currency;
-    const dataListItemDetail = dataListItem?.data?.find(
-      (a) => a.billingItem === dataItem
+    const dataListItemDetail = dataBillingItemList?.find(
+      (a) => (a.item || a.billingItem) === dataItem,
     );
 
     if (adjustmentAmount) {
@@ -131,7 +126,7 @@ const AdjustmentBISectionForm = ({
     formDetail.setFieldsValue({
       totalAmount: newTotalAmount,
     });
-  }, [adjustmentAmount, typeBI, formDetail, dataListItem?.data, dataItem]);
+  }, [adjustmentAmount, typeBI, formDetail, dataBillingItemList, dataItem]);
 
   // Set Value Form Update
   useEffect(() => {
@@ -232,7 +227,7 @@ const AdjustmentBISectionForm = ({
             tempValue.length > 0
               ? tempValue[0].replace(
                   /\B(?=(\d{3})+(?!\d))/g,
-                  thousandSeparator
+                  thousandSeparator,
                 ) + descimal
               : "";
           return format.toLowerCase();
@@ -267,7 +262,7 @@ const AdjustmentBISectionForm = ({
     (r) => {
       setListDataABI((prevState) => prevState.filter((e) => e.key !== r.key));
     },
-    [listDataABI]
+    [listDataABI],
   );
 
   // Handle Cancel Modal
@@ -292,20 +287,22 @@ const AdjustmentBISectionForm = ({
   const dataBillingItem =
     listDataABI?.length > 0 ? listDataABI?.map((item) => item?.item) : [];
 
-  // console.log(dataBillingItem);
-
   const filterBillingItem = () => {
-    return dataBillingItem.length > 0
-      ? dataListItem?.data?.filter(
-          (a) => !dataBillingItem?.includes(a.billingItem)
-        )
-      : dataListItem?.data;
+    const result =
+      dataBillingItem.length > 0
+        ? dataBillingItemList?.filter((a) => {
+            const itemName = a.item || a.billingItem;
+            return !dataBillingItem?.includes(itemName);
+          })
+        : dataBillingItemList;
+
+    return result;
   };
 
   // Handle Add Value to Array
   const handleAdd = (formValue) => {
-    const findDataItem = dataListItem?.data?.find(
-      (item) => item.billingItem === formValue?.item
+    const findDataItem = dataBillingItemList?.find(
+      (item) => (item.item || item.billingItem) === formValue?.item,
     )?.billingItemCode;
 
     if (typeModal === "create") {
@@ -376,13 +373,25 @@ const AdjustmentBISectionForm = ({
   };
 
   const handleCreateClick = useCallback(() => {
-    invoiceNumber === undefined
-      ? setModalValidation(true)
-      : setOpenModal(true);
+    if (!canCreate) {
+      setModalValidation(true);
+      return;
+    }
+
+    // Check if invoice number is selected and has a value
+    if (
+      !invoiceNumber ||
+      invoiceNumber === undefined ||
+      invoiceNumber === null
+    ) {
+      setModalValidation(true);
+      return;
+    }
+
+    // Open modal for creating new billing item
     setTypeModal("create");
-    setDataUpdate([]);
-    setAdjustmentAmount(0);
-  }, [invoiceNumber]);
+    setOpenModal(true);
+  }, [canCreate, invoiceNumber]);
 
   // Expose handleCreateClick to parent via onCreateClick callback
   useEffect(() => {
@@ -393,7 +402,10 @@ const AdjustmentBISectionForm = ({
 
   return (
     <div>
-      {!showCreateButtonInHeader && type !== "detail" && type !== "show" ? (
+      {!showCreateButtonInHeader &&
+      type !== "detail" &&
+      type !== "show" &&
+      canCreate ? (
         <div className="w-full flex justify-end mb-3">
           <ButtonComponent
             type={"submit"}
@@ -402,6 +414,16 @@ const AdjustmentBISectionForm = ({
           >
             Create
           </ButtonComponent>
+        </div>
+      ) : null}
+
+      {!showCreateButtonInHeader &&
+      type !== "detail" &&
+      type !== "show" &&
+      !canCreate &&
+      createBlockedMessage ? (
+        <div className="w-full flex justify-end mb-3">
+          <p className="text-xs text-[#6B7280]">{createBlockedMessage}</p>
         </div>
       ) : null}
 
@@ -434,8 +456,8 @@ const AdjustmentBISectionForm = ({
               onFilter,
               sorter,
               handleDetail,
-              showAction
-            )
+              showAction,
+            ),
           )}
         />
       </div>
@@ -484,13 +506,23 @@ const AdjustmentBISectionForm = ({
                 },
               ]}
             >
-              <SelectComponent onChange={onChangeItem}>
-                {dataListItem?.data &&
-                  filterBillingItem()?.map((data, index) => (
-                    <Select.Option key={index} value={data.billingItem}>
-                      {data.billingItem}
+              <SelectComponent
+                placeholder={"Choose Item"}
+                onChange={onChangeItem}
+              >
+                {(() => {
+                  const filtered = filterBillingItem();
+
+                  if (!filtered || filtered.length === 0) {
+                    return null;
+                  }
+
+                  return filtered.map((data, index) => (
+                    <Select.Option key={index} value={data.item}>
+                      {data.item}
                     </Select.Option>
-                  ))}
+                  ));
+                })()}
               </SelectComponent>
             </Form.Item>
 
@@ -506,6 +538,7 @@ const AdjustmentBISectionForm = ({
             >
               <InputNumber
                 type="number"
+                placeholder="Input Quantity"
                 controls={false}
                 style={{
                   width: "100%",
@@ -528,6 +561,7 @@ const AdjustmentBISectionForm = ({
             >
               <InputComponent
                 decimalScale={2}
+                placeholder="Input Price"
                 thousandSeparator={","}
                 decimalSeparator={"."}
                 type="numeric"
@@ -536,11 +570,11 @@ const AdjustmentBISectionForm = ({
             </Form.Item>
 
             <Form.Item label="UOM" name="uom">
-              <InputComponent disabled={true} />
+              <InputComponent placeholder={"Auto Filled"} disabled={true} />
             </Form.Item>
 
             <Form.Item label="Currency" name="currency">
-              <InputComponent disabled={true} />
+              <InputComponent placeholder={"Auto Filled"} disabled={true} />
             </Form.Item>
 
             <Form.Item
@@ -553,7 +587,10 @@ const AdjustmentBISectionForm = ({
                 },
               ]}
             >
-              <SelectComponent onChange={onChangeType}>
+              <SelectComponent
+                placeholder={"Choose Type"}
+                onChange={onChangeType}
+              >
                 {dataDetailType &&
                   dataDetailType?.map((data, index) => (
                     <Select.Option key={index} value={data.id}>
@@ -576,6 +613,7 @@ const AdjustmentBISectionForm = ({
                 decimalSeparator={"."}
                 type="numeric"
                 disabled={true}
+                placeholder={"0"}
                 fixedDecimalScale={true}
               />
             </Form.Item>
@@ -597,6 +635,7 @@ const AdjustmentBISectionForm = ({
                 decimalSeparator={"."}
                 type="numeric"
                 onChange={onChangeAdjustmentAmount}
+                placeholder={"0"}
               />
             </Form.Item>
 
@@ -615,6 +654,7 @@ const AdjustmentBISectionForm = ({
                 disabled={true}
                 fixedDecimalScale={true}
                 allowNegative={true}
+                placeholder={"0"}
               />
             </Form.Item>
 
@@ -633,6 +673,7 @@ const AdjustmentBISectionForm = ({
                 disabled={true}
                 fixedDecimalScale={true}
                 allowNegative={true}
+                placeholder={"0"}
               />
             </Form.Item>
 
@@ -651,6 +692,7 @@ const AdjustmentBISectionForm = ({
                 disabled={true}
                 fixedDecimalScale={true}
                 allowNegative={true}
+                placeholder={"0"}
               />
             </Form.Item>
 
@@ -659,6 +701,7 @@ const AdjustmentBISectionForm = ({
             <div className="col-span-4">
               <Form.Item name={"remark"} className="w-full" label={"Remark"}>
                 <InputComponent
+                  placeholder={"Input Remark"}
                   type="textarea"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
@@ -680,7 +723,15 @@ const AdjustmentBISectionForm = ({
             <SVGIcon name="IconFailed" width={48} />
             <p className="text-[18px] font-bold">{"Failed"}</p>
           </div>
-          <p className="pl-[70px]">{`You can't create Adjustment Billing Item. Please fill out the Invoice Number.`}</p>
+          <p className="pl-[70px]">
+            {!canCreate
+              ? createBlockedMessage
+              : !invoiceNumber ||
+                  invoiceNumber === undefined ||
+                  invoiceNumber === null
+                ? `You can't create Adjustment Billing Item. Please fill out the Invoice Number.`
+                : `You can't create Adjustment Billing Item. Billing item data is not available. Please wait or select a different invoice.`}
+          </p>
         </div>
       </ModalError>
 

@@ -12,7 +12,10 @@ const DateComponent = ({
   disabled = false,
   placeholder,
   defaultPickerValue,
-  key
+  key,
+  format = "DD MMM YYYY",
+  showTime = false,
+  ...restProps
 }) => {
   const wrapper = "flex flex-col";
   const style = {
@@ -43,8 +46,10 @@ const DateComponent = ({
         style={style}
         placeholder={placeholder}
         allowClear
-        format={"DD MMM YYYY"}
+        format={format}
+        showTime={showTime}
         defaultPickerValue={defaultPickerValue}
+        {...restProps}
       />
     </div>
   );

@@ -100,7 +100,6 @@ const DataExpand = ({ list = [] }) => {
         usePagination={false}
         dataSource={list}
         columns={columns}
-        className={"mb-4"}
       />
     </div>
   );
@@ -123,8 +122,9 @@ const FunctionalApproval = ({
   showSelect = true,
   disableSelect = false,
   approvalName,
+  loading = false,
 }) => {
-  const handleSelectHiararchy = (value) => {
+  const handleSelectHierarchy = (value) => {
     updateSelectHierarchy(value);
     return value;
   };
@@ -147,7 +147,7 @@ const FunctionalApproval = ({
             },
           ]}
           className="no-margin-form w-1/3"
-          getValueFromEvent={handleSelectHiararchy}
+          getValueFromEvent={handleSelectHierarchy}
           label={"Approval Hierarchy"}
           required
         >
@@ -166,13 +166,14 @@ const FunctionalApproval = ({
         <DetailText label={"Approval Hierarchy:"}>{approvalName}</DetailText>
       ) : null}
 
-      {selectedHierarchy && dataTable.length > 0 ? (
+      {selectedHierarchy && (dataTable.length > 0 || loading) ? (
         <div className="w-full">
           <TablePaginationNew
             type="FE"
             useSelect={false}
             usePagination={false}
             dataSource={dataTableWithKeys}
+            loading={loading}
             columns={columnInactivateData(
               searchInput,
               searchedColumn,

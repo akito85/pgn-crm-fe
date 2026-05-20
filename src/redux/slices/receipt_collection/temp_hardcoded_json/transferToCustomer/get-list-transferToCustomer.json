@@ -1,0 +1,54 @@
+{
+    "success": true,
+    "code": 200,
+    "message": "Success Get Data Transfer To Customer",
+    "data": {
+        "result": [
+            {
+                "id": 1,
+                "key": 1,
+                "no": 1,
+                "customerId": "CUST001",
+                "customerName": "PT SINAR MAS",
+                "customer": "CUST001",
+                "toCustomerName": "PT SINAR MAS",
+                "areaCode": "BEK001",
+                "currency": "IDR",
+                "amount": 5000000,
+                "description": "Initial deposit"
+            },
+            {
+                "id": 2,
+                "key": 2,
+                "no": 2,
+                "customerId": "CUST002",
+                "customerName": "PT JAYA ABADI",
+                "customer": "CUST002",
+                "toCustomerName": "PT JAYA ABADI",
+                "areaCode": "BEK002",
+                "currency": "USD",
+                "amount": 100,
+                "description": "Warranty payment"
+            },
+            {
+                "id": 3,
+                "key": 3,
+                "no": 3,
+                "customerId": "CUST003",
+                "customerName": "CV SEJAHTERA",
+                "customer": "CUST003",
+                "toCustomerName": "CV SEJAHTERA",
+                "areaCode": "BEK003",
+                "currency": "IDR",
+                "amount": 2500000,
+                "description": "Late payment"
+            }
+        ],
+        "page": {
+            "size": 10,
+            "totalElements": 3,
+            "totalPages": 1,
+            "number": 0
+        }
+    }
+}

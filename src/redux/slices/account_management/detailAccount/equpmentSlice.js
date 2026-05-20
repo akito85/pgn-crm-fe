@@ -17,19 +17,29 @@ const initialState = {
   ddlEnergyEquipment: [],
   ddlGasConversionEquipment: [],
   ddlFuelTypeEquipment: [],
+  list_equipment: [],
+  pagination_equipment: {
+    totalPages: 0,
+    totalElements: 0,
+    currentPage: 0,
+    pageSize: 10,
+  },
 };
 
 // Get list pagination equpment
 export const getListEqupment = createAsyncThunk(
   "GET_LIST_EQUIPMENT",
-  async ({ id, page, pageSize, search, sort }, thunkAPI) => {
+  async ({ id, page, pageSize, search, sort, isLoadMore }, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
       const url = `/v1/dbs/api/account-detail/equipment/view-paging/${id}?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
       const response = await accountManagementService.getPagination(url);
-      return response.data;
+      return {
+        ...response.data,
+        isLoadMore,
+      };
     } catch (error) {
       thunkAPI.dispatch(
         validateError({
@@ -73,7 +83,7 @@ export const createEqupment = createAsyncThunk(
       const response = await accountManagementService.createData(url, body);
       const successBody = {
         title: `Successful`,
-        description: "Your data has been created.",
+        description: body?.id ? "Your data has been updated." : "Your data has been created.",
         return: false,
       };
       thunkAPI.dispatch(showModalSuccess(successBody));
@@ -326,15 +336,50 @@ const accountEquipmentSlice = createSlice({
   initialState,
   extraReducers: {
     // Get Pagination Equipment
-    [getListEqupment.pending]: (state) => {
-      state.loading = true;
+    [getListEqupment.pending]: (state, action) => {
+      if (!action.meta.arg?.isLoadMore) {
+        state.loading = true;
+      }
     },
-    [getListEqupment.rejected]: (state) => {
+    [getListEqupment.rejected]: (state, action) => {
       state.loading = false;
+
+      if (!action.meta.arg?.isLoadMore) {
+        state.list_equipment = [];
+        state.pagination_equipment = {
+          totalPages: 0,
+          totalElements: 0,
+          currentPage: 0,
+          pageSize: 10,
+        };
+      }
     },
     [getListEqupment.fulfilled]: (state, action) => {
-      state.data = action.payload;
       state.loading = false;
+      const { result, page, isLoadMore } = action.payload;
+
+      if (Array.isArray(result)) {
+        if (isLoadMore) {
+          const currentIds = new Set(state.list_equipment.map((item) => item.id));
+          const filteredResult = result.filter(
+            (resultItem) => !currentIds.has(resultItem.id)
+          );
+
+          state.list_equipment = [
+            ...state.list_equipment,
+            ...filteredResult,
+          ];
+        } else {
+          state.list_equipment = result;
+        }
+      }
+
+      state.pagination_equipment = {
+        totalPages: page?.totalPages || 0,
+        totalElements: page?.totalElements || 0,
+        currentPage: page?.number || 0,
+        pageSize: page?.size || 10,
+      };
     },
 
     // Get Detail Equipment

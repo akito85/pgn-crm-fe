@@ -87,7 +87,6 @@ export const getDetailContactAfterChoose = createAsyncThunk(
 export const activationAccountContact = createAsyncThunk(
   "ACTIVATION_ACCOUNT_CONTACT",
   async ({ body, title }, thunkAPI) => {
-    console.log("🚀 ~ file: accountContactSlice.js:50 ~ body:", body);
     try {
       const url = `/v1/dbs/api/account/contact/inactive`;
       const response = await accountManagementService.updateData(url, body);
@@ -131,7 +130,6 @@ export const createAccountContact = createAsyncThunk(
       thunkAPI.dispatch(showModalSuccess(successBody));
       return response;
     } catch (error) {
-      console.log("🚀 ~ file: accountContactSlice.js:118 ~ error:", error);
       const message =
         (error.response &&
           error.response.data &&

@@ -1,63 +1,87 @@
-import { LeftOutlined } from "@ant-design/icons";
+import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import moment from "moment";
-import  { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
+import { Form, Tabs, Spin } from "antd";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrReject";
-import RadioTabs from "../../../../../components/RadioTabs";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import {
-  approveOrRejectSetting,
-  approveOrRejectInactive,
-  getDetailSetting,
-} from "../../../../../redux/slices/receipt_collection/setting";
+  getDetailDeduction,
+  approveOrRejectDeduction,
+  getListCategory,
+  getAllApprovalList,
+  getListApprovalById,
+  getCustomerDeductionList
+} from "../../../../../redux/slices/receipt_collection/deduction";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import DetailDeduction from "./DetailDeduction";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
-import BaseContainer from "../../../../../components/BaseContainer";
+import SectionCard from "../../../../../components/SectionCard";
+import CardContainerNoBorder from "../../../../../components/CardContainerNoBorder";
+import FooterDetail from "../../../../../components/FooterDetail";
 import receiptCollectionHttpService from "../../../../../redux/services/receiptCollectionHttpService";
 import { configApp } from "../../../../../constants/configApp";
+import TableRBI from "../../../../../components/TableRBI";
+import { getCustomerListColumns } from "./CustomerColumns";
+import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
+import GridLayout from "../../../../../components/GridLayout";
+import DetailText from "../../../../../components/DetailText";
+import LogHistoryInfo from "../../../../../components/LogHistoryInfo";
 
-const ListDetailSettings = () => {
+const ListDetailDeduction = () => {
   const dispatch = useDispatch();
   const location = useLocation();
   const navigate = useNavigate();
+  const [form] = Form.useForm();
   const [modalApprove, setModalApprove] = useState(false);
   const [approveOrReject, setApproveOrReject] = useState("");
   const id = location?.state?.id;
   const [dataHeader, setDataHeader] = useState({});
   const [listDataAttachment, setListDataAttachment] = useState([]);
 
-  // Define tabData before using it in useState
-  const [tabData, setTabData] = useState([
-    { value: "Setting" },
-    { value: "Attachment" },
-  ]);
+  const {
+    loading,
+    loadingDetail,
+    loadingAppHier,
+    loadingAppHierDetail,
+    loadingCustomerList,
+    data_detail,
+    dataListAppHierId,
+    dataListAppHierDetail,
+    customerData
+  } = useSelector((state) => state.deduction);
 
-  const { loading, data_detail } = useSelector(
-    (state) => state.receiptSetting
-  );
-  const [segmentedPage, setSegmentedPage] = useState(tabData[0].value);
+  const [activeTab, setActiveTab] = useState("1");
+  const [appHierOptions, setAppHierOptions] = useState([]);
+  const [selectedHierarchy, setSelectedHierarchy] = useState(null);
+  const [appHierDataDetail, setAppHierDataDetail] = useState([]);
 
-  const handleSegmentedPage = (e) => {
-    setSegmentedPage(e.target.value);
-  };
+  // Table state 
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
+  const approvalName = dataListAppHierId?.find(x => x.appHierId === data_detail?.deduction?.appHierId)?.approvalName || dataHeader?.approvalName || dataHeader?.appHierId || "-";
 
   useEffect(() => {
-    dispatch(getDetailSetting(id));
-  }, [ dispatch, id]);
-
-
+    if (id) {
+      dispatch(getDetailDeduction(id));
+      dispatch(getAllApprovalList());
+    }
+  }, [dispatch, id]);
 
   useEffect(() => {
-    if (
-      id &&
-      data_detail?.settings?.id &&
-      data_detail &&
-      data_detail?.settings?.id === id
-    ) {
+    dispatch(getCustomerDeductionList({ page, pageSize, id }));
+  }, [dispatch, page, pageSize, id]);
+
+  useEffect(() => {
+    if (data_detail && data_detail.deduction?.appHierId) {
+      setSelectedHierarchy(data_detail.deduction.appHierId);
+      form.setFieldsValue({ apphierId: data_detail.deduction.appHierId });
+    }
+
+    if (data_detail) {
       const dataAttachment = (data_detail?.attachmentDtoList || []).map(
         (item) => {
           return {
@@ -80,107 +104,200 @@ const ListDetailSettings = () => {
         }
       );
       setListDataAttachment(dataAttachment);
-      setDataHeader(data_detail?.settings);
+      setDataHeader(data_detail.deduction);
     }
+  }, [data_detail, form]);
 
-    
-  }, [id, data_detail]);
-
-
-  
-  const renderSection = (segmentedPage) => {
-    switch (segmentedPage) {
-      case "Setting":
-        return (
-          <DetailDeduction
-            key={"active"}
-            data_detail={dataHeader}
-            data_req={data_detail?.tApprovalDto}
-          />
-        );
-      case "Draft":
-        return (
-          <DetailDeduction
-            key={"draft"}
-            data_detail={dataHeader}
-            data_req={data_detail?.tApprovalDto}
-          />
-        );
-      case "Attachment":
-        return (
-          <BaseContainer header={"ATTACHMENT INFORMATION"}>
-            <AttachmentComponent
-              type={"detail"}
-              data={listDataAttachment}
-              updateData={setListDataAttachment}
-              typeSelector="receiptSetting"
-              service={receiptCollectionHttpService}
-              configApplication={configApp.PAYMENT_SERVICE}
-              // getAPIGuard={getConfigFileRBIData}
-            />
-          </BaseContainer>
-        );
-      default:
-        return <></>;
+  useEffect(() => {
+    if (dataListAppHierId && dataListAppHierId.length > 0) {
+      const tempAppHier = dataListAppHierId.map((appHier) => ({
+        name: appHier.approvalName,
+        value: appHier.appHierId,
+      }));
+      setAppHierOptions(tempAppHier);
     }
+  }, [dataListAppHierId]);
+
+  useEffect(() => {
+    if (selectedHierarchy) {
+      dispatch(getListApprovalById({ id: selectedHierarchy }));
+    }
+  }, [dispatch, selectedHierarchy]);
+
+  useEffect(() => {
+    if (dataListAppHierDetail && dataListAppHierDetail.length > 0) {
+      const data = dataListAppHierDetail.map((a, index) => ({
+        ...a,
+        key: index + 1,
+        employeeDetail: a.employeeDetail.map((b, index) => ({
+          ...b,
+          key: index + 1,
+        })),
+      }));
+      setAppHierDataDetail(data);
+    } else {
+      setAppHierDataDetail([]);
+    }
+  }, [dataListAppHierDetail]);
+
+  const columnsCustomer = useMemo(() => {
+    return getCustomerListColumns({
+      page,
+      pageSize,
+      actionType: "none",
+    });
+  }, [page, pageSize]);
+
+  const onChangePage = (page, pageSize) => {
+    setPage(page);
+    setPageSize(pageSize);
   };
+
+  const handleNext = () => {
+    if (activeTab === "1") setActiveTab("2");
+    else if (activeTab === "2") setActiveTab("3");
+  };
+
+  const items = [
+    {
+      key: '1',
+      label: 'Deduction',
+      children: (
+          <SectionCard title="DEDUCTION INFORMATION" >
+            <DetailDeduction data_detail={dataHeader} />
+          </SectionCard>
+      ),
+    },
+    {
+      key: '2',
+      label: 'Approval',
+      children: (
+        <SectionCard title="DEDUCTION APPROVAL INFORMATION">
+          <ApprovalComponentGeneral
+            dataTable={appHierDataDetail}
+            dataOption={appHierOptions}
+            selectedHierarchy={selectedHierarchy}
+            updateSelectedHierarchy={setSelectedHierarchy}
+            showSelect={false}
+            disableSelect={true}
+            approvalName={approvalName}
+          />
+        </SectionCard>
+      ),
+    },
+    {
+      key: '3',
+      label: 'Attachment',
+      children: (
+        <SectionCard title="ATTACHMENT INFORMATION">
+          <AttachmentComponent
+            type={"detail"}
+            data={listDataAttachment}
+            updateData={setListDataAttachment}
+            typeSelector="deduction"
+            dispatch={dispatch}
+            getAPICategory={getListCategory}
+            service={receiptCollectionHttpService}
+            configApplication={configApp.PAYMENT_SERVICE}
+          />
+        </SectionCard>
+      ),
+    },
+  ];
 
   const isShowButton = data_detail?.tApprovalDto?.isApprover;
 
-  // Breadcrumbs
   const routes = [
     {
       path: "",
       breadcrumbName: "Receipt & Collection",
     },
     {
-      path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_SETTINGS,
-      breadcrumbName: "Settings",
+      path: "",
+      breadcrumbName: "Payment  Guarantee",
     },
     {
-      path: RECEIPT_AND_COLLECTION_ROUTES.DETAIL_SETTINGS,
-      breadcrumbName: `Detail ${segmentedPage}`,
+      path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_DEDUCTION,
+      breadcrumbName: "Deduction",
+    },
+    {
+      path: RECEIPT_AND_COLLECTION_ROUTES.DETAIL_DEDUCTION,
+      breadcrumbName: "Detail Deduction",
     },
   ];
 
-  // handle Confirm
   const handleConfirm = (res, handleClear) => {
-    if (data_detail?.tApprovalDto?.approvalType === "INACTIVE_RECEIPT_SETTING") {
-      const data = {
-        id: id,
-        remark: res.remark,
-        approvalId: data_detail?.tApprovalDto?.tAppId,
-        action: approveOrReject.toUpperCase(),
-      };
-      dispatch(approveOrRejectInactive({ body: data }));
-      handleClear();
-      setModalApprove(false);
-    } else {
-      const data = {
-        id: id,
-        remark: res.remark,
-        approvalId: data_detail?.tApprovalDto?.tAppId,
-        action: approveOrReject.toUpperCase(),
-      };
-      dispatch(approveOrRejectSetting({ body: data }));
-      handleClear();
-      setModalApprove(false);
-    }
-  };
+    const data = {
+      id: id,
+      remark: res.remark,
+      approvalId: data_detail?.tApprovalDto?.tAppId,
+      action: approveOrReject.toUpperCase(),
+    };
 
-  const handleCancel = () => {
-    // setRemark("");
+    dispatch(approveOrRejectDeduction({ body: data }));
+    handleClear();
     setModalApprove(false);
   };
 
+  const handleCancel = () => {
+    setModalApprove(false);
+  };
 
   return (
-    <LayoutMenu>
-      <BreadCrumb routes={routes} />
-      <div>
-        <RadioTabs data={tabData} onChange={handleSegmentedPage} />
-        {renderSection(segmentedPage)}
-      </div>
+    <>
+      <Spin spinning={loading || loadingDetail || loadingAppHier || loadingAppHierDetail || loadingCustomerList || !data_detail}>
+        <BreadCrumb routes={routes} />
+        <div className="w-full">
+        <CardContainerNoBorder 
+          header="DEDUCTION DETAIL" 
+          collapsible={true}
+          defaultExpanded={true}
+          noPadding={true}
+        >
+          <div className="px-4 pb-4">
+            <Tabs 
+              activeKey={activeTab} 
+              onChange={setActiveTab} 
+              items={items} 
+              className="custom-tabs"
+            />
+          </div>
+        </CardContainerNoBorder>
+
+        <CardContainerNoBorder 
+          header="CUSTOMER INFORMATION" 
+          collapsible={true}
+          defaultExpanded={true}
+        >
+          <SectionCard title="CUSTOMER INFORMATION" > 
+            <TableRBI
+              columns={columnsCustomer}
+              dataSource={customerData?.result?.map((item, index) => ({ ...item, key: index })) || []}
+              pagination={false}
+              tableScrolled={{ x: 1800 }}
+              size="small"
+              current={page}
+              pageSize={pageSize}
+              totalData={customerData?.page?.totalElements || 0}
+              onChange={onChangePage}
+              onSizeChanger={onChangePage}
+            />
+          </SectionCard>
+        </CardContainerNoBorder>
+
+        
+
+        <LogHistoryInfo
+          data={{
+            recordId: dataHeader?.id || "-",
+            createdDate: dataHeader?.createdDate ? moment(dataHeader.createdDate).format("DD MMM YYYY HH:mm:ss") : "-",
+            createdBy: dataHeader?.createdBy || "-",
+            updatedDate: dataHeader?.updatedDate ? moment(dataHeader.updatedDate).format("DD MMM YYYY HH:mm:ss") : "-",
+            updatedBy: dataHeader?.updatedBy || "-"
+          }}
+        />
+        </div>
+      </Spin>
 
       <ModalApproveOrReject
         isOpen={modalApprove}
@@ -188,53 +305,24 @@ const ListDetailSettings = () => {
         onFinish={handleConfirm}
         header={approveOrReject}
         approveOrReject={approveOrReject}
-        menu={"Setting"}
-        named={ data_detail?.settings?.partnerCode
-        }
+        menu={"Deduction"}
+        named={dataHeader?.id}
       />
 
-      <div className="flex mt-[30px] justify-between py-5">
-        <ButtonComponent
-          type={"submit"}
-          onClick={() => navigate(-1)}
-          icon={
-            <LeftOutlined
-              style={{
-                color: "#fff",
-                fontSize: 24,
-                justifyItems: "center",
-              }}
-            />
-          }
-        >
-          Back
-        </ButtonComponent>
-
-        {isShowButton === true ? (
-          <div className="flex align-middle gap-5">
-            <ButtonComponent
-              type="reject"
-              onClick={() => {
-                setModalApprove(true);
-                setApproveOrReject("reject");
-              }}
-            >
-              Reject
-            </ButtonComponent>
-            <ButtonComponent
-              type="approve"
-              onClick={() => {
-                setModalApprove(true);
-                setApproveOrReject("approve");
-              }}
-            >
-              Approve
-            </ButtonComponent>
-          </div>
-        ) : null}
-      </div>
-    </LayoutMenu>
+      <FooterDetail
+        onCancel={() => navigate(-1)}
+        onApprove={() => {
+          setModalApprove(true);
+          setApproveOrReject("approve");
+        }}
+        onReject={() => {
+          setModalApprove(true);
+          setApproveOrReject("reject");
+        }}
+        showApproval={isShowButton}
+      />
+    </>
   );
 };
 
-export default ListDetailSettings;
+export default ListDetailDeduction;

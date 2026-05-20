@@ -1,0 +1,354 @@
+import { hasValue, renderColumn, renderDateColumn } from "../../../../../../utils";
+import { getColumnSearchPropsUseFilteredValueFE } from "../../../../../../utils/getColumnSearchProps";
+import { sorterFunction } from "../../../../../../utils/sorterFunction";
+
+/**
+ * Returns the column definitions for the Related Detail list table.
+ *
+ * @param {Object}          params                - Column configuration options.
+ * @param {Object}          params.search         - Current active search/filter values keyed by column dataIndex.
+ * @param {React.RefObject} params.searchInput    - Ref to the search input element (used for focus).
+ * @param {string}          params.searchedColumn - The dataIndex of the column currently being searched.
+ * @param {string}          params.searchText     - The current search text value.
+ * @param {Function}        params.handleSearch   - Callback invoked when a search/filter is confirmed.
+ * @returns {Array<Object>} Array of Ant Design column definition objects.
+ */
+const getRelatedDetailColumns = ({
+  search,
+  searchInput,
+  searchedColumn,
+  searchText,
+  handleSearch
+}) => [
+  {
+    key: "no",
+    title: "NO",
+    width: 50,
+    align: "center",
+    render: (_, __, index) => index + 1,
+  },
+  {
+    key: "accountNumber",
+    title: "ACCOUNT NUMBER",
+    dataIndex: "accountNumber",
+    width: 150,
+    sorter: true,
+    ...getColumnSearchPropsUseFilteredValueFE(
+      search,
+      "accountNumber",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) => {
+      return renderColumn("accountNumber", searchedColumn, searchText, text, false, "input", search)
+    },
+  },
+  {
+    key: "accountName",
+    title: "ACCOUNT NAME",
+    dataIndex: "accountName",
+    width: 150,
+    sorter: true,
+    ...getColumnSearchPropsUseFilteredValueFE(
+      search,
+      "accountName",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) => {
+      return renderColumn("accountName", searchedColumn, searchText, text, false, "input", search)
+    },
+  },
+  {
+    title: "CATEGORY",
+    dataIndex: "accountCategory",
+    width: 110,
+    sorter: true,
+    ...getColumnSearchPropsUseFilteredValueFE(
+      search,
+      "accountCategory",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) => {
+      return renderColumn("accountCategory", searchedColumn, searchText, text, false, "input", search)
+    },
+  },
+  {
+    key: "sor",
+    title: "SOR",
+    dataIndex: "sor",
+    width: 70,
+    sorter: true,
+    ...getColumnSearchPropsUseFilteredValueFE(
+      search,
+      "sor",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) => {
+      return renderColumn("sor", searchedColumn, searchText, text, false, "input", search)
+    },
+  },
+  {
+    key: "costCenter",
+    title: "COST CENTER",
+    dataIndex: "costCenter",
+    width: 130,
+    sorter: true,
+    ...getColumnSearchPropsUseFilteredValueFE(
+      search,
+      "costCenter",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) => {
+      return renderColumn("costCenter", searchedColumn, searchText, text, false, "input", search)
+    },
+  },
+  {
+    key: "meterReadingCode",
+    title: "METER READING CODES",
+    dataIndex: "meterReadingCode",
+    width: 170,
+    sorter: true,
+    ...getColumnSearchPropsUseFilteredValueFE(
+      search,
+      "meterReadingCode",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) => {
+      return renderColumn("meterReadingCode", searchedColumn, searchText, text, false, "input", search)
+    },
+  },
+  {
+    key: "customerManagement",
+    title: "CUSTOMER MANAGEMENT",
+    dataIndex: "customerManagement",
+    width: 180,
+    sorter: true,
+    ...getColumnSearchPropsUseFilteredValueFE(
+      search,
+      "customerManagement",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) => {
+      return renderColumn("customerManagement", searchedColumn, searchText, text, false, "input", search)
+    },
+  },
+  {
+    key: "classificationType",
+    title: "CLASSIFICATION TYPE",
+    dataIndex: "classificationType",
+    width: 160,
+    sorter: true,
+    ...getColumnSearchPropsUseFilteredValueFE(
+      search,
+      "classificationType",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) => {
+      return renderColumn("classificationType", searchedColumn, searchText, text, false, "input", search)
+    },
+  },
+  {
+    key: "accountSegment",
+    title: "SEGMENT",
+    dataIndex: "accountSegment",
+    width: 170,
+    sorter: true,
+    ...getColumnSearchPropsUseFilteredValueFE(
+      search,
+      "accountSegment",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) => {
+      return renderColumn("accountSegment", searchedColumn, searchText, text, false, "input", search)
+    },
+  },
+  {
+    key: "accountGroupType",
+    title: "ACCOUNT GROUP TYPE",
+    dataIndex: "accountGroupType",
+    width: 140,
+    sorter: true,
+    ...getColumnSearchPropsUseFilteredValueFE(
+      search,
+      "accountGroupType",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) => {
+      return renderColumn("accountGroupType", searchedColumn, searchText, text, false, "input", search)
+    },
+  },
+  {
+    key: "premiseAddress",
+    title: "PREMISE ADDRESS",
+    dataIndex: "premiseAddress",
+    width: 120,
+    sorter: true,
+    ...getColumnSearchPropsUseFilteredValueFE(
+      search,
+      "premiseAddress",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) => {
+      return renderColumn("premiseAddress", searchedColumn, searchText, text, false, "input", search)
+    },
+  },
+  {
+    key: "subDistrict",
+    title: "SUBDISTRICT",
+    dataIndex: "subDistrict",
+    width: 120,
+    sorter: true,
+    ...getColumnSearchPropsUseFilteredValueFE(
+      search,
+      "subDistrict",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) => {
+      return renderColumn("subDistrict", searchedColumn, searchText, text, false, "input", search)
+    },
+  },
+  {
+    key: "district",
+    title: "DISTRICT",
+    dataIndex: "district",
+    width: 100,
+    sorter: true,
+    ...getColumnSearchPropsUseFilteredValueFE(
+      search,
+      "district",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) => {
+      return renderColumn("district", searchedColumn, searchText, text, false, "input", search)
+    },
+  },
+  {
+    key: "city",
+    title: "CITY",
+    dataIndex: "city",
+    width: 100,
+    sorter: true,
+    ...getColumnSearchPropsUseFilteredValueFE(
+      search,
+      "district",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) => {
+      return renderColumn("district", searchedColumn, searchText, text, false, "input", search)
+    },
+  },
+  {
+    key: "country",
+    title: "COUNTRY",
+    dataIndex: "country",
+    width: 100,
+    sorter: true,
+    ...getColumnSearchPropsUseFilteredValueFE(
+      search,
+      "country",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) => {
+      return renderColumn("country", searchedColumn, searchText, text, false, "input", search)
+    },
+  },
+  {
+    key: "longitude",
+    title: "LONGITUDE",
+    dataIndex: "longitude",
+    width: 140,
+    sorter: true,
+    ...getColumnSearchPropsUseFilteredValueFE(
+      search,
+      "longitude",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) => {
+      return renderColumn("longitude", searchedColumn, searchText, text, false, "input", search)
+    },
+  },
+  {
+    key: "latitude",
+    title: "LATITUDE",
+    dataIndex: "latitude",
+    width: 140,
+    sorter: true,
+    ...getColumnSearchPropsUseFilteredValueFE(
+      search,
+      "latitude",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+    render: (text) => {
+      return renderColumn("latitude", searchedColumn, searchText, text, false, "input", search)
+    },
+  },
+];
+
+export { getRelatedDetailColumns };

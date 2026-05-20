@@ -1,0 +1,23 @@
+[
+    {
+        "key": 1,
+        "invoiceNo": "INV001",
+        "invoicePeriod": "Jan 2023",
+        "currency": "IDR",
+        "totalAmount": 1000000
+    },
+    {
+        "key": 2,
+        "invoiceNo": "INV002",
+        "invoicePeriod": "Feb 2023",
+        "currency": "IDR",
+        "totalAmount": 2000000
+    },
+    {
+        "key": 3,
+        "invoiceNo": "INV003",
+        "invoicePeriod": "Mar 2023",
+        "currency": "IDR",
+        "totalAmount": 3000000
+    }
+]

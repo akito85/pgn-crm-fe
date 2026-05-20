@@ -10,7 +10,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import RadioTabs from "../../../../../components/RadioTabs";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import {
   createPaymentItem,
   createValidasiPayMetohod,
@@ -406,7 +405,11 @@ const ListFormPaymentItem = (props) => {
   const routes = [
     {
       path: "",
-      breadcrumbName: "Receipt & Collection",
+      breadcrumbName: "System Setup",
+    },
+    {
+      path: "",
+      breadcrumbName: "Master Data",
     },
     {
       path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_PAYMENT_ITEM,
@@ -725,7 +728,7 @@ const ListFormPaymentItem = (props) => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
       <RadioTabs
         data={tabData}
@@ -894,7 +897,7 @@ const ListFormPaymentItem = (props) => {
           </p>
         </div>
       </ModalConfirm>
-    </LayoutMenu>
+    </>
   );
 };
 

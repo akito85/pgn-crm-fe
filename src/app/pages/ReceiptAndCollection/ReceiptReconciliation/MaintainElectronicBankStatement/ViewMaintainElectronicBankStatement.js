@@ -4,7 +4,6 @@ import { Spin, Tooltip } from "antd";
 import { Link, NavLink } from "react-router-dom";
 import CardContainer from "../../../../../components/CardContainer";
 import BreadCrumb from "../../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import {
   EyeOutlined,
@@ -65,7 +64,7 @@ const ViewMaintainElectronicBankStatement = () => {
       title: "NO",
       key: "no",
       width: 60,
-      align: "center",
+      isClassification: true,
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {
@@ -263,6 +262,7 @@ const ViewMaintainElectronicBankStatement = () => {
       dataIndex: "totalTransaction",
       key: "totalTransaction",
       align: "center",
+      isClassification: true,
       sorter: true,
       ellipsis: {
         showTitle: false,
@@ -292,6 +292,7 @@ const ViewMaintainElectronicBankStatement = () => {
       dataIndex: "totalMatch",
       key: "totalMatch",
       align: "center",
+      isClassification: true,
       sorter: true,
       ellipsis: {
         showTitle: false,
@@ -321,6 +322,7 @@ const ViewMaintainElectronicBankStatement = () => {
       dataIndex: "totalForce",
       key: "totalForce",
       align: "center",
+      isClassification: true,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -349,6 +351,7 @@ const ViewMaintainElectronicBankStatement = () => {
       title: "TOTAL REVERSE",
       dataIndex: "totalReverse",
       align: "center",
+      isClassification: true,
       key: "totalReverse",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
@@ -375,6 +378,7 @@ const ViewMaintainElectronicBankStatement = () => {
       title: "TOTAL SUNDRY",
       dataIndex: "totalSundry",
       key: "totalSundry",
+      isClassification: true,
       align: "center",
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
@@ -402,6 +406,7 @@ const ViewMaintainElectronicBankStatement = () => {
       dataIndex: "currency",
       key: "currency",
       align: "center",
+      isClassification: true,
       sorter: true,
       ...getColumnSearchPropsUseFilteredValue(
         search,
@@ -431,6 +436,7 @@ const ViewMaintainElectronicBankStatement = () => {
       dataIndex: "totalAmount",
       key: "totalAmount",
       align: "right",
+      isNumber: true,
       sorter: true,
       ellipsis: {
         showTitle: false,
@@ -447,6 +453,96 @@ const ViewMaintainElectronicBankStatement = () => {
       render: (text) =>
         renderColumn(
           "totalAmount",
+          searchedColumn,
+          searchText,
+          text,
+          true,
+          "input",
+          search
+        ),
+    },
+
+    {
+      title: "Partner",
+      dataIndex: "partnerName",
+      key: "partnerName",
+      align: "left",
+      sorter: true,
+      ellipsis: {
+        showTitle: false,
+      },
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "partnerName",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) =>
+        renderColumn(
+          "partnerName",
+          searchedColumn,
+          searchText,
+          text,
+          true,
+          "input",
+          search
+        ),
+    },
+
+    {
+      title: "Delivery Channel",
+      dataIndex: "ciName",
+      key: "ciName",
+      align: "left",
+      sorter: true,
+      ellipsis: {
+        showTitle: false,
+      },
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "ciName",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) =>
+        renderColumn(
+          "ciName",
+          searchedColumn,
+          searchText,
+          text,
+          true,
+          "input",
+          search
+        ),
+    },
+
+    {
+      title: "Source",
+      dataIndex: "source",
+      key: "source",
+      align: "left",
+      sorter: true,
+      ellipsis: {
+        showTitle: false,
+      },
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "source",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) =>
+        renderColumn(
+          "source",
           searchedColumn,
           searchText,
           text,
@@ -515,7 +611,7 @@ const ViewMaintainElectronicBankStatement = () => {
 
   const [fixedColumns, setFixedColumns] = useState(() => ({
     left: ["no"],
-    right: ["statusBankStatement",  "action"],
+    right: ["statusBankStatement", "action"],
   }));
 
   //dispatch
@@ -607,7 +703,7 @@ const ViewMaintainElectronicBankStatement = () => {
               }
               state={{ id: record?.id }}
             >
-              <EyeOutlined />
+              <EyeOutlined style={{ fontSize: "24px" }} />
             </Link>
           </Tooltip>
         );
@@ -631,10 +727,10 @@ const ViewMaintainElectronicBankStatement = () => {
 
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
-        <Toolbar items={itemActions} />
+        {/* <Toolbar items={itemActions} /> */}
         {/* <div className="w-full flex justify-end gap-[20px]">
           <ButtonComponent
             icon={<SVGIcon name="IconButtonDownload" width={24} />}
@@ -676,7 +772,14 @@ const ViewMaintainElectronicBankStatement = () => {
           </NavLink>
         </div> */}
 
-        <CardContainer header={"BANK STATEMENT LIST"}>
+        <CardContainer header={
+          <div className="flex -my-4 justify-between items-center">
+            <p className="mt-[15px] font-bold">BANK STATEMENT LIST</p>
+            <div className="flex gap-2">
+              <Toolbar items={itemActions} />
+            </div>
+          </div>
+        }>
           <TableRBI
             dataSource={data?.result}
             columns={[
@@ -693,7 +796,7 @@ const ViewMaintainElectronicBankStatement = () => {
             totalData={data?.page?.totalElements || 0}
             onSort={onSort}
             tableScrolled={{
-              x: 3700,
+              x: "max-content",
               y: 525,
             }}
             showExport={true}
@@ -704,7 +807,7 @@ const ViewMaintainElectronicBankStatement = () => {
         </CardContainer>
       </Spin>
       {renderModal}
-    </LayoutMenu>
+    </>
   );
 };
 

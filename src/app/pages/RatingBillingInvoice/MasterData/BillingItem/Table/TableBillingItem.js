@@ -19,8 +19,26 @@ export const columns = (
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {
+      key: "transMappingType",
+      title: "TYPE",
+      dataIndex: "transMappingType",
+      sorter: true,
+      width: 200,
+      filteredValue: [search?.transMappingType] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "transMappingType",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) => renderColumn('transMappingType', hasValue(search['transMappingType']), searchText, text, false, 'input', search)
+    },
+    {
       key: "billingItemCode",
-      title: "BILLING ITEM CODE",
+      title: "TRANSACTION MAPPING CODE",
       dataIndex: "billingItemCode",
       sorter: true,
       width: 200,
@@ -38,7 +56,7 @@ export const columns = (
     },
     {
       key: "billingItemCategory",
-      title: "BILLING ITEM CATEGORY",
+      title: "TRANSACTION MAPPING CATEGORY",
       dataIndex: "billingItemCategory",
       sorter: true,
       align: "center",
@@ -92,47 +110,6 @@ export const columns = (
         true
       ),
       render: (text) => renderColumn('billingType', hasValue(search['billingType']), searchText, text, false, 'input', search)
-    },
-    {
-      key: "glAccount",
-      title: "GL ACCOUNT",
-      dataIndex: "glAccount",
-      sorter: true,
-      align: "center",
-      width: 180,
-      filteredValue: [search?.glAccount] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "glAccount",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) => renderColumn('glAccount', hasValue(search['glAccount']), searchText, text, false, 'input', search)
-    },
-    {
-      key: "category",
-      title: "CATEGORY",
-      dataIndex: "category",
-      sorter: true,
-      align: "left",
-      width: 200,
-      filteredValue: [search?.category] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "category",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      ellipsis: {
-        showTitle: false,
-      },
-      render: (text) => renderColumn('category', hasValue(search['category']), searchText, text, true, 'input', search)
     },
     {
       key: "startDate",
@@ -211,6 +188,44 @@ export const columns = (
         true
       ),
       render: (text) => renderColumn('paymentWarranty', hasValue(search['paymentWarranty']), searchText, text, false, 'input', search)
+    },
+    {
+      key: "installment",
+      title: "INSTALMENT",
+      dataIndex: "installment",
+      sorter: true,
+      align: "center",
+      width: 200,
+      filteredValue: [search?.installment] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "installment",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) => renderColumn('installment', hasValue(search['installment']), searchText, text, false, 'input', search)
+    },
+    {
+      key: "criteria",
+      title: "CRITERIA",
+      dataIndex: "criteria",
+      sorter: true,
+      align: "center",
+      width: 200,
+      filteredValue: [search?.criteria] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "criteria",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      render: (text) => renderColumn('criteria', hasValue(search['criteria']), searchText, text, false, 'input', search)
     },
     {
       key: "description",

@@ -1,0 +1,333 @@
+import { Tabs, Spin, Form } from "antd";
+import moment from "moment";
+import { useEffect, useState, useMemo } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useLocation, useNavigate } from "react-router-dom";
+import BreadCrumb from "../../../../../components/BreadCrumb";
+import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrReject";
+import {
+    getDetailTransferToCustomer,
+    approveOrRejectTransferToCustomer,
+    getListCategory,
+    getAllApprovalList,
+    getListApprovalById,
+    resetDetailState
+} from "../../../../../redux/slices/receipt_collection/transferToCustomer";
+import { showModalSuccess } from "../../../../../redux/slices/general_slice";
+import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
+import DetailTransferToCustomer from "./DetailTransferToCustomer";
+import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
+import BaseContainer from "../../../../../components/BaseContainer";
+import receiptCollectionHttpService from "../../../../../redux/services/receiptCollectionHttpService";
+import { configApp } from "../../../../../constants/configApp";
+import TableRBI from "../../../../../components/TableRBI";
+import { getCustomerListColumns } from "./CustomerListColumns";
+import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
+import DetailWarrantyInformation from "./DetailWarrantyInformation";
+import CardContainerNoBorder from "../../../../../components/CardContainerNoBorder";
+import LogHistoryInfo from "../../../../../components/LogHistoryInfo";
+import FooterDetail from "../../../../../components/FooterDetail";
+
+import SubSectionCard from "../../../../../components/SubSectionCard";
+
+const ListDetailTransferToCustomer = () => {
+    const dispatch = useDispatch();
+    const location = useLocation();
+    const navigate = useNavigate();
+    const [form] = Form.useForm();
+    const id = location?.state?.id;
+    const {
+        loading,
+        data_detail,
+        dataListAppHierId,
+        dataListAppHierDetail
+    } = useSelector((state) => state.transferToCustomer);
+
+    const [activeTab, setActiveTab] = useState("transfer");
+    const [modalApprove, setModalApprove] = useState(false);
+    const [approveOrReject, setApproveOrReject] = useState("");
+    const [listDataAttachment, setListDataAttachment] = useState([]);
+    const [appHierOptions, setAppHierOptions] = useState([]);
+    const [selectedHierarchy, setSelectedHierarchy] = useState(null);
+    const [appHierDataDetail, setAppHierDataDetail] = useState([]);
+
+    // Table state 
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
+
+    const handleTabChange = (key) => {
+        setActiveTab(key);
+    };
+
+    useEffect(() => {
+        if (id) {
+            dispatch(getDetailTransferToCustomer(id));
+            dispatch(getAllApprovalList());
+        }
+    }, [dispatch, id]);
+
+    useEffect(() => {
+        if (data_detail && data_detail.transferToCustomer?.appHierId) {
+            setSelectedHierarchy(data_detail.transferToCustomer.appHierId);
+            form.setFieldsValue({ apphierId: data_detail.transferToCustomer.appHierId });
+        }
+
+        if (data_detail) {
+            const dataAttachment = (data_detail?.attachmentDtoList || []).map(
+                (item) => {
+                    return {
+                        id: item.id,
+                        size: item.size,
+                        fileName: item.fileName,
+                        fileSize: item.fileSize,
+                        fileType: item.fileType,
+                        fileCategoryId: item.fileCategoryId,
+                        fileCategoryName: item.fileCategoryName,
+                        pathFile: item.pathFile,
+                        urlFile1: item.urlFile1,
+                        urlFile2: item.urlFile2,
+                        createdBy: item.createdBy,
+                        createdDate: item.createdDate
+                            ? moment(item.createdDate).format("DD MMM YYYY")
+                            : "",
+                        dataType: "exist",
+                    };
+                }
+            );
+            setListDataAttachment(dataAttachment);
+            setDataHeader(data_detail.transferToCustomer);
+        }
+    }, [data_detail, form]);
+
+    useEffect(() => {
+        if (dataListAppHierId && dataListAppHierId.length > 0) {
+            const tempAppHier = dataListAppHierId.map((appHier) => ({
+                name: appHier.approvalName,
+                value: appHier.appHierId,
+            }));
+            setAppHierOptions(tempAppHier);
+        }
+    }, [dataListAppHierId]);
+
+    useEffect(() => {
+        if (selectedHierarchy) {
+            dispatch(getListApprovalById({ id: selectedHierarchy }));
+        }
+    }, [dispatch, selectedHierarchy]);
+
+    useEffect(() => {
+        if (dataListAppHierDetail && dataListAppHierDetail.length > 0) {
+            const data = dataListAppHierDetail.map((a, index) => ({
+                ...a,
+                key: index + 1,
+                employeeDetail: a.employeeDetail.map((b, index) => ({
+                    ...b,
+                    key: index + 1,
+                })),
+            }));
+            setAppHierDataDetail(data);
+        } else {
+            setAppHierDataDetail([]);
+        }
+    }, [dataListAppHierDetail]);
+
+    const [dataHeader, setDataHeader] = useState({});
+
+    const columnsCustomer = useMemo(() => {
+        return getCustomerListColumns({
+            page,
+            pageSize,
+            actionType: "none",
+        });
+    }, [page, pageSize]);
+
+    const onChangePage = (page, pageSize) => {
+        setPage(page);
+        setPageSize(pageSize);
+    };
+
+    const approvalName = appHierOptions.find(x => x.value === selectedHierarchy)?.name || data_detail?.transferToCustomer?.approvalName || "-";
+
+    const items = [
+        {
+            key: "transfer",
+            label: "Transfer to Customer",
+            children: (
+                <div className="p-5">
+                    <DetailTransferToCustomer data_detail={data_detail?.transferToCustomer} />
+                </div>
+            ),
+        },
+        {
+            key: "attachment",
+            label: "Attachment",
+            children: (
+                <div className="p-5">
+                    <SubSectionCard title="ATTACHMENT INFORMATION">
+                        <AttachmentComponent
+                            type={"detail"}
+                            data={listDataAttachment}
+                            updateData={setListDataAttachment}
+                            typeSelector="transferToCustomer"
+                            dispatch={dispatch}
+                            getAPICategory={getListCategory}
+                            service={receiptCollectionHttpService}
+                            configApplication={configApp.PAYMENT_SERVICE}
+                        />
+                    </SubSectionCard>
+                </div>
+            ),
+        },
+    ];
+
+    const isShowButton = data_detail?.tApprovalDto?.isApprover;
+
+    const routes = [
+        {
+            path: "",
+            breadcrumbName: "Receipt & Collection",
+        },
+        {
+            path: "",
+            breadcrumbName: "Payment  Guarantee",
+        },
+        {
+            path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_TRANSFER_TO_CUSTOMER,
+            breadcrumbName: "Transfer to Customer",
+        },
+        {
+            path: RECEIPT_AND_COLLECTION_ROUTES.DETAIL_TRANSFER_TO_CUSTOMER,
+            breadcrumbName: "Detail Transfer to Customer",
+        },
+    ];
+
+    const handleConfirm = async (res, handleClear) => {
+        const data = {
+            id: id,
+            remark: res.remark,
+            approvalId: data_detail?.tApprovalDto?.tAppId,
+            action: approveOrReject.toUpperCase(),
+        };
+
+        try {
+            await dispatch(approveOrRejectTransferToCustomer({ body: data })).unwrap();
+            handleClear();
+            setModalApprove(false);
+        } catch (error) {
+            // Error sudah di-handle di thunk
+            handleClear();
+            setModalApprove(false);
+        }
+    };
+
+    const handleCancel = () => {
+        setModalApprove(false);
+    };
+
+    return (
+        <Spin spinning={loading}>
+            <BreadCrumb routes={routes} />
+            
+            <CardContainerNoBorder
+                header="TRANSFER TO CUSTOMER DETAIL"
+                className="mt-5 !border-[1.5px] !border-[#0075bf] !rounded-md !bg-white !shadow-none"
+                noPadding
+                collapsible={true}
+                defaultExpanded={true}
+            >
+                <div className="full-width-tabs">
+                    <Tabs
+                        activeKey={activeTab}
+                        items={items}
+                        onChange={handleTabChange}
+                        className="custom-tabs-layout"
+                    />
+                </div>
+            </CardContainerNoBorder>
+
+            <CardContainerNoBorder
+                header="GUARANTEE DETAIL"
+                className="mt-5 !border-[1.5px] !border-[#0075bf] !rounded-md !bg-white !shadow-none"
+                noPadding
+                collapsible={true}
+                defaultExpanded={true}
+            >
+               <div className="p-5">
+                    <DetailWarrantyInformation data_detail={data_detail?.transferToCustomer} />
+               </div>
+            </CardContainerNoBorder>
+
+            <CardContainerNoBorder
+                header="CUSTOMER INFORMATION"
+                className="mt-5 !border-[1.5px] !border-[#0075bf] !rounded-md !bg-white !shadow-none"
+                noPadding
+                collapsible={true}
+                defaultExpanded={true}
+            >
+                <div className="p-5">
+                    <SubSectionCard>
+                        <TableRBI
+                            columns={columnsCustomer}
+                            dataSource={IndexCustomer(data_detail?.transferToCustomer?.customerList || [], page, pageSize).slice((page - 1) * pageSize, page * pageSize)}
+                            pagination={false}
+                            tableScrolled={{ x: 1000 }}
+                            current={page}
+                            pageSize={pageSize}
+                            totalData={data_detail?.transferToCustomer?.customerList?.length || 0}
+                            onChange={onChangePage}
+                            onSizeChanger={onChangePage}
+                        />
+                    </SubSectionCard>
+                </div>
+            </CardContainerNoBorder>
+
+            <LogHistoryInfo
+                data={{
+                    recordId: data_detail?.transferToCustomer?.id || "-",
+                    createdDate: data_detail?.transferToCustomer?.createdDate ? moment(data_detail?.transferToCustomer?.createdDate).format("DD MMM YYYY HH:mm:ss") : "-",
+                    createdBy: data_detail?.transferToCustomer?.createdBy || "-",
+                    updatedDate: data_detail?.transferToCustomer?.updatedDate ? moment(data_detail?.transferToCustomer?.updatedDate).format("DD MMM YYYY HH:mm:ss") : "-",
+                    updatedBy: data_detail?.transferToCustomer?.updatedBy || "-"
+                }}
+            />
+
+            <FooterDetail
+                onCancel={() => navigate(RECEIPT_AND_COLLECTION_ROUTES.VIEW_TRANSFER_TO_CUSTOMER)}
+                showApproval={isShowButton === true}
+                onApprove={() => {
+                    setApproveOrReject("approve");
+                    setModalApprove(true);
+                }}
+                onReject={() => {
+                    setApproveOrReject("reject");
+                    setModalApprove(true);
+                }}
+            />
+
+            <ModalApproveOrReject
+                isOpen={modalApprove}
+                handleCloseModal={handleCancel}
+                onFinish={handleConfirm}
+                header={approveOrReject === "approve" ? "Approve" : "Reject"}
+                approveOrReject={approveOrReject}
+                menu={"Transfer To Customer"}
+                named={dataHeader?.id}
+            />
+        </Spin>
+    );
+};
+
+
+
+
+const IndexCustomer = (data, page, pageSize) => {
+    return data.map((item, index) => {
+        return {
+            ...item,
+            key: index,
+            no: (page - 1) * pageSize + index + 1
+        }
+    })
+}
+
+export default ListDetailTransferToCustomer;

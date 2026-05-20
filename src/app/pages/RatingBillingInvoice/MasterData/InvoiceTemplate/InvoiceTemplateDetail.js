@@ -2,21 +2,22 @@ import React, { useState, useEffect } from "react";
 import { LeftOutlined } from "@ant-design/icons";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Spin } from "antd";
+import { Spin, Tabs } from "antd";
 import moment from "moment";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../../components/BreadCrumb";
-import RadioTabs from "../../../../../components/RadioTabs";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
-import BaseContainer from "../../../../../components/BaseContainer";
+import CardContainer from "../../../../../components/CardContainer";
+import CollapsibleContainer from "../../../../../components/CollapsibleContainer";
 import DetailSection from "./Utils/DetailSection";
+import DetailText from "../../../../../components/DetailText";
 import { ModalError } from "../../../../../components/Modal/ModalPopUp";
 import SVGIcon from "../../../../../assets/Icon/index";
-import DetailText from "../../../../../components/DetailText";
 import { dateFormatting } from "../../../../../utils";
+import FunctionalCriteriaInvoiceTemplate from "./Form/FunctionalCriteriaInvoiceTemplate";
 import {
+  approveOrRejectActivatedInvoiceTemplate,
   approveOrRejectInactiveInvoiceTemplate,
   approveOrRejectInvoiceTemplate,
   getDetailDraftInvoiceTemplate,
@@ -29,7 +30,7 @@ import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOr
 const InvoiceTemplateDetail = () => {
   // Selector
   const { loading, data_detail, data_detail_draft } = useSelector(
-    (state) => state.invoice_template
+    (state) => state.invoice_template,
   );
 
   // Declaration
@@ -41,7 +42,7 @@ const InvoiceTemplateDetail = () => {
   const [modalConfirm, setModalConfirm] = useState(false);
   const [modalErrorServer, setModalErrorServer] = useState(false);
 
-  const [valuePage, setValuePage] = useState("Invoice Template");
+  const [activeTab, setActiveTab] = useState("invoiceTemplate");
   const [approveOrReject, setApproveOrReject] = useState("");
 
   const [dataDetail, setDataDetail] = useState({});
@@ -51,14 +52,11 @@ const InvoiceTemplateDetail = () => {
   const [criteriaValuesDraft, setCriteriaValuesDraft] = useState([]);
   const [listDataCriteriaDraft, setListDataCriteriaDraft] = useState([]);
   const [dataDraft, setDataDraft] = useState({});
+  const [hasDraft, setHasDraft] = useState(false);
 
   const [bodyError, setBodyError] = useState({});
   const [dataLogInformation, setDataLogInformation] = useState({});
   const [listDataAttachment, setListDataAttachment] = useState([]);
-  const [listSectionInfo, setListSectionInfo] = useState([
-    { value: "Invoice Template" },
-    { value: "Attachment" },
-  ]);
   const [bodyApproval, setBodyApproval] = useState({
     isApprover: false,
     tappId: null,
@@ -68,6 +66,12 @@ const InvoiceTemplateDetail = () => {
 
   const showButtonApproval =
     bodyApproval.isApprover !== null && bodyApproval.isApprover;
+
+  // Determine which criteria data to show based on draft availability
+  const displayCriteriaValues = hasDraft ? criteriaValuesDraft : criteriaValues;
+  const displayCriteriaData = hasDraft
+    ? listDataCriteriaDraft
+    : listDataCriteria;
 
   // Use Effect
   useEffect(() => {
@@ -109,7 +113,7 @@ const InvoiceTemplateDetail = () => {
               : "",
             dataType: "exist",
           };
-        }
+        },
       );
 
       // Data Criteria Information
@@ -180,33 +184,10 @@ const InvoiceTemplateDetail = () => {
             id: item.id,
             criteria: item.criteria,
           };
-        }
+        },
       );
 
       const mappingCriteria = criteriaSelect?.map((a) => a.criteria);
-
-      // Data Attachment Information
-      // const dataDraftAttachment = (
-      //   data_detail?.attachmentDtoList || []
-      // ).map((item) => {
-      //   return {
-      //     id: item.id,
-      //     size: item.size,
-      //     fileName: item.fileName,
-      //     fileSize: item.fileSize,
-      //     fileType: item.fileType,
-      //     fileCategoryId: item.fileCategoryId,
-      //     fileCategoryName: item.fileCategoryName,
-      //     pathFile: item.pathFile,
-      //     urlFile1: item.urlFile1,
-      //     urlFile2: item.urlFile2,
-      //     createdBy: item.createdBy,
-      //     createdDate: item.createdDate
-      //       ? moment(item.createdDate).format("DD MMM YYYY")
-      //       : "",
-      //     dataType: "exist",
-      //   };
-      // });
 
       // Data Criteria Information
       const dataDraftCriteriaList = (
@@ -240,16 +221,7 @@ const InvoiceTemplateDetail = () => {
       setDataDraft(data_detail_draft);
       setListDataCriteriaDraft(dataDraftCriteriaList);
       setCriteriaValuesDraft(mappingCriteria);
-      // setListDataAttachment((prevState) => [
-      //   ...prevState,
-      //   ...dataDraftAttachment,
-      // ]);
-
-      setListSectionInfo([
-        { value: "Invoice Template" },
-        { value: "Draft" },
-        { value: "Attachment" },
-      ]);
+      setHasDraft(true);
     }
   }, [id, data_detail, data_detail_draft]);
 
@@ -268,50 +240,10 @@ const InvoiceTemplateDetail = () => {
       breadcrumbName: "Invoice Template",
     },
     {
-      path: RBI_ROUTES.INVOICE_TEMPLATE_DETAIL,
+      path: "",
       breadcrumbName: "Detail Invoice Template",
     },
   ];
-
-  const layout = (valuePage) => {
-    switch (valuePage) {
-      case "Invoice Template":
-        return (
-          <DetailSection
-            key={"detail"}
-            dataInvoice={dataDetail}
-            dataHistory={dataLogInformation}
-            criteriaValues={criteriaValues}
-            dataCriteria={listDataCriteria}
-          />
-        );
-      case "Draft":
-        return (
-          <DetailSection
-            key={"draft"}
-            dataInvoice={dataDraft}
-            dataHistory={dataLogInformation}
-            criteriaValues={criteriaValuesDraft}
-            dataCriteria={listDataCriteriaDraft}
-          />
-        );
-      case "Attachment":
-        return (
-          <BaseContainer header={"Attachment Information"}>
-            <AttachmentComponent
-              type={"detail"}
-              data={listDataAttachment}
-              updateData={setListDataAttachment}
-              typeSelector="invoice_template"
-              service={ratingBillingHttpService}
-              configApplication={configApp.RATING_BILLING_SERVICE}
-            />
-          </BaseContainer>
-        );
-      default:
-        return <></>;
-    }
-  };
 
   const handleRetry = () => {
     handleConfirm();
@@ -328,9 +260,7 @@ const InvoiceTemplateDetail = () => {
     setModalConfirm(false);
   };
 
-  // handle Confirm
   const handleConfirm = (res, handleClear) => {
-    setModalConfirm(false);
     const data = {
       id: id,
       remark: res.remark,
@@ -338,18 +268,24 @@ const InvoiceTemplateDetail = () => {
       action: approveOrReject.toUpperCase(),
     };
 
-    dispatch(
+    const approvalAction =
       bodyApproval.approvalType === "INACTIVE_INVOICE_TEMPLATE"
         ? approveOrRejectInactiveInvoiceTemplate({
             body: data,
           })
-        : approveOrRejectInvoiceTemplate({
-            body: data,
-          })
-    )
+        : bodyApproval.approvalType === "ACTIVATED_INVOICE_TEMPLATE"
+          ? approveOrRejectActivatedInvoiceTemplate({
+              body: data,
+            })
+          : approveOrRejectInvoiceTemplate({
+              body: data,
+            });
+
+    return dispatch(approvalAction)
       .unwrap()
       .then(() => {
-        handleClear()
+        setModalConfirm(false);
+        handleClear();
         dispatch(getDetailDraftInvoiceTemplate(id));
         dispatch(getDetailInvoiceTemplate(id));
       })
@@ -365,19 +301,47 @@ const InvoiceTemplateDetail = () => {
           setModalErrorServer(true);
         }
       });
-    console.log(data);
   };
 
+  // Build tab items
+  const tabItems = [
+    {
+      key: "invoiceTemplate",
+      label: "Invoice Template",
+      children: null,
+    },
+    ...(hasDraft
+      ? [
+          {
+            key: "draft",
+            label: "Draft",
+            children: null,
+          },
+        ]
+      : []),
+    {
+      key: "attachment",
+      label: "Attachment",
+      children: null,
+    },
+  ];
+
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
-        <div className="flex flex-col w-full gap-4">
-          {bodyApproval.isApprover &&
+        <CardContainer
+          header={
+            <p className="w-full text-primary">INVOICE TEMPLATE DETAIL</p>
+          }
+          className="!overflow-visible [&>div]:!overflow-visible"
+        >
+          {/* Inactive Request Info */}
+          {/* {bodyApproval.isApprover &&
             bodyApproval.approvalType &&
             bodyApproval.approvalType === "INACTIVE_INVOICE_TEMPLATE" && (
-              <BaseContainer header={"inactive request information"}>
+              <CardContainer header={"Inactive Request Information"}>
                 <div className="w-full grid grid-cols-4 gap-3">
                   <DetailText label={"Requested Date"}>
                     {bodyApproval.approvalDetail.requestedDate
@@ -393,16 +357,99 @@ const InvoiceTemplateDetail = () => {
                     {bodyApproval.approvalDetail.remarks}
                   </DetailText>
                 </div>
-              </BaseContainer>
-            )}
-          <RadioTabs
-            data={listSectionInfo}
-            onChange={(e) => setValuePage(e.target.value)}
-            currentPosition={valuePage}
-          />
-          {layout(valuePage)}
-        </div>
+              </CardContainer>
+            )} */}
 
+          {/* Tabs - only switches top section */}
+          <Tabs
+            items={tabItems}
+            onChange={(key) => setActiveTab(key)}
+            activeKey={activeTab}
+            className="[&_.ant-tabs-tab]:text-[12px] [&_.ant-tabs-nav]:my-0 [&_.ant-tabs-nav]:pt-0 -mt-0"
+          />
+
+          {/* Tab Content: Invoice Template */}
+          <div
+            className="[&>div]:!mt-[2px]"
+            style={{
+              display: activeTab === "invoiceTemplate" ? undefined : "none",
+            }}
+          >
+            <DetailSection dataInvoice={dataDetail} />
+          </div>
+
+          {/* Tab Content: Draft */}
+          {hasDraft && (
+            <div
+              className="[&>div]:!mt-[2px]"
+              style={{
+                display: activeTab === "draft" ? undefined : "none",
+              }}
+            >
+              <DetailSection dataInvoice={dataDraft} />
+            </div>
+          )}
+
+          {/* Tab Content: Attachment */}
+          <div
+            className="[&>div]:!mt-[2px]"
+            style={{
+              display: activeTab === "attachment" ? undefined : "none",
+            }}
+          >
+            <CollapsibleContainer header={"Attachment Information"}>
+              <AttachmentComponent
+                type={"detail"}
+                data={listDataAttachment}
+                updateData={setListDataAttachment}
+                typeSelector="invoice_template"
+                service={ratingBillingHttpService}
+                configApplication={configApp.RATING_BILLING_SERVICE}
+              />
+            </CollapsibleContainer>
+          </div>
+        </CardContainer>
+
+        {/* Criteria Information - separate section */}
+        <CardContainer header={"Criteria Information"}>
+          <FunctionalCriteriaInvoiceTemplate
+            data={displayCriteriaData}
+            dataCriteria={displayCriteriaValues}
+            type={"show"}
+            showAction={"show"}
+          />
+        </CardContainer>
+
+        {/* History Log Information - separate section */}
+        <CardContainer header={"History Log Information"}>
+          <div className="w-full grid grid-cols-5 gap-3">
+            <DetailText label="Record ID">
+              {dataLogInformation?.recordId}
+            </DetailText>
+            <DetailText label="Created Date">
+              {dataLogInformation?.createdDate
+                ? moment(dataLogInformation.createdDate).format(
+                    dateFormatting.dateTime,
+                  )
+                : ""}
+            </DetailText>
+            <DetailText label="Created By">
+              {dataLogInformation?.createdBy}
+            </DetailText>
+            <DetailText label="Updated Date">
+              {dataLogInformation?.updatedDate
+                ? moment(dataLogInformation.updatedDate).format(
+                    dateFormatting.dateTime,
+                  )
+                : ""}
+            </DetailText>
+            <DetailText label="Updated By">
+              {dataLogInformation?.updatedBy}
+            </DetailText>
+          </div>
+        </CardContainer>
+
+        {/* Footer: Back + Approve/Reject */}
         <div className="flex mt-[30px]">
           <ButtonComponent
             type={"submit"}
@@ -446,15 +493,14 @@ const InvoiceTemplateDetail = () => {
 
         {/* Modal Approve/Reject */}
         <ModalApproveOrReject
-         isOpen={modalConfirm}
-         handleCloseModal={handleCancel}
-         onFinish={handleConfirm}
-         header={approveOrReject}
-         approveOrReject={approveOrReject}
-         menu={"Invoice Template"}
-         named={dataDetail?.invoiceName}
+          isOpen={modalConfirm}
+          handleCloseModal={handleCancel}
+          onFinish={handleConfirm}
+          header={approveOrReject}
+          approveOrReject={approveOrReject}
+          menu={"Invoice Template"}
+          named={dataDetail?.invoiceName}
         />
-       
 
         {/* Modal Retry */}
         <ModalError
@@ -475,7 +521,7 @@ const InvoiceTemplateDetail = () => {
           </div>
         </ModalError>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

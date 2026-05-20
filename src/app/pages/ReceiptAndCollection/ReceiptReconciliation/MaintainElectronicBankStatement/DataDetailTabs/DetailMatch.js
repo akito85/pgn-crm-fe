@@ -16,309 +16,309 @@ const columns = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => {}
+  handleSearch = () => { }
 ) => [
-  {
-    key: "no",
-    title: "NO",
-    width: 60,
-    align: "center",
-    render: (text, object, index) => (page - 1) * pageSize + index + 1,
-  },
-  {
-    key: "sor",
-    title: "SOR",
-    dataIndex: "sor",
-    align: "",
-    sorter: true,
-    ...getColumnSearchPropsPaging(
-      "sor",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true
-    ),
-    render: (text) =>
-      searchedColumn === "sor" ? (
-        <Highlighter
-          highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
-          searchWords={[searchText]}
-          autoEscape
-          textToHighlight={text ? text.toString() : ""}
-        />
-      ) : text ? (
-        <Tooltip placement="topLeft" title={text}>
-          {text}
-        </Tooltip>
-      ) : (
-        ""
+    {
+      key: "no",
+      title: "NO",
+      width: 60,
+      align: "center",
+      render: (text, object, index) => (page - 1) * pageSize + index + 1,
+    },
+    {
+      key: "sor",
+      title: "SOR",
+      dataIndex: "sor",
+      align: "",
+      sorter: true,
+      ...getColumnSearchPropsPaging(
+        "sor",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
       ),
-  },
-  {
-    key: "costCenter",
-    title: "COST CENTER",
-    dataIndex: "costCenter",
-    align: "",
-    sorter: true,
-    ...getColumnSearchPropsPaging(
-      "costCenter",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true
-    ),
-    ellipsis: { showTitle: false },
-    render: (text) =>
-      searchedColumn === "costCenter" ? (
-        <Highlighter
-          highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
-          searchWords={[searchText]}
-          autoEscape
-          textToHighlight={text ? text.toString() : ""}
-        />
-      ) : text ? (
-        <Tooltip placement="topLeft" title={text}>
-          {text}
-        </Tooltip>
-      ) : (
-        ""
-      ),
-  },
-  {
-    key: "customerName",
-    title: "CUSTOMER",
-    dataIndex: "customerName",
-    align: "left",
-    sorter: true,
-    ...getColumnSearchPropsPaging(
-      "customerName",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true
-    ),
-    ellipsis: { showTitle: false },
-    render: (text) =>
-      searchedColumn === "customerName" ? (
-        <Highlighter
-          highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
-          searchWords={[searchText]}
-          autoEscape
-          textToHighlight={text ? text.toString() : ""}
-        />
-      ) : text ? (
-        <Tooltip placement="topLeft" title={text}>
-          {text}
-        </Tooltip>
-      ) : (
-        ""
-      ),
-  },
-  {
-    key: "accountNumber",
-    title: "ACCOUNT",
-    dataIndex: "accountNumber",
-    align: "left",
-    sorter: true,
-    ...getColumnSearchPropsPaging(
-      "accountNumber",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true
-    ),
-    ellipsis: { showTitle: false },
-    render: (text) =>
-      searchedColumn === "accountNumber" ? (
-        <Highlighter
-          highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
-          searchWords={[searchText]}
-          autoEscape
-          textToHighlight={text ? text.toString() : ""}
-        />
-      ) : text ? (
-        <Tooltip placement="topLeft" title={text}>
-          {text}
-        </Tooltip>
-      ) : (
-        ""
-      ),
-  },
-  {
-    key: "receiptCode",
-    title: "RECEIPT CODE",
-    dataIndex: "receiptCode",
-    align: "left",
-    sorter: true,
-    ...getColumnSearchPropsPaging("receiptCode"),
-    render: (text) =>
-      searchedColumn === "receiptCode" ? (
-        <Highlighter
-          highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
-          searchWords={[searchText]}
-          autoEscape
-          textToHighlight={text ? text.toString() : ""}
-        />
-      ) : text ? (
-        <Tooltip placement="topLeft" title={text}>
-          {text}
-        </Tooltip>
-      ) : (
-        ""
-      ),
-  },
-  {
-    key: "receiptNumber",
-    title: "RECEIPT NUMBER",
-    dataIndex: "receiptNumber",
-    align: "left",
-    sorter: true,
-    ...getColumnSearchPropsPaging(
-      "receiptNumber",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true
-    ),
-    ellipsis: { showTitle: false },
-    render: (text) =>
-      searchedColumn === "receiptNumber" ? (
-        <Highlighter
-          highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
-          searchWords={[searchText]}
-          autoEscape
-          textToHighlight={text ? text.toString() : ""}
-        />
-      ) : text ? (
-        <Tooltip placement="topLeft" title={text}>
-          {text}
-        </Tooltip>
-      ) : (
-        ""
-      ),
-  },
-  {
-    key: "receiptDate",
-    title: "RECEIPT DATE",
-    dataIndex: "receiptDate",
-    align: "center",
-    sorter: true,
-    ...getColumnSearchPropsPaging(
-      "receiptDate",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true,
-      "date"
-    ),
-    render: (text) =>
-      searchedColumn === "receiptDate" ? (
-        <Highlighter
-          highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
-          searchWords={[
-            searchText
-              ? moment(searchText, "YYYY-MM-DD").format("DD MMM YYYY")
-              : "",
-          ]}
-          autoEscape
-          textToHighlight={
-            text ? moment(text).format(dateFormatting.dateCapital) : ""
-          }
-        />
-      ) : (
-        moment(text).format(dateFormatting.dateCapital) || ""
-      ),
-  },
-  {
-    key: "amount",
-    title: "RECEIPT AMOUNT",
-    dataIndex: "amount",
-    align: "right",
-    sorter: true,
-    ...getColumnSearchPropsPaging(
-      "amount",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true
-    ),
-    ellipsis: { showTitle: false },
-    render: (text) =>
-      searchedColumn === "amount" ? (
-        <Highlighter
-          highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
-          searchWords={[searchText]}
-          autoEscape
-          textToHighlight={text ? text.toString() : ""}
-        />
-      ) : text ? (
-        <Tooltip placement="topLeft" title={text}>
-          {text}
-        </Tooltip>
-      ) : (
-        ""
-      ),
-  },
-  {
-    key: "statusApproval",
-    title: "STATUS APPROVAL",
-    dataIndex: "statusApproval",
-    align: "center",
-    sorter: true,
-    fixed: "right",
-    ...getColumnSearchPropsPaging(
-      "statusApproval",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true
-    ),
-    render: (approvalStatus) => {
-      let text;
-      switch (approvalStatus) {
-        case "WAITING APPROVAL":
-          text = "Waiting Approval";
-          break;
-        case "APPROVED":
-          text = "Approved";
-          break;
-        default:
-          text = approvalStatus
-            ? approvalStatus.charAt(0).toUpperCase() +
-              approvalStatus.slice(1).toLowerCase()
-            : approvalStatus;
-          break;
-      }
-
-      if (searchedColumn === "statusApproval") {
-        return (
+      render: (text) =>
+        searchedColumn === "sor" ? (
           <Highlighter
             highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
             searchWords={[searchText]}
             autoEscape
             textToHighlight={text ? text.toString() : ""}
           />
-        );
-      }
-
-      return text ? (
-        <div className="flex justify-center">
-          <StatusComponent colour={text}>{text}</StatusComponent>
-        </div>
-      ) : (
-        text
-      );
+        ) : text ? (
+          <Tooltip placement="topLeft" title={text}>
+            {text}
+          </Tooltip>
+        ) : (
+          ""
+        ),
     },
-  },
-];
+    {
+      key: "costCenter",
+      title: "COST CENTER",
+      dataIndex: "costCenter",
+      align: "",
+      sorter: true,
+      ...getColumnSearchPropsPaging(
+        "costCenter",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      ellipsis: { showTitle: false },
+      render: (text) =>
+        searchedColumn === "costCenter" ? (
+          <Highlighter
+            highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
+            searchWords={[searchText]}
+            autoEscape
+            textToHighlight={text ? text.toString() : ""}
+          />
+        ) : text ? (
+          <Tooltip placement="topLeft" title={text}>
+            {text}
+          </Tooltip>
+        ) : (
+          ""
+        ),
+    },
+    {
+      key: "customerName",
+      title: "CUSTOMER",
+      dataIndex: "customerName",
+      align: "left",
+      sorter: true,
+      ...getColumnSearchPropsPaging(
+        "customerName",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      ellipsis: { showTitle: false },
+      render: (text) =>
+        searchedColumn === "customerName" ? (
+          <Highlighter
+            highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
+            searchWords={[searchText]}
+            autoEscape
+            textToHighlight={text ? text.toString() : ""}
+          />
+        ) : text ? (
+          <Tooltip placement="topLeft" title={text}>
+            {text}
+          </Tooltip>
+        ) : (
+          ""
+        ),
+    },
+    {
+      key: "accountNumber",
+      title: "ACCOUNT",
+      dataIndex: "accountNumber",
+      align: "left",
+      sorter: true,
+      ...getColumnSearchPropsPaging(
+        "accountNumber",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      ellipsis: { showTitle: false },
+      render: (text) =>
+        searchedColumn === "accountNumber" ? (
+          <Highlighter
+            highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
+            searchWords={[searchText]}
+            autoEscape
+            textToHighlight={text ? text.toString() : ""}
+          />
+        ) : text ? (
+          <Tooltip placement="topLeft" title={text}>
+            {text}
+          </Tooltip>
+        ) : (
+          ""
+        ),
+    },
+    {
+      key: "receiptCode",
+      title: "RECEIPT CODE",
+      dataIndex: "receiptCode",
+      align: "left",
+      sorter: true,
+      ...getColumnSearchPropsPaging("receiptCode"),
+      render: (text) =>
+        searchedColumn === "receiptCode" ? (
+          <Highlighter
+            highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
+            searchWords={[searchText]}
+            autoEscape
+            textToHighlight={text ? text.toString() : ""}
+          />
+        ) : text ? (
+          <Tooltip placement="topLeft" title={text}>
+            {text}
+          </Tooltip>
+        ) : (
+          ""
+        ),
+    },
+    {
+      key: "receiptNumber",
+      title: "RECEIPT NUMBER",
+      dataIndex: "receiptNumber",
+      align: "left",
+      sorter: true,
+      ...getColumnSearchPropsPaging(
+        "receiptNumber",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      ellipsis: { showTitle: false },
+      render: (text) =>
+        searchedColumn === "receiptNumber" ? (
+          <Highlighter
+            highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
+            searchWords={[searchText]}
+            autoEscape
+            textToHighlight={text ? text.toString() : ""}
+          />
+        ) : text ? (
+          <Tooltip placement="topLeft" title={text}>
+            {text}
+          </Tooltip>
+        ) : (
+          ""
+        ),
+    },
+    {
+      key: "receiptDate",
+      title: "RECEIPT DATE",
+      dataIndex: "receiptDate",
+      align: "center",
+      sorter: true,
+      ...getColumnSearchPropsPaging(
+        "receiptDate",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+        "date"
+      ),
+      render: (text) =>
+        searchedColumn === "receiptDate" ? (
+          <Highlighter
+            highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
+            searchWords={[
+              searchText
+                ? moment(searchText, "YYYY-MM-DD").format("DD MMM YYYY")
+                : "",
+            ]}
+            autoEscape
+            textToHighlight={
+              text ? moment(text).format(dateFormatting.dateCapital) : ""
+            }
+          />
+        ) : (
+          moment(text).format(dateFormatting.dateCapital) || ""
+        ),
+    },
+    {
+      key: "amount",
+      title: "RECEIPT AMOUNT",
+      dataIndex: "amount",
+      align: "right",
+      sorter: true,
+      ...getColumnSearchPropsPaging(
+        "amount",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true
+      ),
+      ellipsis: { showTitle: false },
+      render: (text) =>
+        searchedColumn === "amount" ? (
+          <Highlighter
+            highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
+            searchWords={[searchText]}
+            autoEscape
+            textToHighlight={text ? text.toString() : ""}
+          />
+        ) : text ? (
+          <Tooltip placement="topLeft" title={text}>
+            {text}
+          </Tooltip>
+        ) : (
+          ""
+        ),
+    },
+    // {
+    //   key: "statusApproval",
+    //   title: "STATUS APPROVAL",
+    //   dataIndex: "statusApproval",
+    //   align: "center",
+    //   sorter: true,
+    //   fixed: "right",
+    //   ...getColumnSearchPropsPaging(
+    //     "statusApproval",
+    //     searchInput,
+    //     searchedColumn,
+    //     searchText,
+    //     handleSearch,
+    //     true
+    //   ),
+    //   render: (approvalStatus) => {
+    //     let text;
+    //     switch (approvalStatus) {
+    //       case "WAITING APPROVAL":
+    //         text = "Waiting Approval";
+    //         break;
+    //       case "APPROVED":
+    //         text = "Approved";
+    //         break;
+    //       default:
+    //         text = approvalStatus
+    //           ? approvalStatus.charAt(0).toUpperCase() +
+    //           approvalStatus.slice(1).toLowerCase()
+    //           : approvalStatus;
+    //         break;
+    //     }
+
+    //     if (searchedColumn === "statusApproval") {
+    //       return (
+    //         <Highlighter
+    //           highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
+    //           searchWords={[searchText]}
+    //           autoEscape
+    //           textToHighlight={text ? text.toString() : ""}
+    //         />
+    //       );
+    //     }
+
+    //     return text ? (
+    //       <div className="flex justify-center">
+    //         <StatusComponent colour={text}>{text}</StatusComponent>
+    //       </div>
+    //     ) : (
+    //       text
+    //     );
+    //   },
+    // },
+  ];
 
 
 const DetailMatch = ({
@@ -343,9 +343,9 @@ const DetailMatch = ({
   const [sort, setSort] = useState("");
 
   const [fixedColumns, setFixedColumns] = useState(() => ({
-      left: ["no"],
-      right: [],
-    }));
+    left: ["no"],
+    right: [],
+  }));
 
   // Function Search Column
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -427,7 +427,7 @@ const DetailMatch = ({
           onShowSizeChange={handleChange}
           onSort={onSort}
           tableScrolled={{
-            x: 3500,
+            x: "max-content",
             y: 300,
           }}
           showExport={false}

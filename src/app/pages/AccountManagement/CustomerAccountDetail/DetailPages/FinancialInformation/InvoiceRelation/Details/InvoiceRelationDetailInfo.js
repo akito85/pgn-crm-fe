@@ -1,41 +1,53 @@
-import { Fragment } from "react";
-import DetailText from "../../../../../../../../components/DetailText";
-import BaseContainer from "../../../../../../../../components/BaseContainer";
-import moment from "moment";
-import { dateFormatting } from "../../../../../../../../utils";
+import NxDetailText from "../../../../../../../../components/Nx/NxDetailText";
+import NxBaseContainer from "../../../../../../../../components/Nx/NxBaseContainer";
+import NxDate from "../../../../../../../../components/Nx/NxDatePicker";
+import NxStatusComponent from "../../../../../../../../components/Nx/NxStatusComponent";
 
+/**
+ * Presentational info panel for an invoice relation record.
+ * Displays account details, dates, status, and description.
+ *
+ * @param {object} props
+ * @param {object} [props.detail={}] - Invoice relation detail record
+ */
 const InvoiceRelationDetailInfo = ({
-  subjectAccountNumber,
-  dataDetail = {},
+  detail = {},
 }) => {
+  const {
+    accountNumber,
+    accountName,
+    startDate,
+    endDate,
+    status,
+    statusApproval,
+    description,
+  } = detail;
+
   return (
-    <Fragment>
-      <BaseContainer header={"INVOICE RELATION"}>
+    <NxBaseContainer border>
+      <div className="flex flex-col gap-y-4">
         <div className="w-full grid grid-cols-3 gap-4">
           {/* Invoice Relation Information */}
-          <DetailText label="Account Number">{subjectAccountNumber === dataDetail.accountNumber ? dataDetail.relatedAccountNumber : dataDetail.accountNumber}</DetailText>
-          <DetailText label="Account Name">{subjectAccountNumber === dataDetail.accountNumber ? dataDetail.relatedAccountName : dataDetail.accountName}</DetailText>
-          <DetailText label="Priority">{dataDetail.priority}</DetailText>
-          <DetailText label="Start Date">{dataDetail.startDate ? moment(dataDetail.startDate, dateFormatting.f_date).format(dateFormatting.date) : ""}</DetailText>
-          <DetailText label="End Date">{dataDetail.endDate ? moment(dataDetail.endDate, dateFormatting.f_date).format(dateFormatting.date) : ""}</DetailText>
-          <DetailText label="Status">{dataDetail.status}</DetailText>
+          <NxDetailText label="Account Number">{accountNumber}</NxDetailText>
+          <NxDetailText label="Account Name">{accountName}</NxDetailText>
+          <NxDetailText label="Start Date">{NxDate.formatDate(startDate, "DD MMM YYYY")}</NxDetailText>
+          <NxDetailText label="End Date">{NxDate.formatDate(endDate, "DD MMM YYYY")}</NxDetailText>
+          <NxDetailText label="Status">
+            <NxStatusComponent colour={status}>
+              {status}
+            </NxStatusComponent>
+          </NxDetailText>
+          <NxDetailText label="Status Approval">
+            <NxStatusComponent colour={statusApproval}>
+              {statusApproval}
+            </NxStatusComponent>
+          </NxDetailText>
         </div>
         <div className="w-full">
-          <DetailText label="Description">{dataDetail.description}</DetailText>
+          <NxDetailText label="Description">{description}</NxDetailText>
         </div>
-      </BaseContainer>
-
-      <BaseContainer header={"HISTORY LOG INFORMATION"}>
-        <div className="w-full grid grid-cols-5 gap-4">
-          {/* History Log Information */}
-          <DetailText label="Record Id">{dataDetail.id}</DetailText>
-          <DetailText label="Created Date">{dataDetail.createdDate ? moment(dataDetail.createdDate, dateFormatting.meas_date).format(dateFormatting.dateTime) : ""}</DetailText>
-          <DetailText label="Created By">{dataDetail.createdBy}</DetailText>
-          <DetailText label="Updated Date">{dataDetail.updatedDate ? moment(dataDetail.updatedDate, dateFormatting.meas_date).format(dateFormatting.dateTime) : ""}</DetailText>
-          <DetailText label="Updated By">{dataDetail.updatedBy}</DetailText>
-        </div>
-      </BaseContainer>
-    </Fragment>
+      </div>
+    </NxBaseContainer>
   );
 };
 

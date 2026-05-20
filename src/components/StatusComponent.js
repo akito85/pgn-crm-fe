@@ -13,7 +13,13 @@ import {
 } from "@ant-design/icons";
 import React, { useMemo } from "react";
 
-const StatusComponent = ({ children, colour, type = "status" }) => {
+const StatusComponent = ({
+  children,
+  colour,
+  type = "status",
+  size = "default",
+  margin = true,
+}) => {
   const { bgcolor, textColor } = useMemo(() => {
     if (!colour || typeof colour !== "string") {
       return { bgcolor: "bg-slate-600", textColor: "text-white" };
@@ -36,13 +42,49 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
       case "sent":
       case "approved":
       case "success_upload":
-      case "standard": // ✅ E-Faktur: Generated successfully
+      case "standard":
         bgColor = "status-active";
         tColor = "text-white";
         break;
 
       case "open":
+        bgColor = "status-active";
+        tColor = "text-white";
+        break;
+
+      case "submitted":
+        bgColor = "bg-[#28C76F]";
+        tColor = "text-white";
+        break;
+
+      case "in_progress":
+        bgColor = "bg-[#f57c00]";
+        tColor = "text-white";
+        break;
+
+      case "on_hold":
+        bgColor = "bg-[#F2D957]";
+        tColor = "text-black";
+        break;
+
+      case "resolved":
+        bgColor = "bg-[#0075BF]";
+        tColor = "text-white";
+        break;
+
+      case "closed":
         bgColor = "bg-gray-600";
+        tColor = "text-white";
+        break;
+
+      case "waiting_approval":
+      case "waiting_for_approval":
+        bgColor = "bg-[#f57c00]";
+        tColor = "text-white";
+        break;
+
+      case "none":
+        bgColor = "bg-gray-400";
         tColor = "text-white";
         break;
 
@@ -59,16 +101,22 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
       case "failed billing":
       case "fail":
       case "not_paid":
+      case "broken":
+        bgColor = "status-inactive";
+        tColor = "text-white";
+        break;
+
       case "cancelled":
       case "CANCELLED":
-        bgColor = "status-inactive";
+      case "canceled":
+        bgColor = "bg-[#f57c00]";
         tColor = "text-white";
         break;
 
       // ===== WAITING/PENDING STATUSES =====
       case "partial payment":
       case "waiting to release":
-      case "need review": // ✅ Billing status
+      case "need review":
         bgColor = "status-waiting";
         tColor = "text-yellow-700";
         break;
@@ -79,14 +127,15 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
       case "awaiting_approval":
       case "awaiting approval":
       case "processing":
-      case "submitted":
       case "waiting":
       case "waiting approval":
       case "waiting_approval":
+      case "waiting_for_approval":
       case "waiting_cancellation_approval":
       case "waiting cancellation approval":
       case "waiting_upload_approval":
       case "waiting upload approval":
+      case "partially paid": // recipt allocation
         bgColor = "bg-[#f57c00]";
         tColor = "text-white";
         break;
@@ -101,6 +150,11 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
 
       case "main":
         bgColor = "status-active";
+        tColor = "text-white";
+        break;
+      
+      case "break":
+        bgColor = "bg-[#0075BF]";
         tColor = "text-white";
         break;
 
@@ -132,20 +186,25 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
       case "primary":
       case "refund":
       case "unapplied":
+        bgColor = "bg-[#0075BF]";
+        tColor = "text-white";
+        break;
+
       case "hold":
       case "rating":
       case "standby":
-        bgColor = "bg-blue-500";
+        bgColor = "bg-[#F57C00]";
         tColor = "text-white";
         break;
 
       case "applied":
-        bgColor = "bg-[#ACC424]";
+        bgColor = "bg-[#288C44]";
         tColor = "text-white";
         break;
 
       case "reverse":
-        bgColor = "bg-[#910000]";
+      case "reversed":
+        bgColor = "bg-[#BE3036]";
         tColor = "text-white";
         break;
 
@@ -183,7 +242,12 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
         break;
 
       case "terminated":
-        bgColor = "bg-white";
+        bgColor = "bg-[#00CFE8]";
+        tColor = "text-white";
+        break;
+        
+      case "early payoff":
+        bgColor = "bg-[#0075BF]";
         tColor = "text-white";
         break;
 
@@ -256,15 +320,15 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
       case "generating":
       case "in progress":
       case "inprogress":
-      case "processing": // ✅ E-Faktur processing
-      case "submitted": // ✅ E-Faktur submitted
+      case "processing":
+      case "submitted":
       case "waiting approval":
       case "waiting_approval":
       case "awaiting_approval":
       case "awaiting approval":
-      case "waiting_cancellation_approval": // ✅ E-Faktur
+      case "waiting_cancellation_approval":
       case "waiting cancellation approval":
-      case "waiting_upload_approval": // ✅ E-Faktur
+      case "waiting_upload_approval":
       case "waiting upload approval":
         return <Loading3QuartersOutlined style={{ fontSize: "13px" }} />;
 
@@ -303,16 +367,19 @@ const StatusComponent = ({ children, colour, type = "status" }) => {
 
   if (!children) return null;
 
+  const sizeClasses =
+    size === "small" ? `px-2 py-0 text-xs ${margin ? "my-0.5" : ""}` : `px-3 py-0 ${margin ? "my-1" : ""}`;
+
   return (
     <div
       className={
         type === "status"
-          ? `flex gap-2 justify-center items-center my-1 ${bgcolor} ${textColor} px-3 py-0 rounded-3xl text-center w-fit`
+          ? `flex gap-2 justify-center items-center ${bgcolor} ${textColor} ${sizeClasses} rounded-3xl text-center w-fit text-none`
           : `${textColor} font-semibold`
       }
     >
       {/* {renderIconStatus()} */}
-      {children}
+      {children.replace(/_/g, " ")}
     </div>
   );
 };

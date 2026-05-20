@@ -11,14 +11,13 @@ import { useSelector, useDispatch } from "react-redux";
 import moment from "moment";
 
 import accountManagementPromoHttpService from "../../../../../../../redux/services/account_management/accountManagementService";
-import BaseContainer from "../../../../../../../components/BaseContainer";
-import LayoutMenu from "../../../../../../../components/SidebarMenu/LayoutMenu";
+
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
 import SVGIcon from "../../../../../../../assets/Icon/index";
 import HeaderDetail from "../../../HeaderDetail";
 import SaInformation from "./SaInformation";
-import SaDetail from "./SaDetail";
+import SaDetail from "../shared/SaDetail";
 import Attachment from "./Attachment";
 import Approval from "./Approval";
 import {
@@ -45,10 +44,17 @@ import {
 	ModalConfirm,
 	ModalError,
 } from "../../../../../../../components/Modal/ModalPopUp";
-import ConfirmationSa from "./Modal/ConfirmationSa";
+import ConfirmationSa from "../shared/Modal/ConfirmationSa";
 import { dateFormatting, hasValue } from "../../../../../../../utils";
-import BreadCrumbAdvanced from "../../../../../../../components/BreadCrumbAdvanced";
+import {
+	isSelectedOptionSemantic,
+	SERVICE_AGREEMENT_TYPE_VALUE,
+	SERVICE_TYPE_VALUE,
+} from "../idResolver";
+
 import { IconModal } from "../../../../../../../utils/Icon";
+import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
+import NxBreadCrumb from "../../../../../../../components/Nx/NxBreadCrumb";
 
 const UpdateServiceAgreement = ({ saType }) => {
 	const dispatch = useDispatch();
@@ -61,17 +67,15 @@ const UpdateServiceAgreement = ({ saType }) => {
 	const segmentValue = segmentElement?.innerText;
 
 	const [tabPagesSaDetail, setTabPagesSaDetail] = useState([
-    { value: "Pricing", paramValue: ["priceCode"] },
-    { value: "Calculation Rule", paramValue: ["calculationType"] },
-    { value: "Term of Service" },
-    { value: "Late Charge" },
-    { value: "Tax Implication" },
-  ]);
+		{ value: "Pricing", paramValue: ["priceCode"] },
+		{ value: "Calculation Rule", paramValue: ["calculationType"] },
+		{ value: "Term of Service" },
+		{ value: "Late Charge" },
+		{ value: "Tax Implication" },
+	]);
 
-  const [valuePageSaDetail, setValuePageSaDetail] = useState(
-    tabPagesSaDetail[0].value
-  );
-  const [modalSaDetail, setModalSaDetail] = useState(false);
+	const [valuePageSaDetail, setValuePageSaDetail] = useState("pricing");
+	const [modalSaDetail, setModalSaDetail] = useState(false);
 
 	const [modalChooseProduct, setModalChooseProduct] = useState(false);
 	const [modalBack, setModalBack] = useState(false);
@@ -89,10 +93,12 @@ const UpdateServiceAgreement = ({ saType }) => {
 	const [isReset, setIsReset] = useState(false);
 
 	const [typeSubmit, setTypeSubmit] = useState("");
+	const [confirmationRemark, setConfirmationRemark] = useState("");
 
 	const [dataTableDetailProduct, setDataTableDetailProduct] = useState({});
 	const [modalValidateSa, setModalValidateSa] = useState(false)
 	const [messageValidateSa, setMessageValidateSa] = useState("")
+	const [loadingNext, setLoadingNext] = useState(false);
 
 	const [dataListVersion, setDataListVersion] = useState([]);
 
@@ -158,8 +164,9 @@ const UpdateServiceAgreement = ({ saType }) => {
 
 	const [modalError, setModalError] = useState(false);
 	const [bodyError, setBodyError] = useState({});
+	const [loadingChooseProduct, setLoadingChooseProduct] = useState(false);
 	const [loadingForm, setLoadingForm] = useState(false);
-	const isLoading = loading || loadingForm;
+	const isLoading = loadingForm || (loading && !modalChooseProduct);
 
 	// State Location
 	const location = useLocation();
@@ -170,6 +177,16 @@ const UpdateServiceAgreement = ({ saType }) => {
 	const saReferenceNumber = location?.state?.saReferenceNumber;
 	const saRecordData = location?.state;
 	const idSa = location?.state?.idSa;
+	const isGasServiceType = isSelectedOptionSemantic(
+		data_service_type,
+		saInfoObj?.serviceType,
+		SERVICE_TYPE_VALUE.GAS
+	);
+	const isPjbgServiceAgreementType = isSelectedOptionSemantic(
+		data_sa_type,
+		saInfoObj?.serviceAgreementType,
+		SERVICE_AGREEMENT_TYPE_VALUE.PJBG
+	);
 
 	// Use Effect
 	useEffect(() => {
@@ -589,9 +606,7 @@ const UpdateServiceAgreement = ({ saType }) => {
 
 
 	useEffect(() => {
-		if (data_approval_detail?.length > 0) {
-			setDataTableApproval(data_approval_detail);
-		}
+		setDataTableApproval(data_approval_detail || []);
 	}, [data_approval_detail]);
 
 	// handle get detail approval
@@ -697,7 +712,7 @@ const UpdateServiceAgreement = ({ saType }) => {
 	};
 	const validateGasInPlanDate = () => {
 		let obj2 = saInfoObj.gasInPlanDate;
-		if (saInfoObj.serviceType === 608 && (obj2 !== undefined || obj2 !== null) && !saInfoObj.alreadyGasIn) {
+		if (isGasServiceType && (obj2 !== undefined || obj2 !== null) && !saInfoObj.alreadyGasIn) {
 			return obj2;
 		} else {
 			return true;
@@ -757,9 +772,11 @@ const UpdateServiceAgreement = ({ saType }) => {
 			saDate: moment(saInfoObj.serviceAgreementDate).format('YYYY-MM-DD')
 			// saDate: 2023-10-20"
 		}
+		setLoadingChooseProduct(true);
 		dispatch(getDetailProductSa({ body: body }))
 			.unwrap()
 			.then((data) => {
+				setLoadingChooseProduct(false);
 				if (data.product !== null) {
 					// Start DDL Product Selected
 					const tempProductDetail = data?.product?.productDetail;
@@ -894,26 +911,26 @@ const UpdateServiceAgreement = ({ saType }) => {
 							description: item?.description
 						}
 					})
-					const dataDetailPricing = (data?.product?.productPricing?.priceRuleTiering || []).map((item, index) => {
+					const dataDetailPricing = (data?.product?.productPricing?.priceRuleTiering || []).filter(Boolean).map((item, index) => {
 						return {
-							currency: item.currency,
-							currencyId: item.currency,
-							description: item.description,
+							currency: item?.currency,
+							currencyId: item?.currency,
+							description: item?.description,
 							flag: null,
-							id: item.priceCodeId,
-							idPricing: item.pricingRuleDetailId,
-							key: index + 1,
-							lineNumber: item.lineNumber,
-							max: item.max,
+							id: item?.priceCodeId,
+							idPricing: item?.pricingRuleDetailId,
+							key: `${item?.priceCodeId ?? 'pc'}-${item?.min ?? 0}-${item?.max ?? 'unlim'}-${index}`,
+							lineNumber: item?.lineNumber,
+							max: item?.max,
 							maximumName: null,
-							min: item.min,
-							priceCode: item.priceCodeId,
-							priceCodeName: item.priceCode,
-							priceDetail: `${item.value}/${item.currencyName}/${item.uomName}`,
-							unlimited: item.isUnlim,
-							uom: item.uom,
-							uomName: item.uom,
-							value: item.value,
+							min: item?.min,
+							priceCode: item?.priceCodeId,
+							priceCodeName: item?.priceCode,
+							priceDetail: `${item?.value}/${item?.currencyName}/${item?.uomName}`,
+							unlimited: item?.isUnlim,
+							uom: item?.uom,
+							uomName: item?.uom,
+							value: item?.value,
 							adjustment: item?.adjustment?.adjustmentText,
 							adjustmentId: item?.adjustment?.priceAdjustmentDetailId
 						}
@@ -944,6 +961,7 @@ const UpdateServiceAgreement = ({ saType }) => {
 				}
 			})
 			.catch(() => {
+				setLoadingChooseProduct(false);
 				console.log("error");
 			});
 	}
@@ -1079,26 +1097,26 @@ const UpdateServiceAgreement = ({ saType }) => {
 							description: item?.description
 						}
 					})
-					const dataDetailPricing = (data?.productPricing?.priceRuleTiering || []).map((item, index) => {
+					const dataDetailPricing = (data?.productPricing?.priceRuleTiering || []).filter(Boolean).map((item, index) => {
 						return {
-							currency: item.currency,
-							currencyId: item.currency,
-							description: item.description,
+							currency: item?.currency,
+							currencyId: item?.currency,
+							description: item?.description,
 							flag: null,
-							id: item.priceCodeId,
-							idPricing: item.pricingRuleDetailId,
-							key: index + 1,
-							lineNumber: item.lineNumber,
-							max: item.max,
+							id: item?.priceCodeId,
+							idPricing: item?.pricingRuleDetailId,
+							key: `${item?.priceCodeId ?? 'pc'}-${item?.min ?? 0}-${item?.max ?? 'unlim'}-${index}`,
+							lineNumber: item?.lineNumber,
+							max: item?.max,
 							maximumName: null,
-							min: item.min,
-							priceCode: item.priceCodeId,
-							priceCodeName: item.priceCode,
-							priceDetail: `${item.value}/${item.currencyName}/${item.uomName}`,
-							unlimited: item.isUnlim,
-							uom: item.uom,
-							uomName: item.uom,
-							value: item.value,
+							min: item?.min,
+							priceCode: item?.priceCodeId,
+							priceCodeName: item?.priceCode,
+							priceDetail: `${item?.value}/${item?.currencyName}/${item?.uomName}`,
+							unlimited: item?.isUnlim,
+							uom: item?.uom,
+							uomName: item?.uom,
+							value: item?.value,
 							adjustment: item?.adjustment?.adjustmentText,
 							adjustmentId: item?.adjustment?.priceAdjustmentDetailId
 						}
@@ -1169,7 +1187,7 @@ const UpdateServiceAgreement = ({ saType }) => {
 					setSaInfoObj={setSaInfoObj}
 				/>
 			),
-			disabled: false, 
+			disabled: false,
 			// allValidateSaInfo() || !validateSaNumb(),
 		},
 		{
@@ -1186,6 +1204,7 @@ const UpdateServiceAgreement = ({ saType }) => {
 					setDataTableDetailProduct={setDataTableDetailProduct}
 					modalChooseProduct={modalChooseProduct}
 					setModalChooseProduct={setModalChooseProduct}
+					loadingChooseProduct={loadingChooseProduct}
 					dataTableProduct={dataTableProduct}
 					setDataTableProduct={setDataTableProduct}
 					dataPricing={dataPricing}
@@ -1212,6 +1231,7 @@ const UpdateServiceAgreement = ({ saType }) => {
 					ddlPriceCode={ddlPriceCode}
 					ddlPriceRule={ddlPriceRule}
 					dataListVersion={dataListVersion}
+					setDataListVersion={setDataListVersion}
 					setDdlPriceRule={setDdlPriceRule}
 					isMain={isMain}
 					data_detail={data_detail}
@@ -1265,6 +1285,7 @@ const UpdateServiceAgreement = ({ saType }) => {
 					type={"create"}
 					data={listDataAttachment}
 					updateData={setListDataAttachment}
+					saStatus={saRecordData.status}
 				/>
 			),
 			disabled: false,
@@ -1272,106 +1293,111 @@ const UpdateServiceAgreement = ({ saType }) => {
 	];
 
 	const navigate = useNavigate();
+
+	const getCheckValidateCreateSaBody = (step = current) => {
+		if (step === 0 && isGasServiceType && isMain === "Y") {
+			return {
+				saId: idSa,
+				accountId: idAccount,
+				isMain: true,
+				productId: null,
+				startDate: null,
+				endDate: null,
+				saType: "main",
+			};
+		}
+
+		if (saRecordData?.saType === "Amendment") {
+			return {
+				saId: idSa,
+				accountId: idAccount,
+				isMain: false,
+				productId: null,
+				startDate: moment(saInfoObj.startDate).format("YYYY-MM-DD"),
+				endDate: moment(saInfoObj.endDate).format("YYYY-MM-DD"),
+				saType: "Amendment",
+				saReferenceNumber: saReferenceNumber,
+			};
+		}
+
+		if (step === 1 && saRecordData?.saType === "Addon") {
+			return {
+				saId: idSa,
+				accountId: idAccount,
+				isMain: false,
+				productId: saDetailObj?.productId,
+				startDate: moment(saInfoObj.startDate).format("YYYY-MM-DD"),
+				endDate: moment(saInfoObj.endDate).format("YYYY-MM-DD"),
+				saType: "addon",
+				saReferenceNumber: saReferenceNumber,
+			};
+		}
+
+		return null;
+	};
+
+	const runCheckValidateCreateSa = async (step = current) => {
+		const body = getCheckValidateCreateSaBody(step);
+
+		if (!body) {
+			return true;
+		}
+
+		try {
+			const data = await dispatch(checkValidateCreateSa({ body })).unwrap();
+
+			if (data?.isCreated === true) {
+				return true;
+			}
+
+			setModalValidateSa(true);
+			setMessageValidateSa(data?.message);
+			return false;
+		} catch (error) {
+			if (error?.data) {
+				const message = error?.data?.message;
+				const isCreated = error?.data?.data?.isCreated;
+
+				if (isCreated === false || hasValue(message)) {
+					setModalValidateSa(true);
+					setMessageValidateSa(message);
+				}
+			}
+
+			return false;
+		}
+	};
+
+	const handleSaveAsDraft = async () => {
+		setLoadingNext(true);
+		setTypeSubmit("draft");
+		setConfirmationRemark("");
+
+		try {
+			await form.validateFields(["serviceType", "serviceAgreementNumber"]);
+
+			const isCreateValid = await runCheckValidateCreateSa();
+			if (!isCreateValid) {
+				return;
+			}
+
+			handleSubmitForm(form.getFieldsValue(true), "draft");
+		} catch (_error) {
+			return;
+		} finally {
+			setLoadingNext(false);
+		}
+	};
+
 	const next = () => {
-    if (current === 0 && saInfoObj.serviceType === 608 && isMain === "Y") {
-      const body = {
-        saId:idSa,
-        accountId: idAccount,
-        isMain: true,
-        productId: null,
-        startDate: null,
-        endDate: null,
-        saType: "main",
-      };
-      dispatch(checkValidateCreateSa({ body }))
-        .unwrap()
-        .then((data) => {
-          if (data?.data?.isCreated === true) {
-            setCurrent(current + 1);
-          } else {
-            setModalValidateSa(true);
-            setMessageValidateSa(data?.message);
-            setCurrent((current = 0));
-          }
-        })
-        .catch((error) => {
-          if (error?.data) {
-            let message = error?.data?.message;
-            if (error?.data?.data?.isCreated === false) {
-              setModalValidateSa(true);
-              setMessageValidateSa(message);
-              setCurrent((current = 0));
-            }
-          }
-        });
-    } else if (saRecordData?.saType === "Amendment") {
-      const body = {
-        saId:idSa,
-        accountId: idAccount,
-        isMain: false,
-        productId: null,
-        startDate: moment(saInfoObj.startDate).format("YYYY-MM-DD"),
-        endDate: moment(saInfoObj.endDate).format("YYYY-MM-DD"),
-        saType: "Amendment",
-        saReferenceNumber: saReferenceNumber,
-      };
-      dispatch(checkValidateCreateSa({ body }))
-        .unwrap()
-        .then((data) => {
-          if (data?.data?.isCreated === true) {
-            setCurrent(current + 1);
-          } else {
-            setModalValidateSa(true);
-            setMessageValidateSa(data?.message);
-            setCurrent((current = 0));
-          }
-        })
-        .catch((error) => {
-          if (error?.data) {
-            let message = error?.data?.message;
-            if (error?.data?.data?.isCreated === false) {
-              setModalValidateSa(true);
-              setMessageValidateSa(message);
-              setCurrent((current = 0));
-            }
-          }
-        });
-    } else if (current === 1 && saRecordData?.saType === "Addon") {
-      const body = {
-        saId:idSa,
-        accountId: idAccount,
-        isMain: false,
-        productId: saDetailObj?.productId,
-        startDate: moment(saInfoObj.startDate).format("YYYY-MM-DD"),
-        endDate: moment(saInfoObj.endDate).format("YYYY-MM-DD"),
-        saType: "addon",
-        saReferenceNumber: saReferenceNumber,
-      };
-      dispatch(checkValidateCreateSa({ body }))
-        .unwrap()
-        .then((data) => {
-          if (data?.data?.isCreated === true) {
-            setCurrent(current + 1);
-          } else {
-            setModalValidateSa(true);
-            setMessageValidateSa(data?.message);
-            setCurrent((current = 1));
-          }
-        })
-        .catch((error) => {
-          if (error?.data) {
-            let message = error?.data?.message;
-            if (error?.data?.data?.isCreated === false) {
-              setModalValidateSa(true);
-              setMessageValidateSa(message);
-              setCurrent((current = 1));
-            }
-          }
-        });
-    } else {
-      setCurrent(current + 1);
-    }
-  };
+		runCheckValidateCreateSa(current).then((isCreated) => {
+			if (!isCreated) {
+				return;
+			}
+
+			setCurrent(current + 1);
+		});
+	};
 	const prev = () => {
 		setCurrent(current - 1);
 	};
@@ -1382,83 +1408,179 @@ const UpdateServiceAgreement = ({ saType }) => {
 	};
 
 	const handleButtonNext = () => {
-		switch(steps[current]?.title){
-		  case "Service Agreement Information":
-			functionCheckSaInformation();
-			break;
+		switch (steps[current]?.title) {
+			case "Service Agreement Information":
+				functionCheckSaInformation();
+				break;
 			case "Service Agreement Detail":
-			  funtionCheckSaDetail();
-			  break;
+				funtionCheckSaDetail();
+				break;
 			case "Approval":
-			  functionCheckApproval();
-			  break;
-		  default:
-			next();
-			scrollRightHandler();
-			break;
+				functionCheckApproval();
+				break;
+			default:
+				next();
+				scrollRightHandler();
+				break;
 		}
-	  };
+	};
 
-	const handleMandatory = (setTabPagesSaDetail = () => {}, listDataAttachment, errorFields) => {
+	/**
+	 * Handle clicking on stepper to navigate between steps
+	 * - Backward: can jump freely without validation
+	 * - Forward: can only go to next step (no skipping), with validation
+	 */
+	const handleSetCurrent = (newCurrent) => {
+		// Backward navigation - can jump freely
+		if (newCurrent < current) {
+			setCurrent(newCurrent);
+			return;
+		}
+
+		// Forward navigation - can only go to next step (no skipping)
+		if (newCurrent > current + 1) {
+			return;
+		}
+
+		// Forward navigation - use existing step-specific validation
+		switch (filteredSteps[current]?.title) {
+			case "Service Agreement Information":
+				functionCheckSaInformation();
+				break;
+			case "Service Agreement Detail":
+				funtionCheckSaDetail();
+				break;
+			case "Approval":
+				functionCheckApproval();
+				break;
+			case "Attachment":
+				setCurrent(newCurrent);
+				scrollRightHandler();
+				break;
+			default:
+				setCurrent(newCurrent);
+				scrollRightHandler();
+				break;
+		}
+	};
+
+	const handleMandatory = (setTabPagesSaDetail = () => { }, listDataAttachment, errorFields) => {
 		setTabPagesSaDetail((prevState) => {
-		  const res = prevState.map((item) => {
-			const errorBadge = item.value === "Calculation Rule" || item?.value === "Pricing" ? (errorFields || []).reduce(
-			  (current, next) =>
-				item?.paramValue?.includes(next.name[0]) ? current + 1 : current,
-			  0
-			) : 0;
-			return {
-			  value: item.value,
-			  paramValue: item.paramValue,
-			  errorBadge,
-			};
-		  });
-		  return res;
+			const res = prevState.map((item) => {
+				const errorBadge = item.value === "Calculation Rule" || item?.value === "Pricing" ? (errorFields || []).reduce(
+					(current, next) =>
+						item?.paramValue?.includes(next.name[0]) ? current + 1 : current,
+					0
+				) : 0;
+				return {
+					value: item.value,
+					paramValue: item.paramValue,
+					errorBadge,
+				};
+			});
+			return res;
 		});
-	  }
+	}
 
-  const functionCheckSaInformation = () => {
-    form.validateFields()
-    .then((values) => {
-      next();
-      scrollRightHandler();
-    })
-    .catch((error) => {
-      console.error("Validation failed:", error);
-      // Handle the rejected result here
-    });
-  }
-  
-  const functionCheckApproval = () => {
-    form.validateFields()
-    .then((values) => {
-      next();
-      scrollRightHandler();
-    })
-    .catch((error) => {
-      console.error("Validation failed:", error);
-      // Handle the rejected result here
-    });
-  }
+	// Fields for SA Information step
+	let saInformationFields = [
+		'serviceType',
+		'serviceAgreementNumber',
+		'serviceAgreementType',
+		'saReferenceNumber',
+		'serviceAgreementDate',
+		'startDate',
+		'endDate',
+		'termOfPayment',
+		'billingCycle',
+		'invoiceTemplate',
+	];
 
-  const funtionCheckSaDetail = () => {
-      form
-        .validateFields()
-        .then((values) => {
-          handleMandatory(setTabPagesSaDetail, listDataAttachment);
-          if(dataPricing?.length < 2 && hasValue(saDetailObj?.pricingRule)) {
-            setModalSaDetail(true)
-          } else {
-            next();
-            scrollRightHandler();
-          }
-        })
-        .catch((error) => {
-          console.error("Validation failed:", error);
-          handleMandatory(setTabPagesSaDetail, listDataAttachment, error.errorFields);
-          // Handle the rejected result here
-        });
-  }
+	if (saRecordData?.typeSa === "addon") {
+		saInformationFields = [
+			...saInformationFields,
+			'saReferenceNumber'
+		];
+	}
+
+	if (isPjbgServiceAgreementType) {
+		saInformationFields = [
+			...saInformationFields,
+			'pjbgType'
+		];
+	}
+
+	let saDetailFields = [
+		'createFrom',
+		'chooseProduct',
+		'productVersionId',
+		'priceCode',
+		'pricingRule',
+		'calculationType',
+	];
+
+	if (saRecordData?.typeSa === 'addon') {
+		saDetailFields = [...saDetailFields, 'serviceAgreementChildType'];
+	}
+
+	if (isGasServiceType && saRecordData?.isMain === "Y" && !saInfoObj?.alreadyGasIn) {
+		saInformationFields = [
+			...saInformationFields,
+			'gasInPlanDate'
+		];
+	}
+
+	if (segment === "KI") {
+		saInformationFields = [
+			...saInformationFields,
+			'commitmentDate',
+		];
+	}
+
+	const functionCheckSaInformation = () => {
+		form.validateFields(saInformationFields)
+			.then((values) => {
+				next();
+				scrollRightHandler();
+			})
+			.catch((error) => {
+				console.error("Validation failed:", error);
+				// Handle the rejected result here
+			});
+	}
+
+	const approvalFields = ['appHierId'];
+
+	const functionCheckApproval = () => {
+		form.validateFields(approvalFields)
+			.then((values) => {
+				next();
+				scrollRightHandler();
+			})
+			.catch((error) => {
+				console.error("Validation failed:", error);
+				// Handle the rejected result here
+			});
+	}
+
+	const funtionCheckSaDetail = () => {
+		form
+			.validateFields(saDetailFields)
+			.then((values) => {
+				handleMandatory(setTabPagesSaDetail, listDataAttachment);
+				if (dataPricing?.length < 2 && hasValue(saDetailObj?.pricingRule)) {
+					setModalSaDetail(true)
+				} else {
+					next();
+					scrollRightHandler();
+				}
+			})
+			.catch((error) => {
+				console.error("Validation failed:", error);
+				handleMandatory(setTabPagesSaDetail, listDataAttachment, error.errorFields);
+				// Handle the rejected result here
+			});
+	}
 
 	// For Check Step Amount
 	// const isThreeSteps = (saRecordData.status === "DRAFT" && saRecordData.approvalStatus !== "DRAFT") ||  (saRecordData.status === "ACTIVE" && saRecordData.approvalStatus === "APPROVED") ? true : false
@@ -1485,7 +1607,10 @@ const UpdateServiceAgreement = ({ saType }) => {
 	};
 
 	// Save/show to confirmation modal
-	const handleSubmitForm = (formValue) => {
+	const handleSubmitForm = (formValue, submitType = typeSubmit) => {
+		if (submitType === "draft") {
+			setConfirmationRemark("");
+		}
 
 		const objPaymentType = {
 			name: {
@@ -1528,7 +1653,7 @@ const UpdateServiceAgreement = ({ saType }) => {
 
 		const bodyIsDraft = {
 			saId: saRecordData?.idSa,
-			isSubmit: typeSubmit !== "draft" && true,
+			isSubmit: submitType !== "draft",
 			saInfo: {
 				saReferenceNumber: saReferenceNumber ? saReferenceNumber : null,
 				accountId: idAccount,
@@ -1629,6 +1754,7 @@ const UpdateServiceAgreement = ({ saType }) => {
 		// };
 		const bodyIsActive = {
 			isSubmit: typeSubmit !== "draft" && true,
+			...(typeSubmit !== "draft" ? { remark: confirmationRemark || null } : {}),
 			saInfo: {
 				description: saInfoObj.description,
 				endDate: moment(saInfoObj.endDate).format(dateFormatting.dateFormal),
@@ -1660,6 +1786,7 @@ const UpdateServiceAgreement = ({ saType }) => {
 		if (saRecordData.status !== "ACTIVE") {
 			var body = {
 				...dataFinal,
+				...(typeSubmit !== "draft" ? { remark: confirmationRemark || null } : {}),
 				saDetail: {
 					...dataFinal?.saDetail,
 					productPricing: {
@@ -1669,12 +1796,12 @@ const UpdateServiceAgreement = ({ saType }) => {
 				}
 			}
 		}
-// console.log(body, ' body');
+		// console.log(body, ' body');
 
+		setLoadingForm(true);
 		dispatch(updateServiceAgreement({ body: saRecordData.status === "ACTIVE" ? bodyIsActive : body }))
 			.unwrap()
 			.then(async (data) => {
-				setLoadingForm(true);
 				const idServiceagreement = data.saId;
 				const filterDataAttach = listDataAttachment.filter(
 					(item) => item.dataType !== "exist"
@@ -1692,7 +1819,7 @@ const UpdateServiceAgreement = ({ saType }) => {
 					);
 				}
 				setLoadingForm(false);
-				setModalConfirm(false);
+				handleCloseConfirmationModal();
 			})
 			.catch((error) => {
 				if (Math.floor((error.response.data.code || 0) / 100) === 5) {
@@ -1705,9 +1832,15 @@ const UpdateServiceAgreement = ({ saType }) => {
 					setBodyError({ message });
 					setModalError(true);
 				}
-				setModalConfirm(false);
+				setLoadingForm(false);
+				handleCloseConfirmationModal();
 			});
 		dispatch(resetDataDetail());
+	};
+
+	const handleCloseConfirmationModal = () => {
+		setModalConfirm(false);
+		setConfirmationRemark("");
 	};
 
 	const handleCloseModalError = () => {
@@ -1721,19 +1854,21 @@ const UpdateServiceAgreement = ({ saType }) => {
 	};
 
 	// console.log(dataTermOfService, ' data tos depan');
-	
+
 	return (
-		<div>
-			<LayoutMenu>
-				<Spin spinning={isLoading}>
-					<BreadCrumbAdvanced routes={routes(idAccount)} />
-					<HeaderDetail
-						data_header={["CUSTOMER INFORMATION", "ACCOUNT INFORMATION"]}
-						dispatch={dispatch}
-						idAccount={idAccount}
-						idCustomer={idCustomer}
-						type={type}
-					/>
+		<>
+			<Spin spinning={isLoading}>
+				<div className="flex flex-col gap-y-4">
+					<NxBreadCrumb routes={routes(idAccount)} />
+					<div ref={headerRef}>
+						<HeaderDetail
+							data_header={["CUSTOMER INFORMATION", "ACCOUNT INFORMATION"]}
+							dispatch={dispatch}
+							idAccount={idAccount}
+							idCustomer={idCustomer}
+							type={type}
+						/>
+					</div>
 					<Form
 						id="SaForm"
 						form={form}
@@ -1741,9 +1876,10 @@ const UpdateServiceAgreement = ({ saType }) => {
 						onFinish={handleSubmitForm}
 						// onFinishFailed={handleErrorSubmit}
 						scrollToFirstError={true}
+						className="flex flex-col gap-y-4"
 					>
-						{/* s Contents */}
-						<BaseContainer>
+						{/* Stepper Container - Separate & Clickable */}
+						<NxBaseContainer border>
 							<div className="flex flex-row gap-x-6 justify-center">
 								<span className="mt-[10px]">
 									<LeftCircleOutlined
@@ -1758,6 +1894,7 @@ const UpdateServiceAgreement = ({ saType }) => {
 								>
 									<Steps
 										current={current}
+										onChange={handleSetCurrent}
 										items={filteredItems}
 										labelPlacement="vertical"
 									/>
@@ -1769,82 +1906,82 @@ const UpdateServiceAgreement = ({ saType }) => {
 									/>
 								</span>
 							</div>
-							<div className="steps-content my-6">
-								{filteredSteps[current].content}
+						</NxBaseContainer>
+
+						{/* Step Contents - Rendered with visibility control */}
+						{filteredSteps.map((step, index) => (
+							<div key={`step-content-${index}`} className={current !== index ? "hidden" : ""}>
+								{step.content}
 							</div>
-						</BaseContainer>
+						))}
 
 						{/* Section Action Steps */}
-						<div className="steps-action my-8 flex w-full justify-between gap-x-2">
-							<ButtonComponent
-								type={"submit"}
-								icon={<SVGIcon name="IconArrowNarrowLeft" width={24} />}
-								onClick={() => {
-									setModalBack(true);
-								}}
-							>
-								Back
-							</ButtonComponent>
-							<div className="flex w-full justify-end gap-x-4">
+						<NxBaseContainer border>
+							<div className="steps-action flex w-full justify-between gap-x-2">
 								<ButtonComponent
-									icon={<SVGIcon name={`IconButtonReset`} width={24} />}
-									type="submit"
-									onClick={() => handleReset()}
+									type={"menu"}
+									onClick={() => {
+										setModalBack(true);
+									}}
 								>
-									Reset
+									Cancel
 								</ButtonComponent>
-								{current > 0 && (
+								<div className="flex w-full justify-end gap-x-2">
+									
 									<ButtonComponent
+										icon={<SVGIcon name={`IconButtonClear`} width={16} />}
+										type="reject"
+										onClick={() => handleReset()}
+									>
+										Clear Data
+									</ButtonComponent>
+									
+									
+									<ButtonComponent
+										type="secondary"
+										onClick={handleSaveAsDraft}
+										loading={loadingNext}
+									>
+										Save as Draft
+									</ButtonComponent>
+									{/* )} */}
+									{current > 0 && (
+										<ButtonComponent
 										onClick={() => {
 											prev();
 											scrollLeftHandler();
 										}}
-										type={"submit"}
-										icon={<SVGIcon name="IconArrowNarrowLeft" width={24} />}
-									>
-										Previous
-									</ButtonComponent>
-								)}
-								{current < filteredItems.length - 1 && (
-									<Button
-										onClick={handleButtonNext}
-										type="primary"
-										className="ant-btn ant-btn-submit flex w-full justify-center"
-										disabled={filteredItems[current].disabled}
-									>
-										<span className="p-1 text-[18px] text-center">Next</span>
-										<RightOutlined
-											style={{
-												justifyItems: "center",
-												fontSize: "18px",
-												color: "#fff",
-											}}
-										/>
-									</Button>
-								)}
-								{current === filteredItems.length - 1 && (
-									<>
-										<ButtonComponent
-											htmlType="submit"
-											type="submit"
-											onClick={() => setTypeSubmit("draft")}
+										type={"menu"}
+										loading={loadingNext}
 										>
-											Save as Draft
+										Previous
 										</ButtonComponent>
+									)}
+									{current < filteredItems.length - 1 && (
+										<ButtonComponent
+											onClick={handleButtonNext}
+											type={"submit"}
+											disabled={steps[current].disabled}
+											loading={loadingNext}
+										>
+											Next
+										</ButtonComponent>
+									)}
+									{current === filteredItems.length - 1 && (
 										<ButtonComponent
 											htmlType="submit"
-											type="submit"
+											type="approve"
 											onClick={() => setTypeSubmit("submit")}
 										>
-											Save & Submit
+											Submit
 										</ButtonComponent>
-									</>
-								)}
+									)}
+								</div>
 							</div>
-						</div>
+						</NxBaseContainer>
 					</Form>
-				</Spin>
-			</LayoutMenu>
+				</div>
+			</Spin>
 
 			{/* Modal Back */}
 			<ModalConfirm
@@ -1867,9 +2004,13 @@ const UpdateServiceAgreement = ({ saType }) => {
 			{/* Modal COnfirmation SA */}
 			<ConfirmationSa
 				isOpen={modalConfirm}
-				setModalConfirm={setModalConfirm}
+				setModalConfirm={handleCloseConfirmationModal}
 				dataFinal={dataFinal}
 				handleConfirm={handleConfirm}
+				typeSubmit={typeSubmit}
+				remark={confirmationRemark}
+				setRemark={setConfirmationRemark}
+				loadingSubmit={loadingForm}
 				listDataAttachment={listDataAttachment}
 				saInfoObj={saInfoObj}
 				saDetailObj={saDetailObj}
@@ -1904,24 +2045,26 @@ const UpdateServiceAgreement = ({ saType }) => {
 				</div>
 			</ModalError>
 
-      {/* modal validate table at SA detail */}
-      {modalSaDetail ? (
-        <ModalError
-          isOpen={modalSaDetail}
-          handleOk={() => setModalSaDetail(false)}
-          handleCancel={() => setModalSaDetail(false)}
-        >
-          <div className="px-5 pt-5 pb-[10px] justify-center">
-            <div className="w-full flex gap-[20px]">
-              {IconModal["icon_error_default"]}
-              <p className="text-[18px] font-bold">{"Failed"}</p>
-            </div>
-            <p className="pl-[70px]">
-			{`Please Input Pricing Rule, it must contain at least two tier!.`}
-            </p>
-          </div>
-        </ModalError>
-      ) : null}
+			{/* modal validate table at SA detail */}
+			{
+				modalSaDetail ? (
+					<ModalError
+						isOpen={modalSaDetail}
+						handleOk={() => setModalSaDetail(false)}
+						handleCancel={() => setModalSaDetail(false)}
+					>
+						<div className="px-5 pt-5 pb-[10px] justify-center">
+							<div className="w-full flex gap-[20px]">
+								{IconModal["icon_error_default"]}
+								<p className="text-[18px] font-bold">{"Failed"}</p>
+							</div>
+							<p className="pl-[70px]">
+								{`Please Input Pricing Rule, it must contain at least two tier!.`}
+							</p>
+						</div>
+					</ModalError>
+				) : null
+			}
 
 			{/** Modal Validate Sa Create */}
 			<ModalError
@@ -1938,7 +2081,7 @@ const UpdateServiceAgreement = ({ saType }) => {
 					<p className="pl-[70px]">{messageValidateSa}</p>
 				</div>
 			</ModalError>
-		</div>
+		</>
 	);
 };
 

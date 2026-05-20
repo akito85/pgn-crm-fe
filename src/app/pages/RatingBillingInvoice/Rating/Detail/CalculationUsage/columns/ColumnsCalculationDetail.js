@@ -1,0 +1,424 @@
+import React from "react";
+import {
+  hasValue,
+  renderColumn,
+  renderDateColumn,
+} from "../../../../../../../utils";
+import { getColumnSearchPropsUseFilteredValue } from "../../../../../../../utils/getColumnSearchProps";
+import {
+  currencyFormatting,
+  energiFormatting,
+  numberFormatting,
+  usageFormatting,
+} from "../../../../../../../utils/formatCurrency";
+
+export const columnsCalculationDetail = (
+  page,
+  pageSize,
+  searchInput,
+  searchedColumn,
+  searchText,
+  handleSearch,
+  search = {},
+) => [
+  {
+    title: "No",
+    dataIndex: "no",
+    key: "no",
+    width: 60,
+    align: "center",
+    render: (text, record, index) => (page - 1) * pageSize + index + 1,
+  },
+  {
+    title: "Time Unit",
+    dataIndex: "timeUnit",
+    key: "timeUnit",
+    isClassification: true,
+    width: 120,
+    sorter: true,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "timeUnit",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      false,
+      "input",
+    ),
+    render: (text) =>
+      renderColumn(
+        "timeUnit",
+        hasValue(search["timeUnit"]),
+        searchText,
+        text || "",
+        false,
+        "input",
+        search,
+      ),
+  },
+  {
+    title: "Transaction Date",
+    dataIndex: "transactionDate",
+    key: "transactionDate",
+    width: 180,
+    sorter: true,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "transactionDate",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+      "date",
+    ),
+    render: (text) =>
+      renderDateColumn(
+        "transactionDate",
+        hasValue(search["transactionDate"]),
+        searchText,
+        text,
+        "date",
+        search,
+      ),
+  },
+  {
+    title: "Usage",
+    dataIndex: "usage",
+    key: "usage",
+    width: 150,
+    align: "right",
+    sorter: true,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "usage",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      false,
+      "input",
+    ),
+    render: (text, record) =>
+      renderColumn(
+        "usage",
+        hasValue(search["usage"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+        record.calculatedUsageUom === "MMBTU" ? "energi" : "usage",
+      ),
+  },
+  {
+    title: "Min Usage",
+    dataIndex: "minUsage",
+    key: "minUsage",
+    width: 150,
+    align: "right",
+    sorter: true,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "minUsage",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      false,
+      "input",
+    ),
+    render: (text, record) =>
+      renderColumn(
+        "minUsage",
+        hasValue(search["minUsage"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+        record.calculatedUsageUom === "MMBTU" ? "energi" : "usage",
+      ),
+  },
+  {
+    title: "Max Usage",
+    dataIndex: "maxUsage",
+    key: "maxUsage",
+    width: 150,
+    align: "right",
+    sorter: true,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "maxUsage",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      false,
+      "input",
+    ),
+    render: (text, record) =>
+      renderColumn(
+        "maxUsage",
+        hasValue(search["maxUsage"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+        record.calculatedUsageUom === "MMBTU" ? "energi" : "usage",
+      ),
+  },
+  {
+    title: "SA Type",
+    dataIndex: "saType",
+    key: "saType",
+    isClassification: true,
+    width: 120,
+    sorter: true,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "saType",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      false,
+      "input",
+    ),
+    render: (text) =>
+      renderColumn(
+        "saType",
+        hasValue(search["saType"]),
+        searchText,
+        text || "",
+        false,
+        "input",
+        search,
+      ),
+  },
+  // CALCULATED USAGE PARTITION
+  {
+    title: "CALCULATED USAGE PARTITION",
+    children: [
+      {
+        title: "UOM",
+        dataIndex: "calculatedUsageUom",
+        key: "calculatedUsageUom",
+        width: 120,
+        align: "center",
+        sorter: true,
+        render: (text) => text || "",
+      },
+      {
+        title: "MIN",
+        dataIndex: "calculatedUsageMin",
+        key: "calculatedUsageMin",
+        width: 130,
+        isNumber: true,
+        sorter: true,
+        render: (text, record) =>
+          record.calculatedUsageUom === "MMBTU"
+            ? energiFormatting(text)
+            : usageFormatting(text),
+      },
+      {
+        title: "NORMAL",
+        dataIndex: "calculatedUsageNormal",
+        key: "calculatedUsageNormal",
+        width: 150,
+        isNumber: true,
+        sorter: true,
+        render: (text, record) =>
+          record.calculatedUsageUom === "MMBTU"
+            ? energiFormatting(text)
+            : usageFormatting(text),
+      },
+      {
+        title: "OUP",
+        dataIndex: "calculatedUsageOup",
+        key: "calculatedUsageOup",
+        width: 130,
+        isNumber: true,
+        sorter: true,
+        render: (text, record) =>
+          record.calculatedUsageUom === "MMBTU"
+            ? energiFormatting(text)
+            : usageFormatting(text),
+      },
+    ],
+  },
+  //CONVERTED CALCULATED USAGE PARTITION
+  {
+    title: "CONVERTED CALCULATED USAGE PARTITION",
+    children: [
+      {
+        title: "UOM",
+        dataIndex: "convertedCalculatedUom",
+        key: "convertedCalculatedUom",
+        width: 120,
+        align: "center",
+        sorter: true,
+        render: (text) => text || "",
+      },
+      {
+        title: "MIN",
+        dataIndex: "convertedCalculatedMin",
+        key: "convertedCalculatedMin",
+        width: 130,
+        isNumber: true,
+        sorter: true,
+        render: (text, record) =>
+          record.convertedCalculatedUom === "MMBTU"
+            ? energiFormatting(text)
+            : usageFormatting(text),
+      },
+      {
+        title: "NORMAL",
+        dataIndex: "convertedCalculatedNormal",
+        key: "convertedCalculatedNormal",
+        width: 150,
+        isNumber: true,
+        sorter: true,
+        render: (text, record) =>
+          record.convertedCalculatedUom === "MMBTU"
+            ? energiFormatting(text)
+            : usageFormatting(text),
+      },
+      {
+        title: "OUP",
+        dataIndex: "convertedCalculatedOup",
+        key: "convertedCalculatedOup",
+        width: 130,
+        isNumber: true,
+        sorter: true,
+        render: (text, record) =>
+          record.convertedCalculatedUom === "MMBTU"
+            ? energiFormatting(text)
+            : usageFormatting(text),
+      },
+    ],
+  },
+  // PRICE
+  {
+    title: "PRICE",
+    children: [
+      {
+        title: "PRICE CODE",
+        dataIndex: "priceCode",
+        key: "priceCode",
+        width: 150,
+        align: "center",
+        sorter: true,
+        ...getColumnSearchPropsUseFilteredValue(
+          search,
+          "priceCode",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          false,
+          "input",
+        ),
+        render: (text) =>
+          renderColumn(
+            "priceCode",
+            hasValue(search["priceCode"]),
+            searchText,
+            text || "",
+            false,
+            "input",
+            search,
+          ),
+      },
+      {
+        title: "MIN",
+        dataIndex: "priceMin",
+        key: "priceMin",
+        width: 130,
+        isNumber: true,
+        sorter: true,
+        render: (text) => currencyFormatting(text, "idr"),
+      },
+      {
+        title: "NORMAL",
+        dataIndex: "priceNormal",
+        key: "priceNormal",
+        width: 150,
+        isNumber: true,
+        sorter: true,
+        render: (text) => currencyFormatting(text, "idr"),
+      },
+      {
+        title: "OUP",
+        dataIndex: "priceOup",
+        key: "priceOup",
+        width: 130,
+        isNumber:true,
+        sorter: true,
+        render: (text) => currencyFormatting(text, "idr"),
+      },
+    ],
+  },
+  // AMOUNT PARTITION
+  {
+    title: "AMOUNT PARTITION",
+    children: [
+      {
+        title: "CURRENCY",
+        dataIndex: "amountPartitionCurrency",
+        key: "amountPartitionCurrency",
+        width: 120,
+        isClassification:true,
+        sorter: true,
+        render: (text) => text || "",
+      },
+      {
+        title: "MIN",
+        dataIndex: "amountPartitionMin",
+        key: "amountPartitionMin",
+        width: 150,
+        isNumber:true,
+        sorter: true,
+        render: (text) => currencyFormatting(text, "idr"),
+      },
+      {
+        title: "NORMAL",
+        dataIndex: "amountPartitionNormal",
+        key: "amountPartitionNormal",
+        width: 170,
+        isNumber:true,
+        sorter: true,
+        render: (text) => currencyFormatting(text, "idr"),
+      },
+      {
+        title: "OUP",
+        dataIndex: "amountPartitionOup",
+        key: "amountPartitionOup",
+        width: 150,
+        isNumber:true,
+        sorter: true,
+        render: (text) => currencyFormatting(text, "idr"),
+      },
+    ],
+  },
+  {
+    title: "Amount Partition",
+    dataIndex: "amountPartition",
+    key: "amountPartition",
+    width: 160,
+    isNumber:true,
+    sorter: true,
+    render: (text) => currencyFormatting(text, "idr"),
+  },
+  {
+    title: "Amount Partition Total",
+    dataIndex: "amountPartitionTotal",
+    key: "amountPartitionTotal",
+    width: 180,
+    isNumber:true,
+    sorter: true,
+    render: (text) => currencyFormatting(text, "idr"),
+  },
+];

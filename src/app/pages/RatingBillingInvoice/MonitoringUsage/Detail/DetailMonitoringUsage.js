@@ -1,13 +1,11 @@
 import React, { useCallback, useEffect, useState, useMemo } from "react";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
 import { useLocation, useNavigate } from "react-router-dom";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../../components/BreadCrumb";
-import { Alert, Form, Spin, Tooltip, Tabs } from "antd";
+import { Alert, Button, Form, Spin, Tooltip, Tabs } from "antd";
 import { useDispatch, useSelector } from "react-redux";
-import ButtonComponent from "../../../../../components/ButtonComponent";
 import SVGIcon from "../../../../../assets/Icon/index";
-import { LeftOutlined, WarningOutlined } from "@ant-design/icons";
+import { WarningOutlined, DownloadOutlined } from "@ant-design/icons";
 import {
   addDeletedData,
   addUpdatedData,
@@ -17,10 +15,12 @@ import {
   getListApprovalById,
   updateSingleUsage,
   deleteSingleUsage,
+  clearDetailData,
 } from "../../../../../redux/slices/rating_billing_invoice/monitoring_usage";
 import { showModalError } from "../../../../../redux/slices/general_slice";
 import CardContainer from "../../../../../components/CardContainer";
-import BaseContainer from "../../../../../components/BaseContainer";
+import { FormFooter } from "../../../../../components/FormStepNavigation";
+import CollapsibleContainer from "../../../../../components/CollapsibleContainer";
 import DetailText from "../../../../../components/DetailText";
 import { dateFormatting, hasValue, toTitleCase } from "../../../../../utils";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
@@ -58,6 +58,8 @@ const DetailMonitoringUsage = () => {
   const [tabHeader, setTabHeader] = useState("Upload");
   const [page, setPage] = useState(1);
   const [loadMoreSize] = useState(20);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [showBackWarning, setShowBackWarning] = useState(false);
   const [appHierOptions, setAppHierOptions] = useState([]);
   const [appHierDataDetail, setAppHierDataDetail] = useState([]);
   const [selectedHierarchy, setSelectedHierarchy] = useState();
@@ -70,6 +72,7 @@ const DetailMonitoringUsage = () => {
   const [listDataAttachment, setListDataAttachment] = useState([]);
   const [flag, setFlag] = useState(1);
   const [openConfirmation, setOpenConfirmation] = useState(false);
+  const [isDownloadingFailed, setIsDownloadingFailed] = useState(false);
   const [body, setBody] = useState({});
   const [fixedColumns, setFixedColumns] = useState(() => ({
     left: ["no"],
@@ -104,7 +107,26 @@ const DetailMonitoringUsage = () => {
       dispatch(getApprovalHierarchy({ page: 1, pageSize: 100 }));
       setPage(1);
     }
+    
+    return () => {
+      dispatch(clearDetailData());
+    };
   }, [location, dispatch]);
+
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [hasUnsavedChanges]);
 
   useEffect(() => {
     if (
@@ -203,35 +225,43 @@ const DetailMonitoringUsage = () => {
 
   const handleSaveUpdateUsage = async (formValue) => {
     try {
+      // Helper function untuk convert string dengan thousand separator ke number
+      const parseNumericValue = (value) => {
+        if (value === null || value === undefined || value === "") return null;
+        if (typeof value === "number") return value;
+        // Remove thousand separator dan convert ke number
+        if (typeof value === "string") {
+          const cleaned = value.replace(/,/g, "");
+          const parsed = parseFloat(cleaned);
+          return isNaN(parsed) ? null : parsed;
+        }
+        return null;
+      };
+
       const requestBody = {
         accountNumber: formValue?.accountNumber || null,
         accountName: formValue?.accountName || null,
         costCenter: formValue?.costCenter || null,
-        billingPeriod: formValue?.billingPeriod || null,
         assetSerialNum: formValue?.assetSerialNum || null,
         assetType: formValue?.assetType || null,
-        fdate:
-          formValue?.fdate === false
-            ? null
-            : moment(formValue?.fdate).format(dateFormatting.dateFormal),
-        fhour: hasValue(formValue?.fhour)
-          ? moment(formValue?.fhour).format(dateFormatting.fhour)
+        measDate: formValue?.measDate
+          ? moment(formValue?.measDate).format("YYYY-MM-DDTHH:mm:ss")
           : null,
-        measDate: formValue?.measDate || null,
-        streamId: formValue?.streamId || null,
-        temperature: formValue?.temperature || null,
-        pressure: formValue?.pressure || null,
-        correctionFactor: formValue?.correctionFactor || null,
-        calorie: formValue?.calorie || null,
-        beginStand: formValue?.beginStand || null,
-        endStand: formValue?.endStand || null,
-        volMeasured27: formValue?.volMeasured27 || null,
-        volMeasured60: formValue?.volMeasured60 || null,
-        engMeasured: formValue?.engMeasured || null,
-        ghv: formValue?.ghv || null,
-        volMscf: formValue?.volMscf || null,
-        uncorrectedValue: formValue?.uncorrectedValue || null,
-        taxationRowId: formValue?.taxationRowId || null,
+        streamId: parseNumericValue(formValue?.streamId),
+        temperature: parseNumericValue(formValue?.temperature),
+        pressure: parseNumericValue(formValue?.pressure),
+        correctionFactor: parseNumericValue(formValue?.correctionFactor),
+        calorie: parseNumericValue(formValue?.calorie),
+        beginStand: parseNumericValue(formValue?.beginStand),
+        endStand: parseNumericValue(formValue?.endStand),
+        volMeasured27: parseNumericValue(formValue?.volMeasured27),
+        volMeasured60: parseNumericValue(formValue?.volMeasured60),
+        engMeasured: parseNumericValue(formValue?.engMeasured),
+        ghv: parseNumericValue(formValue?.ghv),
+        volMscf: parseNumericValue(formValue?.volMscf),
+        uncorrectedValue: parseNumericValue(formValue?.uncorrectedValue),
+        sourceRowId: parseNumericValue(formValue?.sourceRowId),
+        sourceName: formValue?.sourceName || null,
         source: formValue?.source || null,
         description: formValue?.description || null,
       };
@@ -240,6 +270,7 @@ const DetailMonitoringUsage = () => {
         updateSingleUsage({
           recordId: recordId,
           data: requestBody,
+          batchId: location?.state?.id,
         })
       );
 
@@ -254,10 +285,27 @@ const DetailMonitoringUsage = () => {
           const updatedRow = {
             ...item,
             ...formValue,
-            billingPeriod: requestBody.billingPeriod,
-            fdate: requestBody.fdate,
-            fhour: requestBody.fhour,
             measDate: requestBody.measDate,
+            fdate: requestBody.measDate
+              ? moment(requestBody.measDate).format(dateFormatting.dateFormal)
+              : null,
+            fhour: requestBody.measDate
+              ? moment(requestBody.measDate).format(dateFormatting.fhour)
+              : null,
+            streamId: requestBody.streamId,
+            temperature: requestBody.temperature,
+            pressure: requestBody.pressure,
+            correctionFactor: requestBody.correctionFactor,
+            calorie: requestBody.calorie,
+            beginStand: requestBody.beginStand,
+            endStand: requestBody.endStand,
+            volMeasured27: requestBody.volMeasured27,
+            volMeasured60: requestBody.volMeasured60,
+            engMeasured: requestBody.engMeasured,
+            ghv: requestBody.ghv,
+            volMscf: requestBody.volMscf,
+            uncorrectedValue: requestBody.uncorrectedValue,
+            sourceRowId: requestBody.sourceRowId,
             status: "SUCCESS",
             recordId: recordId,
           };
@@ -288,6 +336,16 @@ const DetailMonitoringUsage = () => {
 
   // handle back page
   const handleBack = () => {
+    if (hasUnsavedChanges) {
+      setShowBackWarning(true);
+    } else {
+      navigate(-1);
+    }
+  };
+
+  const handleConfirmLeave = () => {
+    setShowBackWarning(false);
+    setHasUnsavedChanges(false);
     navigate(-1);
   };
 
@@ -310,9 +368,11 @@ const DetailMonitoringUsage = () => {
     setDataTable(newData);
     dispatch(addDeletedData(deletedRecord));
     setModalDelete(false);
+    setHasUnsavedChanges(true);
   };
 
   const handleDownloadFailed = () => {
+    setIsDownloadingFailed(true);
     dispatch(getDownloadFailed(location?.state?.id))
       .unwrap()
       .then((response) => {
@@ -320,7 +380,8 @@ const DetailMonitoringUsage = () => {
       })
       .catch((error) => {
         console.error("Download failed", error);
-      });
+      })
+      .finally(() => setIsDownloadingFailed(false));
   };
 
   // breadcrumbs routes
@@ -380,12 +441,14 @@ const DetailMonitoringUsage = () => {
                   }}
                 />
               ) : (
-                <SVGIcon
-                  name="IconDelete"
-                  width={20}
-                  color={"#C0BEC6"}
-                  className={"cursor-not-allowed"}
-                />
+                <div className="cursor-not-allowed inline-block">
+                  <SVGIcon
+                    name="IconDelete"
+                    width={20}
+                    color={"#C0BEC6"}
+                    style={{ pointerEvents: "none" }}
+                  />
+                </div>
               )}
             </Tooltip>
           </div>
@@ -418,7 +481,7 @@ const DetailMonitoringUsage = () => {
   }, [allColumns]);
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
       <Spin spinning={loading}>
         <Form layout="vertical" form={form} onFinish={handleSave}>
@@ -444,7 +507,7 @@ const DetailMonitoringUsage = () => {
                 key="Upload"
                 className="flex flex-col gap-3"
               >
-                <BaseContainer header={"Batch List"} border className="-mt-4">
+                <CollapsibleContainer header={"Batch List"} border className="mt-4">
                   {/* Two Column Layout */}
                   <div className="grid grid-cols-5 gap-x-8 gap-y-0">
                     <DetailText label="Batch ID">
@@ -457,7 +520,7 @@ const DetailMonitoringUsage = () => {
                     <DetailText label="Upload Date">
                       {detail_batch?.batchInformation?.uploadDate}
                     </DetailText>
-                    <DetailText label="Total Usage">
+                    <DetailText label="Total Data">
                       {detail_batch?.batchInformation?.totalUsage}
                     </DetailText>
                     <DetailText label="Total Succeed">
@@ -478,9 +541,31 @@ const DetailMonitoringUsage = () => {
                       </StatusComponent>
                     </DetailText>
                   </div>
-                </BaseContainer>
+                  {detail_batch?.batchInformation?.totalFailed > 0 && (
+                    <div className="mt-1 mb-3 flex justify-start">
+                      <Button
+                        type="link"
+                        onClick={handleDownloadFailed}
+                        loading={isDownloadingFailed}
+                        disabled={isDownloadingFailed}
+                        style={{
+                          color: "#0075BF",
+                          fontSize: "13px",
+                          padding: "0 4px",
+                          height: "auto",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "4px",
+                        }}
+                      >
+                        <DownloadOutlined style={{ fontSize: "16px" }} />
+                        {isDownloadingFailed ? "Downloading..." : "Download Failed Data"}
+                      </Button>
+                    </div>
+                  )}
+                </CollapsibleContainer>
 
-                <BaseContainer header={"Usage List"} border className="mt-1">
+                <CollapsibleContainer header={"Usage List"} border className="mt-1">
                   <div className="my-5">
                     <TableRBI
                       idTable="monitoring-usage-detail-table"
@@ -500,30 +585,7 @@ const DetailMonitoringUsage = () => {
                       loadMoreThreshold={20}
                     />
                   </div>
-                </BaseContainer>
-                <BaseContainer
-                  header={"History Log Information"}
-                  className="mt-1"
-                  border
-                >
-                  <div className="grid grid-cols-5 gap-x-8 gap-y-4">
-                    <DetailText label="Record ID">
-                      {detail_batch?.batchInformation?.batchId}
-                    </DetailText>
-                    <DetailText label="Created Date">
-                      {detail_batch?.batchInformation?.uploadDate}
-                    </DetailText>
-                    <DetailText label="Created By">
-                      {detail_batch?.batchInformation?.uploadBy}
-                    </DetailText>
-                    <DetailText label="Updated Date">
-                      {detail_batch?.batchInformation?.uploadDate}
-                    </DetailText>
-                    <DetailText label="Updated By">
-                      {detail_batch?.batchInformation?.uploadBy}
-                    </DetailText>
-                  </div>
-                </BaseContainer>
+                </CollapsibleContainer>
               </Tabs.TabPane>
 
               <Tabs.TabPane tab="Approval" key="Approval">
@@ -539,59 +601,110 @@ const DetailMonitoringUsage = () => {
             </Tabs>
           </CardContainer>
 
-          {/* Action Buttons */}
-          <div className="w-full flex mt-5">
-            <div className="w-full justify-start">
-              <Form.Item>
-                <ButtonComponent
-                  type={"submit"}
-                  icon={
-                    <LeftOutlined
-                      style={{
-                        color: "#fff",
-                        fontSize: 16,
-                        justifyItems: "left",
-                      }}
-                    />
+                          <CardContainer
+                  header={
+                    <div className="flex justify-between items-center -my-4">
+                      <p className="mt-[15px] font-bold text-primary">
+                        HISTORY LOG INFORMATION
+                      </p>
+                    </div>
                   }
-                  onClick={handleBack}
+                  className="mt-1"
                 >
-                  Back
-                </ButtonComponent>
-              </Form.Item>
-            </div>
-            {detail_batch?.batchInformation?.status !== "COMPLETE" && (
-              <div className="w-full flex justify-end gap-5">
-                <Form.Item>
-                  <ButtonComponent
-                    icon={<SVGIcon name={`IconButtonClear`} width={24} />}
-                    type="submit"
+                  <div className="grid grid-cols-5 gap-x-8 gap-y-4">
+                    <DetailText label="Record ID">
+                      {detail_batch?.batchInformation?.batchId}
+                    </DetailText>
+                    <DetailText label="Created Date">
+                      {detail_batch?.batchInformation?.uploadDate}
+                    </DetailText>
+                    <DetailText label="Created By">
+                      {detail_batch?.batchInformation?.uploadBy}
+                    </DetailText>
+                    <DetailText label="Updated Date">
+                      {detail_batch?.batchInformation?.updatedDate
+                        ? moment(detail_batch.batchInformation.updatedDate).format(
+                            "DD MMM YYYY HH:mm:ss"
+                          )
+                        : ""}
+                    </DetailText>
+                    <DetailText label="Updated By">
+                      {detail_batch?.batchInformation?.updatedBy}
+                    </DetailText>
+                  </div>
+                </CardContainer>
+
+          {detail_batch?.batchInformation?.status !== "COMPLETE" ? (
+            <div className="bg-white rounded-lg border border-[#D6E1F0] p-4 mt-6">
+              <div className="flex w-full justify-between items-center">
+                <Button
+                  onClick={handleBack}
+                  className="!border-[#0075BF] !text-[#0075BF]"
+                >
+                  Cancel
+                </Button>
+                <div className="flex items-center gap-3">
+                  <Button
+                    icon={<SVGIcon name="IconButtonClear" width={18} />}
                     onClick={handleClear}
+                    style={{
+                      backgroundColor: "#BE3036",
+                      borderColor: "#BE3036",
+                      color: "#fff",
+                      borderRadius: "6px",
+                      height: "32px",
+                      display: "flex",
+                      alignItems: "center",
+                      fontSize: "12px",
+                    }}
                   >
-                    Clear
-                  </ButtonComponent>
-                </Form.Item>
-                <Form.Item>
-                  <ButtonComponent
-                    type="submit"
-                    htmlType={"submit"}
-                    onClick={() => setFlag(1)}
+                    Clear Data
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setFlag(1);
+                      form.submit();
+                    }}
+                    style={{
+                      backgroundColor: "#E6F1F9",
+                      borderColor: "#E6F1F9",
+                      color: "#0075BF",
+                      borderRadius: "6px",
+                      height: "32px",
+                      fontSize: "12px",
+                    }}
                   >
                     Save as Draft
-                  </ButtonComponent>
-                </Form.Item>
-                <Form.Item>
-                  <ButtonComponent
-                    type="submit"
-                    htmlType={"submit"}
-                    onClick={() => setFlag(2)}
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setFlag(2);
+                      form.submit();
+                    }}
+                    loading={loading}
+                    disabled={loading}
+                    style={{
+                      backgroundColor: "#388E3C",
+                      borderColor: "#388E3C",
+                      color: "#fff",
+                      borderRadius: "6px",
+                      height: "32px",
+                      fontSize: "12px",
+                    }}
                   >
-                    Save & Submit
-                  </ButtonComponent>
-                </Form.Item>
+                    Submit
+                  </Button>
+                </div>
               </div>
-            )}
-          </div>
+            </div>
+          ) : (
+            <FormFooter
+              onCancel={handleBack}
+              useClearData={false}
+              useSaveDraft={false}
+              useNavigation={false}
+            />
+          )}
         </Form>
 
         <ModalUpdateUsage
@@ -612,11 +725,11 @@ const DetailMonitoringUsage = () => {
           <div className="flex justify-center gap-[20px] mt-6">
             <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
             <p className="text-[18px] font-bold">
-              Are you sure want to delete it?
+              Are you sure you want to delete this record?
             </p>
           </div>
           <Alert
-            message="Warning! if you delete this data, it will be permanently."
+            message="Remember to save your changes! This deletion will only take effect after you click 'Save & Submit' or 'Save as Draft'."
             type={"error"}
           />
         </ModalConfirm>
@@ -630,9 +743,27 @@ const DetailMonitoringUsage = () => {
           listDataAppHierDetail={appHierDataDetail}
           data_detail={body}
           columns={filteredColumns}
+          onSaveSuccess={() => setHasUnsavedChanges(false)}
         />
+
+        <ModalConfirm
+          isOpen={showBackWarning}
+          handleCancel={() => setShowBackWarning(false)}
+          handleOk={handleConfirmLeave}
+          width={500}
+          useOk={true}
+        >
+          <div className="flex justify-center gap-[20px] mt-6">
+            <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
+            <p className="text-[18px] font-bold">You have unsaved changes!</p>
+          </div>
+          <Alert
+            message="This change has not been saved yet. If you leave or continue without saving, all activities in this draft will be lost."
+            type="error"
+          />
+        </ModalConfirm>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

@@ -1,30 +1,29 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import DetailText from "../../../../components/DetailText";
 import { useState } from "react";
-import { Alert, Form, Progress, Select, Spin, Tooltip, Typography } from "antd";
+import { Alert, Form, Progress, Select, message, Tooltip } from "antd";
 import SelectComponent from "../../../../components/SelectComponent";
 import Dragger from "antd/lib/upload/Dragger";
 import { bytesConverter } from "../../../../utils/bytesConverter";
 import SVGIcon from "../../../../assets/Icon/index";
-import InputComponent from "../../../../components/InputComponent";
+import CollapsibleContainer from "../../../../components/CollapsibleContainer";
+
 import ButtonComponent from "../../../../components/ButtonComponent";
 import {
-  CloseOutlined,
+  CloseCircleFilled,
   FileOutlined,
   UndoOutlined,
-  UploadOutlined,
   WarningOutlined,
 } from "@ant-design/icons";
 import TablePagination from "../../../../components/TablePagination";
 import {
-  // deleteSingleUsage, // ❌ Hapus import ini
   getFormatUsageType,
   uploadMonitoringUsage,
 } from "../../../../redux/slices/rating_billing_invoice/monitoring_usage";
 import { useDispatch, useSelector } from "react-redux";
-import { Link } from "react-router-dom";
-import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
 import { useMonitoringList } from "./useMonirotingList";
+import { useNavigate } from "react-router-dom";
+import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
 import {
   ModalAttention,
   ModalConfirm,
@@ -32,34 +31,33 @@ import {
 
 const UploadLayout = ({
   dataTable,
-  setDataTable = () => {},
+  setDataTable = () => { },
   tabHeader,
   id,
   dataHeader,
   type,
-  refreshData = () => {},
+  refreshData = () => { },
 }) => {
   const [format, setFormat] = useState();
-  const [urlLink, setUrlLink] = useState("");
   const [fileList, setFileList] = useState([]);
-  const [fileName, setFileName] = useState("");
   const [fileProgress, setFileProgress] = useState(0);
-  const [dataSource, setDataSource] = useState(null);
-  const [selectedRecord, setSelectedRecord] = useState(null);
-  const [deletedRecord, setDeletedRecord] = useState(null);
-  const [recordId, setRecordId] = useState("");
+  const [recordId] = useState("");
   const [isFileUploadEnabled, setFileUploadEnabled] = useState(false);
-  const [isModalVisible, setModalVisible] = useState(false);
-  const [modalDelete, setModalDelete] = useState(false);
+  const [isLinkModalVisible, setLinkModalVisible] = useState(false);
   const [loadingUpload, setLoadingUpload] = useState(false);
+  const [modalDelete, setModalDelete] = useState(false);
+  const [showRecalculateModal, setShowRecalculateModal] = useState(false);
+
   const MAX_FILE_SIZE = 5000000;
+  const [form] = Form.useForm();
   const { loading } = useSelector((state) => state.monitoring_usage);
   const { columns, page, setPage, pageSize, setPageSize, onSort } =
     useMonitoringList(tabHeader, id);
-  const [tableDataSource, setTableDataSource] = useState([]);
   const dispatch = useDispatch();
-  const [isLinkModalVisible, setLinkModalVisible] = useState(false);
+  const navigate = useNavigate();
   const { list_usage_type } = useSelector((state) => state.monitoring_usage);
+
+  const filePreviewRef = useRef(null);
 
   useEffect(() => {
     try {
@@ -69,190 +67,248 @@ const UploadLayout = ({
     }
   }, [dispatch]);
 
-  // onChange Size
-  const onChangeSize = (page, pageSize) => {
-    setPage(page);
-    setPageSize(pageSize);
-  };
+  const isNeedType = (formatValue) => {
+    const target = formatValue ?? format;
+    if (!target) return false;
 
-  const handleUpdate = (record, values) => {
-    const updatedData = { record };
-    setDataSource((prevDataSource) => {
-      return prevDataSource.map((data) =>
-        data.key === record.key ? { ...data, ...updatedData } : data
-      );
-    });
-    setSelectedRecord(null);
-  };
+    let labelStr = "";
 
-  // ✅ Handle delete - hanya update state lokal (seperti versi sebelumnya)
-  const handleDeleteOk = () => {
-    // Filter data berdasarkan recordId
-    const newData = dataTable.filter((item) => item.recordId !== recordId);
-    
-    // Update state lokal
-    setDataTable(newData);
-    
-    // Tutup modal
-    setModalDelete(false);
-    
-    // Optional: Jika ada callback untuk tracking deleted data
-    // Anda bisa menambahkan dispatch(addDeletedData(deletedRecord)) di sini
-    // jika ingin menyimpan history data yang dihapus
-  };
-
-  // column action dengan recordId
-  const action = [
-    {
-      title: "ACTION",
-      dataIndex: "accountId",
-      align: "center",
-      fixed: "right",
-      render: (id, record, index) => {
-        return (
-          <div className="flex w-full justify-center gap-6">
-            <Tooltip title="Update">
-              <Link
-                to={RBI_ROUTES.MONITORING_USAGE_LIST_UPDATE}
-                state={{ id: id, record: record }}
-              >
-                <div className="pt-1">
-                  <SVGIcon
-                    name="IconEdit"
-                    width={24}
-                    onClick={() => handleUpdate(record)}
-                  />
-                </div>
-              </Link>
-            </Tooltip>
-            <Tooltip title="Delete">
-              <div className="pt-1">
-                <SVGIcon
-                  name="IconDelete"
-                  width={24}
-                  onClick={() => {
-                    setModalDelete(true);
-                    setDeletedRecord(record);
-                    setRecordId(record?.recordId);
-                  }}
-                />
-              </div>
-            </Tooltip>
-          </div>
+    if (typeof target === "object") {
+      const raw = target?.label ?? target?.children ?? target?.name ?? "";
+      if (typeof raw === "string") {
+        labelStr = raw;
+      } else if (Array.isArray(raw)) {
+        labelStr = raw.join("");
+      } else {
+        const matched = list_usage_type?.find(
+          (d) => d.id === target?.value || d.id === target?.key
         );
-      },
-    },
-  ];
+        labelStr = matched?.name ?? "";
+      }
+    } else {
+      labelStr = String(target);
+    }
 
-  // handle pagination
+    return labelStr.toUpperCase() === "NEED";
+  };
+
+  const handleDeleteOk = () => {
+    const newData = dataTable.filter((item) => item.recordId !== recordId);
+    setDataTable(newData);
+    setModalDelete(false);
+  };
+
   const updateDataPagination = (page, pageSize) => {
     return dataTable?.slice((page - 1) * pageSize, page * pageSize);
   };
 
-  // handle format change
   const handleFormat = (value) => {
     setFormat(value);
     setFileUploadEnabled(!!value);
+
+    if (isNeedType(value)) {
+      setShowRecalculateModal(true);
+    }
   };
 
-  // data format
-  const dataFormat = [
-    { id: 1, text: "docs" },
-    { id: 2, text: "xlxs" },
-    { id: 3, text: "csv" },
-  ];
-
-  const handleFileChange = ({ fileList }) => {
-    setFileList(fileList);
+  const handleRecalculateConfirm = () => {
+    setShowRecalculateModal(false);
   };
 
-  // properties dragger
+  const handleRecalculateCancel = () => {
+    setShowRecalculateModal(false);
+    setFormat(undefined);
+    setFileUploadEnabled(false);
+    form.resetFields(['format_usage_type']);
+  };
+
+
   const property = {
-    name: "file",
-    multiple: false,
+    name: "documents",
+    multiple: true,
     fileList: fileList,
     showUploadList: false,
     accept: ".xlsx, .xls",
-    maxCount: 1,
-    beforeUpload: (file) => {
-      // Check file size
-      if (file.size > MAX_FILE_SIZE) {
+    beforeUpload: (file, newFiles) => {
+      if (!format) {
+        form.validateFields(['format_usage_type']).catch(() => { });
         return false;
       }
 
-      setFileName(file);
+      if (file.size > MAX_FILE_SIZE) {
+        message.error(`${file.name} exceeds 5 MB limit`);
+      }
+
+      // Only add files not already in list (by name+size)
+      setFileList((prev) => {
+        const exists = prev.some(
+          (f) => f.name === file.name && f.size === file.size
+        );
+        if (exists) return prev;
+        return [...prev, {
+          name: file.name,
+          size: file.size,
+          type: file.type,
+          originFileObj: file,
+          _status: 'pending',
+        }];
+      });
+
+      setTimeout(() => {
+        filePreviewRef.current?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'nearest'
+        });
+      }, 100);
+
       return false;
     },
-    onChange: handleFileChange,
+    onChange: ({ fileList: newList }) => { },
   };
 
   const handleUploadButtonClick = () => {
     if (!format) {
-      setModalVisible(true);
+      form.validateFields(['format_usage_type']).catch(() => { });
     }
-  };
-
-  const handleModalClose = () => {
-    setModalVisible(false);
   };
 
   const handleUpload = async () => {
-    try {
-      setFileProgress(0);
-      const body = {
-        document: fileName,
-        calculationType: format.value,
-        onProgress: (progress) => setFileProgress(progress),
-      };
-      setLoadingUpload(true);
-      await dispatch(uploadMonitoringUsage(body)).unwrap();
-
-      // ✅ Refresh data setelah upload berhasil
-      if (refreshData && typeof refreshData === "function") {
-        refreshData();
-      }
-    } catch (error) {
-      setFileList((prevFileList) =>
-        prevFileList.map((file) => {
-          if (file.name === fileName.name) {
-            return { ...file, status: "error" };
-          }
-          return file;
-        })
-      );
+    const validFiles = fileList.filter((f) => f.size <= MAX_FILE_SIZE);
+    if (validFiles.length === 0) {
+      message.error('No valid files to upload.');
+      return;
     }
-    setLoadingUpload(false);
-  };
 
-  // handle upload by link
-  const handleUploadLink = async (e) => {
-    e.stopPropagation();
-
-    // Validasi: cek apakah urlLink sudah diisi
-    if (!urlLink || urlLink.trim() === "") {
-      setLinkModalVisible(true);
+    if (!format) {
+      form.validateFields(['format_usage_type']).catch(() => { });
       return;
     }
 
     try {
       setFileProgress(0);
-      const body = {
-        document: urlLink,
-        calculationType: format.value,
-        onProgress: (progress) => setFileProgress(progress),
-      };
-      await dispatch(uploadMonitoringUsage(body)).unwrap();
+      // Mark all as uploading
+      setFileList((prev) =>
+        prev.map((f) =>
+          f.size <= MAX_FILE_SIZE ? { ...f, _status: 'uploading' } : f
+        )
+      );
+      setLoadingUpload(true);
 
-      // ✅ Refresh data setelah upload berhasil
+      const rawFiles = validFiles.map((f) => f.originFileObj || f);
+      const result = await dispatch(
+        uploadMonitoringUsage({
+          documents: rawFiles,
+          calculationType: format.value,
+          onProgress: (progress) => setFileProgress(progress),
+        })
+      ).unwrap();
+
+      const uploadSummary = result?.uploadSummary || {};
+      const failedFiles = uploadSummary?.failedFiles ?? 0;
+      const failedFileNames = new Set(uploadSummary?.failedFileNames || []);
+      const successfulFileNames = new Set(uploadSummary?.successfulFileNames || []);
+
+      if (failedFiles === 0) {
+        setFileList([]);
+        setFileProgress(0);
+      } else {
+        setFileList((prev) =>
+          prev
+            .filter((f) => {
+              if (f.size > MAX_FILE_SIZE) return true;
+              if (failedFileNames.has(f.name)) return true;
+              if (successfulFileNames.has(f.name)) return false;
+              return false;
+            })
+            .map((f) => {
+              if (f.size > MAX_FILE_SIZE) return f;
+              return {
+                ...f,
+                _status: failedFileNames.has(f.name) ? 'error' : f._status,
+              };
+            })
+        );
+      }
+
       if (refreshData && typeof refreshData === "function") {
         refreshData();
       }
 
-      // Reset urlLink setelah berhasil upload
-      setUrlLink("");
+      if (failedFiles === 0) {
+        navigate(RBI_ROUTES.MONITORING_USAGE_VIEW, {
+          state: { defaultTab: "Batch List" },
+        });
+      }
     } catch (error) {
-      console.error("Upload error:", error);
+      setFileList((prev) =>
+        prev.map((f) =>
+          f.size <= MAX_FILE_SIZE ? { ...f, _status: 'error' } : f
+        )
+      );
+      message.error('Upload failed. Please try again.');
     }
+    setLoadingUpload(false);
+  };
+
+  const handleRetryFile = async (index) => {
+    const file = fileList[index];
+    if (!file || file.size > MAX_FILE_SIZE) return;
+    if (!format) {
+      form.validateFields(['format_usage_type']).catch(() => { });
+      return;
+    }
+
+    setFileList((prev) =>
+      prev.map((f, i) => (i === index ? { ...f, _status: 'uploading' } : f))
+    );
+    setLoadingUpload(true);
+    setFileProgress(0);
+
+    try {
+      const rawFile = file.originFileObj || file;
+      const result = await dispatch(
+        uploadMonitoringUsage({
+          documents: [rawFile],
+          calculationType: format.value,
+          onProgress: (progress) => setFileProgress(progress),
+        })
+      ).unwrap();
+
+      const uploadSummary = result?.uploadSummary || {};
+      const failedFiles = uploadSummary?.failedFiles ?? 0;
+      const failedFileNames = new Set(uploadSummary?.failedFileNames || []);
+      const successfulFileNames = new Set(uploadSummary?.successfulFileNames || []);
+
+      if (failedFiles === 0 || successfulFileNames.has(file.name)) {
+        setFileList((prev) => prev.filter((_, i) => i !== index));
+      } else {
+        setFileList((prev) =>
+          prev.map((f, i) => {
+            if (i !== index) return f;
+            return {
+              ...f,
+              _status: failedFileNames.has(file.name) ? 'error' : 'done',
+            };
+          })
+        );
+      }
+
+      if (refreshData && typeof refreshData === "function") {
+        refreshData();
+      }
+
+      if (failedFiles === 0) {
+        navigate(RBI_ROUTES.MONITORING_USAGE_VIEW, {
+          state: { defaultTab: "Batch List" },
+        });
+      }
+    } catch (error) {
+      setFileList((prev) =>
+        prev.map((f, i) => (i === index ? { ...f, _status: 'error' } : f))
+      );
+      message.error(`Retry failed for ${file.name}. Please try again.`);
+    }
+    setLoadingUpload(false);
   };
 
   const handleChangePage = (page, pageSizeChange) => {
@@ -261,31 +317,18 @@ const UploadLayout = ({
     setPageSize(pageSizeChange);
   };
 
-  // update link files
-  const updateLink = (e) => {
-    e.stopPropagation();
-    setUrlLink(e.target.value);
-  };
-
-  const reUploadImage = async () => {
-    setFileList((prevFileList) =>
-      prevFileList.map((file) => ({
-        ...file,
-        percent: 0,
-        status: "uploading",
-      }))
-    );
-    handleUpload();
-  };
-
-  // remove file list
   const handleRemove = (index) => {
-    setFileList((prevFileList) => {
-      const updatedFileList = [...prevFileList];
-      updatedFileList.splice(index, 1);
-      return updatedFileList;
+    setFileList((prev) => {
+      const updated = [...prev];
+      updated.splice(index, 1);
+      return updated;
     });
-    setFileName("");
+  };
+
+  const handleDraggerClick = (e) => {
+    if (!format) {
+      form.validateFields(['format_usage_type']).catch(() => { });
+    }
   };
 
   const renderLayout = (type) => {
@@ -348,14 +391,24 @@ const UploadLayout = ({
       );
     } else {
       return (
-        <Form>
+        <Form layout={"vertical"} form={form}>
           <div className={"w-full flex flex-col"}>
             <div className={"w-full flex no-margin-form"}>
-              <Form.Item className="w-1/4">
+              <Form.Item
+                className="w-1/4"
+                name={"format_usage_type"}
+                label={"Format Usage Type"}
+                rules={[
+                  {
+                    required: true,
+                    message: "Please select Format Usage Type first",
+                  },
+                ]}
+                validateTrigger={['onChange', 'onBlur']}
+              >
                 <SelectComponent
                   allowClear={false}
                   mandatory
-                  label={"Format Usage Type"}
                   placeholder={"Choose Usage Type"}
                   onChange={handleFormat}
                   labelInValue
@@ -368,9 +421,14 @@ const UploadLayout = ({
                 </SelectComponent>
               </Form.Item>
             </div>
-            <Form.Item name={"file"}>
+
+            <Form.Item
+              name={"file"}
+              rules={[{ validator: async () => Promise.resolve() }]}
+              validateTrigger={['onChange', 'onBlur']}
+            >
               <div className="w-full">
-                <Spin spinning={loadingUpload}>
+                <div onClick={handleDraggerClick}>
                   <Dragger {...property} disabled={!isFileUploadEnabled}>
                     <p className="ant-upload-drag-icon">
                       <SVGIcon
@@ -379,133 +437,168 @@ const UploadLayout = ({
                       />
                     </p>
                     <p className="ant-upload-text text-bold">
-                      Drag and drop your file here or{" "}
-                      <span className="underline"> click for upload</span>
+                      Drag and drop your files here or{" "}
+                      <span className="underline">click for upload</span>
                     </p>
                     <p className="ant-upload-hint">
-                      The maximum file size is limited to 5 MB
+                      The maximum file size is limited to 5 MB per file. You can upload multiple files.
                     </p>
-                    <div className="flex items-center justify-center my-3 gap-x-3">
-                      <div className="border-t-0 rounded-full border-x-0 border-solid border-gray-300 w-24 h-0" />
-                      <span>or</span>
-                      <div className="border-t-0 rounded-full border-x-0 border-solid border-gray-300 w-24 h-0" />
-                    </div>
-                    <p className="ant-upload-text">
-                      Put Google Drive link or local file
-                    </p>
-                    <div
-                      className="flex my-5 justify-center items-center"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <div className="flex gap-3 justify-center items-center">
-                        <InputComponent
-                          onChange={updateLink}
-                          disabled={!isFileUploadEnabled}
-                          onClick={(e) => e.stopPropagation()}
-                          value={urlLink}
-                          placeholder="Paste your link here"
-                        />
-                        <ButtonComponent
-                          icon={<UploadOutlined />}
-                          type={"submit"}
-                          border={false}
-                          onClick={handleUploadLink}
-                          disabled={!isFileUploadEnabled}
-                        />
-                      </div>
-                    </div>
                   </Dragger>
-                </Spin>
+                </div>
               </div>
             </Form.Item>
-            {fileList.map((file, index) => (
-              <div
-                className="border-solid border-[0.12rem] border-black rounded-[0.5rem] my-4 py-2 px-3 flex gap-4 items-center"
-                key={index}
-              >
-                <div>
-                  <FileOutlined style={{ fontSize: "20px" }} />
-                </div>
-                <div className="flex flex-col w-full">
-                  <div className="flex w-full justify-between">
-                    <Typography className={"text-red-500"}>
-                      {file.fileName}
-                    </Typography>
-                    <ButtonComponent
-                      icon={<CloseOutlined style={{ color: "#58804D" }} />}
-                      border={false}
-                      onClick={() => handleRemove(index)}
-                    />
-                  </div>
-                  <Typography>{bytesConverter(file.size)}</Typography>
-                  {file.fileStatus === "error" ? (
-                    <div className="flex w-full justify-between">
-                      <span className={"text-red-700"}>Failed to Upload</span>
-                      <ButtonComponent border={false}>
-                        <span className={"text-green-800 mr-2"}>Re-upload</span>
-                        <UndoOutlined style={{ color: "#58804D" }} />
-                      </ButtonComponent>
-                    </div>
-                  ) : file.size <= MAX_FILE_SIZE ? (
-                    loadingUpload ? (
-                      <Progress
-                        percent={fileProgress}
-                        format={(percent) => `${percent}%`}
-                      />
-                    ) : (
-                      <div className="flex gap-2 mt-2">
-                        <ButtonComponent
-                          type="primary"
-                          size={"middle"}
-                          onClick={handleUpload}
+
+            {/* Multi-file list — Collapsible */}
+            {fileList.length > 0 && (
+              <div ref={filePreviewRef}>
+                <CollapsibleContainer
+                  header={"Files Upload"}
+                  border
+                  defaultOpen
+                >
+                  <div className="flex flex-col gap-3 pt-3 pb-2">
+                    {fileList.map((file, index) => {
+                      const isError = file._status === "error";
+                      const isUploading = file._status === "uploading";
+                      const isDone = file._status === "done";
+                      const isTooBig = file.size > MAX_FILE_SIZE;
+
+                      return (
+                        <div
+                          key={index}
+                          className={`border border-solid rounded-lg px-4 py-3 ${isError
+                              ? "bg-[#FFF1F0] border-[#FFA39E]"
+                              : "bg-white border-[#E5E7EB]"
+                            }`}
                         >
-                          Upload
-                        </ButtonComponent>
-                      </div>
-                    )
-                  ) : (
-                    <span className={"text-red-700"}>
-                      File is bigger than 5MB
-                    </span>
-                  )}
-                </div>
-                {file.status === "error" && (
-                  <div className={"flex flex-col justify-end items-end"}>
-                    <ButtonComponent border={false}>
-                      <span
-                        className={"text-green-800 mr-2"}
-                        onClick={reUploadImage}
-                      >
-                        Re-upload
-                      </span>
-                      <UndoOutlined style={{ color: "#58804D" }} />
-                    </ButtonComponent>
+                          {/* Row: icon + name + size + action */}
+                          <div className="flex items-center gap-3">
+                            {/* File Icon */}
+                            <div className="flex-shrink-0">
+                              <FileOutlined style={{ fontSize: 20, color: "#0075BF" }} />
+                            </div>
+
+                            {/* Name + size inline */}
+                            <div className="flex items-center gap-2 flex-1 min-w-0">
+                              <span className="text-sm font-medium text-gray-800 truncate">
+                                {file.name}
+                              </span>
+                              <span className="text-xs text-gray-400 whitespace-nowrap flex-shrink-0">
+                                {bytesConverter(file.size)}
+                              </span>
+                            </div>
+
+                            {/* Right-side action per status */}
+                            <div className="flex items-center gap-2 flex-shrink-0">
+                              {isTooBig && (
+                                <span className="text-xs text-red-500">Exceeds 5 MB</span>
+                              )}
+                              {isError && (
+                                <ButtonComponent
+                                  size="small"
+                                  border={false}
+                                  onClick={() => handleRetryFile(index)}
+                                  style={{
+                                    backgroundColor: "#1E293B",
+                                    color: "#fff",
+                                    borderRadius: "20px",
+                                    fontSize: "12px",
+                                    height: "28px",
+                                    padding: "0 14px",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "6px",
+                                    border: "none",
+                                  }}
+                                >
+                                  <UndoOutlined style={{ fontSize: "12px" }} />
+                                  Try Again
+                                </ButtonComponent>
+                              )}
+                              {isUploading && (
+                                <Tooltip title="Cancel upload">
+                                  <CloseCircleFilled
+                                    onClick={() => handleRemove(index)}
+                                    style={{
+                                      fontSize: "20px",
+                                      color: "#BE3036",
+                                      cursor: "pointer",
+                                    }}
+                                  />
+                                </Tooltip>
+                              )}
+                              {(isDone || (!isUploading && !isError)) && (
+                                <Tooltip title="Remove">
+                                  <SVGIcon
+                                    name="IconDelete"
+                                    width={20}
+                                    color="#BE3036"
+                                    onClick={() => handleRemove(index)}
+                                  />
+                                </Tooltip>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Progress bar — full width, below filename row */}
+                          {isUploading && (
+                            <div className="mt-2">
+                              <Progress
+                                percent={fileProgress}
+                                size="small"
+                                strokeColor="#0075BF"
+                                format={(p) => `${p}%`}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
-                )}
+                </CollapsibleContainer>
               </div>
-            ))}
+            )}
+
+            {/* Footer buttons */}
+            {fileList.length > 0 && (
+              <div className="flex justify-between items-center mt-4">
+                <ButtonComponent
+                  className="bg-[#fff]"
+                  onClick={() => {
+                    setFileList([]);
+                    setFileProgress(0);
+                  }}
+                >
+                  Cancel
+                </ButtonComponent>
+                <ButtonComponent
+                  type="submit"
+                  onClick={handleUpload}
+                  disabled={
+                    loadingUpload ||
+                    fileList.every((f) => f.size > MAX_FILE_SIZE)
+                  }
+                >
+                  Upload
+                </ButtonComponent>
+              </div>
+            )}
           </div>
         </Form>
       );
     }
+
   };
 
   return (
     <>
       {renderLayout(type)}
-      <ModalAttention
-        isOpen={isModalVisible}
-        handleCancel={handleModalClose}
-        handleOk={handleModalClose}
-        textList={"format usage type before uploading a file"}
-        header="Failed"
-      />
 
       <ModalAttention
         isOpen={isLinkModalVisible}
         handleCancel={() => setLinkModalVisible(false)}
         handleOk={() => setLinkModalVisible(false)}
-        textList={" a valid link before uploading"}
+        textList={"Please enter a valid link before uploading"}
         header="Link Required"
       />
 
@@ -525,6 +618,25 @@ const UploadLayout = ({
         <Alert
           message="Warning! if you delete this data, it will be permanently."
           type={"error"}
+        />
+      </ModalConfirm>
+
+      <ModalConfirm
+        isOpen={showRecalculateModal}
+        handleCancel={handleRecalculateCancel}
+        handleOk={handleRecalculateConfirm}
+        width={500}
+        useOk={true}
+      >
+        <div className="flex justify-center gap-[20px] mt-6">
+          <WarningOutlined style={{ fontSize: "24px", color: "#FAAD14" }} />
+          <p className={"text-[18px] font-bold"}>
+            Data will be Recalculated
+          </p>
+        </div>
+        <Alert
+          message="You selected usage type NEED. Uploading this data will trigger a recalculation process. Are you sure you want to continue?"
+          type={"warning"}
         />
       </ModalConfirm>
     </>

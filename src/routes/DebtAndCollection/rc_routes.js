@@ -35,15 +35,38 @@ export const DEBT_AND_COLLECTION_ROUTES = {
   CREATE_ACTIVITIES: "/debt-and-collection/activities/create",
   DETAIL_ACTIVITIES: "/debt-and-collection/activities/view",
   UPDATE_ACTIVITIES: "/debt-and-collection/activities/update",
-  
+
   // Transaction Report
   VIEW_TRANSACTION_REPORT: "/debt-and-collection/transaction-report",
   DETAIL_TRANSACTION_REPORT: "/debt-and-collection/transaction-report/view",
 
-  
+
   // Plan Activity
   VIEW_ACTIVITIES_PLAN: "/debt-and-collection/activities-plan",
   CREATE_ACTIVITIES_PLAN: "/debt-and-collection/activities-plan/create",
   DETAIL_ACTIVITIES_PLAN: "/debt-and-collection/activities-plan/view",
   UPDATE_ACTIVITIES_PLAN: "/debt-and-collection/activities-plan/update",
+
+  // Restructure
+  VIEW_RESTRUCTURE: "/debt-and-collection/restructure",
+  VIEW_RESTRUCTURE_MONITORING: "/debt-and-collection/restructure-monitoring",
+  CREATE_RESTRUCTURE: "/debt-and-collection/restructure/create",
+  DETAIL_RESTRUCTURE: "/debt-and-collection/restructure/view",
+  UPDATE_RESTRUCTURE: "/debt-and-collection/restructure/update",
+  UPLOAD_RESTRUCTURE: "/debt-and-collection/restructure/upload",
+
+  // Early Repayment
+  CREATE_EARLY_REPAYMENT: "/debt-and-collection/restructure/early-repayment",
+  CREATE_RE_PLAN: "/debt-and-collection/restructure/re-plan",
+
+  // Offset
+  VIEW_OFFSET: "/debt-and-collection/offset",
+  CREATE_OFFSET: "/debt-and-collection/offset/create",
+  DETAIL_OFFSET: "/debt-and-collection/offset/view",
+
+  // Write Off
+  VIEW_WRITE_OFF: "/debt-and-collection/write-off",
+  CREATE_WRITE_OFF: "/debt-and-collection/write-off/create",
+  DETAIL_WRITE_OFF: "/debt-and-collection/write-off/view",
+  UPDATE_WRITE_OFF: "/debt-and-collection/write-off/update",
 };

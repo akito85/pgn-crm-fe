@@ -1,25 +1,22 @@
-import React, { useEffect } from "react";
-import BreadCrumb from "../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
+import { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { Spin } from "antd";
-import ButtonComponent from "../../../../components/ButtonComponent";
-import { LeftOutlined } from "@ant-design/icons";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../routes/account_management/customer_account_routes";
 import HeaderDetail from "./HeaderDetail";
 import { useState } from "react";
 import AccountDetailInformation from "./AccountDetailInformation";
-import { useNavigate, useLocation, Link } from "react-router-dom";
+import { useLocation } from "react-router-dom";
+import NxBreadCrumb from "../../../../components/Nx/NxBreadCrumb";
 
 const data = [
   // { value: "Customer Information" },
   { value: "Account Information" }, //
-  { value: "Last Activity", disabled: true },
-  { value: "Billing", disabled: true },
-  { value: "Receipt", disabled: true },
-  { value: "Service Request", disabled: true },
-  { value: "Account Statement", disabled: true },
-  { value: "Pre Requisite", disabled: true },
+  { value: "Last Activity" },
+  { value: "Billing", disabled: true, },
+  { value: "Receipt", disabled: true, },
+  { value: "Service Request", disabled: false, },
+  { value: "Account Statement", disabled: true, },
+  { value: "Pre Requisite", disabled: true, },
   { value: "Account Address" }, //
   { value: "Account Contact" }, //
   { value: "Distribution Media" }, //
@@ -28,16 +25,16 @@ const data = [
   { value: "Service Agreement" },
   { value: "Relationship" },
   { value: "Gas Source" },
-  { value: "Gas Deposit", disabled: true },
-  { value: "Compensation", disabled: true },
-  { value: "Promo", disabled: false },
+  { value: "Gas Deposit" },
+  { value: "Compensation", disabled: true, },
+  { value: "Promo" },
   { value: "Multi Destination" },
-  { value: "Additional Information", disabled: true  },
-  { value: "Gas Utilization", disabled: true  },
-  { value: "Equipment", disabled: true  },
-  { value: "Raw Material Source", disabled: true  },
-  { value: "Product Distribution", disabled: true  },
-  { value: "User Access", disabled: true },
+  { value: "Additional Information" },
+  { value: "Gas Utilization" },
+  { value: "Equipment" },
+  { value: "Raw Material Source" },
+  { value: "Product Distribution" },
+  { value: "User Access", disabled: true, },
 ];
 
 const CustomerAccountDetail = ({ type = "standard" }) => {
@@ -45,7 +42,6 @@ const CustomerAccountDetail = ({ type = "standard" }) => {
   const dispatch = useDispatch();
   const { loading } = useSelector((state) => state.accountManagement);
   //declare
-  const navigate = useNavigate();
   const location = useLocation();
   const id = location?.state?.idAccount;
   const idCustomer = location?.state?.idCustomer;
@@ -53,9 +49,6 @@ const CustomerAccountDetail = ({ type = "standard" }) => {
 
   //state
   const [tabs, setTabs] = useState([]);
-  const [isApproval, setIsApproval] = useState(false);
-  const [showApprovalButton, setShowApprovalButton] = useState(false);
-  const [submitApprovalCondition, setSubmitApprovalCondition] = useState("");
 
   useEffect(() => {
     if (type != "standard") {
@@ -74,7 +67,8 @@ const CustomerAccountDetail = ({ type = "standard" }) => {
             item.value === "Account Statement" ||
             item.value === "Promo" ||
             item.value === "User Access" ||
-            item.value === "Multi Destination"
+            item.value === "Multi Destination" ||
+            item.value === "Gas Deposit"
         )
       );
     } else {
@@ -86,10 +80,6 @@ const CustomerAccountDetail = ({ type = "standard" }) => {
     useState(section || data[0].value);
 
   const handleAccountInfoDetailSection = (e) => {
-    console.log("e.target.value", e.target.value);
-    console.log("typeAccountInfoDetailSection", typeAccountInfoDetailSection);
-    console.log("section", section);
-    console.log("data", data);
     setTypeAccountInfoDetailSection(e.target.value);
   };
 
@@ -116,21 +106,19 @@ const CustomerAccountDetail = ({ type = "standard" }) => {
   ];
 
   return (
-    <LayoutMenu>
-      <Spin spinning={loading} className={"w-full justify-bottom"}>
-        <BreadCrumb routes={routes} />
-        <div className="w-full">
+    <Spin spinning={loading}>
+      <div className="flex flex-col gap-y-4">
+        <NxBreadCrumb routes={routes} />
+        <div className="flex flex-col gap-y-4">
           <HeaderDetail
             data_header={["CUSTOMER INFORMATION", "ACCOUNT INFORMATION"]}
             dispatch={dispatch}
             idAccount={id}
             idCustomer={idCustomer}
             type={type}
+            collapsible
           />
-        </div>
-        <div className="flex flex-col gap-3 mt-8">
-          {/* {type.section === "" ? ( */}
-          <div>
+          <div className="flex flex-col gap-y-4">
             <AccountDetailInformation
               id={id}
               section={typeAccountInfoDetailSection}
@@ -140,87 +128,12 @@ const CustomerAccountDetail = ({ type = "standard" }) => {
               type={type}
               setTypeAccountInfoDetailSection={setTypeAccountInfoDetailSection}
               dispatch = {dispatch}
-              isApproval={isApproval}
-              setIsApproval={setIsApproval}
-              setShowApprovalButton={setShowApprovalButton}
-              submitApprovalCondition={submitApprovalCondition}
-              setSubmitApprovalCondition={setSubmitApprovalCondition}
               // handleChangeInteraction={handleSetType}
             />
-            <div className="my-5 flex justify-between">
-              {isApproval ? (
-                <ButtonComponent
-                  type={"submit"}
-                  onClick={() => setIsApproval(false)}
-                  icon={
-                    <LeftOutlined
-                      style={{
-                        color: "#fff",
-                        fontSize: 24,
-                        justifyItems: "center",
-                      }}
-                    />
-                  }
-                >
-                  Back
-                </ButtonComponent>
-              ) : (
-                <Link
-                  to={
-                    type === "standard"
-                      ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_STANDARD
-                      : ACCOUNT_MANAGEMENT_ROUTES.VIEW_ACCOUNT_ONETIME
-                  }
-                >
-                  <ButtonComponent
-                    type={"submit"}
-                    // onClick={() => {
-                    //   navigate(-1)
-                    // }}
-                    icon={
-                      <LeftOutlined
-                        style={{
-                          color: "#fff",
-                          fontSize: 24,
-                          justifyItems: "center",
-                        }}
-                      />
-                    }
-                  >
-                    Back
-                  </ButtonComponent>
-                </Link>
-              )}
-
-              {showApprovalButton && (
-              <div className={"w-full flex justify-end gap-5"}>
-                <ButtonComponent
-                  type="reject"
-                  onClick={() => setSubmitApprovalCondition("reject")}
-                  disabled={!!submitApprovalCondition}
-                >
-                  Reject
-                </ButtonComponent>
-                <ButtonComponent
-                  type="approve"
-                  onClick={() => setSubmitApprovalCondition("approve")}
-                  disabled={!!submitApprovalCondition}
-                >
-                  Approve
-                </ButtonComponent>
-              </div>
-            )}
-            </div>
           </div>
-          {/* ) : (
-           <UpdatePageInformation
-          type={type}
-          handleChangeInteraction={handleSetType}
-          />
-        )} */}
         </div>
-      </Spin>
-    </LayoutMenu>
+      </div>
+    </Spin>
   );
 };
 

@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import BaseContainer from "../../../../../components/BaseContainer";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
@@ -39,21 +38,9 @@ const UploadPage = () => {
   const onFinish = (formValue) => {
     // console.log(formValue, ' formValue');
   };
-  // clear form
-  const onClear = () => {
-    form.resetFields();
-  };
-  // change tabs
-  const changeTabHeader = (e) => {
-    setTabHeader(e.target.value);
-  };
 
   const handleApprovalChangeFromLayout = (newApphierId) => {
     setApphierId(newApphierId);
-  };
-
-  const handleSave = () => {
-    // console.log("handleSave")
   };
 
   const routes = [
@@ -84,7 +71,7 @@ const UploadPage = () => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
       <Spin spinning={loading}>
         <div className={"w-full flex flex-col"}>
@@ -128,8 +115,8 @@ const UploadPage = () => {
               />
             )}
           </CardContainer>
-          <div className={"w-full flex mt-5"}>
-            <div className={"w-full justify-start"}>
+          <div className={"flex mt-5"}>
+            <div className={"justify-start"}>
               <Form.Item>
                 <ButtonComponent
                   type={"submit"}
@@ -194,7 +181,7 @@ const UploadPage = () => {
           </div>
         </Form>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

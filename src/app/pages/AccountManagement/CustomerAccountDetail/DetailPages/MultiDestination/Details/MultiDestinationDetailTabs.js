@@ -1,72 +1,64 @@
-import { Fragment } from "react";
-import RadioTabs from "../../../../../../../components/RadioTabs";
-import MultiDestinationDetailAttch from "./MultiDestinationDetailAttch";
 import MultiDestinationDetailInfo from "./MultiDestinationDetailInfo";
+import { useState } from "react";
+import NxCardContainer from "../../../../../../../components/Nx/NxCardContainer";
+import NxTabs from "../../../../../../../components/Nx/NxTabs";
+import NxAttachmentInput from "../../../../../../../components/Nx/NxAttachmentInput";
+import { configApp } from "../../../../../../../constants/configApp";
+import accountManagementService from "../../../../../../../redux/services/account_management/accountManagementService";
 
-const dataTabs = {
-  mdi: "Multi Destination Information",
-  attch: "Attachment",
-};
-
+/**
+ * Tabbed detail view for a multi destination record.
+ * Renders "Multi Destination Information" and "Attachment" tabs.
+ *
+ * @param {object} props
+ * @param {object} [props.detail={}] - Multi destination detail record
+ */
 const MultiDestinationDetailTabs = ({
-  subjectAccountNumber,
-  dataDetail = {},
-  dataAttachment = [],
-  section = "",
-  options = [],
-  handleChangeOption = () => {},
+  detail = {},
 }) => {
-  // Use provided options or fall back to default tabs
-  const tabOptions = options.length > 0 ? options : [
-    { value: "mdi", label: "Multi Destination Information" },
-    { value: "attch", label: "Attachment" },
+  const attachments = detail.attachments;
+
+  const tabOptions = [
+    {
+      key: "mdi",
+      label: "Multi Destination Information",
+      children: (
+        <MultiDestinationDetailInfo
+          detail={detail}
+        />
+      )
+    },
+    {
+      key: "attch",
+      label: "Attachment",
+      children: (
+        <NxAttachmentInput
+          data={attachments}
+          type="detail"
+          configApplication={configApp.ACCOUNT_SERVICE}
+          service={accountManagementService}
+        />
+      )
+    },
   ];
 
-  const AccountType = () => {
-    // Path form URL
-    const path = window.location.pathname
-
-    // Strict whitelist (prevents XSS, traversal, unicode injections)
-    const allowed = /^[a-zA-Z0-9-_]+$/;
-
-    // Match only your known route structure:
-    // /account-management/<dynamic>/view
-    const match = path.match(/^\/account-management\/([a-zA-Z0-9-_]+)\/view\/?$/);
-
-    if (!match) return null;
-
-    const dynamicPart = match[1];
-
-    return allowed.test(dynamicPart) ? dynamicPart : null;
-  }
-
-  const renderSection = () => {
-    switch (section) {
-      case dataTabs.mdi:
-        return <MultiDestinationDetailInfo subjectAccountNumber={subjectAccountNumber} dataDetail={dataDetail} type={AccountType}/>;
-      case dataTabs.attch:
-        return <MultiDestinationDetailAttch dataAttachment={dataAttachment} />;
-      default:
-        return <MultiDestinationDetailInfo />;
-    }
-  };
+  const [activeKey, setActiveKey] = useState(tabOptions[0]?.key || "");
 
   return (
-    <Fragment>
-      <div className="flex flex-col gap-4">
-        {/* Wrapper div to ensure proper styling */}
-        <div className="self-stretch inline-flex justify-start items-center gap-2.5">
-          <div className="w-full">
-            <RadioTabs
-              currentPosition={section}
-              data={tabOptions}
-              onChange={handleChangeOption}
-            />
-          </div>
-        </div>
-        {renderSection()}
-      </div>
-    </Fragment>
+    <NxCardContainer
+      header={"DETAIL INFORMATION"}
+      type="tabs"
+      element={
+        <NxTabs
+          items={tabOptions}
+          onChange={setActiveKey}
+          activeKey={activeKey}
+        />
+      }
+      hideChildren
+      withoutPadding
+    >
+    </NxCardContainer>
   );
 };
 

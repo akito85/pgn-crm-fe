@@ -1,17 +1,17 @@
-import React from "react";
-
 const SVG = ({
   style = {},
   width = "100%",
   className = "",
   onClick = () => { },
-  color ="#4B465C"
+  color,
+  ...otherProps
 }) => (
   <svg
+    {...otherProps}
     width={width}
     style={style}
     height={width}
-    className={`cursor-pointer${className}`}
+    className={`cursor-pointer ${className}`}
     onClick={onClick}
     viewBox="0 0 24 24"
     fill="none"
@@ -19,14 +19,14 @@ const SVG = ({
   >
     <path
       d="M7 12L12 17L22 7"
-      stroke={color}
+      stroke={color || "currentColor"}
       strokeWidth="1.75"
       strokeLinecap="round"
       strokeLinejoin="round"
     />
     <path
       d="M2.61872 11.3813C2.27701 11.0396 1.72299 11.0396 1.38128 11.3813C1.03957 11.723 1.03957 12.277 1.38128 12.6187L2.61872 11.3813ZM6.38128 17.6187C6.72299 17.9604 7.27701 17.9604 7.61872 17.6187C7.96043 17.277 7.96043 16.723 7.61872 16.3813L6.38128 17.6187ZM11.3813 11.3813C11.0396 11.723 11.0396 12.277 11.3813 12.6187C11.723 12.9604 12.277 12.9604 12.6187 12.6187L11.3813 11.3813ZM17.6187 7.61872C17.9604 7.27701 17.9604 6.72299 17.6187 6.38128C17.277 6.03957 16.723 6.03957 16.3813 6.38128L17.6187 7.61872ZM1.38128 12.6187L6.38128 17.6187L7.61872 16.3813L2.61872 11.3813L1.38128 12.6187ZM12.6187 12.6187L17.6187 7.61872L16.3813 6.38128L11.3813 11.3813L12.6187 12.6187Z"
-      fill={color}
+      fill={color || "currentColor"}
     />
   </svg>
 );

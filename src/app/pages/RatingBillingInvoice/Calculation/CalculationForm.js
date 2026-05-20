@@ -3,11 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { Form, Modal, Spin, Select, DatePicker } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import moment from "moment";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../components/BreadCrumb";
-import BaseContainer from "../../../../components/BaseContainer";
 import ButtonComponent from "../../../../components/ButtonComponent";
-import { LeftOutlined, WarningOutlined } from "@ant-design/icons";
+import { WarningOutlined } from "@ant-design/icons";
 import SVGIcon from "../../../../assets/Icon/index";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
 import ModalCustom from "../../../../components/Modal/ModalCustom";
@@ -38,11 +36,12 @@ import { IconModal } from "../../../../utils/Icon";
 import { validateCreateUpdate } from "../../../../redux/slices/general_slice";
 import ratingBillingHttpService from "../../../../redux/services/ratingBillingHttpService";
 import CardContainer from "../../../../components/CardContainer";
+import { FormFooter } from "../../../../components/FormStepNavigation";
 
 const CalculationForm = ({ type }) => {
-  // Selector
   const {
     loading,
+    loadingCreate,
     list_sor,
     list_service_type,
     list_account_group,
@@ -59,11 +58,9 @@ const CalculationForm = ({ type }) => {
     data_user_calculation,
   } = useSelector((state) => state.rbi_calculation);
 
-  // Declaration
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // State
   const [openModal, setOpenModal] = useState(false);
   const [openBack, setOpenBack] = useState(false);
   const [billingCycle, setBillingCycle] = useState();
@@ -100,7 +97,6 @@ const CalculationForm = ({ type }) => {
   const [openWarningPopulate, setOpenWarningPopulate] = useState(false);
   const [pendingDataFinal, setPendingDataFinal] = useState(null);
 
-  // Use Effect
   useEffect(() => {
     dispatch(getListSor());
     dispatch(getListServiceType());
@@ -207,7 +203,6 @@ const CalculationForm = ({ type }) => {
 
   const handleSelectCustomer = useCallback(
     (value, option) => {
-      // Simpan data customer yang baru dipilih
       const customerData = filteredCustomerList.find(
         (item) => (item.accountNumber || item.code) === value
       );
@@ -222,7 +217,6 @@ const CalculationForm = ({ type }) => {
         }));
       }
 
-      // Clear search
       setSearchCustomerValue("");
       setFilteredCustomerList([]);
       setDataSpecificCustomer((prevState) => ({
@@ -242,57 +236,50 @@ const CalculationForm = ({ type }) => {
     };
   }, []);
 
-  // Untuk CalculationForm
-const handleReset = () => {
-  let tempData = [
-    "billing_cycle",
-    "billing_period",
-    "calculation_type",
-    "serviceType",
-    "sor",
-    "costCenter",
-    "meterReading",
-    "accountSegment",
-    "accountGroupType",
-    "specificCustomer",
-    "type",
-    "scheduleDateTime",
-    "remark",
-  ];
-  
-  // Jangan reset field yang memiliki default data
-  if (defaultData?.costCenter?.length > 0) {
-    tempData = tempData.filter((item) => item !== "costCenter");
-  }
-  if (defaultData?.sor) {
-    tempData = tempData.filter((item) => item !== "sor");
-  }
-  
-  // Reset form fields
-  form.resetFields(tempData);
-  
-  // Reset state-state yang terkait
-  setSelectedScheduleType(null);
-  setSearchCustomerValue("");
-  setFilteredCustomerList([]);
-  setBillingCycle(null); // Reset billing cycle state agar billing period jadi disabled
-  
-  // Reset dataSpecificCustomer ke kondisi awal (hanya dengan default data)
-  setDataSpecificCustomer({
-    sorId: defaultData?.sor || null,
-    costCenterId: defaultData?.costCenter || [],
-    meterReadingCodeId: [],
-    accountSegmentId: [],
-    accountGroupTypeId: [],
-    search: "",
-    limit: DEFAULT_SEARCH_LIMIT,
-  });
-  
-  // Reset selected customers map
-  setSelectedCustomersMap({});
-};
+  const handleReset = () => {
+    let tempData = [
+      "billing_cycle",
+      "billing_period",
+      "calculation_type",
+      "serviceType",
+      "sor",
+      "costCenter",
+      "meterReading",
+      "accountSegment",
+      "accountGroupType",
+      "specificCustomer",
+      "type",
+      "scheduleDateTime",
+      "remark",
+    ];
 
-  // Validate Data before Modal
+    if (defaultData?.costCenter?.length > 0) {
+      tempData = tempData.filter((item) => item !== "costCenter");
+    }
+    if (defaultData?.sor) {
+      tempData = tempData.filter((item) => item !== "sor");
+    }
+
+    form.resetFields(tempData);
+
+    setSelectedScheduleType(null);
+    setSearchCustomerValue("");
+    setFilteredCustomerList([]);
+    setBillingCycle(null);
+
+    setDataSpecificCustomer({
+      sorId: defaultData?.sor || null,
+      costCenterId: defaultData?.costCenter || [],
+      meterReadingCodeId: [],
+      accountSegmentId: [],
+      accountGroupTypeId: [],
+      search: "",
+      limit: DEFAULT_SEARCH_LIMIT,
+    });
+
+    setSelectedCustomersMap({});
+  };
+
   const checkDataValidity = async (data) => {
     const url =
       type === "create"
@@ -314,7 +301,6 @@ const handleReset = () => {
     }
   };
 
-  // handle open modal
   const onFinish = async (formValue) => {
     const tempDataFinal = {
       billingCycle: formValue?.billing_cycle,
@@ -398,7 +384,6 @@ const handleReset = () => {
     setPendingDataFinal(null);
   };
 
-  // handle save
   const handleSave = async () => {
     const tempBody = {
       ...dataFinal,
@@ -436,7 +421,6 @@ const handleReset = () => {
       });
   };
 
-  // handle back page
   const handleBackPage = () => {
     if (Object.values(formValue).length > 0) {
       setOpenBack(true);
@@ -446,7 +430,6 @@ const handleReset = () => {
     }
   };
 
-  // Routes
   const routes = [
     {
       path: "",
@@ -462,13 +445,11 @@ const handleReset = () => {
     },
   ];
 
-  // Handle Change Billing Cycle
   const handleChangeBillingCycle = (e) => {
     setBillingCycle(e);
     dispatch(getListBillingPeriod(e));
   };
 
-  // Handle Change SOR
   const handleChangeSOR = (e) => {
     setDataSpecificCustomer((prevState) => {
       return {
@@ -483,7 +464,6 @@ const handleReset = () => {
     form.resetFields(["specificCustomer"]);
   };
 
-  // Handle Change Cost Center
   const handleChangeCostCenter = (e) => {
     setDataSpecificCustomer((prevState) => {
       return {
@@ -508,7 +488,6 @@ const handleReset = () => {
     form.resetFields(["meterReading", "specificCustomer"]);
   };
 
-  // Handle Change Meter Reading Route
   const handleMeterReadingRoute = (e) => {
     setDataSpecificCustomer((prevState) => {
       return {
@@ -523,7 +502,6 @@ const handleReset = () => {
     form.resetFields(["specificCustomer"]);
   };
 
-  // Handle Change Account Group
   const handleAccountGroup = (e) => {
     setDataSpecificCustomer((prevState) => {
       return {
@@ -538,7 +516,6 @@ const handleReset = () => {
     form.resetFields(["specificCustomer"]);
   };
 
-  // Handle Change Account Segment
   const handleAccountSegment = (e) => {
     setDataSpecificCustomer((prevState) => {
       return {
@@ -559,7 +536,6 @@ const handleReset = () => {
     form.resetFields(["accountGroupType", "specificCustomer"]);
   };
 
-  // Handle Schedule Type Change
   const handleScheduleTypeChange = (value) => {
     setSelectedScheduleType(value);
     const selectedType = list_scheduler_type?.find((item) => item.id === value);
@@ -568,7 +544,6 @@ const handleReset = () => {
     }
   };
 
-  // Handle Change Create New
   const handleCreateNew = () => {
     let tempData = [
       "costCenter",
@@ -603,7 +578,7 @@ const handleReset = () => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
       <Spin spinning={loading}>
         <Form layout={"vertical"} form={form} onFinish={onFinish}>
@@ -655,6 +630,7 @@ const handleReset = () => {
               </Form.Item>
             </div>
           </CardContainer>
+
           <CardContainer
             header={
               <div className="flex -my-4 justify-between items-center">
@@ -900,7 +876,7 @@ const handleReset = () => {
                             <span
                               className={
                                 searchCustomerValue.length >= MAX_SEARCH_LENGTH
-                                  ? "text-red-500 "
+                                  ? "text-red-500"
                                   : "text-gray-500"
                               }
                             >
@@ -930,9 +906,7 @@ const handleReset = () => {
           <CardContainer
             header={
               <div className="flex -my-4 justify-between items-center">
-                <p className="mt-[15px] text-primary">
-                  SCHEDULER INFORMATION
-                </p>
+                <p className="mt-[15px] text-primary">SCHEDULER INFORMATION</p>
               </div>
             }
           >
@@ -1001,52 +975,23 @@ const handleReset = () => {
               </div>
             </div>
           </CardContainer>
-          <div className={"w-full flex mt-5"}>
-            <div className={"w-full justify-start"}>
-              <Form.Item>
-                <ButtonComponent
-                  type={"submit"}
-                  icon={
-                    <LeftOutlined
-                      style={{
-                        color: "#fff",
-                        fontSize: 16,
-                        justifyItems: "left",
-                      }}
-                    />
-                  }
-                  onClick={handleBackPage}
-                >
-                  Back
-                </ButtonComponent>
-              </Form.Item>
-            </div>
-            <div className={"w-full justify-end flex gap-2"}>
-              <ButtonComponent
-                type={"submit"}
-                icon={
-                  <SVGIcon
-                    name={
-                      type === "update" ? `IconButtonReset` : `IconButtonClear`
-                    }
-                    width={24}
-                  />
-                }
-                onClick={handleReset}
-              >
-                {type === "create" ? "Clear" : "Reset"}
-              </ButtonComponent>
-              <Form.Item>
-                <ButtonComponent type={"submit"} htmlType={"submit"}>
-                  Save
-                </ButtonComponent>
-              </Form.Item>
-            </div>
-          </div>
+
+          <FormFooter
+            onCancel={handleBackPage}
+            onClear={handleReset}
+            onSaveDraft={() => form.submit()}
+            type={type}
+            useNavigation={false}
+            saveDraftLabel="Save"
+            saveDraftStyle={{
+              backgroundColor: "#0075BF",
+              borderColor: "#0075BF",
+              color: "#fff",
+            }}
+          />
         </Form>
       </Spin>
 
-      {/* modal back */}
       <ModalConfirm
         isOpen={openBack}
         handleCancel={() => setOpenBack(false)}
@@ -1055,13 +1000,10 @@ const handleReset = () => {
       >
         <div className="flex justify-center mt-5 gap-[20px]">
           <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
-          <p className="text-[18px]">
-            Are you sure you want to back?
-          </p>
+          <p className="text-[18px]">Are you sure you want to back?</p>
         </div>
       </ModalConfirm>
 
-      {/* modal warning populate all */}
       <ModalConfirm
         isOpen={openWarningPopulate}
         handleCancel={handleCancelPopulateAll}
@@ -1087,8 +1029,8 @@ const handleReset = () => {
               <div className="mt-3 p-4 bg-orange-50 rounded-lg border-l-4 border-orange-500">
                 <p className="text-[14px] text-orange-800">
                   The system will process{" "}
-                  <span className="text-[16px]">ALL customers</span>{" "}
-                  that match your filter criteria
+                  <span className="text-[16px]">ALL customers</span> that match
+                  your filter criteria
                 </p>
               </div>
 
@@ -1206,19 +1148,27 @@ const handleReset = () => {
         </div>
       </ModalConfirm>
 
-      {/* modal confirmation */}
       <ModalCustom
         isOpen={openModal}
         handleCancel={() => setOpenModal(false)}
         header={"CONFIRMATION"}
         width={900}
+        loading={loadingCreate}
         type={"confirmation"}
         footer={
           <div className={"flex w-full justify-end gap-2 mb-5"}>
-            <ButtonComponent onClick={() => setOpenModal(false)}>
+            <ButtonComponent
+              onClick={() => setOpenModal(false)}
+              disabled={loadingCreate}
+            >
               Cancel
             </ButtonComponent>
-            <ButtonComponent type={"submit"} onClick={handleSave}>
+            <ButtonComponent
+              type={"submit"}
+              onClick={handleSave}
+              isLoading={loadingCreate}
+              disabled={loadingCreate}
+            >
               Confirm
             </ButtonComponent>
           </div>
@@ -1227,7 +1177,6 @@ const handleReset = () => {
         <FormConfirmation data={dataFinal} />
       </ModalCustom>
 
-      {/* Modal Success */}
       <Modal
         open={modalSuccess}
         onOk={() => navigate(-1)}
@@ -1264,7 +1213,6 @@ const handleReset = () => {
         </div>
       </Modal>
 
-      {/** Modal Retry */}
       <ModalError
         isOpen={modalError}
         handleOk={handleRetry}
@@ -1280,7 +1228,7 @@ const handleReset = () => {
           <p className="pl-[70px]">Please try again.</p>
         </div>
       </ModalError>
-    </LayoutMenu>
+    </>
   );
 };
 

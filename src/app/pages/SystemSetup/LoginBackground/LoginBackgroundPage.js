@@ -7,7 +7,6 @@ import SVGIcon from "../../../../assets/Icon/index";
 import BaseContainer from "../../../../components/BaseContainer";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import TablePaginationNew from "../../../../components/TablePaginationNew";
 import {
   getPagingBackground,
@@ -269,7 +268,7 @@ const LoginBackgroundPage = () => {
 
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <Toolbar  items={itemActions} />
@@ -329,7 +328,7 @@ const LoginBackgroundPage = () => {
           </div>
         </ModalError>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

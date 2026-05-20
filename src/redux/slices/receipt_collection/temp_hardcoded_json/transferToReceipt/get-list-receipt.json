@@ -1,0 +1,12 @@
+{
+    "success": true,
+    "code": 200,
+    "message": "Success Get Receipt List",
+    "data": {
+        "result": [
+            { "id": 1, "receiptId": "REC-001", "areaCode": "JKT", "customerNumber": "C-001", "customerName": "Customer A", "receiptNo": "RJ-001", "amount": 1000000, "currency": "IDR", "status": "UNPAID", "appliedAmount": 0 },
+            { "id": 2, "receiptId": "REC-002", "areaCode": "BND", "customerNumber": "C-002", "customerName": "Customer B", "receiptNo": "RJ-002", "amount": 500000, "currency": "IDR", "status": "UNPAID", "appliedAmount": 0 },
+            { "id": 3, "receiptId": "REC-003", "areaCode": "SBY", "customerNumber": "C-003", "customerName": "Customer C", "receiptNo": "RJ-003", "amount": 750000, "currency": "IDR", "status": "UNPAID", "appliedAmount": 0 }
+        ]
+    }
+}

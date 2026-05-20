@@ -1,9 +1,9 @@
-import { useEffect } from "react";
-import { Collapse, Space } from "antd";
+import { useEffect, memo } from "react";
+import { Collapse } from "antd";
+import { DownOutlined } from "@ant-design/icons";
 import { useLocation } from "react-router-dom";
 import { useState } from "react";
 import { Fragment } from "react";
-import MiniBaseContainer from "../../../../../../components/MiniBaseContainer";
 import WitholdingTax from "./WitholdingTax/WitholdingTax";
 import PaymentChannel from "./Payment Channel/PaymentChannel";
 import TaxIdentifierAndRelation from "./TaxIdentifier/TaxIdentifierAndRelation";
@@ -14,34 +14,70 @@ import PaymentRelation from "./PaymentRelation/PaymentRelation";
 import { useDispatch, useSelector } from "react-redux";
 import { getGrantedAccessAccount } from "../../../../../../redux/slices/account_management/accountManagement";
 import InvoiceRelation from "./InvoiceRelation/InvoiceRelation";
+import { usePrevLocContext } from "../../../../../../utils/usePrevLoc";
+import NxBaseContainer from "../../../../../../components/Nx/NxBaseContainer";
+import SVGIcon from "../../../../../../assets/Icon/index";
+
+const { Panel } = Collapse;
 
 const FinancialInformation = ({
   id = 0,
   idCustomer = 0,
-  isApproval = false,
-  setIsApproval = () => {},
-  setShowApprovalButton = () => {},
-  submitApprovalCondition = "",
-  setSubmitApprovalCondition = () => {},
 }) => {
   //   // const dispatch = useDispatch();
   //   const { data, data_detail, loading } = useSelector((state) => state.tos);
-	const [current, setCurrent] = useState(0)
-  const dispatch = useDispatch();
+  const { path } = usePrevLocContext();
+  
+	const [current, setCurrent] = useState(
+    path?.pathname.includes("/account-management/account-standard/financial-information/payment-relation") ? 6
+    : path?.pathname.includes("/account-management/account-standard/financial-information/invoice-relation") ? 7
+    : 0
+  )
+  
   const location = useLocation();
+  const dispatch = useDispatch();
   
   const { access_account } = useSelector(
     (state) => state.accountManagement
   );
 
-    // Use Effect
-    useEffect(() => {
-      if(location?.pathname.includes('account-standard')) {
-        dispatch(getGrantedAccessAccount('/account-management/account-standard/financial-information'))
-      }else{
-        dispatch(getGrantedAccessAccount('/account-management/account-onetime/financial-information'))
-      }
-    }, [dispatch])
+  // Use Effect
+  useEffect(() => {
+    let collapse = "";
+
+    switch (current) {
+      case 0:
+        collapse = "/payment-channel"
+        break;
+      case 1:
+        collapse = "/tax-identifier"
+        break;
+      case 2:
+        collapse = "/witholding-tax"
+        break;
+      case 3:
+        collapse = "/accounting-rule"
+        break;
+      case 4:
+        collapse = "/billing-bucket"
+        break;
+      case 5:
+        collapse = "/tax-implication"
+        break;
+      case 6:
+        collapse = "/payment-relation"
+        break;
+      case 7:
+        collapse = "/invoice-relation"
+        break;
+    }
+
+    if(location?.pathname.includes('account-standard')) {
+      dispatch(getGrantedAccessAccount(`/account-management/account-standard/financial-information${collapse}`))
+    }else{
+      dispatch(getGrantedAccessAccount(`/account-management/account-onetime/financial-information${collapse}`))
+    }
+  }, [current]);
 
   const financialList = [
     // {
@@ -83,11 +119,6 @@ const FinancialInformation = ({
           id={id}
           idCustomer={idCustomer}
           isActive={current === 6}
-          isApproval={isApproval}
-          setIsApproval={setIsApproval}
-          setShowApprovalButton={setShowApprovalButton}
-          submitApprovalCondition={submitApprovalCondition}
-          setSubmitApprovalCondition={setSubmitApprovalCondition}
         />
       ),
     },
@@ -95,14 +126,9 @@ const FinancialInformation = ({
       header: "Invoice Relation",
       children: (
         <InvoiceRelation
-          id={id}
-          idCustomer={idCustomer}
+          accountId={id}
+          customerId={idCustomer}
           isActive={current === 7}
-          isApproval={isApproval}
-          setIsApproval={setIsApproval}
-          setShowApprovalButton={setShowApprovalButton}
-          submitApprovalCondition={submitApprovalCondition}
-          setSubmitApprovalCondition={setSubmitApprovalCondition}
         />
       ),
     },
@@ -131,11 +157,28 @@ const FinancialInformation = ({
 		}
 	}
 
+  const collapseStyle = {
+    borderRadius: 5,
+  };
+
+  const panelStyle = {
+    border: "1px solid #d9d9d9",
+    borderRadius: 4,
+    overflow: "hidden",
+  };
+
+  const headerStyle = {
+    fontSize: 16,
+    fontWeight: 400,
+    color: "#0075bf",
+    textTransform: "uppercase",
+  };
+
   return (
     <Fragment>
-      <MiniBaseContainer>
+      <NxBaseContainer>
 				{/* template collapse */}
-        <Space direction="vertical" style={{ width: "100%" }}>
+        <div className="flex flex-col gap-y-4">
           {financialList.map((elm, index) => (
             <Collapse
               key={index}
@@ -143,17 +186,36 @@ const FinancialInformation = ({
 							onChange={
 								(e) => handleCollapse(e,index)
 							}
-              style={{ borderRadius: "8px",backgroundColor: "#E6F1F9"}}
+              style={collapseStyle}
+              expandIconPosition="end"
+              expandIcon={({ isActive }) => (
+                <SVGIcon
+                  name="IconChevronDown"
+                  width={24}
+                  className="text-black"
+                  style={{
+                    transform: `translateY(-50%) rotate(${isActive ? 180 : 0}deg)`,
+                    transition: "transform 0.3s",
+                  }}
+                />
+              )}
             >
-              <Collapse.Panel header={elm.header}>
-                {elm.children}
-              </Collapse.Panel>
+              <Panel
+                header={
+                  <span style={headerStyle}>{elm.header}</span>
+                }
+                style={panelStyle}
+              >
+                <NxBaseContainer border>
+                  {elm.children}
+                </NxBaseContainer>
+              </Panel>
             </Collapse>
           ))}
-        </Space>
-      </MiniBaseContainer>
+        </div>
+      </NxBaseContainer>
     </Fragment>
   );
 };
 
-export default FinancialInformation;
+export default memo(FinancialInformation);

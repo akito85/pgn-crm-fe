@@ -1,263 +1,204 @@
-import React, { useRef } from "react";
-import { Input, Tooltip } from "antd";
-import Highlighter from "react-highlight-words";
 import { useNavigate } from "react-router-dom";
-import StatusComponent from "../../../../../../components/StatusComponent";
-import { useState } from "react";
-import TablePagination from "../../../../../../components/TablePagination";
-import SVGIcon from "../../../../../../assets/Icon/index";
-import { Fragment } from "react";
-import ServiceRequestDetail from "./ServiceRequestDetail";
-import ModalCustom from "../../../../../../components/Modal/ModalCustom";
+import { useDispatch, useSelector } from "react-redux";
+import { useMemo, useState, useRef, useEffect } from "react";
 
-const data = [
-  {
-    srId: "SR-0001",
-    srType: "Suspend Request",
-    category: "Suspend",
-    description: "Suspend Request",
-    status: "Active",
-    createdBy: "Annisa",
-    createdDate: "21 Agustus 2023 11:03:55",
-    updatedBy: "Annisa",
-    updatedDate: "22 Agustus 2023 11:03:55",
-  },
-  {
-    srId: "SR-0002",
-    srType: "Suspend Request",
-    category: "Suspend",
-    description: "Suspend Request",
-    status: "Active",
-    createdBy: "Annisa",
-    createdDate: "21 Agustus 2023 11:03:55",
-    updatedBy: "Annisa",
-    updatedDate: "22 Agustus 2023 11:03:55",
-  },
-  {
-    srId: "SR-0003",
-    srType: "Suspend Request",
-    category: "Suspend",
-    description: "Suspend Request",
-    status: "Inactive",
-    createdBy: "Annisa",
-    createdDate: "21 Agustus 2023 11:03:55",
-    updatedBy: "Annisa",
-    updatedDate: "22 Agustus 2023 11:03:55",
-  },
-];
+import { setData } from "../../../../../../redux/slices/data_slice";
+import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../routes/account_management/customer_account_routes";
+import { getServiceRequests } from "../../../../../../redux/slices/account_management/detailAccount/ServiceRequestSlice";
+import { useColumnActionPermission } from "../../../../../../components/ColumnActionPermission";
+import Toolbar from "../../../../../../components/Toolbar";
+import NxTable from "../../../../../../components/Nx/NxTable";
+import { getServiceRequestColumns } from "./getServiceRequestColumns";
+import { nxGetAccountActions } from "../../../../../../components/Nx/NxGetAccountActions";
 
-const ServiceRequestTable = () => {
-  // const dispatch = useDispatch();
-  // const { data_detail, loading } = useSelector(
-  //   (state) => state.accountManagement
-  // );
-  const [page, setPage] = useState(1);
-  const navigate = useNavigate;
-  const [pageSize, setPageSize] = useState(10);
-  const [id, setId] = useState("");
-  const [status, setStatus] = useState();
-  const [modalDetail, setModalDetail] = useState();
+/**
+ * Service request list table (container + presentational component).
+ * Owns search, pagination, sort, and download state/logic.
+ * The parent (`ServiceRequest`) is responsible for access checks, layout, and modals.
+ *
+ * @param {object}   props
+ * @param {number}   props.idAccount         - Account ID
+ * @param {number}   props.idCustomer        - Customer ID
+ * @param {Function} [props.handleApproval]  - Triggers the approval action
+ * @param {number}   [props.refreshSignal=0] - Increment to trigger a page-1 refresh from the parent
+ */
+const ServiceRequestTable = ({
+  idAccount = 0,
+  idCustomer = 0,
+  handleApproval = () => {},
+  refreshSignal = 0,
+}) => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const { list_serviceRequest, pagination_listSr, loading_listSr } = useSelector(
+    (state) => state.serviceRequest
+  );
+
+  // --- Derived values ---
+  const dataSource = useMemo(() => {
+    if (!Array.isArray(list_serviceRequest)) return [];
+    return list_serviceRequest.map((item, index) => ({
+      ...item,
+      key: `${item.id ?? "sr"}-${index}`,
+    }));
+  }, [list_serviceRequest]);
+
+  const totalElement = pagination_listSr?.totalElement || 0;
+  const hasMore = dataSource.length < totalElement;
+
+  // --- State ---
   const searchInput = useRef(null);
+  const [page, setPage] = useState(1);
+  const [loadMoreSize] = useState(20);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState("");
-  const [dataDetail, setDataDetail] = useState("");
+  const [search, setSearch] = useState({});
+  const [filters, setFilters] = useState([]);
+  const [filterRules, setFilterRules] = useState([]);
 
-  //   useEffect(() => {
-  //     dispatch(getAllTosPaginate({ page, pageSize }));
-  //   }, [dispatch, page, pageSize]);
+  // --- Handlers ---
+  const handleRefresh = () => {
+    dispatch(
+      getServiceRequests({
+        idAccount,
+        body: { page: 1, size: loadMoreSize, sort, searchs: search, filters, filterRules },
+        isLoadMore: false,
+      })
+    );
+    setPage(1);
+  };
 
-  //   //handle on-changes listener
-  const handleChange = (page) => {
-    setPage(page);
-    // dispatch(getAllTosPaginate({ page, pageSize, sort }));
-  };
-  const handleChangeSize = (pageChange, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
-    setPage(tempPage);
-    setPageSize(pageSizeChange);
-    // dispatch(
-    //   getAllTosPaginate({ page: tempPage, pageSize: pageSizeChange, sort })
-    // );
-  };
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
+    setSearch((prevState) => {
+      if (prevState[dataIndex] !== selectedKeys[0]) setPage(1);
+      return { ...prevState, [dataIndex]: selectedKeys[0] };
+    });
   };
 
-  const handleDetail = (record) => {
-    setDataDetail(record);
+  const onSort = (_, __, sort) => {
+    const dataSort = sort.order
+      ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
+      : "";
+    setSort(dataSort);
   };
-  //   const handleDetail = (id) => {
-  //     dispatch(getTosDetail(id));
-  //   };
 
-  //   const handleOpenModalActivation = () => {
-  //     setModalActivionChanges(true);
-  //   };
-  //   const handleCancelModalActivation = () => {
-  //     setModalActivionChanges(false);
-  //   };
-  //   const handleSubmitModalInactivate = (res, handleClear) => {};
+  const handleLoadMore = async () => {
+    const nextPage = page + 1;
+    const totalPage = pagination_listSr?.totalPage || 0;
+    if (nextPage <= totalPage) {
+      await dispatch(
+        getServiceRequests({
+          idAccount,
+          body: { page: nextPage, size: loadMoreSize, sort, searchs: search, filters, filterRules },
+          isLoadMore: true,
+        })
+      ).unwrap();
+      setPage(nextPage);
+    }
+  };
 
-  // Search Column Table
-  const getColumnSearchProps = (dataIndex) => ({
-    filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }) => (
-      <div
-        style={{
-          padding: 8,
-        }}
-        onKeyDown={(e) => e.stopPropagation()}
-      >
-        <Input
-          ref={searchInput}
-          placeholder={`Search ${dataIndex}`}
-          value={selectedKeys[0]}
-          onChange={(e) =>
-            setSelectedKeys(e.target.value ? [e.target.value] : [])
-          }
-          onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
-          style={{
-            display: "block",
-          }}
-        />
-      </div>
-    ),
-    onFilter: (value, record) =>
-      record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()),
-    onFilterDropdownOpenChange: (visible) => {
-      if (visible) {
-        setTimeout(() => searchInput.current?.select(), 100);
-      }
+  const handleDownload = () => {
+    // TODO: Implement download functionality
+    console.log("Download service requests");
+  };
+
+  // --- Effects ---
+  // Re-fetch page 1 whenever sort or search changes.
+  useEffect(() => {
+    dispatch(
+      getServiceRequests({
+        idAccount,
+        body: { page: 1, size: loadMoreSize, sort, searchs: search, filters, filterRules },
+        isLoadMore: false,
+      })
+    );
+    setPage(1);
+  }, [sort, search, filters, filterRules]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Trigger a page-1 refresh when the parent signals it (e.g. after approval).
+  useEffect(() => {
+    if (refreshSignal > 0) handleRefresh();
+  }, [refreshSignal]);
+
+  // --- Column configuration ---
+  const itemActions = nxGetAccountActions({
+    handleCreate: () => {
+      dispatch(
+        setData({
+          key: "serviceRequestCreation",
+          data: { idAccount, idCustomer, type: "standard" },
+        })
+      );
+      navigate(ACCOUNT_MANAGEMENT_ROUTES.CREATE_SERVICE_REQUEST, {
+        state: { idAccount, idCustomer, type: "standard" },
+      });
     },
-    render: (text) =>
-      searchedColumn === dataIndex ? (
-        <Highlighter
-          highlightStyle={{
-            backgroundColor: "#ffc069",
-            padding: 0,
-          }}
-          searchWords={[searchText]}
-          autoEscape
-          textToHighlight={text ? text.toString() : ""}
-        />
-      ) : (
-        text
-      ),
+    handleView: (record) => {
+      navigate(ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_SERVICE_REQUEST, {
+        state: { id: record?.id, idAccount, idCustomer, type: "standard" },
+      });
+    },
+    handleUpdate: (record) => {
+      navigate(ACCOUNT_MANAGEMENT_ROUTES.UPDATE_SERVICE_REQUEST, {
+        state: { id: record?.id, idAccount, idCustomer, type: "update" },
+      });
+    },
+    handleApproval,
+    handleDownload,
   });
 
-  const columns = [
-    {
-      title: "NO",
-      width: 25,
-      align: "center",
-      render: (text, object, index) => (page - 1) * pageSize + index + 1,
-    },
-    {
-      title: "SERVICE REQUEST ID",
-      dataIndex: "srId",
-      width: 150,
-      sorter: true,
-      ...getColumnSearchProps("srId"),
-    },
-    {
-      title: "SERVICE REQUEST TYPE",
-      dataIndex: "srType",
-      width: 150,
-      sorter: true,
-      ...getColumnSearchProps("srType"),
-    },
-    {
-      title: "CATEGORY",
-      dataIndex: "category",
-      width: 150,
-      sorter: true,
-      ...getColumnSearchProps("criteria"),
-    },
-    {
-      title: "DESCRIPTION",
-      dataIndex: "description",
-      width: 150,
-      sorter: true,
-      ...getColumnSearchProps("description"),
-    },
-    {
-      title: "STATUS",
-      dataIndex: "status",
-      width: 100,
-      sorter: true,
-      ...getColumnSearchProps("status"),
-      render: (index) => (
-        <div className={" flex justify-center"}>
-          <StatusComponent colour={index}>{index}</StatusComponent>
-        </div>
-      ),
-    },
-    {
-      title: "ACTIONS",
-      align: "center",
-      width: 50,
-      fixed: "right",
-      render: (v, r, i) => {
-        return (
-          <div className="flex justify-center align-middle gap-2">
-            <Tooltip>
-              <SVGIcon
-                name="IconDetail"
-                color={"#0075bf"}
-                width={24}
-                onClick={() => {
-                  handleDetail(r);
-                  setModalDetail(true);
-                }}
-              />
-            </Tooltip>
-          </div>
-        );
-      },
-    },
-  ];
+  const actionCols = useColumnActionPermission(
+    ["View", "Update"],
+    itemActions,
+    "View",
+    "table"
+  ).map((col) => ({
+    ...col,
+    width: 100,
+    align: "center",
+  }));
 
-  //   const onSort = (_, __, sort) => {
-  //     const dataSort = sort.order
-  //       ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
-  //       : "";
-  //     let obj = { page: 1, pageSize };
-  //     if (dataSort) {
-  //       obj.sort = dataSort;
-  //       setSort(dataSort);
-  //     }
-  //     dispatch(getAllTosPaginate(obj));
-  //   };
+  const baseColumns = useMemo(
+    () =>
+      getServiceRequestColumns({
+        search,
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch
+      }),
+    [search, searchText, searchedColumn]
+  );
+
+  const columns = useMemo(
+    () => [...baseColumns, ...actionCols],
+    [baseColumns, actionCols]
+  );
 
   return (
-    <Fragment>
-      <TablePagination
-        dataSource={data}
-        totalData={data.length}
+    <div className="flex flex-col gap-y-4">
+      <Toolbar items={itemActions} type="detail" />
+      <NxTable
+        idTable="service-request-table"
+        dataSource={dataSource}
+        totalData={totalElement}
         current={page}
-        pageSize={pageSize}
-        onChange={handleChange}
-        onSizeChanger={handleChangeSize}
-        tableScrolled={{ y: 525, x: 1300 }}
-        // onSort={onSort}
+        tableScrolled={{ x: dataSource.length ? "max-content" : 2700 }}
+        onSort={onSort}
         columns={columns}
+        usePagination={false}
+        useInfiniteScroll={true}
+        hasMore={hasMore}
+        onLoadMore={handleLoadMore}
+        loadMoreThreshold={20}
+        loading={loading_listSr}
       />
-
-      {/* modal detail */}
-      <ModalCustom
-        isOpen={modalDetail}
-        type="detail"
-        header="Detail Customer Management"
-        width={700}
-        handleCancel={() => {
-          setModalDetail(false);
-        }}
-      >
-        <ServiceRequestDetail data_detail={dataDetail} />
-      </ModalCustom>
-    </Fragment>
+    </div>
   );
 };
 

@@ -5,10 +5,9 @@ import {
 } from "../../../../../../components/Modal/ModalPopUp";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import BaseContainer from "../../../../../../components/BaseContainer";
-import LayoutMenu from "../../../../../../components/SidebarMenu/LayoutMenu";
 import { Form, Spin } from "antd";
 import BreadCrumb from "../../../../../../components/BreadCrumb";
-import RadioTabs from "../../../../../../components/RadioTabs";
+import { FormStepper, FormFooter } from "../../../../../../components/FormStepNavigation";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import { RBI_ROUTES } from "../../../../../../routes/rating_billing/rbi_routes";
@@ -58,8 +57,17 @@ const CreateAndUpdateGeneralTemplate = ({ type }) => {
   const id = location.state?.id || undefined;
   const statusType = location.state?.status || undefined;
 
+  // Stepper state
+  const [current, setCurrent] = useState(0);
+
+  const steps = [
+    { title: "CREATE", value: "General Template" },
+    { title: "APPROVAL", value: "Approval" },
+    { title: "ATTACHMENT", value: "Attachment" },
+  ];
+
   //state data
-  const [dataTabs, setDataTabs] = useState([
+  const [tabData, setTabData] = useState([
     {
       value: "General Template",
       paramValue: [
@@ -68,13 +76,14 @@ const CreateAndUpdateGeneralTemplate = ({ type }) => {
         "startDate",
         "endDate",
         "description",
+        "uploadTemplate",
       ],
     },
     { value: "Approval", paramValue: ["apphierId"] },
     { value: "Attachment" },
   ]);
 
-  const [tabHeader, setTabHeader] = useState(dataTabs[0].value);
+  const [valuePage, setValuePage] = useState(steps[0].value);
 
   const [dataListDetailApproval, setDataListDetailApproval] = useState([]);
   const [dataApprovalId, setDataApprovalId] = useState();
@@ -85,6 +94,7 @@ const CreateAndUpdateGeneralTemplate = ({ type }) => {
 
   //state attachment
   const [dataAttachment, setDataAttachment] = useState([]);
+  const [deletedAttachmentIds, setDeletedAttachmentIds] = useState([]);
 
   //general template
   const [fileList, setFileList] = useState([]);
@@ -94,10 +104,48 @@ const CreateAndUpdateGeneralTemplate = ({ type }) => {
   const [modalError, setModalError] = useState(false);
   const [bodyError, setBodyError] = useState({});
   const [loadingForm, setLoadingForm] = useState(false);
+  const [loadingSave, setLoadingSave] = useState(false);
 
   //modal
   const [modalBack, setModalBack] = useState(false);
   const [modalConfirm, setModalConfirm] = useState(false);
+  const [modalIncomplete, setModalIncomplete] = useState({
+    isOpen: false,
+    stepName: "",
+    stepIndex: 0,
+  });
+
+  // Update valuePage when current changes
+  useEffect(() => {
+    setValuePage(steps[current].value);
+  }, [current]);
+
+  // Stepper navigation functions
+  const next = () => {
+    const fieldsToValidate = tabData[current]?.paramValue;
+    if (fieldsToValidate) {
+      form
+        .validateFields(fieldsToValidate)
+        .then(() => {
+          if (current < steps.length - 1) {
+            setCurrent(current + 1);
+          }
+        })
+        .catch((error) => {
+          console.log("Validation failed:", error);
+        });
+    } else {
+      if (current < steps.length - 1) {
+        setCurrent(current + 1);
+      }
+    }
+  };
+
+  const prev = () => {
+    if (current > 0) {
+      setCurrent(current - 1);
+    }
+  };
 
   //handle
   const handleFormUpdateApprovalChecked = useCallback(
@@ -122,13 +170,11 @@ const CreateAndUpdateGeneralTemplate = ({ type }) => {
         name: data_detail.templateName,
         startDate: data_detail.startDate ? moment(data_detail.startDate) : null,
         endDate: data_detail.endDate ? moment(data_detail.endDate) : null,
-        // apphierId: data_detail.approvalHierarchy,
       });
-      // setDataApprovalId(data_detail.approvalHierarchy);
+
       if (data_detail.fileTemplate) {
         setFileList((prevState) => {
           const res = {
-            // ...file,
             ...data_detail?.fileTemplate,
             name: data_detail?.fileTemplate?.fileName,
             fileSize: bytesConverter(data_detail?.fileTemplate?.size || 0),
@@ -140,13 +186,13 @@ const CreateAndUpdateGeneralTemplate = ({ type }) => {
       }
 
       setDataAttachment([
-        ...(data_detail?.attachment || []).map((item) => {
+        ...(data_detail?.attachment || []).map((item, index) => {
           return {
             ...item,
+            key: index + 1,
             createdDate: moment(item.createdDate).format(dateFormatting.date),
             uploadBy: item.createdBy,
             uploadDate: moment(item.createdDate).format(dateFormatting.date),
-            // fileSize: bytesConverter(item.fileSize || 0),
             dataType: "exist",
           };
         }),
@@ -184,7 +230,6 @@ const CreateAndUpdateGeneralTemplate = ({ type }) => {
           ...data_detail_draft,
           type: data_detail_draft?.templateType?.name,
           attachment: data_detail?.attachment,
-          // fileTemplate: data_detail?.fileTemplate,
         };
         handleFormSetUpdate(body, data_template_type, id);
       } else {
@@ -272,10 +317,22 @@ const CreateAndUpdateGeneralTemplate = ({ type }) => {
     }
   }, [dataListAppHierDetail]);
 
-  //handle radio tabs
-  const changeTabHeader = (e) => {
-    setTabHeader(e.target.value);
-  };
+  const handleUpdateAttachment = useCallback((updater) => {
+    setDataAttachment((prevState) => {
+      const newState =
+        typeof updater === "function" ? updater(prevState) : updater;
+      const removedItems = prevState.filter(
+        (item) => !newState.some((newItem) => newItem.key === item.key),
+      );
+      const removedExistingIds = removedItems
+        .filter((item) => item.dataType === "exist" && item.id)
+        .map((item) => item.id);
+      if (removedExistingIds.length > 0) {
+        setDeletedAttachmentIds((prev) => [...prev, ...removedExistingIds]);
+      }
+      return newState;
+    });
+  }, []);
 
   //general template form
   const handleStartDate = (e) => {
@@ -311,9 +368,14 @@ const CreateAndUpdateGeneralTemplate = ({ type }) => {
 
   const onFinish = async (e) => {
     if (dataAttachment.length === 0 || fileList.length === 0) {
-      handleMandatory(setDataTabs, dataAttachment, fileList);
+      handleMandatory(setTabData, dataAttachment, fileList);
+      setModalIncomplete({
+        isOpen: true,
+        stepName: steps[2].title,
+        stepIndex: 2,
+      });
     } else {
-      handleMandatory(setDataTabs, dataAttachment, fileList);
+      handleMandatory(setTabData, dataAttachment, fileList);
 
       const bodyValidation = {
         ...e,
@@ -374,6 +436,12 @@ const CreateAndUpdateGeneralTemplate = ({ type }) => {
   );
 
   const handleSendDataFile = async (data) => {
+    if (type === "update" && deletedAttachmentIds.length > 0) {
+      await ratingBillingHttpService.deleteDataWithBody(
+        `/v1/dbs/api/attachment/delete-attachment`,
+        { fileId: deletedAttachmentIds }
+      );
+    }
     if (fileList[0]?.dataType !== "exist") {
       const body_upload = {
         files: fileList[0].file,
@@ -402,8 +470,8 @@ const CreateAndUpdateGeneralTemplate = ({ type }) => {
   };
 
   const handleSendData = (data) => {
+    setLoadingSave(true);
     const body = {
-      // id: id ? id : undefined,
       ...data,
       templateName: data.name,
       approvalHierarchy: data.apphierId,
@@ -426,12 +494,27 @@ const CreateAndUpdateGeneralTemplate = ({ type }) => {
       .unwrap()
       .then(async (data) => {
         setLoadingForm(true);
-        await handleSendDataFile(data);
-        handleDescriptionSuccess(body, type);
-        handleClearOrReset();
+        try {
+          await handleSendDataFile(data);
+          handleDescriptionSuccess(body, type);
+          handleClearOrReset(type);
+        } catch (error) {
+          const message =
+            error?.response?.data?.data ||
+            error?.response?.data?.message ||
+            error?.message ||
+            "Failed to upload file";
+          setBodyError({ message, value: data });
+          setModalError(true);
+          setLoadingForm(false);
+        }
+        setLoadingSave(false);
+        setModalConfirm(false);
       })
       .catch((error) => {
-        if (Math.floor((error.response.data.code || 0) / 100) === 5) {
+        setLoadingSave(false);
+        setModalConfirm(false);
+        if (Math.floor((error.response?.data?.code || 0) / 100) === 5) {
           const message =
             (error?.response &&
               error?.response?.data &&
@@ -450,26 +533,106 @@ const CreateAndUpdateGeneralTemplate = ({ type }) => {
   };
 
   const handleErrorSubmit = ({ values, errorFields, outOfDate }) => {
-    handleMandatory(setDataTabs, dataAttachment, fileList, errorFields);
+    handleMandatory(setTabData, dataAttachment, fileList, errorFields);
+    
+    // Set error badges on tabs
+    setTabData((prevState) => {
+      const res = prevState.map((item) => {
+        if (!item.paramValue || item.paramValue.length < 0) {
+          return {
+            value: item.value,
+            paramValue: item.paramValue,
+          };
+        }
+        const errorBadge = errorFields.reduce(
+          (current, next) =>
+            item.paramValue.includes(next.name[0]) ? current + 1 : current,
+          0
+        );
+        return {
+          value: item.value,
+          paramValue: item.paramValue,
+          errorBadge,
+        };
+      });
+      return res;
+    });
+
+    if (errorFields?.length > 0) {
+      const firstError = errorFields[0].name[0];
+      const stepIndex = tabData.findIndex((page) =>
+        page.paramValue?.includes(firstError)
+      );
+
+      if (stepIndex !== -1) {
+        setModalIncomplete({
+          isOpen: true,
+          stepName: steps[stepIndex].title,
+          stepIndex: stepIndex,
+        });
+      }
+    }
   };
 
-  const handleClearOrReset = (type = "create") => {
-    if (type === "update") {
-      handleFormSetUpdate(data_detail, data_template_type, id);
+  const handleClearOrReset = (type_action = "create") => {
+    if (type_action === "update") {
+      dispatch(getDetailGeneralTemplate(id));
+      dispatch(getDetailDraftGeneralTemplate(id));
     } else {
       form.resetFields();
       setFileList([]);
-      // setPreviewImage("");
-      // setFileName("");
-      // setBase64Image("");
       setDataApprovalId();
-      // setDataApproval([]);
       setDataListDetailApproval([]);
       setDataAttachment([]);
+      setDeletedAttachmentIds([]);
       setTypeSubmit(false);
+      setStartDate(undefined);
+      setTabData([
+        {
+          value: "General Template",
+          paramValue: [
+            "name",
+            "templateType",
+            "startDate",
+            "endDate",
+            "description",
+            "uploadTemplate",
+          ],
+        },
+        { value: "Approval", paramValue: ["apphierId"] },
+        { value: "Attachment" },
+      ]);
     }
+    setCurrent(0);
     setLoadingForm(false);
   };
+
+  // Handle Back button
+  const handleBack = () => {
+    if (
+      form.getFieldValue() === null ||
+      Object.keys(form.getFieldValue()).length === 0
+    ) {
+      navigate(-1);
+    } else {
+      setModalBack(true);
+    }
+  };
+
+  const handleClear = () => {
+    handleClearOrReset(type);
+  };
+
+  const handleSaveDraft = () => {
+    setTypeSubmit(false);
+    form.submit();
+  };
+
+  const handleSaveSubmit = () => {
+    setTypeSubmit(true);
+    form.submit();
+  };
+
   // routes
   const routes = [
     {
@@ -491,19 +654,19 @@ const CreateAndUpdateGeneralTemplate = ({ type }) => {
       } General Template`,
     },
   ];
+
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading || loadingForm}>
         <BreadCrumb routes={routes} />
-        <div className={"w-full flex flex-col"}>
-          <div className={"w-full flex justify-start"}>
-            <RadioTabs
-              data={dataTabs}
-              onChange={changeTabHeader}
-              currentPosition={tabHeader}
-            />
-          </div>
-        </div>
+        
+        <FormStepper
+          steps={steps}
+          current={current}
+          onPrev={prev}
+          onNext={next}
+        />
+
         <Form
           id={"form"}
           layout={"vertical"}
@@ -514,7 +677,7 @@ const CreateAndUpdateGeneralTemplate = ({ type }) => {
         >
           <div
             style={{
-              display: tabHeader !== dataTabs[0].value ? "none" : undefined,
+              display: valuePage !== tabData[0].value ? "none" : undefined,
             }}
           >
             <GeneralTempalteCreateUpdateForm
@@ -522,20 +685,16 @@ const CreateAndUpdateGeneralTemplate = ({ type }) => {
               statusType={statusType}
               optionTemplateType={data_template_type}
               fileList={fileList}
-              // handleChange={handleChange}
-              // handleRemove={handleRemove}
               startDate={startDate}
               handleStartDate={handleStartDate}
-              // setValidateFile={setValidateFile}
               setFileList={setFileList}
               dispatch={dispatch}
-              // setFileName={setFileName}
-              // setBase64Image={setBase64Image}
             />
           </div>
+          
           <div
             style={{
-              display: tabHeader !== dataTabs[1].value ? "none" : undefined,
+              display: valuePage !== tabData[1].value ? "none" : undefined,
             }}
           >
             <BaseContainer header={"APPROVAL INFORMATION"}>
@@ -547,90 +706,33 @@ const CreateAndUpdateGeneralTemplate = ({ type }) => {
               />
             </BaseContainer>
           </div>
+          
           <div
             style={{
-              display: tabHeader !== dataTabs[2].value ? "none" : undefined,
+              display: valuePage !== tabData[2].value ? "none" : undefined,
             }}
           >
             <BaseContainer header={"ATTACHMENT INFORMATION"}>
               <GeneralTempalteAttachment
                 dispatch={dispatch}
                 dataAttachment={dataAttachment}
-                setDataAttachment={setDataAttachment}
+                setDataAttachment={handleUpdateAttachment}
               />
             </BaseContainer>
           </div>
-          <div className={"w-full flex justify-between mt-10"}>
-            <div className=" flex">
-              <ButtonComponent
-                type={"submit"}
-                onClick={() => {
-                  setModalBack(true);
-                }}
-                icon={
-                  <LeftOutlined
-                    style={{
-                      color: "#fff",
-                      fontSize: 24,
-                      justifyItems: "center",
-                    }}
-                  />
-                }
-              >
-                Back
-              </ButtonComponent>
-            </div>
 
-            <div className={"flex gap-5"}>
-              <Form.Item>
-                <ButtonComponent
-                  icon={
-                    <SVGIcon
-                      name={
-                        type === "update"
-                          ? `IconButtonReset`
-                          : `IconButtonClear`
-                      }
-                      width={24}
-                      color={"#FFFFFF"}
-                    />
-                  }
-                  type="submit"
-                  onClick={() => {
-                    handleClearOrReset(type);
-                  }}
-                >
-                  {type === "update" ? "Reset" : "Clear"}
-                </ButtonComponent>
-              </Form.Item>
-              <Form.Item>
-                <ButtonComponent
-                  type="submit"
-                  htmlType={"submit"}
-                  form={"form"}
-                  disabled={loadingForm}
-                  onClick={() => {
-                    setTypeSubmit(false);
-                  }}
-                >
-                  Save As Draft
-                </ButtonComponent>
-              </Form.Item>
-              <Form.Item>
-                <ButtonComponent
-                  type="submit"
-                  htmlType={"submit"}
-                  form={"form"}
-                  disabled={loadingForm}
-                  onClick={() => {
-                    setTypeSubmit(true);
-                  }}
-                >
-                  Save & Submit
-                </ButtonComponent>
-              </Form.Item>
-            </div>
-          </div>
+          <FormFooter
+            current={current}
+            totalSteps={steps.length}
+            onPrev={prev}
+            onNext={next}
+            onCancel={handleBack}
+            onClear={handleClear}
+            onSaveDraft={handleSaveDraft}
+            onSubmit={handleSaveSubmit}
+            type={type}
+            isLoading={loadingSave}
+          />
         </Form>
 
         {/* Modal Retry */}
@@ -694,6 +796,7 @@ const CreateAndUpdateGeneralTemplate = ({ type }) => {
                     setModalConfirm(false);
                     setTypeSubmit(false);
                   }}
+                  disabled={loadingSave}
                 >
                   Cancel
                 </ButtonComponent>
@@ -702,7 +805,8 @@ const CreateAndUpdateGeneralTemplate = ({ type }) => {
                   onClick={() => {
                     handleSendData(dataConfirm);
                   }}
-                  disabled={loading || loadingForm}
+                  isLoading={loadingSave}
+                  disabled={loading || loadingForm || loadingSave}
                 >
                   Confirm
                 </ButtonComponent>
@@ -721,8 +825,27 @@ const CreateAndUpdateGeneralTemplate = ({ type }) => {
             />
           </ModalCustom>
         ) : null}
+
+        {/* Modal Incomplete */}
+        <ModalError
+          isOpen={modalIncomplete.isOpen}
+          handleOk={() => {
+            setCurrent(modalIncomplete.stepIndex);
+            setModalIncomplete({ isOpen: false, stepName: "", stepIndex: 0 });
+          }}
+          handleCancel={() => setModalIncomplete({ isOpen: false, stepName: "", stepIndex: 0 })}
+          customText="Go to Step"
+        >
+          <div className="px-5 pt-5 pb-[10px] justify-center">
+            <div className="w-full flex gap-[20px]">
+              <SVGIcon name="IconFailed" width={48} />
+              <p className="text-[18px] font-bold">{"Incomplete Data"}</p>
+            </div>
+            <p className="pl-[70px]">Please complete the mandatory fields in the <b>{modalIncomplete.stepName}</b> section before proceeding.</p>
+          </div>
+        </ModalError>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

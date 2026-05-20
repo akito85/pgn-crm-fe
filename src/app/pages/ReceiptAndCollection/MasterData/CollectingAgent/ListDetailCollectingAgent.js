@@ -1,15 +1,20 @@
-import { LeftOutlined } from "@ant-design/icons";
+import {
+    LeftOutlined,
+    CheckSquareOutlined,
+    CloseSquareOutlined
+} from "@ant-design/icons";
 import moment from "moment";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrReject";
-import RadioTabs from "../../../../../components/RadioTabs";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
+import FooterDetail from "../../../../../components/FooterDetail";
+import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrRejectV2";
+import { Tabs, Spin } from "antd";
 import {
     approveOrRejectCollectingAgent,
+    approveOrRejectInactiveCollectingAgent,
     getDetailCollectingAgent,
 } from "../../../../../redux/slices/receipt_collection/collectingAgent";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
@@ -24,26 +29,19 @@ const ListDetailCollectingAgent = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const [modalApprove, setModalApprove] = useState(false);
+    const [loadingConfirm, setLoadingConfirm] = useState(false);
     const [approveOrReject, setApproveOrReject] = useState("");
     const id = location?.state?.id;
     const [dataHeader, setDataHeader] = useState({});
     const [listDataAttachment, setListDataAttachment] = useState([]);
     // const [isShowButton, setIsShowButton] = useState(false);
 
-    // Define tabData before using it in useState
-    const [tabData, setTabData] = useState([
-        { value: "Collecting Agent" },
-        { value: "Attachment" },
-    ]);
-
     const { loading, data_detail } = useSelector(
         (state) => state.collectingAgent
     );
-    const [segmentedPage, setSegmentedPage] = useState(tabData[0].value);
+    const [segmentedPage, setSegmentedPage] = useState("Collecting Agent");
 
-    const handleSegmentedPage = (e) => {
-        setSegmentedPage(e.target.value);
-    };
+
 
     useEffect(() => {
         dispatch(getDetailCollectingAgent(id));
@@ -78,33 +76,7 @@ const ListDetailCollectingAgent = () => {
         }
     }, [id, data_detail]);
 
-    const renderSection = (segmentedPage) => {
-        switch (segmentedPage) {
-            case "Collecting Agent":
-                return (
-                    <DetailCollectingAgent
-                        key={"active"}
-                        data_detail={dataHeader}
-                        data_req={data_detail?.tApprovalDto}
-                    />
-                );
-            case "Attachment":
-                return (
-                    <BaseContainer header={"ATTACHMENT INFORMATION"}>
-                        <AttachmentComponent
-                            type={"detail"}
-                            data={listDataAttachment}
-                            updateData={setListDataAttachment}
-                            typeSelector="collectingAgent"
-                            service={receiptCollectionHttpService}
-                            configApplication={configApp.PAYMENT_SERVICE}
-                        />
-                    </BaseContainer>
-                );
-            default:
-                return <></>;
-        }
-    };
+
 
     const isShowButton = data_detail?.tApprovalDto?.isApprover;
 
@@ -112,44 +84,120 @@ const ListDetailCollectingAgent = () => {
 
     // Breadcrumbs
     const routes = [
-        {
-            path: "",
-            breadcrumbName: "Receipt & Collection",
-        },
-        {
-            path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_COLLECTING_AGENT,
-            breadcrumbName: "Collecting Agent",
-        },
-        {
-            path: RECEIPT_AND_COLLECTION_ROUTES.DETAIL_COLLECTING_AGENT,
-            breadcrumbName: `Detail ${segmentedPage}`,
-        },
+      {
+        path: "",
+        breadcrumbName: "System Setup",
+      },
+      {
+        path: "",
+        breadcrumbName: "Master Data",
+      },
+      {
+        path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_COLLECTING_AGENT,
+        breadcrumbName: "Collecting Agent",
+      },
+      {
+        path: RECEIPT_AND_COLLECTION_ROUTES.DETAIL_COLLECTING_AGENT,
+        breadcrumbName: `Detail ${segmentedPage}`,
+      },
     ];
 
     // handle Confirm
+    // handle Confirm
     const handleConfirm = (res, handleClear) => {
-        const data = {
-            collectingAgentId: id,
-            remark: res.remark,
-            approvalId: data_detail?.tApprovalDto?.tAppId,
-            action: approveOrReject.toUpperCase(),
-        };
-        dispatch(approveOrRejectCollectingAgent({ body: data }));
-        handleClear();
-        setModalApprove(false);
+        setLoadingConfirm(true);
+        if (
+            data_detail?.tApprovalDto?.approvalType === "INACTIVE_COLLECTING_AGENT" ||
+            data_detail?.tApprovalDto?.approvalType === "ACTIVE_COLLECTING_AGENT"
+        ) {
+            const data = {
+                id: id,
+                remark: res.remark,
+                approvalId: data_detail?.tApprovalDto?.tAppId,
+                action: approveOrReject.toUpperCase(),
+            };
+            dispatch(approveOrRejectInactiveCollectingAgent({ body: data }))
+                .unwrap()
+                .then(() => {
+                    handleClear();
+                    setModalApprove(false);
+                    setLoadingConfirm(false);
+                })
+                .catch(() => {
+                    setLoadingConfirm(false);
+                });
+        } else {
+            const data = {
+                collectingAgentId: id,
+                remark: res.remark,
+                approvalId: data_detail?.tApprovalDto?.tAppId,
+                action: approveOrReject.toUpperCase(),
+            };
+            dispatch(approveOrRejectCollectingAgent({ body: data }))
+                .unwrap()
+                .then(() => {
+                    handleClear();
+                    setModalApprove(false);
+                    setLoadingConfirm(false);
+                })
+                .catch(() => {
+                    setLoadingConfirm(false);
+                });
+        }
     };
 
     const handleCancel = () => {
         setModalApprove(false);
     };
 
+    const approvalType = data_detail?.tApprovalDto?.approvalType;
+    let approvalMenu = "Collecting Agent";
+    if (approvalType === "INACTIVE_COLLECTING_AGENT") {
+        approvalMenu = "Inactive Collecting Agent";
+    } else if (approvalType === "ACTIVE_COLLECTING_AGENT") {
+        approvalMenu = "Active Collecting Agent";
+    }
+
     return (
-        <LayoutMenu>
+        <>
             <BreadCrumb routes={routes} />
-            <div>
-                <RadioTabs data={tabData} onChange={handleSegmentedPage} />
-                {renderSection(segmentedPage)}
+            <Spin spinning={loading}>
+                <div>
+                    <Tabs
+                        activeKey={segmentedPage}
+                    onChange={setSegmentedPage}
+                    items={[
+                        {
+                            label: "Collecting Agent",
+                            key: "Collecting Agent",
+                            children: (
+                                <DetailCollectingAgent
+                                    key={"active"}
+                                    data_detail={dataHeader}
+                                    data_req={data_detail?.tApprovalDto}
+                                />
+                            ),
+                        },
+                        {
+                            label: "Attachment",
+                            key: "Attachment",
+                            children: (
+                                <BaseContainer header={"ATTACHMENT INFORMATION"}>
+                                    <AttachmentComponent
+                                        type={"detail"}
+                                        data={listDataAttachment}
+                                        updateData={setListDataAttachment}
+                                        typeSelector="collectingAgent"
+                                        service={receiptCollectionHttpService}
+                                        configApplication={configApp.PAYMENT_SERVICE}
+                                    />
+                                </BaseContainer>
+                            ),
+                        },
+                    ]}
+                />
             </div>
+            </Spin>
 
             <ModalApproveOrReject
                 isOpen={modalApprove}
@@ -157,51 +205,24 @@ const ListDetailCollectingAgent = () => {
                 onFinish={handleConfirm}
                 header={approveOrReject}
                 approveOrReject={approveOrReject}
-                menu={"Collecting Agent"}
+                menu={approvalMenu}
                 named={data_detail?.collectingAgent?.name}
+                loading={loadingConfirm}
             />
 
-            <div className="flex mt-[30px] justify-between py-5">
-                <ButtonComponent
-                    type={"submit"}
-                    onClick={() => navigate(-1)}
-                    icon={
-                        <LeftOutlined
-                            style={{
-                                color: "#fff",
-                                fontSize: 24,
-                                justifyItems: "center",
-                            }}
-                        />
-                    }
-                >
-                    Back
-                </ButtonComponent>
-
-                {isShowButton === true ? (
-                    <div className="flex align-middle gap-5">
-                        <ButtonComponent
-                            type="reject"
-                            onClick={() => {
-                                setModalApprove(true);
-                                setApproveOrReject("reject");
-                            }}
-                        >
-                            Reject
-                        </ButtonComponent>
-                        <ButtonComponent
-                            type="approve"
-                            onClick={() => {
-                                setModalApprove(true);
-                                setApproveOrReject("approve");
-                            }}
-                        >
-                            Approve
-                        </ButtonComponent>
-                    </div>
-                ) : null}
-            </div>
-        </LayoutMenu>
+            <FooterDetail
+                onCancel={() => navigate(-1)}
+                onApprove={() => {
+                    setModalApprove(true);
+                    setApproveOrReject("approve");
+                }}
+                onReject={() => {
+                    setModalApprove(true);
+                    setApproveOrReject("reject");
+                }}
+                showApproval={isShowButton === true}
+            />
+        </>
     );
 };
 

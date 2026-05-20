@@ -53,7 +53,7 @@ const EditableCell = ({
   dataEditRecord,
   formTableCriteria,
   endDateHeader,
-  handleEditDataRecord = () => {},
+  handleEditDataRecord = () => { },
   ...restProps
 }) => {
   const dispatch = useDispatch();
@@ -183,13 +183,13 @@ const EditableCell = ({
             inputType !== "endDate"
               ? rules()
               : [
-                  {
-                    validator: (_, value) =>
-                      endDateValidator(
-                        formTableCriteria.getFieldValue().startDate
-                      )(_, value),
-                  },
-                ]
+                {
+                  validator: (_, value) =>
+                    endDateValidator(
+                      formTableCriteria.getFieldValue().startDate
+                    )(_, value),
+                },
+              ]
           }
         >
           {inputNode}
@@ -206,15 +206,15 @@ const FunctionalTableCriteriaPayment = ({
   data = [],
   dataCriteria = [],
   disableDate,
-  updateData = () => {},
+  updateData = () => { },
   storedData = false,
-  setStoredData = () => {},
+  setStoredData = () => { },
   endDateHeader,
   required,
   status,
   statusApproval,
   showAction,
-  setIsEditing = () => {},
+  setIsEditing = () => { },
 }) => {
   const searchInput = useRef(null);
   const [formTableCriteria] = Form.useForm();
@@ -671,6 +671,7 @@ const FunctionalTableCriteriaPayment = ({
   const columns = () => {
     const temp = [
       {
+        key: "no",
         title: "NO",
         width: 60,
         dataIndex: "no",
@@ -686,6 +687,7 @@ const FunctionalTableCriteriaPayment = ({
         handleSearch
       ),
       {
+        key: "startDate",
         title: "START DATE",
         required: true,
         width: 240,
@@ -722,6 +724,7 @@ const FunctionalTableCriteriaPayment = ({
         },
       },
       {
+        key: "endDate",
         title: "END DATE",
         width: 240,
         align: "center",
@@ -758,6 +761,7 @@ const FunctionalTableCriteriaPayment = ({
         },
       },
       {
+        key: "operation",
         title: "ACTION",
         dataIndex: "operation",
         width: 240,
@@ -770,7 +774,7 @@ const FunctionalTableCriteriaPayment = ({
             record.type !== "exist";
 
           return (
-            <Space className="my-3 gap-2">
+            <Space className="gap-2">
               {editable ? (
                 <>
                   <ButtonComponent
@@ -849,10 +853,10 @@ const FunctionalTableCriteriaPayment = ({
       type !== "detail" ? temp : temp.filter((col) => col.title !== "ACTION");
     return filterCol.filter((col) =>
       col.title !== "NO" &&
-      col.title !== "ACTION" &&
-      col.title !== "START DATE" &&
-      col.title !== "END DATE"
-        ? dataCriteria.includes(col.indexValue)
+        col.title !== "ACTION" &&
+        col.title !== "START DATE" &&
+        col.title !== "END DATE"
+        ? dataCriteria.some((v) => Number(v) === col.indexValue)
         : true
     );
   };
@@ -952,7 +956,7 @@ const FunctionalTableCriteriaPayment = ({
   //   }
   //   return result.slice((page - 1) * pageSize, page * pageSize);
   // };
-  return dataCriteria && dataCriteria.length > 0 && dataCriteria[0] !== 24 ? (
+  return dataCriteria && dataCriteria.length > 0 && Number(dataCriteria[0]) !== 24 ? (
     <div className="flex flex-col w-full gap-4">
       {type !== "detail" && type !== "preview" && type !== "show" ? (
         <div className="flex w-full justify-end">
@@ -1010,6 +1014,7 @@ const FunctionalTableCriteriaPayment = ({
         <div className="w-full">
           <Table
             bordered
+            size="small"
             dataSource={filterDataByPage()}
             columns={filterColumn(
               columns().map((col) => ({

@@ -623,6 +623,7 @@ const DistributionMediaForm = ({
               form={formDM}
               onFinish={handleAdd}
               id={"formDM"}
+              scrollToFirstError={{ behavior: "smooth", block: "center" }}
             >
               <span className="text-primary uppercase font-bold">
                 PRODUCT INFORMATION

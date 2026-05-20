@@ -1,269 +1,91 @@
-import React, { useEffect, useRef, useState, useMemo } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import TableRBI from "../../../../../components/TableRBI";
-import { getAllCalculationUsagePaginate } from "../../../../../redux/slices/rating_billing_invoice/rating";
-import { columnsCalculationUsage } from "./Table/TableCalculationUsage";
-import ModalCustom from "../../../../../components/Modal/ModalCustom";
-import ButtonComponent from "../../../../../components/ButtonComponent";
-import CardComponent from "../../../../../components/Card/CardComponent";
-import DetailText from "../../../../../components/DetailText";
-import { hasValue, renderDateConverter } from "../../../../../utils";
-import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
+import React, { useState } from "react";
+import { Collapse } from "antd";
+import { DownOutlined } from "@ant-design/icons";
+import CalculationItemInfo from "./CalculationUsage/CalculationItemInfo";
+import CalculationSummary from "./CalculationUsage/CalculationSummary";
+import CalculationDetail from "./CalculationUsage/CalculationDetail";
+import AdjustmentSection from "./CalculationUsage/AdjustmentSection";
 
-const CalculationUsageSection = ({ ratingCodeId, calculationCode }) => {
-  const { data_calculationUsage, loading } = useSelector((state) => state.rating);
+const { Panel } = Collapse;
 
-  const dispatch = useDispatch();
-  const searchInput = useRef(null);
-  const dataSource = data_calculationUsage?.result;
+const CalculationUsageSection = ({ calculationCode, ratingCode, accountNumber, saType }) => {
+  const [activeKey, setActiveKey] = useState(["1"]);
 
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const [searchedColumn, setSearchedColumn] = useState("");
-  const [searchText, setSearchText] = useState("");
-  const [sort, setSort] = useState("");
-  const [search, setSearch] = useState({});
-  const [isOpen, setIsOpen] = useState(false);
-  const [detailCalculationItem, setDetailCalculationItem] = useState({});
-
-  const [fixedColumns, setFixedColumns] = useState(() => ({
-    left: ["no"],
-    right: ["action"],
-  }));
-
-  useEffect(() => {
-    let tempSearch = "";
-    for (const dataIndex in search) {
-      if (Object.hasOwnProperty.call(search, dataIndex)) {
-        const tempSearchText = search[dataIndex];
-        if (tempSearchText) {
-          tempSearch += `${dataIndex}~${tempSearchText},`;
-        }
-      }
-    }
-    tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
-    dispatch(
-      getAllCalculationUsagePaginate({
-        id: ratingCodeId,
-        search: encodeURIComponent(JSON.stringify(search)),
-        page,
-        pageSize,
-        sort,
-      })
-    );
-  }, [ratingCodeId, search, page, pageSize, sort, dispatch]);
-
-  const handleSearch = (selectedKeys, confirm, dataIndex) => {
-    confirm();
-    setSearchText(selectedKeys[0]);
-    setSearchedColumn(selectedKeys[0] ? dataIndex : "");
-    setSearch((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
-      }
-      return {
-        ...prevState,
-        [dataIndex]: selectedKeys[0],
-      };
-    });
+  const handleCollapseChange = (keys) => {
+    setActiveKey(keys);
   };
 
-  const handleChange = (pageChange, pageSizeChange) => {
-    setPage(pageSize !== pageSizeChange ? 1 : pageChange);
-    setPageSize(pageSizeChange);
+  const panelStyle = {
+    marginBottom: 16,
+    border: "1px solid #d9d9d9",
+    borderRadius: 4,
+    overflow: "hidden",
   };
 
-  const onSortApi = (_, __, sorter) => {
-    const dataSort =
-      sorter.order !== undefined
-        ? `${sorter.field}~${sorter.order === "ascend" ? "asc" : "desc"}`
-        : "";
-    setSort(dataSort);
+  const headerStyle = {
+    fontSize: 15,
+    fontWeight: 500,
+    color: "#0075bf",
+    textTransform: "uppercase",
   };
-
-  const handleDetail = (record) => {
-    setDetailCalculationItem(record);
-    setIsOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setDetailCalculationItem({});
-    setIsOpen(false);
-  };
-
-  const baseColumns = useMemo(
-    () =>
-      columnsCalculationUsage(
-        page,
-        pageSize,
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        handleDetail
-      ),
-    [page, pageSize, searchedColumn, searchText]
-  );
-
-  const allColumns = useMemo(() => {
-    const columnsWithKeys = baseColumns.map((col) => ({
-      ...col,
-      key: col.key || col.dataIndex || col.title,
-    }));
-    return columnsWithKeys;
-  }, [baseColumns]);
-
-  const processedColumns = useMemo(() => {
-    return applyFixedColumns(allColumns, fixedColumns);
-  }, [allColumns, fixedColumns]);
-
-  const columnDefinitions = useMemo(() => {
-    return allColumns.map((col) => ({
-      key: col.key || col.dataIndex || col.title,
-      title: col.title,
-    }));
-  }, [allColumns]);
 
   return (
-    <>
-     <div className="mb-4">
-        <p className="text-[15px] font-medium text-[#0075bf] mb-3">
-          CALCULATION USAGE INFORMATION
-        </p>
-        <div className="flex flex-row gap-8">
-          <div className="flex flex-col gap-1">
-            <p className="text-[15px] font-normal text-gray-700">
-              Calculation Code
-            </p>
-            <p className="text-[20px] font-medium text-[#0075bf]">
-              {calculationCode}
-            </p>
-          </div>
-          <div className="flex flex-col gap-1">
-            <p className="text-[15px] font-normal text-gray-700">Rating Code</p>
-            <p className="text-[20px] font-medium text-[#0075bf]">
-              {ratingCodeId}
-            </p>
-          </div>
-        </div>
-      </div>
-      <div className="w-full">
-        <TableRBI
-          dataSource={dataSource}
-          columns={processedColumns}
-          current={page}
-          pageSize={pageSize}
-          onChange={handleChange}
-          onSizeChanger={handleChange}
-          totalData={data_calculationUsage?.page?.totalElements || 0}
-          tableScrolled={{ y: 525, x: 4500 }}
-          onSort={onSortApi}
-          showExport={false}
-          columnDefinitions={columnDefinitions}
-          fixedColumns={fixedColumns}
-          setFixedColumns={setFixedColumns}
-          loading={loading}
-        />
-      </div>
-
-      <ModalCustom
-        header={"Calculation Usage Detail"}
-        isOpen={isOpen}
-        handleCancel={handleCloseModal}
-        type={"detail"}
-        width={1000}
-        footer={
-          <ButtonComponent type={"default"} onClick={handleCloseModal}>
-            Back
-          </ButtonComponent>
-        }
+    <div>
+      <Collapse
+        activeKey={activeKey}
+        onChange={handleCollapseChange}
+        expandIcon={({ isActive }) => (
+          <DownOutlined rotate={isActive ? 180 : 0} />
+        )}
+        expandIconPosition="right"
       >
-        <CardComponent header={"CALCULATION USAGE INFORMATION"} cols={1}>
-          <div className="w-full grid grid-cols-4">
-            <DetailText label={"Type"}>{detailCalculationItem?.type}</DetailText>
-            <DetailText label={"UOM"}>{detailCalculationItem?.uom}</DetailText>
-            <DetailText label={"Usage"}>{detailCalculationItem?.usage}</DetailText>
-            <DetailText label={"Converted Usage M3"}>
-              {detailCalculationItem?.convUsageM3}
-            </DetailText>
-          </div>
-          <div className="w-full grid grid-cols-4">
-            <DetailText label={"Converted Usage MMBTU"}>
-              {detailCalculationItem?.convUsageMmbtu}
-            </DetailText>
-            <DetailText label={"Discount Usage"}>
-              {detailCalculationItem?.discountUsage}
-            </DetailText>
-            <DetailText label={"Discount Usage M3"}>
-              {detailCalculationItem?.discountUsageM3}
-            </DetailText>
-            <DetailText label={"Discount Usage MMBTU"}>
-              {detailCalculationItem?.discountUsageMmbtu}
-            </DetailText>
-          </div>
-          <div className="w-full grid grid-cols-4">
-            <DetailText label={"Total Usage"}>
-              {detailCalculationItem?.totalUsage}
-            </DetailText>
-            <DetailText label={"Converted Total Usage M3"}>
-              {detailCalculationItem?.convTotalUsageM3}
-            </DetailText>
-            <DetailText label={"Converted Total Usage MMBTU"}>
-              {detailCalculationItem?.convTotalUsageMmbtu}
-            </DetailText>
-            <DetailText label={"Price Code"}>
-              {detailCalculationItem?.priceCode}
-            </DetailText>
-          </div>
-          <div className="w-full grid grid-cols-4">
-            <DetailText label={"Currency"}>
-              {detailCalculationItem?.currency}
-            </DetailText>
-            <DetailText label={"Price"}>{detailCalculationItem?.price}</DetailText>
-            <DetailText label={"Amount"}>{detailCalculationItem?.amount}</DetailText>
-            <DetailText label={"Amount EQV IDR"}>
-              {detailCalculationItem?.amountEqvIdr}
-            </DetailText>
-          </div>
-          <div className="w-full grid grid-cols-4">
-            <DetailText label={"Amount EQV USD"}>
-              {detailCalculationItem?.amountEqvUsd}
-            </DetailText>
-            <DetailText label={"Discount Amount"}>
-              {detailCalculationItem?.discountAmount}
-            </DetailText>
-            <DetailText label={"Discount Amount EQV IDR"}>
-              {detailCalculationItem?.discountAmountEqvIdr}
-            </DetailText>
-            <DetailText label={"Discount Amount EQV USD"}>
-              {detailCalculationItem?.discountAmountEqvUsd}
-            </DetailText>
-          </div>
-          <div className="w-full">
-            <DetailText label={"Remark"}>{detailCalculationItem?.remark}</DetailText>
-          </div>
-        </CardComponent>
-        <CardComponent header={"HISTORY LOG INFORMATION"} cols={5}>
-          <DetailText label="Record ID">
-            {detailCalculationItem?.idCalcUsage}
-          </DetailText>
-          <DetailText label="Created Date">
-            {hasValue(detailCalculationItem?.createdDate) &&
-              renderDateConverter(detailCalculationItem?.createdDate, "datetime")}
-          </DetailText>
-          <DetailText label="Created By">
-            {detailCalculationItem?.createdBy}
-          </DetailText>
-          <DetailText label="Updated Date">
-            {hasValue(detailCalculationItem?.updatedDate) &&
-              renderDateConverter(detailCalculationItem?.updatedDate, "datetime")}
-          </DetailText>
-          <DetailText label="Updated By">
-            {detailCalculationItem?.updatedBy}
-          </DetailText>
-        </CardComponent>
-      </ModalCustom>
-    </>
+        <Panel
+          header={
+            <span style={headerStyle}>Calculation Item Information</span>
+          }
+          key="1"
+          style={panelStyle}
+        >
+          <CalculationItemInfo
+            calculationCode={calculationCode}
+            ratingCode={ratingCode}
+            accountNumber={accountNumber}
+          />
+        </Panel>
+
+        <Panel
+          header={<span style={headerStyle}>Calculation Summary</span>}
+          key="2"
+          style={panelStyle}
+        >
+          <CalculationSummary 
+            ratingCode={ratingCode}
+            calculationCode={calculationCode}
+            saType={saType}
+          />
+        </Panel>
+
+        <Panel
+          header={<span style={headerStyle}>Calculation Detail</span>}
+          key="3"
+          style={panelStyle}
+        >
+          <CalculationDetail 
+            calculationCode={calculationCode}
+          />
+        </Panel>
+
+        <Panel
+          header={<span style={headerStyle}>Adjustment</span>}
+          key="4"
+          style={panelStyle}
+        >
+          <AdjustmentSection 
+            calculationCode={calculationCode}
+          />
+        </Panel>
+      </Collapse>
+    </div>
   );
 };
 

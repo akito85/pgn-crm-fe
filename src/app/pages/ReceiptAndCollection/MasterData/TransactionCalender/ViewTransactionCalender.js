@@ -1,22 +1,20 @@
-import {
-  Checkbox,
-  Form,
-  Spin,
-  Tooltip,
-} from "antd";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import { Checkbox, Form, Spin, Tooltip } from "antd";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import BaseContainer from "../../../../../components/BaseContainer";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
+import CardContainer from "../../../../../components/CardContainer";
 import SVGIcon from "../../../../../assets/Icon/index";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import TablePagination from "../../../../../components/TablePagination";
-import {
-  DownloadOutlined,
-} from "@ant-design/icons";
-import {
-  renderColumn,
-  renderDateColumn,
-} from "../../../../../utils";
+import TableRBI from "../../../../../components/TableRBI";
+import { DownloadOutlined, EyeOutlined } from "@ant-design/icons";
+
+import { renderColumn, renderDateColumn } from "../../../../../utils";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import { useDispatch, useSelector } from "react-redux";
@@ -57,8 +55,6 @@ const ViewTransactionCalender = () => {
   // const dataSource = data?.result;
 
   // State
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const [search, setSearch] = useState({});
@@ -74,28 +70,54 @@ const ViewTransactionCalender = () => {
   const [openModalHistory, setOpenModalHistory] = useState(false);
   const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
   const [body, setBody] = useState({});
+  const [allData, setAllData] = useState([]);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const shouldResetRef = useRef(true);
+  const [pageSize] = useState(20);
+
+  const hasMore = allData.length < (data?.page?.totalElements || 0);
 
   //useeffcet paginng
-  const handleFetch = useCallback(() => {
-    dispatch(
-      getPaginateCycle({
-        page,
-        pageSize,
-        sort,
-        search: encodeURIComponent(JSON.stringify(search)),
-      })
-    );
-  }, [dispatch, page, pageSize, search, sort]);
+  const handleFetch = useCallback(
+    (fetchPage = 1) => {
+      dispatch(
+        getPaginateCycle({
+          page: fetchPage,
+          pageSize,
+          sort,
+          search: encodeURIComponent(JSON.stringify(search)),
+        }),
+      );
+    },
+    [dispatch, pageSize, search, sort],
+  );
 
   useEffect(() => {
-    handleFetch();
-  }, [handleFetch]);
+    shouldResetRef.current = true;
+    handleFetch(1);
+  }, [search, sort, refreshKey]);
+
+  // Accumulate data for infinite scroll
+  useEffect(() => {
+    if (data?.result) {
+      if (shouldResetRef.current) {
+        setAllData(data.result);
+        shouldResetRef.current = false;
+      } else {
+        setAllData((prev) => [...prev, ...data.result]);
+      }
+    }
+  }, [data]);
 
   // Breadcrumbs
   const routes = [
     {
       path: "",
-      breadcrumbName: "Receipt & Collection",
+      breadcrumbName: "System Setup",
+    },
+    {
+      path: "",
+      breadcrumbName: "Master Data",
     },
     {
       path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_TRANSACTION_CALENDER,
@@ -132,16 +154,12 @@ const ViewTransactionCalender = () => {
     }
   }, [dataListAppHierDetail]);
 
-
   // Function Search Column
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(selectedKeys[0] ? dataIndex : "");
     setSearch((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
-      }
       return {
         ...prevState,
         [dataIndex]: selectedKeys[0],
@@ -149,20 +167,15 @@ const ViewTransactionCalender = () => {
     });
   };
 
-  const handleChange = (page, pageSize) => {
-    setPage(page);
-    setPageSize(pageSize);
-  };
-
   // handle download
   const handleDownload = () => {
     dispatch(
       getDownloadTrans({
         search: encodeURIComponent(JSON.stringify(search)),
-        page,
+        page: 1,
         pageSize,
         sort,
-      })
+      }),
     );
   };
 
@@ -173,26 +186,27 @@ const ViewTransactionCalender = () => {
 
   const handleApprovalHistory = async (data) => {
     try {
-      setBody(data?.idTransCalendar)
+      setBody(data?.idTransCalendar);
       await dispatch(getApprovalHistory(data.idTransCalendar))?.unwrap();
       setOpenModalHistory(true);
-      
     } catch (error) {
       setOpenModalHistory(false);
-      
     }
   };
 
   const columns = [
     {
       title: "NO",
+      key: "no",
       width: 60,
       dataIndex: "key",
       align: "center",
-      render: (text, object, index) => (page - 1) * pageSize + index + 1,
+      isClassification: true,
+      render: (text, object, index) => index + 1,
     },
     {
       title: "BEGIN CYCLE",
+      key: "beginCycle",
       dataIndex: "beginCycle",
       align: "right",
       sorter: true,
@@ -202,7 +216,7 @@ const ViewTransactionCalender = () => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -212,11 +226,12 @@ const ViewTransactionCalender = () => {
           text,
           true,
           "input",
-          search
+          search,
         ),
     },
     {
       title: "END CYCLE",
+      key: "endCycle",
       dataIndex: "endCycle",
       align: "right",
       sorter: true,
@@ -226,7 +241,7 @@ const ViewTransactionCalender = () => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -236,11 +251,12 @@ const ViewTransactionCalender = () => {
           text,
           true,
           "input",
-          search
+          search,
         ),
     },
     {
       title: "TIME UNIT",
+      key: "timeUnit",
       dataIndex: "timeUnit",
       sorter: true,
       ...getColumnSearchPropsPaging(
@@ -249,7 +265,7 @@ const ViewTransactionCalender = () => {
         searchedColumn,
         searchText,
         handleSearch,
-        true
+        true,
       ),
       render: (text) =>
         renderColumn(
@@ -259,11 +275,12 @@ const ViewTransactionCalender = () => {
           text,
           true,
           "input",
-          search
+          search,
         ),
     },
     {
       title: "START DATE",
+      key: "startDate",
       sorter: true,
       align: "center",
       dataIndex: "startDate",
@@ -274,7 +291,7 @@ const ViewTransactionCalender = () => {
         searchText,
         handleSearch,
         false,
-        "date"
+        "date",
       ),
       render: (v) =>
         renderDateColumn(
@@ -283,11 +300,12 @@ const ViewTransactionCalender = () => {
           searchText,
           v,
           "date",
-          search
+          search,
         ),
     },
     {
       title: "END DATE",
+      key: "endDate",
       sorter: true,
       align: "center",
       dataIndex: "endDate",
@@ -298,7 +316,7 @@ const ViewTransactionCalender = () => {
         searchText,
         handleSearch,
         false,
-        "date"
+        "date",
       ),
       render: (v) =>
         renderDateColumn(
@@ -307,13 +325,13 @@ const ViewTransactionCalender = () => {
           searchText,
           v,
           "date",
-          search
+          search,
         ),
     },
     {
       title: "DESCRIPTION",
-      dataIndex: "description",
       key: "description",
+      dataIndex: "description",
       sorter: true,
       ellipsis: {
         showTitle: false,
@@ -324,7 +342,7 @@ const ViewTransactionCalender = () => {
         searchedColumn,
         searchText,
         handleSearch,
-        false
+        false,
       ),
       render: (text) =>
         renderColumn(
@@ -334,13 +352,13 @@ const ViewTransactionCalender = () => {
           text,
           true,
           "input",
-          search
+          search,
         ),
     },
     {
       title: "STATUS",
-      dataIndex: "status",
       key: "status",
+      dataIndex: "status",
       width: 150,
       sorter: true,
       fixed: "right",
@@ -350,7 +368,7 @@ const ViewTransactionCalender = () => {
         searchedColumn,
         searchText,
         handleSearch,
-        false
+        false,
       ),
       render: (text) =>
         renderColumn(
@@ -359,13 +377,13 @@ const ViewTransactionCalender = () => {
           searchText,
           text,
           false,
-          "status"
+          "status",
         ),
     },
     {
       title: "STATUS APPROVAL",
-      dataIndex: "statusApproval",
       key: "statusApproval",
+      dataIndex: "statusApproval",
       sorter: true,
       width: 200,
       fixed: "right",
@@ -375,16 +393,16 @@ const ViewTransactionCalender = () => {
         searchedColumn,
         searchText,
         handleSearch,
-        false
+        false,
       ),
       render: (text) =>
         renderColumn(
-          "status",
+          "statusApproval",
           searchedColumn,
           searchText,
           text,
           false,
-          "status"
+          "status",
         ),
     },
   ];
@@ -396,6 +414,35 @@ const ViewTransactionCalender = () => {
         : "";
     setSort(dataSort);
   };
+
+  // Handle Load More (infinite scroll) - directly dispatch like PrabillingPage
+  const handleLoadMore = useCallback(async () => {
+    const totalElements = data?.page?.totalElements || 0;
+    if (allData.length >= totalElements) return;
+
+    const nextPage = Math.floor(allData.length / pageSize) + 1;
+    await dispatch(
+      getPaginateCycle({
+        page: nextPage,
+        pageSize,
+        sort,
+        search: encodeURIComponent(JSON.stringify(search)),
+      }),
+    );
+  }, [
+    dispatch,
+    allData.length,
+    data?.page?.totalElements,
+    pageSize,
+    sort,
+    search,
+  ]);
+
+  // Handle Refresh
+  const handleRefresh = useCallback(() => {
+    shouldResetRef.current = true;
+    setRefreshKey((prev) => prev + 1);
+  }, []);
 
   const handleCancelModalInactivate = () => {
     setDataInactivate({});
@@ -415,9 +462,8 @@ const ViewTransactionCalender = () => {
       .then(() => {
         handleClear();
         handleCancelModalInactivate();
-        dispatch(
-          getPaginateCycle({ search: encodeURIComponent(JSON.stringify(search)), page, pageSize, sort })
-        );
+        shouldResetRef.current = true;
+        handleFetch(1);
       });
   };
 
@@ -460,7 +506,7 @@ const ViewTransactionCalender = () => {
           onClick={handleDownload}
           type={"submit"}
           border={false}
-          icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
+          icon={<DownloadOutlined style={{ fontSize: "20px" }} />}
         >
           Download List
         </ButtonComponent>
@@ -471,7 +517,7 @@ const ViewTransactionCalender = () => {
       render: (
         <NavLink to={RECEIPT_AND_COLLECTION_ROUTES.CREATE_TRANSACTION_CALENDER}>
           <ButtonComponent
-            icon={<SVGIcon name="IconButtonCreate" width={24} />}
+            icon={<SVGIcon name="IconButtonCreate" width={20} />}
             type="submit"
           >
             Create
@@ -486,19 +532,14 @@ const ViewTransactionCalender = () => {
       type: "table",
       render: (record, data_length) => {
         return (
-          <Tooltip title={"Detail"}>
-            <Link
-              to={RECEIPT_AND_COLLECTION_ROUTES.DETAIL_TRANSACTION_CALENDER}
-              state={{ id: record?.idTransCalendar }}
-            >
-              {/* <ButtonComponent
-                  className="gap-5"
-                  icon={<SVGIcon name="IconDetail" width={24} />}
-                  border={false}
-                /> */}
-              <SVGIcon name="IconDetail" width={24} />
-            </Link>
-          </Tooltip>
+          <Link
+            to={RECEIPT_AND_COLLECTION_ROUTES.DETAIL_TRANSACTION_CALENDER}
+            state={{ id: record?.idTransCalendar }}
+          >
+            <Tooltip title="Detail">
+              <SVGIcon name="IconDetail" width={20} />
+            </Tooltip>
+          </Link>
         );
       },
     },
@@ -507,130 +548,132 @@ const ViewTransactionCalender = () => {
       type: "table",
       render: (record, data_length) => {
         const isEditable =
-        record.status === "Draft" && record.statusApproval === "Rejected" 
-        return (
-          data_length > 3 ? (
+          record.status === "Draft" && record.statusApproval === "Rejected";
+        return data_length > 3 ? (
+          <Link
+            to={RECEIPT_AND_COLLECTION_ROUTES.UPDATE_TRANSACTION_CALENDER}
+            state={{ id: record?.idTransCalendar }}
+          >
+            <ButtonComponent
+              className="gap-5 w-full"
+              icon={
+                <SVGIcon
+                  name="IconEdit"
+                  width={24}
+                  color={isEditable ? "#0075bf" : "#8D91A0"}
+                />
+              }
+              type={"action"}
+              border={false}
+              disabled={!isEditable}
+            >
+              <span className={"text-black gap-2 text-center w-full"}>
+                Update
+              </span>
+            </ButtonComponent>
+          </Link>
+        ) : (
+          <Tooltip title="Update">
             <Link
               to={RECEIPT_AND_COLLECTION_ROUTES.UPDATE_TRANSACTION_CALENDER}
               state={{ id: record?.idTransCalendar }}
             >
-              <ButtonComponent
-                className="gap-5 w-full"
-                icon={
-                  <SVGIcon name="IconEdit" width={24} color={isEditable? "#0075bf" : "#8D91A0"}  />
-                }
-                border={false}
-                disabled={!isEditable}
-                
-              >
-                <span
-                  className={"text-black gap-2 text-xl text-center w-full"}
-                >
-                  Update
-                </span>
-              </ButtonComponent>
+              <div border={false}>
+                <SVGIcon
+                  name="IconEdit"
+                  color={!isEditable ? "#8D91A0" : "#ACC424"}
+                  width={24}
+                  className={!isEditable ? "cursor-not-allowed" : undefined}
+                />
+              </div>
             </Link>
-          ) : (
-            <Tooltip title="Update">
-              <Link
-                to={RECEIPT_AND_COLLECTION_ROUTES.UPDATE_TRANSACTION_CALENDER}
-                state={{ id: record?.idTransCalendar }}
-              >
-                <div border={false}>
-                  <SVGIcon name="IconEdit"
-                    color={!isEditable? "#8D91A0" : "#ACC424"} width={24}
-                    className={!isEditable ? "cursor-not-allowed" : undefined} />
-                </div>
-              </Link>
-            </Tooltip>
-          )
-        )
+          </Tooltip>
+        );
       },
     },
     {
       action: "Activate",
       type: "table",
       render: (record, data_length) => {
-        const statusLowerCase = record?.status?.toLowerCase()
+        const statusLowerCase = record?.status?.toLowerCase();
         const isActivateOrInactivate =
-        (record.statusApproval === "Approved" &&
-          record.status === "Active") ||
-        (record.statusApproval === "Draft" && record.status === "Active") ||
-        (record.statusApproval === "Rejected" &&
-          record.status === "Active") ||
-        (record.statusApproval === "Waiting Approval" &&
-          record.status === "Active");
-        return (
-          data_length > 3 ?
-            <ButtonComponent
+          (record.statusApproval === "Approved" &&
+            record.status === "Active") ||
+          (record.statusApproval === "Draft" && record.status === "Active") ||
+          (record.statusApproval === "Rejected" &&
+            record.status === "Active") ||
+          (record.statusApproval === "Waiting Approval" &&
+            record.status === "Active");
+        return data_length > 3 ? (
+          <ButtonComponent
+            border={false}
+            type={"action"}
+            onClick={() => {
+              setDataInactivate(record?.idTransCalendar);
+              setModalActiveInactive(true);
+              setStatus(record?.status);
+            }}
+            disabled={!isActivateOrInactivate}
+          >
+            <Checkbox
               border={false}
-              onClick={() => {
-                setDataInactivate(record?.idTransCalendar);
-                setModalActiveInactive(true);
-                setStatus(record?.status);
-                // setPaymentItemId(r?.id);
-              }}
-              disabled={!isActivateOrInactivate
-                // disabledActionByStatus('activate', record?.status, record?.statusApproval)
-              }
-            >
+              disabled={record?.status !== "Active"}
+              checked={record?.status !== "Active"}
+            />
+            <span className={"text-black ml-4 gap-2 w-full"}>
+              {record?.status === "Active" ? "Inactivate" : "Activate"}
+            </span>
+          </ButtonComponent>
+        ) : (
+          <Tooltip
+            title={
+              statusLowerCase === "active" || statusLowerCase === "draft"
+                ? "Inactivate"
+                : "Activate"
+            }
+          >
+            <div>
               <Checkbox
                 border={false}
-                // onClick={() => handleInactive(record)}
-                disabled={record?.status !== "Active"}
+                onClick={() => {
+                  setDataInactivate(record?.idTransCalendar);
+                  setModalActiveInactive(true);
+                  setStatus(record?.status);
+                  // setPaymentItemId(r?.id);
+                }}
                 checked={record?.status !== "Active"}
+                disabled={record?.status !== "Active"}
                 // disabled={disabledActionByStatus('activate', record?.status, record?.statusApproval)}
               />
-              <span className={"text-black ml-6 gap-2 text-xl text-center w-full"}>
-                {record?.status === "Active" ? "Inactivate" : "Activate"}
-              </span>
-            </ButtonComponent>
-            :
-            <Tooltip title={statusLowerCase === "active" || statusLowerCase === 'draft' ? "Inactivate" : "Activate"}>
-              <div>
-                <Checkbox
-                  border={false}
-                  onClick={() => {
-                    setDataInactivate(record?.idTransCalendar);
-                    setModalActiveInactive(true);
-                    setStatus(record?.status);
-                    // setPaymentItemId(r?.id);
-                  }}
-                  checked={record?.status !== "Active"}
-                  disabled={record?.status !== "Active"}
-                  // disabled={disabledActionByStatus('activate', record?.status, record?.statusApproval)}
-                />
-              </div>
-            </Tooltip>
-        )
+            </div>
+          </Tooltip>
+        );
       },
     },
     {
       action: "history",
       type: "table",
       render: (record, data_length) => {
-        return (
-          data_length > 3 ?
-            <ButtonComponent
-              className="gap-5"
-              icon={
-                <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
-              }
-              border={false}
-              onClick={() => handleApprovalHistory(record)}
-            >
-              <span className={"text-black gap-2 text-xl text-center"}>
-                Approval History
-              </span>
-            </ButtonComponent>
-            :
-            <Tooltip title={'Approval History'}>
-              <div border={false}
-                onClick={() => handleApprovalHistory(record)}
-              >
-                <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
-              </div>
-            </Tooltip>
+        return data_length > 3 ? (
+          <ButtonComponent
+            className="gap-5"
+            icon={
+              <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
+            }
+            type={"action"}
+            border={false}
+            onClick={() => handleApprovalHistory(record)}
+          >
+            <span className={"text-black gap-2 ml-1 text-center"}>
+              Approval History
+            </span>
+          </ButtonComponent>
+        ) : (
+          <Tooltip title={"Approval History"}>
+            <div border={false} onClick={() => handleApprovalHistory(record)}>
+              <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
+            </div>
+          </Tooltip>
         );
       },
     },
@@ -655,33 +698,52 @@ const ViewTransactionCalender = () => {
 
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
 
+  const actionColumns = useColumnActionPermission(
+    ["view", "history", "update", "activate"],
+    itemActions,
+  );
+
+  const tableColumns = useMemo(
+    () => [...columns, ...actionColumns],
+    [columns, actionColumns],
+  );
+
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
-        <Toolbar items={itemActions} />
-        <BaseContainer header={"TRANSACTION CALENDAR LIST"}>
-          <TablePagination
-            dataSource={data?.result}
+        <CardContainer
+          header={
+            <div className="flex -my-4 justify-between items-center">
+              <p className="mt-[15px]">TRANSACTION CALENDAR LIST</p>
+              <div className="flex gap-2">
+                <Toolbar items={itemActions} />
+              </div>
+            </div>
+          }
+        >
+          <TableRBI
+            idTable="transactionCalendarTable"
+            dataSource={allData}
             pageSize={pageSize}
-            columns={[
-              ...columns,
-              ...useColumnActionPermission(
-                ["view", "history", "update", 'activate'],
-                itemActions
-              ),
-            ]}
-            current={page}
-            onChange={handleChange}
-            onSizeChanger={handleChange}
-            totalData={data?.page?.totalElements}
+            handleDownload={handleDownload}
+            columns={tableColumns}
+            totalData={data?.page?.totalElements || 0}
+            loading={loading}
             onSort={onSort}
             tableScrolled={{
-              x: 1800,
+              x: "max-content",
               y: 525,
             }}
+            useInfiniteScroll={true}
+            usePagination={false}
+            onLoadMore={handleLoadMore}
+            hasMore={hasMore}
+            showRefresh={true}
+            onRefresh={handleRefresh}
+            refreshLabel="Refresh"
           />
-        </BaseContainer>
+        </CardContainer>
 
         <ModalHistory
           isOpen={openModalHistory && dataApprovalHistoryFix}
@@ -706,7 +768,7 @@ const ViewTransactionCalender = () => {
 
       {/* modal try again */}
       {renderModal()}
-    </LayoutMenu>
+    </>
   );
 };
 

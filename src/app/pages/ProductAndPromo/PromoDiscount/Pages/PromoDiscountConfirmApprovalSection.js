@@ -1,5 +1,6 @@
-import React, { Fragment } from "react";
+import React from "react";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
+import NxBaseContainer from "../../../../../components/Nx/NxBaseContainer";
 
 const PromoDiscountConfirmApprovalSection = ({
   dataApproval,
@@ -11,11 +12,7 @@ const PromoDiscountConfirmApprovalSection = ({
     ?.find((v) => v.name)?.name;
 
   return (
-    <Fragment>
-      <div className="text-primary text-xs font-bold uppercase mt-5 mb-5">
-        {"APPROVAL INFORMATION"}
-      </div>
-
+    <NxBaseContainer border header="Approval">
       <ApprovalComponentGeneral
         showSelect={false}
         dataTable={dataApprovalTable}
@@ -23,7 +20,7 @@ const PromoDiscountConfirmApprovalSection = ({
         approvalName={labelApproval}
         disableSelect={true}
       />
-    </Fragment>
+    </NxBaseContainer>
   );
 };
 

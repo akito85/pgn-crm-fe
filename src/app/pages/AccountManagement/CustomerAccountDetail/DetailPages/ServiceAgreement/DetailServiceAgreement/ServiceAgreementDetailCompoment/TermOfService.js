@@ -1,8 +1,11 @@
-import React,{useState, useEffect, useRef} from 'react'
-import TablePagination from '../../../../../../../../components/TablePagination'
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'
+import NxTable from '../../../../../../../../components/Nx/NxTable';
+import TablePagination from '../../../../../../../../components/TablePagination';
+import { getColumnSearchPropsUseFilteredValueFE } from '../../../../../../../../utils/getColumnSearchProps';
+import { hasValue, renderColumn } from '../../../../../../../../utils';
 
 const expandedRowRender = (record) => {
-  const columns = [
+  const innerColumns = [
     {
       title: "NO",
       align: "center",
@@ -18,16 +21,8 @@ const expandedRowRender = (record) => {
       align: 'right',
       dataIndex: 'value',
     },
-    // {
-    //   title: 'UNIT',
-    //   dataIndex: 'unit',
-    // },
-    // {
-    //   title: 'FROM ITEM',
-    //   dataIndex: 'fromItem',
-    // }
   ];
- 
+
   return (
     <div>
       <p className="text-primary text-xs font-bold uppercase">
@@ -37,46 +32,86 @@ const expandedRowRender = (record) => {
         useSelect={false}
         usePagination={false}
         dataSource={record?.tosDetail}
-        columns={columns}
+        columns={innerColumns}
       />
     </div>
   )
 };
 
-const TermOfService = ({data}) => {
+const TermOfService = ({ data }) => {
   const searchInput = useRef(null);
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const [totalElement, setTotalElement] = useState(0);
+  const [displayData, setDisplayData] = useState([]);
+  const [loadedCount, setLoadedCount] = useState(20);
+  const [hasMore, setHasMore] = useState(true);
   const [fieldSort, setFieldSort] = useState("");
   const [orderSort, setOrderSort] = useState("");
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    right: [],
+    left: [],
+  }));
+  const [search, setSearch] = useState({});
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
-  const [dataTable, setDataTable] = useState([]);
 
-  // mapping for push key data
-  useEffect(() => {
-    if (data?.saTOS && data?.saTOS?.length > 0) {
-      const dataTos = data?.saTOS?.map((a, index) => ({
-        ...a,
-        key: index + 1,
-        tosDetail: a.tosDetail?.map((b, index) => ({
-          ...b,
-          key: index + 1,
-        })),
-      }));
-      setDataTable(dataTos)
-    }
-  }, [data?.saTOS]);
-
-  useEffect(() => {
-    setTotalElement(dataTable?.length);
-  }, [dataTable])
-  
-  const handleChangeSize = (pageChange, pageSizeChange) => {
-    setPage(pageSize !== pageSizeChange ? 1 : pageChange);
-    setPageSize(pageSizeChange);
+  const handleSearch = (selectedKeys, confirm, dataIndex) => {
+    confirm();
+    setSearchText(selectedKeys[0]);
+    setSearchedColumn(selectedKeys[0] ? dataIndex : "");
+    setSearch((prevState) => {
+      let tempData = { ...prevState };
+      if (selectedKeys[0]) {
+        tempData[dataIndex] = selectedKeys[0];
+      } else {
+        delete tempData[dataIndex];
+      }
+      return tempData;
+    });
+    setLoadedCount(20);
   };
+
+  const processedData = useMemo(() => {
+    if (!data?.saTOS || data.saTOS.length === 0) return [];
+
+    let result = data.saTOS.map((a, index) => ({
+      ...a,
+      key: index + 1,
+      tosDetail: a.tosDetail?.map((b, idx) => ({
+        ...b,
+        key: idx + 1,
+      })),
+    }));
+
+    // Apply FE search filters
+    if (Object.keys(search).length > 0) {
+      result = result.filter(item =>
+        Object.entries(search).every(([key, val]) =>
+          !val || item[key]?.toString()?.toLowerCase()?.includes(val.toLowerCase())
+        )
+      );
+    }
+
+    if (!fieldSort) return result;
+    return [...result].sort((a, b) => {
+      const fa = a[fieldSort]?.toString()?.toLowerCase() || "";
+      const fb = b[fieldSort]?.toString()?.toLowerCase() || "";
+      if (fa < fb) return orderSort === "asc" ? -1 : 1;
+      if (fa > fb) return orderSort === "asc" ? 1 : -1;
+      return 0;
+    });
+  }, [data?.saTOS, fieldSort, orderSort, search]);
+
+  useEffect(() => {
+    const sliced = processedData.slice(0, loadedCount);
+    setDisplayData(sliced);
+    setHasMore(loadedCount < processedData.length);
+  }, [processedData, loadedCount]);
+
+  const handleLoadMore = useCallback(() => {
+    return new Promise((resolve) => {
+      setLoadedCount((prev) => prev + 20);
+      resolve();
+    });
+  }, []);
 
   const onSort = (_, __, sort) => {
     if (sort.order) {
@@ -86,91 +121,61 @@ const TermOfService = ({data}) => {
       setFieldSort("");
       setOrderSort("");
     }
+    setLoadedCount(20);
   };
 
-  const handleSearch = (selectedKeys, confirm, dataIndex) => {
-    confirm();
-    setSearchText(selectedKeys[0]);
-    const tempSearchColumn = selectedKeys[0] ? dataIndex : "";
-    if (searchedColumn !== tempSearchColumn) {
-      setPage(1);
-    }
-    setSearchedColumn(tempSearchColumn);
-  };
-
-  const filterDataByPage = () => {
-    let result = [...dataTable];
-    if (searchedColumn) {
-      const fixSearchText = searchText.toLowerCase();
-      result = result.filter((item) => {
-        return item[searchedColumn]?.toLowerCase().includes(fixSearchText);
-      });
-    }
-    const handleDataSort = (obj) => {
-      return obj[fieldSort];
-    };
-    if (fieldSort) {
-      result.sort((a, b) => {
-        let fa = handleDataSort(a);
-        let fb = handleDataSort(b);
-        if (fa < fb) {
-          return orderSort === "asc" ? -1 : 1;
-        }
-        if (fa > fb) {
-          return orderSort === "asc" ? 1 : -1;
-        }
-        return 0;
-      });
-    }
-    return result.slice((page - 1) * pageSize, page * pageSize);
-  };
-
-  const columns = ({
-    page = 1,
-    pageSize = 10,
-    searchInput,
-    searchedColumn = "",
-    searchText = "",
-    handleSearch = () => {},
-  }) => {
-    const result = [
-      {
-        title: "NO",
-        align: "center",
-        width: 60,
-        render: (text, object, index) => index + 1,
-      },
-      {
-        title: 'TERM OF SERVICE',
-        dataIndex: 'tosName',
-      },
-      {
-        title: 'DESCRIPTION',
-        dataIndex: 'description',
-      },
-    ];
-    return result
-  }
+  const columns = [
+    {
+      title: "NO",
+      key: "no",
+      align: "center",
+      width: 60,
+      render: (text, object, index) => index + 1,
+    },
+    {
+      title: 'TERM OF SERVICE',
+      key: 'tosName',
+      dataIndex: 'tosName',
+      sorter: true,
+      filteredValue: search?.["tosName"] ? [search?.["tosName"]] : null,
+      ...getColumnSearchPropsUseFilteredValueFE(search, "tosName", searchInput, searchedColumn, searchText, handleSearch, true, "input"),
+      render: (text) => renderColumn("tosName", hasValue(search["tosName"]), searchText, text, false, "input", search),
+    },
+    {
+      title: 'DESCRIPTION',
+      key: 'description',
+      dataIndex: 'description',
+      sorter: true,
+      filteredValue: search?.["description"] ? [search?.["description"]] : null,
+      ...getColumnSearchPropsUseFilteredValueFE(search, "description", searchInput, searchedColumn, searchText, handleSearch, true, "input"),
+      render: (text) => renderColumn("description", hasValue(search["description"]), searchText, text, false, "input", search),
+    },
+  ];
 
   return (
-    <div className='w-full py-6'>
-      <TablePagination
-        pageSize={pageSize}
-        current={page}
-        dataSource={filterDataByPage()}
-        tableScrolled={{y: 525, x: 900 }}
-        totalData={totalElement}
-        onChange={handleChangeSize}
-        onSort={onSort}
-        columns={columns({
-          page,
-          pageSize,
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-        })}
-        expandable={{expandedRowRender}}
+    <div className='w-full'>
+      <NxTable
+        idTable="sa-detail-tos-table"
+        dataSource={displayData}
+        columns={columns}
+        totalData={processedData.length}
+        tableScrolled={{ x: "max-content", y: 400 }}
+        usePagination={false}
+        useInfiniteScroll={true}
+        hasMore={hasMore}
+        onLoadMore={handleLoadMore}
+        loadMoreThreshold={2}
+        fixedColumns={fixedColumns}
+        setFixedColumns={setFixedColumns}
+        columnDefinitions={columns.map((col) => ({
+          key: col.key || col.dataIndex || col.title,
+          title: col.title,
+        }))}
+        onChange={onSort}
+        loading={false}
+        showAdvanceSearch={false}
+        showSearchBar={false}
+        expandable={{ expandedRowRender }}
       />
     </div>
   )

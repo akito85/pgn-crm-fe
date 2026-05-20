@@ -45,7 +45,7 @@ const EditableCell = ({
   disableDate,
   validateStartDate,
   validateEndDate,
-  handleEditDataRecord = () => { },
+  handleEditDataRecord = () => {},
   ...restProps
 }) => {
   const dispatch = useDispatch();
@@ -78,23 +78,39 @@ const EditableCell = ({
   };
 
   const handleDisableDateBetween = (current) => {
-    if (dataIndex === 'endDate' && hasValue(formTableCriteria.getFieldValue('startDate')) && hasValue(validateEndDate)) {
-      return moment(formTableCriteria.getFieldValue('startDate')) > current || current > moment(validateEndDate).add(1, 'days')
-    } else if (validateStartDate && validateEndDate) {
-      const startDate = moment(validateStartDate).startOf("day");
-      const endDate = moment(validateEndDate).endOf("day");
-      return current.isBefore(startDate) || current.isAfter(endDate);
-    } else {
-      return true; // Disable all dates if start or end date is not defined
+    if (!current) return false;
+
+    const headerStart = validateStartDate
+      ? moment(validateStartDate).startOf("day")
+      : null;
+    const headerEnd = validateEndDate
+      ? moment(validateEndDate).endOf("day")
+      : null;
+    const rowStart = formTableCriteria.getFieldValue("startDate")
+      ? moment(formTableCriteria.getFieldValue("startDate")).startOf("day")
+      : null;
+
+    if (headerStart && current.isBefore(headerStart, "day")) return true;
+    if (headerEnd && current.isAfter(headerEnd, "day")) return true;
+
+    if (
+      dataIndex === "endDate" &&
+      rowStart &&
+      current.isBefore(rowStart, "day")
+    ) {
+      return true;
     }
+
+    return false;
   };
 
   // Validation Handle Start Date from Header Data
   const handleDisableDateBefore = (current) => {
-    if (validateStartDate !== null) {
-      return moment(validateStartDate) > current;
+    if (!current) return false;
+    if (validateStartDate) {
+      return current.isBefore(moment(validateStartDate).startOf("day"), "day");
     }
-    return moment().add(-1, "days") >= current;
+    return current.isBefore(moment().startOf("day"), "day");
   };
 
   const getInputNode = (inputType) => {
@@ -182,13 +198,13 @@ const EditableCell = ({
             inputType !== "endDate"
               ? rules()
               : [
-                {
-                  validator: (_, value) =>
-                    endDateValidator(
-                      formTableCriteria.getFieldValue().startDate
-                    )(_, value),
-                },
-              ]
+                  {
+                    validator: (_, value) =>
+                      endDateValidator(
+                        formTableCriteria.getFieldValue().startDate,
+                      )(_, value),
+                  },
+                ]
           }
         >
           {inputNode}
@@ -204,9 +220,9 @@ const FunctionalCriteriaBillingBucket = ({
   type,
   data = [],
   dataCriteria = [],
-  updateData = () => { },
+  updateData = () => {},
   storedData = false,
-  setStoredData = () => { },
+  setStoredData = () => {},
   required,
   disableDate,
   status,
@@ -253,8 +269,6 @@ const FunctionalCriteriaBillingBucket = ({
   const [modalHistory, setModalHistory] = useState(false);
   const [modalValidationTable, setModalValidationTable] = useState(false);
 
-
-
   // Use Effect
   useEffect(() => {
     setTotalData(data.length);
@@ -275,92 +289,111 @@ const FunctionalCriteriaBillingBucket = ({
     }
   }, [type]);
 
-
   // Data Select Criteria
-  const budget = (data_budget || []).map((item) => {
+  const budget = (Array.isArray(data_budget) ? data_budget : []).map((item) => {
     return {
       value: item.id,
       label: item.text,
     };
   });
-  const province = (data_province || []).map((item) => {
+  const province = (Array.isArray(data_province) ? data_province : []).map(
+    (item) => {
+      return {
+        value: item.value,
+        label: item.name,
+      };
+    },
+  );
+  const city = (Array.isArray(data_city) ? data_city : []).map((item) => {
     return {
       value: item.value,
       label: item.name,
     };
   });
-  const city = (data_city || []).map((item) => {
+  const industrialSector = (
+    Array.isArray(data_industrial_sector) ? data_industrial_sector : []
+  ).map((item) => {
+    return {
+      value: item.id,
+      label: item.text,
+    };
+  });
+  const district = (Array.isArray(data_district) ? data_district : []).map(
+    (item) => {
+      return {
+        value: item.value,
+        label: item.name,
+      };
+    },
+  );
+  const subDistrict = (
+    Array.isArray(data_sub_district) ? data_sub_district : []
+  ).map((item) => {
     return {
       value: item.value,
       label: item.name,
     };
   });
-  const industrialSector = (data_industrial_sector || []).map((item) => {
+  const accountCategory = (
+    Array.isArray(data_account_Category) ? data_account_Category : []
+  ).map((item) => {
     return {
       value: item.id,
       label: item.text,
     };
   });
-  const district = (data_district || []).map((item) => {
-    return {
-      value: item.value,
-      label: item.name,
-    };
-  });
-  const subDistrict = (data_sub_district || []).map((item) => {
-    return {
-      value: item.value,
-      label: item.name,
-    };
-  });
-  const accountCategory = (data_account_Category || []).map((item) => {
+  const serviceType = (
+    Array.isArray(data_service_type) ? data_service_type : []
+  ).map((item) => {
     return {
       value: item.id,
       label: item.text,
     };
   });
-  const serviceType = (data_service_type || []).map((item) => {
+  const accountGroup = (
+    Array.isArray(data_account_group) ? data_account_group : []
+  ).map((item) => {
+    return {
+      value: item.id,
+      label: item.name,
+    };
+  });
+  const sor = (Array.isArray(data_sor) ? data_sor : []).map((item) => {
+    return {
+      value: item.id,
+      label: item.name,
+    };
+  });
+  const costCenter = (
+    Array.isArray(data_cost_center) ? data_cost_center : []
+  ).map((item) => {
+    return {
+      value: item.id,
+      label: item.name,
+    };
+  });
+  const gsizes = (Array.isArray(data_Gsizes) ? data_Gsizes : []).map((item) => {
     return {
       value: item.id,
       label: item.text,
     };
   });
-  const accountGroup = (data_account_group || []).map((item) => {
-    return {
-      value: item.id,
-      label: item.name,
-    };
-  });
-  const sor = (data_sor || []).map((item) => {
-    return {
-      value: item.id,
-      label: item.name,
-    };
-  });
-  const costCenter = (data_cost_center || []).map((item) => {
-    return {
-      value: item.id,
-      label: item.name,
-    };
-  });
-  const gsizes = (data_Gsizes || []).map((item) => {
+  const customerSegment = (
+    Array.isArray(data_customer_segment) ? data_customer_segment : []
+  ).map((item) => {
     return {
       value: item.id,
       label: item.text,
     };
   });
-  const customerSegment = (data_customer_segment || []).map((item) => {
-    return {
-      value: item.id,
-      label: item.text,
-    };
-  });
-  const customer = (data_customer || []).map((item) => {
-    return {
-      value: item.id,
-      label: item.name,
-    };
-  });
+  const customer = (Array.isArray(data_customer) ? data_customer : []).map(
+    (item) => {
+      return {
+        value: item.id,
+        label: item.name,
+      };
+    },
+  );
 
   // Declare data list option
   const listOption = {
@@ -517,17 +550,22 @@ const FunctionalCriteriaBillingBucket = ({
   };
 
   const checkOverlappingDate = useCallback((formHeaderValue, rowValue) => {
-    // if (hasValue(formHeaderValue?.endDate)) {
-    if (moment(rowValue?.startDate) < moment(formHeaderValue?.startDate)) {
-      return true
-    } else if (moment(rowValue?.endDate) > moment(formHeaderValue?.endDate)?.add(1, 'days') && hasValue(formHeaderValue?.endDate)) {
-      return true
+    if (
+      moment(rowValue?.startDate).startOf("day") <
+      moment(formHeaderValue?.startDate).startOf("day")
+    ) {
+      return true;
+    } else if (
+      hasValue(rowValue?.endDate) &&
+      moment(rowValue?.endDate).startOf("day") >
+        moment(formHeaderValue?.endDate).startOf("day").add(1, "days") &&
+      hasValue(formHeaderValue?.endDate)
+    ) {
+      return true;
     } else {
-      return false
+      return false;
     }
-    // }
   }, []);
-
 
   // Function Save Data
   const save = async (key) => {
@@ -535,15 +573,18 @@ const FunctionalCriteriaBillingBucket = ({
       const row = await formTableCriteria.validateFields();
       const newData = [...data];
       const index = newData.findIndex((item) => key === item.key);
-      const isOverlappingDate = checkOverlappingDate({ startDate: validStartDate, endDate: validEndDate }, row);
+      const isOverlappingDate = checkOverlappingDate(
+        { startDate: validStartDate, endDate: validEndDate },
+        row,
+      );
       if (isOverlappingDate) {
         formTableCriteria.setFields([
           {
-            name: 'startDate',
+            name: "startDate",
             errors: [`Overlapping date found`],
           },
           {
-            name: 'endDate',
+            name: "endDate",
             errors: [`Overlapping date found`],
           },
         ]);
@@ -558,7 +599,6 @@ const FunctionalCriteriaBillingBucket = ({
         setStoredData(false);
         setStatusAction("");
         formTableCriteria.resetFields();
-
       }
     } catch (errInfo) {
       console.log("Validate Failed:", errInfo);
@@ -568,26 +608,31 @@ const FunctionalCriteriaBillingBucket = ({
   const checkOverlappingData = useCallback((formHeader, dataTable) => {
     const dataOverlap = [];
     // if (hasValue(formHeader?.endDate)) {
-    dataTable?.forEach(item => {
-      if (moment(item?.startDate) < moment(formHeader?.startDate) || moment(item?.endDate) > moment(formHeader?.endDate)?.add(1, 'days')) {
-        dataOverlap?.push(item)
+    dataTable?.forEach((item) => {
+      if (
+        moment(item?.startDate) < moment(formHeader?.startDate) ||
+        moment(item?.endDate) > moment(formHeader?.endDate)?.add(1, "days")
+      ) {
+        dataOverlap?.push(item);
       }
     });
 
     if (dataOverlap?.length > 0) {
-      return true
+      return true;
     } else {
-      return false
+      return false;
     }
     // }
-
   }, []);
 
   // Function Add Row Data
   const addRow = () => {
-    const hasOverlapping = checkOverlappingData({ startDate: validStartDate, endDate: validEndDate }, data);
+    const hasOverlapping = checkOverlappingData(
+      { startDate: validStartDate, endDate: validEndDate },
+      data,
+    );
     if (hasOverlapping) {
-      setModalValidationTable(true)
+      setModalValidationTable(true);
     } else {
       formTableCriteria.resetFields();
       setStoredData(true);
@@ -610,7 +655,7 @@ const FunctionalCriteriaBillingBucket = ({
   // Function Delete Row
   const deleteRow = (record) => {
     updateData((prevState) =>
-      prevState.filter((item) => item.key !== record.key)
+      prevState.filter((item) => item.key !== record.key),
     );
     setStoredData(false);
   };
@@ -630,7 +675,7 @@ const FunctionalCriteriaBillingBucket = ({
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       {
         title: "ACTION",
@@ -680,8 +725,9 @@ const FunctionalCriteriaBillingBucket = ({
                           <SVGIcon
                             name="IconEdit"
                             color={editingKey ? "#8D91A0" : "#ACC424"}
-                            className={`${editingKey ? "cursor-not-allowed" : ""
-                              }`}
+                            className={`${
+                              editingKey ? "cursor-not-allowed" : ""
+                            }`}
                             width={24}
                             onClick={
                               !editingKey ? () => edit(record) : undefined
@@ -725,11 +771,11 @@ const FunctionalCriteriaBillingBucket = ({
         : temp.filter((col) => col.title !== "ACTION");
     return filterCol.filter((col) =>
       col.title !== "NO" &&
-        col.title !== "ACTION" &&
-        col.title !== "START DATE" &&
-        col.title !== "END DATE"
+      col.title !== "ACTION" &&
+      col.title !== "START DATE" &&
+      col.title !== "END DATE"
         ? dataCriteria.includes(col.indexValue)
-        : true
+        : true,
     );
   };
 
@@ -785,8 +831,9 @@ const FunctionalCriteriaBillingBucket = ({
       ) : null}
       <div className="relative flex flex-col w-full">
         <div
-          className={`${totalData !== 0 ? "z-[1] absolute mt-4" : "my-4"
-            } w-1/4 flex`}
+          className={`${
+            totalData !== 0 ? "z-[1] absolute mt-4" : "my-4"
+          } w-1/4 flex`}
         >
           <Select
             mode="multiple"
@@ -839,7 +886,7 @@ const FunctionalCriteriaBillingBucket = ({
                   validateStartDate: validStartDate,
                   validateEndDate: validEndDate,
                 }),
-              }))
+              })),
             )}
             pagination={{
               position: ["topRight"],
@@ -903,7 +950,7 @@ const FunctionalCriteriaBillingBucket = ({
             <SVGIcon name="IconFailed" width={48} />
             <p className="text-[18px] font-bold">{"Failed"}</p>
           </div>
-          <p className="pl-[70px]">{`You can't add Criteria. Start date and enda date can't be overlap`}</p>
+          <p className="pl-[70px]">{`You can't add Criteria. Start date and end date can't be overlap`}</p>
         </div>
       </ModalError>
     </div>

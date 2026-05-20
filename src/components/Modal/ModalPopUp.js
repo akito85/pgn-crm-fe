@@ -22,7 +22,7 @@ const ModalConfirm = ({
       bodyStyle={{ bodyStyle }}
       maskClosable={false}
       footer={[
-        <div className={"w-full justify-end flex gap-1"}>
+        <div key="footer" className={"w-full justify-end flex gap-1"}>
           <ButtonComponent type={"default"} onClick={handleCancel}>
             {useOk === true ? "Back" : "Cancel"}
           </ButtonComponent>
@@ -45,6 +45,7 @@ const ModalError = ({
   children,
   onlyBackButton = false,
   customText = "OK",
+  loading = false,
 }) => {
   return (
     <Modal
@@ -56,13 +57,13 @@ const ModalError = ({
       width={width}
       maskClosable={false}
       footer={[
-        <div className={"w-full justify-end flex gap-[20px]"}>
+        <div key="footer" className={"w-full justify-end flex gap-[20px]"}>
           {onlyBackButton === true ? (
-            <ButtonComponent type={"default"} onClick={handleOk}>
+            <ButtonComponent type={"default"} onClick={handleOk} loading={loading}>
               Back
             </ButtonComponent>
           ) : (
-            <ButtonComponent type={"reject"} onClick={handleOk} border={false}>
+            <ButtonComponent type={"reject"} onClick={handleOk} border={false} loading={loading}>
               {customText}
             </ButtonComponent>
           )}
@@ -88,7 +89,7 @@ const ModalSuccess = ({
       onOk={handleOk}
       onCancel={handleCancel}
       footer={[
-        <ButtonComponent type={"submit"} onClick={handleOk} border={false}>
+        <ButtonComponent key="ok" type={"submit"} onClick={handleOk} border={false}>
           OK
         </ButtonComponent>,
       ]}
@@ -126,7 +127,7 @@ const ModalAttention = ({
       width={450}
       maskClosable={false}
       footer={[
-        <div className={"w-full justify-end flex gap-[20px]"}>
+        <div key="footer" className={"w-full justify-end flex gap-[20px]"}>
           {onlyBackButton === true ? (
             <ButtonComponent type={"default"} onClick={handleOk}>
               Back

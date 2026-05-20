@@ -31,27 +31,24 @@ import FormAssets from "../../app/pages/SystemSetup/MasterData/Assets/FormAssets
 import ViewAssets from "../../app/pages/SystemSetup/MasterData/Assets/ViewAssets";
 import DetailAssets from "../../app/pages/SystemSetup/MasterData/Assets/DetailAssets";
 import GroupAccessFormBackup from "../../app/pages/SystemSetup/GroupAccess/GroupAccessFormBackup";
-import ListJob from "../../app/pages/SystemSetup/JobManagement/ListJob";
-import FormJob from "../../app/pages/SystemSetup/JobManagement/FormJob";
-import JobControlPage from "../../app/pages/SystemSetup/JobControl/JobControlPage";
-import LoggingPage from "../../app/pages/SystemSetup/Logging/LoggingPage";
+import ListPaymentCycle from "../../app/pages/SystemSetup/MasterData/PaymentCycle/ListPaymentCycle";
+import PaymentCycleForm from "../../app/pages/SystemSetup/MasterData/PaymentCycle/PaymentCycleForm";
+import ViewPaymentCycle from "../../app/pages/SystemSetup/MasterData/PaymentCycle/ViewPaymentCycle";
+import ListPaymentPeriod from "../../app/pages/SystemSetup/MasterData/PaymentPeriod/ListPaymentPeriod";
+import PaymentPeriodForm from "../../app/pages/SystemSetup/MasterData/PaymentPeriod/PaymentPeriodForm";
+import ViewPaymentPeriod from "../../app/pages/SystemSetup/MasterData/PaymentPeriod/ViewPaymentPeriod";
+import ListBillingItemCategory from "../../app/pages/SystemSetup/MasterData/BillingItemCategory/ListBillingItemCategory";
+import BillingItemCategoryForm from "../../app/pages/SystemSetup/MasterData/BillingItemCategory/BillingItemCategoryForm";
+import BillingItemCategoryDetail from "../../app/pages/SystemSetup/MasterData/BillingItemCategory/BillingItemCategoryDetail";
+import CalendarView from "../../app/pages/SystemSetup/MasterData/Calendar/CalendarView";
+import CalendarForm from "../../app/pages/SystemSetup/MasterData/Calendar/CalendarForm";
+import CalendarDetail from "../../app/pages/SystemSetup/MasterData/Calendar/CalendarDetail";
 
 export const SYSTEM_SETUP_ELEMENTS = {
-  // logging
-  VIEW_LOGGING_PAGE: <LoggingPage />,
-  
   // menu
   VIEW_MENU_PAGE: <Menu />,
   CREATE_MENU_PAGE: <FormMenu type={"create"} />,
   UPDATE_MENU_PAGE: <FormMenu type={"update"} />,
-
-  //Job Management
-  VIEW_JOBM_PAGE: <ListJob />,
-  CREATE_JOBM_PAGE: <FormJob type={"create"} />,
-  DETAIL_JOBM_PAGE: <FormJob type={"view"}/>,
-
-  //Job Control
-  VIEW_JOB_CONTROL_PAGE: <JobControlPage />,
 
   // global type
   VIEW_GLOBAL_PAGE: <ViewGlobalType />,
@@ -122,4 +119,28 @@ export const SYSTEM_SETUP_ELEMENTS = {
 
   // Maintenance Mode
   VIEW_MAINTENANCE_MODE: <MaintenanceModePage />,
+
+  // Payment Cycle
+  VIEW_PAYMENT_CYCLE: <ListPaymentCycle />,
+  DETAIL_PAYMENT_CYCLE: <ViewPaymentCycle />,
+  CREATE_PAYMENT_CYCLE: <PaymentCycleForm type="create" />,
+  UPDATE_PAYMENT_CYCLE: <PaymentCycleForm type="update" />,
+
+  // Payment Period
+  VIEW_PAYMENT_PERIOD: <ListPaymentPeriod />,
+  DETAIL_PAYMENT_PERIOD: <ViewPaymentPeriod />,
+  CREATE_PAYMENT_PERIOD: <PaymentPeriodForm type="create" />,
+  UPDATE_PAYMENT_PERIOD: <PaymentPeriodForm type="update" />,
+
+  // Billing Item Category
+  VIEW_BILLING_ITEM_CATEGORY: <ListBillingItemCategory />,
+  DETAIL_BILLING_ITEM_CATEGORY: <BillingItemCategoryDetail />,
+  CREATE_BILLING_ITEM_CATEGORY: <BillingItemCategoryForm type="create" />,
+  UPDATE_BILLING_ITEM_CATEGORY: <BillingItemCategoryForm type="update" />,
+
+  // Calendar
+  VIEW_CALENDAR_PAGE: <CalendarView />,
+  DETAIL_CALENDAR_PAGE: <CalendarDetail />,
+  CREATE_CALENDAR_PAGE: <CalendarForm type="create" />,
+  UPDATE_CALENDAR_PAGE: <CalendarForm type="update" />,
 };

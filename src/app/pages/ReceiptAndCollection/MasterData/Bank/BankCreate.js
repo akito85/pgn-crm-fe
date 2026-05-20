@@ -1,230 +1,210 @@
-import { Input, Select } from "antd";
 import React, { useState } from "react";
-import { Form } from "antd";
-import BaseContainer from "../../../../../components/BaseContainer";
-import { formMessageRequired } from "../../../../../utils";
+import { Select, Form } from "antd";
+import CardContainer from "../../../../../components/CardContainer";
 import InputComponent from "../../../../../components/InputComponent";
 import SelectComponent from "../../../../../components/SelectComponent";
-import BankCreateCheckbox from "./BankCreateCheckbox";
+import { formMessageRequired } from "../../../../../utils";
 
 const BankCreate = ({
   dataBank = [],
   form,
-  data_detail,
-  codeBank,
   setCodeBank,
-  isPage,
-  setIsPage,
-  type,
-  // disabledDraf,
 }) => {
-  const handleCodeBank = (value) => {
+  const [officeType, setOfficeType] = useState(form.getFieldValue("officeType"));
+  const isBranch = officeType === "branch" || officeType === "BRANCH" || officeType === "Cabang";
+
+  const handleOfficeTypeChange = (value) => {
+    setOfficeType(value);
+    form.setFieldsValue({
+      bankCode: undefined,
+      bankName: undefined,
+      bankShortName: undefined,
+      branchName: undefined,
+    });
+    setCodeBank("");
+  };
+
+  const handleCodeBankInput = (e) => {
+    setCodeBank(e.target.value);
+  };
+
+  const handleCodeBankSelect = (value) => {
     setCodeBank(value);
-    return value;
-  };
-
-  const [npwp, setNpwp] = useState("");
-
-  const handlePage = (e) => {
-    setIsPage(e.target.checked);
-  };
-  // Custom validation function to check if the email has a valid domain
-  const validateEmail = (_, value) => {
-    if (!value || value.indexOf("@") === -1) {
-      return Promise.reject("Please enter a valid email address.");
+    const selectedBank = dataBank.find((item) => item.bankCode === value);
+    if (selectedBank) {
+      form.setFieldsValue({
+        bankName: selectedBank.bankName,
+        bankShortName: selectedBank.bankShortName || "",
+      });
     }
-
-    const [, domain] = value.split("@");
-
-    if (!domain || domain.indexOf(".") === -1) {
-      return Promise.reject(
-        "Please enter a valid email address with a domain."
-      );
-    }
-
-    return Promise.resolve();
   };
 
   const validateNPWP = (_, value) => {
-    if (!value || value.length <= 16) {
-      return Promise.reject("Input number must be 16 digits!");
+    if (!value) {
+      return Promise.reject("NPWP wajib diisi!");
+    }
+    const digitsOnly = value.replace(/\D/g, "");
+    if (digitsOnly.length !== 16) {
+      return Promise.reject("NPWP harus terdiri dari 16 digit!");
     }
     return Promise.resolve();
   };
 
-  const validatePhoneNumber = (_, value) => {
-    if (!value || value.length < 11 || value.length === 14) {
-      return Promise.reject("Input number must be between 11 and 13 digits.");
-    }
-    return Promise.resolve();
-  };
+  const renderHeader = (title) => (
+    <div className="flex -my-4 justify-between items-center">
+      <p className="w-full mt-[15px] text-primary font-bold">
+        {title.toUpperCase()}
+      </p>
+    </div>
+  );
 
   return (
-    <div className="w-full">
-      <BaseContainer header={"BANK DATA INFORMATION"}>
-        <div className="w-40">
-          <Form.Item name={"isBranch"} valuePropName="checked">
-            <BankCreateCheckbox isPage={isPage} handlePage={handlePage} />
-          </Form.Item>
-        </div>
-        <div className="w-full grid grid-cols-3 gap-5">
-          {isPage === true ? (
-            <Form.Item
-              label={"Bank Code"}
-              name={"bankCode"}
-              rules={formMessageRequired("Bank Code")}
-              getValueFromEvent={handleCodeBank}
+    <div className="w-full mb-5">
+      <CardContainer header={renderHeader("BANK DATA INFORMATION")}>
+        <div className="w-full grid grid-cols-4 gap-4">
+          <Form.Item
+            label="Office Type"
+            name="officeType"
+            rules={formMessageRequired("Office Type")}
+          >
+            <SelectComponent
+              placeholder="Select Office Type"
+              onChange={handleOfficeTypeChange}
             >
-              <SelectComponent>
+              <Select.Option value="head_office">Head Office</Select.Option>
+              <Select.Option value="branch">Branch</Select.Option>
+            </SelectComponent>
+          </Form.Item>
+
+          <Form.Item
+            label="Bank Code"
+            name="bankCode"
+            rules={formMessageRequired("Bank Code")}
+          >
+            {isBranch ? (
+              <SelectComponent
+                placeholder="Select Bank Code"
+                optionLabelProp="value"
+                onChange={handleCodeBankSelect}
+              >
                 {dataBank?.map((data) => (
-                  <Select.Option key={data.bankCode} value={data.bankCode}>
-                    {data.bankCodeName}
+                  <Select.Option
+                    key={data.bankCode}
+                    value={data.bankCode}
+                    label={data.bankCode}
+                  >
+                    {data.bankCode} - {data.bankName}
                   </Select.Option>
                 ))}
               </SelectComponent>
-            </Form.Item>
-          ) : (
-            <Form.Item
-              label={"Bank Code"}
-              name={"bankCode"}
-              rules={formMessageRequired("Bank Code")}
-              // getValueFromEvent={handleCodeBank}
-            >
-              <Input
-                allowClear
-                maxLength={5}
-                // onInput={(e) =>
-                //   (e.target.value = e.target.value.replace(/\D/g, ""))
-                // }
-              />
-            </Form.Item>
-          )}
-          <Form.Item
-            label={"Bank Name"}
-            name={"bankName"}
-            rules={formMessageRequired("Bank Name")}
-            // onChange={selectedBank?.bankName}
-          >
-            {isPage === true ? (
-              <InputComponent disabled />
             ) : (
-              <Input
+              <InputComponent
                 allowClear
                 maxLength={50}
-                // onInput={(e) =>
-                //   (e.target.value = e.target.value.replace(/\D/g, ""))
-                // }
+                placeholder="Input Bank Code"
+                onChange={handleCodeBankInput}
               />
             )}
           </Form.Item>
+
           <Form.Item
-            label={"Short Bank Name"}
-            name={"bankShortName"}
-            rules={formMessageRequired("Short Bank Name")}
+            label="Bank Name"
+            name="bankName"
+            rules={!isBranch ? formMessageRequired("Bank Name"): []}
           >
-            {isPage === true ? (
-              <InputComponent disabled />
-            ) : (
-              <Input
-                allowClear
-                maxLength={50}
-                // onInput={(e) =>
-                //   (e.target.value = e.target.value.replace(/\D/g, ""))
-                // }
-              />
-            )}
+            <InputComponent
+              disabled={isBranch}
+              allowClear
+              maxLength={50}
+              placeholder="Input Bank Name"
+            />
           </Form.Item>
-        </div>
-        <div
-          className={`w-full grid gap-5 ${
-            isPage === true ? "grid-cols-4" : "grid-cols-3"
-          }`}
-        >
-          {isPage === true ? (
-            <Form.Item
-              label={"Branch Name"}
-              name={"branchName"}
-              rules={formMessageRequired("branchName")}
-            >
-              <InputComponent />
-            </Form.Item>
-          ) : null}
+
           <Form.Item
-            label={"Tax Identification Number (NPWP)"}
-            name={"npwp"}
+            label="Short Bank Name"
+            name="bankShortName"
+            rules={!isBranch ? formMessageRequired("Short Bank Name"): []}
+          >
+            <InputComponent
+              disabled={isBranch}
+              allowClear
+              maxLength={50}
+              placeholder="Input Short Bank Name"
+            />
+          </Form.Item>
+
+          <Form.Item
+            label="Branch Name"
+            name="branchName"
+            rules={isBranch ? formMessageRequired("Branch Name") : []}
+          >
+            <InputComponent
+              disabled={!isBranch}
+              placeholder="Input Branch Name"
+            />
+          </Form.Item>
+
+          <Form.Item
+            label="Tax Identification Number (NPWP)"
+            name="npwp"
             rules={[
-              {
-                required: true,
-                message: "Please input your NPWP!",
-              },
+              { required: true, message: "Please input your NPWP!" },
               { validator: validateNPWP },
             ]}
           >
-            {/* <InputComponent /> */}
-            <Input
+            <InputComponent
               allowClear
               maxLength={16}
-              onInput={
-                (e) => {
-                  const input = e.target;
-                  const value = input.value.replace(/[^\d]/g, "");
-                  const formattedValue = value.replace(
-                    /(\d{2})(\d{3})(\d{3})(\d{1})(\d{3})(\d{4})/,
-                    "$1.$2.$3.$4-$5.$6"
-                  );
-                  input.value = formattedValue;
-                }
-                // (e.target.value = e.target.value.replace(/\D/g, ""))
-              }
+              placeholder="Input NPWP"
+              onInput={(e) => {
+                const input = e.target;
+                const value = input.value.replace(/[^\d]/g, "");
+                input.value = value.replace(
+                  /(\d{2})(\d{3})(\d{3})(\d{1})(\d{3})(\d{4})/,
+                  "$1.$2.$3.$4-$5.$6"
+                );
+              }}
             />
           </Form.Item>
+
           <Form.Item
-            label={"Phone Number"}
-            name={"phoneNumber"}
+            label="Telephone Number"
+            name="phoneNumber"
             rules={[
-              { required: true, message: "Please input your Phone Number" },
+              { required: true, message: "Phone number is required!" },
+              { pattern: /^[0-9]{5,13}$/, message: "Phone number must be 5-13 digits!" },
             ]}
           >
-            {/* <InputNumber
-              maxLength={11}
-              addonBefore={"62"}
-              controls={false}
-              type={"number"}
-              style={{ width: "100%" }}
-            /> */}
-            <Input
+            <InputComponent
               allowClear
-              addonBefore={"62"}
-              maxLength={11}
-              onInput={(e) =>
-                (e.target.value = e.target.value.replace(/\D/g, ""))
-              }
+              maxLength={13}
+              placeholder="Input Telephone Number"
+              onInput={(e) => (e.target.value = e.target.value.replace(/\D/g, ""))}
             />
           </Form.Item>
+
           <Form.Item
-            label={"Email"}
-            name={"email"}
+            label="Email"
+            name="email"
             rules={[
-              ...formMessageRequired("Email"),
-              {
-                type: "email",
-                message: "The input is not valid E-mail!",
-              },
+              { required: true, message: "Email is required!" },
+              { type: "email", message: "Invalid email format! Example: name@domain.com" },
             ]}
           >
-            <InputComponent />
+            <InputComponent placeholder="Input Email" />
           </Form.Item>
+
+          <div className="col-span-4">
+            <Form.Item
+              label="Address"
+              name="address"
+              rules={formMessageRequired("Address")}
+            >
+              <InputComponent rows={3} type="textarea" placeholder="Input Address" />
+            </Form.Item>
+          </div>
         </div>
-        <div className="w-full grid grid-cols-1">
-          <Form.Item
-            label={"Address"}
-            name={"address"}
-            rules={formMessageRequired("address")}
-          >
-            <InputComponent rows={5} type="textarea" />
-          </Form.Item>
-        </div>
-      </BaseContainer>
+      </CardContainer>
     </div>
   );
 };

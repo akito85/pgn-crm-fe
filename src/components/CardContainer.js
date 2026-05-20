@@ -1,21 +1,54 @@
-const CardContainer = ({ header, subHeader, children, type, element }) => {
+const CardContainer = ({
+  header,
+  subHeader,
+  children,
+  type,
+  element,
+  className,
+}) => {
   return (
-    <div className="drop-shadow-lg bg-white rounded-lg w-full my-5">
+    <div
+      className={`drop-shadow-lg bg-white rounded-lg w-full my-2 ${className}`}
+    >
       {type === "profile" || type === "tab" ? (
         <>
-          <div className="p-3">{element}</div>
+          <div style={{ padding: "16px" }}>{element}</div>
+        </>
+      ) : type === "tabs" ? (
+        <>
+          <div
+            className="flex flex-col bg-[#F9F9F9] rounded-t-lg uppercase"
+            style={{
+              borderBottom: "1px solid #BDBDBD",
+              padding: "16px",
+            }}
+          >
+            <div className="text-[16px] text-primary">{header}</div>
+            <div className="text-primary text-sm">{subHeader}</div>
+          </div>
+          <div style={{ padding: "12px 16px 0 16px" }}>{element}</div>
         </>
       ) : (
         <div
-          className="flex flex-col bg-[#F9F9F9] p-3 rounded-t-lg uppercase"
-          style={{ borderBottom: "1px solid #BDBDBD" }}
+          className="flex flex-col bg-[#F9F9F9] rounded-t-lg uppercase"
+          style={{ borderBottom: "1px solid #BDBDBD", padding: "16px" }}
         >
           <div className="text-[16px] text-primary">{header}</div>
           <div className="text-primary text-sm">{subHeader}</div>
         </div>
       )}
-      {type === "tabs" && <div className="p-3">{element}</div>}
-      <div className="px-3 py-3">{children}</div>
+
+      <div className={type !== "tabs" ? "p-3" : "p-0"}>
+        <div
+          style={{
+            border: type !== "tabs" ? "1px solid #C8CDD4" : "",
+            borderRadius: "8px",
+            padding: "12px",
+          }}
+        >
+          {children}
+        </div>
+      </div>
     </div>
   );
 };

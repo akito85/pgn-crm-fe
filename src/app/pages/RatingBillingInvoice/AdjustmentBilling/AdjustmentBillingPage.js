@@ -1,9 +1,14 @@
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useMemo,
+  useCallback,
+} from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, NavLink } from "react-router-dom";
 import { Spin, Alert, Tooltip } from "antd";
 import ButtonComponent from "../../../../components/ButtonComponent";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import SVGIcon from "../../../../assets/Icon/index";
 import BaseContainer from "../../../../components/BaseContainer";
@@ -31,7 +36,7 @@ import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 const AdjustmentBillingPage = () => {
   // Selector
   const { data, loading, data_approval_history, message } = useSelector(
-    (state) => state.adjustmentBilling
+    (state) => state.adjustmentBilling,
   );
 
   // Declaration
@@ -56,22 +61,24 @@ const AdjustmentBillingPage = () => {
 
   const [fixedColumns, setFixedColumns] = useState(() => ({
     left: ["no"],
-    right: ["statusApproval", "action"],
+    right: ["status", "statusApproval", "action"],
   }));
 
-  // Use Effect - Initial fetch dengan 100 data
-  useEffect(() => {
+  const handleRefresh = useCallback(() => {
     dispatch(
       getAdjustmentBillingPaginate({
         search: encodeURIComponent(JSON.stringify(search)),
         page: 1,
-        pageSize: 100, // Initial load 100 data
+        pageSize: 100,
         sort,
-        isLoadMore: false, // Flag untuk initial load
-      })
+        isLoadMore: false,
+      }),
     );
     setPage(1);
   }, [dispatch, search, sort]);
+  useEffect(() => {
+    handleRefresh();
+  }, [handleRefresh]);
 
   useEffect(() => {
     if (data_approval_history?.dataApprover) {
@@ -87,7 +94,6 @@ const AdjustmentBillingPage = () => {
     }
   }, [data_approval_history]);
 
-  // Function Search Column - Reset page ke 1 saat search
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
@@ -103,27 +109,28 @@ const AdjustmentBillingPage = () => {
     });
   };
 
-  // Load more handler
   const handleLoadMore = async () => {
-    const nextPage = page + 1;
-    const totalPages = data?.page?.totalPages || 0;
+    const totalElements = data?.page?.totalElements || 0;
+    const currentDataLength = dataSource?.length || 0;
 
-    // Check if there's more data to load
-    if (nextPage <= totalPages) {
-      await dispatch(
-        getAdjustmentBillingPaginate({
-          search: encodeURIComponent(JSON.stringify(search)),
-          page: nextPage,
-          pageSize: loadMoreSize, // Load 20 more
-          sort,
-          isLoadMore: true, // Flag untuk load more
-        })
-      );
-      setPage(nextPage);
+    if (currentDataLength >= totalElements) {
+      return;
     }
+
+    const nextPage = Math.floor(currentDataLength / loadMoreSize) + 1;
+
+    await dispatch(
+      getAdjustmentBillingPaginate({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page: nextPage,
+        pageSize: loadMoreSize,
+        sort,
+        isLoadMore: true,
+      }),
+    );
+    setPage(nextPage);
   };
 
-  // Calculate if there's more data
   const hasMore = (dataSource?.length || 0) < (data?.page?.totalElements || 0);
 
   const onSort = (_, __, sorter) => {
@@ -154,7 +161,7 @@ const AdjustmentBillingPage = () => {
         page,
         pageSize: loadMoreSize,
         sort,
-      })
+      }),
     );
   };
 
@@ -183,7 +190,7 @@ const AdjustmentBillingPage = () => {
             pageSize: 100,
             sort,
             isLoadMore: false,
-          })
+          }),
         );
         setPage(1);
         handleCancel();
@@ -199,7 +206,6 @@ const AdjustmentBillingPage = () => {
 
   // Handle Approval History
   const handleApprovalHistory = (id) => {
-    // console.log(id);
     dispatch(getApprovalHistory(id));
     setModalApprovalHistory(true);
   };
@@ -248,61 +254,68 @@ const AdjustmentBillingPage = () => {
     {
       action: "View",
       type: "table",
-      render: (record, data) => {
-        const content =
-          data > 3 ? (
-            <Link
-              to={RBI_ROUTES.ADJUSTMENT_BILLING_DETAIL}
-              state={{ id: record.id }}
-            >
-              <ButtonComponent
-                icon={<SVGIcon name="IconDetail" width={20} />}
-                border={false}
-              >
-                <span className={"text-black ml-3"}> Detail</span>
-              </ButtonComponent>
-            </Link>
-          ) : (
-            <Link
-              to={RBI_ROUTES.ADJUSTMENT_BILLING_DETAIL}
-              state={{ id: record.id }}
-            >
-              <Tooltip title="Detail">
-                <div className="pt-1">
-                  <SVGIcon name="IconDetail" width={20} />
-                </div>
-              </Tooltip>
-            </Link>
-          );
-
-        return content;
+      render: (record) => {
+        return (
+          <Link
+            to={RBI_ROUTES.ADJUSTMENT_BILLING_DETAIL}
+            state={{ id: record.id }}
+          >
+            <Tooltip title="Detail">
+              <div className="pt-0">
+                <SVGIcon name="IconDetail" width={20} />
+              </div>
+            </Tooltip>
+          </Link>
+        );
       },
     },
     {
       action: "Update",
       type: "table",
       render: (record, data) => {
+        const normalizedStatus = (record?.status || "").toUpperCase();
+        const normalizedStatusApproval = (
+          record?.statusApproval || ""
+        ).toUpperCase();
         const isEditable =
-          record.statusApproval === "DRAFT" ||
-          record.statusApproval === "REJECTED";
+          normalizedStatus === "DRAFT" ||
+          normalizedStatusApproval === "REJECTED";
 
         const content =
           data > 3 ? (
             <ButtonComponent
-              icon={<SVGIcon name="IconEdit" color={"#0075bf"} width={20} />}
+              icon={
+                <SVGIcon
+                  name="IconEdit"
+                  color={isEditable ? "#0075bf" : "#8D91A0"}
+                  width={20}
+                />
+              }
+              type={"action"}
               border={false}
               disabled={!isEditable}
             >
-              <span className={"text-black ml-3"}> Update</span>
+              <span
+                className={
+                  isEditable ? "text-black ml-0" : "text-gray-400 ml-0"
+                }
+              >
+                Update
+              </span>
             </ButtonComponent>
           ) : (
             <Tooltip title="Update">
-              <div className="pt-1">
+              <div
+                className="pt-0"
+                style={{ pointerEvents: !isEditable ? "none" : "auto" }}
+              >
                 <SVGIcon
                   name="IconEdit"
                   width={20}
                   color={!isEditable ? "#8D91A0" : "#ACC424"}
-                  className={!isEditable ? "cursor-not-allowed" : undefined}
+                  className={
+                    !isEditable ? "cursor-not-allowed" : "cursor-pointer"
+                  }
                 />
               </div>
             </Tooltip>
@@ -310,7 +323,7 @@ const AdjustmentBillingPage = () => {
 
         return isEditable ? (
           <Link
-            to={RBI_ROUTES.ADJUSTMENT_BILLING_UPDATE}
+            to={`${RBI_ROUTES.ADJUSTMENT_BILLING_UPDATE}`}
             state={{
               id: record.id,
               adjustmentNumber: record.adjustmentNumber,
@@ -319,31 +332,59 @@ const AdjustmentBillingPage = () => {
             {content}
           </Link>
         ) : (
-          <div>{content}</div>
+          <div style={{ opacity: 0.5, cursor: "not-allowed" }}>{content}</div>
         );
       },
     },
     {
       action: "Delete",
       type: "table",
-      render: (record) => {
+      render: (record, data) => {
         const isDelete =
           record.statusApproval === "DRAFT" ||
           record.statusApproval === "REJECTED";
-
-        return (
-          <Tooltip title="Delete">
-            <div className="pt-1">
-              <SVGIcon
-                name="IconDelete"
-                width={20}
-                color={isDelete ? "#D90000" : "#8D91A0"}
-                className={isDelete ? undefined : "disabled cursor-not-allowed"}
-                onClick={isDelete ? () => handleDelete(record.id) : undefined}
-              />
-            </div>
-          </Tooltip>
-        );
+        const Content =
+          data > 3 ? (
+            <ButtonComponent
+              icon={
+                <SVGIcon
+                  name="IconDelete"
+                  color={isDelete ? "#D90000" : "#8D91A0"}
+                  width={20}
+                />
+              }
+              type={"action"}
+              border={false}
+              disabled={!isDelete}
+              onClick={isDelete ? () => handleDelete(record.id) : undefined}
+            >
+              <span
+                className={isDelete ? "text-black ml-0" : "text-gray-400 ml-0"}
+              >
+                Delete
+              </span>
+            </ButtonComponent>
+          ) : (
+            <Tooltip title="Delete">
+              <div
+                className="pt-0"
+                style={{
+                  pointerEvents: !isDelete ? "none" : "auto",
+                  opacity: !isDelete ? 0.5 : 1,
+                  cursor: !isDelete ? "not-allowed" : "pointer",
+                }}
+              >
+                <SVGIcon
+                  name="IconDelete"
+                  width={20}
+                  color={isDelete ? "#D90000" : "#8D91A0"}
+                  className={isDelete ? "cursor-pointer" : "cursor-not-allowed"}
+                  onClick={isDelete ? () => handleDelete(record.id) : undefined}
+                />
+              </div>
+            </Tooltip>
+          );
+        return Content;
       },
     },
     {
@@ -356,14 +397,15 @@ const AdjustmentBillingPage = () => {
               icon={
                 <SVGIcon name="IconLogHistory" color={"#0075bf"} width={20} />
               }
+              type={"action"}
               border={false}
               onClick={() => handleApprovalHistory(record.id)}
             >
-              <span className={"text-black ml-3"}>Approval History</span>
+              <span className={"text-black ml-0"}>Approval History</span>
             </ButtonComponent>
           ) : (
             <Tooltip title="Approval History">
-              <div className="pt-1">
+              <div className="pt-0">
                 <SVGIcon
                   name="IconLogHistory"
                   color={"#0075bf"}
@@ -382,7 +424,6 @@ const AdjustmentBillingPage = () => {
   const actionCols = useColumnActionPermission(
     ["view", "update", "delete", "history"],
     itemGrantAccess,
-    "Delete"
   ).map((col) => ({
     ...col,
     width: 100,
@@ -391,13 +432,13 @@ const AdjustmentBillingPage = () => {
 
   const baseColumns = useMemo(() => {
     return columnsAdjustmentBilling(
-      0, // Tidak digunakan untuk infinite scroll
-      0, // Tidak digunakan untuk infinite scroll
+      0,
+      0,
       searchInput,
       searchedColumn,
       searchText,
       handleSearch,
-      search
+      search,
     );
   }, [searchInput, searchedColumn, searchText, search]);
 
@@ -428,96 +469,96 @@ const AdjustmentBillingPage = () => {
   }, [dataSource]);
 
   return (
-    <LayoutMenu>
-      <Spin spinning={loading}>
-        <BreadCrumb routes={routes} />
+    <>
+      <BreadCrumb routes={routes} />
 
-        <CardContainer
-          header={
-            <div className="flex -my-4 justify-between items-center">
-              <p className="w-full mt-[15px] text-primary">
-                Adjustment Billing List
-              </p>
-
-              <Toolbar items={itemGrantAccess} />
-            </div>
-          }
-        >
-          <div className="w-full">
-            <TableRBI
-              idTable="adjustment-billing-table"
-              showExport={false}
-              dataSource={dataSourceWithKeys}
-              columns={processedColumns}
-              totalData={data?.page?.totalElements || 0}
-              onSort={onSort}
-              handleDownload={handleDownload}
-              columnDefinitions={columnDefinitions}
-              fixedColumns={fixedColumns}
-              setFixedColumns={setFixedColumns}
-              loading={loading}
-              usePagination={false}
-              useInfiniteScroll={true}
-              onLoadMore={handleLoadMore}
-              hasMore={hasMore}
-              loadMoreThreshold={20}
-              tableScrolled={{ y: 525, x: 3000 }}
-            />
-          </div>
-        </CardContainer>
-
-        {/* Modal Delete */}
-        <ModalConfirm
-          isOpen={modalDelete}
-          handleCancel={() => setModalDelete(false)}
-          handleOk={handleDeleteOk}
-          width={500}
-          useOk={true}
-        >
-          <div className="flex justify-center gap-[20px] mt-6">
-            <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
-            <p className={"text-[18px] font-bold"}>
-              {`Are you sure want to delete it?`}
+      <CardContainer
+        header={
+          <div className="flex -my-4 justify-between items-center">
+            <p className="w-full mt-[15px] text-primary">
+              Adjustment Billing List
             </p>
+
+            <Toolbar items={itemGrantAccess} />
           </div>
-          <Alert
-            message="Warning! if you delete this data, it will be permanently."
-            type={"error"}
+        }
+      >
+        <div className="w-full">
+          <TableRBI
+            idTable="adjustment-billing-table"
+            showExport={false}
+            dataSource={dataSourceWithKeys}
+            columns={processedColumns}
+            totalData={data?.page?.totalElements || 0}
+            onSort={onSort}
+            handleDownload={handleDownload}
+            columnDefinitions={columnDefinitions}
+            fixedColumns={fixedColumns}
+            setFixedColumns={setFixedColumns}
+            loading={loading}
+            usePagination={false}
+            useInfiniteScroll={true}
+            onLoadMore={handleLoadMore}
+            hasMore={hasMore}
+            loadMoreThreshold={20}
+            tableScrolled={{ y: 525, x: 3000 }}
+            onRefresh={handleRefresh}
+            showRefresh={true}
           />
-        </ModalConfirm>
+        </div>
+      </CardContainer>
 
-        {/* Modal Error Delete */}
-        <ModalError
-          isOpen={modalError}
-          handleOk={() => {
-            handleDeleteOk(bodyError.body, bodyError.handleClear);
-            setModalError(false);
-            setBodyError({});
-          }}
-          handleCancel={() => setModalError(false)}
-        >
-          <div className="px-8 py-8 justify-center">
-            <div className="w-full flex gap-[20px]">
-              <SVGIcon name="IconDelete" width={48} />
-              <p className="text-[18px] font-bold">Failed</p>
-            </div>
-            <p className="pl-[70px]">
-              {`Your data was not deleted, ${message?.data?.message}. Please try again.`}
-            </p>
-          </div>
-        </ModalError>
-
-        {/* Modal Approval History */}
-        <ModalHistory
-          isOpen={modalApprovalHistory && dataApprovalHistory}
-          handleClose={() => setModalApprovalHistory(false)}
-          header={"Approval History"}
-          width={1000}
-          dataApprover={dataApprovalHistory?.dataApprover}
-          dataHistory={dataApprovalHistory?.dataHistory}
+      {/* Modal Delete */}
+      <ModalConfirm
+        isOpen={modalDelete}
+        handleCancel={() => setModalDelete(false)}
+        handleOk={handleDeleteOk}
+        width={500}
+        // useOk={true}
+      >
+        <div className="flex justify-center gap-[20px] mt-6">
+          <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
+          <p className={"text-[18px] font-bold"}>
+            {`Are you sure want to delete it?`}
+          </p>
+        </div>
+        <Alert
+          message="Warning! if you delete this data, it will be permanently."
+          type={"error"}
         />
-      </Spin>
-    </LayoutMenu>
+      </ModalConfirm>
+
+      {/* Modal Error Delete */}
+      <ModalError
+        isOpen={modalError}
+        handleOk={() => {
+          handleDeleteOk(bodyError.body, bodyError.handleClear);
+          setModalError(false);
+          setBodyError({});
+        }}
+        handleCancel={() => setModalError(false)}
+      >
+        <div className="px-8 py-8 justify-center">
+          <div className="w-full flex gap-[20px]">
+            <SVGIcon name="IconDelete" width={48} />
+            <p className="text-[18px] font-bold">Failed</p>
+          </div>
+          <p className="pl-[70px]">
+            {`Your data was not deleted, ${message?.data?.message}. Please try again.`}
+          </p>
+        </div>
+      </ModalError>
+
+      {/* Modal Approval History */}
+      <ModalHistory
+        isOpen={modalApprovalHistory && dataApprovalHistory}
+        handleClose={() => setModalApprovalHistory(false)}
+        header={"Approval History"}
+        width={1000}
+        dataApprover={dataApprovalHistory?.dataApprover}
+        dataHistory={dataApprovalHistory?.dataHistory}
+      />
+    </>
   );
 };
 

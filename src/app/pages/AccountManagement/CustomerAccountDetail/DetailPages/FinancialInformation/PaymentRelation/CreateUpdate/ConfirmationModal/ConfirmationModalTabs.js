@@ -1,75 +1,70 @@
-import React, { Fragment } from "react";
-import RadioTabs from "../../../../../../../../../components/RadioTabs";
-import ConfirmationModalInfo from "./ConfirmationModalInfo";
-import ConfirmationModalApproval from "./ConfirmationModalApproval";
-import ConfirmationModalAttachment from "./ConfirmationModalAttachment";
-
-const dataTabs = {
-  info: "Payment Relation Information",
-  apprv: "Approval",
-  attch: "Attachment",
-};
+import NxTabs from "../../../../../../../../../components/Nx/NxTabs";
+import NxBaseContainer from "../../../../../../../../../components/Nx/NxBaseContainer";
+import NxApprovalInput from "../../../../../../../../../components/Nx/NxApprovalInput";
+import NxAttachmentInput from "../../../../../../../../../components/Nx/NxAttachmentInput";
+import InfoPaymentRelation from "../StepContents/InformationForm/InfoPaymentRelation";
+import NxRemarkInput from "../../../../../../../../../components/Nx/NxRemarkIInput";
 
 const ConfirmationModalTabs = ({
-  section = "",
-  options = [],
-  handleChangeOption = () => {},
-  selectedAppHierId,
-  selectedApprovalName,
-  hierarchyTableData,
-  dispatch,
-  dataAttachment,
-  data = {},
+  form,
+  approvalData,
+  attachmentDataSource,
   service,
+  type = "",
   configApplication,
+  activeTab = 0,
+  setActiveTab = () => {},
+  disabled = false,
 }) => {
-  // Use provided options or fall back to default tabs
-  const tabOptions = options.length > 0 ? options : [
-    { value: "info", label: "Payment Relation Information" },
-    { value: "apprv", label: "Approval" },
-    { value: "attch", label: "Attachment" },
-  ];
-
-  const renderSection = () => {
-    switch (section) {
-      case dataTabs.info:
-        return <ConfirmationModalInfo data={data} />;
-      case dataTabs.apprv:
-        return (
-        <ConfirmationModalApproval
-          dataTable={hierarchyTableData}
-          selectedAppHierId={selectedAppHierId}
-          selectedApprovalName={selectedApprovalName}
-        />
-        )
-      case dataTabs.attch:
-        return <ConfirmationModalAttachment
-          data={dataAttachment}
-          dispatch={dispatch}
+  const tabOptions = [
+    {
+      key: 0,
+      label: "Payment Relation Information",
+      disabled,
+      children: <InfoPaymentRelation form={form} formView={false} />
+    },
+    {
+      key: 1,
+      label: "Approval",
+      disabled,
+      children: (
+        <NxApprovalInput form={form} hierarchyDetails={approvalData} formView={false} />
+      )
+    },
+    {
+      key: 2,
+      label: "Attachment",
+      disabled,
+      children: (
+        <NxAttachmentInput
+          data={attachmentDataSource}
           service={service}
           configApplication={configApplication}
-        />;
-      default:
-        return "Payment Relation Information";
-    }
-  };
+          type={"confirmation"}
+        />
+      )
+    },
+    type === "submit" && {
+      key: 3,
+      label: "Remark",
+      disabled,
+      children: <NxRemarkInput disabled={disabled} />,
+      required: true
+    },
+  ].filter(Boolean).map((tabOption) => ({
+    ...tabOption,
+    children:
+      <NxBaseContainer border header={tabOption.label} required={tabOption.required}>
+        {tabOption.children}
+      </NxBaseContainer>
+  }));
 
   return (
-    <Fragment>
-      <div className="flex flex-col gap-4">
-        {/* Wrapper div to ensure proper styling */}
-        <div className="self-stretch inline-flex justify-start items-center gap-2.5">
-          <div className="w-full">
-            <RadioTabs
-              currentPosition={section}
-              data={tabOptions}
-              onChange={handleChangeOption}
-            />
-          </div>
-        </div>
-        {renderSection()}
-      </div>
-    </Fragment>
+    <NxTabs
+      items={tabOptions}
+      onChange={setActiveTab}
+      activeKey={activeTab}
+    />
   );
 };
 

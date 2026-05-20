@@ -1,5 +1,6 @@
 // components/ColumnSettings/ColumnSettings.js
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import ReactDOM from "react-dom";
 import { Button, Input, Checkbox, Radio } from "antd";
 import { DownOutlined, UpOutlined, SearchOutlined } from "@ant-design/icons";
 
@@ -9,6 +10,7 @@ const ColumnSettings = ({
   onHiddenColumnsChange,
   fixedColumns = { left: [], right: [] },
   onFixedColumnsChange,
+  staticFixedKeys = { left: [], right: [] },
   buttonStyle = {},
   buttonText = "Column Settings",
   panelWidth = "480px",
@@ -16,8 +18,19 @@ const ColumnSettings = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchText, setSearchText] = useState("");
+  const [panelPos, setPanelPos] = useState({ top: 0, left: 0 });
   const panelRef = useRef(null);
   const buttonRef = useRef(null);
+
+  const updatePanelPos = useCallback(() => {
+    if (buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setPanelPos({
+        top: rect.bottom + window.scrollY + 4,
+        left: rect.left + window.scrollX,
+      });
+    }
+  }, []);
 
   // Close panel when clicking outside
   useEffect(() => {
@@ -39,10 +52,26 @@ const ColumnSettings = ({
     };
   }, [isOpen]);
 
+  // Update position on scroll/resize
+  useEffect(() => {
+    if (!isOpen) return;
+    window.addEventListener("scroll", updatePanelPos, true);
+    window.addEventListener("resize", updatePanelPos);
+    return () => {
+      window.removeEventListener("scroll", updatePanelPos, true);
+      window.removeEventListener("resize", updatePanelPos);
+    };
+  }, [isOpen, updatePanelPos]);
+
+  const handleToggle = () => {
+    if (!isOpen) updatePanelPos();
+    setIsOpen((prev) => !prev);
+  };
+
   // Filtered columns for search
   const filteredColumns = searchText
     ? columns.filter((col) =>
-        col.title?.toLowerCase().includes(searchText.toLowerCase())
+        col.title?.toLowerCase().includes(searchText.toLowerCase()),
       )
     : columns;
 
@@ -55,22 +84,34 @@ const ColumnSettings = ({
   const isColumnFixed = (columnKey) => {
     return (
       fixedColumns.left.includes(columnKey) ||
-      fixedColumns.right.includes(columnKey)
+      fixedColumns.right.includes(columnKey) ||
+      staticFixedKeys.left.includes(columnKey) ||
+      staticFixedKeys.right.includes(columnKey)
+    );
+  };
+
+  // Check if column is statically fixed (from column definitions)
+  const isStaticallyFixed = (columnKey) => {
+    return (
+      staticFixedKeys.left.includes(columnKey) ||
+      staticFixedKeys.right.includes(columnKey)
     );
   };
 
   // Get fixed position
   const getFixedPosition = (columnKey) => {
-    if (fixedColumns.left.includes(columnKey)) return "left";
-    if (fixedColumns.right.includes(columnKey)) return "right";
+    if (
+      fixedColumns.left.includes(columnKey) ||
+      staticFixedKeys.left.includes(columnKey)
+    )
+      return "left";
+    if (
+      fixedColumns.right.includes(columnKey) ||
+      staticFixedKeys.right.includes(columnKey)
+    )
+      return "right";
     return null;
   };
-
-  // Check if column can be fixed to left
-  const canFixLeft = (columnIndex) => columnIndex !== columns.length - 1;
-
-  // Check if column can be fixed to right
-  const canFixRight = (columnIndex) => columnIndex !== 0;
 
   // Handle visibility checkbox change
   const handleVisibilityChange = (e, columnKey) => {
@@ -144,7 +185,7 @@ const ColumnSettings = ({
       {/* Button */}
       <Button
         ref={buttonRef}
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={handleToggle}
         style={{
           display: "flex",
           alignItems: "center",
@@ -166,169 +207,170 @@ const ColumnSettings = ({
         )}
       </Button>
 
-      {/* Floating Panel */}
-      {isOpen && (
-        <div
-          ref={panelRef}
-          style={{
-            position: "absolute",
-            top: "48px",
-            left: 0,
-            zIndex: 1000,
-            padding: "12px",
-            background: "white",
-            border: "1px solid #ddd",
-            borderRadius: 8,
-            boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-            width: panelWidth,
-            maxWidth: "90vw",
-            height: panelMaxHeight,
-            display: "flex",
-            flexDirection: "column",
-          }}
-        >
-          {/* Search Input */}
-          <div style={{ marginBottom: 10 }}>
-            <Input
-              placeholder="Search Column Name"
-              value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
-              prefix={
-                <SearchOutlined
-                  style={{ color: "#bfbfbf", fontSize: "12px" }}
-                />
-              }
+      {/* Floating Panel — rendered via portal to escape overflow:hidden ancestors */}
+      {isOpen &&
+        ReactDOM.createPortal(
+          <div
+            ref={panelRef}
+            style={{
+              position: "absolute",
+              top: panelPos.top,
+              left: panelPos.left,
+              zIndex: 9999,
+              padding: "12px",
+              background: "white",
+              border: "1px solid #ddd",
+              borderRadius: 8,
+              boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+              width: panelWidth,
+              maxWidth: "90vw",
+              height: panelMaxHeight,
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            {/* Search Input */}
+            <div style={{ marginBottom: 10 }}>
+              <Input
+                placeholder="Search Column Name"
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                prefix={
+                  <SearchOutlined
+                    style={{ color: "#bfbfbf", fontSize: "12px" }}
+                  />
+                }
+                style={{
+                  borderRadius: 4,
+                  height: 32,
+                  fontSize: "12px",
+                }}
+                allowClear
+              />
+            </div>
+
+            {/* Column List Header */}
+            <div
               style={{
-                borderRadius: 4,
-                height: 32,
-                fontSize: "12px",
+                display: "grid",
+                gridTemplateColumns: "35px 1fr 55px 110px",
+                gap: "6px",
+                padding: "6px 4px",
+                fontWeight: "600",
+                fontSize: "10px",
+                color: "#666",
+                borderBottom: "1px solid #eee",
+                marginBottom: 6,
               }}
-              allowClear
-            />
-          </div>
+            >
+              <div style={{ textAlign: "center" }}>✓</div>
+              <div>COLUMN NAME</div>
+              <div style={{ textAlign: "center" }}>FIXED</div>
+              <div style={{ textAlign: "center" }}>POSITION</div>
+            </div>
 
-          {/* Column List Header */}
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "35px 1fr 55px 110px",
-              gap: "6px",
-              padding: "6px 4px",
-              fontWeight: "600",
-              fontSize: "10px",
-              color: "#666",
-              borderBottom: "1px solid #eee",
-              marginBottom: 6,
-            }}
-          >
-            <div style={{ textAlign: "center" }}>✓</div>
-            <div>COLUMN NAME</div>
-            <div style={{ textAlign: "center" }}>FIXED</div>
-            <div style={{ textAlign: "center" }}>POSITION</div>
-          </div>
+            {/* Column List */}
+            <div
+              style={{
+                flex: 1,
+                overflowY: "auto",
+                overflowX: "hidden",
+              }}
+            >
+              {filteredColumns.map((col, index) => {
+                const isVisible = isColumnVisible(col.key);
+                const isFixed = isColumnFixed(col.key);
+                const isStaticallyFixedCol = isStaticallyFixed(col.key);
+                const position = getFixedPosition(col.key);
 
-          {/* Column List */}
-          <div
-            style={{
-              flex: 1,
-              overflowY: "auto",
-              overflowX: "hidden",
-            }}
-          >
-            {filteredColumns.map((col, index) => {
-              const isVisible = isColumnVisible(col.key);
-              const isFixed = isColumnFixed(col.key);
-              const position = getFixedPosition(col.key);
-
-              return (
-                <div
-                  key={col.key || index}
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "35px 1fr 55px 110px",
-                    gap: "3px",
-                    padding: "0px 2px",
-                    alignItems: "center",
-                    borderBottom: "1px solid #f5f5f5",
-                    backgroundColor: isVisible ? "white" : "#fafafa",
-                  }}
-                >
-                  {/* Visibility Checkbox */}
-                  <div style={{ textAlign: "center" }}>
-                    <Checkbox
-                      checked={isVisible}
-                      onChange={(e) => handleVisibilityChange(e, col.key)}
-                    />
-                  </div>
-
-                  {/* Column Name */}
+                return (
                   <div
+                    key={col.key || index}
                     style={{
-                      fontSize: "10px",
-                      fontWeight: "500",
-                      color: isVisible ? "#000" : "#999",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
+                      display: "grid",
+                      gridTemplateColumns: "35px 1fr 55px 110px",
+                      gap: "3px",
+                      padding: "0px 2px",
+                      alignItems: "center",
+                      borderBottom: "1px solid #f5f5f5",
+                      backgroundColor: isVisible ? "white" : "#fafafa",
                     }}
-                    title={col.title}
                   >
-                    {col.title}
-                  </div>
+                    {/* Visibility Checkbox */}
+                    <div style={{ textAlign: "center" }}>
+                      <Checkbox
+                        checked={isVisible}
+                        onChange={(e) => handleVisibilityChange(e, col.key)}
+                      />
+                    </div>
 
-                  {/* Fixed Checkbox */}
-                  <div style={{ textAlign: "center" }}>
-                    <Checkbox
-                      checked={isFixed}
-                      onChange={(e) => handleFixedChange(e, col.key)}
-                      disabled={!isVisible}
-                    />
-                  </div>
-
-                  {/* Position Radio Buttons */}
-                  <div>
-                    <Radio.Group
-                      value={position || "left"}
-                      onChange={(e) =>
-                        handlePositionChange(col.key, e.target.value)
-                      }
-                      disabled={!isFixed || !isVisible}
-                      size="small"
-                      buttonStyle="solid"
-                      style={{ display: "flex", gap: "4px" }}
+                    {/* Column Name */}
+                    <div
+                      style={{
+                        fontSize: "10px",
+                        fontWeight: "500",
+                        color: isVisible ? "#000" : "#999",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                      }}
+                      title={col.title}
                     >
-                      <Radio.Button
-                        value="left"
-                        disabled={!canFixLeft(index) || !isFixed || !isVisible}
-                        style={{
-                          fontSize: "10px",
-                          flex: 1,
-                          textAlign: "center",
-                          padding: "0 6px",
-                        }}
+                      {col.title}
+                    </div>
+
+                    {/* Fixed Checkbox */}
+                    <div style={{ textAlign: "center" }}>
+                      <Checkbox
+                        checked={isFixed}
+                        onChange={(e) => handleFixedChange(e, col.key)}
+                        disabled={!isVisible || isStaticallyFixedCol}
+                      />
+                    </div>
+
+                    {/* Position Radio Buttons */}
+                    <div>
+                      <Radio.Group
+                        value={position || "left"}
+                        onChange={(e) =>
+                          handlePositionChange(col.key, e.target.value)
+                        }
+                        disabled={!isFixed || !isVisible}
+                        size="small"
+                        buttonStyle="solid"
+                        style={{ display: "flex", gap: "4px" }}
                       >
-                        Left
-                      </Radio.Button>
-                      <Radio.Button
-                        value="right"
-                        disabled={!canFixRight(index) || !isFixed || !isVisible}
-                        style={{
-                          fontSize: "10px",
-                          flex: 1,
-                          textAlign: "center",
-                          padding: "0 6px",
-                        }}
-                      >
-                        Right
-                      </Radio.Button>
-                    </Radio.Group>
+                        <Radio.Button
+                          value="left"
+                          style={{
+                            fontSize: "10px",
+                            flex: 1,
+                            textAlign: "center",
+                            padding: "0 6px",
+                          }}
+                        >
+                          Left
+                        </Radio.Button>
+                        <Radio.Button
+                          value="right"
+                          style={{
+                            fontSize: "10px",
+                            flex: 1,
+                            textAlign: "center",
+                            padding: "0 6px",
+                          }}
+                        >
+                          Right
+                        </Radio.Button>
+                      </Radio.Group>
+                    </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
+                );
+              })}
+            </div>
+          </div>,
+          document.body,
+        )}
     </div>
   );
 };

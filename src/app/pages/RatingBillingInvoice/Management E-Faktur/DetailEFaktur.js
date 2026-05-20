@@ -6,7 +6,6 @@ import { LeftOutlined, DownloadOutlined, EyeOutlined, FileTextOutlined } from "@
 import moment from "moment";
 import axios from "axios";
 import BreadCrumb from "../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import CardContainer from "../../../../components/CardContainer";
 import TableRBI from "../../../../components/TableRBI";
@@ -264,7 +263,7 @@ const DetailEFaktur = () => {
           "date"
         ),
         render: (text) => {
-          if (!text) return "-";
+          if (!text) return " ";
           const formatted = moment(text).format("DD-MM-YYYY HH:mm:ss");
           return renderDateColumn(
             "createdDtm",
@@ -297,7 +296,7 @@ const DetailEFaktur = () => {
             "createdBy",
             hasValue(search["createdBy"]),
             searchText,
-            text || "-",
+            text || " ",
             false,
             "input",
             search
@@ -324,7 +323,7 @@ const DetailEFaktur = () => {
             "activity",
             hasValue(search["activity"]),
             searchText,
-            text || "-",
+            text || " ",
             false,
             "input",
             search
@@ -351,7 +350,7 @@ const DetailEFaktur = () => {
             "message",
             hasValue(search["message"]),
             searchText,
-            text || "-",
+            text || " ",
             false,
             "input",
             search
@@ -529,20 +528,20 @@ const DetailEFaktur = () => {
 
   if (loading_detail && !detail_efaktur) {
     return (
-      <LayoutMenu>
+      <>
         <div className="flex flex-col justify-center items-center h-screen">
           <Spin size="large" />
           <p className="mt-4 text-gray-600 text-base">
             Memuat detail E-Faktur...
           </p>
         </div>
-      </LayoutMenu>
+      </>
     );
   }
 
   if (!loading_detail && !detail_efaktur) {
     return (
-      <LayoutMenu>
+      <>
         <BreadCrumb routes={routes} />
         <CardContainer header="Detail E-Faktur">
           <Empty
@@ -557,7 +556,7 @@ const DetailEFaktur = () => {
             </ButtonComponent>
           </Empty>
         </CardContainer>
-      </LayoutMenu>
+      </>
     );
   }
 
@@ -580,7 +579,7 @@ const DetailEFaktur = () => {
   const attachmentCount = detail_efaktur?.attachments?.length || 0;
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading_detail}>
         <BreadCrumb routes={routes} />
 
@@ -1085,7 +1084,7 @@ const DetailEFaktur = () => {
           efakturId={efakturId}
         />
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

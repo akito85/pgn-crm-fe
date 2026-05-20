@@ -11,7 +11,6 @@ import {
 import moment from "moment";
 import { useNavigate } from "react-router-dom";
 import BreadCrumb from "../../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../routes/account_management/customer_account_routes";
 import BaseContainer from "../../../../../components/BaseContainer";
 import { dateFormatting } from "../../../../../utils";
@@ -78,6 +77,8 @@ const StandardForm = () => {
   const [keyModal, setKeyModal] = useState();
   // Financial Information
   const [fiObj, setFiObj] = useState({});
+  const [fiCurrent, setFiCurrent] = useState(0);
+  const [fiErrorFieldName, setFiErrorFieldName] = useState(null);
   // Tax Identifier Information
   const [tiObj, setTiObj] = useState({});
   // Withholding Tax Information
@@ -129,6 +130,29 @@ const StandardForm = () => {
   ])
   
   const [valuePageSectionCAI, setValuePageSectionCAI] = useState(tabPagesSectionCAI[0].value);
+  const [caiErrorType, setCaiErrorType] = useState(null);
+  const [caiErrorField, setCaiErrorField] = useState(null);
+
+  useEffect(() => {
+    if (valuePageSectionCAI === "Attachment" && caiErrorType === "attachment") {
+      if (window) {
+        window.scrollTo({
+          top: 0,
+          behavior: "smooth",
+        })
+      }
+      setCaiErrorType(null);
+    }
+    else if (valuePageSectionCAI === "Customer/Account Information" && caiErrorType === "info" && caiErrorField) {
+      form.scrollToField(caiErrorField, {
+        block: "center",
+        behavior: "smooth",
+      });
+      setCaiErrorField(null)
+      setCaiErrorType(null);
+    }
+    
+  }, [valuePageSectionCAI, caiErrorType, caiErrorField])
 
   useEffect(() => {
     form.setFieldsValue({
@@ -265,12 +289,6 @@ const StandardForm = () => {
   const handleAddressObj = (e, type) => {
     let result;
     switch (type) {
-      case "address1":
-      case "address2":
-      case "address3":
-      case "address4":
-        result = e.target.value;
-        break;
       case "premiseAddress1":
       case "premiseAddress2":
       case "premiseAddress3":
@@ -1079,6 +1097,10 @@ const StandardForm = () => {
           dataAddress={addressTable}
           form={form}
           setTiObj={setTiObj}
+          current={fiCurrent}
+          setCurrent={setFiCurrent}
+          errorFieldName={fiErrorFieldName}
+          setErrorFieldName={setFiErrorFieldName}
         />
       ),
     },
@@ -1176,6 +1198,13 @@ const StandardForm = () => {
     form.validateFields()
     .then((values) => {
       handleMandatory(setTabPagesSectionCAI, listDataAttachment);
+
+      if (!listDataAttachment.length) {
+        setValuePageSectionCAI("Attachment");
+        setCaiErrorType("attachment");
+        return;
+      }
+
       const body = {
         registrationNumber: caiObj?.accountRegistrationNumber || "",
       };
@@ -1213,16 +1242,36 @@ const StandardForm = () => {
     .catch((error) => {
       console.error("Validation failed:", error);
       handleMandatory(setTabPagesSectionCAI, listDataAttachment, error.errorFields);
+
+      // Handle scroll to the first field that failed
+      if (error.errorFields && error.errorFields.length > 0) {
+        const firstErrorFieldName = error.errorFields[0].name;
+
+        if (valuePageSectionCAI === "Customer/Account Information")
+          form.scrollToField(firstErrorFieldName, {
+            behavior: 'smooth',
+            block: 'center',
+          });
+        else if (valuePageSectionCAI === "Attachment") {
+          setValuePageSectionCAI("Customer/Account Information")
+          setCaiErrorType("info");
+          setCaiErrorField(firstErrorFieldName);
+        }
+      }
     });
   }
 
   const FunctionCheckValidateAddress = () => {
     form
       .validateFields([
-        `businessPurpose1`,
-        `businessPurpose2`,
-        `businessPurpose3`,
-        `businessPurpose4`,
+        "address1",
+        "businessPurpose1",
+        "address2",
+        "businessPurpose2",
+        "businessPurpose3",
+        "address3",
+        "businessPurpose4",
+        "address4",
       ])
       .then((values) => {
         next();
@@ -1230,16 +1279,30 @@ const StandardForm = () => {
       })
       .catch((error) => {
         console.error("Validation failed:", error);
+
+        // Handle scroll to the first field that failed
+        if (error.errorFields && error.errorFields.length > 0) {
+          const firstErrorFieldName = error.errorFields[0].name;
+          
+          form.scrollToField(firstErrorFieldName, {
+            behavior: 'smooth',
+            block: 'center',
+          });
+        }
       });
   }
 
   const FunctionCheckValidateContact = () => {
     form
       .validateFields([
-        `contactAddress1`,
-        `contactAddress2`,
-        `contactAddress3`,
-        `contactAddress4`,
+        "contact1",
+        "contactAddress1",
+        "contact2",
+        "contactAddress2",
+        "contact3",
+        "contactAddress3",
+        "contact4",
+        "contactAddress4",
       ])
       .then((values) => {
         next();
@@ -1247,6 +1310,16 @@ const StandardForm = () => {
       })
       .catch((error) => {
         console.error("Validation failed:", error);
+
+        // Handle scroll to the first field that failed
+        if (error.errorFields && error.errorFields.length > 0) {
+          const firstErrorFieldName = error.errorFields[0].name;
+          
+          form.scrollToField(firstErrorFieldName, {
+            behavior: 'smooth',
+            block: 'center',
+          });
+        }
       });
   }
 
@@ -1609,11 +1682,52 @@ const StandardForm = () => {
         setModalConfirm(true);
       }
     })
-    .catch((errorInfo) => {
+    .catch((error) => {
       // Handle validation errors if needed
-      console.log(errorInfo);
+      console.log(error);
     });
   };
+
+  const handleSaveFailed = (error) => {
+    if (error.errorFields && error.errorFields.length > 0) {
+      
+      const firstErrorFieldName = error.errorFields[0].name[0];
+
+      switch (firstErrorFieldName) {
+        case "paymentChannelType":
+        case "generateVA":
+          setFiCurrent(0);
+          break;
+        
+        case "taxIdentifierType":
+        case "taxIdentifierNumber":
+        case "taxIdentifierName":
+        case "taxAddress":
+        case "relatedAccountId":
+        case "customerNameTI":
+        case "accountNameTI":
+        case "ratit":
+        case "ratin":
+        case "ratin2":
+        case "ratia":
+        case "startDateTI":
+        case "descriptionTI":
+          setFiCurrent(1);
+          break;
+
+        case "wapuFlag":
+        case "startDateWT":
+        case "descriptionWT":
+          setFiCurrent(2);
+          break;
+        
+        case "receivableAccount":
+        case "revenueAccount":
+          setFiCurrent(3)
+      }
+      setFiErrorFieldName(firstErrorFieldName);
+    }
+  }
 
   const FunctionCheckCustomer = () => {
     form.validateFields()
@@ -1638,7 +1752,16 @@ const StandardForm = () => {
       })
       .catch((error) => {
         console.error("Validation failed:", error);
-        // Handle the rejected result here
+
+        // Handle scroll to the first field that failed
+        if (error.errorFields && error.errorFields.length > 0) {
+          const firstErrorFieldName = error.errorFields[0].name;
+          
+          form.scrollToField(firstErrorFieldName, {
+            behavior: 'smooth',
+            block: 'center',
+          });
+        }
       });
   };
 
@@ -1796,7 +1919,7 @@ const StandardForm = () => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={isLoading}>
         <BreadCrumb routes={routes} />
 
@@ -1847,7 +1970,7 @@ const StandardForm = () => {
           </BaseContainer>
         ) : null}
 
-        <Form layout="vertical" form={form} onFinish={handleSave}>
+        <Form layout="vertical" form={form} onFinish={handleSave} onFinishFailed={handleSaveFailed} >
           <BaseContainer header={"Account - Standard Information"}>
             <div className="flex flex-row gap-x-6 justify-center">
               <span className="mt-[10px]">
@@ -1959,14 +2082,16 @@ const StandardForm = () => {
                     className="ant-btn ant-btn-submit flex w-full justify-center"
                     disabled={steps[current].disabled}
                   >
-                    <span className="p-1 text-[18px] text-center">Next</span>
-                    <RightOutlined
-                      style={{
-                        justifyItems: "center",
-                        fontSize: "18px",
-                        color: "#fff",
-                      }}
-                    />
+                    <div className="flex gap-x-2 items-center">
+                      <span>Next</span>
+                      <RightOutlined
+                        style={{
+                          justifyItems: "center",
+                          fontSize: "18px",
+                          color: "#fff",
+                        }}
+                      />
+                    </div>
                   </ButtonComponent>
                 </Form.Item>
               )}
@@ -2126,7 +2251,7 @@ const StandardForm = () => {
         }
 
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

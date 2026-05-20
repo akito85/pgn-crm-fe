@@ -1,0 +1,23 @@
+{
+    "status": 200,
+    "message": "success",
+    "data": {
+        "result": [
+            {
+                "value": "ACC001",
+                "label": "ACC001 - Billing Gas",
+                "customerNumber": "CUS001"
+            },
+            {
+                "value": "ACC003",
+                "label": "ACC003 - Billing Non-Gas",
+                "customerNumber": "CUS001"
+            },
+            {
+                "value": "ACC008",
+                "label": "ACC008 - Billing Gas",
+                "customerNumber": "CUS008"
+            }
+        ]
+    }
+}

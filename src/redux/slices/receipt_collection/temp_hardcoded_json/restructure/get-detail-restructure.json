@@ -1,0 +1,132 @@
+{
+    "data": {
+        "restructure": {
+            "id": "RES-20260106-001",
+            "customerNumber": "CUS001",
+            "customerName": "PT PERTAMINA GAS NEGARA TBK",
+            "accountNumber": "130252597",
+            "accountName": "PLN (PERSERO), PT",
+            "accountGroupType": "GROUP-A",
+            "sor": "SOR-001",
+            "costCenter": "011 - JAKARTA PUSAT",
+            "accountSegment": "KI - Komersial Industri",
+            "meterReadingCode": "MR-001",
+            "accountType": "INDUSTRIAL",
+            "classificationType": "TYPE-A",
+            "sapCustId": "SAP-001",
+            "accountStatus": "ACTIVE",
+            "serviceAgreementNumber": "SA-001",
+            "serviceAgreementName": "AGREEMENT 1",
+            "serviceAgreementDate": "2023-01-01",
+            "startDate": "2023-01-01",
+            "endDate": "2026-12-31",
+            "minimumContract": "12",
+            "maximumContract": "24",
+            "uom": "MONTH",
+            "description": "Restructuring of outstanding debt for the year 2023-2024 to support business cash flow.",
+            "type": "INSTALLMENT",
+            "tenor": 12,
+            "startPeriod": "2026-01-01",
+            "source": "SAP FSCD",
+            "requestDate": "2026-01-06",
+            "appHierId": 502,
+            "createdDate": "2026-01-06T10:00:00.000+07:00",
+            "createdBy": "Dedi",
+            "updatedDate": "2026-01-06T11:00:00.000+07:00",
+            "updatedBy": "Admin",
+            "approvalStatus": "WAITING APPROVAL",
+            "contactList": [
+                {
+                    "key": 1,
+                    "primary": true,
+                    "contactName": "Rendy Fatih Setiawan",
+                    "job": "Manager",
+                    "position": "Finance",
+                    "address": "JL. ANGKASA, AA NO. 12, YOGYAKARTA",
+                    "child": [
+                        { "key": 1, "type": "Whatsapp", "value": "IDN - 628768789439" },
+                        { "key": 2, "type": "Email", "value": "rendyfatih@gmail.com" },
+                        { "key": 3, "type": "PGN Mobile", "value": "IDN - 628768789439" }
+                    ]
+                },
+                {
+                    "key": 2,
+                    "primary": false,
+                    "contactName": "Daniellirza Kurniawan",
+                    "job": "Staff Engineer",
+                    "position": "Finance",
+                    "address": "JL. ANGKASA, AA NO. 12, YOGYAKARTA",
+                    "child": [
+                        { "key": 1, "type": "Whatsapp", "value": "IDN - 628123456789" }
+                    ]
+                }
+            ]
+        },
+        "badDebtList": [
+            {
+                "key": 1,
+                "invoiceNo": "INV/2023/001",
+                "invoicePeriod": "JAN 2023",
+                "currency": "IDR",
+                "totalAmount": 150000000,
+                "allocation": "GAS BILL"
+            },
+            {
+                "key": 2,
+                "invoiceNo": "INV/2023/002",
+                "invoicePeriod": "FEB 2023",
+                "currency": "IDR",
+                "totalAmount": 250000000,
+                "allocation": "GAS BILL"
+            },
+            {
+                "key": 3,
+                "invoiceNo": "INV/2023/003",
+                "invoicePeriod": "MAR 2023",
+                "currency": "USD",
+                "totalAmount": 5000,
+                "allocation": "GAS BILL"
+            }
+        ],
+        "calculationList": [
+            {
+                "key": 1,
+                "periode": "JAN 2026",
+                "amount": 12500000,
+                "currency": "IDR"
+            },
+            {
+                "key": 2,
+                "periode": "FEB 2026",
+                "amount": 12500000,
+                "currency": "IDR"
+            },
+            {
+                "key": 3,
+                "periode": "JAN 2026",
+                "amount": 500,
+                "currency": "USD"
+            }
+        ],
+        "attachmentDtoList": [
+            {
+                "id": 1,
+                "fileName": "Restructure_Proposal_PLN.pdf",
+                "fileSize": "1.2 MB",
+                "fileType": "application/pdf",
+                "fileCategoryId": "C001",
+                "fileCategoryName": "Legal Document",
+                "createdBy": "Dedi",
+                "createdDate": "2026-01-06T10:00:00.000+07:00"
+            }
+        ],
+        "tApprovalDto": {
+            "isApprover": true,
+            "tAppId": 1,
+            "approvalType": "RESTRUCTURE_APPROVAL",
+            "requestedDate": "2026-01-06T10:00:00.000+07:00",
+            "requestedBy": "Admin",
+            "remarks": "Please approve restructure request"
+        }
+    }
+}

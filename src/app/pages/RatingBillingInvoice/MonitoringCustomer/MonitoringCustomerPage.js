@@ -1,52 +1,173 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Spin, Row, Col, Select } from "antd";
-import {
-  ClockCircleOutlined,
-  CheckCircleOutlined,
-  WarningOutlined,
-  SyncOutlined,
-  ArrowUpOutlined,
-  ArrowDownOutlined,
-} from "@ant-design/icons";
-import { motion } from "framer-motion";
+import { Spin, Row, Col, Select, Tabs } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
-import ButtonComponent from "../../../../components/ButtonComponent";
 import CardContainer from "../../../../components/CardContainer";
+import BaseContainer from "../../../../components/BaseContainer";
+import StatCard from "../../../../components/StatCard";
+import ComparisonCard from "../../../../components/ComparisonCard";
+import DetailStatsCard from "../../../../components/DetailStatsCard";
+import DonutChartCard from "../../../../components/DonutChartCard";
+import TableRBI from "../../../../components/TableRBI";
+import SVGIcon from "../../../../assets/Icon/index";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
 import {
   getSummaryData,
-  getTrendData,
-  getPriorityList,
-  asyncDataMart,
-  getListBillingPeriod
+  getListBillingPeriod,
 } from "../../../../redux/slices/rating_billing_invoice/monitoringSlice";
-import TrendChart from "../../../../components/TrendChart";
-import PriorityList from "../../../../components/PriorityList";
-import DetailPendingTransactions from "./DetailPendingTransactions";
-import DetailPendingApprovals from "./DetailPendingApprovals";
-import DetailGapRatingBilling from "./DetailGapRatingBilling";
-import DetailGapPraBillingMaster from "./DetailGapPraBillingMaster";
 
 const { Option } = Select;
 
 const MonitoringCustomerPage = () => {
-
-  const { loading, summaryData, trendData, priorityList, list_billing_period } = useSelector(
+  const { loading, summaryData, list_billing_period } = useSelector(
     (state) => state.monitoring
   );
 
   const dispatch = useDispatch();
 
   const [filterPeriod, setFilterPeriod] = useState(340);
-  const [detailView, setDetailView] = useState(null);
+
+  // Table columns definition for failed customers
+  const tableColumns = [
+    {
+      title: "ACCOUNT NUMBER",
+      dataIndex: "accountNumber",
+      key: "accountNumber",
+      width: 140,
+    },
+    {
+      title: "ACCOUNT NAME",
+      dataIndex: "accountName",
+      key: "accountName",
+      width: 150,
+    },
+    {
+      title: "CUSTOMER NUMBER",
+      dataIndex: "customerNumber",
+      key: "customerNumber",
+      width: 150,
+    },
+    {
+      title: "CUSTOMER NAME",
+      dataIndex: "customerName",
+      key: "customerName",
+      width: 150,
+    },
+    {
+      title: "CUSTOMER TYPE",
+      dataIndex: "customerType",
+      key: "customerType",
+      width: 130,
+    },
+    {
+      title: "SOR",
+      dataIndex: "sor",
+      key: "sor",
+      width: 100,
+    },
+    {
+      title: "COST CENTER",
+      dataIndex: "costCenter",
+      key: "costCenter",
+      width: 120,
+    },
+    {
+      title: "METER READING CODE",
+      dataIndex: "meterReadingCode",
+      key: "meterReadingCode",
+      width: 160,
+    },
+    {
+      title: "ACCOUNT SEGMENT",
+      dataIndex: "accountSegment",
+      key: "accountSegment",
+      width: 150,
+    },
+    {
+      title: "ACCOUNT GROUP TYPE",
+      dataIndex: "accountGroupType",
+      key: "accountGroupType",
+      width: 160,
+    },
+    {
+      title: "CATEGORY",
+      dataIndex: "category",
+      key: "category",
+      width: 120,
+    },
+    {
+      title: "CLASSIFICATION TYPE",
+      dataIndex: "classificationType",
+      key: "classificationType",
+      width: 160,
+    },
+    {
+      title: "ACCOUNT TYPE",
+      dataIndex: "accountType",
+      key: "accountType",
+      width: 130,
+    },
+    {
+      title: "STATUS",
+      dataIndex: "status",
+      key: "status",
+      width: 100,
+    },
+    {
+      title: "MESSAGE",
+      dataIndex: "message",
+      key: "message",
+      width: 200,
+    },
+  ];
+
+  // Table columns definition for priority list
+  const priorityListColumns = [
+    {
+      title: "NO",
+      dataIndex: "no",
+      key: "no",
+      width: 80,
+      align: "center",
+    },
+    {
+      title: "RANK",
+      dataIndex: "rank",
+      key: "rank",
+      width: 100,
+    },
+    {
+      title: "ACCOUNT NUMBER",
+      dataIndex: "accountNumber",
+      key: "accountNumber",
+      width: 200,
+    },
+    {
+      title: "COUNT",
+      dataIndex: "count",
+      key: "count",
+      width: 150,
+      align: "right",
+      isNumber: true,
+    },
+    {
+      title: "ACTION",
+      dataIndex: "action",
+      key: "action",
+      width: 100,
+      align: "center",
+      fixed: "right",
+      render: () => (
+        <div className="flex justify-center">
+          <SVGIcon name="iconDetail" style={{ cursor: "pointer" }} />
+        </div>
+      ),
+    },
+  ];
 
   useEffect(() => {
     dispatch(getListBillingPeriod());
     dispatch(getSummaryData());
-    dispatch(getTrendData(filterPeriod));
-    dispatch(getPriorityList());
   }, [filterPeriod, dispatch]);
 
   const routes = [
@@ -60,265 +181,336 @@ const MonitoringCustomerPage = () => {
     },
   ];
 
-  const handleAsyncDataMart = () => {
-    dispatch(asyncDataMart());
-  };
-
-  const handleCardClick = (type) => {
-    setDetailView(type);
-  };
-
-  const handleBackToDashboard = () => {
-    setDetailView(null);
-    dispatch(getSummaryData());
-    dispatch(getTrendData(filterPeriod));
-    dispatch(getPriorityList());
-  };
-
-  const renderDetailView = () => {
-    switch (detailView) {
-      case "pendingTransactions":
-        return (
-          <DetailPendingTransactions
-            filterPeriod={filterPeriod}
-            handleBack={handleBackToDashboard}
-          />
-        );
-      case "pendingApprovals":
-        return (
-          <DetailPendingApprovals
-            filterPeriod={filterPeriod}
-            handleBack={handleBackToDashboard}
-          />
-        );
-      case "gapRatingBilling":
-        return (
-          <DetailGapRatingBilling
-            filterPeriod={filterPeriod}
-            handleBack={handleBackToDashboard}
-          />
-        );
-      case "gapPraBillingMaster":
-        return (
-          <DetailGapPraBillingMaster
-            filterPeriod={filterPeriod}
-            handleBack={handleBackToDashboard}
-          />
-        );
-      default:
-        return null;
-    }
-  };
-
-  if (detailView) {
-    return renderDetailView();
-  }
-
-  // Card configuration dengan data dari desain
-  const cardData = [
-    {
-      key: "pendingTransactions",
-      title: "Pending Transactions",
-      value: summaryData.pendingTransactions || 312,
-      icon: <ClockCircleOutlined />,
-      iconColor: "#FF9800",
-      totalAvg: 53.3,
-      percentage: 32.8,
-      isPositive: true,
-    },
-    {
-      key: "pendingApprovals",
-      title: "Pending Approvals",
-      value: summaryData.pendingApprovals || 240,
-      icon: <CheckCircleOutlined />,
-      iconColor: "#2196F3",
-      totalAvg: 37.5,
-      percentage: 14.78,
-      isPositive: false,
-    },
-    {
-      key: "gapRatingBilling",
-      title: "Gap Rating vs Billing",
-      value: summaryData.gapRatingBilling || 273,
-      icon: <WarningOutlined />,
-      iconColor: "#F44336",
-      totalAvg: 45,
-      percentage: 90,
-      isPositive: false,
-    },
-    {
-      key: "gapPraBillingMaster",
-      title: "Gap Pra Billing vs Master",
-      value: summaryData.gapPraBillingMaster || 228,
-      icon: <SyncOutlined />,
-      iconColor: "#9E9E9E",
-      totalAvg: 32.5,
-      percentage: 32.8,
-      isPositive: true,
-    },
-  ];
-
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
-        {/* Card Container Pertama: Dashboard Summary & Chart */}
-        <CardContainer 
-          header={
-            <div className="flex justify-between items-center -my-4">
-              <p className="mt-[15px] font-bold">Dashboard Monitoring Customer</p>
-            </div>
-          }
-        >
-          {/* Filters */}
-          <div className="w-full mb-6 mt-4">
-            <Row gutter={[16, 16]} align="middle">
-              <Col>
-                <span style={{ fontWeight: 500 }}>Period:</span>
-              </Col>
-              <Col>
-                <Select
-                  placeholder="Select Period"
-                  value={filterPeriod}
-                  onChange={(value) => setFilterPeriod(value)}
-                  style={{ width: 200 }}
-                  showSearch
-                  filterOption={(input, option) =>
-                    option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
-                  }
-                >
-                  {list_billing_period.map((period) => (
-                    <Option key={period.id} value={period.id}>
-                      {period.name}
-                    </Option>
-                  ))}
-                </Select>
-              </Col>
-              <Col>
-                <ButtonComponent
-                  icon={<SyncOutlined />}
-                  type="primary"
-                  onClick={handleAsyncDataMart}
-                >
-                  Async Data Mart
-                </ButtonComponent>
-              </Col>
-            </Row>
-          </div>
-
-          {/* Summary Cards */}
-          <div className="w-full mb-6">
-            <Row gutter={[12, 12]}>
-              {cardData.map((card) => (
-                <Col xs={24} sm={12} lg={6} key={card.key}>
-                  <motion.div
-                    whileHover={{ scale: 1.01 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <div
-                      onClick={() => handleCardClick(card.key)}
-                      style={{
-                        cursor: "pointer",
-                        backgroundColor: "#FAFAFA",
-                        border: "none",
-                        borderRadius: "6px",
-                        padding: "14px 16px",
-                        minHeight: "100px",
-                        transition: "all 0.2s",
-                        position: "relative",
-                      }}
-                      className="hover:bg-gray-100"
-                    >
-                      {/* Header: Icon + Title + Arrow */}
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <div style={{ fontSize: 18, color: card.iconColor }}>
-                            {card.icon}
-                          </div>
-                          <div
-                            style={{
-                              fontSize: 12,
-                              color: "#595959",
-                              fontWeight: 400,
-                            }}
-                          >
-                            {card.title}
-                          </div>
-                        </div>
-                        <div style={{ fontSize: 16, color: "#bfbfbf" }}>
-                          →
-                        </div>
-                      </div>
-
-                      {/* Value */}
-                      <div
-                        style={{
-                          fontSize: 32,
-                          fontWeight: 700,
-                          color: "#262626",
-                          marginBottom: 6,
-                          lineHeight: 1.2,
-                        }}
-                      >
-                        {card.value.toLocaleString()}
-                      </div>
-
-                      {/* Footer Info */}
-                      <div className="flex justify-between items-center">
-                        <div style={{ fontSize: 11, color: "#8c8c8c" }}>
-                          Total Avg: {card.totalAvg}
-                        </div>
-                        <div
-                          style={{
-                            fontSize: 12,
-                            fontWeight: 600,
-                            color: card.isPositive ? "#52c41a" : "#f5222d",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 2,
-                          }}
-                        >
-                          {card.isPositive ? (
-                            <ArrowUpOutlined style={{ fontSize: 10 }} />
-                          ) : (
-                            <ArrowDownOutlined style={{ fontSize: 10 }} />
-                          )}
-                          {card.percentage}%
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
-                </Col>
+        {/* Main Card Container: Monitoring Billing Process */}
+        <CardContainer header="MONITORING BILLING PROCESS">
+          {/* Period Filter */}
+          <div className="mb-3">
+            <Select
+              placeholder="Select Period"
+              value={filterPeriod}
+              onChange={(value) => setFilterPeriod(value)}
+              style={{ width: 200 }}
+              size="small"
+              showSearch
+              filterOption={(input, option) =>
+                option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+              }
+            >
+              {list_billing_period.map((period) => (
+                <Option key={period.id} value={period.id}>
+                  {period.name}
+                </Option>
               ))}
-            </Row>
+            </Select>
           </div>
 
-          {/* Trend Chart */}
-          <div className="w-full">
-            <TrendChart data={trendData} />
+          {/* Top Stats Cards - Total Success & Total Failed */}
+          <Row gutter={[12, 12]} className="mb-3">
+            <Col xs={24} sm={12}>
+              <StatCard
+                title="TOTAL SUCCESS RATING LIST"
+                value={summaryData.totalSuccessRating || 3000}
+                percentage={80}
+                isPositive={true}
+                type="success"
+              />
+            </Col>
+            <Col xs={24} sm={12}>
+              <StatCard
+                title="TOTAL FAILED RATING LIST"
+                value={summaryData.totalFailedRating || 7867}
+                percentage={35}
+                isPositive={true}
+                type="failed"
+              />
+            </Col>
+          </Row>
+
+          {/* Comparison Cards - PRA-BILLING VS RATING & RATING VS BILLING */}
+          <Row gutter={[12, 12]} className="mb-3">
+            <Col xs={24} lg={12}>
+              <ComparisonCard
+                title="PRA-BILLING VS RATING"
+                leftColumn={{
+                  title: "Pra-Billing",
+                  count: summaryData.praBillingCount || 8097,
+                  valueUsage: summaryData.praBillingValue || 26908,
+                }}
+                rightColumn={{
+                  title: "Rating",
+                  count: summaryData.ratingCount || 12908,
+                  valueUsage: summaryData.ratingValue || 11908,
+                }}
+              />
+            </Col>
+            <Col xs={24} lg={12}>
+              <ComparisonCard
+                title="RATING VS BILLING"
+                leftColumn={{
+                  title: "Rating",
+                  count: summaryData.ratingCount2 || 12908,
+                  valueUsage: summaryData.ratingValue2 || 11908,
+                }}
+                rightColumn={{
+                  title: "Billing",
+                  count: summaryData.billingCount || 60678,
+                  valueUsage: summaryData.billingValue || 120008,
+                }}
+              />
+            </Col>
+          </Row>
+
+          {/* Detail Stats Cards - 4 Sections */}
+          <Row gutter={[12, 12]}>
+            <Col xs={24} lg={12}>
+              <DetailStatsCard
+                title="TOTAL CUSTOMER NEED TO PROCESSED"
+                totalValue={summaryData.customerNeedProcessed || 312}
+                details={[
+                  { label: "Pra-Billing", value: 28 },
+                  { label: "Rating", value: 12 },
+                  { label: "Billing", value: 272 },
+                  { label: "", value: "" },
+                ]}
+              />
+            </Col>
+            <Col xs={24} lg={12}>
+              <DetailStatsCard
+                title="TOTAL CUSTOMER IN EACH STAGE NOT APPROVED YET"
+                totalValue={summaryData.customerNotApproved || 312}
+                details={[
+                  { label: "Master", value: 28 },
+                  { label: "Pra-Billing", value: 12 },
+                  { label: "Rating", value: 272 },
+                  { label: "Billing", value: 272 },
+                ]}
+              />
+            </Col>
+            <Col xs={24} lg={12}>
+              <DetailStatsCard
+                title="GAP PRA-BILLING VS MASTER"
+                totalValue={summaryData.gapPraBillingMaster || 3000}
+                percentage={80}
+                isPositive={false}
+                details={[
+                  { label: "Usage", value: 1800 },
+                  { label: "Price", value: 870 },
+                  { label: "Promo", value: 330 },
+                  { label: "", value: "" },
+                ]}
+              />
+            </Col>
+            <Col xs={24} lg={12}>
+              <DetailStatsCard
+                title="TOTAL ERROR PROCESS"
+                totalValue={summaryData.totalErrorProcess || 7867}
+                percentage={35}
+                isPositive={true}
+                details={[
+                  { label: "Master", value: 1578 },
+                  { label: "Pra-Billing", value: 2356 },
+                  { label: "Rating", value: 1879 },
+                  { label: "Billing", value: 2065 },
+                ]}
+              />
+            </Col>
+          </Row>
+
+          {/* Donut Charts - Comparison Charts */}
+          <Row gutter={[12, 12]} className="mt-3">
+            <Col xs={24} lg={8}>
+              <DonutChartCard
+                title="COMPARISON OF THE NUMBER OF SUCCESSFUL CUSTOMER"
+                data={[60, 40]}
+                labels={["Pra-billing, Rating, Billing, Approved", "Master"]}
+                colors={["#1C8CCC", "#FF8C42"]}
+              />
+            </Col>
+            <Col xs={24} lg={8}>
+              <DonutChartCard
+                title="COMPARISON OF MEASURE QUANTITIES"
+                data={[25, 35, 40]}
+                labels={["Billing", "Rating", "Master Usage"]}
+                colors={["#1C8CCC", "#FF8C42", "#4CAF51"]}
+              />
+            </Col>
+            <Col xs={24} lg={8}>
+              <DonutChartCard
+                title="COMPARISON OF DATA FOR EACH COMPONENT"
+                data={[35, 65]}
+                labels={["Pra-billing, Rating, Billing, Approved", "Master"]}
+                colors={["#1C8CCC", "#FF8C42"]}
+              />
+            </Col>
+          </Row>
+
+          {/* Table Section with Tabs */}
+          <div className="mt-3">
+            <BaseContainer
+              border={true}
+              header="LIST OF CUSTOMERS WHO FAILED IN RATING AND BILLING PROCESS"
+              type="tabs"
+              element={
+                <Tabs
+                  defaultActiveKey="1"
+                  size="small"
+                  items={[
+                    {
+                      key: "1",
+                      label: "Rating Failed",
+                      children: (
+                        <div className="pb-3">
+                          <TableRBI
+                            idTable="table-rating-failed"
+                            dataSource={[]}
+                            columns={tableColumns}
+                            pageSize={10}
+                            current={1}
+                            loading={false}
+                            totalData={0}
+                            tableScrolled={{ x: "max-content" }}
+                            usePagination={true}
+                            useSelect={true}
+                            showAdvanceSearch={true}
+                            showSearchBar={true}
+                          />
+                        </div>
+                      ),
+                    },
+                    {
+                      key: "2",
+                      label: "Billing Failed",
+                      children: (
+                        <div className="pb-3">
+                          <TableRBI
+                            idTable="table-billing-failed"
+                            dataSource={[]}
+                            columns={tableColumns}
+                            pageSize={10}
+                            current={1}
+                            loading={false}
+                            totalData={0}
+                            tableScrolled={{ x: "max-content" }}
+                            usePagination={true}
+                            useSelect={true}
+                            showAdvanceSearch={true}
+                            showSearchBar={true}
+                          />
+                        </div>
+                      ),
+                    },
+                  ]}
+                />
+              }
+            />
           </div>
         </CardContainer>
 
-        {/* Card Container Kedua: Priority List */}
-        <div className="mt-6">
-          <CardContainer 
-            header={
-              <div className="flex justify-between items-center -my-4">
-                <p className="mt-[15px] font-bold">Priority List: Top 5 Anomalies</p>
-              </div>
-            }
-          >
-            <div className="my-5">
-              <PriorityList
-                data={priorityList}
-                onItemClick={handleCardClick}
-              />
-            </div>
-          </CardContainer>
-        </div>
+        {/* Priority List: Top 5 Anomalies */}
+        <CardContainer header="PRIORITY LIST: TOP 5 ANOMALIES">
+          <Tabs
+            defaultActiveKey="1"
+            size="small"
+            animated={false}
+            items={[
+              {
+                key: "1",
+                label: "Pending Transactions",
+                children: (
+                  <div className="pb-3">
+                    <TableRBI
+                      idTable="table-pending-transactions"
+                      dataSource={[]}
+                      columns={priorityListColumns}
+                      pageSize={5}
+                      current={1}
+                      loading={false}
+                      totalData={0}
+                      tableScrolled={{ x: "max-content" }}
+                      usePagination={false}
+                      useSelect={false}
+                      showAdvanceSearch={false}
+                      showSearchBar={false}
+                    />
+                  </div>
+                ),
+              },
+              {
+                key: "2",
+                label: "Pending Approvals",
+                children: (
+                  <div className="pb-3">
+                    <TableRBI
+                      idTable="table-pending-approvals"
+                      dataSource={[]}
+                      columns={priorityListColumns}
+                      pageSize={5}
+                      current={1}
+                      loading={false}
+                      totalData={0}
+                      tableScrolled={{ x: "max-content" }}
+                      usePagination={false}
+                      useSelect={false}
+                      showAdvanceSearch={false}
+                      showSearchBar={false}
+                    />
+                  </div>
+                ),
+              },
+              {
+                key: "3",
+                label: "Gap Rating vs Billing",
+                children: (
+                  <div className="pb-3">
+                    <TableRBI
+                      idTable="table-gap-rating-billing"
+                      dataSource={[]}
+                      columns={priorityListColumns}
+                      pageSize={5}
+                      current={1}
+                      loading={false}
+                      totalData={0}
+                      tableScrolled={{ x: "max-content" }}
+                      usePagination={false}
+                      useSelect={false}
+                      showAdvanceSearch={false}
+                      showSearchBar={false}
+                    />
+                  </div>
+                ),
+              },
+              {
+                key: "4",
+                label: "Gap Pra-Billing vs Master",
+                children: (
+                  <div className="pb-3">
+                    <TableRBI
+                      idTable="table-gap-prabilling-master"
+                      dataSource={[]}
+                      columns={priorityListColumns}
+                      pageSize={5}
+                      current={1}
+                      loading={false}
+                      totalData={0}
+                      tableScrolled={{ x: "max-content" }}
+                      usePagination={false}
+                      useSelect={false}
+                      showAdvanceSearch={false}
+                      showSearchBar={false}
+                    />
+                  </div>
+                ),
+              },
+            ]}
+          />
+        </CardContainer>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

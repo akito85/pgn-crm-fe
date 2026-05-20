@@ -33,7 +33,7 @@ const ListUserFromUpload = ({ data, onChangeData = () => {} }) => {
   const searchInput = useRef(null);
   const [searchedColumn, setSearchedColumn] = useState("");
   useEffect(() => {
-    dispatch(getAllEmployees());
+    dispatch(getAllEmployees(0));
     dispatch(getAllUserLevel());
     dispatch(getAllUserType());
     dispatch(getAllAuthType());

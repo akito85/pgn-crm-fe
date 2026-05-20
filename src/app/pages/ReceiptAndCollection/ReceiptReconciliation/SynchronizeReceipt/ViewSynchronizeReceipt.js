@@ -4,9 +4,8 @@ import { useDispatch } from "react-redux";
 import { Input, Space, Tooltip } from "antd";
 import CardContainer from "../../../../../components/CardContainer";
 import BreadCrumb from "../../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import {
-  EyeOutlined, 
+  EyeOutlined,
   FilterOutlined
 } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
@@ -132,6 +131,7 @@ const ViewSynchronizeReceipt = () => {
       title: "NO",
       key: "no",
       width: 60,
+      isClassification: true,
       align: "center",
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
@@ -204,9 +204,9 @@ const ViewSynchronizeReceipt = () => {
               >
                 <ButtonComponent
                   icon={
-                  // <SVGIcon name="IconDetail" width={24} />
-                  <EyeOutlined />
-                }
+                    // <SVGIcon name="IconDetail" width={24} />
+                    <EyeOutlined />
+                  }
                   border={false}
                 />
               </Link>
@@ -236,7 +236,7 @@ const ViewSynchronizeReceipt = () => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       {/* <Spin spinning={loading}> */}
       <BreadCrumb routes={routes} />
 
@@ -252,7 +252,7 @@ const ViewSynchronizeReceipt = () => {
             // totalData={data?.page?.totalElements}
             onSort={onSort}
             tableScrolled={{
-              x: 1300,
+              x: "max-content",
               y: 300,
             }}
             fixedColumns={fixedColumns}
@@ -262,7 +262,7 @@ const ViewSynchronizeReceipt = () => {
       </CardContainer>
 
       {/* </Spin> */}
-    </LayoutMenu>
+    </>
   );
 };
 

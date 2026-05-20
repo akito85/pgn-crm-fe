@@ -13,6 +13,7 @@ export const NOTIFICATION_CONFIG = {
 // explort constant app service
 export const configApp = {
   USER_MANAGEMENT_SERVICE: `/um`,
+  JOB_SERVICE: `/job`,
   MASTER_MANAGEMENT: `/mst`,
   PRODUCT_SERVICE: `/service/product`,
   RATING_BILLING_SERVICE: `/rbi`,
@@ -28,4 +29,8 @@ export const configApp = {
   JP_SERVICE: `/service/jp`,
   REPORT_SERVICE: `/rpt`,
   NOTIFICATION_SERVICE: `/ntf`, // Notification REST API service
+};
+
+export const API_ENDPOINTS = {
+  UPLOAD_ATTACHMENT: '/v1/dbs/api/attachment/upload/v1',
 };

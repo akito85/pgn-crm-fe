@@ -6,6 +6,7 @@ import {
 } from "../../../../../utils";
 import { getColumnSearchPropsUseFilteredValueFE } from "../../../../../utils/getColumnSearchProps";
 import { separatorCurrency } from "../../UtilsProduct/UtilsAllProduct";
+import StatusComponent from "../../../../../components/StatusComponent";
 
 const sorter = (fieldSort, a, b) => {
   const handleDataSort = (obj) => {
@@ -61,6 +62,7 @@ export const columnsTableCriteriaPromo = (
   {
     required: true,
     title: "PRODUCT",
+    key: "product",
     width: 240,
     //onFilter: (value, record) => //onFilter("accountCategory", value, record),
     sorter: (a, b) => sorter("product", a, b),
@@ -95,7 +97,45 @@ export const columnsTableCriteriaPromo = (
   },
   {
     required: true,
+    title: "PRODUCT VERSION",
+    key: "productVersion",
+    width: 240,
+    //onFilter: (value, record) => //onFilter("accountCategory", value, record),
+    sorter: (a, b) => sorter("productVersion", a, b),
+    dataIndex: "productVersion",
+    dataIndexForm: "data_version",
+    indexValue: 38,
+    inputType: "select",
+    filteredValue: search?.["productVersion"] ? [search?.["productVersion"]] : null,
+    option: listOption["data_product_version"],
+    url: "getProductVersionList",
+    dependDataIndex: "product",
+    ...getColumnSearchPropsUseFilteredValueFE(
+      search,
+      "version",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+      "input",
+      storedData
+    ),
+    render: (text) =>
+      renderColumn(
+        "version",
+        hasValue(search["version"]),
+        searchText,
+        text?.label,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    required: true,
     title: "ACCOUNT CATEGORY",
+    key: "accountCategory",
     width: 240,
     //onFilter: (value, record) => //onFilter("accountCategory", value, record),
     sorter: (a, b) => sorter("accountCategory", a, b),
@@ -133,6 +173,7 @@ export const columnsTableCriteriaPromo = (
   {
     required: true,
     title: "SERVICE TYPE",
+    key: "serviceType",
     width: 240,
     //onFilter: (value, record) => //onFilter("serviceType", value, record),
     sorter: (a, b) => sorter("serviceType", a, b),
@@ -168,6 +209,7 @@ export const columnsTableCriteriaPromo = (
   {
     required: true,
     title: "CUSTOMER SEGMENT",
+    key: "customerSegment",
     width: 240,
     //onFilter: (value, record) => //onFilter("customerSegment", value, record),
     sorter: (a, b) => sorter("customerSegment", a, b),
@@ -205,6 +247,7 @@ export const columnsTableCriteriaPromo = (
   {
     required: true,
     title: "ACCOUNT GROUP",
+    key: "accountGroup",
     width: 240,
     //onFilter: (value, record) => //onFilter("accountGroup", value, record),
     sorter: (a, b) => sorter("accountGroup", a, b),
@@ -241,6 +284,7 @@ export const columnsTableCriteriaPromo = (
   {
     required: true,
     title: "INDUSTRIAL SECTOR",
+    key: "industrialSector",
     width: 240,
     //onFilter: (value, record) => //onFilter("industrialSector", value, record),
     sorter: (a, b) => sorter("industrialSector", a, b),
@@ -278,6 +322,7 @@ export const columnsTableCriteriaPromo = (
   {
     required: true,
     title: "BUDGET",
+    key: "budget",
     width: 240,
     //onFilter: (value, record) => //onFilter("budget", value, record),
     sorter: (a, b) => sorter("budget", a, b),
@@ -313,6 +358,7 @@ export const columnsTableCriteriaPromo = (
   {
     required: true,
     title: "SOR",
+    key: "sor",
     width: 240,
     //onFilter: (value, record) => //onFilter("sor", value, record),
     sorter: (a, b) => sorter("sor", a, b),
@@ -348,6 +394,7 @@ export const columnsTableCriteriaPromo = (
   {
     required: true,
     title: "COST CENTER",
+    key: "costCenter",
     width: 240,
     //onFilter: (value, record) => //onFilter("area", value, record),
     sorter: (a, b) => sorter("area", a, b),
@@ -382,7 +429,44 @@ export const columnsTableCriteriaPromo = (
   },
   {
     required: true,
+    title: "COUNTRY",
+    key: "country",
+    width: 240,
+    //onFilter: (value, record) => //onFilter("province", value, record),
+    sorter: (a, b) => sorter("country", a, b),
+    dataIndex: "country",
+    dataIndexForm: "data_country",
+    indexValue: 3118,
+    inputType: "select",
+    filteredValue: search?.["country"] ? [search?.["country"]] : null,
+    option: listOption["data_country"],
+    url: "getCountryList",
+    ...getColumnSearchPropsUseFilteredValueFE(
+      search,
+      "country",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+      "input",
+      storedData
+    ),
+    render: (text) =>
+      renderColumn(
+        "country",
+        hasValue(search["country"]),
+        searchText,
+        text?.label,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    required: true,
     title: "PROVINCE",
+    key: "province",
     width: 240,
     //onFilter: (value, record) => //onFilter("province", value, record),
     sorter: (a, b) => sorter("province", a, b),
@@ -393,6 +477,7 @@ export const columnsTableCriteriaPromo = (
     filteredValue: search?.["province"] ? [search?.["province"]] : null,
     option: listOption["data_province"],
     url: "getProvinceList",
+    dependDataIndex: "country",
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
       "province",
@@ -418,6 +503,7 @@ export const columnsTableCriteriaPromo = (
   {
     required: true,
     title: "CITY",
+    key: "city",
     width: 240,
     //onFilter: (value, record) => //onFilter("city", value, record),
     sorter: (a, b) => sorter("city", a, b),
@@ -454,6 +540,7 @@ export const columnsTableCriteriaPromo = (
   {
     required: true,
     title: "DISTRICT",
+    key: "district",
     width: 240,
     //onFilter: (value, record) => //onFilter("district", value, record),
     sorter: (a, b) => sorter("district", a, b),
@@ -490,6 +577,7 @@ export const columnsTableCriteriaPromo = (
   {
     required: true,
     title: "SUB-DISTRICT",
+    key: "subDistrict",
     width: 240,
     //onFilter: (value, record) => //onFilter("subDistrict", value, record),
     sorter: (a, b) => sorter("subDistrict", a, b),
@@ -526,6 +614,7 @@ export const columnsTableCriteriaPromo = (
   {
     required: true,
     title: "ACCOUNT",
+    key: "account",
     width: 240,
     //onFilter: (value, record) => //onFilter("customer", value, record),
     sorter: (a, b) => sorter("customer", a, b),
@@ -564,6 +653,7 @@ export const columnsTableCriteriaPromo = (
   {
     required: true,
     title: "G-SIZES",
+    key: "gSizes",
     width: 240,
     //onFilter: (value, record) => //onFilter("gsizes", value, record),
     sorter: (a, b) => sorter("gsizes", a, b),
@@ -599,6 +689,7 @@ export const columnsTableCriteriaPromo = (
   {
     required: true,
     title: "ADJUSTMENT TYPE",
+    key: "adjustmentType",
     width: 240,
     //onFilter: (value, record) => //onFilter("adjustmentType", value, record),
     sorter: (a, b) => sorter("adjustmentType", a, b),
@@ -636,6 +727,7 @@ export const columnsTableCriteriaPromo = (
   {
     required: true,
     title: "ADJUSTMENT VALUE",
+    key: "adjustmentValue",
     width: 240,
     dataIndex: "adjustmentValue",
     indexValue: 1,
@@ -701,6 +793,7 @@ export const columnsTableCriteriaPromo = (
   {
     required: true,
     title: "UOM",
+    key: "uom",
     width: 240,
     //onFilter: (value, record) => //onFilter("uom", value, record),
     sorter: (a, b) => sorter("uom", a, b),
@@ -734,8 +827,9 @@ export const columnsTableCriteriaPromo = (
       ),
   },
   {
-    required: true,
+    required: false,
     title: "MAX VALUE UOM",
+    key: "maxValueUom",
     width: 240,
     //onFilter: (value, record) => //onFilter("maxValueUom", value, record),
     sorter: (a, b) => sorter("maxValueUom", a, b),
@@ -800,6 +894,7 @@ export const columnsTableCriteriaPromo = (
   {
     required: true,
     title: "FROM ITEM",
+    key: "fromItem",
     width: 240,
     //onFilter: (value, record) => //onFilter("fromItem", value, record),
     sorter: (a, b) => sorter("fromItem", a, b),
@@ -834,6 +929,7 @@ export const columnsTableCriteriaPromo = (
   },
   {
     title: "TIERING",
+    key: "tiering",
     width: 240,
     //onFilter: (value, record) => //onFilter("tiering", value, record),
     sorter: (a, b) => sorter("tiering", a, b),
@@ -869,6 +965,7 @@ export const columnsTableCriteriaPromo = (
   },
   {
     title: "START DATE",
+    key: "startDate",
     dataIndex: "startDate",
     dataIndexForm: "startDate",
     indexValue: 1,
@@ -920,6 +1017,7 @@ export const columnsTableCriteriaPromo = (
   },
   {
     title: "END DATE",
+    key: "endDate",
     dataIndex: "endDate",
     dataIndexForm: "endDate",
     inputType: "endDate",
@@ -970,6 +1068,7 @@ export const columnsTableCriteriaPromo = (
   },
   {
     title: "DESCRIPTION",
+    key: "description",
     width: 240,
     inputType: "textarea",
     dataIndex: "description",
@@ -1028,5 +1127,40 @@ export const columnsTableCriteriaPromo = (
     //     return "";
     //   }
     // },
+  },
+  {
+    title: "STATUS",
+    key: "status",
+    dataIndex: "status",
+    width: 180,
+    align: "center",
+    indexValue: -1,
+    filteredValue: search?.["status"] ? [search?.["status"]] : null,
+    sorter: (a, b) => {
+      const statusA = (a.status || "").toLowerCase();
+      const statusB = (b.status || "").toLowerCase();
+      return statusA.localeCompare(statusB);
+    },
+    ...getColumnSearchPropsUseFilteredValueFE(
+      search,
+      "status",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+      "input",
+      storedData
+    ),
+    render: (text) => {
+      if (!text) return "-";
+      return (
+        <div className={" flex justify-center"}>
+          <StatusComponent colour={text}>
+            {text}
+          </StatusComponent>
+        </div>
+      );
+    },
   },
 ];

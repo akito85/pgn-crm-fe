@@ -73,7 +73,7 @@ const ModalQueryCustom = ({
           {(fields, { add, remove }) => (
             <>
               {fields.map(({ key, name, ...restField }, index) => (
-                <div key={key} className="flex flex-row">
+                <div key={key} className="flex gap-x-2">
                   <div className="w-full">
                     <QueryParams
                       name={name}
@@ -84,19 +84,17 @@ const ModalQueryCustom = ({
                       optionsConditions={advancedSearchMetadata?.conditions || []}
                     />
                   </div>
-                  <div className="pt-8 pl-5">
-                    <Tooltip title="Delete">
-                      <SVGIcon
-                        name="IconDelete"
-                        color={"#D90000"}
-                        width={24}
-                        onClick={() => {
-                          remove(name);
-                          handleFirstQuery();
-                        }}
-                      />
-                    </Tooltip>
-                  </div>
+                  <Tooltip title="Delete">
+                    <SVGIcon
+                      name="IconDelete"
+                      color={"#D90000"}
+                      width={24}
+                      onClick={() => {
+                        remove(name);
+                        handleFirstQuery();
+                      }}
+                    />
+                  </Tooltip>
                 </div>
               ))}
               <div className={"w-full flex justify-between mt-5"}>

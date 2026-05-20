@@ -1,4 +1,4 @@
-import { LeftOutlined } from "@ant-design/icons";
+import { WarningOutlined } from "@ant-design/icons";
 import { Form, Spin } from "antd";
 import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -6,8 +6,10 @@ import { useLocation, useNavigate } from "react-router-dom";
 import BaseContainer from "../../../../../../components/BaseContainer";
 import BreadCrumb from "../../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
-import RadioTabs from "../../../../../../components/RadioTabs";
-import LayoutMenu from "../../../../../../components/SidebarMenu/LayoutMenu";
+import {
+  FormStepper,
+  FormFooter,
+} from "../../../../../../components/FormStepNavigation";
 import { RBI_ROUTES } from "../../../../../../routes/rating_billing/rbi_routes";
 import DailyRateCreate from "./DailyRateCreate";
 import SVGIcon from "../../../../../../assets/Icon/index";
@@ -35,8 +37,11 @@ import { dateFormatting } from "../../../../../../utils";
 import AttachmentComponent from "../../../../../../components/Attachment/AttachmentComponent";
 import { getConfigFileRBIData } from "../../../../../../redux/slices/attachmentSlice";
 import { configApp } from "../../../../../../constants/configApp";
-import ModalBack from "../../../../../../components/Modal/ModalBack";
-import { ModalError } from "../../../../../../components/Modal/ModalPopUp";
+import {
+  ModalConfirm,
+  ModalError,
+} from "../../../../../../components/Modal/ModalPopUp";
+import CardContainer from "../../../../../../components/CardContainer";
 
 const DailyRateForm = ({ type }) => {
   const {
@@ -57,12 +62,41 @@ const DailyRateForm = ({ type }) => {
   const listTypeSubmit = [true, false];
   const { id, status, statusApproval } = location?.state || {};
 
+  // State untuk Stepper
+  const [current, setCurrent] = useState(0);
+
+  const steps = [
+    { title: "DAILY RATE", value: "Daily Rate" },
+    { title: "APPROVAL", value: "Approval" },
+    { title: "ATTACHMENT", value: "Attachment" },
+  ];
+
+  const [tabData, setTabData] = useState([
+    {
+      value: "Daily Rate",
+      paramValue: [
+        "rateType",
+        "fCurrency",
+        "tCurrency",
+        "rateDate",
+        "convertedRate",
+      ],
+    },
+    { value: "Approval", paramValue: ["apphierId"] },
+    { value: "Attachment" },
+  ]);
+
+  const [valuePage, setValuePage] = useState(steps[0].value);
+
+  // State lainnya
   const [appHierOptions, setAppHierOptions] = useState([]);
   const [appHierDataDetail, setAppHierDataDetail] = useState([]);
   const [listDataAttachment, setListDataAttachment] = useState([]);
+  const [deletedAttachmentIds, setDeletedAttachmentIds] = useState([]);
   const [kirimBody, setKirimBody] = useState({});
   const [bodyError, setBodyError] = useState({});
-  const [loadingForm, setLoadingForm] = useState(loading);
+  const [loadingForm, setLoadingForm] = useState(false);
+  const [loadingSave, setLoadingSave] = useState(false);
   const [ratesId, setRatesId] = useState();
   const [selectedHierarchy, setSelectedHierarchy] = useState();
   const [convertedRate, setConvertedRate] = useState();
@@ -72,7 +106,57 @@ const DailyRateForm = ({ type }) => {
   const [modalConfirm, setModalConfirm] = useState(false);
   const [modalError, setModalError] = useState(false);
 
-  // useeffect
+  const isLoading = loading || loadingForm;
+
+  const handleUpdateAttachment = useCallback((updater) => {
+    setListDataAttachment((prevState) => {
+      const newState =
+        typeof updater === "function" ? updater(prevState) : updater;
+      const removedItems = prevState.filter(
+        (item) => !newState.some((newItem) => newItem.key === item.key),
+      );
+      const removedExistingIds = removedItems
+        .filter((item) => item.dataType === "exist" && item.id)
+        .map((item) => item.id);
+      if (removedExistingIds.length > 0) {
+        setDeletedAttachmentIds((prev) => [...prev, ...removedExistingIds]);
+      }
+      return newState;
+    });
+  }, []);
+
+  // Stepper navigation handlers
+  useEffect(() => {
+    setValuePage(steps[current].value);
+  }, [current]);
+
+  const next = () => {
+    const fieldsToValidate = tabData[current]?.paramValue;
+    if (fieldsToValidate) {
+      form
+        .validateFields(fieldsToValidate)
+        .then(() => {
+          if (current < steps.length - 1) {
+            setCurrent(current + 1);
+          }
+        })
+        .catch((error) => {
+          console.log("Validation failed:", error);
+        });
+    } else {
+      if (current < steps.length - 1) {
+        setCurrent(current + 1);
+      }
+    }
+  };
+
+  const prev = () => {
+    if (current > 0) {
+      setCurrent(current - 1);
+    }
+  };
+
+  // useEffect
   useEffect(() => {
     dispatch(getCurrencyDDL());
     dispatch(getAllApprovalList());
@@ -118,7 +202,7 @@ const DailyRateForm = ({ type }) => {
     }
   }, [dataListAppHierDetail]);
 
-  // filter to curency and from
+  // filter to currency from and to
   const fCurrencyName = data_cur
     ?.filter((a) => a.Id === formValue?.fCurrency)
     ?.find((b) => b.text)?.text;
@@ -132,25 +216,28 @@ const DailyRateForm = ({ type }) => {
   const asserDataDetail = useCallback(
     (data_detail) => {
       const appHier = data_detail?.appHierId || [];
-      const dataAttachment = (data_detail?.mattachments || []).map((item) => {
-        return {
-          id: item.id,
-          size: item.size,
-          fileName: item.fileName,
-          fileSize: item.fileSize,
-          fileType: item.fileType,
-          fileCategoryId: item.fileCategoryId,
-          fileCategoryName: item.fileCategoryName,
-          pathFile: item.pathFile,
-          urlFile1: item.urlFile1,
-          urlFile2: item.urlFile2,
-          createdBy: item.createdBy,
-          createdDate: item.createdDate
-            ? moment(item.createdDate).format("DD MMM YYYY")
-            : "",
-          dataType: "exist",
-        };
-      });
+      const dataAttachment = (data_detail?.mattachments || []).map(
+        (item, index) => {
+          return {
+            key: index + 1,
+            id: item.id,
+            size: item.size,
+            fileName: item.fileName,
+            fileSize: item.fileSize,
+            fileType: item.fileType,
+            fileCategoryId: item.fileCategoryId,
+            fileCategoryName: item.fileCategoryName,
+            pathFile: item.pathFile,
+            urlFile1: item.urlFile1,
+            urlFile2: item.urlFile2,
+            createdBy: item.createdBy,
+            createdDate: item.createdDate
+              ? moment(item.createdDate).format("DD MMM YYYY")
+              : "",
+            dataType: "exist",
+          };
+        },
+      );
       setSelectedHierarchy(appHier);
       setListDataAttachment(dataAttachment);
       form.setFieldsValue({
@@ -167,32 +254,35 @@ const DailyRateForm = ({ type }) => {
         apphierId: appHier,
       });
     },
-    [form]
+    [form],
   );
 
   const asserDataDetailDraft = useCallback(
     (data_detail_draft, data_detail) => {
       const appHier = data_detail_draft?.appHierId || [];
       setSelectedHierarchy(appHier);
-      const dataAttachment = (data_detail?.mattachments || []).map((item) => {
-        return {
-          id: item.id,
-          size: item.size,
-          fileName: item.fileName,
-          fileSize: item.fileSize,
-          fileType: item.fileType,
-          fileCategoryId: item.fileCategoryId,
-          fileCategoryName: item.fileCategoryName,
-          pathFile: item.pathFile,
-          urlFile1: item.urlFile1,
-          urlFile2: item.urlFile2,
-          createdBy: item.createdBy,
-          createdDate: item.createdDate
-            ? moment(item.createdDate).format("DD MMM YYYY")
-            : "",
-          dataType: "exist",
-        };
-      });
+      const dataAttachment = (data_detail?.mattachments || []).map(
+        (item, index) => {
+          return {
+            key: index + 1,
+            id: item.id,
+            size: item.size,
+            fileName: item.fileName,
+            fileSize: item.fileSize,
+            fileType: item.fileType,
+            fileCategoryId: item.fileCategoryId,
+            fileCategoryName: item.fileCategoryName,
+            pathFile: item.pathFile,
+            urlFile1: item.urlFile1,
+            urlFile2: item.urlFile2,
+            createdBy: item.createdBy,
+            createdDate: item.createdDate
+              ? moment(item.createdDate).format("DD MMM YYYY")
+              : "",
+            dataType: "exist",
+          };
+        },
+      );
       setListDataAttachment(dataAttachment);
       form.setFieldsValue({
         id: data_detail_draft?.ratesId,
@@ -208,7 +298,7 @@ const DailyRateForm = ({ type }) => {
         description: data_detail_draft?.description,
       });
     },
-    [form]
+    [form],
   );
 
   useEffect(() => {
@@ -248,26 +338,6 @@ const DailyRateForm = ({ type }) => {
     }
   }, [formValue, appHierOptions, form]);
 
-  //handle Tab
-  const [tabData, setTabData] = useState([
-    {
-      value: "Daily Rate",
-      paramValue: [
-        "rateType",
-        "fCurrency",
-        "tCurrency",
-        "rateDate",
-        "convertedRate",
-      ],
-    },
-    { value: "Approval", paramValue: ["apphierId"] },
-    { value: "Attachment" },
-  ]);
-  const [valuePage, setValuePage] = useState(tabData[0].value);
-  const onChange = (e) => {
-    setValuePage(e.target.value);
-  };
-
   const routes = [
     {
       path: "",
@@ -275,35 +345,29 @@ const DailyRateForm = ({ type }) => {
     },
     {
       path: "",
-      breadcrumbName: "Master Datap",
+      breadcrumbName: "Master Data",
     },
     {
       path: RBI_ROUTES.DAILY_RATE_VIEW,
       breadcrumbName: "Daily Rate",
     },
     {
-      path: RBI_ROUTES.DAILY_RATE_CREATE,
-      breadcrumbName: `${type === "create" ? "Create" : "Update"}`,
+      path:
+        type === "create"
+          ? RBI_ROUTES.DAILY_RATE_CREATE
+          : RBI_ROUTES.DAILY_RATE_UPDATE,
+      breadcrumbName: `${type === "create" ? "Create Daily Rate" : "Update Daily Rate"}`,
     },
   ];
 
-  // Validation Button Back
   const handleBack = () => {
-    if (
-      form.getFieldValue() === null ||
-      Object.keys(form.getFieldValue()).length === 0
-    ) {
-      navigate(-1);
-    } else {
-      setModalBack(true);
-    }
+    setModalBack(true);
   };
 
-  //handle Error Vlaidasi
   const handleMandatory = (
     setListSectionInfo = () => {},
     listDataAttachment,
-    errorFields
+    errorFields,
   ) => {
     setListSectionInfo((prevState) => {
       const res = prevState.map((item) => {
@@ -314,11 +378,11 @@ const DailyRateForm = ({ type }) => {
                   item.paramValue.includes(next.name[0])
                     ? current + 1
                     : current,
-                0
+                0,
               )
             : listDataAttachment.length < 1
-            ? 1
-            : 0;
+              ? 1
+              : 0;
         return {
           value: item.value,
           paramValue: item.paramValue,
@@ -329,12 +393,10 @@ const DailyRateForm = ({ type }) => {
     });
   };
 
-  // Handle Error Tab Form
   const handleError = ({ values, errorFields, outOfDate }) => {
     handleMandatory(setTabData, listDataAttachment, errorFields);
   };
 
-  // process data body
   const processData = ({
     type,
     kirimBody,
@@ -355,7 +417,6 @@ const DailyRateForm = ({ type }) => {
     return body;
   };
 
-  // Validate Data before Modal
   const checkDataValidity = async (formValue) => {
     const url =
       type === "create"
@@ -368,7 +429,7 @@ const DailyRateForm = ({ type }) => {
       fCurrencyName,
       rTypeName,
       tCurrencyName,
-      type
+      type,
     });
 
     try {
@@ -378,7 +439,7 @@ const DailyRateForm = ({ type }) => {
           services: ratingBillingHttpService,
           endPoint: url,
           type: type,
-        })
+        }),
       )?.unwrap();
       return true;
     } catch (error) {
@@ -387,12 +448,14 @@ const DailyRateForm = ({ type }) => {
   };
 
   const handleClear = () => {
+    setCurrent(0);
     if (type === "create") {
       form.resetFields();
       setAppHierDataDetail([]);
       setSelectedHierarchy("");
       setKirimBody({});
       setListDataAttachment([]);
+      setDeletedAttachmentIds([]);
       setTabData([
         {
           value: "Daily Rate",
@@ -409,7 +472,7 @@ const DailyRateForm = ({ type }) => {
       ]);
     } else {
       if (id && data_detail_draft?.ratesId === id) {
-        asserDataDetailDraft(data_detail_draft);
+        asserDataDetailDraft(data_detail_draft, data_detail);
       } else if (
         id &&
         !data_detail_draft?.ratesId &&
@@ -420,13 +483,13 @@ const DailyRateForm = ({ type }) => {
     }
   };
 
-  // handle Save & Submit Form
   const handleSubmitForm = async (formValue) => {
+    const allFormValues = { ...formValue, ...form.getFieldsValue(true) };
     if (listDataAttachment.length === 0) {
       handleMandatory(setTabData, listDataAttachment);
     } else {
       handleMandatory(setTabData, listDataAttachment);
-      if (formValue?.tCurrency === formValue?.fCurrency) {
+      if (allFormValues?.tCurrency === allFormValues?.fCurrency) {
         const errorBody = {
           title: "Failed",
           description: "From currency cannot be the same as to currency!",
@@ -434,15 +497,15 @@ const DailyRateForm = ({ type }) => {
         dispatch(showModalError(errorBody));
       } else {
         const dataValue = {
-          rateType: formValue?.rateType,
-          fromCurrency: formValue?.fCurrency,
-          toCurrency: formValue?.tCurrency,
-          rateDate: moment(formValue?.rateDate).format(
-            dateFormatting.dateCapital
+          rateType: allFormValues?.rateType,
+          fromCurrency: allFormValues?.fCurrency,
+          toCurrency: allFormValues?.tCurrency,
+          rateDate: moment(allFormValues?.rateDate).format(
+            dateFormatting.dateCapital,
           ),
-          convertedRate: formValue?.convertedRate,
-          description: formValue?.description,
-          appHierId: formValue?.apphierId,
+          convertedRate: allFormValues?.convertedRate,
+          description: allFormValues?.description,
+          appHierId: allFormValues?.apphierId,
           submit: typeSubmit,
         };
         const isDataValid = await checkDataValidity(dataValue);
@@ -471,34 +534,20 @@ const DailyRateForm = ({ type }) => {
     }
   };
 
-  //cancle modall
   const handleCancelModalConfirm = () => {
     setModalConfirm(false);
-    // setValue(tabData[0].value);
   };
 
   const handleProcessModalConfirm = async () => {
+    setLoadingSave(true);
     const body = processData({
       kirimBody,
       data_detail,
       fCurrencyName,
       rTypeName,
       tCurrencyName,
-      type
+      type,
     });
-    // const body = {
-    //   ...kirimBody,
-    //   convertedRateName: kirimBody?.convertedRate,
-    // };
-
-    // const bodyUpdate = {
-    //   ...kirimBody,
-    //   fromCurrencyName: fCurrencyName,
-    //   toCurrencyName: tCurrencyName,
-    //   rateTypeName: rTypeName,
-    //   convertedRateName: kirimBody?.convertedRate,
-    // };
-
 
     if (type !== "update") {
       dispatch(createMasterDailyRates(body))
@@ -506,6 +555,12 @@ const DailyRateForm = ({ type }) => {
         .then(async (data) => {
           let dailyRate = data?.id;
           setLoadingForm(true);
+          if (deletedAttachmentIds.length > 0) {
+            await ratingBillingHttpService.deleteDataWithBody(
+              `/v1/dbs/api/attachment/delete-attachment`,
+              { fileId: deletedAttachmentIds },
+            );
+          }
           for (let icon = 0; icon < listDataAttachment.length; icon++) {
             const element = listDataAttachment[icon];
             const body = {
@@ -513,39 +568,43 @@ const DailyRateForm = ({ type }) => {
               refId: dailyRate,
               category: element.fileCategoryId,
             };
-            const response = await ratingBillingHttpService.uploadAttachment(
+            await ratingBillingHttpService.uploadAttachment(
               `/v1/dbs/api/daily-rate/upload-attachment`,
-              body
+              body,
             );
           }
           setLoadingForm(false);
+          setLoadingSave(false);
           setRatesId(dailyRate);
           handleCancelModalConfirm();
           handleClear();
         })
         .catch((error) => {
-          if (Math.floor((error.response.data.code || 0) / 100) === 5) {
+          setLoadingSave(false);
+          if (Math.floor((error.response?.data?.code || 0) / 100) === 5) {
             const message =
               (error.response &&
                 error.response.data &&
                 error.response.data.message) ||
               error.message ||
               error.toString();
-            dispatch(showModalError(message));
+            setBodyError({ message });
+            setModalError(true);
           }
         });
     } else {
-      // const bodys = {
-      //   ...bodyUpdate,
-      //   ratesId: data_detail?.ratesId,
-      // };
-
       dispatch(updateMasterDailyRates(body))
         .unwrap()
         .then(async () => {
           setLoadingForm(true);
+          if (deletedAttachmentIds.length > 0) {
+            await ratingBillingHttpService.deleteDataWithBody(
+              `/v1/dbs/api/attachment/delete-attachment`,
+              { fileId: deletedAttachmentIds },
+            );
+          }
           const filterDataAttach = listDataAttachment.filter(
-            (item) => item.dataType !== "exist"
+            (item) => item.dataType !== "exist",
           );
           for (let icon = 0; icon < filterDataAttach.length; icon++) {
             const element = filterDataAttach[icon];
@@ -554,12 +613,13 @@ const DailyRateForm = ({ type }) => {
               refId: data_detail?.ratesId,
               category: element.fileCategoryId,
             };
-            const response = await ratingBillingHttpService.uploadAttachment(
+            await ratingBillingHttpService.uploadAttachment(
               `/v1/dbs/api/daily-rate/upload-attachment`,
-              body
+              body,
             );
           }
           setLoadingForm(false);
+          setLoadingSave(false);
           setRatesId(ratesId);
           handleCancelModalConfirm();
           form.resetFields();
@@ -567,14 +627,16 @@ const DailyRateForm = ({ type }) => {
           setListDataAttachment([]);
         })
         .catch((error) => {
-          if (Math.floor((error.response.data.code || 0) / 100) === 5) {
+          setLoadingSave(false);
+          if (Math.floor((error.response?.data?.code || 0) / 100) === 5) {
             const message =
               (error.response &&
                 error.response.data &&
                 error.response.data.message) ||
               error.message ||
               error.toString();
-            dispatch(showModalError(message));
+            setBodyError({ message });
+            setModalError(true);
           }
         });
     }
@@ -591,14 +653,31 @@ const DailyRateForm = ({ type }) => {
     setBodyError({});
   };
 
+  const handleSubmit = () => {
+    setTypeSubmit(listTypeSubmit[0]);
+    setTimeout(() => {
+      form.submit();
+    }, 0);
+  };
+
+  const handleSaveDraft = () => {
+    setTypeSubmit(listTypeSubmit[1]);
+    setTimeout(() => {
+      form.submit();
+    }, 0);
+  };
+
   return (
-    <LayoutMenu>
-      <Spin spinning={loading || loadingForm}>
+    <>
+      <Spin spinning={isLoading}>
         <BreadCrumb routes={routes} />
-        <RadioTabs
-          data={tabData}
-          onChange={onChange}
-          currentPosition={valuePage}
+
+        {/* FormStepper menggantikan RadioTabs */}
+        <FormStepper
+          steps={steps}
+          current={current}
+          onPrev={prev}
+          onNext={next}
         />
 
         <Form
@@ -607,11 +686,8 @@ const DailyRateForm = ({ type }) => {
           onFinish={handleSubmitForm}
           onFinishFailed={handleError}
         >
-          <div
-            style={{
-              display: valuePage !== tabData[0].value ? "none" : undefined,
-            }}
-          >
+          {/* Step 1: Daily Rate - Conditional Rendering */}
+          {valuePage === tabData[0].value && (
             <DailyRateCreate
               dataCurrency={data_cur}
               dataRateType={data_rate}
@@ -619,33 +695,27 @@ const DailyRateForm = ({ type }) => {
               convertedRate={convertedRate}
               status={status}
             />
-          </div>
+          )}
 
-          <div
-            style={{
-              display: valuePage !== tabData[1].value ? "none" : undefined,
-            }}
-          >
-            <BaseContainer header={"APPROVAL INFORMATION"}>
+          {/* Step 2: Approval - Conditional Rendering */}
+          {valuePage === tabData[1].value && (
+            <CardContainer header={"APPROVAL INFORMATION"}>
               <ApprovalComponentGeneral
                 dataTable={appHierDataDetail}
                 dataOption={appHierOptions}
                 selectedHierarchy={selectedHierarchy}
                 updateSelectedHierarchy={setSelectedHierarchy}
               />
-            </BaseContainer>
-          </div>
+            </CardContainer>
+          )}
 
-          <div
-            style={{
-              display: valuePage !== tabData[2].value ? "none" : undefined,
-            }}
-          >
-            <BaseContainer header={"ATTCHMENT INFORMATION"}>
+          {/* Step 3: Attachment - Conditional Rendering */}
+          {valuePage === tabData[2].value && (
+            <CardContainer header={"ATTACHMENT INFORMATION"}>
               <AttachmentComponent
                 type={type}
                 data={listDataAttachment}
-                updateData={setListDataAttachment}
+                updateData={handleUpdateAttachment}
                 typeSelector={"daily_rate"}
                 dispatch={dispatch}
                 getAPICategory={getListCategory}
@@ -655,61 +725,24 @@ const DailyRateForm = ({ type }) => {
                 typeRBI={"data"}
                 mandatory={true}
               />
-            </BaseContainer>
-          </div>
+            </CardContainer>
+          )}
 
-          <div className="flex w-full justify-between align-middle my-3">
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => handleBack()}
-              icon={
-                <LeftOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 24,
-                    justifyItems: "center",
-                  }}
-                />
-              }
-            >
-              Back
-            </ButtonComponent>
-            <div className="flex align-middle gap-3">
-              <ButtonComponent
-                icon={
-                  <SVGIcon
-                    name={
-                      type === "update" ? `IconButtonReset` : `IconButtonClear`
-                    }
-                    width={24}
-                  />
-                }
-                type="submit"
-                onClick={handleClear}
-              >
-                {type === "update" ? "Reset" : "Clear"}
-              </ButtonComponent>
-              <ButtonComponent
-                htmlType="submit"
-                type="submit"
-                onClick={() => setTypeSubmit(listTypeSubmit[1])}
-                // disabled={disableSubmit}
-              >
-                Save as Draft
-              </ButtonComponent>
-
-              <ButtonComponent
-                htmlType="submit"
-                type="submit"
-                onClick={() => setTypeSubmit(listTypeSubmit[0])}
-                // disabled={disableSubmit}
-              >
-                Save & Submit
-              </ButtonComponent>
-            </div>
-          </div>
+          {/* FormFooter menggantikan tombol manual */}
+          <FormFooter
+            current={current}
+            totalSteps={steps.length}
+            onPrev={prev}
+            onNext={next}
+            onCancel={handleBack}
+            onClear={handleClear}
+            onSaveDraft={handleSaveDraft}
+            onSubmit={handleSubmit}
+            type={type}
+          />
         </Form>
 
+        {/* Modal Confirmation */}
         <ModalCustom
           isOpen={modalConfirm}
           handleCancel={handleCancelModalConfirm}
@@ -727,6 +760,7 @@ const DailyRateForm = ({ type }) => {
               <ButtonComponent
                 type="submit"
                 onClick={handleProcessModalConfirm}
+                loading={loadingSave}
               >
                 Confirm
               </ButtonComponent>
@@ -745,12 +779,20 @@ const DailyRateForm = ({ type }) => {
           />
         </ModalCustom>
 
-        {/* Modal Back*/}
-        <ModalBack
+        {/* Modal Back */}
+        <ModalConfirm
           isOpen={modalBack}
           handleCancel={() => setModalBack(false)}
           handleOk={() => navigate(-1)}
-        />
+          width={400}
+        >
+          <div className="flex justify-center mt-5 gap-[20px]">
+            <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
+            <p className="text-[18px] font-bold">
+              Are you sure you want to back?
+            </p>
+          </div>
+        </ModalConfirm>
 
         {/* Modal Retry */}
         <ModalError
@@ -765,13 +807,13 @@ const DailyRateForm = ({ type }) => {
               <p className="text-[18px] font-bold">{"Failed"}</p>
             </div>
             <p className="pl-[70px]">{`Your data was not ${
-              typeSubmit === 1 ? "created" : "submitted"
+              typeSubmit ? "submitted" : "created"
             }. ${bodyError.message}.`}</p>
             <p className="pl-[70px]">Please try again.</p>
           </div>
         </ModalError>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

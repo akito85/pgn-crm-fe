@@ -1,6 +1,6 @@
 import React, { useRef, useState } from "react";
 import { columnsReverse } from "./columnForce";
-import TablePaginationNew from "../../../../../../components/TablePaginationNew";
+import TableRBI from "../../../../../../components/TableRBI";
 import { columnsReverseTab } from "./ColumnReverseTab";
 
 const TableReverseFE = ({
@@ -84,7 +84,7 @@ const TableReverseFE = ({
   };
 
   return (
-    <TablePaginationNew
+    <TableRBI
       type={paging}
       // dataSource={paginationTable("data")}
       dataSource={data}
@@ -93,7 +93,8 @@ const TableReverseFE = ({
       current={page}
       pageSize={pageSize}
       tableScrolled={{
-        x: 3000,
+        // x: 3000,
+        x: "max-content",
         y: 525,
       }}
       onChange={paging !== "BE" ? handleChangeSize : handleChangeBE}
@@ -101,21 +102,21 @@ const TableReverseFE = ({
       columns={
         columns === "colReverseTab"
           ? columnsReverseTab(
-              page,
-              pageSize,
-              searchInput,
-              searchedColumn,
-              searchText,
-              paging === "BE" ? handleSearchBE : handleSearch
-            )
+            page,
+            pageSize,
+            searchInput,
+            searchedColumn,
+            searchText,
+            paging === "BE" ? handleSearchBE : handleSearch
+          )
           : columnsReverse(
-              page,
-              pageSize,
-              searchInput,
-              searchedColumn,
-              searchText,
-              paging === "BE" ? handleSearchBE : handleSearch
-            )
+            page,
+            pageSize,
+            searchInput,
+            searchedColumn,
+            searchText,
+            paging === "BE" ? handleSearchBE : handleSearch
+          )
       }
       onSort={paging !== "BE" ? onSort : onSortBE}
       rowSelection={type === 1 ? rowSelection : undefined}

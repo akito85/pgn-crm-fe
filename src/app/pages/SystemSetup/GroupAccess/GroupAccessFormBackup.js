@@ -3,7 +3,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import BaseContainer from "../../../../components/BaseContainer";
 import BreadCrumb from "../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { SYSTEM_SETUP_ROUTES } from "../../../../routes/system_setup/setup_routes";
 import { Form, Select, Space, Spin, Tree } from "antd";
 import SelectComponent from "../../../../components/SelectComponent";
@@ -286,7 +285,7 @@ const GroupAccessForm = (props) => {
 
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading || loading_group_access}>
         <BreadCrumb routes={routes} />
         <Form
@@ -518,7 +517,7 @@ const GroupAccessForm = (props) => {
 
       {/* try again modal */}
       {renderModal()}
-    </LayoutMenu>
+    </>
   );
 };
 export default GroupAccessForm;

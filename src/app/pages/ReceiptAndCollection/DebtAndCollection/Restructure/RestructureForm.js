@@ -1,0 +1,56 @@
+import React, { useState, useEffect } from "react";
+import AccountInfoSection from "./Form/AccountInfoSection";
+import ServiceAgreementSection from "./Form/ServiceAgreementSection";
+import ContactInfoSection from "./Form/ContactInfoSection";
+import PaymentPlanInfoSection from "./Form/PaymentPlanInfoSection";
+import OpenItemInfoSection from "./Form/OpenItemInfoSection";
+import PaymentPlanDetailSection from "./Form/PaymentPlanDetailSection";
+
+const RestructureForm = ({
+    form,
+    listAccount,
+    handleAccountChange,
+    disabled,
+    openItems = [],
+    onContactChange,
+    onPlanDetailValidation,
+    onInstallmentsChange,
+    contactRef
+}) => {
+    const [planInfo, setPlanInfo] = useState({ type: null, tenor: null, startPeriod: null });
+
+    return (
+        <div className="flex flex-col gap-1">
+            <AccountInfoSection 
+                form={form}
+                listAccount={listAccount}
+                handleAccountChange={handleAccountChange}
+                disabled={disabled}
+            />
+            <ServiceAgreementSection 
+                form={form}
+                disabled={disabled}
+            />
+            <ContactInfoSection 
+                onContactsChange={onContactChange} 
+                accountNumber={form.getFieldValue("accountNumber")}
+                ref={contactRef}
+            />
+            <PaymentPlanInfoSection 
+                form={form}
+                disabled={disabled}
+                onPlanInfoChange={setPlanInfo}
+            />
+            <OpenItemInfoSection openItems={openItems} />
+            <PaymentPlanDetailSection 
+                planInfo={planInfo} 
+                openItems={openItems} 
+                onValidationChange={onPlanDetailValidation}
+                onInstallmentsChange={onInstallmentsChange}
+            />
+        </div>
+    );
+};
+
+export default RestructureForm;
+

@@ -5,7 +5,6 @@ import BaseContainer from "../../../../components/BaseContainer";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import GridLayout from "../../../../components/GridLayout";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { USER_ROUTES } from "../../../../routes/user_management/user_routes";
 import SVGIcon from "../../../../assets/Icon/index";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -69,6 +68,11 @@ const EmployeeForm = (props) => {
     return result;
   };
   const [disabledButton, setDisabledButton] = useState(false);
+  // isPreparing guards the Spin in edit mode until the correct employee's detail
+  // AND all lookup data (job, position) are present. Without this guard the shared
+  // Redux `loading` flag collapses the spinner as soon as the first action resolves,
+  // leaving the form visually blank while getEmployeeDetail is still in-flight.
+  const [isPreparing, setIsPreparing] = useState(!!id);
 
   useEffect(() => {
     dispatch(getListEmpType());
@@ -87,7 +91,7 @@ const EmployeeForm = (props) => {
         const job = data_job?.data?.find(itemjob => itemjob?.jobId === item?.jobId);
         jobId = job ? { label: job.jobName, key: job.jobId, value: job.jobId, disabled: job.disabled } : null;
         const position = data_post?.data?.find(itemPosition => itemPosition?.positionId === item?.positionId);
-        positionId = job ? { label: position?.name, key: position?.positionId, value: position?.positionId, disabled: position?.disabled } : null;
+                    positionId = position ? { label: position?.name, key: position?.positionId, value: position?.positionId, disabled: position?.disabled } : null;
       }
       return {
         id: item?.assignId,
@@ -130,11 +134,33 @@ const EmployeeForm = (props) => {
     setPageSize(pageSize);
   };
 
+  // Populate form and assignment table only when the right employee's detail AND
+  // the job/position lookups are all loaded. Without data_job/data_post in the
+  // dependency list, assert() can run before lookups arrive and leave assignment
+  // rows with null job/position values.
   useEffect(() => {
-    if (id) {
+    if (
+      id &&
+      data_detail?.employeeCode === id &&
+      hasValue(data_job?.data) &&
+      hasValue(data_post?.data)
+    ) {
       assert();
     }
-  }, [id, data_detail]);
+  }, [id, data_detail, data_job, data_post]);
+
+  // Clear isPreparing once the correct employee's detail is loaded AND all lookups
+  // are present. Checking employeeCode === id prevents stale Redux data from a
+  // previous edit session from prematurely dismissing the spinner.
+  useEffect(() => {
+    if (!id) return;
+    const allReady =
+      data_detail?.employeeCode === id &&
+      Array.isArray(data_emp?.data) &&
+      Array.isArray(data_job?.data) &&
+      Array.isArray(data_post?.data);
+    if (allReady) setIsPreparing(false);
+  }, [id, data_detail, data_emp, data_job, data_post]);
 
   const dataJob = data_job?.data?.map((item) => {
     return {
@@ -470,8 +496,8 @@ const EmployeeForm = (props) => {
 
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
   return (
-    <LayoutMenu>
-      <Spin spinning={loading || isLoading}>
+    <>
+      <Spin spinning={isPreparing || isLoading}>
         <BreadCrumb routes={routes} />
         <Form form={form} layout={"vertical"} onFinish={handleConfirmation}>
           <BaseContainer
@@ -685,7 +711,7 @@ const EmployeeForm = (props) => {
 
       {/* try again */}
       {renderModal()}
-    </LayoutMenu>
+    </>
   );
 };
 

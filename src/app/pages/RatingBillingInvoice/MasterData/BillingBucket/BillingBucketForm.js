@@ -1,17 +1,18 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Form, Spin } from "antd";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { LeftOutlined } from "@ant-design/icons";
+import { WarningOutlined } from "@ant-design/icons";
 import moment from "moment";
 import BaseContainer from "../../../../../components/BaseContainer";
 import BreadCrumb from "../../../../../components/BreadCrumb";
-import ButtonComponent from "../../../../../components/ButtonComponent";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import SVGIcon from "../../../../../assets/Icon/index";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
 import ratingBillingHttpService from "../../../../../redux/services/ratingBillingHttpService";
-import RadioTabs from "../../../../../components/RadioTabs";
+import {
+  FormStepper,
+  FormFooter,
+} from "../../../../../components/FormStepNavigation";
 import BillingBucketSectionForm from "./Form/BillingBucketSectionForm";
 import { getConfigFileRBIData } from "../../../../../redux/slices/attachmentSlice";
 import { dateFormatting, hasValue } from "../../../../../utils";
@@ -29,14 +30,20 @@ import {
   getAttachmentCategory,
   getDetailBillingBucket,
   getDetailDraftBillingBucket,
+  getBillingBucketCurrency,
+  getBillingBucketCategory,
 } from "../../../../../redux/slices/rating_billing_invoice/MasterData/billingBucket";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
 import { columnsTableCriteriaBillingBucket } from "./Table/TableCriteriaBillingBucket";
 import ModalBack from "../../../../../components/Modal/ModalBack";
 import { configApp } from "../../../../../constants/configApp";
-import { ModalError } from "../../../../../components/Modal/ModalPopUp";
+import {
+  ModalConfirm,
+  ModalError,
+} from "../../../../../components/Modal/ModalPopUp";
 import ConfirmationBillingBucket from "./Modal/ConfirmationBillingBucket";
+import CardContainer from "../../../../../components/CardContainer";
 
 const BillingBucketForm = ({ type }) => {
   // Selector
@@ -50,8 +57,6 @@ const BillingBucketForm = ({ type }) => {
     loading,
   } = useSelector((state) => state.billing_bucket);
 
-
-
   // Declaration
   const [form] = Form.useForm();
   const navigate = useNavigate();
@@ -62,9 +67,11 @@ const BillingBucketForm = ({ type }) => {
   const statusApproval = location?.state?.statusApproval;
 
   // State
+  const [current, setCurrent] = useState(0);
   const [appHierOptions, setAppHierOptions] = useState([]);
   const [appHierDataDetail, setAppHierDataDetail] = useState([]);
   const [listDataAttachment, setListDataAttachment] = useState([]);
+  const [deletedAttachmentIds, setDeletedAttachmentIds] = useState([]);
   const [listDataCriteria, setListDataCriteria] = useState([]);
   const [listDataBI, setListDataBI] = useState([]);
   const [criteriaOptions, setCriteriaOptions] = useState([]);
@@ -74,7 +81,7 @@ const BillingBucketForm = ({ type }) => {
   const [endDate, setEndDate] = useState();
 
   const [flag, setFlag] = useState(false);
-  const [valuePage, setValuePage] = useState("Billing Bucket");
+  const isSubmitRef = useRef(false);
   const [listSectionInfo, setListSectionInfo] = useState([
     {
       value: "Billing Bucket",
@@ -82,6 +89,8 @@ const BillingBucketForm = ({ type }) => {
         "billingBucketCode",
         "name",
         "priorityPeriod",
+        "currency",
+        "category",
         "criteria",
         "startDate",
       ],
@@ -98,16 +107,100 @@ const BillingBucketForm = ({ type }) => {
   const [priority, setPriority] = useState(false);
   const [bodyError, setBodyError] = useState({});
   const [bodyData, setBodyData] = useState({});
-  
-  const isDisabledDate = useMemo(() => {
-    if (hasValue(form?.getFieldsValue()?.endDate) === true && listDataCriteria?.map(item => ({ startDate: item?.startDate, endDate: item?.endDate }))?.length > 0) {
-      return true;
-    } else {
-      return false
-    }
-  }, [form, listDataCriteria]);
+  const [modalIncomplete, setModalIncomplete] = useState({
+    isOpen: false,
+    stepName: "",
+    stepIndex: 0,
+  });
 
-  
+  // Steps configuration
+  const steps = [
+    { title: "BILLING BUCKET", value: "Billing Bucket" },
+    { title: "APPROVAL", value: "Approval" },
+    { title: "ATTACHMENT", value: "Attachment" },
+  ];
+
+  const [valuePage, setValuePage] = useState(steps[0].value);
+
+  useEffect(() => {
+    setValuePage(steps[current].value);
+  }, [current]);
+
+  // Navigation handlers
+  const next = () => {
+    const fieldsToValidate = listSectionInfo[current]?.paramValue;
+    if (fieldsToValidate) {
+      form
+        .validateFields(fieldsToValidate)
+        .then(() => {
+          if (current === 0) {
+            const formData = form.getFieldsValue();
+            if (
+              listDataCriteria.length === 0 &&
+              !formData?.criteria?.includes(24)
+            ) {
+              dispatch(
+                showModalError({
+                  title: "Failed",
+                  description: "Criteria Mandatory. Please insert data.",
+                }),
+              );
+              return;
+            }
+            if (listDataBI.length === 0) {
+              dispatch(
+                showModalError({
+                  title: "Failed",
+                  description:
+                    "Billing Item Detail Mandatory. Please insert data.",
+                }),
+              );
+              return;
+            }
+          }
+          if (current < steps.length - 1) {
+            setCurrent(current + 1);
+            window.scrollTo(0, 0);
+          }
+        })
+        .catch((error) => {
+          console.log("Validation failed:", error);
+        });
+    } else {
+      if (current < steps.length - 1) {
+        setCurrent(current + 1);
+        window.scrollTo(0, 0);
+      }
+    }
+  };
+
+  const prev = () => {
+    if (current > 0) {
+      setCurrent(current - 1);
+      window.scrollTo(0, 0);
+    }
+  };
+
+  const isDisabledDate = useMemo(() => {
+    return listDataCriteria?.length > 0;
+  }, [listDataCriteria]);
+
+  const handleUpdateAttachment = useCallback((updater) => {
+    setListDataAttachment((prevState) => {
+      const newState =
+        typeof updater === "function" ? updater(prevState) : updater;
+      const removedItems = prevState.filter(
+        (item) => !newState.some((newItem) => newItem.key === item.key),
+      );
+      const removedExistingIds = removedItems
+        .filter((item) => item.dataType === "exist" && item.id)
+        .map((item) => item.id);
+      if (removedExistingIds.length > 0) {
+        setDeletedAttachmentIds((prev) => [...prev, ...removedExistingIds]);
+      }
+      return newState;
+    });
+  }, []);
 
   const isLoading = loading || loadingForm;
 
@@ -118,6 +211,8 @@ const BillingBucketForm = ({ type }) => {
     dispatch(getAvailableApproval());
     dispatch(getSelectedApproval());
     dispatch(getListPriorityPeriod());
+    dispatch(getBillingBucketCurrency());
+    dispatch(getBillingBucketCategory());
   }, [dispatch]);
 
   useEffect(() => {
@@ -151,14 +246,13 @@ const BillingBucketForm = ({ type }) => {
           id: item.id,
           key: index + 1,
           billingItem: item.billingItem?.value,
-          currency: item.currency?.value,
+          groups: item.groups,
+          groupSequence: item.groupSequence,
           sequence: item.sequence,
-          startDate: moment(item.startDate).format(dateFormatting.dateFormal),
+          startDate: moment(item.startDate).format(dateFormatting.date),
           endDate: item.endDate
-            ? moment(item.endDate).format(dateFormatting.dateFormal)
+            ? moment(item.endDate).format(dateFormatting.date)
             : null,
-          priority: item.priority,
-          description: item.description,
           type: "exist",
         };
       });
@@ -176,8 +270,9 @@ const BillingBucketForm = ({ type }) => {
 
       // Data Draft Attachment Information
       const dataDraftAttachment = (data_detail?.mattachmentLists || []).map(
-        (item) => {
+        (item, index) => {
           return {
+            key: index + 1,
             id: item.id,
             size: item.size,
             fileName: item.fileName,
@@ -194,7 +289,7 @@ const BillingBucketForm = ({ type }) => {
               : "",
             dataType: "exist",
           };
-        }
+        },
       );
 
       // Data Criteria Information
@@ -229,6 +324,8 @@ const BillingBucketForm = ({ type }) => {
         billingBucketCode: data_detail_draft?.information?.billingBucketCode,
         name: data_detail_draft?.information?.name,
         priorityPeriod: data_detail_draft?.information?.priorityPeriod?.value,
+        currency: data_detail_draft?.information?.currency,
+        category: data_detail_draft?.information?.category,
         startDate: moment(data_detail_draft?.information?.startDate),
         endDate: data_detail_draft?.information?.endDate
           ? moment(data_detail_draft?.information?.endDate)
@@ -239,6 +336,11 @@ const BillingBucketForm = ({ type }) => {
       });
 
       setStartDate(moment(data_detail_draft?.information?.startDate));
+      setEndDate(
+        data_detail_draft?.information?.endDate
+          ? moment(data_detail_draft?.information?.endDate)
+          : undefined,
+      );
       setSelectedHierarchy(data_detail_draft?.information?.apphierId);
       setListDataAttachment(dataDraftAttachment);
       setCriteriaValues(mappingCriteria);
@@ -256,17 +358,16 @@ const BillingBucketForm = ({ type }) => {
             id: item.id,
             key: index + 1,
             billingItem: item.billingItem?.value,
-            currency: item.currency?.value,
+            groups: item.groups,
+            groupSequence: item.groupSequence,
             sequence: item.sequence,
-            startDate: moment(item.startDate).format(dateFormatting.dateFormal),
+            startDate: moment(item.startDate).format(dateFormatting.date),
             endDate: item.endDate
-              ? moment(item.endDate).format(dateFormatting.dateFormal)
+              ? moment(item.endDate).format(dateFormatting.date)
               : null,
-            priority: item.priority,
-            description: item.description,
             type: "exist",
           };
-        }
+        },
       );
 
       // Data Criteria Select
@@ -282,8 +383,9 @@ const BillingBucketForm = ({ type }) => {
 
       // Data Attachment Information
       const dataAttachment = (data_detail?.mattachmentLists || []).map(
-        (item) => {
+        (item, index) => {
           return {
+            key: index + 1,
             id: item.id,
             size: item.size,
             fileName: item.fileName,
@@ -300,7 +402,7 @@ const BillingBucketForm = ({ type }) => {
               : "",
             dataType: "exist",
           };
-        }
+        },
       );
 
       // Data Criteria Information
@@ -336,6 +438,8 @@ const BillingBucketForm = ({ type }) => {
         billingBucketCode: data_detail?.information?.billingBucketCode,
         name: data_detail?.information?.name,
         priorityPeriod: data_detail?.information?.priorityPeriod?.value,
+        currency: data_detail?.information?.currency,
+        category: data_detail?.information?.category,
         startDate: moment(data_detail?.information?.startDate),
         endDate: data_detail?.information?.endDate
           ? moment(data_detail?.information?.endDate)
@@ -346,6 +450,11 @@ const BillingBucketForm = ({ type }) => {
       });
 
       setStartDate(moment(data_detail?.information?.startDate));
+      setEndDate(
+        data_detail?.information?.endDate
+          ? moment(data_detail?.information?.endDate)
+          : undefined,
+      );
       setSelectedHierarchy(data_detail?.information?.apphierId);
       setListDataAttachment(dataAttachment);
       setCriteriaValues(mappingCriteria);
@@ -427,10 +536,10 @@ const BillingBucketForm = ({ type }) => {
       return listDataCriteria?.map((item) => ({
         id: item?.id || null,
         startDate: item.startDate
-          ? moment(item.startDate).format(dateFormatting.dateFormal)
+          ? moment(item.startDate).format("DD MMM YYYY")
           : null,
         endDate: item.endDate
-          ? moment(item.endDate).format(dateFormatting.dateFormal)
+          ? moment(item.endDate).format("DD MMM YYYY")
           : null,
         customer: item.customer?.value || null,
         budget: item.budget?.value || null,
@@ -450,15 +559,18 @@ const BillingBucketForm = ({ type }) => {
     };
 
     // Helper function to map listDataBI
-    const mapListDataBI = (listDataBI, dateFormatting) => {
+    const mapListDataBI = (listDataBI) => {
       return listDataBI?.map((item) => ({
-        ...item,
-        priority: item.priority === undefined ? false : item.priority,
+        id: item.id || null,
+        billingItem: item.billingItem,
+        sequence: item.sequence,
+        groups: item.groups || item.group || null,
+        groupSequence: item.groupSequence || null,
         startDate: item.startDate
-          ? moment(item.startDate).format(dateFormatting.dateFormal)
+          ? moment(item.startDate).format("DD MMM YYYY")
           : null,
         endDate: item.endDate
-          ? moment(item.endDate).format(dateFormatting.dateFormal)
+          ? moment(item.endDate).format("DD MMM YYYY")
           : null,
       }));
     };
@@ -468,9 +580,9 @@ const BillingBucketForm = ({ type }) => {
       bodyData,
       id,
       data_detail,
-      data_detail_draft
+      data_detail_draft,
     ) => {
-      return bodyData?.criteria.map((item) => {
+      return (bodyData?.criteria || []).map((item) => {
         const tempData =
           id && data_detail_draft?.information?.id === id
             ? data_detail_draft?.listCriteria || []
@@ -486,12 +598,12 @@ const BillingBucketForm = ({ type }) => {
     // Helper function to filter criteria
     const getFilteredCriteria = (
       bodyData,
-      columnsTableCriteriaBillingBucket
+      columnsTableCriteriaBillingBucket,
     ) => {
       return columnsTableCriteriaBillingBucket().filter(
         (item) =>
-          !bodyData.criteria.includes(item.indexValue) &&
-          bodyData.criteria.includes(item.indexValue) === 1
+          !(bodyData.criteria || []).includes(item.indexValue) &&
+          (bodyData.criteria || []).includes(item.indexValue) === 1,
       );
     };
 
@@ -508,47 +620,44 @@ const BillingBucketForm = ({ type }) => {
 
     const dataCriteriaObject = mapListDataCriteria(
       listDataCriteria,
-      dateFormatting
+      dateFormatting,
     );
 
-    const dataListBI = mapListDataBI(listDataBI, dateFormatting);
+    const dataListBI = mapListDataBI(listDataBI);
 
     const criteriaArrayObject = mapCriteriaArrayObject(
       bodyData,
       id,
       data_detail,
-      data_detail_draft
+      data_detail_draft,
     );
 
     const filteredCriteria = getFilteredCriteria(
       bodyData,
-      columnsTableCriteriaBillingBucket
+      columnsTableCriteriaBillingBucket,
     );
 
     const updatedDataCriteriaObject = updateDataCriteriaObject(
       dataCriteriaObject,
-      filteredCriteria
+      filteredCriteria,
     );
 
-    const includesAll = bodyData.criteria.includes(24);
+    const includesAll = (bodyData.criteria || []).includes(24);
 
-    dataListBI.map((a) => {
-      return {
-        type: delete a.type,
-        key: delete a.key,
-      };
-    });
+    // listDetail already mapped with correct fields in mapListDataBI
 
     const body = {
       id: type === "create" ? undefined : id,
       billingBucketCode: bodyData.billingBucketCode,
       name: bodyData.name,
       priorityPeriod: bodyData.priorityPeriod,
+      currency: bodyData.currency,
+      category: bodyData.category,
       startDate: bodyData.startDate
-        ? moment(bodyData?.startDate).format(dateFormatting.dateFormal)
+        ? moment(bodyData?.startDate).format("DD MMM YYYY")
         : null,
       endDate: bodyData.endDate
-        ? moment(bodyData?.endDate).format(dateFormatting.dateFormal)
+        ? moment(bodyData?.endDate).format("DD MMM YYYY")
         : null,
       description: bodyData.description ? bodyData.description : null,
       apphierId: bodyData.apphierId,
@@ -590,7 +699,7 @@ const BillingBucketForm = ({ type }) => {
           services: ratingBillingHttpService,
           endPoint: url,
           type: type,
-        })
+        }),
       )?.unwrap();
       return true;
     } catch (error) {
@@ -656,19 +765,19 @@ const BillingBucketForm = ({ type }) => {
     criteriaValues,
     dataCriteria,
     listDataCriteria = [],
-    setMissingColumn = () => { },
-    minimumData = 0
+    setMissingColumn = () => {},
+    minimumData = 0,
   ) => {
     let missingColumn = [];
     const tempArray = criteriaValues.filter((item) =>
-      dataCriteria?.includes(item.value)
+      dataCriteria?.includes(item.value),
     );
     const tempNameCriteria = tempArray.map((data) => data.name);
     listDataCriteria?.map((item) => {
       tempNameCriteria?.forEach((criteriaName) => {
         if (
-          !item[lowerCaseCheckedCriteria(criteriaName)] || //no column
-          !hasValueCriteria(item[lowerCaseCheckedCriteria(criteriaName)]) //no value at object
+          !item[lowerCaseCheckedCriteria(criteriaName)] ||
+          !hasValueCriteria(item[lowerCaseCheckedCriteria(criteriaName)])
         ) {
           missingColumn.push(criteriaName);
         }
@@ -691,38 +800,123 @@ const BillingBucketForm = ({ type }) => {
   // check has overlapping data
   const checkOverlappingData = useCallback((formHeader, dataTable) => {
     const dataOverlap = [];
-    // if (hasValue(formHeader?.endDate)) {
-    dataTable?.forEach(item => {
-      if (moment(item?.startDate) < moment(formHeader?.startDate) || moment(item?.endDate) > moment(formHeader?.endDate)) {
-        dataOverlap?.push(item)
+    dataTable?.forEach((item) => {
+      let isOverlap = false;
+
+      if (
+        moment(item?.startDate).startOf("day") <
+        moment(formHeader?.startDate).startOf("day")
+      ) {
+        isOverlap = true;
+      }
+
+      if (formHeader?.endDate) {
+        if (
+          !item?.endDate ||
+          moment(item?.endDate).startOf("day") >
+            moment(formHeader?.endDate).startOf("day")
+        ) {
+          isOverlap = true;
+        }
+      }
+
+      if (isOverlap) {
+        dataOverlap?.push(item);
       }
     });
 
     if (dataOverlap?.length > 0) {
-      return true
+      return true;
     } else {
-      return false
+      return false;
     }
-    // }
-
   }, []);
 
+  const handleSubmit = () => {
+    isSubmitRef.current = true;
+    setFlag(true);
+    setTimeout(() => {
+      form.submit();
+    }, 0);
+  };
+
+  const handleSaveDraft = () => {
+    isSubmitRef.current = false;
+    setFlag(false);
+    setTimeout(() => {
+      const formValue = form.getFieldsValue();
+      handleSave(formValue);
+    }, 0);
+  };
 
   // Handle Save Form
   const handleSave = async (formValue) => {
+    // Save as draft: hanya wajib billingBucketCode
+    if (!isSubmitRef.current) {
+      try {
+        await form.validateFields(["billingBucketCode"]);
+      } catch {
+        setCurrent(0);
+        setTimeout(() => {
+          form.scrollToField("billingBucketCode", { behavior: "smooth", block: "center" });
+        }, 100);
+        return;
+      }
+      setBodyData({ ...formValue });
+      setModalConfirm(true);
+      setListSectionInfo([
+        {
+          value: "Billing Bucket",
+          paramValue: [
+            "billingBucketCode",
+            "name",
+            "priorityPeriod",
+            "currency",
+            "category",
+            "criteria",
+            "startDate",
+          ],
+        },
+        { value: "Approval", paramValue: ["apphierId"] },
+        { value: "Attachment" },
+      ]);
+      return;
+    }
+
     let errorBody = {};
-    const hasOverlapping = checkOverlappingData({startDate: formValue?.startDate, endDate: formValue?.endDate}, listDataCriteria)
+    const hasOverlappingCriteria = checkOverlappingData(
+      { startDate: formValue?.startDate, endDate: formValue?.endDate },
+      listDataCriteria,
+    );
+    const hasOverlappingBI = checkOverlappingData(
+      { startDate: formValue?.startDate, endDate: formValue?.endDate },
+      listDataBI,
+    );
     if (listDataAttachment.length === 0) {
       handleMandatory(setListSectionInfo, listDataAttachment);
+      setModalIncomplete({
+        isOpen: true,
+        stepName: "ATTACHMENT",
+        stepIndex: 2,
+      });
     } else {
-      handleMandatory(setListSectionInfo, setListSectionInfo);
+      handleMandatory(setListSectionInfo, listDataAttachment);
       if (listDataCriteria.length === 0 && !formValue.criteria.includes(24)) {
+        setCurrent(0);
         errorBody = {
           title: "Failed",
           description: "Criteria Mandatory. Please insert data.",
         };
         dispatch(showModalError(errorBody));
+      } else if (listDataBI.length === 0) {
+        setCurrent(0);
+        errorBody = {
+          title: "Failed",
+          description: "Billing Item Detail Mandatory. Please insert data.",
+        };
+        dispatch(showModalError(errorBody));
       } else if (storedDataInline) {
+        setCurrent(0);
         errorBody = {
           title: "Failed",
           description: `Please save data table inline before submit. Please try again.`,
@@ -733,23 +927,34 @@ const BillingBucketForm = ({ type }) => {
           criteriaOptions,
           formValue?.criteria,
           listDataCriteria,
-          () => { },
-          0
+          () => {},
+          0,
         )
       ) {
+        setCurrent(0);
         const errorBody = {
           title: "Failed",
           description: `There is missing values in table criteria. Please try again`,
         };
         dispatch(showModalError(errorBody));
-      } else if (hasOverlapping) {
+      } else if (hasOverlappingCriteria) {
+        setCurrent(0);
         const errorBody = {
           title: "Failed",
           description: `You can't add Criteria. Start date and end date can't be overlap`,
         };
         dispatch(showModalError(errorBody));
-       } else {
-        const isDataValid = await checkDataValidity(formValue);
+      } else if (hasOverlappingBI) {
+        setCurrent(0);
+        const errorBody = {
+          title: "Failed",
+          description: `You can't add Billing Item Detail. Start date and end date can't be overlap`,
+        };
+        dispatch(showModalError(errorBody));
+      } else {
+        const isDataValid = isSubmitRef.current
+          ? await checkDataValidity(formValue)
+          : true;
 
         if (isDataValid) {
           setBodyData({
@@ -763,6 +968,8 @@ const BillingBucketForm = ({ type }) => {
                 "billingBucketCode",
                 "name",
                 "priorityPeriod",
+                "currency",
+                "category",
                 "criteria",
                 "startDate",
               ],
@@ -779,101 +986,6 @@ const BillingBucketForm = ({ type }) => {
 
   const handleConfirm = () => {
     setModalConfirm(false);
-
-    // let dataListBI = listDataBI.map((item) => {
-    //   return {
-    //     ...item,
-    //     priority: item.priority === undefined ? false : item.priority,
-    //     startDate: item.startDate
-    //       ? moment(item.startDate).format(dateFormatting.dateFormal)
-    //       : null,
-    //     endDate: item.endDate
-    //       ? moment(item.endDate).format(dateFormatting.dateFormal)
-    //       : null,
-    //   };
-    // });
-
-    // let dataCriteriaObject = listDataCriteria.map((item) => {
-    //   return {
-    //     id: item?.id || null,
-    //     startDate: item.startDate
-    //       ? moment(item.startDate).format(dateFormatting.dateFormal)
-    //       : null,
-    //     endDate: item.endDate
-    //       ? moment(item.endDate).format(dateFormatting.dateFormal)
-    //       : null,
-    //     customer: item.customer?.value || null,
-    //     budget: item.budget?.value || null,
-    //     subDistrict: item.subDistrict?.value || null,
-    //     district: item.district?.value || null,
-    //     city: item.city?.value || null,
-    //     province: item.province?.value || null,
-    //     area: item.area?.value || null,
-    //     sor: item.sor?.value || null,
-    //     industrialSector: item.industrialSector?.value || null,
-    //     gsizes: item.gsizes?.value || null,
-    //     customerSegment: item.customerSegment?.value || null,
-    //     accountGroup: item.accountGroup?.value || null,
-    //     serviceType: item.serviceType?.value || null,
-    //     accountCategory: item.accountCategory?.value || null,
-    //   };
-    // });
-
-    // let criteriaArrayObject = bodyData.criteria.map((item) => {
-    //   let tempData =
-    //     id && data_detail_draft?.information?.id === id
-    //       ? data_detail_draft?.listCriteria || []
-    //       : data_detail?.listCriteria || [];
-    //   const temp = tempData?.filter((a) => item === a.criteria);
-    //   return {
-    //     billingBucketCriteriaId: temp[0]?.billingBucketCriteriaId || null,
-    //     criteria: item,
-    //   };
-    // });
-
-    // const filteredCriteria = columnsTableCriteriaBillingBucket().filter(
-    //   (item) =>
-    //     !bodyData.criteria.includes(item.indexValue) &&
-    //     bodyData.criteria.includes(item.indexValue) === 1
-    // );
-
-    // dataCriteriaObject = dataCriteriaObject.map((item) => {
-    //   let obj = { ...item };
-    //   filteredCriteria.forEach((criteria) => {
-    //     obj[criteria.dataIndexForm] = null;
-    //   });
-    //   return obj;
-    // });
-
-    // const includesAll = bodyData.criteria.includes(24);
-
-    // dataListBI.map((a) => {
-    //   return {
-    //     type: delete a.type,
-    //     key: delete a.key,
-    //   };
-    // });
-
-    // const body = {
-    //   id: type === "create" ? undefined : id,
-    //   billingBucketCode: bodyData.billingBucketCode,
-    //   name: bodyData.name,
-    //   priorityPeriod: bodyData.priorityPeriod,
-    //   startDate: bodyData.startDate
-    //     ? moment(bodyData?.startDate).format(dateFormatting.dateFormal)
-    //     : null,
-    //   endDate: bodyData.endDate
-    //     ? moment(bodyData?.endDate).format(dateFormatting.dateFormal)
-    //     : null,
-    //   description: bodyData.description ? bodyData.description : null,
-    //   apphierId: bodyData.apphierId,
-    //   listDetail: dataListBI,
-    //   listCriteria: criteriaArrayObject,
-    //   listCriteriaData: includesAll
-    //     ? [{ allCriteria: true }]
-    //     : dataCriteriaObject,
-    //   isSubmit: flag,
-    // };
 
     const body = processData({
       listDataCriteria,
@@ -894,6 +1006,12 @@ const BillingBucketForm = ({ type }) => {
         .then(async (dataForm) => {
           const billingBucketCode = dataForm?.billingBucketCode;
           setLoadingForm(true);
+          if (deletedAttachmentIds.length > 0) {
+            await ratingBillingHttpService.deleteDataWithBody(
+              `/v1/dbs/api/attachment/delete-attachment`,
+              { fileId: deletedAttachmentIds },
+            );
+          }
           for (let icon = 0; icon < listDataAttachment.length; icon++) {
             const element = listDataAttachment[icon];
             const body = {
@@ -903,7 +1021,7 @@ const BillingBucketForm = ({ type }) => {
             };
             await ratingBillingHttpService.uploadAttachment(
               `/v1/dbs/api/rbi/billing-bucket/create-attachment`,
-              body
+              body,
             );
           }
           setLoadingForm(false);
@@ -929,10 +1047,16 @@ const BillingBucketForm = ({ type }) => {
         .then(async (dataForm) => {
           const billingBucketCode = dataForm.billingBucketCode;
           const filterDataAttach = listDataAttachment.filter(
-            (item) => item.dataType !== "exist"
+            (item) => item.dataType !== "exist",
           );
           setLoadingForm(true);
-          for (let icon = 0; icon < listDataAttachment.length; icon++) {
+          if (deletedAttachmentIds.length > 0) {
+            await ratingBillingHttpService.deleteDataWithBody(
+              `/v1/dbs/api/attachment/delete-attachment`,
+              { fileId: deletedAttachmentIds },
+            );
+          }
+          for (let icon = 0; icon < filterDataAttach.length; icon++) {
             const element = filterDataAttach[icon];
             const body = {
               files: element.file,
@@ -941,7 +1065,7 @@ const BillingBucketForm = ({ type }) => {
             };
             await ratingBillingHttpService.uploadAttachment(
               `/v1/dbs/api/rbi/billing-bucket/create-attachment`,
-              body
+              body,
             );
           }
           setLoadingForm(false);
@@ -964,21 +1088,21 @@ const BillingBucketForm = ({ type }) => {
   };
 
   const handleMandatory = (
-    setListSectionInfo = () => { },
+    setListSectionInfo = () => {},
     listDataAttachment,
-    errorFields
+    errorFields,
   ) => {
     setListSectionInfo((prevState) => {
       const res = prevState.map((item) => {
         const errorBadge =
           item.value !== "Attachment"
             ? (errorFields || []).reduce(
-              (current, next) =>
-                item.paramValue.includes(next.name[0])
-                  ? current + 1
-                  : current,
-              0
-            )
+                (current, next) =>
+                  item.paramValue.includes(next.name[0])
+                    ? current + 1
+                    : current,
+                0,
+              )
             : listDataAttachment.length < 1
               ? 1
               : 0;
@@ -995,14 +1119,31 @@ const BillingBucketForm = ({ type }) => {
   // Handle Error Tab Form
   const handleError = ({ values, errorFields, outOfDate }) => {
     handleMandatory(setListSectionInfo, listDataAttachment, errorFields);
+
+    if (errorFields?.length > 0) {
+      const firstError = errorFields[0].name[0];
+      const stepIndex = listSectionInfo.findIndex((page) =>
+        page.paramValue?.includes(firstError),
+      );
+
+      if (stepIndex !== -1) {
+        setModalIncomplete({
+          isOpen: true,
+          stepName: steps[stepIndex].title,
+          stepIndex: stepIndex,
+        });
+      }
+    }
   };
 
   const handleClear = () => {
+    setCurrent(0);
     if (type === "create") {
       form.resetFields();
       setAppHierDataDetail([]);
       setSelectedHierarchy("");
       setListDataAttachment([]);
+      setDeletedAttachmentIds([]);
       setBodyData({});
       setListDataCriteria([]);
       setCriteriaValues([]);
@@ -1015,6 +1156,8 @@ const BillingBucketForm = ({ type }) => {
             "billingBucketCode",
             "name",
             "priorityPeriod",
+            "currency",
+            "category",
             "criteria",
             "startDate",
           ],
@@ -1043,24 +1186,89 @@ const BillingBucketForm = ({ type }) => {
   const handleStartDate = (value) => {
     form.resetFields(["endDate"]);
     setStartDate(value);
+
+    // Auto adjust details start date
+    if (value) {
+      const newHeaderStart = moment(value);
+      const formattedValue = newHeaderStart.format(dateFormatting.dateFormal);
+
+      if (listDataCriteria?.length > 0) {
+        const adjustedCriteria = listDataCriteria.map((item) => {
+          let newStartDate = item.startDate;
+          if (item.startDate && moment(item.startDate) < newHeaderStart) {
+            newStartDate = formattedValue;
+          }
+          return { ...item, startDate: newStartDate };
+        });
+        setListDataCriteria(adjustedCriteria);
+      }
+
+      if (listDataBI?.length > 0) {
+        const adjustedBI = listDataBI.map((item) => {
+          let newStartDate = item.startDate;
+          if (item.startDate && moment(item.startDate) < newHeaderStart) {
+            newStartDate = formattedValue;
+          }
+          return { ...item, startDate: newStartDate };
+        });
+        setListDataBI(adjustedBI);
+      }
+    }
+
     return value;
   };
 
   // Function Get Data EndDate
   const handleEndDate = (value) => {
     setEndDate(value);
+
+    // Auto adjust details end date
+    if (value) {
+      const newHeaderEnd = moment(value);
+      const formattedValue = newHeaderEnd.format(dateFormatting.dateFormal);
+
+      if (listDataCriteria?.length > 0) {
+        const adjustedCriteria = listDataCriteria.map((item) => {
+          let newEndDate = item.endDate;
+          if (!item.endDate || moment(item.endDate) > newHeaderEnd) {
+            newEndDate = formattedValue;
+          }
+          return { ...item, endDate: newEndDate };
+        });
+        setListDataCriteria(adjustedCriteria);
+      }
+
+      if (listDataBI?.length > 0) {
+        const adjustedBI = listDataBI.map((item) => {
+          let newEndDate = item.endDate;
+          if (!item.endDate || moment(item.endDate) > newHeaderEnd) {
+            newEndDate = formattedValue;
+          }
+          return { ...item, endDate: newEndDate };
+        });
+        setListDataBI(adjustedBI);
+      }
+    }
+
     return value;
   };
 
+  const handleBack = () => {
+    setModalBack(true);
+  };
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={isLoading}>
         <BreadCrumb routes={routes} />
-        <RadioTabs
-          data={listSectionInfo}
-          onChange={(e) => setValuePage(e.target.value)}
-          currentPosition={valuePage}
+
+        {/* FormStepper menggantikan RadioTabs */}
+        <FormStepper
+          steps={steps}
+          current={current}
+          onPrev={prev}
+          onNext={next}
+          disabled={storedDataInline}
         />
 
         <Form
@@ -1070,7 +1278,12 @@ const BillingBucketForm = ({ type }) => {
           onFinishFailed={handleError}
         >
           {/* Billing Bucket Section */}
-          <div className={`${valuePage !== "Billing Bucket" ? "hidden" : ""}`}>
+          <div
+            style={{
+              display:
+                valuePage !== listSectionInfo[0].value ? "none" : undefined,
+            }}
+          >
             <BillingBucketSectionForm
               type={type}
               form={form}
@@ -1094,8 +1307,13 @@ const BillingBucketForm = ({ type }) => {
             />
           </div>
 
-          <div className={valuePage !== "Approval" ? "hidden" : ""}>
-            <BaseContainer header={"Approval Information"}>
+          <div
+            style={{
+              display:
+                valuePage !== listSectionInfo[1].value ? "none" : undefined,
+            }}
+          >
+            <CardContainer header={"Approval Information"}>
               <ApprovalComponentGeneral
                 type={type}
                 dataTable={appHierDataDetail}
@@ -1103,15 +1321,20 @@ const BillingBucketForm = ({ type }) => {
                 selectedHierarchy={selectedHierarchy}
                 updateSelectedHierarchy={setSelectedHierarchy}
               />
-            </BaseContainer>
+            </CardContainer>
           </div>
 
-          <div className={valuePage !== "Attachment" ? "hidden" : ""}>
-            <BaseContainer header={"Attachment Information"}>
+          <div
+            style={{
+              display:
+                valuePage !== listSectionInfo[2].value ? "none" : undefined,
+            }}
+          >
+            <CardContainer header={"Attachment Information"}>
               <AttachmentComponent
                 type={type}
                 data={listDataAttachment}
-                updateData={setListDataAttachment}
+                updateData={handleUpdateAttachment}
                 dispatch={dispatch}
                 getAPICategory={getAttachmentCategory}
                 typeSelector="billing_bucket"
@@ -1121,63 +1344,23 @@ const BillingBucketForm = ({ type }) => {
                 typeRBI={"data"}
                 mandatory={true}
               />
-            </BaseContainer>
+            </CardContainer>
           </div>
 
-          <div className="mt-[30px] flex">
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => setModalBack(true)}
-              icon={
-                <LeftOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 24,
-                    justifyItems: "center",
-                  }}
-                />
-              }
-              disabled={storedDataInline}
-            >
-              Back
-            </ButtonComponent>
-
-            <div className="w-full flex justify-end gap-5">
-              <ButtonComponent
-                disabled={storedDataInline ? true : false}
-                icon={
-                  <SVGIcon
-                    name={
-                      type === "update" ? "IconButtonReset" : "IconButtonClear"
-                    }
-                    width={24}
-                  />
-                }
-                type="submit"
-                onClick={() => {
-                  handleClear();
-                }}
-              >
-                {type === "update" ? "Reset" : "Clear"}
-              </ButtonComponent>
-              <ButtonComponent
-                htmlType="submit"
-                type="submit"
-                onClick={() => setFlag(false)}
-                disabled={storedDataInline}
-              >
-                Save as Draft
-              </ButtonComponent>
-              <ButtonComponent
-                htmlType="submit"
-                type="submit"
-                onClick={() => setFlag(true)}
-                disabled={storedDataInline}
-              >
-                Save & Submit
-              </ButtonComponent>
-            </div>
-          </div>
+          {/* FormFooter menggantikan manual footer buttons */}
+          <FormFooter
+            current={current}
+            totalSteps={steps.length}
+            onPrev={prev}
+            onNext={next}
+            onCancel={handleBack}
+            onClear={handleClear}
+            onSaveDraft={handleSaveDraft}
+            onSubmit={handleSubmit}
+            type={type}
+            disabled={storedDataInline}
+            isLoading={loadingForm}
+          />
         </Form>
 
         {/* Modal Confirmation */}
@@ -1195,14 +1378,23 @@ const BillingBucketForm = ({ type }) => {
           dataOption={appHierOptions}
           handleCancel={() => setModalConfirm(false)}
           handleConfirm={() => handleConfirm()}
+          isLoading={loadingForm}
         />
 
         {/* Modal Back */}
-        <ModalBack
+        <ModalConfirm
           isOpen={modalBack}
           handleCancel={() => setModalBack(false)}
           handleOk={() => navigate(-1)}
-        />
+          width={400}
+        >
+          <div className="flex justify-center mt-5 gap-[20px]">
+            <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
+            <p className="text-[18px] font-bold">
+              Are you sure you want to back?
+            </p>
+          </div>
+        </ModalConfirm>
 
         {/* Modal Retry */}
         <ModalError
@@ -1216,13 +1408,38 @@ const BillingBucketForm = ({ type }) => {
               <SVGIcon name="IconFailed" width={48} />
               <p className="text-[18px] font-bold">{"Failed"}</p>
             </div>
-            <p className="pl-[70px]">{`Your data was not ${flag === 1 ? "created" : "submitted"
-              }. ${bodyError.message}.`}</p>
+            <p className="pl-[70px]">{`Your data was not ${
+              flag === 1 ? "created" : "submitted"
+            }. ${bodyError.message}.`}</p>
             <p className="pl-[70px]">Please try again.</p>
           </div>
         </ModalError>
+
+        {/* Modal Incomplete */}
+        <ModalError
+          isOpen={modalIncomplete.isOpen}
+          handleOk={() => {
+            setCurrent(modalIncomplete.stepIndex);
+            setModalIncomplete({ isOpen: false, stepName: "", stepIndex: 0 });
+          }}
+          handleCancel={() =>
+            setModalIncomplete({ isOpen: false, stepName: "", stepIndex: 0 })
+          }
+          customText="Go to Step"
+        >
+          <div className="px-5 pt-5 pb-[10px] justify-center">
+            <div className="w-full flex gap-[20px]">
+              <SVGIcon name="IconFailed" width={48} />
+              <p className="text-[18px] font-bold">{"Incomplete Data"}</p>
+            </div>
+            <p className="pl-[70px]">
+              Please complete the mandatory fields in the{" "}
+              <b>{modalIncomplete.stepName}</b> section before proceeding.
+            </p>
+          </div>
+        </ModalError>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

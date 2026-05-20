@@ -2,12 +2,12 @@ import React, { Fragment } from "react";
 import moment from "moment";
 import { dateFormatting } from "../../../../../utils";
 import DetailText from "../../../../../components/DetailText";
-import BaseContainer from "../../../../../components/BaseContainer";
 import InvoiceSectionForm from "../Form/InvoiceSectionForm";
 import AdjustmentBillingInfoSection from "./AdjustmentBillingInfoSection";
 import CustomerInfoSection from "./CustomerInfoSection";
 import AdjustmentBISectionForm from "../Form/AdjustmentBISectionForm";
 import { currencyFormatting } from "../../../../../utils/formatCurrency";
+import CardContainer from "../../../../../components/CardContainer";
 
 const ABDInfoSection = ({ data, listDataABI = [] }) => {
   // Sum Total Adjustment IDR
@@ -16,7 +16,7 @@ const ABDInfoSection = ({ data, listDataABI = [] }) => {
     .map((a) => a.adjustmentAmount);
   const sumIDR = dataIDR.reduce(
     (accumulator, currentValue) => accumulator + currentValue,
-    0
+    0,
   );
 
   // Sum Total Adjustment USD
@@ -25,50 +25,47 @@ const ABDInfoSection = ({ data, listDataABI = [] }) => {
     .map((a) => a.adjustmentAmount);
   const sumUSD = dataUSD.reduce(
     (accumulator, currentValue) => accumulator + currentValue,
-    0
+    0,
   );
 
   return (
     <Fragment>
-      <BaseContainer header={"CUSTOMER INFORMATION"}>
+      <CardContainer header={"CUSTOMER INFORMATION"}>
         <CustomerInfoSection data={data} />
-      </BaseContainer>
+      </CardContainer>
 
-      <BaseContainer header={"INVOICE INFORMATION"}>
+      <CardContainer header={"ADJUSTMENT BILLING INFORMATION"}>
+        <AdjustmentBillingInfoSection data={data} />
+      </CardContainer>
+      <CardContainer header={"INVOICE INFORMATION"}>
         <InvoiceSectionForm
           listDataABI={listDataABI}
           type={"detail"}
           data={data?.invoiceInformation}
         />
-      </BaseContainer>
+      </CardContainer>
 
-      <BaseContainer header={"ADJUSTMENT BILLING INFORMATION"}>
-        <AdjustmentBillingInfoSection data={data} />
-      </BaseContainer>
-
-      <BaseContainer header={"Adjustment Billing Item Information"}>
+      <CardContainer header={"Adjustment Billing Item Information"}>
         <AdjustmentBISectionForm
           listDataABI={listDataABI}
-          type="show"
-          showAction={"show"}
-          children={
-            <div className="w-full grid grid-cols-2 gap-4">
-              <DetailText label={"Total Adjustment IDR"}>
-                {sumIDR ? currencyFormatting(sumIDR, "idr") : sumIDR}
-              </DetailText>
-              <DetailText label={"Total Adjustment USD"}>
-                {sumUSD ? currencyFormatting(sumUSD, "idr") : sumUSD}
-              </DetailText>
-            </div>
-          }
+          type="detail"
+          // showAction={"show"}
+          // children={
+          //   <div className="w-full grid grid-cols-2 gap-4">
+          //     <DetailText label={"Total Adjustment IDR"}>
+          //       {sumIDR ? currencyFormatting(sumIDR, "idr") : sumIDR}
+          //     </DetailText>
+          //     <DetailText label={"Total Adjustment USD"}>
+          //       {sumUSD ? currencyFormatting(sumUSD, "idr") : sumUSD}
+          //     </DetailText>
+          //   </div>
+          // }
         />
-      </BaseContainer>
+      </CardContainer>
 
-      <BaseContainer header={"HISTORY LOG INFORMATION"}>
+      <CardContainer header={"HISTORY LOG INFORMATION"}>
         <div className="w-full grid grid-cols-5 gap-3">
-          <DetailText label="Record ID">
-            {data?.id}
-          </DetailText>
+          <DetailText label="Record ID">{data?.id}</DetailText>
           <DetailText label="Created Date">
             {data?.createdDate
               ? moment(data.createdDate).format(dateFormatting.dateTime)
@@ -82,7 +79,7 @@ const ABDInfoSection = ({ data, listDataABI = [] }) => {
           </DetailText>
           <DetailText label="Updated By">{data?.updatedBy}</DetailText>
         </div>
-      </BaseContainer>
+      </CardContainer>
     </Fragment>
   );
 };

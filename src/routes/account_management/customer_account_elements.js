@@ -16,12 +16,13 @@ import PremiseDetail from "../../app/pages/AccountManagement/CustomerAccountDeta
 import ServicePoint from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/ServicePoint/ServicePoint";
 import ServicePointAssetAssign from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/ServicePoint/ServicePointAssetAssign";
 import UpdateAccountInformation from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/AccountInformation/UpdateAccountInformation";
-import RelationshipCreateAndUpdate from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/Relationship/RelationshipCreateAndUpdate";
-import RelationshipDetail from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/Relationship/RelationshipDetail";
+import RelationshipDetail from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/Relationship/Details/RelationshipDetail";
 import ApproveOrRejectTOS from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/ServiceAgreement/DetailServiceAgreement/TosSubmission/ApproveOrRejectTos/ApproveOrRejectTOS";
 import CustomerDetail from "../../app/pages/AccountManagement/Customer/CustomerDetail";
 import UpdateCustomer from "../../app/pages/AccountManagement/Customer/Update/UpdateCustomer";
 import CreateTosSubmission from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/TosSubmission/CreateTosSubmission";
+import CreateWarrantyTerm from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/Warranty/CreateWarrantyTerm";
+import DetailWarrantyTerm from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/Warranty/DetailWarrantyTerm";
 import UpdateServiceAgreement from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/ServiceAgreement/UpdateServiceAgreement";
 import ViewMeterReadingCode from "../../app/pages/SystemSetup/MasterData/MeterReadingCode/ViewMeterReadingCode";
 import FormMeterReadingCode from "../../app/pages/SystemSetup/MasterData/MeterReadingCode/FormMeterReadingCode";
@@ -48,15 +49,21 @@ import GasUtilizationForm from "../../app/pages/AccountManagement/CustomerAccoun
 import EquipmentForm from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/Equipment/Form/EquipmentForm";
 import RawMaterialSourceForm from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/RawMaterialSource/RawMaterialSourceHistory/RawMaterialSourceForm";
 import ProductDistributionForm from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/ProductDistribution/ProductDistributionHistory/ProductDistributionForm";
-import PaymentRelationDetails from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/FinancialInformation/PaymentRelation/Details/PaymentRelationDetails"; 
+import PaymentRelationDetail from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/FinancialInformation/PaymentRelation/Details/PaymentRelationDetail"; 
 import CreateUpdatePaymentRelation from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/FinancialInformation/PaymentRelation/CreateUpdate/CreateUpdatePaymentRelation"
 
-// import CreateCustomerServiceRequest from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/ServiceRequest/Create/CreateCustomerServiceRequest";
-// import CustomerServiceRequestDetails from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/ServiceRequest/Details/CustomerServiceRequestDetails";
-import InvoiceRelationDetails from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/FinancialInformation/InvoiceRelation/Details/InvoiceRelationDetails";
+import CreateCustomerServiceRequest from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/ServiceRequest/Create/CreateCustomerServiceRequest";
+import CustomerServiceRequestDetails from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/ServiceRequest/Details/CustomerServiceRequestDetails";
+import PreRequisiteCreateForm from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/ServiceRequest/Create/StepContents/PreRequisiteForm/Create";
+
+import InvoiceRelationDetail from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/FinancialInformation/InvoiceRelation/Details/InvoiceRelationDetail";
 import CreateUpdateInvoiceRelation from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/FinancialInformation/InvoiceRelation/CreateUpdate/CreateUpdateInvoiceRelation";
-import MultiDestinationDetails from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/MultiDestination/Details/MultiDestinationDetails";
+import MultiDestinationDetail from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/MultiDestination/Details/MultiDestinationDetail";
 import CreateUpdateMultiDestination from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/MultiDestination/CreateUpdate/CreateUpdateMultiDestination";
+import CreateUpdateRelationship from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/Relationship/CreateUpdate/CreateUpdateRelationship";
+import GasDeposit from "../../app/pages/AccountManagement/GasDeposit/GasDeposit";
+import GasDepositDetail from "../../app/pages/AccountManagement/GasDeposit/Detail/GasDepositDetail";
+import RecalculateExpireGasDeposit from "../../app/pages/AccountManagement/GasDeposit/RecalculateExpire/RecalculateExpireGasDeposit";
 
 export const ACCOUNT_MANAGEMENT_ELEMENTS = {
   // Customer/Account List
@@ -103,19 +110,30 @@ export const ACCOUNT_MANAGEMENT_ELEMENTS = {
   UPDATE_ACCOUNT_CONTACT_PAGE: <FormAccountContact type={"update"} />,
 
   // Service Request Detail
-  // VIEW_DETAIL_SERVICE_REQUEST_PAGE: <CustomerServiceRequestDetails />,
-  // CREATE_SERVICE_REQUEST_PAGE: <CreateCustomerServiceRequest />,
+  VIEW_DETAIL_SERVICE_REQUEST_PAGE: <CustomerServiceRequestDetails />,
+  CREATE_SERVICE_REQUEST_PAGE: <CreateCustomerServiceRequest />,
   // UPDATE_SERVICE_REQUEST_PAGE: <UpdateCustomerServiceRequest />,
+  CREATE_SERVICE_REQUEST_PREREQUISITE_PAGE: <PreRequisiteCreateForm />,
 
   // Payment Relation Detail
-  VIEW_DETAIL_PAYMENT_RELATION_PAGE: <PaymentRelationDetails />,
-  CREATE_PAYMENT_RELATION_PAGE: <CreateUpdatePaymentRelation type={"create"} />,
-  UPDATE_PAYMENT_RELATION_PAGE: <CreateUpdatePaymentRelation type={"update"} />,
+  VIEW_DETAIL_PAYMENT_RELATION_PAGE: <PaymentRelationDetail accountType="standard" />,
+  CREATE_PAYMENT_RELATION_PAGE: <CreateUpdatePaymentRelation formType={"create"} accountType={"standard"} />,
+  UPDATE_PAYMENT_RELATION_PAGE: <CreateUpdatePaymentRelation formType={"update"} accountType={"standard"} />,
 
-  // Payment Relation Detail
-  VIEW_DETAIL_INVOICE_RELATION_PAGE: <InvoiceRelationDetails />,
-  CREATE_INVOICE_RELATION_PAGE: <CreateUpdateInvoiceRelation type={"create"} />,
-  UPDATE_INVOICE_RELATION_PAGE: <CreateUpdateInvoiceRelation type={"update"} />,
+  // Payment Relation Account One Time
+  VIEW_DETAIL_PAYMENT_RELATION_ONETIME_PAGE: <PaymentRelationDetail accountType="oneTime" />,
+  CREATE_PAYMENT_RELATION_ONETIME_PAGE: <CreateUpdatePaymentRelation formType={"create"} accountType={"oneTime"} />,
+  UPDATE_PAYMENT_RELATION_ONETIME_PAGE: <CreateUpdatePaymentRelation formType={"update"} accountType={"oneTime"} />,
+
+  // Invoice Relation Account Standard
+  VIEW_DETAIL_INVOICE_RELATION_PAGE: <InvoiceRelationDetail accountType="standard" />,
+  CREATE_INVOICE_RELATION_PAGE: <CreateUpdateInvoiceRelation formType={"create"} accountType={"standard"} />,
+  UPDATE_INVOICE_RELATION_PAGE: <CreateUpdateInvoiceRelation formType={"update"} accountType={"standard"} />,
+
+  // Invoice Relation Account One Time
+  VIEW_DETAIL_INVOICE_RELATION_ONETIME_PAGE: <InvoiceRelationDetail accountType="oneTime" />,
+  CREATE_INVOICE_RELATION_ONETIME_PAGE: <CreateUpdateInvoiceRelation formType={"create"} accountType={"oneTime"} />,
+  UPDATE_INVOICE_RELATION_ONETIME_PAGE: <CreateUpdateInvoiceRelation formType={"update"} accountType={"oneTime"} />,
 
   // Gas Source
   DETAIL_GAS_SOURCE: <DetailGasSource />,
@@ -124,10 +142,37 @@ export const ACCOUNT_MANAGEMENT_ELEMENTS = {
   VIEW_GAS_SOURCE: <ViewGasSource />,
   UPLOAD_GAS_SOURCE: <UploadGasSource />,
 
-  // Multi Destination
-  VIEW_DETAIL_MULTI_DESTINATION_PAGE: <MultiDestinationDetails />,
-  CREATE_MULTI_DESTINATION_PAGE: <CreateUpdateMultiDestination type={"create"} />,
-  UPDATE_MULTI_DESTINATION_PAGE: <CreateUpdateMultiDestination type={"update"} />,
+  // Gas Deposit Stand Alone
+  VIEW_GAS_DEPOSIT_SA_PAGE: <GasDeposit moduleType="sa" />,
+  VIEW_DETAIL_GAS_DEPOSIT_SA_PAGE: <GasDepositDetail moduleType="sa" />,
+  RECALCULATE_GAS_DEPOSIT_SA_PAGE: <RecalculateExpireGasDeposit formType="recalculate" />,
+  EXPIRE_GAS_DEPOSIT_SA_PAGE: <RecalculateExpireGasDeposit formType="expire" />,
+  BULK_RECALCULATE_GAS_DEPOSIT_SA_PAGE: <RecalculateExpireGasDeposit formType="recalculate" isBulk />,
+  BULK_EXPIRE_GAS_DEPOSIT_SA_PAGE: <RecalculateExpireGasDeposit formType="expire" isBulk />,
+  
+  // Gas Deposit Account Standard
+  VIEW_DETAIL_GAS_DEPOSIT_PAGE: <GasDepositDetail moduleType="ua" accountType="standard" />,
+  RECALCULATE_GAS_DEPOSIT_PAGE: <RecalculateExpireGasDeposit formType="recalculate" accountType="standard" />,
+  EXPIRE_GAS_DEPOSIT_PAGE: <RecalculateExpireGasDeposit formType="expire" accountType="standard" />,
+  BULK_RECALCULATE_GAS_DEPOSIT_PAGE: <RecalculateExpireGasDeposit formType="recalculate" accountType="standard" isBulk />,
+  BULK_EXPIRE_GAS_DEPOSIT_PAGE: <RecalculateExpireGasDeposit formType="expire" accountType="standard" isBulk />,
+
+  // Gas Deposit Account One Time
+  VIEW_DETAIL_GAS_DEPOSIT_ONETIME_PAGE: <GasDepositDetail moduleType="ua" accountType="oneTime" />,
+  RECALCULATE_GAS_DEPOSIT_ONETIME_PAGE: <RecalculateExpireGasDeposit formType="recalculate" accountType="oneTime" />,
+  EXPIRE_GAS_DEPOSIT_ONETIME_PAGE: <RecalculateExpireGasDeposit formType="expire" accountType="oneTime" />,
+  BULK_RECALCULATE_GAS_DEPOSIT_ONETIME_PAGE: <RecalculateExpireGasDeposit formType="recalculate" accountType="oneTime" isBulk />,
+  BULK_EXPIRE_GAS_DEPOSIT_ONETIME_PAGE: <RecalculateExpireGasDeposit formType="expire" accountType="oneTime" isBulk />,
+
+  // Multi Destination Account Standard
+  VIEW_DETAIL_MULTI_DESTINATION_PAGE: <MultiDestinationDetail accountType="standard" />,
+  CREATE_MULTI_DESTINATION_PAGE: <CreateUpdateMultiDestination accountType="standard" formType="create" />,
+  UPDATE_MULTI_DESTINATION_PAGE: <CreateUpdateMultiDestination accountType="standard" formType="update" />,
+
+  // Multi Destination Account One Time
+  VIEW_DETAIL_MULTI_DESTINATION_ONETIME_PAGE: <MultiDestinationDetail accountType="oneTime" />,
+  CREATE_MULTI_DESTINATION_ONETIME_PAGE: <CreateUpdateMultiDestination accountType="oneTime" formType="create" />,
+  UPDATE_MULTI_DESTINATION_ONETIME_PAGE: <CreateUpdateMultiDestination accountType="oneTime" formType="update" />,
 
   // Premise
   VIEW_DETAIL_PREMISE_PAGE: <PremiseDetail />,
@@ -139,10 +184,15 @@ export const ACCOUNT_MANAGEMENT_ELEMENTS = {
   //ACCOUNT
   UPDATE_ACCOUNT_STANDARD_PAGE: <UpdateAccountInformation />,
 
-  //RELATIONSHIP
-  CREATE_RELATIONSHIP_PAGE: <RelationshipCreateAndUpdate type={"create"} />,
-  UPDATE_RELATIONSHIP_PAGE: <RelationshipCreateAndUpdate type={"update"} />,
-  DETAIL_RELATIONSHIP_PAGE: <RelationshipDetail />,
+  //RELATIONSHIP ACCOUNT STANDARD
+  CREATE_RELATIONSHIP_PAGE: <CreateUpdateRelationship accountType="standard" formType="create" />,
+  UPDATE_RELATIONSHIP_PAGE: <CreateUpdateRelationship accountType="standard" formType="update" />,
+  DETAIL_RELATIONSHIP_PAGE: <RelationshipDetail accountType="standard" />,
+
+  //RELATIONSHIP ACCOUNT ONE TIME
+  CREATE_RELATIONSHIP_ONETIME_PAGE: <CreateUpdateRelationship accountType="oneTime" formType="create" />,
+  UPDATE_RELATIONSHIP_ONETIME_PAGE: <CreateUpdateRelationship accountType="oneTime" formType="update" />,
+  DETAIL_RELATIONSHIP_ONETIME_PAGE: <RelationshipDetail accountType="oneTime" />,
 
   //SA-APPROVE-REJECT-TOS
   APPROVE_OR_REJECT_TOS_PAGE: <ApproveOrRejectTOS />,
@@ -155,6 +205,11 @@ export const ACCOUNT_MANAGEMENT_ELEMENTS = {
   CREATE_TOS_SUBMISSION_PAGE: <CreateTosSubmission typeForm={"create"} />,
   UPDATE_TOS_SUBMISSION_PAGE: <CreateTosSubmission typeForm={"update"} />,
   DETAIL_TOS_SUBMISSION_PAGE: <ApproveOrRejectTOS />,
+
+  // WARRANTY TERM
+  CREATE_WARRANTY_TERM_PAGE: <CreateWarrantyTerm typeForm={'create'} />,
+  UPDATE_WARRANTY_TERM_PAGE: <CreateWarrantyTerm typeForm={'update'} />,
+  DETAIL_WARRANTY_TERM_PAGE: <DetailWarrantyTerm />,
 
   // RAW MATERIAL SOURCE
   CREATE_RAW_MATERIAL_SOURCE_PAGE: <RawMaterialSourceForm type={"create"}/>,

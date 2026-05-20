@@ -1,5 +1,6 @@
 import ViewReceipt from "../../app/pages/ReceiptAndCollection/Receipt/ViewReceipt";
 import ListDetailReceipt from "../../app/pages/ReceiptAndCollection/Receipt/ListDetailReceipt";
+import CreateAccounting from "../../app/pages/ReceiptAndCollection/Receipt/CreateAccounting";
 import ViewSynchronizeReceipt from "../../app/pages/ReceiptAndCollection/ReceiptReconciliation/SynchronizeReceipt/ViewSynchronizeReceipt";
 import DetailSynchronizeReceipt from "../../app/pages/ReceiptAndCollection/ReceiptReconciliation/SynchronizeReceipt/DetailSynchronizeReceipt";
 import ViewReconcileReceiptHistories from "../../app/pages/ReceiptAndCollection/ReceiptReconciliation/ReconcileReceiptHistories/ViewReconcileReceiptHistories";
@@ -20,12 +21,17 @@ import AccountInformation from "../../app/pages/ReceiptAndCollection/MasterData/
 import ViewLateCharge from "../../app/pages/ReceiptAndCollection/LateChargeManagement/ViewLateCharge";
 import ListRececiptForm from "../../app/pages/ReceiptAndCollection/Receipt/CreateReceipt/ListRececiptForm";
 import ListDetailLateCharge from "../../app/pages/ReceiptAndCollection/LateChargeManagement/DetailLateCharge/ListDetailLateCharge";
+import ListFormLateCharge from "../../app/pages/ReceiptAndCollection/LateChargeManagement/ListFormLateCharge";
 import ViewBridge from "../../app/pages/ReceiptAndCollection/MasterData/Bridge/ViewBridge";
 import ViewInvoice from "../../app/pages/ReceiptAndCollection/MasterData/Invoice/ViewInvoice";
 import ViewPayment from "../../app/pages/ReceiptAndCollection/MasterData/Payment/ViewPayment";
 import ViewTransactionLog from "../../app/pages/ReceiptAndCollection/MasterData/TransactionLog/ViewTransactionLog";
+import ListFormRecalculate from "../../app/pages/ReceiptAndCollection/LateChargeManagement/Recalculate/ListFormRecalculate";
+import ListFormReplace from "../../app/pages/ReceiptAndCollection/LateChargeManagement/Replace/ListFormReplace";
+import ListFormReverse from "../../app/pages/ReceiptAndCollection/LateChargeManagement/Reverse/ListFormReverse";
 
 
+import DetailAccounting from "../../app/pages/ReceiptAndCollection/Receipt/DetailAccounting";
 import ViewPartner from "../../app/pages/ReceiptAndCollection/MasterData/Partner/ViewPartner";
 import ListDetailPartner from "../../app/pages/ReceiptAndCollection/MasterData/Partner/ListDetailPartner";
 import ListFormPartner from "../../app/pages/ReceiptAndCollection/MasterData/Partner/ListFormPartner";
@@ -62,12 +68,45 @@ import ViewTransferToReceipt from "../../app/pages/ReceiptAndCollection/PaymentW
 import ListDetailTransferToReceipt from "../../app/pages/ReceiptAndCollection/PaymentWarranty/TransferToReceipt/ListDetailTransferToReceipt";
 import ListFormTransferToReceipt from "../../app/pages/ReceiptAndCollection/PaymentWarranty/TransferToReceipt/ListFormTransferToReceipt";
 
+import ViewTransferToCustomer from "../../app/pages/ReceiptAndCollection/PaymentWarranty/TransferToCustomer/ViewTransferToCustomer";
+import ListDetailTransferToCustomer from "../../app/pages/ReceiptAndCollection/PaymentWarranty/TransferToCustomer/ListDetailTransferToCustomer";
+import ListFormTransferToCustomer from "../../app/pages/ReceiptAndCollection/PaymentWarranty/TransferToCustomer/ListFormTransferToCustomer";
+
+import ViewWarranty from "../../app/pages/ReceiptAndCollection/PaymentWarranty/Warranty/ViewWarranty";
+import ListDetailWarranty from "../../app/pages/ReceiptAndCollection/PaymentWarranty/Warranty/ListDetailWarranty";
+import ListFormWarranty from "../../app/pages/ReceiptAndCollection/PaymentWarranty/Warranty/ListFormWarranty";
+
+import ListHistoryPaymentWarranty from "../../app/pages/ReceiptAndCollection/PaymentWarranty/History/ListHistoryPaymentWarranty";
+import UploadWarrantyPage from "../../app/pages/ReceiptAndCollection/PaymentWarranty/Warranty/Upload/UploadWarrantyPage";
+
+import ViewGapuraManagement from "../../app/pages/ReceiptAndCollection/GapuraManagement/ViewGapuraManagement";
+import ListDetailGapuraManagement from "../../app/pages/ReceiptAndCollection/GapuraManagement/ListDetailGapuraManagement";
+
+import ViewPaymentWarrantyPartner from "../../app/pages/ReceiptAndCollection/MasterData/PaymentWarrantyPartner/ViewPaymentWarrantyPartner";
+import ListDetailPaymentWarrantyPartner from "../../app/pages/ReceiptAndCollection/MasterData/PaymentWarrantyPartner/ListDetailPaymentWarrantyPartner";
+import ListFormPaymentWarrantyPartner from "../../app/pages/ReceiptAndCollection/MasterData/PaymentWarrantyPartner/ListFormPaymentWarrantyPartner";
+import ViewLiborRate from "../../app/pages/ReceiptAndCollection/MasterData/LiborRate/ViewLiborRate";
+import ListDetailLiborRate from "../../app/pages/ReceiptAndCollection/MasterData/LiborRate/ListDetailLiborRate";
+import ListFormLiborRate from "../../app/pages/ReceiptAndCollection/MasterData/LiborRate/ListFormLiborRate";
+
+import ViewCaCiMapping from "../../app/pages/ReceiptAndCollection/MasterData/CaCiMapping/ViewCaCiMapping";
+import ListDetailCaCiMapping from "../../app/pages/ReceiptAndCollection/MasterData/CaCiMapping/ListDetailCaCiMapping";
+import ListFormCaCiMapping from "../../app/pages/ReceiptAndCollection/MasterData/CaCiMapping/ListFormCaCiMapping";
+
+
+
 export const RECEIPT_AND_COLLECTION_ELEMENTS = {
   // Receipt
   VIEW_RECEIPT_PAGE: <ViewReceipt />,
   DETAIL_RECEIPT_PAGE: <ListDetailReceipt />,
+  APPROVAL_RECEIPT_HOLD: <ListDetailReceipt type="hold" />,
+  APPROVAL_RECEIPT_RELEASE: <ListDetailReceipt type="release" />,
+  APPROVAL_RECEIPT_REFUND: <ListDetailReceipt type="refund" />,
+  APPROVAL_RECEIPT_REVERSE: <ListDetailReceipt type="reverse" />,
   CREATE_RECEIPT: <ListRececiptForm type="create" />,
   UPDATE_RECEIPT: <ListRececiptForm type="update" />,
+  CREATE_ACCOUNTING: <CreateAccounting />,
+  DETAIL_ACCOUNTING: <DetailAccounting />,
 
   // Receipt Reconciliation
 
@@ -115,6 +154,11 @@ export const RECEIPT_AND_COLLECTION_ELEMENTS = {
   //late Charge
   VIEW_LATE_CHARGE: <ViewLateCharge />,
   DETAIL_LATE_CHARGE: <ListDetailLateCharge />,
+  CREATE_LATE_CHARGE: <ListFormLateCharge type="create" />,
+  UPDATE_LATE_CHARGE: <ListFormLateCharge type="update" />,
+  RECALCULATE_LATE_CHARGE: <ListFormRecalculate />,
+  REPLACE_LATE_CHARGE: <ListFormReplace />,
+  REVERSE_LATE_CHARGE: <ListFormReverse />,
 
   // bridge
   VIEW_BRIDGE: <ViewBridge />,
@@ -130,7 +174,7 @@ export const RECEIPT_AND_COLLECTION_ELEMENTS = {
   DETAIL_PARTNER: <ListDetailPartner />,
   CREATE_PARTNER: <ListFormPartner type={"create"} />,
   UPDATE_PARTNER: <ListFormPartner type={"update"} />,
-  
+
   // payment
   VIEW_PAYMENT: <ViewPayment />,
 
@@ -163,7 +207,7 @@ export const RECEIPT_AND_COLLECTION_ELEMENTS = {
   DETAIL_PAYMENT_CHANNEL: <ListDetailPaymentChannel />,
   CREATE_PAYMENT_CHANNEL: <ListFormPaymentChannel type={"create"} />,
   UPDATE_PAYMENT_CHANNEL: <ListFormPaymentChannel type={"update"} />,
-  
+
   // Accounting
   VIEW_ACCOUNTING: <ViewAccounting />,
 
@@ -172,10 +216,46 @@ export const RECEIPT_AND_COLLECTION_ELEMENTS = {
   DETAIL_DEDUCTION: <ListDetailDeduction />,
   CREATE_DEDUCTION: <ListFormDeduction type={"create"} />,
   UPDATE_DEDUCTION: <ListFormDeduction type={"update"} />,
-  
+
   // Transfer to Receipt
   VIEW_TRANSFER_TO_RECEIPT: <ViewTransferToReceipt />,
   DETAIL_TRANSFER_TO_RECEIPT: <ListDetailTransferToReceipt />,
   CREATE_TRANSFER_TO_RECEIPT: <ListFormTransferToReceipt type={"create"} />,
-  UPDATE_TRANSFER_TO_RECEIPT: <ListFormTransferToReceipt type={"update"} />,
+
+  // Transfer to Customer
+  VIEW_TRANSFER_TO_CUSTOMER: <ViewTransferToCustomer />,
+  DETAIL_TRANSFER_TO_CUSTOMER: <ListDetailTransferToCustomer />,
+  CREATE_TRANSFER_TO_CUSTOMER: <ListFormTransferToCustomer type={"create"} />,
+
+  // Transfer to Receipt
+  VIEW_WARRANTY: <ViewWarranty />,
+  DETAIL_WARRANTY: <ListDetailWarranty />,
+  CREATE_WARRANTY: <ListFormWarranty type={"create"} />,
+  UPDATE_WARRANTY: <ListFormWarranty type={"update"} />,
+  UPLOAD_WARRANTY: <UploadWarrantyPage />,
+
+  // History Payment Warranty
+  VIEW_HISTORY_PAYMENT_WARRANTY: <ListHistoryPaymentWarranty />,
+
+  // Gapura Management
+  VIEW_GAPURA_MANAGEMENT_PAGE: <ViewGapuraManagement />,
+  DETAIL_GAPURA_MANAGEMENT_PAGE: <ListDetailGapuraManagement />,
+
+  // Payment Warranty Partner
+  VIEW_PAYMENT_WARRANTY_PARTNER: <ViewPaymentWarrantyPartner />,
+  DETAIL_PAYMENT_WARRANTY_PARTNER: <ListDetailPaymentWarrantyPartner />,
+  CREATE_PAYMENT_WARRANTY_PARTNER: <ListFormPaymentWarrantyPartner type={"create"} />,
+  UPDATE_PAYMENT_WARRANTY_PARTNER: <ListFormPaymentWarrantyPartner type={"update"} />,
+
+  // Libor Rate
+  VIEW_LIBOR_RATE: <ViewLiborRate />,
+  DETAIL_LIBOR_RATE: <ListDetailLiborRate />,
+  CREATE_LIBOR_RATE: <ListFormLiborRate type={"create"} />,
+  UPDATE_LIBOR_RATE: <ListFormLiborRate type={"update"} />,
+
+  // CA CI Mapping
+  VIEW_CA_CI_MAPPING: <ViewCaCiMapping />,
+  DETAIL_CA_CI_MAPPING: <ListDetailCaCiMapping />,
+  CREATE_CA_CI_MAPPING: <ListFormCaCiMapping type={"create"} />,
+  UPDATE_CA_CI_MAPPING: <ListFormCaCiMapping type={"update"} />,
 };

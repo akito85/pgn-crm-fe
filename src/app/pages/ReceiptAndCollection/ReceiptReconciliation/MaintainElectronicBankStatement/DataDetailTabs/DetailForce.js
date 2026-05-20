@@ -15,7 +15,7 @@ import { useDispatch, useSelector } from "react-redux";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import InputComponent from "../../../../../../components/InputComponent";
 import ModalCustom from "../../../../../../components/Modal/ModalCustom";
-import TablePagination from "../../../../../../components/TablePagination";
+import TableRBI from "../../../../../../components/TableRBI";
 import receiptCollectionHttpService from "../../../../../../redux/services/receiptCollectionHttpService";
 import {
   showModalError,
@@ -43,7 +43,7 @@ import AttachmentComponent from "../../../../../../components/Attachment/Attachm
 import { columnsAwalForce } from "./columnForce";
 
 const DetailForce = (props) => {
-  const { data, loading, id, isApprover } = props;
+  const { data, loading, id, isApprover, isSubmitter } = props;
   // Declaration
   const dispatch = useDispatch();
   const searchInput = useRef(null);
@@ -73,7 +73,7 @@ const DetailForce = (props) => {
   const [tableForceSelected, setTableForceSelected] = useState([]);
   const [forceObj, setForceObj] = useState({});
   const [keyTableForceSelected, setKeyTableForceSelected] = useState([]);
-  const [loadingForm, setLoadingForm] = useState(loading);
+  const [loadingForm, setLoadingForm] = useState(false);
   const [modalApproval, setModalApproval] = useState(false);
   const [approveOrReject, setApproveOrReject] = useState("");
   const [showModal, setShowModal] = useState(false);
@@ -646,19 +646,21 @@ const DetailForce = (props) => {
   };
 
   return (
-    <Spin spinning={loadingForm}>
+    <Spin spinning={loading || loadingForm}>
       <div className="my-5">
         <div className="w-full flex justify-end my-5 gap-5">
-          <ButtonComponent
-            //   icon={<SVGIcon name="IconButtonDownload" width={24} />}
-            type="submit"
-            onClick={() => {
-              setModalRequest(true);
-              setShowModal(false);
-            }}
-          >
-            Request
-          </ButtonComponent>
+          {isSubmitter ? (
+            <ButtonComponent
+              //   icon={<SVGIcon name="IconButtonDownload" width={24} />}
+              type="submit"
+              onClick={() => {
+                setModalRequest(true);
+                setShowModal(false);
+              }}
+            >
+              Request
+            </ButtonComponent>
+          ) : null}
 
           {isApprover ? (
             <>
@@ -675,7 +677,7 @@ const DetailForce = (props) => {
           ) : null}
         </div>
 
-        <TablePagination
+        <TableRBI
           dataSource={data?.result}
           columns={columnsAwalForce(
             page,
@@ -693,7 +695,8 @@ const DetailForce = (props) => {
           // onShowSizeChange={handleChange}
           onSort={onSort}
           tableScrolled={{
-            x: 3500,
+            // x: 3500,
+            x: "max-content",
             y: 300,
           }}
         />
@@ -899,7 +902,7 @@ const DetailForce = (props) => {
           </div>
         </ModalCustom>
       </div>
-    </Spin>
+    </Spin >
   );
 };
 

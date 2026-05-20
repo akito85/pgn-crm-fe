@@ -1,181 +1,210 @@
-import { Select, Input,InputNumber } from "antd";
-import { Form } from "antd";
-import BaseContainer from "../../../../../components/BaseContainer";
+import { useEffect } from "react";
+import { Form, Row, Col } from "antd";
+import { useDispatch, useSelector } from "react-redux";
+import CardContainerNoBorder from "../../../../../components/CardContainerNoBorder";
 import { formMessageRequired } from "../../../../../utils";
-import InputComponent from "../../../../../components/InputComponent";
-import moment from "moment";
-import { useDispatch } from "react-redux";
-import { useLocation, useNavigate } from "react-router-dom";
-import DateComponent from "../../../../../components/DateComponent";
 import SelectComponent from "../../../../../components/SelectComponent";
+import DateComponent from "../../../../../components/DateComponent";
+import InputComponent from "../../../../../components/InputComponent";
+import ButtonComponent from "../../../../../components/ButtonComponent";
+import { getDDLDeductionPeriod, getListFromCustomer } from "../../../../../redux/slices/receipt_collection/transferToReceipt";
+import { TRANSFER_CATEGORY_RECEIPT } from "../../../../../constants/transferToReceipt";
 
-const SettingsForm = (props) => {
-  const {
-    dataType,
-    form,
-  } = props;
+import SubSectionCard from "../../../../../components/SubSectionCard";
 
-  const dispatch = useDispatch();
-  const location = useLocation();
-  const navigate = useNavigate();
-  const id = location?.state?.id;
+const TransferToReceiptForm = ({ form, onSearchWarranty }) => {
+    const dispatch = useDispatch();
+    const { ddlDeductionPeriod, listFromCustomer } = useSelector((state) => state.transferToReceipt);
 
-  const disabledDate = (current) => {
-    if (
-      form.getFieldValue("effStartDate") === undefined ||
-      form.getFieldValue("effStartDate") === null
-    ) {
-      return current && current < moment().add(-1, "days");
-    } else {
-      return current && current < moment(form.getFieldValue("effStartDate"));
-    }
-  };
+    useEffect(() => {
+        dispatch(getDDLDeductionPeriod());
+        dispatch(getListFromCustomer());
+    }, [dispatch]);
 
-  const handleStartDate = (date) => {
-    if (!date) {
-      form.setFieldsValue({
-        endDate: null,
-      });
-    }
-  };
+    const handleFromCustomerChange = (value) => {
+        const selected = listFromCustomer.find(item => item.customerNumber === value);
+        if (selected) {
+            form.setFieldsValue({
+                fromCustomerName: selected.customerName,
+                areaCode: selected.costCenter,
+            });
+        }
+    };
 
-  // const disableStartDate = (current) => {
-  //   return moment().add(-2, "days") >= current;
-  //   //  current && current < moment().startOf("month");
-  // };
-  const disabledStartDate = (current) => {
-    // const today = moment();
-    // const startDate = today.clone().startOf("month");
-    // const endDate = today.clone().endOf("month");
-    // return current < startDate || current > endDate;
-    return false
-  };
+    return (
+        <div className="flex flex-col gap-8">
+            {/* SECTION 1: TRANSFER TO RECEIPT INFORMATION */}
+            <CardContainerNoBorder 
+                header={"TRANSFER TO RECEIPT INFORMATION"}
+                collapsible={true}
+            >
+                <div className="mx-2 mb-4 mt-4">
+                    <SubSectionCard>
+                        <Row gutter={[24, 0]}>
+                            <Col span={6}>
+                                <Form.Item
+                                    label="From Customer Number"
+                                    name="fromCustomerId"
+                                    rules={formMessageRequired("From Customer Number")}
+                                >
+                                    <SelectComponent
+                                        placeholder="Select From Customer Number"
+                                        options={listFromCustomer.map(item => ({ label: item.customerNumber, value: item.customerNumber }))}
+                                        onChange={handleFromCustomerChange}
+                                    />
+                                </Form.Item>
+                            </Col>
+                            <Col span={6}>
+                                <Form.Item
+                                    label="From Customer Name"
+                                    name="fromCustomerName"
+                                >
+                                    <InputComponent disabled />
+                                </Form.Item>
+                            </Col>
+                            <Col span={6}>
+                                <Form.Item
+                                    label="Area Code"
+                                    name="areaCode"
+                                >
+                                    <InputComponent disabled />
+                                </Form.Item>
+                            </Col>
+                            <Col span={6}>
+                                <Form.Item
+                                    label="Category"
+                                    name="category"
+                                    rules={formMessageRequired("Category")}
+                                >
+                                    <SelectComponent
+                                        placeholder="Select category"
+                                        options={TRANSFER_CATEGORY_RECEIPT}
+                                    />
+                                </Form.Item>
+                            </Col>
+                            <Col span={24}>
+                                <Form.Item
+                                    label="Description"
+                                    name="description"
+                                    rules={formMessageRequired("Description")}
+                                >
+                                    <InputComponent
+                                        type="textarea"
+                                        placeholder="Type..."
+                                        rows={4}
+                                    />
+                                </Form.Item>
+                            </Col>
+                        </Row>
+                    </SubSectionCard>
+                </div>
+            </CardContainerNoBorder>
 
-  return (
-    <div>
-      <BaseContainer header={"DEDUCTION"}>
-        <div className="w-full grid grid-cols-2 gap-5">
-          <Form.Item
-            label={"Partner Code"}
-            name={"partnerCode"}
-            rules={formMessageRequired("Partner Code")}
-          >
-            <Input allowClear maxLength={11} />
-          </Form.Item>
+            {/* SECTION 2: GUARANTEE INFORMATION */}
+            <CardContainerNoBorder 
+                collapsible={true}
+                header="GUARANTEE INFORMATION"
+            >
+                <div className="flex flex-col gap-4 mt-2">
+                    <div className="flex justify-end pr-2">
+                        <ButtonComponent type="primary" onClick={onSearchWarranty}>
+                            Search Guarantee
+                        </ButtonComponent>
+                    </div>
+                    
+                    <div className="mx-2 mb-4">
+                        <SubSectionCard>
+                            <div className="grid grid-cols-4 gap-x-6 gap-y-4">
+                                {/* Row 1 */}
+                                <Form.Item label="Payment Guarantee Code" name="paymentWarrantyCode">
+                                    <InputComponent placeholder="Type Payment Guarantee Code" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
+                                </Form.Item>
+                                <Form.Item label="Cost Center" name="warrantyAreaCode">
+                                    <InputComponent placeholder="Type Cost Center" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
+                                </Form.Item>
+                                <Form.Item label="Account Number" name="accountNumber">
+                                    <InputComponent placeholder="Type Account Number" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
+                                </Form.Item>
+                                <Form.Item label="Account Name" name="accountName">
+                                    <InputComponent placeholder="Type Account Name" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
+                                </Form.Item>
 
-          <Form.Item
-            label={"Collection Agent Code"}
-            name={"caCode"}
-            rules={formMessageRequired("CA Code")}
-          >
-            <Input allowClear maxLength={10} />
-          </Form.Item>
+                                {/* Row 2 */}
+                                <Form.Item label="Customer Number" name="customerId">
+                                    <InputComponent placeholder="Type Customer Number" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
+                                </Form.Item>
+                                <Form.Item label="Customer Name" name="customerName">
+                                    <InputComponent placeholder="Type Customer Name" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
+                                </Form.Item>
+                                <Form.Item label="Customer Segment" name="customerSegment">
+                                    <InputComponent placeholder="Type Customer Segment" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
+                                </Form.Item>
+                                <Form.Item label="Customer Group" name="customerGroup">
+                                    <InputComponent placeholder="Type Customer Group" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
+                                </Form.Item>
 
-          <Form.Item
-            label={"Payment Channel Code"}
-            name={"ciCode"}
-          >
-            <Input allowClear maxLength={10} />
-          </Form.Item>
+                                {/* Row 3 */}
+                                <Form.Item label="Type" name="type">
+                                    <InputComponent placeholder="Type..." disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
+                                </Form.Item>
+                                <Form.Item label="Document Number" name="documentNumber">
+                                    <InputComponent placeholder="Type Document Number" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
+                                </Form.Item>
+                                <Form.Item label="Document Date" name="mutationDate">
+                                    <DateComponent placeholder="Select Mutation Date" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
+                                </Form.Item>
+                                <Form.Item label="Issuer" name="publisher">
+                                    <InputComponent placeholder="Type Issuer" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
+                                </Form.Item>
 
-          <Form.Item
-            label={"Date Start"}
-            name={"dateStart"}
-            rules={formMessageRequired("Date Start")}
-          >
-            <InputNumber
-              type="number"
-              controls={false}
-              style={{ width: "100%" }}
-            />
-          </Form.Item>
+                                {/* Row 4 */}
+                                <Form.Item label="Issuer Branch" name="issuerBranch">
+                                    <InputComponent placeholder="Type Issuer Branch" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
+                                </Form.Item>
+                                <Form.Item label="Currency" name="currency">
+                                    <InputComponent placeholder="Type Currency" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
+                                </Form.Item>
+                                <Form.Item label="Balance Amount" name="balance">
+                                    <InputComponent placeholder="Type Balance Amount" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
+                                </Form.Item>
+                                <Form.Item label="Rate Type" name="rateType">
+                                    <InputComponent placeholder="Type Rate Type" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
+                                </Form.Item>
 
-          <Form.Item
-            label={"Date End"}
-            name={"dateEnd"}
-            rules={formMessageRequired("Date End")}
-          >
-            <InputNumber
-              type="number"
-              controls={false}
-              style={{ width: "100%" }}
-            />
-          </Form.Item>
+                                {/* Row 5 */}
+                                <Form.Item label="Rate Date" name="rateDate">
+                                    <DateComponent placeholder="Select Rate Date" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
+                                </Form.Item>
+                                <Form.Item label="Rate" name="rate">
+                                    <InputComponent placeholder="Type Rate" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
+                                </Form.Item>
+                                <Form.Item label="EQV Balance Amount" name="equivalent">
+                                    <InputComponent placeholder="Type EQV Balance Amount" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
+                                </Form.Item>
+                                <Form.Item label="Reff. Start Date" name="effectiveDate">
+                                    <DateComponent placeholder="Select Reff. Start Date" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
+                                </Form.Item>
 
-          <Form.Item
-            label={"Hour Start"}
-            name={"hourStart"}
-            rules={formMessageRequired("Hour Start")}
-          >
-            <InputNumber
-              type="number"
-              controls={false}
-              min={0}
-              max={23}
-              style={{ width: "100%" }}
-            />
-          </Form.Item>
-
-          <Form.Item
-            label={"Hour End"}
-            name={"hourEnd"}
-            rules={formMessageRequired("Hour End")}
-          >
-            <InputNumber
-              type="number"
-              controls={false}
-              min={0}
-              max={23}
-              style={{ width: "100%" }}
-            />
-          </Form.Item>
-
-          <Form.Item
-            label={"Minute Start"}
-            name={"minuteStart"}
-            rules={formMessageRequired("Minute Start")}
-          >
-            <InputNumber
-              type="number"
-              controls={false}
-              min={0}
-              max={59}
-              style={{ width: "100%" }}
-            />
-          </Form.Item>
-
-          <Form.Item
-            label={"Minute End"}
-            name={"minuteEnd"}
-            rules={formMessageRequired("Minute End")}
-          >
-            <InputNumber
-              type="number"
-              controls={false}
-              min={0}
-              max={59}
-              style={{ width: "100%" }}
-            />
-          </Form.Item>
-
-          <Form.Item
-            label={"Type"}
-            name={"type"}
-            rules={formMessageRequired("Type")}
-          >
-            <SelectComponent>
-              {dataType?.data?.map((data) => (
-                <Select.Option key={data.name} value={data.name}>
-                  {data.name}
-                </Select.Option>
-              ))}
-            </SelectComponent>
-          </Form.Item>
+                                {/* Row 6 */}
+                                <Form.Item label="Reff. End Date" name="expiringDate">
+                                    <DateComponent placeholder="Select Reff. End Date" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
+                                </Form.Item>
+                                <Form.Item label="Claim Period" name="endDateClaim">
+                                    <DateComponent placeholder="Select Claim Period" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
+                                </Form.Item>
+                                <Form.Item label="Account Type" name="accountType">
+                                    <InputComponent placeholder="Type Account Type" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
+                                </Form.Item>
+                                <Form.Item label="Classification Type" name="classificationType">
+                                    <InputComponent placeholder="Type Classification Type" disabled className="!border-[#D9D9D9] !bg-[#F0F2F5] !rounded-lg" />
+                                </Form.Item>
+                            </div>
+                        </SubSectionCard>
+                    </div>
+                </div>
+            </CardContainerNoBorder>
         </div>
-        
-      </BaseContainer>
-    </div>
-  );
+    );
 };
 
-export default SettingsForm;
+export default TransferToReceiptForm;

@@ -1,19 +1,19 @@
 import moment from "moment";
-import { Spin, Form } from "antd";
-import { LeftOutlined } from "@ant-design/icons";
+import { Spin, Tabs } from "antd";
 import React, { useEffect, useState } from "react";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../../components/BreadCrumb";
-import RadioTabs from "../../../../../components/RadioTabs";
 import BillingItemDetailInformation from "./Detail/BillingItemDetailInformation";
-import BaseContainer from "../../../../../components/BaseContainer";
+import CardContainer from "../../../../../components/CardContainer";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
+  approvalActivatedBillingItem,
   approvalInactiveBillingItem,
   approvalRejectBillingItem,
   getBillingItemDetail,
-  getDetailDraft,
+  getBillingItemTypeList,
+  getBillingItemCriteriaList,
+  getAttachmentDetail,
 } from "../../../../../redux/slices/rating_billing_invoice/billingItem";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
@@ -27,156 +27,86 @@ import { renderDateTime } from "./Utils/Utils";
 import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrReject";
 
 const BillingItemDetail = () => {
-  const { data_BillingItemDetail, data_detailDraft, loading, message } =
-    useSelector((state) => state.billing_item);
+  const {
+    data_BillingItemDetail,
+    data_typeList,
+    data_criteriaList,
+    loading,
+    loadingDetail,
+  } = useSelector((state) => state.billing_item);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const dataRecord = useLocation().state?.id;
-  const [form] = Form.useForm();
 
-  const [valuePage, setValuePage] = useState("Billing Item");
+  const [valueTab, setValueTab] = useState("BillingItem");
   const [approveOrReject, setApproveOrReject] = useState("");
-  const [remark, setRemark] = useState("");
-
   const [modalError, setModalError] = useState(false);
   const [modalConfirm, setModalConfirm] = useState(false);
-  // const [modalErrorServer, setModalErrorServer] = useState(false);
 
   const [dataMapping, setDataMapping] = useState([]);
   const [listDataAttachment, setListDataAttachment] = useState([]);
-
-  const [dataDraft, setDataDraft] = useState({});
-  const [dataMappingDraft, setDataMappingDraft] = useState({});
-
   const [bodyError, setBodyError] = useState({});
-
-  const [billingItemDetail, setBillingItemDetail] = useState([
-    { value: "Billing Item" },
-    { value: "Attachment" },
-  ]);
-
   const [showButtonApproval, setShowButtonApproval] = useState(false);
 
   useEffect(() => {
     if (dataRecord) {
       dispatch(getBillingItemDetail({ id: dataRecord }));
-      dispatch(getDetailDraft({ id: dataRecord }));
+      dispatch(getAttachmentDetail(dataRecord))
+        .unwrap()
+        .then((res) => {
+          setListDataAttachment(
+            (res?.result || []).map((item) => ({
+              ...item,
+              createdDate: item.createdDate
+                ? moment(item.createdDate).format("DD MMM YYYY")
+                : "",
+              urlFile1: `/v1/dbs/api/billingitem/attachment-download/${item.id}`,
+              dataType: "exist",
+            })),
+          );
+        })
+        .catch(() => {
+           // Handle error if needed or silently ignore
+        });
     }
+    dispatch(getBillingItemTypeList());
+    dispatch(getBillingItemCriteriaList());
   }, [dispatch, dataRecord]);
 
   useEffect(() => {
-    if (dataRecord && data_BillingItemDetail && data_BillingItemDetail?.billingItemCode === dataRecord) {
+    if (
+      dataRecord &&
+      data_BillingItemDetail &&
+      (data_BillingItemDetail?.billingItemCode === dataRecord ||
+        data_BillingItemDetail?.id == dataRecord)
+    ) {
+      // Tombol Approve/Reject
       setShowButtonApproval(
         (data_BillingItemDetail.statusApproval === "WAITING APPROVAL" ||
           data_BillingItemDetail.statusApproval === "WAITING_APPROVAL") &&
-          data_BillingItemDetail?.approvalDto?.isApprover
+        data_BillingItemDetail?.approvalDto?.isApprover,
       );
 
       // Mapping Information
       setDataMapping(
-        (data_BillingItemDetail?.mappingInformation || [])?.map((item) => {
-          return {
-            ...item,
-            categoryName: item.category,
-            startDate: item.startDate ? moment(item.startDate) : "",
-            endDate: item.endDate ? moment(item.endDate) : "",
-            dataType: "exist",
-          };
-        })
+        (data_BillingItemDetail?.mappingInformation || []).map((item) => ({
+          ...item,
+          categoryName: item.category,
+          startDate: item.startDate ? moment(item.startDate) : "",
+          endDate: item.endDate ? moment(item.endDate) : "",
+          dataType: "exist",
+        })),
       );
 
-      // Attachment Information
-      setListDataAttachment(
-        (data_BillingItemDetail?.attachmentDtoList || []).map((item) => {
-          return {
-            ...item,
-            createdDate: item.createdBy
-              ? moment(item.createdDate).format("DD MMM YYYY")
-              : "",
-            dataType: "exist",
-          };
-        })
-      );
-
-      if (
-        // dataRecord &&
-        // data_BillingItemDetail &&
-        data_detailDraft &&
-        data_detailDraft?.billingItemCode === data_BillingItemDetail?.billingItemCode &&
-        data_detailDraft?.billingItemCode === dataRecord &&
-        (data_BillingItemDetail?.statusApproval !== "APPROVED")
-        //   data_BillingItemDetail?.approvalDto?.approvalType !== "INACTIVE_BILLING_ITEM")
-      ) {
-        // Mapping Information
-        const dataMappingInfoDraft = (
-          data_detailDraft?.mappingInformation || []
-        )?.map((item) => {
-          return {
-            ...item,
-            categoryName: item.category,
-            startDate: item.startDate ? moment(item.startDate) : "",
-            endDate: item.endDate ? moment(item.endDate) : "",
-            dataType: "exist",
-          };
-        });
-
-        setDataDraft((prev) => {
-          return {
-            id: data_BillingItemDetail?.id,
-            billingItemCode: data_BillingItemDetail?.billingItemCode, // for detail draft from detail
-            billingItemCategory: data_detailDraft.billingItemCategory,
-            billingItemName: data_detailDraft.billingItemName,
-            billingType: data_detailDraft.billingType,
-            startDate: data_detailDraft.startDate,
-            endDate: data_detailDraft.endDate,
-            lateCharge: data_detailDraft.lateCharge,
-            paymentWarranty: data_detailDraft.paymentWarranty,
-            description: data_detailDraft.description,
-            createdBy: data_BillingItemDetail?.createdBy,
-            createdDate: data_BillingItemDetail.createdDate,
-            updatedBy: data_BillingItemDetail.updatedBy,
-            updatedDate: data_BillingItemDetail.updatedDate,
-            status: data_BillingItemDetail?.status,// for detail draft from detail
-            statusApproval: data_BillingItemDetail?.statusApproval,// for detail draft from detail
-            mappingInformation: data_detailDraft?.mappingInformation?.map(
-              (item) => {
-                return {
-                  ...item,
-                  categoryId: item.categoryId,
-                  // detailMappingInfo : item.detailMappingInfo
-                };
-              }
-            ),
-          };
-        });
-        setDataMappingDraft(dataMappingInfoDraft);
-        setBillingItemDetail([
-          { value: "Billing Item" },
-          { value: "Draft" },
-          { value: "Attachment" },
-        ]);
-      }
     }
-  }, [dataRecord, data_BillingItemDetail, data_detailDraft]);
+  }, [dataRecord, data_BillingItemDetail]);
 
   const routes = [
-    {
-      path: "",
-      breadcrumbName: "System Setup",
-    },
-    {
-      path: "",
-      breadcrumbName: "Master Data",
-    },
-    {
-      path: RBI_ROUTES.BILLING_ITEM_VIEW,
-      breadcrumbName: "Billing Item",
-    },
-    {
-      path: "",
-      breadcrumbName: "Detail Billing Item",
-    },
+    { path: "", breadcrumbName: "System Setup" },
+    { path: "", breadcrumbName: "Master Data" },
+    { path: RBI_ROUTES.BILLING_ITEM_VIEW, breadcrumbName: "Transaction Mapping" },
+    { path: "", breadcrumbName: "Detail Transaction Mapping" },
   ];
 
   const handleRetry = () => {
@@ -191,13 +121,10 @@ const BillingItemDetail = () => {
   };
 
   const handleCancel = () => {
-    setRemark("");
-    form.resetFields();
     setModalConfirm(false);
   };
 
-  // handle Confirm
-  const handleConfirm = (e, handleClear = () => {}) => {
+  const handleConfirm = (e, handleClear = () => { }) => {
     const body = {
       id: data_BillingItemDetail?.id,
       remark: e?.remark,
@@ -205,15 +132,20 @@ const BillingItemDetail = () => {
       action: approveOrReject.toUpperCase(),
     };
 
-    dispatch(
-      data_BillingItemDetail?.approvalDto?.approvalType?.includes("INACTIVE")
-        ? approvalInactiveBillingItem(body)
-        : approvalRejectBillingItem(body)
-    )
+    const approvalType =
+      data_BillingItemDetail?.approvalDto?.approvalType?.toUpperCase() || "";
+    const approvalAction = approvalType.includes("INACTIVE")
+      ? approvalInactiveBillingItem(body)
+      : approvalType.includes("ACTIVATED")
+        ? approvalActivatedBillingItem(body)
+        : approvalRejectBillingItem(body);
+
+    dispatch(approvalAction)
       .unwrap()
-      .then(async (data) => {
+      .then(() => {
         handleClear();
         handleCancel();
+        dispatch(getBillingItemDetail({ id: dataRecord }));
       })
       .catch((error) => {
         if (Math.floor((error.response.data.code || 0) / 100) === 5) {
@@ -230,27 +162,27 @@ const BillingItemDetail = () => {
     setModalConfirm(false);
   };
 
-  const renderSection = () => {
-    switch (valuePage) {
-      case "Billing Item":
-        return (
+  const tabItems = [
+    {
+      key: "BillingItem",
+      label: "Transaction Mapping",
+      children: (
+        <div className="my-0">
           <BillingItemDetailInformation
             dataMapping={dataMapping}
-            key={"Detail"}
             dataBillingItem={data_BillingItemDetail}
+            data_typeList={data_typeList || []}
+            data_criteriaList={data_criteriaList || []}
           />
-        );
-      case "Draft":
-        return (
-          <BillingItemDetailInformation
-            dataBillingItem={dataDraft}
-            key={"Draft"}
-            dataMapping={dataMappingDraft}
-          />
-        );
-      case "Attachment":
-        return (
-          <BaseContainer header={"ATTACHMENT INFORMATION"}>
+        </div>
+      ),
+    },
+    {
+      key: "Attachment",
+      label: "Attachment",
+      children: (
+        <div className="my-0">
+          <CardContainer header="ATTACHMENT INFORMATION">
             <AttachmentComponent
               typeSelector={"billing_item"}
               data={listDataAttachment}
@@ -259,67 +191,69 @@ const BillingItemDetail = () => {
               service={ratingBillingHttpService}
               configApplication={configApp.RATING_BILLING_SERVICE}
             />
-          </BaseContainer>
-        );
-      default:
-        return <></>;
-    }
-  };
+          </CardContainer>
+        </div>
+      ),
+    },
+  ];
 
   return (
-    <LayoutMenu>
-      <Spin spinning={loading}>
+    <>
+      <Spin spinning={loading || loadingDetail}>
         <BreadCrumb routes={routes} />
-        {data_BillingItemDetail?.approvalDto?.approvalType?.includes(
-          "INACTIVE"
-        ) && data_BillingItemDetail?.approvalDto?.isApprover ? (
-          <div className="mt-5">
-            <BaseContainer header={"Inactive Request Information"}>
-              <div className="w-full grid grid-cols-4 gap-5">
-                <DetailText label="Requested Date">
-                  {renderDateTime(
-                    data_BillingItemDetail?.approvalDto?.requestedDate
-                  )}
-                </DetailText>
-                <DetailText label="Requested By">
-                  {data_BillingItemDetail?.approvalDto?.requestedBy}
-                </DetailText>
-                <DetailText label="Remark">
-                  {data_BillingItemDetail?.approvalDto?.remark}
-                </DetailText>
-              </div>
-            </BaseContainer>
-          </div>
-        ) : null}
+        {(data_BillingItemDetail?.approvalDto?.approvalType?.includes(
+          "INACTIVE",
+        ) ||
+          data_BillingItemDetail?.approvalDto?.approvalType?.includes(
+            "ACTIVATED",
+          )) &&
+          data_BillingItemDetail?.approvalDto?.isApprover && (
+            <div className="mt-5">
+              <CardContainer
+                header={
+                  data_BillingItemDetail?.approvalDto?.approvalType?.includes(
+                    "ACTIVATED",
+                  )
+                    ? "Activate Request Information"
+                    : "Inactive Request Information"
+                }
+              >
+                <div className="w-full grid grid-cols-4 gap-5">
+                  <DetailText label="Requested Date">
+                    {renderDateTime(
+                      data_BillingItemDetail?.approvalDto?.requestedDate,
+                    )}
+                  </DetailText>
+                  <DetailText label="Requested By">
+                    {data_BillingItemDetail?.approvalDto?.requestedBy}
+                  </DetailText>
+                  <DetailText label="Remark">
+                    {data_BillingItemDetail?.approvalDto?.remark}
+                  </DetailText>
+                </div>
+              </CardContainer>
+            </div>
+          )}
+
         <div className="mt-5">
-          <RadioTabs
-            data={billingItemDetail}
-            onChange={(e) => setValuePage(e.target.value)}
-            currentPosition={valuePage}
+          <Tabs
+            items={tabItems}
+            onChange={(key) => setValueTab(key)}
+            activeKey={valueTab}
+            tabBarStyle={{ marginBottom: 0 }}
           />
         </div>
-        <div className={"w-full"}>{renderSection()}</div>
-        <div className={"w-full flex justify-between my-10"}>
-          <div className=" flex">
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => navigate(-1)}
-              icon={
-                <LeftOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 24,
-                    justifyItems: "center",
-                  }}
-                />
-              }
-            >
+
+        {/* Footer: Back & Approve/Reject buttons */}
+        <div className="w-full flex justify-between my-2 shadow-md bg-white p-1 rounded-md">
+          <div className="flex w-full bg-white p-3 rounded-md">
+            <ButtonComponent type="submit" onClick={() => navigate(-1)}>
               Back
             </ButtonComponent>
           </div>
 
-          {showButtonApproval ? (
-            <div className={"w-full flex justify-end gap-5"}>
+          {showButtonApproval && (
+            <div className="w-full flex justify-end gap-5 p-3">
               <ButtonComponent
                 type="reject"
                 onClick={() => {
@@ -339,44 +273,24 @@ const BillingItemDetail = () => {
                 Approve
               </ButtonComponent>
             </div>
-          ) : null}
+          )}
         </div>
       </Spin>
 
-      {/* Modal Approve/Reject*/}
-      {modalConfirm ? (
+      {/* Modal Approve/Reject */}
+      {modalConfirm && (
         <ModalApproveOrReject
           isOpen={modalConfirm}
           handleCloseModal={handleCancel}
           onFinish={handleConfirm}
           header={approveOrReject}
           approveOrReject={approveOrReject}
-          menu={"Billing Item"}
-          named={`${data_BillingItemDetail.billingItemName}`}
+          menu={"Transaction Mapping"}
+          named={`${data_BillingItemDetail?.billingItemName || ""}`}
         />
-      ) : null}
+      )}
 
-      {/* <ModalApproveOrRejectBillingItem
-        isOpen={modalConfirm}
-        header={approveOrReject}
-        approveOrReject={approveOrReject}
-        handleCancel={() => handleCancel()}
-        handleConfirm={() => handleConfirm()}
-        remark={remark}
-        onChange={(e) => setRemark(e.target.value)}
-        form={form}
-      /> */}
-
-      {/* Modal Error Approve/Reject
-      <ModalErrorApproveOrRejectBillingItem
-        isOpen={modalError}
-        handleOk={() => setModalError(false)}
-        handleCancel={() => setModalError(false)}
-        approveOrReject={approveOrReject}
-        message={message}
-      /> */}
-
-      {/* Modal Retry */}
+      {/* Modal Error */}
       <ModalError
         isOpen={modalError}
         handleOk={handleRetry}
@@ -388,13 +302,13 @@ const BillingItemDetail = () => {
             <SVGIcon name="IconFailed" width={48} />
             <p className="text-[18px] font-bold">{"Failed"}</p>
           </div>
-          <p className="pl-[70px]">{`Your data was not ${
-            approveOrReject === "Approve" ? "Approved" : "Rejected"
-          }. ${bodyError.message}.`}</p>
+          <p className="pl-[70px]">{`Your data was not ${approveOrReject === "Approve" ? "Approved" : "Rejected"
+            }. ${bodyError.message || ""}.`}</p>
           <p className="pl-[70px]">Please try again.</p>
         </div>
       </ModalError>
-    </LayoutMenu>
+    </>
   );
 };
+
 export default BillingItemDetail;

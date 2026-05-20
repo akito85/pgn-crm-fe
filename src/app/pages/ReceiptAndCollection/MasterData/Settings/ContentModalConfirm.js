@@ -1,10 +1,11 @@
 import moment from "moment";
-import { Fragment, useState } from "react";
+import { useState } from "react";
+import { Tabs } from "antd";
+import { UpOutlined, DownOutlined } from "@ant-design/icons";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
 import DetailText from "../../../../../components/DetailText";
-import RadioTabs from "../../../../../components/RadioTabs";
-import { dateFormatting } from "../../../../../utils";
 import AttachmentSectionForm from "../../../ProductAndPromo/Pricing/Form/AttachmentSectionForm";
+import { dateFormatting } from "../../../../../utils";
 
 const ContentModalConfirm = ({
   data,
@@ -13,93 +14,106 @@ const ContentModalConfirm = ({
   tabData = [],
   dataOption,
   selectedHierarchy,
+  dataMappingList,
 }) => {
   const [valuePage, setValuePage] = useState(tabData[0].value);
+  const [expanded, setExpanded] = useState(true);
 
-  console.log("data in content modal confirm: ", data);
+  const mappingLabel = (() => {
+    const found = (dataMappingList?.data || []).find((p) => p.id === data?.mappingId);
+    return found ? found.name : data?.mappingId;
+  })();
 
-  const showSection = () => {
-    switch (valuePage) {
-      case tabData[0].value:
-        return (
-          <div className="grid grid-cols-2 w-full">
-            <DetailText label={"Date Start"}>
-              {data?.dateStart}
-            </DetailText>
+  const items = [
+    {
+      key: tabData[0].value,
+      label: tabData[0].value,
+      children: (
+        <div className="p-5 bg-[#f8f7fa] min-h-[200px]">
+          <div className="border border-[#dbdade] rounded-lg p-4 bg-white">
+            <div
+              className="flex justify-between items-center cursor-pointer mb-4"
+              onClick={() => setExpanded(!expanded)}
+            >
+              <div className="text-[#0075bf] text-sm font-semibold uppercase">
+                PAYMENT CHANNEL CONFIGURATION INFORMATION
+              </div>
+              <div>{expanded ? <UpOutlined /> : <DownOutlined />}</div>
+            </div>
+            {expanded && (
+              <div className="grid grid-cols-4 gap-y-4 gap-x-2 w-full">
+                <DetailText label={"CA CI Mapping Name"}>{mappingLabel}</DetailText>
+                
+                <DetailText label={"Start Date"}>
+                  {data?.startDate
+                    ? moment(data.startDate, dateFormatting.date).format(dateFormatting.date)
+                    : ""}
+                </DetailText>
+                <DetailText label={"End Date"}>
+                  {data?.endDate
+                    ? moment(data.endDate, dateFormatting.date).format(dateFormatting.date)
+                    : ""}
+                </DetailText>
 
-            <DetailText label={"Date End"}>
-              {data?.dateEnd}
-            </DetailText>
-
-            <DetailText label={"Hour Start"}>
-              {data?.hourStart}
-            </DetailText>
-
-            <DetailText label={"Hour End"}>
-              {data?.hourEnd}
-            </DetailText>
-
-            <DetailText label={"Minute Start"}>
-              {data?.minuteStart}
-            </DetailText>
-
-            <DetailText label={"Minute End"}>
-              {data?.minuteEnd}
-            </DetailText>
-
-            <DetailText label={"CA Code"}>
-              {data?.caCode}
-            </DetailText>
-
-
-            <DetailText label={"Partner Code"}>
-              {data?.partnerCode}
-            </DetailText>
-
-            <DetailText label={"CI Code"}>
-              {data?.ciCode}
-            </DetailText>
-
-            <DetailText label={"Type"}>
-              {data?.type}
-            </DetailText>
+                <DetailText label={"Start Time"}>
+                  {data?.startHour ? `${data.startHour}:${data.startMinute}` : ""}
+                </DetailText>
+                <DetailText label={"End Time"}>
+                  {data?.endHour ? `${data.endHour}:${data.endMinute}` : ""}
+                </DetailText>
+              </div>
+            )}
           </div>
-        );
-      case tabData[1].value:
-        return (
-          <ApprovalComponentGeneral
-            showSelect={false}
-            disableSelect={true}
-            approvalName={
-              (dataOption || []).filter(
-                (data) => data.value === selectedHierarchy
-              )?.[0].name || ""
-            }
-            dataTable={listDataAppHierDetail}
-            selectedHierarchy
-          />
-        );
-      case tabData[2].value:
-        return (
-          <AttachmentSectionForm type={"preview"} data={listDataAttachment} />
-        );
-      default:
-        return <Fragment></Fragment>;
-    }
-  };
-  const handleMethod = (e) => {
-    setValuePage(e.target.value);
-  };
+        </div>
+      ),
+    },
+    {
+      key: tabData[1].value,
+      label: tabData[1].value,
+      children: (
+        <div className="p-5 bg-[#f8f7fa] min-h-[200px]">
+          <div className="border border-[#dbdade] rounded-lg p-4 bg-white">
+            <ApprovalComponentGeneral
+              showSelect={false}
+              disableSelect={true}
+              approvalName={
+                (dataOption || []).find((opt) => opt.value === selectedHierarchy)?.name || ""
+              }
+              dataTable={listDataAppHierDetail}
+              selectedHierarchy={selectedHierarchy}
+            />
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: tabData[2].value,
+      label: tabData[2].value,
+      children: (
+        <div className="p-5 bg-[#f8f7fa] min-h-[200px]">
+          <div className="border border-[#dbdade] rounded-lg p-4 bg-white">
+            <AttachmentSectionForm type={"preview"} data={listDataAttachment} />
+          </div>
+        </div>
+      ),
+    },
+  ];
 
   return (
-    <div className="flex flex-col gap-4">
-      <RadioTabs data={tabData} onChange={handleMethod} />
-      <div className="flex flex-col gap-4">
-        <div className="text-primary text-xs font-bold uppercase">
-          {`${valuePage} INFORMATION`}
-        </div>
-        {showSection()}
-      </div>
+    <div className="flex flex-col gap-0 -mt-4 -mx-4 -mb-4 bg-white">
+      <Tabs
+        defaultActiveKey={tabData[0].value}
+        activeKey={valuePage}
+        onChange={(key) => setValuePage(key)}
+        items={items}
+        className="custom-confirm-tabs"
+        tabBarStyle={{
+          paddingLeft: "16px",
+          paddingRight: "16px",
+          marginBottom: 0,
+          borderBottom: "1px solid #dbdade",
+        }}
+      />
     </div>
   );
 };

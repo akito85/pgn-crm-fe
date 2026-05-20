@@ -1,5 +1,4 @@
 import  { useEffect, useRef, useState } from "react";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import { Spin } from "antd";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
@@ -21,7 +20,11 @@ import {
 const routes = [
   {
     path: "",
-    breadcrumbName: "Receipt & Collection",
+    breadcrumbName: "System Setup",
+  },
+  {
+    path: "",
+    breadcrumbName: "Master Data",
   },
   {
     path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_BRIDGE,
@@ -120,7 +123,7 @@ const ViewBridge = () => {
 
   
   return (
-    <LayoutMenu>
+    <>
       <Spin
         spinning={loading || false}
         className={"w-full top-20"}
@@ -140,7 +143,7 @@ const ViewBridge = () => {
               totalData={totalElements}
               current={page}
               pageSize={pageSize}
-              tableScrolled={{ y: 525, x: 1500 }}
+              tableScrolled={{ y: "max-content", x: 1500 }}
               onChange={handleChangeSize}
               handleDownload={handleDownload}
               onSort={onSort}
@@ -168,7 +171,7 @@ const ViewBridge = () => {
         </div>
         
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

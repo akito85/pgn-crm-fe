@@ -1,18 +1,14 @@
-import {
-  LeftOutlined,
-  WarningOutlined,
-} from "@ant-design/icons";
-import { Form,Spin } from "antd";
+import { WarningOutlined } from "@ant-design/icons";
+import { Form, Spin } from "antd";
 import moment from "moment";
-import  { useEffect,  useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import RadioTabs from "../../../../../components/RadioTabs";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
+import { FormStepper, FormFooter } from "../../../../../components/FormStepNavigation";
 import {
-  getTypeDDL,
   createPartner,
   createValidasiPartner,
   getAllApprovalList,
@@ -20,13 +16,14 @@ import {
   getListApprovalById,
   getListCategory,
   updatePartner,
+  saveDraftPartner,
+  getDetailDraftPartner,
 } from "../../../../../redux/slices/receipt_collection/partner";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import { dateFormatting } from "../../../../../utils";
 import PartnerForm from "./PartnerForm";
-import SVGIcon from "../../../../../assets/Icon/index";
 import { ModalConfirm } from "../../../../../components/Modal/ModalPopUp";
-import BaseContainer from "../../../../../components/BaseContainer";
+import CardContainer from "../../../../../components/CardContainer";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import ContentModalConfirm from "./ContentModalConfirm";
 import receiptCollectionHttpService from "../../../../../redux/services/receiptCollectionHttpService";
@@ -39,6 +36,12 @@ import ApprovalComponentGeneral from "../../../../../components/Approval/Approva
 import { configApp } from "../../../../../constants/configApp";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 
+const steps = [
+  { title: "CREATE", value: "Partner" },
+  { title: "APPROVAL", value: "Approval" },
+  { title: "ATTACHMENT", value: "Attachment" },
+];
+
 const ListFormPartner = (props) => {
   const { type } = props;
   const {
@@ -46,7 +49,6 @@ const ListFormPartner = (props) => {
     dataListAppHierId,
     dataListAppHierDetail,
     loading,
-    dataType,
   } = useSelector((state) => state.partner);
 
   // Declaration
@@ -55,7 +57,7 @@ const ListFormPartner = (props) => {
   const [form] = Form.useForm();
   const formValue = form.getFieldsValue();
   const location = useLocation();
-  const { id } = location?.state || {};
+  const { id, status } = location?.state || {};
   const [listDataAttachment, setListDataAttachment] = useState([]);
   const [selectedHierarchy, setSelectedHierarchy] = useState();
   const [modalConfirm, setModalConfirm] = useState(false);
@@ -63,25 +65,28 @@ const ListFormPartner = (props) => {
   const [appHierOptions, setAppHierOptions] = useState([]);
   const [appHierDataDetail, setAppHierDataDetail] = useState([]);
   const [loadingForm, setLoadingForm] = useState(loading);
+  const [loadingSave, setLoadingSave] = useState(false);
+  const [current, setCurrent] = useState(0);
 
-  
 
-  
 
-  
+
 
   useEffect(() => {
     if (id && type === "update") {
-      dispatch(getDetailPartner(id));
+      if (status === "Draft") {
+        dispatch(getDetailDraftPartner(id));
+      } else {
+        dispatch(getDetailPartner(id));
+      }
     }
-  }, [dispatch, id, type]);
+  }, [dispatch, id, type, status]);
 
 
- 
+
 
   useEffect(() => {
     dispatch(getAllApprovalList());
-    dispatch(getTypeDDL());
   }, [dispatch]);
 
   useEffect(() => {
@@ -93,7 +98,7 @@ const ListFormPartner = (props) => {
       setAppHierOptions(tempAppHier);
     }
   }, [dataListAppHierId]);
-  
+
   useEffect(() => {
     if (selectedHierarchy && selectedHierarchy !== 0) {
       dispatch(getListApprovalById({ id: selectedHierarchy }));
@@ -129,7 +134,7 @@ const ListFormPartner = (props) => {
   }, [formValue, appHierOptions, form]);
 
   useEffect(() => {
-    if (id  && data_detail) {
+    if (id && data_detail) {
 
       form.setFieldsValue({
         id: data_detail?.partner.id,
@@ -144,8 +149,7 @@ const ListFormPartner = (props) => {
             ? ""
             : moment(data_detail?.partner?.effEndDate).clone(),
         tokenExpirationTime: data_detail?.partner?.tokenExpirationTime,
-        seckeySignature: data_detail?.partner?.secKeySignature,
-        type: data_detail?.partner?.type,
+        secKeySignature: data_detail?.partner?.secKeySignature,
         apphierId: data_detail?.partner?.appHierId,
       });
 
@@ -159,27 +163,55 @@ const ListFormPartner = (props) => {
         }))
       );
     }
-  }, [data_detail, id]);
+  }, [data_detail, id, form]);
 
   // Define tabData before using it in useState
 
   const [tabData, setTabData] = useState([
-    { value: "Partner", paramValue: ["partnerCode", 
-                                      "partnerName",
-                                      "effStartDate",
-                                      "effEndDate",
-                                      "tokenExpirationTime",
-                                      "secKeySignature",
-                                      "type"
-                                     ] },
+    {
+      value: "Partner", paramValue: ["partnerCode",
+        "partnerName",
+        "effStartDate",
+        "effEndDate",
+        "tokenExpirationTime",
+        "secKeySignature",
+      ]
+    },
     { value: "Approval", paramValue: ["apphierId"] },
     { value: "Attachment" },
   ]);
 
-  const [valuePage, setValuePage] = useState(tabData[0].value);
+  const [valuePage, setValuePage] = useState(steps[0].value);
   const [sendBody, setSendBody] = useState();
-  const onChange = (e) => {
-    setValuePage(e.target.value);
+
+  useEffect(() => {
+    setValuePage(steps[current].value);
+  }, [current]);
+
+  const next = () => {
+    const fieldsToValidate = tabData[current]?.paramValue;
+    if (fieldsToValidate) {
+      form
+        .validateFields(fieldsToValidate)
+        .then(() => {
+          if (current < steps.length - 1) {
+            setCurrent(current + 1);
+          }
+        })
+        .catch((error) => {
+          console.log("Validation failed:", error);
+        });
+    } else {
+      if (current < steps.length - 1) {
+        setCurrent(current + 1);
+      }
+    }
+  };
+
+  const prev = () => {
+    if (current > 0) {
+      setCurrent(current - 1);
+    }
   };
 
   useEffect(() => {
@@ -191,55 +223,71 @@ const ListFormPartner = (props) => {
       setSelectedHierarchy(null);
     }
   }, [formValue, appHierOptions, form]);
-
-  
-
   const handleSubmitForm = (formValue) => {
-      const dataValue = {
-        // partnerId: id,
-        partnerCode: formValue.partnerCode,
-        partnerName: formValue.partnerName,
-        type: formValue.type,
-        tokenExpirationTime: formValue.tokenExpirationTime,
-        seckeySignature: formValue.secKeySignature,
-        effStartDate: moment(formValue.effStartDate).format(dateFormatting.date),
-        effEndDate: formValue.effEndDate
-          ? moment(formValue.endDate).format(dateFormatting.date)
-          : null,
-        apphierId: formValue.apphierId,
-      };
+    const dataValue = {
+      // partnerId: id,
+      partnerCode: formValue.partnerCode,
+      partnerName: formValue.partnerName,
+      tokenExpirationTime: formValue.tokenExpirationTime,
+      seckeySignature: formValue.secKeySignature,
+      effStartDate: moment(formValue.effStartDate).format(dateFormatting.date),
+      effEndDate: formValue.effEndDate
+        ? moment(formValue.effEndDate).format(dateFormatting.date)
+        : null,
+      apphierId: formValue.apphierId,
+    };
 
-      setSendBody(dataValue);
-      const bodyValidasiUpdate = {
-        ...dataValue,
-        id: data_detail?.partner?.id,
-      };
-      if (type !== "update") {
-        dispatch(createValidasiPartner(dataValue))
-          .unwrap()
-          .then(async (data) => {
-            const sukses = data?.success;
-            if (sukses === false) {
-              setModalConfirm(false);
-            }
-            setModalConfirm(true);
-          });
-      }else{
-        dispatch(createValidasiPartner(bodyValidasiUpdate))
-          .unwrap()
-          .then(async (data) => {
-            const sukses = data?.success;
-            if (sukses === false) {
-              setModalConfirm(false);
-            }
-            setModalConfirm(true);
-            setSendBody(bodyValidasiUpdate)
-          });
-      }
-      
+    setSendBody(dataValue);
+    const bodyValidasiUpdate = {
+      ...dataValue,
+      id: data_detail?.partner?.id,
+    };
+    if (type !== "update") {
+      dispatch(createValidasiPartner(dataValue))
+        .unwrap()
+        .then(async (data) => {
+          const sukses = data?.success;
+          if (sukses === false) {
+            setModalConfirm(false);
+          }
+          setModalConfirm(true);
+        });
+    } else {
+      dispatch(createValidasiPartner(bodyValidasiUpdate))
+        .unwrap()
+        .then(async (data) => {
+          const sukses = data?.success;
+          if (sukses === false) {
+            setModalConfirm(false);
+          }
+          setModalConfirm(true);
+          setSendBody(bodyValidasiUpdate)
+        });
+    }
+
   };
 
-  
+  const handleSaveDraft = () => {
+    const values = form.getFieldsValue();
+    const dataValue = {
+      id: id,
+      partnerCode: values.partnerCode,
+      partnerName: values.partnerName,
+      tokenExpirationTime: values.tokenExpirationTime,
+      seckeySignature: values.secKeySignature,
+      effStartDate: values.effStartDate ? moment(values.effStartDate).format(dateFormatting.date) : null,
+      effEndDate: values.effEndDate ? moment(values.effEndDate).format(dateFormatting.date) : null,
+      apphierId: values.apphierId,
+    };
+
+    dispatch(saveDraftPartner(dataValue))
+      .unwrap()
+      .then(() => {
+        navigate(RECEIPT_AND_COLLECTION_ROUTES.VIEW_PARTNER);
+      });
+  };
+
+
   const handleCancelModalConfirm = () => {
     setModalConfirm(false);
   };
@@ -295,7 +343,11 @@ const ListFormPartner = (props) => {
   const routes = [
     {
       path: "",
-      breadcrumbName: "Receipt & Collection",
+      breadcrumbName: "System Setup",
+    },
+    {
+      path: "",
+      breadcrumbName: "Master Data",
     },
     {
       path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_PARTNER,
@@ -306,11 +358,11 @@ const ListFormPartner = (props) => {
       breadcrumbName: `${type === "create" ? "Create" : "Update"}`,
     },
   ];
-  
+
 
   //kriim bodyy
   const handleSave = async () => {
-    setModalConfirm(false);
+    setLoadingSave(true);
     const successMessageCreate = {
       title: "Successfull",
       description: `Your data has been submited`,
@@ -327,7 +379,6 @@ const ListFormPartner = (props) => {
       dispatch(updatePartner(sendBody))
         .unwrap()
         .then(async () => {
-          const id = data_detail?.partner?.id;
           setLoadingForm(true);
           const filterDataAttach = listDataAttachment.filter(
             (item) => item.dataType !== "exist"
@@ -340,7 +391,7 @@ const ListFormPartner = (props) => {
               category: "PARTNER",
               fileCategoryId: element.fileCategoryId,
             };
-            const response = await receiptCollectionHttpService.uploadImage(
+            await receiptCollectionHttpService.uploadImage(
               `/v1/dbs/api/attachment/upload/v1`,
               body
             );
@@ -352,8 +403,11 @@ const ListFormPartner = (props) => {
           setListDataAttachment([]);
           dispatch(showModalSuccess(successMessageUpdate));
           handleClear();
+          setLoadingSave(false);
         })
         .catch((error) => {
+          setLoadingSave(false);
+          setModalConfirm(false);
           if (Math.floor((error.response.data.code || 0) / 100) === 5) {
             const message =
               (error.response &&
@@ -379,7 +433,7 @@ const ListFormPartner = (props) => {
               referensiId: id,
               category: "PARTNER",
             };
-            const response = await receiptCollectionHttpService.uploadImage(
+            await receiptCollectionHttpService.uploadImage(
               `/v1/dbs/api/attachment/upload/v1`,
               body
             );
@@ -388,8 +442,11 @@ const ListFormPartner = (props) => {
           handleCancelModalConfirm();
           handleClear();
           dispatch(showModalSuccess(successMessageCreate));
+          setLoadingSave(false);
         })
         .catch((error) => {
+          setLoadingSave(false);
+          setModalConfirm(false);
           if (Math.floor((error.response.data.code || 0) / 100) === 5) {
             const message =
               (error.response &&
@@ -404,13 +461,14 @@ const ListFormPartner = (props) => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
-      <Spin spinning={loadingForm}>
-        <RadioTabs
-          data={tabData}
-          onChange={onChange}
-          currentPosition={valuePage}
+      <Spin spinning={loading || loadingForm}>
+        <FormStepper
+          steps={steps}
+          current={current}
+          onPrev={prev}
+          onNext={next}
         />
         <Form
           layout="vertical"
@@ -424,7 +482,6 @@ const ListFormPartner = (props) => {
             }}
           >
             <PartnerForm
-              dataType={dataType}
               form={form}
             />
           </div>
@@ -433,21 +490,21 @@ const ListFormPartner = (props) => {
               display: valuePage !== tabData[1].value ? "none" : undefined,
             }}
           >
-            <BaseContainer header={"APPROVAL INFORMATION"}>
+            <CardContainer header={"APPROVAL INFORMATION"}>
               <ApprovalComponentGeneral
                 dataTable={appHierDataDetail}
                 dataOption={appHierOptions}
                 selectedHierarchy={selectedHierarchy}
                 updateSelectedHierarchy={setSelectedHierarchy}
               />
-            </BaseContainer>
+            </CardContainer>
           </div>
           <div
             style={{
               display: valuePage !== tabData[2].value ? "none" : undefined,
             }}
           >
-            <BaseContainer header={"ATTACHMENT INFORMATION"}>
+            <CardContainer header={"ATTACHMENT INFORMATION"}>
               <AttachmentComponent
                 type={type}
                 data={listDataAttachment}
@@ -459,49 +516,19 @@ const ListFormPartner = (props) => {
                 configApplication={configApp.PAYMENT_SERVICE}
                 typeRBI={"data"}
               />
-            </BaseContainer>
+            </CardContainer>
           </div>
-          <div className="flex w-full justify-between align-middle my-3">
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => handleBack()}
-              icon={
-                <LeftOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 24,
-                    justifyItems: "center",
-                  }}
-                />
-              }
-            >
-              Back
-            </ButtonComponent>
-            <div className="flex align-middle gap-3">
-              <ButtonComponent
-                icon={
-                  <SVGIcon
-                    name={
-                      type === "update" ? `IconButtonReset` : `IconButtonClear`
-                    }
-                    width={24}
-                  />
-                }
-                type="submit"
-                onClick={handleClear}
-              >
-                {type === "update" ? "Reset" : "Clear"}
-              </ButtonComponent>
-              <ButtonComponent
-                htmlType="submit"
-                type="submit"
-              // onClick={() => setModalConfirm(true)}
-              // disabled={disableSubmit}
-              >
-                Save & Submit
-              </ButtonComponent>
-            </div>
-          </div>
+          <FormFooter
+            current={current}
+            totalSteps={steps.length}
+            onPrev={prev}
+            onNext={next}
+            onCancel={handleBack}
+            onClear={handleClear}
+            onSaveDraft={handleSaveDraft}
+            onSubmit={() => form.submit()}
+            type={type}
+          />
         </Form>
       </Spin>
       <ModalCustom
@@ -511,11 +538,16 @@ const ListFormPartner = (props) => {
         width={1000}
         type={"confirmation"}
         footer={
-          <div className="w-full flex justify-end gap-5 p-4">
+          <div className="w-full flex justify-between gap-5 p-4">
             <ButtonComponent onClick={handleCancelModalConfirm} type="default">
               Cancel
             </ButtonComponent>
-            <ButtonComponent type="submit" onClick={handleSave}>
+            <ButtonComponent
+              className="!bg-[#28a745] !border-[#28a745] hover:!bg-[#218838]"
+              isPrimary
+              onClick={handleSave}
+              loading={loadingSave}
+            >
               Confirm
             </ButtonComponent>
           </div>
@@ -545,7 +577,7 @@ const ListFormPartner = (props) => {
           </p>
         </div>
       </ModalConfirm>
-    </LayoutMenu>
+    </>
   );
 };
 

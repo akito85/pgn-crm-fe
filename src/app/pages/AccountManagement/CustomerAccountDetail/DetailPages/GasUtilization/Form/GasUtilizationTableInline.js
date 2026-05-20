@@ -1,5 +1,5 @@
-import React, {useState, useRef, useEffect} from "react";
-import { Form, Input, InputNumber, Pagination, Select, Table, Tooltip } from "antd";
+import React, {useState, useRef, useEffect, Fragment} from "react";
+import { Button, Form, Input, InputNumber, Pagination, Select, Tooltip } from "antd";
 
 import SVGIcon from "../../../../../../../assets/Icon/index";
 import { getColumnSearchProps } from "../../../../../../../utils/getColumnSearchProps";
@@ -7,34 +7,101 @@ import ButtonComponent from "../../../../../../../components/ButtonComponent";
 import { getColumnSearchPropsCriteria } from "../../../../../ProductAndPromo/Product/columnTableCriteria";
 import { showModalError } from "../../../../../../../redux/slices/general_slice";
 import InputComponent from "../../../../../../../components/InputComponent";
+import NxTable from "../../../../../../../components/Nx/NxTable";
+import Highlighter from "react-highlight-words";
+import { nxGetAccountActions } from "../../../../../../../components/Nx/NxGetAccountActions";
 
 const onFilter = (dataIndex, value, record) => {
-  const tempSearchText = value.toLowerCase();
-  switch (dataIndex) {
-    case "name":
-    case "unit":
-      return record[dataIndex]?.label.toLowerCase().includes(tempSearchText);
-    default:
-      return record[dataIndex]
-        ?.toString()
-        ?.toLowerCase()
-        .includes(tempSearchText);
+  const fixSearchText = String(value || "").toLowerCase().trim();
+  const cell = record ? record[dataIndex] : undefined;
+
+  if (cell === undefined || cell === null) return false;
+
+  if (dataIndex === "percentage") {
+    const temp = cell !== undefined && cell !== null ? String(cell) : "";
+    return temp.toLowerCase().includes(fixSearchText);
   }
+
+  // handle React element as label or nested label/value objects
+  const rawLabel = cell?.label ?? cell;
+
+  // If rawLabel is a React element, try to read its children
+  if (React.isValidElement(rawLabel)) {
+    const child = rawLabel.props?.children;
+    const childStr =
+      child !== undefined && child !== null && (typeof child === "string" || typeof child === "number")
+        ? String(child).toLowerCase().trim()
+        : "";
+    if (childStr.includes(fixSearchText)) return true;
+  } else if (typeof rawLabel === "string" || typeof rawLabel === "number") {
+    if (String(rawLabel).toLowerCase().trim().includes(fixSearchText)) return true;
+  }
+
+  // also check cell.value if present
+  const valStr = cell?.value !== undefined && cell?.value !== null ? String(cell.value).toLowerCase().trim() : "";
+  if (valStr.includes(fixSearchText)) return true;
+
+  return false;
 };
 
 const sorter = (fieldSort, a, b) => {
-  const handleDataSort = (obj) => {
-    switch (fieldSort) {
-      case "name":
-      case "unit":
-        return obj[fieldSort]?.label?.toLowerCase();
-      default:
-        return obj[fieldSort]?.toString()?.toLowerCase();
+  const extractSortable = (obj) => {
+    const cell = obj ? obj[fieldSort] : undefined;
+    if (cell === undefined || cell === null) return "";
+
+    if (fieldSort === "percentage") {
+      const n = Number(cell);
+      return isNaN(n) ? String(cell).toLowerCase() : n;
     }
+
+    if (typeof cell === "string" || typeof cell === "number") {
+      return String(cell).toLowerCase();
+    }
+
+    if (typeof cell === "object") {
+      const lbl = cell.label !== undefined ? cell.label : undefined;
+      const val = cell.value !== undefined ? cell.value : undefined;
+
+      if (lbl !== undefined) {
+        if (React.isValidElement(lbl)) {
+          const child = lbl.props?.children;
+          if (child !== undefined && child !== null && (typeof child === "string" || typeof child === "number")) {
+            return String(child).toLowerCase();
+          }
+          try {
+            return String(lbl).toLowerCase();
+          } catch (e) {
+            // fallthrough
+          }
+        }
+
+        if (typeof lbl === "string" || typeof lbl === "number") {
+          return String(lbl).toLowerCase();
+        }
+      }
+
+      if (val !== undefined && (typeof val === "string" || typeof val === "number")) {
+        return String(val).toLowerCase();
+      }
+
+      try {
+        return JSON.stringify(cell).toLowerCase();
+      } catch (e) {
+        return "";
+      }
+    }
+
+    return String(cell).toLowerCase();
   };
-  let fa = handleDataSort(a);
-  let fb = handleDataSort(b);
-  return fa.localeCompare(fb);
+
+  const aVal = extractSortable(a);
+  const bVal = extractSortable(b);
+
+  if (typeof aVal === "number" && typeof bVal === "number") {
+    return aVal - bVal;
+  }
+
+  return String(aVal).localeCompare(String(bVal));
 };
 
 
@@ -83,10 +150,14 @@ const EditableCell = ({
             optionFilterProp="children"
             filterOption={filterOption}
             labelInValue
+            size="small"
+            style={{
+              lineHeight: "32px",
+            }}
           >
             {options.map((option) => (
-              <Select.Option key={option.value} value={option.value}>
-                {option.label}
+              <Select.Option key={option.value} value={option.value} disabled={option.disabled}>
+                <span className="text-xs">{option.label}</span>
               </Select.Option>
             ))}
           </Select>
@@ -94,17 +165,16 @@ const EditableCell = ({
       case "number":
         return (
           <InputNumber
+            size="small"
             type={"number"}
             controls={false}
             style={{
               width: "100%",
+              height: "34px",
+              lineHeight: "32px",
             }}
           />
         );
-      case "description":
-        return <Input.TextArea rows={1} maxLength={255} />;
-      default:
-        return <InputComponent />;
     }
   };
   const inputNode = getInputNode(inputType);
@@ -130,7 +200,15 @@ const EditableCell = ({
   };
 
   return (
-    <td {...restProps}>
+    <td
+      {...restProps}
+      style={{
+        padding: "0 8px",
+        height: "34px",
+        lineHeight: "32px",
+        fontSize: 12,
+      }}
+    >
       {editing ? (
         <Form.Item
           name={dataIndex}
@@ -155,7 +233,7 @@ const EditableCell = ({
                 ]
           }
         >
-          {inputNode}
+            {inputNode}
         </Form.Item>
       ) : (
         children
@@ -190,28 +268,30 @@ const GasUtilizationTableInline = ({
   const [editDataRecord, setEditDataRecord] = useState({});
   const [statusAction, setStatusAction] = useState("");
 
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    right: ["action"],
+    left: [],
+  }));
+
   // const [fulfilPercentage, setFulfilPercentage] = useState(0);
   const [validationError, setValidationError] = useState('');
-  const [filterDdlUtilName, setFilterDdlUtilName] = useState([]);
 
-  useEffect(() => {
-    const filteredListName = ddlUtilizationName?.filter(item => {
-      return !dataTableGasUtilization?.some(fix => fix?.name?.label === item?.label);
-    });
-    setFilterDdlUtilName(filteredListName)
-  }, [dataTableGasUtilization, ddlUtilizationName])
+  const filterDdlUtilName = (ddlUtilizationName || []).map((option) => {
+    const isSelected = dataTableGasUtilization
+      .filter((row) => String(row.key) !== String(editingKey))
+      .some((row) => String(row?.name?.value) === String(option.value));
+    return { ...option, disabled: isSelected };
+  });
 
+  const itemActions = nxGetAccountActions({
+    handleUpdate: (record) => edit(record.key),
+    handleDelete: (record) => deleteRow(record.key),
+  }).filter(action => action.action === "Delete" || action.action === "Update");
   
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
-  };
-
-  const handleChangeSize = (pageChange, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
-    setPage(tempPage);
-    setPageSize(pageSizeChange);
   };
 
   const onSort = (_, __, sort) => {
@@ -226,44 +306,20 @@ const GasUtilizationTableInline = ({
 
   const filteredData = (typeData = "data") => {
     let result = [...dataTableGasUtilization];
+
+    // filtering using the robust onFilter
     if (searchedColumn) {
-      const tempSearchText = searchText.toLowerCase();
-      result = result.filter((item) => {
-        switch (searchedColumn) {
-          case "name":
-          case "unit":
-            return item[searchedColumn]?.label
-              .toLowerCase()
-              .includes(tempSearchText);
-          default:
-            return item[searchedColumn]?.toLowerCase().includes(tempSearchText);
-        }
-      });
+      result = result.filter((item) => onFilter(searchedColumn, searchText, item));
     }
 
-    const handleSort = (obj) => {
-      switch (fieldSort) {
-        case "name":
-        case "unit":
-          return obj[fieldSort]?.label.toString().toLowerCase();
-        default:
-          return obj[fieldSort].toString().toLowerCase();
-      }
-    };
+    // sorting using the robust sorter
     if (fieldSort) {
       result.sort((a, b) => {
-        let fa = handleSort(a);
-        let fb = handleSort(b);
-
-        if (fa < fb) {
-          return orderSort === "asc" ? -1 : 1;
-        }
-        if (fa > fb) {
-          return orderSort === "asc" ? 1 : -1;
-        }
-        return 0;
+        const res = sorter(fieldSort, a, b);
+        return orderSort === "asc" ? res : -res;
       });
     }
+
     const fix = result.slice((page - 1) * pageSize, page * pageSize);
     return typeData === "data" ? fix : result.length;
   };
@@ -283,10 +339,11 @@ const GasUtilizationTableInline = ({
   };
 
   const edit = (record, field) => {
+    const dataEdit = dataTableGasUtilization.find(item => String(item.key) === String(record));
     setStatusAction("edit");
     setIsEdit(true)
-    formTable.setFieldsValue(record);
-    const { key, ...extraProps } = record || {};
+    formTable.setFieldsValue(dataEdit);
+    const { key, ...extraProps } = dataEdit || {};
     const tempValue = { ...extraProps };
     for (const attribute in tempValue) {
       if (Object.hasOwnProperty.call(tempValue, attribute)) {
@@ -304,7 +361,7 @@ const GasUtilizationTableInline = ({
         });
       }
     }
-    setEditingKey(record.key);
+    setEditingKey(record);
    
   };
 
@@ -313,7 +370,7 @@ const GasUtilizationTableInline = ({
     setEditingKey("");
     setIsEdit(false)
     if (statusAction === "add") {
-      deleteRow(record);
+      deleteRow(record.key);
     }
     setStatusAction("");
   };
@@ -350,39 +407,6 @@ const GasUtilizationTableInline = ({
     }
   };
 
-
-  // const save = async (key) => {
-  //     try {
-  //       // Calculate the total percentage
-  //       const totalPercentage = dataTableGasUtilization.reduce((accumulator, currentValue) => {
-  //         return accumulator + currentValue.percentage;
-  //       }, 0);
-
-  //       const row = await formTable.validateFields();
-  //       const newData = [...dataTableGasUtilization];
-  //       const index = newData.findIndex((item) => key === item.key);
-
-  //       if (totalPercentage > 100 || totalPercentage < 100) {
-  //         alert('Percentage total must be exactly 100%');
-  //         return; // Exit the function if the total percentage is not 100%
-  //       }
-  //       if (index > -1) {
-  //         const item = newData[index];
-  //         const updatedRow = {
-  //           ...item,
-  //           ...row,
-  //         };
-  //         newData.splice(index, 1, updatedRow);
-  //         setDataTableGasUtilization(newData);
-  //         setEditingKey("");
-  //       }
-  //       setStoredData(false);
-  //       setStatusAction("");
-  //       formTable.resetFields();
-  //     } catch (errInfo) {
-  //       console.log("Validate Failed:", errInfo);
-  //     }
-  // };
   const save = async (key) => {
     try {
       // Validate the form fields
@@ -433,10 +457,9 @@ const GasUtilizationTableInline = ({
     }
   };
   
-
   const deleteRow = (record) => {
     setDataTableGasUtilization((prevState) =>
-      prevState.filter((item) => item.key !== record.key)
+      prevState.filter((item) => item.key !== record)
     );
     setStoredData(false);
   };
@@ -444,6 +467,7 @@ const GasUtilizationTableInline = ({
   const columns = () => {
     const temp = [
       {
+        key: "no",
         title: "NO",
         width: 60,
         dataIndex: "no",
@@ -451,6 +475,7 @@ const GasUtilizationTableInline = ({
         render: (text, object, index) => (page - 1) * pageSize + index + 1,
       },
       {
+        key: "name",
         title: "UTILIZATION NAME",
         width: 240,
         dataIndex: "name",
@@ -466,8 +491,50 @@ const GasUtilizationTableInline = ({
           searchText,
           handleSearch
         ),
+        render: (data) => {
+          // support label as string, number, React element, or fallback
+          const rawLabel = data?.label ?? data ?? "";
+
+          // If it's a React element, try to extract children text or return element
+          if (React.isValidElement(rawLabel)) {
+            const child = rawLabel.props?.children;
+            const childStr =
+              child !== undefined && child !== null && (typeof child === "string" || typeof child === "number")
+                ? String(child)
+                : null;
+
+            if (searchedColumn === "name" && searchText && childStr) {
+              return (
+                <Highlighter
+                  highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
+                  searchWords={[searchText]}
+                  autoEscape
+                  textToHighlight={childStr}
+                />
+              );
+            }
+
+            // fallback to rendering the element itself
+            return rawLabel;
+          }
+
+          const label = rawLabel !== undefined && rawLabel !== null ? String(rawLabel) : "";
+          if (searchedColumn === "name" && searchText) {
+            return (
+              <Highlighter
+                highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
+                searchWords={[searchText]}
+                autoEscape
+                textToHighlight={label}
+              />
+            );
+          }
+
+          return label || "";
+        },
       },
       {
+        key: "percentage",
         title: "PERCENTAGE",
         width: 240,
         dataIndex: "percentage",
@@ -486,63 +553,52 @@ const GasUtilizationTableInline = ({
         ),
       },
       {
+        key: "operation",
         title: "ACTION",
         width: 240,
         fixed: "right",
         dataIndex: "operation",
         render: (_, record) => {
           const editable = record.key === editingKey;
+          record.id = record.key;
+          record.statusApproval = "DRAFT";
           return (
-            <div className="flex w-full justify-center my-3 gap-2">
+            <div className="flex w-full justify-center my-1 gap-2">
               {editable ? (
-                <>
-                  <ButtonComponent onClick={()=>cancel(record)} type="default">
+                <div className="flex items-center gap-2">
+                  <Button
+                    onClick={() => cancel(record)}
+                    type="default"
+                    size="small"
+                    style={{
+                      borderRadius: "20px",
+                      border: "1px solid var(--primary, #0075BF)",
+                      color: "var(--primary, #0075BF)",
+                    }}
+                  >
                     Cancel
-                  </ButtonComponent>
-                  <ButtonComponent
+                  </Button>
+                  <Button
                     onClick={() => save(record.key)}
-                    type="submit"
+                    type="default"
+                    size="small"
+                    style={{
+                      borderRadius: "20px",
+                      border: "1px solid var(--primary, #0075BF)",
+                      backgroundColor: "var(--primary, #0075BF)",
+                      color: "#fff",
+                    }}
                   >
                     Save
-                  </ButtonComponent>
-                </>
+                  </Button>
+                </div>
               ) : (
                 <>
-                  <Tooltip title="Edit">
-                    <span 
-                      className={`flex justify-center${
-                        editingKey ? " cursor-not-allowed" : ""
-                      }`}
-                    >
-                      <SVGIcon
-                        name="IconEdit"
-                        color={editingKey ? "#8D91A0" : "#ACC424"}
-                        width={24}
-                        onClick={!editingKey ? () => edit(record) : undefined}
-                      />
-                    </span>
-                  </Tooltip>
-                  <Tooltip title="Delete">
-                    <span
-                      className={`flex justify-center${
-                        editingKey ? " cursor-not-allowed" : ""
-                      }`}
-                    >
-                      <SVGIcon
-                        name="IconDelete"
-                        width={24}
-                        className={
-                          editingKey ? "disabled" : undefined
-                        }
-                        color={editingKey ? "#8D91A0" : "#ff2e2e"}
-                        onClick={
-                          !editingKey
-                            ? () => deleteRow(record)
-                            : undefined
-                        }
-                      />
-                    </span>
-                  </Tooltip>
+                  {itemActions.map((action, index) => (
+                    <Fragment key={`table-action-${index}`}>
+                      {action.render(record, itemActions.length, index)}
+                    </Fragment>
+                  ))}
                 </>
               )}
             </div>
@@ -559,21 +615,18 @@ const GasUtilizationTableInline = ({
 
   const [optionSelectedCol, setOptionSelectedCol] = useState([]);
 
-  const handleDisplayColumn = (value) => {
-    setOptionSelectedCol(value);
-  };
-
   const filterColumn = (dataColumn) => {
     return dataColumn.filter((col) => {
       return !optionSelectedCol.includes(col.title);
     });
   };
+
   const totalPercentage = dataTableGasUtilization.reduce((accumulator, currentValue) => {
     return accumulator + (currentValue.percentage || 0); // Ensure currentValue.percentage is a number
   }, 0);
 
   return (
-      <div>
+      <div className="flex flex-col gap-4">
         {type === "create" && (
           <div className="flex w-full justify-end">
             <ButtonComponent
@@ -586,52 +639,10 @@ const GasUtilizationTableInline = ({
             </ButtonComponent>
           </div>
         )}
-
-        {/* Start Pagination */}
-        <div className={"w-full flex justify-between py-6"}>
-          <Select
-            mode="multiple"
-            placeholder="Show All Column"
-            className={"w-2/6"}
-            maxTagCount={3}
-            onChange={handleDisplayColumn}
-          >
-            {columns()
-              .map((col) => (
-                <Select.Option
-                  key={col.title}
-                  value={col.title}
-                  disabled={
-                    optionSelectedCol.length > 3
-                      ? optionSelectedCol.includes(col.title)
-                        ? false
-                        : true
-                      : false
-                  }
-                >
-                  {col.title}
-                </Select.Option>
-              ))
-              .splice(1)}
-          </Select>
-
-          <Pagination
-            total={filteredData("length")}
-            className={"pr-1"}
-            showSizeChanger
-            current={page}
-            pageSize={pageSize}
-            onChange={handleChangeSize}
-            showTotal={(total, range) =>
-              `Showing ${range[0]} to ${range[1]} of ${total} records`
-            }
-          />
-        </div>
-        {/* End Pagination */}
-
         {/* Table */}
         <Form form={formTable} component={false}>
-          <Table
+          <NxTable
+            idTable="gas-utilization-table"
             dataSource={filteredData("data")}
             columns={filterColumn(
               columns().map((col) => ({
@@ -652,22 +663,20 @@ const GasUtilizationTableInline = ({
                   rules: col.rules,
                   totalPercentage:totalPercentage,
                   formTable: formTable,
-                  validationError: validationError
+                  validationError: validationError,
                 }),
               }))
             )}
+            totalData={filteredData("length")}
+            tableScrolled={{ x: 800, y: 300 }}
+            usePagination={false}
+            useInfiniteScroll={false}
+            onSort={onSort}
+            components={{ body: { cell: EditableCell } }}
             rowClassName={(record) => (isEditing(record) ? "editable-row" : "")}
-            scroll={{
-              x: 800,
-              y: 300,
-            }}
-            pagination={false}
-            components={{
-              body: {
-                cell: EditableCell,
-              },
-            }}
-            onChange={onSort}
+            fixedColumns={fixedColumns}
+            setFixedColumns={setFixedColumns}
+            showAdvanceSearch={false}
           />
 
           {type === 'create' && (
@@ -677,7 +686,7 @@ const GasUtilizationTableInline = ({
             </div>
           )}
         </Form>
-        
+
       </div>
   );
 };

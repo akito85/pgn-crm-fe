@@ -1,15 +1,15 @@
 import React, { useRef, useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Steps, Form } from "antd";
-import { RightOutlined } from "@ant-design/icons";
-import SVGIcon from "../../../../assets/Icon/index";
+import { Steps, Form, Select } from "antd";
 import InputComponent from "../../../../components/InputComponent";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import { columnsRequestBilling } from "./Table/TableRequestBilling";
 import DetailText from "../../../../components/DetailText";
 import {
   approvedBilling,
+  cancelApprovalBilling,
   getAllBillingApprovePaginate,
+  getAllBillingCancelTaskPaginate,
 } from "../../../../redux/slices/rating_billing_invoice/billing";
 import { ModalError } from "../../../../components/Modal/ModalPopUp";
 import { IconModal } from "../../../../utils/Icon";
@@ -19,12 +19,12 @@ import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 
 const ModalApprovalBilling = ({
   isOpen,
-  handleCancel = () => {},
-  handleRefresh = () => {},
-  handleOpenModal = () => {},
+  handleCancel = () => { },
+  handleRefresh = () => { },
+  handleOpenModal = () => { },
 }) => {
   // Selector
-  const { data_list_billing_approval, loading } = useSelector(
+  const { data_list_billing_approval, loadingApproval } = useSelector(
     (state) => state.billing
   );
 
@@ -39,7 +39,7 @@ const ModalApprovalBilling = ({
   const [current, setCurrent] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
   const [page, setPage] = useState(1);
-  const [loadMoreSize] = useState(20); // Load more 20 data each time
+  const [loadMoreSize] = useState(20);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState("");
@@ -47,6 +47,7 @@ const ModalApprovalBilling = ({
   const [remark, setRemark] = useState("");
   const [generateInvoice, setGenerateInvoice] = useState(false);
   const [action, setAction] = useState("");
+  const [approvalType, setApprovalType] = useState("APPROVAL_BILLING");
 
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [dataTableSelect, setDataTableSelect] = useState([]);
@@ -55,24 +56,34 @@ const ModalApprovalBilling = ({
 
   const [fixedColumns, setFixedColumns] = useState({
     left: ["no"],
-    right: [] 
+    right: [],
   });
+
+  const approvalTypeOptions = [
+    { value: "APPROVAL_BILLING", label: "Approval Billing" },
+    { value: "CANCEL_LIST_APPROVAL", label: "Cancel List Approval" },
+  ];
 
   // Initial fetch - Load 100 data pertama
   useEffect(() => {
     if (isOpen) {
-      dispatch(
-        getAllBillingApprovePaginate({
-          search: encodeURIComponent(JSON.stringify(search)),
-          page: 1,
-          pageSize: 100, // Initial load 100
-          sort,
-          isLoadMore: false,
-        })
-      );
+      const payload = {
+        search: encodeURIComponent(JSON.stringify(search)),
+        page: 1,
+        pageSize: 100,
+        sort,
+        isLoadMore: false,
+      };
+
+      if (approvalType === "CANCEL_LIST_APPROVAL") {
+        dispatch(getAllBillingCancelTaskPaginate(payload));
+      } else {
+        dispatch(getAllBillingApprovePaginate(payload));
+      }
+
       setPage(1);
     }
-  }, [dispatch, isOpen, search, sort]);
+  }, [dispatch, isOpen, search, sort, approvalType]);
 
   // Function Search API
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -95,22 +106,25 @@ const ModalApprovalBilling = ({
     const nextPage = page + 1;
     const totalPages = data_list_billing_approval?.page?.totalPages || 0;
 
-    // Check if there's more data to load
     if (nextPage <= totalPages) {
-      await dispatch(
-        getAllBillingApprovePaginate({
-          search: encodeURIComponent(JSON.stringify(search)),
-          page: nextPage,
-          pageSize: loadMoreSize, // Load 20 more
-          sort,
-          isLoadMore: true,
-        })
-      );
+      const payload = {
+        search: encodeURIComponent(JSON.stringify(search)),
+        page: nextPage,
+        pageSize: loadMoreSize,
+        sort,
+        isLoadMore: true,
+      };
+
+      if (approvalType === "CANCEL_LIST_APPROVAL") {
+        await dispatch(getAllBillingCancelTaskPaginate(payload));
+      } else {
+        await dispatch(getAllBillingApprovePaginate(payload));
+      }
+
       setPage(nextPage);
     }
   };
 
-  // Calculate if there's more data
   const hasMore =
     dataSource.length < (data_list_billing_approval?.page?.totalElements || 0);
 
@@ -145,44 +159,26 @@ const ModalApprovalBilling = ({
     },
   ];
 
-  // Button Next
-  const next = () => {
-    setCurrent(current + 1);
-  };
+  const next = () => setCurrent(current + 1);
+  const prev = () => setCurrent(current - 1);
 
-  // Button Previous
-  const prev = () => {
-    setCurrent(current - 1);
-  };
-
-  // Scroll Left Handler
   const scrollLeftHandler = () => {
-    if (containerRef.current) {
-      containerRef.current.scrollLeft -= 250;
-    }
+    if (containerRef.current) containerRef.current.scrollLeft -= 250;
   };
 
-  // Scroll Right Handler
   const scrollRightHandler = () => {
-    if (containerRef.current) {
-      containerRef.current.scrollLeft += 250;
-    }
+    if (containerRef.current) containerRef.current.scrollLeft += 250;
   };
 
-  // Scroll Handler
   const handleScroll = () => {
-    if (containerRef.current) {
-      setScrollLeft(containerRef.current.scrollLeft);
-    }
+    if (containerRef.current) setScrollLeft(containerRef.current.scrollLeft);
   };
 
-  // Handle Next
   const handleButtonNext = () => {
     next();
     scrollRightHandler();
   };
 
-  // Mapping Step
   const items = steps.map((item) => ({
     key: item.title,
     title: item.title,
@@ -201,6 +197,7 @@ const ModalApprovalBilling = ({
     setSort("");
     setSearchText("");
     setSearchedColumn("");
+    setApprovalType("APPROVAL_BILLING");
     form.resetFields();
   };
 
@@ -208,25 +205,28 @@ const ModalApprovalBilling = ({
   const handleSave = (formValue) => {
     handleCancel();
 
-    const dataBillingCodes = dataTableSelect.map((a) => {
-      return {
-        billingCode: a.billingCode,
-        approvalId: a.tappId,
-        isGenerate: a.isGenerate,
-      };
-    });
+    const dataBillingCodes = dataTableSelect.map((a) => ({
+      billCode: a.billCode,
+      approvalId: a.tappId,
+      isGenerate: a.isGenerate,
+    }));
 
     const body = {
       billingCodes: dataBillingCodes,
       action: action,
-      description: remark,
+      description: formValue.remark,
     };
 
+    const submitThunk =
+      approvalType === "CANCEL_LIST_APPROVAL"
+        ? cancelApprovalBilling
+        : approvedBilling;
+
     dispatch(
-      approvedBilling({
+      submitThunk({
         body: body,
         action: action === "APPROVE" ? "approved" : "rejected",
-      })
+      }),
     )
       .unwrap()
       .then(() => {
@@ -244,6 +244,7 @@ const ModalApprovalBilling = ({
         setSort("");
         setSearchText("");
         setSearchedColumn("");
+        setApprovalType("APPROVAL_BILLING");
       })
       .catch((error) => {
         if (Math.floor((error?.response?.data?.code || 0) / 100) === 5) {
@@ -277,17 +278,17 @@ const ModalApprovalBilling = ({
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
+        search
       ),
-    [page, loadMoreSize, searchedColumn, searchText]
+    [page, loadMoreSize, searchedColumn, searchText, search]
   );
 
   const allColumns = useMemo(() => {
-    const columnsWithKeys = baseColumns.map((col) => ({
+    return baseColumns.map((col) => ({
       ...col,
       key: col.key || col.dataIndex || col.title,
     }));
-    return columnsWithKeys;
   }, [baseColumns]);
 
   const processedColumns = useMemo(() => {
@@ -301,10 +302,11 @@ const ModalApprovalBilling = ({
     }));
   }, [allColumns]);
 
+  // PERUBAHAN: Gunakan billCode sebagai row key, fallback ke billHeaderId jika null
   const dataSourceWithKeys = useMemo(() => {
-    return dataSource?.map((item, index) => ({
+    return dataSource?.map((item) => ({
       ...item,
-      key: index + 1,
+      key: item.billCode ?? item.billHeaderId,
     }));
   }, [dataSource]);
 
@@ -318,66 +320,61 @@ const ModalApprovalBilling = ({
         onFinish={handleSave}
         width={1000}
         footer={
-          <div className="flex w-full justify-end gap-5">
-            {current < steps.length - 1 && (
-              <ButtonComponent type={"default"} onClick={handleCancelForm}>
-                Cancel
-              </ButtonComponent>
-            )}
-            {current > 0 && (
-              <ButtonComponent
-                onClick={() => {
-                  prev();
-                  scrollLeftHandler();
-                }}
-                type={"submit"}
-                icon={<SVGIcon name="IconArrowNarrowLeft" width={24} />}
-              >
-                Previous
-              </ButtonComponent>
-            )}
+          <div className="flex w-full justify-between items-center">
+            {/* Kiri: Tombol Cancel */}
+            <div>
+              {current < steps.length - 1 && (
+                <ButtonComponent type={"default"} onClick={handleCancelForm}>
+                  Cancel
+                </ButtonComponent>
+              )}
+            </div>
 
-            {current < steps.length - 1 && (
-              <ButtonComponent
-                onClick={() => {
-                  handleButtonNext();
-                }}
-                type={"submit"}
-                className="ant-btn ant-btn-submit flex w-full justify-center"
-                disabled={steps[current].disabled}
-              >
-                <span className="p-1 text-[18px] text-center">Next</span>
-                <RightOutlined
-                  style={{
-                    justifyItems: "center",
-                    fontSize: "18px",
-                    color: "#fff",
+            {/* Kanan: Tombol Previous, Next, Reject, Approve */}
+            <div className="flex gap-x-3">
+              {current > 0 && (
+                <ButtonComponent
+                  onClick={() => {
+                    prev();
+                    scrollLeftHandler();
                   }}
-                />
-              </ButtonComponent>
-            )}
-            {current === steps.length - 1 && (
-              <>
-                <ButtonComponent
-                  type={"reject"}
-                  htmlType={"submit"}
-                  form={"formApprove"}
-                  onClick={() => setAction("REJECT")}
-                  loading={loading}
+                  type={"default"}
                 >
-                  Reject
+                  Previous
                 </ButtonComponent>
+              )}
+              {current < steps.length - 1 && (
                 <ButtonComponent
-                  type={"approve"}
-                  htmlType={"submit"}
-                  form={"formApprove"}
-                  onClick={() => setAction("APPROVE")}
-                  loading={loading}
+                  onClick={handleButtonNext}
+                  type={"submit"}
+                  disabled={steps[current].disabled}
                 >
-                  Approve
+                  Next
                 </ButtonComponent>
-              </>
-            )}
+              )}
+              {current === steps.length - 1 && (
+                <>
+                  <ButtonComponent
+                    type={"reject"}
+                    htmlType={"submit"}
+                    form={"formApprove"}
+                    onClick={() => setAction("REJECT")}
+                    loading={loadingApproval}
+                  >
+                    Reject
+                  </ButtonComponent>
+                  <ButtonComponent
+                    type={"approve"}
+                    htmlType={"submit"}
+                    form={"formApprove"}
+                    onClick={() => setAction("APPROVE")}
+                    loading={loadingApproval}
+                  >
+                    Approve
+                  </ButtonComponent>
+                </>
+              )}
+            </div>
           </div>
         }
       >
@@ -403,12 +400,31 @@ const ModalApprovalBilling = ({
           >
             <div className="w-full grid grid-cols-1 gap-x-4 pt-[30px]">
               <div className="flex justify-between items-center mb-4">
-                <p className="text-primary uppercase font-bold">
-                  Billing List - Ready to Approve
-                </p>
+                <div className="flex items-center gap-3">
+                  <p className="text-primary uppercase font-bold m-0">
+                    Billing List
+                  </p>
+                  <div className="w-[240px]">
+                    <Select
+                      value={approvalType}
+                      onChange={(value) => {
+                        setApprovalType(value);
+                        setSelectedRowKeys([]);
+                        setDataTableSelect([]);
+                        setPage(1);
+                        setSearch({});
+                        setSort("");
+                        setSearchText("");
+                        setSearchedColumn("");
+                      }}
+                      options={approvalTypeOptions}
+                    />
+                  </div>
+                </div>
                 {selectedRowKeys.length > 0 && (
                   <p className="text-sm font-semibold text-blue-600">
-                    {selectedRowKeys.length} {selectedRowKeys.length === 1 ? 'row' : 'rows'} selected
+                    {selectedRowKeys.length}{" "}
+                    {selectedRowKeys.length === 1 ? "row" : "rows"} selected
                   </p>
                 )}
               </div>
@@ -416,12 +432,12 @@ const ModalApprovalBilling = ({
                 dataSource={dataSourceWithKeys}
                 columns={processedColumns}
                 totalData={data_list_billing_approval?.page?.totalElements || 0}
-                tableScrolled={{ y: 525, x: 15000 }}
+                tableScrolled={{ y: 525, x: 2000 }}
                 onSort={onSort}
                 columnDefinitions={columnDefinitions}
                 fixedColumns={fixedColumns}
                 setFixedColumns={setFixedColumns}
-                loading={loading}
+                loading={loadingApproval}
                 showExport={false}
                 rowSelection={rowSelection}
                 usePagination={false}
@@ -457,11 +473,15 @@ const ModalApprovalBilling = ({
         >
           <div className="w-full grid grid-cols-1 gap-x-4 pt-[30px]">
             <div className="flex justify-between items-center mb-4">
-              <p className="text-primary uppercase font-bold">
-                Confirmation
-              </p>
+              <p className="text-primary uppercase font-bold">Confirmation</p>
               <p className="text-sm font-semibold text-blue-600">
-                {dataTableSelect.length} {dataTableSelect.length === 1 ? 'row' : 'rows'} will be {action === 'APPROVE' ? 'approved' : action === 'REJECT' ? 'rejected' : 'processed'}
+                {dataTableSelect.length}{" "}
+                {dataTableSelect.length === 1 ? "row" : "rows"} will be{" "}
+                {action === "APPROVE"
+                  ? "approved"
+                  : action === "REJECT"
+                    ? "rejected"
+                    : "processed"}
               </p>
             </div>
             <TableRBI
@@ -500,9 +520,8 @@ const ModalApprovalBilling = ({
               : IconModal["icon_error_default"]}
             <p className="text-[18px] font-bold">{"Failed"}</p>
           </div>
-          <p className="pl-[70px]">{`Your data was not ${
-            action === "APPROVE" ? "approved" : "rejected"
-          }. ${bodyError.message}.`}</p>
+          <p className="pl-[70px]">{`Your data was not ${action === "APPROVE" ? "approved" : "rejected"
+            }. ${bodyError.message}.`}</p>
           <p className="pl-[70px]">Please try again.</p>
         </div>
       </ModalError>

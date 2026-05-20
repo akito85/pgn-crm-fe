@@ -32,7 +32,7 @@ const ModalInactivateWithHierarchy = ({
   const [appHierOptions, setAppHierOptions] = useState([]);
   const [appHierDataDetail, setAppHierDataDetail] = useState([]);
   const { dataListAppHierId = [], dataListAppHierDetail = [] } = useSelector(
-    (state) => state[selector]
+    (state) => state[selector],
   );
 
   const getStartDate = () => {
@@ -63,7 +63,7 @@ const ModalInactivateWithHierarchy = ({
   useEffect(() => {
     if (openModalInactivate && selectedHierarchy && selectedHierarchy !== 0) {
       console.log("Fetching detail for hierarchy ID:", selectedHierarchy);
-      dispatch(getAPIDetail(selectedHierarchy));
+      dispatch(getAPIDetail({ id: selectedHierarchy }));
     }
   }, [dispatch, selectedHierarchy, openModalInactivate, getAPIDetail]);
 
@@ -145,7 +145,7 @@ const ModalInactivateWithHierarchy = ({
       >
         <div className="flex flex-col gap-6">
           <Alert
-            message={alertMessage}
+            message={<span className="break-all">{alertMessage}</span>}
             icon={<InfoCircleOutlined />}
             type={"warning"}
             showIcon
@@ -172,7 +172,7 @@ const ModalInactivateWithHierarchy = ({
                     !value
                       ? Promise.resolve()
                       : Promise.reject(
-                          new Error("End date must before Start date")
+                          new Error("End date must before Start date"),
                         ),
                 },
                 { message: requiredMessage("End Date"), required: true },

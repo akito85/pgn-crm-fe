@@ -900,6 +900,14 @@ const AddressForm = ({
     }
   }, [fullAddress, selectedMaps]);
 
+  useEffect(() => {
+    if (Array.isArray(addressTable)) {
+      for (const [index, address] of addressTable.entries()) {
+        form.setFieldValue(`address${index+1}`, address.fullAddress);
+      }
+    }
+  }, [addressTable])
+
 
   return (
     <div>
@@ -908,35 +916,32 @@ const AddressForm = ({
       </span>
 
       <div className="w-full grid grid-cols-3 gap-2 pt-[30px]">
-        <Form.Item
-          label={"Address 1"}
-          name={"address1"}
-          getValueFromEvent={(e) => handleAddressObj(e, "address1")}
-          rules={[
-            {
-              required: true,
-              message: "Please input your Address!",
-            },
-          ]}
-          valuePropName={addressTable?.map((a) => a.fullAddress)[0]}
-        >
-          <div className="flex flex-row">
-            <Input.Group compact>
+        <Form.Item label="Address 1" required>
+          <Input.Group compact>
+            <Form.Item
+              name={"address1"}
+              rules={[
+                {
+                  required: true,
+                  message: "Please input your Address!",
+                },
+              ]}
+              noStyle
+            >
               <InputComponent
                 disabled={true}
-                value={addressTable?.map((a) => a.fullAddress)[0]}
               />
-              <Button
-                type="primary"
-                onClick={() => {
-                  setKeyModal(1);
-                  setModalChooseAddress(true);
-                }}
-              >
-                Choose
-              </Button>
-            </Input.Group>
-          </div>
+            </Form.Item>
+            <Button
+              type="primary"
+              onClick={() => {
+                setKeyModal(1);
+                setModalChooseAddress(true);
+              }}
+            >
+              Choose
+            </Button>
+          </Input.Group>
         </Form.Item>
         <Form.Item
           label={"Business Purpose"}
@@ -982,21 +987,19 @@ const AddressForm = ({
       </span>
 
       <div className="w-full grid grid-cols-3 gap-2 pt-[30px]">
-        <Form.Item
-          label={"Address 2"}
-          name={"address2"}
-          getValueFromEvent={(e) => handleAddressObj(e, "address2")}
-          valuePropName={addressTable?.map((a) => a.fullAddress)[1]}
-        >
-          <div className="flex flex-row">
-            <Input.Group compact>
+        <Form.Item label={"Address 2"}>
+          <Input.Group compact>
+            <Form.Item
+              name={"address2"}
+              noStyle
+            >
               <InputComponent
-                value={addressTable?.map((a) => a.fullAddress)[1]}
                 // disabled={
                 //   !addressTable?.map((a) => a.overview)[0] ? true : false
                 // }
                 disabled={true}
               />
+              </Form.Item>
               <Button
                 type="primary"
                 onClick={() => {
@@ -1010,8 +1013,7 @@ const AddressForm = ({
                 Choose
               </Button>
             </Input.Group>
-          </div>
-        </Form.Item>
+          </Form.Item>
         <Form.Item
           label={"Business Purpose"}
           name={"businessPurpose2"}
@@ -1056,35 +1058,32 @@ const AddressForm = ({
       </span>
 
       <div className="w-full grid grid-cols-3 gap-2 pt-[30px]">
-        <Form.Item
-          label={"Address 3"}
-          name={"address3"}
-          getValueFromEvent={(e) => handleAddressObj(e, "address3")}
-          valuePropName={addressTable?.map((a) => a.fullAddress)[2]}
-        >
-          <div className="flex flex-row">
-            <Input.Group compact>
+        <Form.Item label={"Address 3"}>
+          <Input.Group compact>
+            <Form.Item
+              name={"address3"}
+              noStyle
+            >
               <InputComponent
-                value={addressTable?.map((a) => a.fullAddress)[2]}
                 // disabled={
                 //   !addressTable?.map((a) => a.overview)[1] ? true : false
                 // }
                 disabled={true}
               />
-              <Button
-                type="primary"
-                onClick={() => {
-                  setKeyModal(3);
-                  setModalChooseAddress(true);
-                }}
-                disabled={
-                  !addressTable?.map((a) => a.overview)[1] ? true : false
-                }
-              >
-                Choose
-              </Button>
-            </Input.Group>
-          </div>
+            </Form.Item>
+            <Button
+              type="primary"
+              onClick={() => {
+                setKeyModal(3);
+                setModalChooseAddress(true);
+              }}
+              disabled={
+                !addressTable?.map((a) => a.overview)[1] ? true : false
+              }
+            >
+              Choose
+            </Button>
+          </Input.Group>
         </Form.Item>
         <Form.Item
           label={"Business Purpose"}
@@ -1130,35 +1129,32 @@ const AddressForm = ({
       </span>
 
       <div className="w-full grid grid-cols-3 gap-2 pt-[30px]">
-        <Form.Item
-          label={"Address 4"}
-          name={"address4"}
-          getValueFromEvent={(e) => handleAddressObj(e, "address4")}
-          valuePropName={addressTable?.map((a) => a.fullAddress)[3]}
-        >
-          <div className="flex flex-row">
-            <Input.Group compact>
+        <Form.Item label={"Address 4"} >
+          <Input.Group compact>
+            <Form.Item
+              name={"address4"}
+              noStyle
+            >
               <InputComponent
-                value={addressTable?.map((a) => a.fullAddress)[3]}
                 // disabled={
                 //   !addressTable?.map((a) => a.overview)[2] ? true : false
                 // }
                 disabled={true}
               />
-              <Button
-                type="primary"
-                onClick={() => {
-                  setKeyModal(4);
-                  setModalChooseAddress(true);
-                }}
-                disabled={
-                  !addressTable?.map((a) => a.overview)[2] ? true : false
-                }
-              >
-                Choose
-              </Button>
-            </Input.Group>
-          </div>
+            </Form.Item>
+            <Button
+              type="primary"
+              onClick={() => {
+                setKeyModal(4);
+                setModalChooseAddress(true);
+              }}
+              disabled={
+                !addressTable?.map((a) => a.overview)[2] ? true : false
+              }
+            >
+              Choose
+            </Button>
+          </Input.Group>
         </Form.Item>
         <Form.Item
           label={"Business Purpose"}
@@ -1329,6 +1325,7 @@ const AddressForm = ({
           onValuesChange={(changedValues, allValues) => {
             formAddress.setFieldsValue(changedValues);
           }}
+          scrollToFirstError={{ behavior: "smooth", block: "center" }}
         >
           <span className="text-primary uppercase font-bold">
             ADDRESS INFORMATION

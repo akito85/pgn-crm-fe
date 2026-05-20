@@ -15,9 +15,25 @@
   src: url(assets/fonts/PublicSans-Medium.ttf) format("trueType");
 }
 
+@font-face {
+  font-family: "PlusJakartaSans";
+  src: url(assets/fonts/PlusJakartaSans-VariableFont_wght.ttf)
+    format("trueType");
+  font-weight: 200 800;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "PlusJakartaSans";
+  src: url(assets/fonts/PlusJakartaSans-Italic-VariableFont_wght.ttf)
+    format("trueType");
+  font-weight: 200 800;
+  font-style: italic;
+}
+
 body {
   margin: 0;
-  font-family: "PublicSans" !important;
+  font-family: "PlusJakartaSans", "PublicSans", sans-serif !important;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -70,6 +86,23 @@ tr:nth-child(even) > td.ant-table-cell-fix-right,
   background-color: #ffffff !important;
 }
 
+tr:nth-child(odd) > td.ant-table-cell-fix-left,
+tr:nth-child(odd) > td.ant-table-cell-fix-right,
+.ant-table-tbody .ant-table-row:nth-child(odd) {
+  background-color: #e6f0f4 !important;
+}
+tr:nth-child(even) > td.ant-table-cell,
+tr:nth-child(even) > td.ant-table-cell,
+.ant-table-tbody .ant-table-row:nth-child(even) {
+  border-color: #c8cdd4;
+}
+
+tr:nth-child(odd) > td.ant-table-cell,
+tr:nth-child(odd) > td.ant-table-cell,
+.ant-table-tbody .ant-table-row:nth-child(odd) {
+  border-color: #c8cdd4;
+}
+
 /* Hover effect - kuning pastel soft */
 .ant-table-tbody > tr:hover > td {
   background-color: #fef9e7 !important;
@@ -83,6 +116,18 @@ tr:nth-child(even) > td.ant-table-cell-fix-right,
 /* Hover pada selected row tetap kuning soft */
 .ant-table-tbody > tr.row-selected:hover > td {
   background-color: #fffbea !important;
+}
+
+/* Expand icon column: fixed width, prevent shrinking on resize */
+.ant-table-row-expand-icon-cell {
+  width: 48px !important;
+  min-width: 48px !important;
+  max-width: 48px !important;
+}
+
+/* Expanded row content padding */
+.ant-table-expanded-row > td {
+  padding: 8px 16px !important;
 }
 
 .ant-tag {
@@ -99,8 +144,8 @@ input[type="text"] {
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
-    monospace;
+  font-family:
+    source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
 }
 
 #components-layout-demo-custom-trigger .trigger {
@@ -171,17 +216,28 @@ code {
   color: #09a92a;
 }
 
-button.ant-btn.ant-btn-approve {
-  background: #a4be37;
-  border-radius: 8px;
-  color: #ffffff;
+button.ant-btn {
   height: auto;
-  width: auto;
+  display: flex;
+  justify-content: center;
   align-items: center;
-  display: inline-flex;
+  column-gap: 4px;
+  padding: 7px 9px 7px 9px;
+  font-size: 12px;
+  border-radius: 8px;
+}
+
+button.ant-btn > span {
+  line-height: 150%;
+}
+
+button.ant-btn.ant-btn-approve {
+  background: #388e3c;
+  color: #ffffff;
+  align-items: center;
   box-shadow: 0 0 #0000;
   border-width: 1px;
-  border-color: #a4be37 !important;
+  border-color: #388e3c;
 }
 
 button.ant-btn-primary {
@@ -189,7 +245,6 @@ button.ant-btn-primary {
   background: #0075bf;
   border-radius: 6px !important;
   align-items: center;
-  display: inline-flex;
 }
 
 span.ant-input-affix-wrapper.text-right {
@@ -201,37 +256,113 @@ div.flex.flex-col.w-auto {
 }
 
 button.ant-btn.ant-btn-reject {
-  background: #ff0000;
-  border-radius: 8px;
+  background: #d32f2f;
   color: #ffffff;
-  height: auto;
-  width: auto;
   align-items: center;
-  display: inline-flex;
   box-shadow: 0 0 #0000;
   border-width: 1px;
-  border-color: #ff0000 !important;
+  border-color: #d32f2f;
 }
 
 button.ant-btn:hover {
   border-color: transparent;
 }
+
 button.ant-btn.ant-btn-submit {
   background: #0075bf;
-  border-radius: 8px;
   color: #ffffff;
-  height: auto;
-  width: auto;
+  border-color: #0075bf;
+}
+
+button.ant-btn.ant-btn-secondary {
+  background: #e6f4fa;
+  color: #0075bf;
+  border-color: #e6f4fa;
+}
+
+button.ant-btn.ant-btn-menu {
+  background: #ffffff;
+  border: 1px solid #c8cdd4;
+  color: #000000;
   align-items: center;
-  display: inline-flex;
+}
+
+button.ant-btn.ant-btn-submit:disabled,
+button.ant-btn.ant-btn-secondary:disabled,
+button.ant-btn.ant-btn-menu:disabled,
+button.ant-btn.ant-btn-approve:disabled,
+button.ant-btn.ant-btn-reject:disabled {
+  border-color: #e0e0e0;
+  background: #e0e0e0;
+  color: #bdbdbd;
+}
+
+button.ant-btn.ant-btn-action {
+  display: flex;
+  column-gap: 8px;
+  width: fit-content;
+  background: transparent;
+  color: black;
+  align-items: center;
+  border: none;
+  padding: 8px;
+
+  svg {
+    color: black;
+    transition: color 0.3s ease-in-out;
+  }
+
+  &:hover {
+    background-color: #f5f5f5;
+
+    svg {
+      color: #0075bf;
+    }
+  }
+
+  &:disabled {
+    svg {
+      color: #bdbdbd;
+    }
+
+    &:hover {
+      color: black;
+      background: transparent;
+    }
+  }
+}
+
+button.ant-btn.ant-btn-table-action {
+  display: flex;
+  align-items: center;
+  height: 20px;
+  padding: 0;
+  border: none;
+  background-color: transparent;
+
+  svg {
+    color: black;
+    transition: color 0.3s ease-in-out;
+  }
+
+  &:hover {
+    background-color: transparent;
+
+    svg {
+      color: #0075bf;
+    }
+  }
+
+  &:disabled {
+    svg {
+      color: #bdbdbd;
+    }
+  }
 }
 
 button.ant-btn.ant-btn-default {
   border-width: 1px;
-  border-radius: 8px;
   color: #0075bf;
-  height: auto;
-  width: auto;
   align-items: center;
   display: inline-flex;
   background: transparent;
@@ -239,16 +370,27 @@ button.ant-btn.ant-btn-default {
   box-shadow: 0 0 #0000;
 }
 
+button.ant-btn.ant-btn-default:disabled {
+  background: #e0e0e0;
+  color: #bdbdbd;
+  align-items: center;
+  display: inline-flex;
+  border: none;
+}
+
 button.ant-btn.ant-btn-grey {
   color: #ffffff;
   border-width: 1px;
   border-radius: 5px;
-  height: auto;
   width: auto;
   align-items: center;
   display: inline-flex;
   background: #979797;
   border: none;
+}
+
+div.ant-popover-inner-content {
+  padding: 8px;
 }
 
 span.anticon anticon-delete {
@@ -346,6 +488,13 @@ span.anticon anticon-delete {
   width: 100%;
 }
 
+.ant-popconfirm .ant-popover-buttons {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
 .ant-pagination-item:not(.ant-pagination-item-active),
 .ant-pagination-item-link {
   background: rgb(29.4, 27.5, 36.1, 8%) !important;
@@ -423,16 +572,28 @@ td.ant-table-column-sort {
   border-radius: 4px !important;
 }
 
+.ant-checkbox-checked .ant-checkbox-inner::after {
+  border-color: #ffffff !important;
+}
+
 .action-checkbox .ant-checkbox-checked .ant-checkbox-inner {
   background-color: #0075bf !important;
   border-color: transparent !important;
   border-radius: 4px !important;
 }
 
+.action-checkbox .ant-checkbox-checked .ant-checkbox-inner::after {
+  border-color: #ffffff !important;
+}
+
 .checkbox-table .ant-checkbox-checked .ant-checkbox-inner {
   background-color: #0075bf !important;
   border-color: transparent !important;
   border-radius: 4px !important;
+}
+
+.checkbox-table .ant-checkbox-checked .ant-checkbox-inner::after {
+  border-color: #ffffff !important;
 }
 
 /* .ant-menu .ant-menu-item-selected {
@@ -485,7 +646,7 @@ td.ant-table-column-sort {
 }
 
 .table-expand-custom .ant-table-tbody > tr > td {
-  padding: 16px !important;
+  padding: 0px !important;
 }
 
 #table-expand .ant-table-tbody > tr > td {
@@ -591,7 +752,7 @@ td.ant-table-column-sort {
 }
 .ant-alert {
   border-radius: 5px !important;
-  padding: 4px !important;
+  padding: 8px !important;
 }
 .ant-alert-success {
   border: none !important;
@@ -620,6 +781,9 @@ td.ant-table-column-sort {
   background-color: #fff;
   border: 1px solid #dbdade !important;
   border-radius: 6px !important;
+  height: 34px !important;
+  display: flex !important;
+  align-items: center !important;
 }
 .ant-select-arrow {
   color: #4b465c !important;
@@ -643,12 +807,16 @@ td.ant-table-column-sort {
 }
 
 .ant-layout-header {
-  margin: 10px 20px 0px 20px !important;
   border-radius: 8px;
 }
 span.ant-tree-title {
   color: #000 !important;
 }
+
+.ant-form-item-label {
+  padding-bottom: 4px !important;
+}
+
 .ant-form-item-label
   > label.ant-form-item-required:not(
     .ant-form-item-required-mark-optional
@@ -689,11 +857,8 @@ span.ant-tree-title {
 } */
 
 .ant-alert-message {
-  justify-content: center;
   display: flex !important;
-  margin: 15px 15px 15px 15px;
-  font-size: 15px;
-  line-height: 22px;
+  font-size: 16px;
 }
 
 .modalTerminate .ant-alert-message {
@@ -769,6 +934,19 @@ span.ant-tree-title {
   box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05) !important;
 }
 
+.ant-input-number-handler-wrap {
+  border-radius: 0 6px 6px 0 !important;
+  overflow: hidden;
+}
+
+.ant-input-number-handler-up {
+  border-radius: 0 6px 0 0 !important;
+}
+
+.ant-input-number-handler-down {
+  border-radius: 0 0 6px 0 !important;
+}
+
 .ant-input-number-input {
   text-align: right !important;
 }
@@ -789,9 +967,17 @@ span.ant-tree-title {
 .ant-menu-title-content a {
   color: rgba(0, 0, 0, 0.85);
 }
-.ant-menu-submenu-selected svg {
+.ant-menu-item-selected svg,
+.ant-menu-submenu:has(> .ant-menu-sub > .ant-menu-item-selected)
+  > .ant-menu-submenu-title
+  svg {
   filter: invert(44%) sepia(41%) saturate(3760%) hue-rotate(191deg)
     brightness(101%) contrast(102%);
+}
+/* Nested submenu/item icons smaller than top-level for visual hierarchy */
+.ant-menu-sub.ant-menu-inline .sidebar-icon {
+  width: 16px !important;
+  height: 16px;
 }
 .ant-menu-submenu-selected .ant-menu-title-content .active {
   color: var(--primary);
@@ -911,6 +1097,37 @@ span.ant-tree-title {
 .ant-menu {
   font-size: 12px !important;
 }
+/* Suppress submenu arrow rotation transition in the sidebar so submenus open/close
+   instantly with no animation -- eliminates the expand/collapse glitch on navigation.
+   Scoped to .ant-layout-sider so other antd menus (e.g. dropdowns) are unaffected. */
+.ant-layout-sider .ant-menu-submenu-arrow,
+.ant-layout-sider .ant-menu-submenu-arrow::before,
+.ant-layout-sider .ant-menu-submenu-arrow::after {
+  transition: none !important;
+}
+.ant-layout-sider .ant-menu-submenu,
+.ant-layout-sider .ant-menu-submenu-inline {
+  transition: none !important;
+}
+/* Collapsed sidebar: popup flyout for submenus on hover */
+.custom-menu-popup {
+  background: #fff;
+  border-radius: 4px;
+  box-shadow:
+    0 3px 6px -4px rgba(0, 0, 0, 0.12),
+    0 6px 16px 0 rgba(0, 0, 0, 0.08),
+    0 9px 28px 8px rgba(0, 0, 0, 0.05);
+  min-width: 160px;
+  padding: 4px 0;
+}
+.custom-menu-popup .ant-menu-item {
+  padding: 5px 12px;
+  line-height: 22px;
+  height: auto;
+}
+.custom-menu-popup .ant-menu-item:hover {
+  background: #f5f5f5;
+}
 
 .width-collapsed {
   min-width: 80px !important;
@@ -918,6 +1135,106 @@ span.ant-tree-title {
 .width-not-collapsed {
   min-width: max-content !important;
   max-width: 280px !important;
+}
+
+/* Center icons in collapsed sidebar */
+.ant-menu-inline-collapsed .ant-menu-item-icon,
+.ant-menu-submenu-inline.ant-menu-submenu-popup .ant-menu-item-icon {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  margin-right: 0 !important;
+}
+
+/* When collapsed, all menu items should have minimal padding to center icons */
+.ant-menu-inline-collapsed .ant-menu-item,
+.ant-menu-inline-collapsed .ant-menu-submenu > .ant-menu-submenu-title {
+  padding: 0 !important; /* Remove padding to allow full centering */
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Override any conflicting submenu title padding when collapsed */
+.ant-menu-inline-collapsed .ant-menu-submenu > .ant-menu-submenu-title {
+  left: 0 !important;
+  padding: 0 !important;
+  text-overflow: clip !important;
+}
+
+/* Align logo with menu items */
+.logo {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  height: 46px !important; /* Match menu item height */
+  padding: 0 12px !important; /* Consistent padding */
+}
+
+/* Adjust logo container when sidebar is collapsed */
+.width-collapsed .logo {
+  justify-content: center !important;
+  padding: 0 !important;
+  transition: all 0.3s ease !important;
+}
+
+/* Smooth transition for logo when expanding/collapsing */
+.logo {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  position: relative !important;
+  padding-right: 24px !important; /* Make room for the toggle button */
+}
+
+/* Align the toggle button with submenu arrows */
+.logo .trigger {
+  position: absolute !important;
+  right: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 100% !important;
+  top: 0 !important;
+}
+
+/* Submenu items in collapsed state should also be centered */
+.ant-menu-inline-collapsed .ant-menu-sub .ant-menu-item,
+.ant-menu-inline-collapsed .ant-menu-sub .ant-menu-submenu-title {
+  padding: 0 !important; /* Remove padding to allow full centering */
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Expanded state - maintain proper indentation hierarchy */
+.ant-menu:not(.ant-menu-inline-collapsed) .ant-menu-item {
+  padding: 0 24px !important;
+}
+
+.ant-menu:not(.ant-menu-inline-collapsed) .ant-menu-submenu-title {
+  padding: 0 24px !important;
+}
+
+/* Submenu items in expanded state should have proper indentation */
+.ant-menu:not(.ant-menu-inline-collapsed) .ant-menu-sub .ant-menu-item {
+  padding: 0 24px 0 48px !important; /* Left padding for indentation, right for balance */
+}
+
+.ant-menu:not(.ant-menu-inline-collapsed)
+  .ant-menu-sub
+  .ant-menu-submenu-title {
+  padding: 0 24px 0 48px !important; /* Left padding for indentation, right for balance */
+}
+
+/* Hide text content when sidebar is collapsed */
+.sidebar-collapsed-content {
+  visibility: hidden !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  display: inline-block !important;
+  line-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
 .ant-picker {
@@ -934,7 +1251,9 @@ span.ant-tree-title {
   background: #fff;
   border: 1px solid #d9d9d9;
   border-radius: 6px !important;
-  transition: border 0.3s, box-shadow 0.3s;
+  transition:
+    border 0.3s,
+    box-shadow 0.3s;
   box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05) !important;
 }
 
@@ -1041,4 +1360,86 @@ span.ant-tree-title {
 
 .custom-radio-tabs .ant-radio-button-wrapper span {
   font-size: 12px !important;
+}
+
+/* ========================================
+   Custom Collapse Styling for Receipt Approval Detail
+   Based on Figma Design Specs
+   ======================================== */
+
+/* Remove default collapse styling */
+.ant-collapse {
+  background: transparent !important;
+  border: none !important;
+}
+
+/* Collapse Item - Main container */
+.ant-collapse > .ant-collapse-item {
+  background: var(--Semantic-Background-light-bg-primary, #ffffff) !important;
+  border: 1px solid var(--Semantic-Border-light-border-primary, #c8cdd4) !important;
+  border-radius: 8px !important;
+  margin-bottom: 24px !important;
+  overflow: hidden !important;
+}
+
+/* Active/Expanded item with border highlight */
+.ant-collapse > .ant-collapse-item.ant-collapse-item-active {
+  border: 1px solid var(--Semantic-Border-light-border-primary, #c8cdd4) !important;
+}
+
+/* Collapse Header */
+.ant-collapse-header {
+  background: var(--Semantic-Background-light-bg-secondary, #f5f5f5) !important;
+  color: #0075bf !important;
+  font-weight: 600 !important;
+  font-size: 16px;
+  border-radius: 8px 8px 0 0 !important;
+}
+
+/* Collapse Header when active/expanded */
+.ant-collapse-item-active .ant-collapse-header {
+  border-bottom: 1px solid var(--Semantic-Border-light-border-primary, #c8cdd4) !important;
+}
+
+/* Collapse arrow icon */
+.ant-collapse-header .ant-collapse-arrow {
+  color: black !important;
+  font-size: 14px !important;
+}
+
+/* Collapse Content */
+.ant-collapse-content {
+  background: var(--Semantic-Background-light-bg-primary, #ffffff) !important;
+  border-top: none !important;
+}
+
+/* Collapse Content Body */
+.ant-collapse-content-box {
+  padding: 16px;
+}
+
+/* Remove extra border on last item */
+.ant-collapse > .ant-collapse-item:last-child {
+  margin-bottom: 0 !important;
+}
+
+/* RC Bank — small font for table/form sections (matches text-xs / bank info header) */
+.rc-bank-small table {
+  font-size: 0.75rem;
+}
+.rc-bank-small .ant-table-thead > tr > th {
+  font-size: 0.75rem;
+}
+.rc-bank-small .ant-table-cell {
+  white-space: nowrap;
+  max-width: 280px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rc-bank-small .ant-form-item-label label {
+  font-size: 0.75rem;
+}
+.rc-bank-small .ant-select-selection-item,
+.rc-bank-small .ant-input {
+  font-size: 0.75rem;
 }

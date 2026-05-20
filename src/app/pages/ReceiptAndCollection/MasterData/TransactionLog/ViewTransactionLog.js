@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import { Spin } from "antd";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
@@ -20,14 +19,18 @@ import {
 
 // Breadcrumbs
 const routes = [
-    {
-        path: "",
-        breadcrumbName: "Receipt & Collection",
-    },
-    {
-        path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_TRANSACTION_LOG,
-        breadcrumbName: "Transaction Log",
-    },
+  {
+    path: "",
+    breadcrumbName: "System Setup",
+  },
+  {
+    path: "",
+    breadcrumbName: "Master Data",
+  },
+  {
+    path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_TRANSACTION_LOG,
+    breadcrumbName: "Transaction Log",
+  },
 ];
 
 const ViewTransactionLog = () => {
@@ -115,7 +118,7 @@ const ViewTransactionLog = () => {
     };
 
     return (
-        <LayoutMenu>
+        <>
             <Spin
                 spinning={loading || false}
                 className={"w-full top-20"}
@@ -130,7 +133,7 @@ const ViewTransactionLog = () => {
                             totalData={totalElements}
                             current={page}
                             pageSize={pageSize}
-                            tableScrolled={{ y: 525, x: 1800 }}
+                            tableScrolled={{ y: 525, x: "max-content" }}
                             onChange={handleChangeSize}
                             onSort={onSort}
                             columns={[
@@ -157,7 +160,7 @@ const ViewTransactionLog = () => {
                     </CardContainer>
                 </div>
             </Spin>
-        </LayoutMenu>
+        </>
     );
 };
 

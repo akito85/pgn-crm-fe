@@ -1,6 +1,10 @@
-// TableRBI.js (with resizable columns + customHeaderLeft + showExport control)
+// TableRBI.js (with resizable columns + grouped columns support + customHeaderLeft + showExport control)
 import React, { useMemo, useState, useCallback } from "react";
-import { DownloadOutlined, FilterOutlined } from "@ant-design/icons";
+import {
+  DownloadOutlined,
+  FilterOutlined,
+  ReloadOutlined,
+} from "@ant-design/icons";
 import { Button, Pagination, Select, Table } from "antd";
 import ColumnSettings from "./ColumnSettings/ColumnSettings";
 import SearchBar from "./SearchBar";
@@ -17,7 +21,6 @@ const ResizableTitle = (props) => {
     return <th {...restProps} />;
   }
 
-  // Block click event if we were just resizing
   const handleClick = (e) => {
     if (isResizingRef.current) {
       e.stopPropagation();
@@ -52,7 +55,6 @@ const ResizableTitle = (props) => {
           zIndex: 1,
         }}
         onClick={(e) => {
-          // Prevent sort when clicking on resize handle
           e.stopPropagation();
           e.preventDefault();
         }}
@@ -78,10 +80,8 @@ const ResizableTitle = (props) => {
             document.body.style.cursor = "default";
             document.body.style.userSelect = "auto";
 
-            // Set flag if we actually resized (moved the mouse)
             if (hasMoved) {
               isResizingRef.current = true;
-              // Reset flag after a short delay
               setTimeout(() => {
                 isResizingRef.current = false;
               }, 100);
@@ -122,10 +122,10 @@ const TableRBI = ({
   className,
   useSelect = true,
   usePagination = true,
-  useInfiniteScroll = false, // PROPS BARU untuk infinite scroll
-  onLoadMore = () => {}, // PROPS BARU callback untuk load more
-  hasMore = false, // PROPS BARU indicator apakah masih ada data
-  loadMoreThreshold = 20, // PROPS BARU jumlah row dari bawah untuk trigger load more
+  useInfiniteScroll = false,
+  onLoadMore = () => {},
+  hasMore = false,
+  loadMoreThreshold = 20,
   onSort = () => {},
   handleDownload = () => {},
   columnDefinitions,
@@ -138,32 +138,59 @@ const TableRBI = ({
   showExport = false,
   showAdvanceSearch = true,
   showSearchBar = true,
+  showRefresh = false,
+  onRefresh,
+  refreshLabel,
+  refreshIcon,
   enableRowClick = false,
   selectedRowKey = null,
   onRowClick = () => {},
+  onSearch = () => {},
+  tableSize = "default",
 }) => {
   const [optionSelectedCol, setOptionSelectedCol] = useState([]);
   const [isAdvanceOpen, setIsAdvanceOpen] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [clickedRowKey, setClickedRowKey] = useState(null);
 
-  // State untuk menyimpan width setiap column
-  const [columnWidths, setColumnWidths] = useState({});
+  const handleRefresh =
+    onRefresh ||
+    (() => {
+      window.location.reload();
+    });
 
-  // State untuk drag and drop column reordering
+  const [columnWidths, setColumnWidths] = useState({});
   const [draggedColumnKey, setDraggedColumnKey] = useState(null);
   const [columnOrder, setColumnOrder] = useState([]);
+  const lastScrollTopRef = React.useRef(0);
 
-  // Ref untuk table scroll container
   const tableRef = React.useRef(null);
+
+  // Fungsi helper untuk mengumpulkan semua keys dari kolom (termasuk children)
+  const getAllColumnKeys = useCallback((cols) => {
+    const keys = [];
+    const traverse = (columns) => {
+      columns.forEach((col) => {
+        const key = col.key || col.dataIndex || col.title;
+        if (key) {
+          keys.push(key);
+        }
+        if (col.children && Array.isArray(col.children)) {
+          traverse(col.children);
+        }
+      });
+    };
+    traverse(cols);
+    return keys;
+  }, []);
 
   // Initialize column order when columns change
   React.useEffect(() => {
     if (columns && columns.length > 0 && columnOrder.length === 0) {
-      const initialOrder = columns.map((c) => c.key || c.dataIndex || c.title);
+      const initialOrder = getAllColumnKeys(columns);
       setColumnOrder(initialOrder);
     }
-  }, [columns, columnOrder.length]);
+  }, [columns, columnOrder.length, getAllColumnKeys]);
 
   // Infinite scroll handler
   React.useEffect(() => {
@@ -173,16 +200,15 @@ const TableRBI = ({
       const target = e.target;
       if (!target) return;
 
-      // Check if we're scrolling in the table body
       const scrollTop = target.scrollTop;
+      
+      // Prevent horizontal scroll from triggering fetch
+      if (scrollTop === lastScrollTopRef.current) return;
+      lastScrollTopRef.current = scrollTop;
+
       const scrollHeight = target.scrollHeight;
       const clientHeight = target.clientHeight;
-
-      // Calculate how many pixels from bottom
       const distanceFromBottom = scrollHeight - (scrollTop + clientHeight);
-
-      // Trigger load more when we're close to bottom
-      // Estimate: each row is about 40px, so threshold * 40
       const pixelThreshold = loadMoreThreshold * 40;
 
       if (distanceFromBottom < pixelThreshold && !isLoadingMore && !loading) {
@@ -193,7 +219,6 @@ const TableRBI = ({
       }
     };
 
-    // Find the ant-table-body element
     const tableBody = document.querySelector(`#${idTable} .ant-table-body`);
 
     if (tableBody) {
@@ -212,7 +237,46 @@ const TableRBI = ({
     idTable,
   ]);
 
-  // Handler untuk resize column
+  // Keyboard arrow navigation
+  React.useEffect(() => {
+    const handleKeyDown = (e) => {
+      const activeElement = document.activeElement;
+      const isTyping =
+        activeElement.tagName === "INPUT" ||
+        activeElement.tagName === "TEXTAREA" ||
+        activeElement.isContentEditable;
+
+      if (isTyping) return;
+
+      const tableContainer = document.querySelector(`#${idTable}`);
+      if (!tableContainer) return;
+
+      const tableBody = document.querySelector(`#${idTable} .ant-table-body`);
+      if (!tableBody) return;
+
+      const scrollAmount = 100;
+
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        tableBody.scrollTo({
+          left: tableBody.scrollLeft - scrollAmount,
+          behavior: "smooth",
+        });
+      } else if (e.key === "ArrowRight") {
+        e.preventDefault();
+        tableBody.scrollTo({
+          left: tableBody.scrollLeft + scrollAmount,
+          behavior: "smooth",
+        });
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [idTable]);
+
   const handleResize = useCallback(
     (key) => (newWidth) => {
       setColumnWidths((prev) => ({
@@ -220,10 +284,9 @@ const TableRBI = ({
         [key]: newWidth,
       }));
     },
-    []
+    [],
   );
 
-  // Drag and Drop handlers
   const handleDragStart = useCallback((e, columnKey) => {
     setDraggedColumnKey(columnKey);
     e.dataTransfer.effectAllowed = "move";
@@ -248,7 +311,6 @@ const TableRBI = ({
           const targetIndex = newOrder.indexOf(targetColumnKey);
 
           if (draggedIndex !== -1 && targetIndex !== -1) {
-            // Remove dragged item and insert at target position
             newOrder.splice(draggedIndex, 1);
             newOrder.splice(targetIndex, 0, draggedColumnKey);
           }
@@ -260,79 +322,44 @@ const TableRBI = ({
       setDraggedColumnKey(null);
       return false;
     },
-    [draggedColumnKey]
+    [draggedColumnKey],
   );
 
   const handleDragEnd = useCallback(() => {
     setDraggedColumnKey(null);
   }, []);
 
-  // Build visible + fixed-applied columns with resizable feature
-  const displayedColumns = useMemo(() => {
-    const cols = (columns || []).map((c) => ({
-      ...c,
-      key: c.key || c.dataIndex || c.title,
-    }));
-
-    // Filter out hidden columns
-    const visible = cols.filter((col) => !optionSelectedCol.includes(col.key));
-
-    // Apply column order if available
-    if (columnOrder.length > 0) {
-      visible.sort((a, b) => {
-        const indexA = columnOrder.indexOf(a.key);
-        const indexB = columnOrder.indexOf(b.key);
-        if (indexA === -1) return 1;
-        if (indexB === -1) return -1;
-        return indexA - indexB;
-      });
-    }
-
-    // Separate into left, normal, right
-    const leftFixed = [];
-    const rightFixed = [];
-    const normal = [];
-
-    visible.forEach((col) => {
-      // Check if column is fixed from ColumnSettings state OR from column's own fixed property
-      const isLeftFixed =
-        (Array.isArray(fixedColumns.left) &&
-          fixedColumns.left.includes(col.key)) ||
-        col.fixed === "left";
-      const isRightFixed =
-        (Array.isArray(fixedColumns.right) &&
-          fixedColumns.right.includes(col.key)) ||
-        col.fixed === "right";
-
-      if (isLeftFixed) {
-        leftFixed.push(col);
-      } else if (isRightFixed) {
-        rightFixed.push(col);
-      } else {
-        normal.push(col);
-      }
-    });
-
-    // Apply fixed property and resizable width
-    const applyColumnProps = (col, fixedPos) => {
+  // Fungsi rekursif untuk memproses kolom dengan children
+  const processColumn = useCallback(
+    (col, fixedPos = null) => {
       const colKey = col.key || col.dataIndex || col.title;
 
-      // Determine text alignment based on column properties
-      let textAlign = "left"; // default: rata kiri
-      if (col.isNumber || col.align === "right") {
-        textAlign = "right"; // jika isNumber: rata kanan
-      } else if (col.isClassification) {
-        textAlign = "center"; // jika isClassification: rata tengah
+      // Jika kolom punya children, proses children secara rekursif
+      if (col.children && Array.isArray(col.children)) {
+        return {
+          ...col,
+          key: colKey,
+          children: col.children.map((childCol) =>
+            processColumn(childCol, fixedPos),
+          ),
+        };
       }
 
-      // Determine if drag and drop should be enabled
-      // Not for fixed columns (either by fixedPos parameter or by col.fixed property)
+      // Proses kolom biasa (tanpa children)
+      let textAlign = "left";
+      if (col.isNumber || col.align === "right") {
+        textAlign = "right";
+      } else if (col.isClassification) {
+        textAlign = "center";
+      }
+
       const isDraggable = !fixedPos && !col.fixed;
 
       const newCol = {
         ...col,
+        key: colKey,
         width: columnWidths[colKey] || col.width || 150,
-        align: textAlign,
+        align: col.align || textAlign,
         ellipsis: {
           showTitle: true,
         },
@@ -340,10 +367,10 @@ const TableRBI = ({
           const baseStyle = {
             textTransform: "uppercase",
             fontSize: "10px",
+            padding: tableSize === "small" ? "2px 4px" : "4px 8px",
             cursor: isDraggable ? "move" : "default",
           };
 
-          // Only add drag-related styles if column is being dragged
           if (isDraggable && draggedColumnKey === colKey) {
             baseStyle.opacity = 0.5;
             baseStyle.backgroundColor = "#f0f0f0";
@@ -362,44 +389,122 @@ const TableRBI = ({
             onDragEnd: isDraggable ? handleDragEnd : undefined,
           };
         },
-        onCell: () => ({
-          style: {
-            textAlign: textAlign,
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            fontSize: "11px",
-          },
-        }),
+        onCell: (record, rowIndex) => {
+          const original = col.onCell ? col.onCell(record, rowIndex) : {};
+          return {
+            ...original,
+            style: {
+              ...original.style,
+              textAlign: textAlign,
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              fontSize: "11px",
+            },
+          };
+        },
       };
+
       if (fixedPos) {
         newCol.fixed = fixedPos;
       } else if (!col.fixed) {
         delete newCol.fixed;
       }
+
       return newCol;
+    },
+    [
+      columnWidths,
+      handleResize,
+      handleDragStart,
+      handleDragOver,
+      handleDrop,
+      handleDragEnd,
+      draggedColumnKey,
+      tableSize,
+    ],
+  );
+
+  const displayedColumns = useMemo(() => {
+    const cols = (columns || []).map((c) => ({
+      ...c,
+      key: c.key || c.dataIndex || c.title,
+    }));
+
+    // Filter hidden columns (termasuk check di children)
+    const filterHidden = (columns) => {
+      return columns
+        .map((col) => {
+          const colKey = col.key || col.dataIndex || col.title;
+
+          // Jika kolom ini hidden, skip
+          if (optionSelectedCol.includes(colKey)) {
+            return null;
+          }
+
+          // Jika punya children, filter children juga
+          if (col.children && Array.isArray(col.children)) {
+            const filteredChildren = filterHidden(col.children);
+            // Jika semua children hidden, hide parent juga
+            if (filteredChildren.length === 0) {
+              return null;
+            }
+            return {
+              ...col,
+              children: filteredChildren,
+            };
+          }
+
+          return col;
+        })
+        .filter(Boolean);
     };
 
+    const visible = filterHidden(cols);
+
+    // Apply column order (hanya untuk top-level columns)
+    if (columnOrder.length > 0) {
+      visible.sort((a, b) => {
+        const indexA = columnOrder.indexOf(a.key);
+        const indexB = columnOrder.indexOf(b.key);
+        if (indexA === -1) return 1;
+        if (indexB === -1) return -1;
+        return indexA - indexB;
+      });
+    }
+
+    // Separate into left, normal, right
+    const leftFixed = [];
+    const rightFixed = [];
+    const normal = [];
+
+    visible.forEach((col) => {
+      const isLeftFixed =
+        (Array.isArray(fixedColumns.left) &&
+          fixedColumns.left.includes(col.key)) ||
+        col.fixed === "left";
+      const isRightFixed =
+        (Array.isArray(fixedColumns.right) &&
+          fixedColumns.right.includes(col.key)) ||
+        col.fixed === "right";
+
+      if (isLeftFixed) {
+        leftFixed.push(col);
+      } else if (isRightFixed) {
+        rightFixed.push(col);
+      } else {
+        normal.push(col);
+      }
+    });
+
     const finalCols = [
-      ...leftFixed.map((c) => applyColumnProps(c, "left")),
-      ...normal.map((c) => applyColumnProps(c, undefined)),
-      ...rightFixed.map((c) => applyColumnProps(c, "right")),
+      ...leftFixed.map((c) => processColumn(c, "left")),
+      ...normal.map((c) => processColumn(c, undefined)),
+      ...rightFixed.map((c) => processColumn(c, "right")),
     ];
 
     return finalCols;
-  }, [
-    columns,
-    optionSelectedCol,
-    fixedColumns,
-    columnWidths,
-    handleResize,
-    columnOrder,
-    handleDragStart,
-    handleDragOver,
-    handleDrop,
-    handleDragEnd,
-    draggedColumnKey,
-  ]);
+  }, [columns, optionSelectedCol, fixedColumns, columnOrder, processColumn]);
 
   const handleAdvanceSearch = (searchData) => {
     onAdvanceSearch(searchData);
@@ -410,34 +515,30 @@ const TableRBI = ({
     onAdvanceSearch(null);
   };
 
-  // Components untuk Ant Design Table
   const components = {
     header: {
       cell: ResizableTitle,
     },
   };
 
-  // Check if any right side controls should be shown
-  const hasRightControls = showExport || showAdvanceSearch || showSearchBar;
+  const hasRightControls =
+    showExport || showAdvanceSearch || showSearchBar || showRefresh;
 
-  // Sync internal state with external selectedRowKey
   React.useEffect(() => {
     if (selectedRowKey !== null && selectedRowKey !== clickedRowKey) {
       setClickedRowKey(selectedRowKey);
     }
   }, [selectedRowKey, clickedRowKey]);
 
-  // Handle row click
   const handleRowClick = useCallback(
     (record) => {
       const rowKey = record.key || record.recordId || record.id;
       setClickedRowKey(rowKey);
       onRowClick(record, rowKey);
     },
-    [onRowClick]
+    [onRowClick],
   );
 
-  // Custom onRow handler with hover and click effects
   const customOnRow = useCallback(
     (record, index) => {
       const baseOnRow = onRow ? onRow(record, index) : {};
@@ -445,11 +546,9 @@ const TableRBI = ({
       return {
         ...baseOnRow,
         onClick: (event) => {
-          // Call original onClick if exists
           if (baseOnRow.onClick) {
             baseOnRow.onClick(event);
           }
-          // Handle row click for highlighting
           if (enableRowClick) {
             handleRowClick(record);
           }
@@ -463,10 +562,9 @@ const TableRBI = ({
         },
       };
     },
-    [onRow, enableRowClick, handleRowClick]
+    [onRow, enableRowClick, handleRowClick],
   );
 
-  // Custom rowClassName handler
   const customRowClassName = useCallback(
     (record, index) => {
       const rowKey = record.key || record.recordId || record.id;
@@ -479,55 +577,186 @@ const TableRBI = ({
 
       return `${baseClassName} ${isSelected ? "row-selected" : ""}`.trim();
     },
-    [rowClassName, enableRowClick, clickedRowKey]
+    [rowClassName, enableRowClick, clickedRowKey],
   );
 
   return (
     <div className={"flex flex-col w-full"}>
-      <style>
-        {`
-          /* Override cursor for sort and filter icons in table headers */
-          #${idTable} .ant-table-column-sorter,
-          #${idTable} .ant-table-filter-trigger,
-          #${idTable} .ant-table-column-sorter-up,
-          #${idTable} .ant-table-column-sorter-down,
-          #${idTable} .ant-table-filter-trigger-container {
-            cursor: pointer !important;
+    <style>
+      {`
+        #${idTable} .ant-table-content {
+          position: relative;
+          z-index: 1;
+        }
+
+        #${idTable} .ant-table-body {
+          position: relative;
+          z-index: 1;
+        }
+
+        #${idTable} .ant-table-tbody > tr {
+          position: relative;
+          z-index: 1;
+        }
+
+        #${idTable} .ant-table-tbody > tr:hover {
+          z-index: 2;
+        }
+
+        #${idTable} .ant-table-tbody > tr.row-selected {
+          z-index: 2;
+        }
+
+        #${idTable} .ant-table-tbody .ant-table-cell-fix-left,
+        #${idTable} .ant-table-tbody .ant-table-cell-fix-right {
+          z-index: 3;
+        }
+
+        #${idTable} .ant-table-tbody > tr:hover .ant-table-cell-fix-left,
+        #${idTable} .ant-table-tbody > tr:hover .ant-table-cell-fix-right,
+        #${idTable} .ant-table-tbody > tr.row-selected .ant-table-cell-fix-left,
+        #${idTable} .ant-table-tbody > tr.row-selected .ant-table-cell-fix-right {
+          z-index: 3;
+        }
+
+        #${idTable} .ant-table-thead > tr > th {
+          position: relative;
+          z-index: 4;
+          background-color: #0075BF !important;
+          color: white !important;
+        }
+
+        #${idTable} .ant-table-thead > tr > th .ant-table-column-sorter {
+          color: white !important;
+        }
+
+        #${idTable} .ant-table-thead > tr > th .ant-table-filter-trigger {
+          color: white !important;
+        }
+
+        #${idTable} .ant-table-thead .ant-table-cell-fix-left,
+        #${idTable} .ant-table-thead .ant-table-cell-fix-right {
+          z-index: 5;
+          background-color: #0075BF !important;
+          color: white !important;
+        }
+
+        #${idTable} .ant-table-filter-trigger,
+        #${idTable} .ant-table-filter-trigger-container,
+        #${idTable} .ant-table-column-sorter {
+          position: relative;
+          z-index: 6;
+          pointer-events: auto;
+        }
+
+        #${idTable} .ant-table-body::-webkit-scrollbar {
+          width: 8px;
+          height: 8px;
+          z-index: 10;
+        }
+
+        #${idTable} .ant-table-body::-webkit-scrollbar-track {
+          background: #f1f1f1;
+          z-index: 10;
+        }
+
+        #${idTable} .ant-table-body::-webkit-scrollbar-thumb {
+          background: #888;
+          border-radius: 6px;
+          z-index: 10;
+        }
+
+        #${idTable} .ant-table-body::-webkit-scrollbar-thumb:hover {
+          background: #555;
+        }
+
+        #${idTable} .ant-table-body {
+          scrollbar-width: thin;
+          scrollbar-color: #888 #f1f1f1;
+          padding-bottom: 8px;
+        }
+
+        @supports (-moz-appearance:none) {
+          #${idTable} .ant-table-body {
+            padding-bottom: 12px;
           }
 
-          /* Keep drag cursor for the header cell text area only when draggable */
-          #${idTable} th[draggable="true"] {
-            cursor: move;
+          #${idTable} .ant-table-content {
+            padding-bottom: 4px;
           }
+        }
 
-          /* Override cursor back to pointer when hovering over interactive elements */
-          #${idTable} th[draggable="true"] .ant-table-column-sorter,
-          #${idTable} th[draggable="true"] .ant-table-filter-trigger,
-          #${idTable} th[draggable="true"] .ant-table-column-sorter-up,
-          #${idTable} th[draggable="true"] .ant-table-column-sorter-down,
-          #${idTable} th[draggable="true"] .ant-table-filter-trigger-container,
-          #${idTable} th[draggable="true"] .ant-table-column-sorters {
-            cursor: pointer !important;
-          }
+        #${idTable} .ant-table-column-sorter,
+        #${idTable} .ant-table-filter-trigger,
+        #${idTable} .ant-table-column-sorter-up,
+        #${idTable} .ant-table-column-sorter-down,
+        #${idTable} .ant-table-filter-trigger-container {
+          cursor: pointer;
+        }
 
-          /* Geser icon sort dan filter lebih ke kiri agar tidak mepet kanan */
-          #${idTable} .ant-table-column-sorter {
-            margin-left: 4px;
-            margin-right: 0px;
-          }
+        #${idTable} th[draggable="true"] {
+          cursor: move;
+        }
 
-          #${idTable} .ant-table-filter-trigger {
-            margin-right: 6px;
-          }
+        #${idTable} th[draggable="true"] .ant-table-column-sorter,
+        #${idTable} th[draggable="true"] .ant-table-filter-trigger,
+        #${idTable} th[draggable="true"] .ant-table-column-sorter-up,
+        #${idTable} th[draggable="true"] .ant-table-column-sorter-down,
+        #${idTable} th[draggable="true"] .ant-table-filter-trigger-container,
+        #${idTable} th[draggable="true"] .ant-table-column-sorters {
+          cursor: pointer;
+        }
 
-          #${idTable} .ant-table-column-sorters {
-            padding-right: 0px;
-          }
-        `}
-      </style>
+        #${idTable} .ant-table-column-sorter {
+          margin-left: 4px;
+          margin-right: 0px;
+        }
+
+        #${idTable} .ant-table-filter-trigger {
+          margin-right: 6px;
+        }
+
+        #${idTable} .ant-table-column-sorters {
+          padding-right: 0px;
+        }
+
+        /* Fix div expanded row yang menutupi expand icon */
+        #${idTable} .ant-table-expanded-row-fixed {
+          pointer-events: none !important;
+        }
+
+        #${idTable} .ant-table-expanded-row-fixed > * {
+          pointer-events: auto !important;
+        }
+
+        /* Fix expand icon z-index agar bisa diklik */
+        #${idTable} .ant-table-row-expand-icon-cell {
+          position: relative;
+          z-index: 6;
+        }
+
+        #${idTable} .ant-table-tbody > tr > td.ant-table-row-expand-icon-cell {
+          position: relative;
+          z-index: 6;
+        }
+
+        #${idTable} .ant-table-tbody > tr > td.ant-table-row-expand-icon-cell button,
+        #${idTable} .ant-table-tbody > tr > td.ant-table-row-expand-icon-cell .ant-table-row-expand-icon,
+        #${idTable} .ant-table-tbody > tr > td.ant-table-row-expand-icon-cell > * {
+          position: relative;
+          z-index: 7;
+          pointer-events: auto !important;
+          cursor: pointer !important;
+        }
+
+        #${idTable} .ant-table-tbody > tr.ant-table-expanded-row > td {
+          position: relative;
+          z-index: 1;
+        }
+      `}
+    </style>
       {useSelect ? (
         <div className={"w-full flex mb-3 justify-between items-center"}>
-          {/* BAGIAN KIRI: Column Settings + Custom Header Left */}
           <div className="flex items-center gap-4">
             <ColumnSettings
               columns={columnDefinitions || columns}
@@ -539,17 +768,16 @@ const TableRBI = ({
               buttonStyle={{ height: "32px", fontSize: "12px" }}
             />
 
-            {/* Custom Header Left - untuk Approval Hierarchy dropdown */}
             {customHeaderLeft && customHeaderLeft}
           </div>
 
-          {/* BAGIAN KANAN: Export, Advance Search, Search Bar */}
           {hasRightControls && (
-            <div className="flex justify-end gap-2">
-              {showExport && (
+            <div className="flex justify-end gap-2 items-center">
+              {showRefresh && (
                 <Button
-                  icon={<DownloadOutlined style={{ fontSize: "14px" }} />}
-                  onClick={handleDownload}
+                  icon={refreshIcon || <ReloadOutlined style={{ fontSize: "14px" }} />}
+                  onClick={handleRefresh}
+                  loading={loading}
                   style={{
                     border: "1px solid #BDBDBD",
                     color: "black",
@@ -558,13 +786,14 @@ const TableRBI = ({
                     fontSize: "12px",
                   }}
                 >
-                  Export
+                  {refreshLabel || "Refresh"}
                 </Button>
               )}
 
               {showAdvanceSearch && (
                 <Button
                   onClick={() => setIsAdvanceOpen(true)}
+                  className="flex items-center gap-2"
                   style={{
                     border: "1px solid #BDBDBD",
                     color: "black",
@@ -579,9 +808,11 @@ const TableRBI = ({
               )}
 
               {showSearchBar && (
-                <div style={{ width: "200px" }}>
-                  {" "}
-                  <SearchBar />
+                <div style={{ width: "250px" }}>
+                  <SearchBar 
+                    placeholder="Search Content" 
+                    onChange={onSearch}
+                  />
                 </div>
               )}
             </div>
@@ -589,7 +820,6 @@ const TableRBI = ({
         </div>
       ) : null}
 
-      {/* Table with Resizable Columns */}
       <Table
         dataSource={dataSource}
         columns={displayedColumns}
@@ -606,6 +836,7 @@ const TableRBI = ({
         rowSelection={rowSelection}
         onRow={customOnRow}
         rowClassName={customRowClassName}
+        size={tableSize}
       />
 
       {useInfiniteScroll ? (
@@ -637,9 +868,13 @@ const TableRBI = ({
                 </Option>
               ))}
             </Select>
-            <span style={{ fontSize: "12px" }}>
-              Showing {(current - 1) * pageSize + 1} to{" "}
-              {Math.min(current * pageSize, totalData)} of {totalData} entries
+            <span style={{ fontSize: "12px", color: "#666" }}>
+              Showing {current * pageSize - pageSize + 1} to{" "}
+              {Math.min(current * pageSize, totalData)} entries
+              <span className="mx-2">•</span>
+              <span className="text-[#288C44] font-medium">
+                All data showed
+              </span>
             </span>
           </div>
           <Pagination
