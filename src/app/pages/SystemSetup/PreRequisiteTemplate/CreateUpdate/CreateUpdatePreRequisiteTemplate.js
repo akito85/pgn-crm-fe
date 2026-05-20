@@ -17,24 +17,22 @@ import NxDate from "../../../../../components/Nx/NxDatePicker"
 import SVGIcon from "../../../../../assets/Icon/index"
 import { useNavigate } from "react-router-dom"
 
-const CreateUpdatePreRequisiteTemplate = ({ formType = "create" }) => {
+const STATUS_OPTIONS = [
+    { label: "Active", value: "ACTIVE" },
+    { label: "Inactive", value: "INACTIVE" },
+];
+
+const CreateUpdatePreRequisiteTemplate = ({ type = "create" }) => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const {
         list_source_type = [],
-        loading_source_type = false,
         list_sr_category = [],
-        loading_sr_category = false,
         list_sr_sub_category = [],
-        loading_sr_sub_category = false,
         list_criteria = [],
-        loading_criteria = false,
         list_account_group_type = [],
-        loading_account_group_type = false,
         list_account_segment = [],
-        loading_account_segment = false,
         list_pre_requisite_type = [],
-        loading_pre_requisite_type = false,
     } = useSelector((state) => state.preRequisiteTemplate);
 
     const [criteriaValues, setCriteriaValues] = useState([]);
@@ -71,8 +69,9 @@ const CreateUpdatePreRequisiteTemplate = ({ formType = "create" }) => {
         return base;
     }, [isDetailMode]);
 
+    // BE dropdown response shape: { id, name, value } — use id as the submitted value
     const getNameByValue = useCallback((list, value) =>
-        list?.find((item) => item.value === value)?.name || value || "-"
+        list?.find((item) => item.id === value)?.name || value || "-"
     , []);
 
     // --- Criteria modal handlers ---
@@ -202,62 +201,66 @@ const CreateUpdatePreRequisiteTemplate = ({ formType = "create" }) => {
         }
     ], [handleOpenDetailMode]);
 
-    // --- Criteria data table columns ---
+    // --- Criteria data table columns (fixed: accountType, accountSegment, dates) ---
 
-    const criteriaTableColumns = useMemo(() => {
-        const selectedCriteria = list_criteria.filter((c) => criteriaValues.includes(c.value));
-        return [
-            {
-                key: "no",
-                title: "NO",
-                dataIndex: "no",
-                width: 60,
-                align: "center",
-                render: (_, __, index) => index + 1,
-            },
-            ...selectedCriteria.map((c) => ({
-                key: c.value,
-                title: c.name.toUpperCase(),
-                dataIndex: c.value,
-            })),
-            {
-                key: "startDate",
-                title: "START DATE",
-                dataIndex: "startDate",
-                width: 140,
-                render: (text) => NxDate.formatDate(text, "DD MMM YYYY"),
-            },
-            {
-                key: "endDate",
-                title: "END DATE",
-                dataIndex: "endDate",
-                width: 140,
-                render: (text) => NxDate.formatDate(text, "DD MMM YYYY"),
-            },
-            {
-                key: "action",
-                title: "ACTION",
-                dataIndex: "action",
-                width: 100,
-                fixed: "right",
-                align: "center",
-                render: (_, record) => (
-                    <div className="flex justify-center gap-2 my-1">
-                        <Tooltip title="Update">
-                            <Button type="table-action" onClick={() => handleOpenCriteriaModal(record)}>
-                                <SVGIcon name="IconEdit" width={20} />
-                            </Button>
-                        </Tooltip>
-                        <Tooltip title="Delete">
-                            <Button type="table-action" onClick={() => handleDeleteCriteriaRow(record.key)}>
-                                <SVGIcon name="IconDelete" width={20} />
-                            </Button>
-                        </Tooltip>
-                    </div>
-                ),
-            },
-        ];
-    }, [criteriaValues, list_criteria, handleOpenCriteriaModal, handleDeleteCriteriaRow]);
+    const criteriaTableColumns = useMemo(() => [
+        {
+            key: "no",
+            title: "NO",
+            dataIndex: "no",
+            width: 60,
+            align: "center",
+            render: (_, __, index) => index + 1,
+        },
+        {
+            key: "accountType",
+            title: "ACCOUNT TYPE",
+            dataIndex: "accountType",
+            render: (value) => getNameByValue(list_account_group_type, value),
+        },
+        {
+            key: "accountSegment",
+            title: "ACCOUNT SEGMENT",
+            dataIndex: "accountSegment",
+            render: (value) => getNameByValue(list_account_segment, value),
+        },
+        {
+            key: "startDate",
+            title: "START DATE",
+            dataIndex: "startDate",
+            width: 140,
+            render: (text) => text ? dayjs(text).format("DD MMM YYYY") : "-",
+        },
+        {
+            key: "endDate",
+            title: "END DATE",
+            dataIndex: "endDate",
+            width: 140,
+            render: (text) => text ? dayjs(text).format("DD MMM YYYY") : "-",
+        },
+        {
+            key: "action",
+            title: "ACTION",
+            dataIndex: "action",
+            width: 100,
+            fixed: "right",
+            align: "center",
+            render: (_, record) => (
+                <div className="flex justify-center gap-2 my-1">
+                    <Tooltip title="Update">
+                        <Button type="table-action" onClick={() => handleOpenCriteriaModal(record)}>
+                            <SVGIcon name="IconEdit" width={20} />
+                        </Button>
+                    </Tooltip>
+                    <Tooltip title="Delete">
+                        <Button type="table-action" onClick={() => handleDeleteCriteriaRow(record.key)}>
+                            <SVGIcon name="IconDelete" width={20} />
+                        </Button>
+                    </Tooltip>
+                </div>
+            ),
+        },
+    ], [list_account_group_type, list_account_segment, handleOpenCriteriaModal, handleDeleteCriteriaRow, getNameByValue]);
 
     // --- Detail list table columns ---
 
@@ -310,18 +313,27 @@ const CreateUpdatePreRequisiteTemplate = ({ formType = "create" }) => {
         },
     ], [handleOpenDetailMode, handleDeleteDetailRow, list_pre_requisite_type, getNameByValue]);
 
-    // --- Selected criteria options for modal form ---
-
-    const selectedCriteriaOptions = useMemo(() => {
-        return list_criteria.filter((c) => criteriaValues.includes(c.value));
-    }, [criteriaValues, list_criteria]);
-
     // --- Main form handlers ---
 
     const handleSubmit = () => {
         const values = form.getFieldsValue(true);
-        console.log("submit", { ...values, criteriaDataRows, detailRows });
-    }
+        const payload = {
+            name: values.name,
+            sourceType: values.sourceType,
+            srCategory: values.srCategory,
+            srSubCategory: values.srSubCategory,
+            description: values.description,
+            status: values.status,
+            criteria: (values.criteria || []).map((c) => ({ criteria: c })),
+            criteriaData: criteriaDataRows.map(({ key, startDate, endDate, ...rest }) => ({
+                ...rest,
+                startDate: startDate ? dayjs(startDate).format("YYYY-MM-DD") : null,
+                endDate: endDate ? dayjs(endDate).format("YYYY-MM-DD") : null,
+            })),
+            detail: detailRows.map(({ key, ...rest }) => rest),
+        };
+        console.log("submit", payload);
+    };
 
     const handleClearForm = useCallback(() => {
         form.resetFields();
@@ -334,20 +346,20 @@ const CreateUpdatePreRequisiteTemplate = ({ formType = "create" }) => {
         const updated = [...new Set([...criteriaValues, value])];
         setCriteriaValues(updated);
         form.setFieldsValue({ criteria: updated });
-    }
+    };
 
     const handleDeselectCriteria = (value) => {
         const updated = criteriaValues.filter((item) => item !== value);
         setCriteriaValues(updated);
         setCriteriaDataRows([]);
         form.setFieldsValue({ criteria: updated });
-    }
+    };
 
     const handleClearCriteria = () => {
         setCriteriaValues([]);
         setCriteriaDataRows([]);
         form.setFieldsValue({ criteria: [] });
-    }
+    };
 
     const formSnapshot = isDetailMode ? form.getFieldsValue(true) : {};
 
@@ -373,6 +385,7 @@ const CreateUpdatePreRequisiteTemplate = ({ formType = "create" }) => {
                             <NxDetailText label={"Source Type"}>{getNameByValue(list_source_type, formSnapshot.sourceType)}</NxDetailText>
                             <NxDetailText label={"SR Category"}>{getNameByValue(list_sr_category, formSnapshot.srCategory)}</NxDetailText>
                             <NxDetailText label={"SR Sub Category"}>{getNameByValue(list_sr_sub_category, formSnapshot.srSubCategory)}</NxDetailText>
+                            <NxDetailText label={"Status"}>{formSnapshot.status || "-"}</NxDetailText>
                         </div>
                         <div className="w-full grid gap-4 mt-4">
                             <NxDetailText label={"Criteria"}>
@@ -386,33 +399,40 @@ const CreateUpdatePreRequisiteTemplate = ({ formType = "create" }) => {
                     ) : (
                         <>
                         <div className="w-full grid grid-cols-2 gap-4">
-                            <Form.Item name="name" label="Name" required className="no-margin-form">
+                            <Form.Item name="name" label="Name" required rules={[{ required: true, message: "Name is required" }]} className="no-margin-form">
                                 <InputComponent />
                             </Form.Item>
-                            <Form.Item name="sourceType" label="Source Type" required className="no-margin-form">
+                            <Form.Item name="sourceType" label="Source Type" required rules={[{ required: true, message: "Source Type is required" }]} className="no-margin-form">
                                 <SelectComponent>
                                     {(list_source_type || []).map((data, index) => (
-                                        <Select.Option key={index} value={data.value}>{data.name}</Select.Option>
+                                        <Select.Option key={index} value={data.id}>{data.name}</Select.Option>
                                     ))}
                                 </SelectComponent>
                             </Form.Item>
-                            <Form.Item name="srCategory" label="SR Category" required className="no-margin-form">
+                            <Form.Item name="srCategory" label="SR Category" required rules={[{ required: true, message: "SR Category is required" }]} className="no-margin-form">
                                 <SelectComponent>
                                     {(list_sr_category || []).map((data, index) => (
-                                        <Select.Option key={index} value={data.value}>{data.name}</Select.Option>
+                                        <Select.Option key={index} value={data.id}>{data.name}</Select.Option>
                                     ))}
                                 </SelectComponent>
                             </Form.Item>
-                            <Form.Item name="srSubCategory" label="SR Sub Category" required className="no-margin-form">
+                            <Form.Item name="srSubCategory" label="SR Sub Category" required rules={[{ required: true, message: "SR Sub Category is required" }]} className="no-margin-form">
                                 <SelectComponent>
                                     {(list_sr_sub_category || []).map((data, index) => (
-                                        <Select.Option key={index} value={data.value}>{data.name}</Select.Option>
+                                        <Select.Option key={index} value={data.id}>{data.name}</Select.Option>
+                                    ))}
+                                </SelectComponent>
+                            </Form.Item>
+                            <Form.Item name="status" label="Status" required rules={[{ required: true, message: "Status is required" }]} className="no-margin-form">
+                                <SelectComponent>
+                                    {STATUS_OPTIONS.map((opt) => (
+                                        <Select.Option key={opt.value} value={opt.value}>{opt.label}</Select.Option>
                                     ))}
                                 </SelectComponent>
                             </Form.Item>
                         </div>
-                        <div className="w-full grid gap-4">
-                            <Form.Item name="criteria" label="Criteria" required className="no-margin-form">
+                        <div className="w-full grid gap-4 mt-4">
+                            <Form.Item name="criteria" label="Criteria" required rules={[{ required: true, message: "Criteria is required" }]} className="no-margin-form">
                                 <SelectComponent
                                     mode="multiple"
                                     onSelect={handleSelectCriteria}
@@ -420,11 +440,11 @@ const CreateUpdatePreRequisiteTemplate = ({ formType = "create" }) => {
                                     onClear={handleClearCriteria}
                                 >
                                     {(list_criteria || []).map((data, index) => (
-                                        <Select.Option key={index} value={data.value}>{data.name}</Select.Option>
+                                        <Select.Option key={index} value={data.id}>{data.name}</Select.Option>
                                     ))}
                                 </SelectComponent>
                             </Form.Item>
-                            <Form.Item name="description" label="Description" required className="no-margin-form">
+                            <Form.Item name="description" label="Description" required rules={[{ required: true, message: "Description is required" }]} className="no-margin-form">
                                 <InputComponent type="textarea" rows={4} maxLength={255} />
                             </Form.Item>
                         </div>
@@ -481,9 +501,7 @@ const CreateUpdatePreRequisiteTemplate = ({ formType = "create" }) => {
                 <div className="flex justify-between">
                     <Button
                         type="menu"
-                        onClick={() => {
-                            navigate(-1);
-                        }}
+                        onClick={() => { navigate(-1); }}
                     >
                         Cancel
                     </Button>
@@ -526,7 +544,7 @@ const CreateUpdatePreRequisiteTemplate = ({ formType = "create" }) => {
                             >
                                 <SelectComponent>
                                     {(list_pre_requisite_type || []).map((data, index) => (
-                                        <Select.Option key={index} value={data.value}>{data.name}</Select.Option>
+                                        <Select.Option key={index} value={data.id}>{data.name}</Select.Option>
                                     ))}
                                 </SelectComponent>
                             </Form.Item>
@@ -582,28 +600,33 @@ const CreateUpdatePreRequisiteTemplate = ({ formType = "create" }) => {
                         layout="vertical"
                         className="flex flex-col gap-y-4 p-4"
                     >
-                        <div className={`grid ${selectedCriteriaOptions.length > 1 ? "grid-cols-2" : "grid-cols-1"} gap-4`}>
-                            {selectedCriteriaOptions.map((c) => (
-                                <Form.Item
-                                    key={c.value}
-                                    name={c.value}
-                                    label={c.name}
-                                    required
-                                    rules={[{ required: true, message: `${c.name} is required` }]}
-                                    className="no-margin-form"
-                                >
-                                    <SelectComponent>
-                                        {c.value === "ACCOUNT_GROUP_TYPE"
-                                            ? (list_account_group_type || []).map((data, index) => (
-                                                <Select.Option key={index} value={data.value}>{data.name}</Select.Option>
-                                            ))
-                                            : (list_account_segment || []).map((data, index) => (
-                                                <Select.Option key={index} value={data.value}>{data.name}</Select.Option>
-                                            ))
-                                        }
-                                    </SelectComponent>
-                                </Form.Item>
-                            ))}
+                        <div className="grid grid-cols-2 gap-4">
+                            <Form.Item
+                                name="accountType"
+                                label="Account Type"
+                                required
+                                rules={[{ required: true, message: "Account Type is required" }]}
+                                className="no-margin-form"
+                            >
+                                <SelectComponent>
+                                    {(list_account_group_type || []).map((data, index) => (
+                                        <Select.Option key={index} value={data.id}>{data.name}</Select.Option>
+                                    ))}
+                                </SelectComponent>
+                            </Form.Item>
+                            <Form.Item
+                                name="accountSegment"
+                                label="Account Segment"
+                                required
+                                rules={[{ required: true, message: "Account Segment is required" }]}
+                                className="no-margin-form"
+                            >
+                                <SelectComponent>
+                                    {(list_account_segment || []).map((data, index) => (
+                                        <Select.Option key={index} value={data.id}>{data.name}</Select.Option>
+                                    ))}
+                                </SelectComponent>
+                            </Form.Item>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <Form.Item
