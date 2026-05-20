@@ -9,26 +9,40 @@ import { SYSTEM_SETUP_ROUTES } from "../../../../../routes/system_setup/setup_ro
 import InputComponent from "../../../../../components/InputComponent"
 import SelectComponent from "../../../../../components/SelectComponent"
 import { useDispatch, useSelector } from "react-redux"
-import { createPreRequisiteTemplate, getAccountGroupType, getAccountSegment, getCriteria, getPreRequisiteType, getSourceType, getSrCategory, getSrSubCategory } from "../../../../../redux/slices/system_setup/preRequisiteTemplate"
+import { createPreRequisiteTemplate, updatePreRequisiteTemplate, getDetailPreRequisiteTemplate, getAccountGroupType, getAccountSegment, getCriteria, getPreRequisiteType, getSourceType, getSrCategory, getSrSubCategory } from "../../../../../redux/slices/system_setup/preRequisiteTemplate"
 import Toolbar from "../../../../../components/Toolbar"
 import NxModal from "../../../../../components/Nx/NxModal"
 import NxTable from "../../../../../components/Nx/NxTable"
 import NxDate from "../../../../../components/Nx/NxDatePicker"
 import SVGIcon from "../../../../../assets/Icon/index"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useLocation } from "react-router-dom"
 
 const CreateUpdatePreRequisiteTemplate = ({ type = "create" }) => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const { state: locationState } = useLocation();
+    const recordId = locationState?.id ?? null;
+    const isCreate = type === "create";
+    const isUpdate = type === "update";
+
     const {
         list_source_type = [],
+        loading_source_type = false,
         list_sr_category = [],
+        loading_sr_category = false,
         list_sr_sub_category = [],
+        loading_sr_sub_category = false,
         list_criteria = [],
+        loading_criteria = false,
         list_account_group_type = [],
+        loading_account_group_type = false,
         list_account_segment = [],
+        loading_account_segment = false,
         list_pre_requisite_type = [],
+        loading_pre_requisite_type = false,
         loading_create_update_prt = false,
+        detail_prt = {},
+        loading_detail_prt = false,
     } = useSelector((state) => state.preRequisiteTemplate);
 
     const [criteriaValues, setCriteriaValues] = useState([]);
@@ -39,6 +53,10 @@ const CreateUpdatePreRequisiteTemplate = ({ type = "create" }) => {
     const [editingDetailRecord, setEditingDetailRecord] = useState(null);
     const [isDetailMode, setIsDetailMode] = useState(false);
 
+    const [form] = Form.useForm();
+    const [modalForm] = Form.useForm();
+    const [detailForm] = Form.useForm();
+
     useEffect(() => {
         dispatch(getSourceType());
         dispatch(getSrCategory());
@@ -47,11 +65,49 @@ const CreateUpdatePreRequisiteTemplate = ({ type = "create" }) => {
         dispatch(getAccountGroupType());
         dispatch(getAccountSegment());
         dispatch(getPreRequisiteType());
-    }, [dispatch]);
+        if (type === "update" && recordId) {
+            dispatch(getDetailPreRequisiteTemplate(recordId));
+        }
+    }, [dispatch, type, recordId]);
 
-    const [form] = Form.useForm();
-    const [modalForm] = Form.useForm();
-    const [detailForm] = Form.useForm();
+    useEffect(() => {
+        if (type !== "update" || !detail_prt?.id) return;
+        // wait until at least the source type list is loaded before doing name→id lookup
+        if (!list_source_type.length) return;
+
+        const byName = (list, name) => list?.find((item) => item.name === name)?.id ?? null;
+
+        const criteriaNames = (detail_prt.criterias || "").split(", ").filter(Boolean);
+        const criteriaIds = criteriaNames.map((n) => byName(list_criteria, n)).filter(Boolean);
+
+        form.setFieldsValue({
+            name: detail_prt.name,
+            sourceType: byName(list_source_type, detail_prt.sourceTypeName),
+            srCategory: byName(list_sr_category, detail_prt.srCategoryName),
+            srSubCategory: byName(list_sr_sub_category, detail_prt.srSubCategoryName),
+            description: detail_prt.description,
+            status: detail_prt.status,
+            criteria: criteriaIds,
+        });
+        setCriteriaValues(criteriaIds);
+        setCriteriaDataRows(
+            (detail_prt.criteriaDatas || []).map((row, idx) => ({
+                key: idx.toString(),
+                accountType: byName(list_account_group_type, row.accountTypeName),
+                accountSegment: byName(list_account_segment, row.accountSegmentName),
+                startDate: row.startDate,
+                endDate: row.endDate,
+            }))
+        );
+        setDetailRows(
+            (detail_prt.details || []).map((row, idx) => ({
+                key: idx.toString(),
+                type: byName(list_pre_requisite_type, row.typeName),
+                name: row.name,
+                description: row.description,
+            }))
+        );
+    }, [detail_prt, type, form, list_source_type, list_sr_category, list_sr_sub_category, list_criteria, list_account_group_type, list_account_segment, list_pre_requisite_type]);
 
     const watchedSourceTypeId = Form.useWatch("sourceType", form);
     const isServiceRequest = useMemo(() => {
@@ -66,16 +122,20 @@ const CreateUpdatePreRequisiteTemplate = ({ type = "create" }) => {
     }, [watchedType, list_pre_requisite_type]);
 
     const routes = useMemo(() => {
+        const isUpdate = type === "update";
         const base = [
             { path: "", breadcrumbName: "System Setup" },
             { path: SYSTEM_SETUP_ROUTES.VIEW_PRE_REQUISITE_TEMPLATE, breadcrumbName: "Pre-Requisite Template" },
-            { path: SYSTEM_SETUP_ROUTES.CREATE_PRE_REQUISITE_TEMPLATE, breadcrumbName: "Create Pre-Requisite Template" },
+            {
+                path: isUpdate ? SYSTEM_SETUP_ROUTES.UPDATE_PRE_REQUISITE_TEMPLATE : SYSTEM_SETUP_ROUTES.CREATE_PRE_REQUISITE_TEMPLATE,
+                breadcrumbName: isUpdate ? "Update Pre-Requisite Template" : "Create Pre-Requisite Template",
+            },
         ];
         if (isDetailMode) {
-            base.push({ path: "", breadcrumbName: "Create Detail" });
+            base.push({ path: "", breadcrumbName: isUpdate ? "Update Detail" : "Create Detail" });
         }
         return base;
-    }, [isDetailMode]);
+    }, [isDetailMode, type]);
 
     // BE dropdown response shape: { id, name, value } — use id as the submitted value
     const getNameByValue = useCallback((list, value) =>
@@ -339,6 +399,8 @@ const CreateUpdatePreRequisiteTemplate = ({ type = "create" }) => {
         };
         if (type === "create") {
             dispatch(createPreRequisiteTemplate(payload));
+        } else if (type === "update" && recordId) {
+            dispatch(updatePreRequisiteTemplate({ id: recordId, body: payload }));
         }
     };
 

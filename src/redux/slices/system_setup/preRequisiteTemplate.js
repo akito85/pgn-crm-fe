@@ -109,6 +109,34 @@ export const createPreRequisiteTemplate = createAsyncThunk(
     }
 );
 
+export const updatePreRequisiteTemplate = createAsyncThunk(
+    "UPDATE_PRE_REQUISITE_TEMPLATE",
+    async ({ id, body }, thunkAPI) => {
+        try {
+            const url = `/v1/dbs/api/pre-requisite-template/update/${id}`;
+            const response = await accountManagementService.updateData(url, body);
+            const successBody = {
+                title: "Successful",
+                description: "Your pre-requisite template has been updated successfully.",
+                return: false,
+            };
+            thunkAPI.dispatch(showModalSuccess(successBody));
+            return response.data;
+        } catch (error) {
+            let message =
+                (error.response && error.response.data && error.response.data.message) ||
+                error.message || error.toString();
+            if (Math.floor((error.response?.data?.code || 0) / 100) !== 4) message = "An unknown error occurred";
+            const errorBody = {
+                title: "Failed",
+                description: `Your pre-requisite template failed to be updated. ${message}`,
+            };
+            thunkAPI.dispatch(showModalSuccess(errorBody));
+            return thunkAPI.rejectWithValue(error?.response);
+        }
+    }
+);
+
 export const getSourceType = createAsyncThunk(
     "GET_SOURCE_TYPE",
     async (_, thunkAPI) => {
@@ -269,6 +297,16 @@ const preRequisiteTemplateSlice = createSlice({
             state.loading_create_update_prt = false;
         },
         [createPreRequisiteTemplate.rejected]: (state) => {
+            state.loading_create_update_prt = false;
+        },
+        // Update Pre-requisite Template
+        [updatePreRequisiteTemplate.pending]: (state) => {
+            state.loading_create_update_prt = true;
+        },
+        [updatePreRequisiteTemplate.fulfilled]: (state) => {
+            state.loading_create_update_prt = false;
+        },
+        [updatePreRequisiteTemplate.rejected]: (state) => {
             state.loading_create_update_prt = false;
         },
         // Source Type
