@@ -9,7 +9,7 @@ import { SYSTEM_SETUP_ROUTES } from "../../../../../routes/system_setup/setup_ro
 import InputComponent from "../../../../../components/InputComponent"
 import SelectComponent from "../../../../../components/SelectComponent"
 import { useDispatch, useSelector } from "react-redux"
-import { getAccountGroupType, getAccountSegment, getCriteria, getPreRequisiteType, getSourceType, getSrCategory, getSrSubCategory } from "../../../../../redux/slices/system_setup/preRequisiteTemplate"
+import { createPreRequisiteTemplate, getAccountGroupType, getAccountSegment, getCriteria, getPreRequisiteType, getSourceType, getSrCategory, getSrSubCategory } from "../../../../../redux/slices/system_setup/preRequisiteTemplate"
 import Toolbar from "../../../../../components/Toolbar"
 import NxModal from "../../../../../components/Nx/NxModal"
 import NxTable from "../../../../../components/Nx/NxTable"
@@ -28,6 +28,7 @@ const CreateUpdatePreRequisiteTemplate = ({ type = "create" }) => {
         list_account_group_type = [],
         list_account_segment = [],
         list_pre_requisite_type = [],
+        loading_create_update_prt = false,
     } = useSelector((state) => state.preRequisiteTemplate);
 
     const [criteriaValues, setCriteriaValues] = useState([]);
@@ -315,6 +316,7 @@ const CreateUpdatePreRequisiteTemplate = ({ type = "create" }) => {
             srCategory: values.srCategory,
             srSubCategory: values.srSubCategory,
             description: values.description,
+            status: values.status,
             criteria: (values.criteria || []).map((c) => ({ criteria: c })),
             criteriaData: criteriaDataRows.map(({ key, startDate, endDate, ...rest }) => ({
                 ...rest,
@@ -323,7 +325,9 @@ const CreateUpdatePreRequisiteTemplate = ({ type = "create" }) => {
             })),
             detail: detailRows.map(({ key, ...rest }) => rest),
         };
-        console.log("submit", payload);
+        if (type === "create") {
+            dispatch(createPreRequisiteTemplate(payload));
+        }
     };
 
     const handleClearForm = useCallback(() => {
@@ -500,6 +504,8 @@ const CreateUpdatePreRequisiteTemplate = ({ type = "create" }) => {
                             <Button
                                 type="approve"
                                 onClick={() => form.submit()}
+                                loading={loading_create_update_prt}
+                                disabled={loading_create_update_prt}
                             >
                                 Submit
                             </Button>
