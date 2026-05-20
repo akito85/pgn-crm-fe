@@ -75,7 +75,7 @@ export const columnsCustomerInfo = (
       searchText,
       handleSearch
     ),
-    render: (_, record) => record.accountNumber || record.accountId || "-"
+    render: (_, record) => record.accountNumber || record.accountId || ""
   },
   {
     key: "unAppliedAmount",

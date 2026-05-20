@@ -128,11 +128,11 @@ const ListDetailLiborRate = () => {
 
           <LogHistoryInfo
             data={{
-              recordId: data_detail?.rateIndex?.id || "-",
+              recordId: data_detail?.rateIndex?.id || "",
               createdDate: data_detail?.rateIndex?.createdDate ? moment(data_detail?.rateIndex?.createdDate).format("DD MMM YYYY HH:mm:ss") : "-",
-              createdBy: data_detail?.rateIndex?.createdBy || "-",
+              createdBy: data_detail?.rateIndex?.createdBy || "",
               updatedDate: data_detail?.rateIndex?.updatedDate ? moment(data_detail?.rateIndex?.updatedDate).format("DD MMM YYYY HH:mm:ss") : "-",
-              updatedBy: data_detail?.rateIndex?.updatedBy || "-"
+              updatedBy: data_detail?.rateIndex?.updatedBy || ""
             }}
           />
         </div>

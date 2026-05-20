@@ -290,8 +290,8 @@ const ContactSection = ({
     name: item.contactName, 
     job: item.jobId,
     position: item.positionId,
-    address: item.address || "-", 
-    desc: item.description || "-",
+    address: item.address || "", 
+    desc: item.description || "",
     criteriaList: (item.contactDetails || []).map(detail => ({
       key: detail.contactDetailsId,
       type: detail.type,

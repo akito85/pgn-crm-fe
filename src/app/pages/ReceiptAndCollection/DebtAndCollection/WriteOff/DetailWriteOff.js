@@ -27,13 +27,13 @@ const DetailWriteOff = ({ data_detail }) => {
           <DetailText label={"Created Date"}>
             {data_detail?.createdDate ? moment(data_detail?.createdDate).format("DD MMM YYYY HH:mm:ss") : "-"}
           </DetailText>
-          <DetailText label={"Created By"}>{data_detail?.createdBy || "-"}</DetailText>
+          <DetailText label={"Created By"}>{data_detail?.createdBy || ""}</DetailText>
           <DetailText label={"Updated Date"}>
             {data_detail?.updatedDate
               ? moment(data_detail?.updatedDate).format("DD MMM YYYY HH:mm:ss")
               : "-"}
           </DetailText>
-          <DetailText label={"Updated By"}>{data_detail?.updatedBy || "-"}</DetailText>
+          <DetailText label={"Updated By"}>{data_detail?.updatedBy || ""}</DetailText>
         </div>
       </BaseContainer>
     </div>

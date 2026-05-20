@@ -226,32 +226,32 @@ const ContentModalConfirmRestructure = ({
                 <div className="p-5 bg-[#f8f7fa] min-h-[400px] flex flex-col gap-4">
                     <SectionCard title="ACCOUNT INFORMATION">
                         <div className="grid grid-cols-5 gap-y-4 gap-x-4 w-full">
-                            <DetailText label="Account Number">{formValues?.accountNumber || "-"}</DetailText>
-                            <DetailText label="Account Name">{formValues?.accountName || "-"}</DetailText>
-                            <DetailText label="Customer Number">{formValues?.customerNumber || "-"}</DetailText>
-                            <DetailText label="Customer Name">{formValues?.customerName || "-"}</DetailText>
-                            <DetailText label="Account Group Type">{formValues?.accountGroupType || "-"}</DetailText>
-                            <DetailText label="SOR">{formValues?.sor || "-"}</DetailText>
-                            <DetailText label="Cost Center">{formValues?.costCenter || "-"}</DetailText>
-                            <DetailText label="Account Segment">{formValues?.accountSegment || "-"}</DetailText>
-                            <DetailText label="Meter Reading Code">{formValues?.meterReadingCode || "-"}</DetailText>
-                            <DetailText label="Account Type">{formValues?.accountType || "-"}</DetailText>
-                            <DetailText label="Classification Type">{formValues?.classificationType || "-"}</DetailText>
-                            <DetailText label="SAP Cust ID">{formValues?.sapCustId || "-"}</DetailText>
-                            <DetailText label="Account Status">{formValues?.accountStatus || "-"}</DetailText>
+                            <DetailText label="Account Number">{formValues?.accountNumber || ""}</DetailText>
+                            <DetailText label="Account Name">{formValues?.accountName || ""}</DetailText>
+                            <DetailText label="Customer Number">{formValues?.customerNumber || ""}</DetailText>
+                            <DetailText label="Customer Name">{formValues?.customerName || ""}</DetailText>
+                            <DetailText label="Account Group Type">{formValues?.accountGroupType || ""}</DetailText>
+                            <DetailText label="SOR">{formValues?.sor || ""}</DetailText>
+                            <DetailText label="Cost Center">{formValues?.costCenter || ""}</DetailText>
+                            <DetailText label="Account Segment">{formValues?.accountSegment || ""}</DetailText>
+                            <DetailText label="Meter Reading Code">{formValues?.meterReadingCode || ""}</DetailText>
+                            <DetailText label="Account Type">{formValues?.accountType || ""}</DetailText>
+                            <DetailText label="Classification Type">{formValues?.classificationType || ""}</DetailText>
+                            <DetailText label="SAP Cust ID">{formValues?.sapCustId || ""}</DetailText>
+                            <DetailText label="Account Status">{formValues?.accountStatus || ""}</DetailText>
                         </div>
                     </SectionCard>
 
                     <SectionCard title="SERVICE AGREEMENT INFORMATION">
                         <div className="grid grid-cols-5 gap-y-4 gap-x-4 w-full">
-                            <DetailText label="Service Agreement Number">{formValues?.saNumber || "-"}</DetailText>
-                            <DetailText label="Service Agreement Name">{formValues?.saName || "-"}</DetailText>
+                            <DetailText label="Service Agreement Number">{formValues?.saNumber || ""}</DetailText>
+                            <DetailText label="Service Agreement Name">{formValues?.saName || ""}</DetailText>
                             <DetailText label="Service Agreement Date">{formValues?.saDate ? moment(formValues.saDate).format("DD MMM YYYY") : "-"}</DetailText>
                             <DetailText label="Start Date">{formValues?.startDate ? moment(formValues.startDate).format("DD MMM YYYY") : "-"}</DetailText>
                             <DetailText label="End Date">{formValues?.endDate ? moment(formValues.endDate).format("DD MMM YYYY") : "-"}</DetailText>
-                            <DetailText label="Minimum Contract">{formValues?.minContract || "-"}</DetailText>
-                            <DetailText label="Maximum Contract">{formValues?.maxContract || "-"}</DetailText>
-                            <DetailText label="UOM">{formValues?.uom || "-"}</DetailText>
+                            <DetailText label="Minimum Contract">{formValues?.minContract || ""}</DetailText>
+                            <DetailText label="Maximum Contract">{formValues?.maxContract || ""}</DetailText>
+                            <DetailText label="UOM">{formValues?.uom || ""}</DetailText>
                         </div>
                     </SectionCard>
 
@@ -269,13 +269,13 @@ const ContentModalConfirmRestructure = ({
 
                     <SectionCard title="PAYMENT PLAN INFORMATION">
                         <div className="grid grid-cols-5 gap-y-4 gap-x-4 w-full">
-                            <DetailText label="Type">{formValues?.type || "-"}</DetailText>
+                            <DetailText label="Type">{formValues?.type || ""}</DetailText>
                             <DetailText label="Tenor">{formValues?.tenor ? `${formValues.tenor} Months` : "-"}</DetailText>
                             <DetailText label="Start Period">{formValues?.startPeriod ? moment(formValues.startPeriod).format("MMM YYYY") : "-"}</DetailText>
                             <DetailText label="Source">{formValues?.source }</DetailText>
                             <DetailText label="Request Date">{formValues?.requestDate ? moment(formValues.requestDate).format("DD MMM YYYY") : "-"}</DetailText>
                             <div className="col-span-5">
-                                <DetailText label="Description">{formValues?.description || "-"}</DetailText>
+                                <DetailText label="Description">{formValues?.description || ""}</DetailText>
                             </div>
                         </div>
                     </SectionCard>
