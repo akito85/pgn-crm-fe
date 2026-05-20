@@ -555,7 +555,8 @@ const CalendarView = () => {
       type: "table",
       render: (record, data_length) => {
         const canInactivate =
-          record.statusApproval === "APPROVED" && record.status === "ACTIVE";
+          record.statusApproval !== "WAITING_APPROVAL" &&
+          record.status === "ACTIVE";
         const canActivate =
           record.statusApproval === "APPROVED" && record.status === "INACTIVE";
         const isActivateOrInactivate = canInactivate || canActivate;
