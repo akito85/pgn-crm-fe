@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import accountManagementService from "../../services/account_management/accountManagementService";
-import { showModalSuccess } from "../general_slice";
+import { showModalError, showModalSuccess } from "../general_slice";
 
 const initialState = {
     // List Pre-requisite Template
@@ -19,6 +19,9 @@ const initialState = {
 
     // Create/Update Pre-requisite Template
     loading_create_update_prt: false,
+
+    // Inactive Pre-requisite Template
+    loading_inactive_prt: false,
 
     // source type
     loading_source_type: false,
@@ -90,7 +93,7 @@ export const createPreRequisiteTemplate = createAsyncThunk(
             const successBody = {
                 title: "Successful",
                 description: "Your pre-requisite template has been created successfully.",
-                return: false,
+                return: true,
             };
             thunkAPI.dispatch(showModalSuccess(successBody));
             return response.data;
@@ -103,7 +106,7 @@ export const createPreRequisiteTemplate = createAsyncThunk(
                 title: "Failed",
                 description: `Your pre-requisite template failed to be created. ${message}`,
             };
-            thunkAPI.dispatch(showModalSuccess(errorBody));
+            thunkAPI.dispatch(showModalError(errorBody));
             return thunkAPI.rejectWithValue(error?.response);
         }
     }
@@ -118,7 +121,7 @@ export const updatePreRequisiteTemplate = createAsyncThunk(
             const successBody = {
                 title: "Successful",
                 description: "Your pre-requisite template has been updated successfully.",
-                return: false,
+                return: true,
             };
             thunkAPI.dispatch(showModalSuccess(successBody));
             return response.data;
@@ -131,7 +134,35 @@ export const updatePreRequisiteTemplate = createAsyncThunk(
                 title: "Failed",
                 description: `Your pre-requisite template failed to be updated. ${message}`,
             };
-            thunkAPI.dispatch(showModalSuccess(errorBody));
+            thunkAPI.dispatch(showModalError(errorBody));
+            return thunkAPI.rejectWithValue(error?.response);
+        }
+    }
+);
+
+export const inactivePreRequisiteTemplate = createAsyncThunk(
+    "INACTIVE_PRE_REQUISITE_TEMPLATE",
+    async (id, thunkAPI) => {
+        try {
+            const url = `/v1/dbs/api/pre-requisite-template/inactivate/${id}`;
+            const response = await accountManagementService.updateData(url);
+            const successBody = {
+                title: "Successful",
+                description: "Your pre-requisite template has been inactivated successfully.",
+                return: false,
+            };
+            thunkAPI.dispatch(showModalSuccess(successBody));
+            return response.data;
+        } catch (error) {
+            let message =
+                (error.response && error.response.data && error.response.data.message) ||
+                error.message || error.toString();
+            if (Math.floor((error.response?.data?.code || 0) / 100) !== 4) message = "An unknown error occurred";
+            const errorBody = {
+                title: "Failed",
+                description: `Your pre-requisite template failed to be inactivated. ${message}`,
+            };
+            thunkAPI.dispatch(showModalError(errorBody));
             return thunkAPI.rejectWithValue(error?.response);
         }
     }
@@ -308,6 +339,16 @@ const preRequisiteTemplateSlice = createSlice({
         },
         [updatePreRequisiteTemplate.rejected]: (state) => {
             state.loading_create_update_prt = false;
+        },
+        // Inactive Pre-requisite Template
+        [inactivePreRequisiteTemplate.pending]: (state) => {
+            state.loading_inactive_prt = true;
+        },
+        [inactivePreRequisiteTemplate.fulfilled]: (state) => {
+            state.loading_inactive_prt = false;
+        },
+        [inactivePreRequisiteTemplate.rejected]: (state) => {
+            state.loading_inactive_prt = false;
         },
         // Source Type
         [getSourceType.pending]: (state) => {
