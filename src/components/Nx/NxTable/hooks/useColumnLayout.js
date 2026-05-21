@@ -1,6 +1,13 @@
 // src/components/Nx/NxTable/hooks/useColumnLayout.js
 import React, { useState, useCallback, useMemo } from 'react';
-import { DEFAULT_COL_WIDTH } from '../constants';
+import {
+  DEFAULT_COL_WIDTH,
+  MIN_COL_WIDTH_PX,
+  NO_COL_KEY,
+  NO_COL_WIDTH,
+  ACTION_COL_KEY,
+  ACTION_COL_MIN_WIDTH,
+} from '../constants';
 
 const useColumnLayout = ({
   resolvedColumns,
@@ -353,6 +360,54 @@ function getAllColumnKeys(cols) {
   };
   traverse(cols || []);
   return keys;
+}
+
+// ── computeEffectiveWidths ────────────────────────────────────────────────────
+// Pure helper. Returns a { colKey: pxWidth } map when column distribution is
+// needed (container wider than total defined widths, no active horizontal scroll).
+// Returns null when distribution should not run so callers can skip the override.
+export function computeEffectiveWidths(allCols, columnWidths, containerWidth, scrollX) {
+  if (!containerWidth || containerWidth <= 0) return null;
+  if (scrollX > 0 && scrollX >= containerWidth) return null;
+
+  const pinnedWidths  = {};
+  const lockedFlex    = {};
+  const unresizedFlex = [];
+
+  allCols.forEach((col) => {
+    const key = col.key || col.dataIndex || col.title;
+    if (!key) return;
+
+    if (key === NO_COL_KEY) {
+      pinnedWidths[key] = NO_COL_WIDTH;
+    } else if (key === ACTION_COL_KEY) {
+      pinnedWidths[key] = Math.max(ACTION_COL_MIN_WIDTH, columnWidths[key] || 0);
+    } else if (columnWidths[key]) {
+      lockedFlex[key] = columnWidths[key];
+    } else {
+      unresizedFlex.push({ key, base: col.width || DEFAULT_COL_WIDTH });
+    }
+  });
+
+  const pinnedTotal = Object.values(pinnedWidths).reduce((s, w) => s + w, 0);
+  const lockedTotal = Object.values(lockedFlex).reduce((s, w) => s + w, 0);
+  const totalDefined = pinnedTotal + lockedTotal
+    + unresizedFlex.reduce((s, c) => s + c.base, 0);
+
+  if (totalDefined >= containerWidth) return null;
+
+  const available = containerWidth - pinnedTotal - lockedTotal;
+  if (available <= 0) return null;
+
+  const totalUnresizedBase = unresizedFlex.reduce((s, c) => s + c.base, 0);
+  const scale = totalUnresizedBase > 0 ? available / totalUnresizedBase : 1;
+
+  const result = { ...pinnedWidths, ...lockedFlex };
+  unresizedFlex.forEach(({ key, base }) => {
+    result[key] = Math.max(MIN_COL_WIDTH_PX, Math.floor(base * scale));
+  });
+
+  return result;
 }
 
 export { getAllColumnKeys };
