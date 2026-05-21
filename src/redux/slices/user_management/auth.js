@@ -94,6 +94,7 @@ const initialState = {
     localStorage.getItem("remember") ||
     window.sessionStorage.getItem("remember"),
   data_entities: null,
+  entitiesLoadFailed: false,
   data_check: null,
   data_entity: null,
   data_position: [],
@@ -1041,14 +1042,17 @@ const authSlice = createSlice({
     // get entities
     [getEntities.pending]: (state) => {
       state.loading = true;
+      state.entitiesLoadFailed = false;
     },
     [getEntities.fulfilled]: (state, action) => {
       state.loading = false;
       state.data_entities = action.payload;
+      state.entitiesLoadFailed = false;
     },
-    [getEntities.rejected]: (state, action) => {
+    [getEntities.rejected]: (state) => {
       state.loading = false;
-      state.data_entities = action.payload;
+      state.data_entities = null;
+      state.entitiesLoadFailed = true;
     },
     // forgot password
     [forgotPassword.pending]: (state) => {
