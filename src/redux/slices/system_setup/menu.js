@@ -179,7 +179,7 @@ export const deleteMenu = createAsyncThunk(
     try {
       const url = `/v1/dbs/api/menus/${id}`;
       const response = await userHttpService.deleteData(url);
-      const successBody = { title: "Successful", description: "Menu deleted successfully." };
+      const successBody = { title: "Successful", description: "Menu deleted successfully.", return: false };
       thunkAPI.dispatch(showModalSuccess(successBody));
       return response.data;
     } catch (error) {
