@@ -264,8 +264,11 @@ const ApprovalHierarchyPage = () => {
       type: "table",
       render: (record) => (
         <Tooltip title="Detail">
-          <span className="text-gray-400 hover:text-[#1976D2] transition-colors duration-200">
-            <IconViewList width={20} onClick={() => { handleDetail(record?.appHierId); setModalType("detail"); }} />
+          <span
+            className="inline-flex items-center text-[#1976D2] hover:text-[#1976D2] transition-colors duration-200 cursor-pointer"
+            onClick={() => { handleDetail(record?.appHierId); setModalType("detail"); }}
+          >
+            <IconViewList width={20} />
           </span>
         </Tooltip>
       ),
@@ -277,15 +280,15 @@ const ApprovalHierarchyPage = () => {
         const disabled = record?.status === "INACTIVE";
         return (
           <Tooltip title="Update">
-            <NavLink
-              to={!disabled ? USER_ROUTES.UPDATE_APPROVAL_HIERARCHY : undefined}
-              state={!disabled ? { id: record?.appHierId } : undefined}
-              className={disabled ? "cursor-not-allowed pointer-events-none" : ""}
-            >
-              <span className={`transition-colors duration-200 ${disabled ? "text-gray-300" : "text-gray-400 hover:text-[#1976D2]"}`}>
+            <div className={`inline-flex items-center ${disabled ? "cursor-not-allowed text-gray-300" : ""}`}>
+              <NavLink
+                to={!disabled ? USER_ROUTES.UPDATE_APPROVAL_HIERARCHY : undefined}
+                state={!disabled ? { id: record?.appHierId } : undefined}
+                className={`inline-flex items-center transition-colors duration-200 ${disabled ? "text-gray-300 pointer-events-none" : "text-[#1976D2] hover:text-[#1976D2]"}`}
+              >
                 <IconEditNx width={20} />
-              </span>
-            </NavLink>
+              </NavLink>
+            </div>
           </Tooltip>
         );
       },
@@ -295,20 +298,15 @@ const ApprovalHierarchyPage = () => {
       type: "table",
       render: (record) => {
         const isActive = record?.status === "ACTIVE";
+        const handleToggle = () => { setOpenModal(true); setModalType("inactive"); setStatus(record?.status); setAppHierId(record?.appHierId); setRecord(record); };
         return (
           <Tooltip title={isActive ? "Inactivate" : "Activate"}>
             {isActive
-              ? <span className="text-gray-400 hover:text-[#D32F2F] transition-colors duration-200">
-                  <IconActive width={20} onClick={() => {
-                    setOpenModal(true); setModalType("inactive");
-                    setStatus(record?.status); setAppHierId(record?.appHierId); setRecord(record);
-                  }} />
+              ? <span className="inline-flex items-center text-[#D32F2F] hover:text-[#D32F2F] transition-colors duration-200 cursor-pointer" onClick={handleToggle}>
+                  <IconInactive width={20} />
                 </span>
-              : <span className="text-gray-400 hover:text-[#1976D2] transition-colors duration-200">
-                  <IconInactive width={20} onClick={() => {
-                    setOpenModal(true); setModalType("inactive");
-                    setStatus(record?.status); setAppHierId(record?.appHierId); setRecord(record);
-                  }} />
+              : <span className="inline-flex items-center text-green-600 hover:text-green-600 transition-colors duration-200 cursor-pointer" onClick={handleToggle}>
+                  <IconActive width={20} />
                 </span>
             }
           </Tooltip>

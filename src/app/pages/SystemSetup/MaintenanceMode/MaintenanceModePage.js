@@ -169,8 +169,11 @@ const MaintenanceModePage = () => {
       type: "table",
       render: (record) => (
         <Tooltip title="Detail">
-          <span className="text-gray-400 hover:text-[#1976D2] transition-colors duration-200">
-            <IconViewList width={20} onClick={() => handleOpenDetail(record)} />
+          <span
+            className="inline-flex items-center text-[#1976D2] hover:text-[#1976D2] transition-colors duration-200 cursor-pointer"
+            onClick={() => handleOpenDetail(record)}
+          >
+            <IconViewList width={20} />
           </span>
         </Tooltip>
       ),

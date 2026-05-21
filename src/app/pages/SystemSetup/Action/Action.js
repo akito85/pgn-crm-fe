@@ -15,6 +15,11 @@ import {
 } from "@ant-design/icons";
 import { Link, NavLink } from "react-router-dom";
 import SVGIcon from "../../../../assets/Icon/index";
+import IconViewList from "../../../../assets/Icon/Nx/IconViewList";
+import IconEditNx from "../../../../assets/Icon/Nx/IconEdit";
+import IconDeleteMenu from "../../../../assets/Icon/Nx/IconDeleteMenu";
+import IconActive from "../../../../assets/icons/nx/IconActive";
+import IconInactive from "../../../../assets/icons/nx/IconInactive";
 import { useState } from "react";
 import DetailText from "../../../../components/DetailText";
 import moment from "moment";
@@ -260,13 +265,9 @@ const Action = () => {
       render: (record, data_length) => {
         return (
           <Tooltip title="Detail">
-            <SVGIcon
-              name="IconDetail"
-              width={24}
-              onClick={() => {
-                handleDetail(record?.actionId);
-              }}
-            />
+            <span className="inline-flex items-center text-[#1976D2] hover:text-[#1976D2] transition-colors duration-200 cursor-pointer" onClick={() => handleDetail(record?.actionId)}>
+              <IconViewList width={20} />
+            </span>
           </Tooltip>
         )
       }
@@ -275,17 +276,16 @@ const Action = () => {
       action: 'Update',
       type: 'table',
       render: (record, data_length) => {
+        const disabled = record?.status?.toLowerCase() === "inactive";
         return (
           <Tooltip title="Update">
-            <div className={`${record?.status?.toLowerCase() === "inactive" && 'cursor-not-allowed'}`}>
+            <div className={`inline-flex items-center ${disabled ? "cursor-not-allowed text-gray-300" : ""}`}>
               <Link
-                to={record?.status?.toLowerCase() !== "inactive" && SYSTEM_SETUP_ROUTES.UPDATE_ACTION}
-                state={record?.status?.toLowerCase() !== "inactive" && { id: record?.actionId }}
+                to={!disabled ? SYSTEM_SETUP_ROUTES.UPDATE_ACTION : undefined}
+                state={!disabled ? { id: record?.actionId } : undefined}
+                className={`inline-flex items-center transition-colors duration-200 ${disabled ? "text-gray-300 pointer-events-none" : "text-[#1976D2] hover:text-[#1976D2]"}`}
               >
-                <SVGIcon
-                  className={`${record?.status?.toLowerCase() === "inactive" && 'cursor-not-allowed'}`}
-                  color={record?.status?.toLowerCase() === 'inactive' ? "#8D91A0" : "#ACC424"}
-                  name="IconEdit" width={24} />
+                <IconEditNx width={20} />
               </Link>
             </div>
           </Tooltip>
@@ -295,35 +295,35 @@ const Action = () => {
     {
       action: 'Activate',
       type: 'table',
-      render: (record) => (
-        <Tooltip title={record?.status === "ACTIVE" ? "Inactivate" : "Activate"}>
-          <SVGIcon
-            name="IconEye"
-            width={24}
-            color={record?.status === "ACTIVE" ? "#ACC424" : "#8D91A0"}
-            onClick={() => {
-              setModalActive(true);
-              setActId(record?.actionId);
-              setStatus(record.status);
-            }}
-          />
-        </Tooltip>
-      )
+      render: (record) => {
+        const isActive = record?.status?.toUpperCase() === "ACTIVE";
+        const handleToggle = () => {
+          setModalActive(true);
+          setActId(record?.actionId);
+          setStatus(record.status);
+        };
+        return (
+          <Tooltip title={isActive ? "Inactivate" : "Activate"}>
+            {isActive
+              ? <span className="inline-flex items-center text-[#D32F2F] hover:text-[#D32F2F] transition-colors duration-200 cursor-pointer" onClick={handleToggle}>
+                  <IconInactive width={20} />
+                </span>
+              : <span className="inline-flex items-center text-green-600 hover:text-green-600 transition-colors duration-200 cursor-pointer" onClick={handleToggle}>
+                  <IconActive width={20} />
+                </span>
+            }
+          </Tooltip>
+        );
+      }
     },
     ...(isSuperUser ? [{
       action: 'Delete',
       type: 'table',
       render: (record) => (
         <Tooltip title="Delete">
-          <SVGIcon
-            name="IconDelete"
-            width={24}
-            style={{ cursor: 'pointer' }}
-            onClick={() => {
-              setDeleteId(record?.actionId);
-              setModalDelete(true);
-            }}
-          />
+          <span className="inline-flex items-center text-[#D32F2F] hover:text-[#D32F2F] transition-colors duration-200 cursor-pointer" onClick={() => { setDeleteId(record?.actionId); setModalDelete(true); }}>
+            <IconDeleteMenu width={20} />
+          </span>
         </Tooltip>
       )
     }] : []),

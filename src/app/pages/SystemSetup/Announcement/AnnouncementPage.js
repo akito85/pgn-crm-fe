@@ -202,10 +202,12 @@ const AnnouncementPage = () => {
       type: "table",
       render: (record) => (
         <Tooltip title="Detail">
-          <Link to={SYSTEM_SETUP_ROUTES.DETAIL_ANNOUNCEMENT} state={{ id: record.announcementId }}>
-            <span className="text-gray-400 hover:text-[#1976D2] transition-colors duration-200">
-              <IconViewList width={20} />
-            </span>
+          <Link
+            to={SYSTEM_SETUP_ROUTES.DETAIL_ANNOUNCEMENT}
+            state={{ id: record.announcementId }}
+            className="inline-flex items-center text-[#1976D2] hover:text-[#1976D2] transition-colors duration-200"
+          >
+            <IconViewList width={20} />
           </Link>
         </Tooltip>
       ),
@@ -217,14 +219,13 @@ const AnnouncementPage = () => {
         const disabled = record.status === "INACTIVE";
         return (
           <Tooltip title="Update">
-            <div className={disabled ? "cursor-not-allowed" : ""}>
+            <div className={`inline-flex items-center ${disabled ? "cursor-not-allowed text-gray-300" : ""}`}>
               <Link
                 to={!disabled ? SYSTEM_SETUP_ROUTES.UPDATE_ANNOUNCEMENT : undefined}
                 state={!disabled ? { id: record.announcementId } : undefined}
+                className={`inline-flex items-center transition-colors duration-200 ${disabled ? "text-gray-300 pointer-events-none" : "text-[#1976D2] hover:text-[#1976D2]"}`}
               >
-                <span className={`transition-colors duration-200 ${disabled ? "text-gray-300 cursor-not-allowed" : "text-gray-400 hover:text-[#1976D2]"}`}>
-                  <IconEditNx width={20} />
-                </span>
+                <IconEditNx width={20} />
               </Link>
             </div>
           </Tooltip>
@@ -239,11 +240,11 @@ const AnnouncementPage = () => {
         return (
           <Tooltip title={isActive ? "Inactivate" : "Activate"}>
             {isActive
-              ? <span className="text-gray-400 hover:text-[#D32F2F] transition-colors duration-200">
-                  <IconActive width={20} onClick={() => handleInactive(record)} />
+              ? <span className="inline-flex items-center text-[#D32F2F] hover:text-[#D32F2F] transition-colors duration-200 cursor-pointer" onClick={() => handleInactive(record)}>
+                  <IconInactive width={20} />
                 </span>
-              : <span className="text-gray-400 hover:text-[#1976D2] transition-colors duration-200">
-                  <IconInactive width={20} onClick={() => handleInactive(record)} />
+              : <span className="inline-flex items-center text-green-600 hover:text-green-600 transition-colors duration-200 cursor-pointer" onClick={() => handleInactive(record)}>
+                  <IconActive width={20} />
                 </span>
             }
           </Tooltip>

@@ -12,6 +12,7 @@ import ButtonComponent from "../../../../../components/ButtonComponent";
 import Toolbar from "../../../../../components/Toolbar";
 import TableRBI from "../../../../../components/TableRBI";
 import SVGIcon from "../../../../../assets/Icon/index";
+import IconViewList from "../../../../../assets/Icon/Nx/IconViewList";
 import StatusComponent from "../../../../../components/StatusComponent";
 import {
     getListPaymentCycle,
@@ -322,8 +323,9 @@ const ListPaymentCycle = () => {
                         <Link
                             to="/system-setup/payment-cycle/view"
                             state={{ id: record.idPaymentCycle, statusApproval: record.statusApproval }}
+                            className="inline-flex items-center text-[#1976D2] hover:text-[#1976D2] transition-colors duration-200"
                         >
-                            <SVGIcon name="IconDetail" width={20} />
+                            <IconViewList width={20} />
                         </Link>
                     </Tooltip>
                 );

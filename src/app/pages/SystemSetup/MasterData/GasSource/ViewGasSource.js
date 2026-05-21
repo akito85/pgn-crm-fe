@@ -5,7 +5,7 @@ import {
   UploadOutlined,
 } from "@ant-design/icons";
 import { useSelector, useDispatch } from "react-redux";
-import { Spin, Tooltip, Checkbox, Form, Alert } from "antd";
+import { Spin, Tooltip, Form, Alert } from "antd";
 import { Link } from "react-router-dom";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
 import { NavLink } from "react-router-dom";
@@ -13,6 +13,10 @@ import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../routes/account_management/customer_account_routes";
 import SVGIcon from "../../../../../assets/Icon/index";
+import IconViewList from "../../../../../assets/Icon/Nx/IconViewList";
+import IconEditNx from "../../../../../assets/Icon/Nx/IconEdit";
+import IconActive from "../../../../../assets/icons/nx/IconActive";
+import IconInactive from "../../../../../assets/icons/nx/IconInactive";
 import {
   activeOrInactiveGasSource,
   downloadGasSource,
@@ -454,11 +458,8 @@ const ViewGasSource = () => {
       render: (record, data) => {
         return (
           <Tooltip title="Detail">
-            <Link
-              to={ACCOUNT_MANAGEMENT_ROUTES.DETAIL_GAS_SOURCE}
-              state={{ id: record.gasSourceId }}
-            >
-              <SVGIcon name="IconDetail" width={24} />
+            <Link to={ACCOUNT_MANAGEMENT_ROUTES.DETAIL_GAS_SOURCE} state={{ id: record.gasSourceId }} className="inline-flex items-center text-[#1976D2] hover:text-[#1976D2] transition-colors duration-200">
+              <IconViewList width={20} />
             </Link>
           </Tooltip>
         );
@@ -468,38 +469,16 @@ const ViewGasSource = () => {
       action: "Update",
       type: "table",
       render: (record, data) => {
+        const disabled = record?.status?.toLowerCase() === "inactive";
         return (
           <Tooltip title="Update">
-            <div
-              className={`${
-                record?.status?.toLowerCase() === "inactive" &&
-                "cursor-not-allowed"
-              }`}
-            >
+            <div className={`inline-flex items-center ${disabled ? "cursor-not-allowed text-gray-300" : ""}`}>
               <Link
-                to={
-                  record?.status?.toLowerCase() !== "inactive" &&
-                  ACCOUNT_MANAGEMENT_ROUTES.UPDATE_GAS_SOURCE
-                }
-                state={
-                  record?.status?.toLowerCase() !== "inactive" && {
-                    id: record.gasSourceId,
-                  }
-                }
+                to={!disabled ? ACCOUNT_MANAGEMENT_ROUTES.UPDATE_GAS_SOURCE : undefined}
+                state={!disabled ? { id: record.gasSourceId } : undefined}
+                className={`inline-flex items-center transition-colors duration-200 ${disabled ? "text-gray-300 pointer-events-none" : "text-[#1976D2] hover:text-[#1976D2]"}`}
               >
-                <SVGIcon
-                  name="IconEdit"
-                  width={24}
-                  className={`${
-                    record?.status?.toLowerCase() === "inactive" &&
-                    "cursor-not-allowed"
-                  }`}
-                  color={
-                    record?.status?.toLowerCase() === "inactive"
-                      ? "#8D91A0"
-                      : "#ACC424"
-                  }
-                />
+                <IconEditNx width={20} />
               </Link>
             </div>
           </Tooltip>
@@ -510,18 +489,18 @@ const ViewGasSource = () => {
       action: "Activate",
       type: "table",
       render: (record, data) => {
+        const isActive = record?.status?.toUpperCase() === "ACTIVE";
+        const handleToggle = () => { handleActiveOrInactive(record); };
         return (
-          <Tooltip
-            title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}
-          >
-            <div>
-              <Checkbox
-                onClick={() => {
-                  handleActiveOrInactive(record);
-                }}
-                checked={record.status === "ACTIVE" ? false : true}
-              />
-            </div>
+          <Tooltip title={isActive ? "Inactivate" : "Activate"}>
+            {isActive
+              ? <span className="inline-flex items-center text-[#D32F2F] hover:text-[#D32F2F] transition-colors duration-200 cursor-pointer" onClick={handleToggle}>
+                  <IconInactive width={20} />
+                </span>
+              : <span className="inline-flex items-center text-green-600 hover:text-green-600 transition-colors duration-200 cursor-pointer" onClick={handleToggle}>
+                  <IconActive width={20} />
+                </span>
+            }
           </Tooltip>
         );
       },

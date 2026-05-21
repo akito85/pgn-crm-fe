@@ -5,6 +5,11 @@ import { PlusOutlined, WarningOutlined } from "@ant-design/icons";
 import { useDispatch, useSelector } from "react-redux";
 import { ModalConfirm, ModalError } from "../../../../../../components/Modal/ModalPopUp";
 import { IconModal } from "../../../../../../utils/Icon";
+import IconViewList from "../../../../../../assets/Icon/Nx/IconViewList";
+import IconEditNx from "../../../../../../assets/Icon/Nx/IconEdit";
+import IconDeleteMenu from "../../../../../../assets/Icon/Nx/IconDeleteMenu";
+import IconActive from "../../../../../../assets/icons/nx/IconActive";
+import IconInactive from "../../../../../../assets/icons/nx/IconInactive";
 import {
   getApprovalHistory,
   getLateChargeRulePaginate,
@@ -706,16 +711,15 @@ const LateChargesRuleTable = ({ id, isRuleActive, access }) => {
             <span className={"text-black ml-2"}>Detail</span>
           </ButtonComponent>
         ) : (
-					<Tooltip title="Detail">
-						<div className="pt-1">
-							<SVGIcon name="IconDetail" width={24} />
-						</div>
-					</Tooltip>
+          <Tooltip title="Detail">
+            <IconViewList width={20} />
+          </Tooltip>
         )
         return (
           <Link
             to={ACCOUNT_MANAGEMENT_ROUTES.DETAIL_LATE_CHARGES_RULE}
             state={{ id: record?.id, lateChargeId: id }}
+            className="inline-flex items-center text-[#1976D2] hover:text-[#1976D2] transition-colors duration-200"
           >
             {renderAction}
           </Link>
@@ -769,19 +773,15 @@ const LateChargesRuleTable = ({ id, isRuleActive, access }) => {
                   id: record?.id,
                   lateChargeId: id,
                 }}
+                className="inline-flex items-center text-[#1976D2] hover:text-[#1976D2] transition-colors duration-200"
               >
-                <div className="pt-1">
-                  <SVGIcon name="IconEdit" width={24} />
-                </div>
+                <IconEditNx width={20} />
               </Link>
             ) : (
-              <div className={"cursor-not-allowed pt-1"}>
-                <SVGIcon
-                  name="IconEdit"
-                  width={24}
-                  color={"#C0BEC6"}
-                  className={"cursor-not-allowed"}
-                />
+              <div className={"inline-flex items-center cursor-not-allowed text-gray-300"}>
+                <span className="pointer-events-none">
+                  <IconEditNx width={20} />
+                </span>
               </div>
             )}
           </Tooltip>
@@ -830,23 +830,18 @@ const LateChargesRuleTable = ({ id, isRuleActive, access }) => {
           <Tooltip
             title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}
           >
-            <div className="pt-1">
-              <Checkbox
-                onClick={
-                  record.status === "ACTIVE" &&
-                  record.approvalStatus !== "WAITING_APPROVAL"
-                    ? () => handleOpenModalInactivate(record)
-                    : undefined
-                }
-                checked={record?.status === "INACTIVE"}
-                disabled={
-                  !(
-                    record.status === "ACTIVE" &&
-                    record.approvalStatus !== "WAITING_APPROVAL"
-                  )
-                }
-              />
-            </div>
+            {record.status === "ACTIVE" && record.approvalStatus !== "WAITING_APPROVAL"
+              ? <span className="inline-flex items-center text-[#D32F2F] hover:text-[#D32F2F] transition-colors duration-200 cursor-pointer" onClick={() => handleOpenModalInactivate(record)}>
+                  <IconInactive width={20} />
+                </span>
+              : record.status === "INACTIVE"
+                ? <span className="inline-flex items-center text-green-600 hover:text-green-600 transition-colors duration-200 cursor-pointer" onClick={() => handleOpenModalInactivate(record)}>
+                    <IconActive width={20} />
+                  </span>
+                : <span className="inline-flex items-center text-gray-300 cursor-not-allowed">
+                    <IconInactive width={20} />
+                  </span>
+            }
           </Tooltip>
         )
         return renderAction;
@@ -856,25 +851,17 @@ const LateChargesRuleTable = ({ id, isRuleActive, access }) => {
       action: "Delete",
       type: "table",
       render: (record, data) => {
+        const canDelete = record.approvalStatus === "DRAFT" && record.status === "DRAFT" && !isDelete;
         return (
           <Tooltip title="Delete">
-            <div   
-              className={`pt-1 ${(record.approvalStatus === "DRAFT" && record.status === "DRAFT") ? (!isDelete ? "" : "cursor-not-allowed") : "cursor-not-allowed"}`}
-            >
-              <SVGIcon 
-                name="IconDelete" 
-                className={
-                  (record.approvalStatus === "DRAFT" && record.status === "DRAFT") 
-                  ? "" : "disabled cursor-not-allowed"}
-                width={24} 
-                color={record.approvalStatus === "DRAFT" && record.status === "DRAFT" ? "#FF2E2E" : "#8d91a0"}
-                onClick={ 
-                  (record.approvalStatus === "DRAFT" && record.status === "DRAFT") 
-                  ? () => openModalDeleteRule(record?.id)  
-                  : undefined
-                }
-              />
-            </div>
+            {canDelete
+              ? <span className="inline-flex items-center text-[#D32F2F] hover:text-[#D32F2F] transition-colors duration-200 cursor-pointer" onClick={() => openModalDeleteRule(record?.id)}>
+                  <IconDeleteMenu width={20} />
+                </span>
+              : <span className="inline-flex items-center text-gray-300 cursor-not-allowed">
+                  <IconDeleteMenu width={20} />
+                </span>
+            }
           </Tooltip>
         )
       }

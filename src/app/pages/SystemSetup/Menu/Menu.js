@@ -316,8 +316,8 @@ const Menu = () => {
       type: "table",
       render: (record) => (
         <Tooltip title="Detail">
-          <span className="text-gray-400 hover:text-[#1976D2] transition-colors duration-200">
-            <IconViewList width={20} onClick={() => handleDetail(record?.menuId)} />
+          <span className="inline-flex items-center text-[#1976D2] hover:text-[#1976D2] transition-colors duration-200 cursor-pointer" onClick={() => handleDetail(record?.menuId)}>
+            <IconViewList width={20} />
           </span>
         </Tooltip>
       ),
@@ -329,15 +329,15 @@ const Menu = () => {
         const active = record?.status?.toLowerCase() !== "inactive";
         return (
           <Tooltip title="Update">
-            <Link
-              to={active ? SYSTEM_SETUP_ROUTES.UPDATE_MENU : undefined}
-              state={active ? { id: record?.menuId } : undefined}
-              style={{ pointerEvents: active ? "auto" : "none" }}
-            >
-              <span className={`transition-colors duration-200 ${active ? "text-gray-400 hover:text-[#1976D2]" : "text-gray-300 cursor-not-allowed"}`}>
+            <div className={`inline-flex items-center ${!active ? "cursor-not-allowed text-gray-300" : ""}`}>
+              <Link
+                to={active ? SYSTEM_SETUP_ROUTES.UPDATE_MENU : undefined}
+                state={active ? { id: record?.menuId } : undefined}
+                className={`inline-flex items-center transition-colors duration-200 ${active ? "text-[#1976D2] hover:text-[#1976D2]" : "text-gray-300 pointer-events-none"}`}
+              >
                 <IconEditNx width={20} />
-              </span>
-            </Link>
+              </Link>
+            </div>
           </Tooltip>
         );
       },
@@ -347,14 +347,15 @@ const Menu = () => {
       type: "table",
       render: (record) => {
         const isActive = record?.status?.toUpperCase() === "ACTIVE";
+        const handleToggle = () => { setModalInactive(true); setId(record?.menuId); setStatus(record?.status); };
         return (
           <Tooltip title={isActive ? "Inactivate" : "Activate"}>
             {isActive
-              ? <span className="text-gray-400 hover:text-[#D32F2F] transition-colors duration-200">
-                  <IconActive width={20} onClick={() => { setModalInactive(true); setId(record?.menuId); setStatus(record?.status); }} />
+              ? <span className="inline-flex items-center text-[#D32F2F] hover:text-[#D32F2F] transition-colors duration-200 cursor-pointer" onClick={handleToggle}>
+                  <IconInactive width={20} />
                 </span>
-              : <span className="text-gray-400 hover:text-[#1976D2] transition-colors duration-200">
-                  <IconInactive width={20} onClick={() => { setModalInactive(true); setId(record?.menuId); setStatus(record?.status); }} />
+              : <span className="inline-flex items-center text-green-600 hover:text-green-600 transition-colors duration-200 cursor-pointer" onClick={handleToggle}>
+                  <IconActive width={20} />
                 </span>
             }
           </Tooltip>
@@ -366,8 +367,8 @@ const Menu = () => {
       type: "table",
       render: (record) => (
         <Tooltip title="Delete">
-          <span className="text-gray-400 hover:text-[#D32F2F] transition-colors duration-200">
-            <IconDeleteMenu width={20} onClick={() => { setDeleteId(record?.menuId); setModalDelete(true); }} />
+          <span className="inline-flex items-center text-[#D32F2F] hover:text-[#D32F2F] transition-colors duration-200 cursor-pointer" onClick={() => { setDeleteId(record?.menuId); setModalDelete(true); }}>
+            <IconDeleteMenu width={20} />
           </span>
         </Tooltip>
       ),

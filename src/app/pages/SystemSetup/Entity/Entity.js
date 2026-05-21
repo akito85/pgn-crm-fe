@@ -216,7 +216,7 @@ const EntityPage = () => {
         const disabled = record?.status?.toLowerCase() === "inactive";
         return (
           <Tooltip title="Update">
-            <div className={disabled ? "cursor-not-allowed" : ""}>
+            <div className={`inline-flex items-center ${disabled ? "cursor-not-allowed text-gray-300" : ""}`}>
               <Link
                 to={!disabled ? SYSTEM_SETUP_ROUTES.UPDATE_ENTITY : undefined}
                 state={!disabled ? { id: record?.entityId } : undefined}

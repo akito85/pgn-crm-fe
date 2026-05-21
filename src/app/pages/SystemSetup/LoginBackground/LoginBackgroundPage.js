@@ -1,10 +1,12 @@
 import { DownloadOutlined, PlusOutlined } from "@ant-design/icons";
+import { Tooltip } from "antd";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, NavLink } from "react-router-dom";
 import ViewListIcon from "../../../../assets/Icon/Nx/IconViewList";
 import IconEditNx from "../../../../assets/Icon/Nx/IconEdit";
-import IconPower from "../../../../assets/Icon/Nx/IconPower";
+import IconActive from "../../../../assets/icons/nx/IconActive";
+import IconInactive from "../../../../assets/icons/nx/IconInactive";
 import SVGIcon from "../../../../assets/Icon/index";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
@@ -248,8 +250,7 @@ const LoginBackgroundPage = () => {
           <Link
             to={SYSTEM_SETUP_ROUTES.DETAIL_LOGIN_BACKGROUND}
             state={{ id: record?.loginBackgroundId }}
-            className="flex items-center justify-center"
-            style={{ color: "#1976D2" }}
+            className="inline-flex items-center text-[#1976D2] hover:text-[#1976D2] transition-colors duration-200"
           >
             <ViewListIcon />
           </Link>
@@ -259,17 +260,17 @@ const LoginBackgroundPage = () => {
         action: "Update",
         type: "table",
         render: (record) => {
-          const active = record?.status === "ACTIVE";
-          const color = active ? "#1976D2" : "#C0BEC6";
+          const disabled = record?.status !== "ACTIVE";
           return (
-            <Link
-              to={active ? SYSTEM_SETUP_ROUTES.UPDATE_LOGIN_BACKGROUND : undefined}
-              state={active ? { id: record?.loginBackgroundId } : undefined}
-              style={{ pointerEvents: active ? "auto" : "none", color }}
-              className="flex items-center justify-center"
-            >
-              <IconEditNx color={color} width="18" height="18" />
-            </Link>
+            <div className={`inline-flex items-center ${disabled ? "cursor-not-allowed text-gray-300" : ""}`}>
+              <Link
+                to={!disabled ? SYSTEM_SETUP_ROUTES.UPDATE_LOGIN_BACKGROUND : undefined}
+                state={!disabled ? { id: record?.loginBackgroundId } : undefined}
+                className={`inline-flex items-center transition-colors duration-200 ${disabled ? "text-gray-300 pointer-events-none" : "text-[#1976D2] hover:text-[#1976D2]"}`}
+              >
+                <IconEditNx width={20} />
+              </Link>
+            </div>
           );
         },
       },
@@ -277,15 +278,18 @@ const LoginBackgroundPage = () => {
         action: "Activate",
         type: "table",
         render: (record) => {
-          const color = "#1976D2";
+          const isActive = record?.status === "ACTIVE";
           return (
-            <span
-              className="flex items-center justify-center cursor-pointer"
-              style={{ color }}
-              onClick={() => handleInactive(record)}
-            >
-              <IconPower color={color} width="18" height="18" />
-            </span>
+            <Tooltip title={isActive ? "Inactivate" : "Activate"}>
+              {isActive
+                ? <span className="inline-flex items-center text-[#D32F2F] hover:text-[#D32F2F] transition-colors duration-200 cursor-pointer" onClick={() => handleInactive(record)}>
+                    <IconInactive width={20} />
+                  </span>
+                : <span className="inline-flex items-center text-green-600 hover:text-green-600 transition-colors duration-200 cursor-pointer" onClick={() => handleInactive(record)}>
+                    <IconActive width={20} />
+                  </span>
+              }
+            </Tooltip>
           );
         },
       },

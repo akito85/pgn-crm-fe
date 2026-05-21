@@ -210,8 +210,8 @@ const GroupAccess = () => {
       type: "table",
       render: (record) => (
         <Tooltip title="Detail">
-          <span className="text-gray-400 hover:text-[#1976D2] transition-colors duration-200">
-            <IconViewList width={20} onClick={() => handleDetail(record?.gaId)} />
+          <span className="inline-flex items-center text-[#1976D2] hover:text-[#1976D2] transition-colors duration-200 cursor-pointer" onClick={() => handleDetail(record?.gaId)}>
+            <IconViewList width={20} />
           </span>
         </Tooltip>
       ),
@@ -223,14 +223,13 @@ const GroupAccess = () => {
         const disabled = record?.status?.toLowerCase() === "inactive";
         return (
           <Tooltip title="Update">
-            <div className={disabled ? "cursor-not-allowed" : ""}>
+            <div className={`inline-flex items-center ${disabled ? "cursor-not-allowed text-gray-300" : ""}`}>
               <Link
                 to={!disabled ? SYSTEM_SETUP_ROUTES.UPDATE_GROUP_ACCESS : undefined}
                 state={!disabled ? { id: record?.gaId } : undefined}
+                className={`inline-flex items-center transition-colors duration-200 ${disabled ? "text-gray-300 pointer-events-none" : "text-[#1976D2] hover:text-[#1976D2]"}`}
               >
-                <span className={`transition-colors duration-200 ${disabled ? "text-gray-300 cursor-not-allowed" : "text-gray-400 hover:text-[#1976D2]"}`}>
-                  <IconEditNx width={20} />
-                </span>
+                <IconEditNx width={20} />
               </Link>
             </div>
           </Tooltip>
@@ -242,14 +241,15 @@ const GroupAccess = () => {
       type: "table",
       render: (record) => {
         const isActive = record?.status?.toUpperCase() === "ACTIVE";
+        const handleToggle = () => { setModalInactive(true); setGaId(record?.gaId); setStatus(record?.status); };
         return (
           <Tooltip title={isActive ? "Inactivate" : "Activate"}>
             {isActive
-              ? <span className="text-gray-400 hover:text-[#D32F2F] transition-colors duration-200">
-                  <IconActive width={20} onClick={() => { setModalInactive(true); setGaId(record?.gaId); setStatus(record?.status); }} />
+              ? <span className="inline-flex items-center text-[#D32F2F] hover:text-[#D32F2F] transition-colors duration-200 cursor-pointer" onClick={handleToggle}>
+                  <IconInactive width={20} />
                 </span>
-              : <span className="text-gray-400 hover:text-[#1976D2] transition-colors duration-200">
-                  <IconInactive width={20} onClick={() => { setModalInactive(true); setGaId(record?.gaId); setStatus(record?.status); }} />
+              : <span className="inline-flex items-center text-green-600 hover:text-green-600 transition-colors duration-200 cursor-pointer" onClick={handleToggle}>
+                  <IconActive width={20} />
                 </span>
             }
           </Tooltip>
@@ -261,8 +261,8 @@ const GroupAccess = () => {
       type: "table",
       render: (record) => (
         <Tooltip title="Delete">
-          <span className="text-gray-400 hover:text-[#D32F2F] transition-colors duration-200">
-            <IconDeleteMenu width={20} onClick={() => { setDeleteId(record?.gaId); setModalDelete(true); }} />
+          <span className="inline-flex items-center text-[#D32F2F] hover:text-[#D32F2F] transition-colors duration-200 cursor-pointer" onClick={() => { setDeleteId(record?.gaId); setModalDelete(true); }}>
+            <IconDeleteMenu width={20} />
           </span>
         </Tooltip>
       ),

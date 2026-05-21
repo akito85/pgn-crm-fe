@@ -1,7 +1,6 @@
 import {
   Tooltip,
   Spin,
-  Checkbox,
   Tabs,
   Calendar,
   Badge,
@@ -20,6 +19,10 @@ import ButtonComponent from "../../../../../components/ButtonComponent";
 import Toolbar from "../../../../../components/Toolbar";
 import TableRBI from "../../../../../components/TableRBI";
 import SVGIcon from "../../../../../assets/Icon/index";
+import IconViewList from "../../../../../assets/Icon/Nx/IconViewList";
+import IconEditNx from "../../../../../assets/Icon/Nx/IconEdit";
+import IconActive from "../../../../../assets/icons/nx/IconActive";
+import IconInactive from "../../../../../assets/icons/nx/IconInactive";
 import {
   getListCalendar,
   inactiveCalendar,
@@ -473,14 +476,15 @@ const CalendarView = () => {
       action: "View",
       type: "table",
       render: (record) => (
-        <Link
-          to={SYSTEM_SETUP_ROUTES.DETAIL_CALENDAR}
-          state={{ id: record.calendarId }}
-        >
-          <Tooltip title="Detail">
-            <SVGIcon name="IconDetail" width={20} />
-          </Tooltip>
-        </Link>
+        <Tooltip title="Detail">
+          <Link
+            to={SYSTEM_SETUP_ROUTES.DETAIL_CALENDAR}
+            state={{ id: record.calendarId }}
+            className="inline-flex items-center text-[#1976D2] hover:text-[#1976D2] transition-colors duration-200"
+          >
+            <IconViewList width={20} />
+          </Link>
+        </Tooltip>
       ),
     },
 
@@ -531,15 +535,16 @@ const CalendarView = () => {
                   status: record.status,
                   statusApproval: record.statusApproval,
                 }}
+                className="inline-flex items-center text-[#1976D2] hover:text-[#1976D2] transition-colors duration-200"
               >
-                <SVGIcon name="IconEdit" width={20} color="#ACC424" />
+                <IconEditNx width={20} />
               </Link>
             </Tooltip>
           ) : (
             <Tooltip title="Update">
-              <div className="cursor-not-allowed">
+              <div className="inline-flex items-center cursor-not-allowed text-gray-300">
                 <span className="pointer-events-none">
-                  <SVGIcon name="IconEdit" width={20} color="#8D91A0" />
+                  <IconEditNx width={20} />
                 </span>
               </div>
             </Tooltip>
@@ -561,14 +566,7 @@ const CalendarView = () => {
           data_length > 3 ? (
             canInactivate ? (
               <ButtonComponent
-                icon={
-                  <Checkbox
-                    className="inactive-check"
-                    onClick={() => handleInactive(record)}
-                    disabled={false}
-                    checked={false}
-                  />
-                }
+                icon={<SVGIcon name="IconInactive" width={20} />}
                 type={"action"}
                 border={false}
                 onClick={() => handleInactive(record)}
@@ -579,8 +577,7 @@ const CalendarView = () => {
               </ButtonComponent>
             ) : (
               <div className="flex items-center px-2 py-1">
-                <Checkbox className="inactive-check" disabled checked={false} />
-                <span className="text-gray-400 ml-6">
+                <span className="text-gray-400">
                   {record.status !== "ACTIVE" ? "Activate" : "Inactivate"}
                 </span>
               </div>
@@ -589,16 +586,14 @@ const CalendarView = () => {
             <Tooltip
               title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}
             >
-              <div className="pt-1">
-                <Checkbox
-                  className="inactive-check"
-                  onClick={
-                    canInactivate ? () => handleInactive(record) : undefined
-                  }
-                  disabled={!canInactivate}
-                  checked={record.status !== "ACTIVE"}
-                />
-              </div>
+              {canInactivate
+                ? <span className="inline-flex items-center text-[#D32F2F] hover:text-[#D32F2F] transition-colors duration-200 cursor-pointer" onClick={() => handleInactive(record)}>
+                    <IconInactive width={20} />
+                  </span>
+                : <span className="inline-flex items-center text-gray-300 cursor-not-allowed">
+                    <IconInactive width={20} />
+                  </span>
+              }
             </Tooltip>
           );
 

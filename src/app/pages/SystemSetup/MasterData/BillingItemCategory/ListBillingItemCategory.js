@@ -1,4 +1,4 @@
-import { Tooltip, Spin, Checkbox } from "antd";
+import { Tooltip, Spin } from "antd";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, NavLink } from "react-router-dom";
@@ -8,6 +8,10 @@ import ButtonComponent from "../../../../../components/ButtonComponent";
 import Toolbar from "../../../../../components/Toolbar";
 import TableRBI from "../../../../../components/TableRBI";
 import SVGIcon from "../../../../../assets/Icon/index";
+import IconViewList from "../../../../../assets/Icon/Nx/IconViewList";
+import IconEditNx from "../../../../../assets/Icon/Nx/IconEdit";
+import IconActive from "../../../../../assets/icons/nx/IconActive";
+import IconInactive from "../../../../../assets/icons/nx/IconInactive";
 import {
   getListBillingItemCategory,
   requestInactiveBillingItemCategory,
@@ -344,14 +348,15 @@ const ListBillingItemCategory = () => {
       type: "table",
       render: (record) => {
         return (
-          <Link
-            to={SYSTEM_SETUP_ROUTES.DETAIL_BILLING_ITEM_CATEGORY}
-            state={{ id: record.id }}
-          >
-            <Tooltip title="Detail">
-              <SVGIcon name="IconDetail" width={20} />
-            </Tooltip>
-          </Link>
+          <Tooltip title="Detail">
+            <Link
+              to={SYSTEM_SETUP_ROUTES.DETAIL_BILLING_ITEM_CATEGORY}
+              state={{ id: record.id }}
+              className="inline-flex items-center text-[#1976D2] hover:text-[#1976D2] transition-colors duration-200"
+            >
+              <IconViewList width={20} />
+            </Link>
+          </Tooltip>
         );
       },
     },
@@ -402,19 +407,18 @@ const ListBillingItemCategory = () => {
                   status: record.status,
                   statusApproval: record.statusApproval,
                 }}
+                className="inline-flex items-center text-[#1976D2] hover:text-[#1976D2] transition-colors duration-200"
               >
-                <SVGIcon name="IconEdit" width={24} color="#ACC424" />
+                <IconEditNx width={20} />
               </Link>
             </Tooltip>
           ) : (
             <Tooltip title="Update">
-              <Link>
-                <div className="cursor-not-allowed">
-                  <span className="pointer-events-none">
-                    <SVGIcon name="IconEdit" width={24} color="#8D91A0" />
-                  </span>
-                </div>
-              </Link>
+              <div className="inline-flex items-center cursor-not-allowed text-gray-300">
+                <span className="pointer-events-none">
+                  <IconEditNx width={20} />
+                </span>
+              </div>
             </Tooltip>
           );
 
@@ -433,12 +437,7 @@ const ListBillingItemCategory = () => {
             canInactivate ? (
               <ButtonComponent
                 icon={
-                  <Checkbox
-                    className="inactive-check"
-                    onClick={() => handleInactive(record)}
-                    disabled={false}
-                    checked={false}
-                  />
+                  <SVGIcon name="IconInactive" width={20} />
                 }
                 type={"action"}
                 border={false}
@@ -448,26 +447,19 @@ const ListBillingItemCategory = () => {
               </ButtonComponent>
             ) : (
               <div className="flex items-center px-2 py-1">
-                <Checkbox
-                  className="inactive-check"
-                  disabled={true}
-                  checked={false}
-                />
-                <span className="text-gray-400 ml-4">Inactivate</span>
+                <span className="text-gray-400 pointer-events-none">Inactivate</span>
               </div>
             )
           ) : (
             <Tooltip title="Inactivate">
-              <div className="pt-1">
-                <Checkbox
-                  className="inactive-check"
-                  onClick={
-                    canInactivate ? () => handleInactive(record) : undefined
-                  }
-                  disabled={!canInactivate}
-                  checked={false}
-                />
-              </div>
+              {canInactivate
+                ? <span className="inline-flex items-center text-[#D32F2F] hover:text-[#D32F2F] transition-colors duration-200 cursor-pointer" onClick={() => handleInactive(record)}>
+                    <IconInactive width={20} />
+                  </span>
+                : <span className="inline-flex items-center text-gray-300 cursor-not-allowed">
+                    <IconInactive width={20} />
+                  </span>
+              }
             </Tooltip>
           );
 

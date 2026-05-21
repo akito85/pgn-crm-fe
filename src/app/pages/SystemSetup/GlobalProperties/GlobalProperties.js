@@ -157,10 +157,12 @@ const GlobalProperties = () => {
       type: "table",
       render: (record) => (
         <Tooltip title="Detail">
-          <Link to={SYSTEM_SETUP_ROUTES.DETAIL_GLOBAL_PROPERTIES} state={{ id: record?.gpId }}>
-            <span className="text-gray-400 hover:text-[#1976D2] transition-colors duration-200">
-              <IconViewList width={20} />
-            </span>
+          <Link
+            to={SYSTEM_SETUP_ROUTES.DETAIL_GLOBAL_PROPERTIES}
+            state={{ id: record?.gpId }}
+            className="inline-flex items-center text-[#1976D2] hover:text-[#1976D2] transition-colors duration-200"
+          >
+            <IconViewList width={20} />
           </Link>
         </Tooltip>
       ),
@@ -170,10 +172,12 @@ const GlobalProperties = () => {
       type: "table",
       render: (record) => (
         <Tooltip title="Update">
-          <Link to={SYSTEM_SETUP_ROUTES.UPDATE_GLOBAL_PROPERTIES} state={{ id: record?.gpId }}>
-            <span className="text-gray-400 hover:text-[#1976D2] transition-colors duration-200">
-              <IconEditNx width={20} />
-            </span>
+          <Link
+            to={SYSTEM_SETUP_ROUTES.UPDATE_GLOBAL_PROPERTIES}
+            state={{ id: record?.gpId }}
+            className="inline-flex items-center text-[#1976D2] hover:text-[#1976D2] transition-colors duration-200"
+          >
+            <IconEditNx width={20} />
           </Link>
         </Tooltip>
       ),

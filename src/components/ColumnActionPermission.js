@@ -24,16 +24,16 @@ export const RenderContentActions = ({
           placement="bottomRight"
           showArrow={false}
           overlayInnerStyle={{ border: "1px solid #C8CDD4" }}
-          className="text-gray-400 hover:text-[#1976D2] transition-colors duration-300"
+          className="text-[#1976D2] transition-colors duration-300"
           content={
-            <div className="flex flex-col">
+            <div className="flex flex-col py-1">
               {itemRender
                 ?.filter((item) => item?.action !== sliceColumn?.toLowerCase())
                 ?.sort((a, b) => (a?.action || "").localeCompare(b?.action || ""))
                 ?.map((item, index) => {
                   if (permissions?.includes(item?.action)) {
                     return (
-                      <div key={item.action} className="inline-flex items-center" onClick={() => setOpen(false)}>
+                      <div key={item.action} className="inline-flex items-center px-3 py-1.5 text-black" onClick={() => setOpen(false)}>
                         {item?.render(record, totalLength, index)}
                       </div>
                     );

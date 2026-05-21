@@ -182,10 +182,12 @@ const ViewGlobalType = () => {
       type: "table",
       render: (record) => (
         <Tooltip title="Detail">
-          <Link to={SYSTEM_SETUP_ROUTES.DETAIL_GLOBAL_TYPE} state={{ id: record?.glbTypeId }}>
-            <span className="text-gray-400 hover:text-[#1976D2] transition-colors duration-200">
-              <IconViewList width={20} />
-            </span>
+          <Link
+            to={SYSTEM_SETUP_ROUTES.DETAIL_GLOBAL_TYPE}
+            state={{ id: record?.glbTypeId }}
+            className="inline-flex items-center text-[#1976D2] hover:text-[#1976D2] transition-colors duration-200"
+          >
+            <IconViewList width={20} />
           </Link>
         </Tooltip>
       ),
@@ -195,10 +197,12 @@ const ViewGlobalType = () => {
       type: "table",
       render: (record) => (
         <Tooltip title="Update">
-          <Link to={SYSTEM_SETUP_ROUTES.UPDATE_GLOBAL_TYPE} state={{ id: record?.glbTypeId }}>
-            <span className="text-gray-400 hover:text-[#1976D2] transition-colors duration-200">
-              <IconEditNx width={20} />
-            </span>
+          <Link
+            to={SYSTEM_SETUP_ROUTES.UPDATE_GLOBAL_TYPE}
+            state={{ id: record?.glbTypeId }}
+            className="inline-flex items-center text-[#1976D2] hover:text-[#1976D2] transition-colors duration-200"
+          >
+            <IconEditNx width={20} />
           </Link>
         </Tooltip>
       ),
@@ -208,8 +212,8 @@ const ViewGlobalType = () => {
       type: "table",
       render: (record) => (
         <Tooltip title="Delete">
-          <span className="text-gray-400 hover:text-[#D32F2F] transition-colors duration-200">
-            <IconDeleteMenu width={20} onClick={() => { setDeleteId(record?.glbTypeId); setModalDelete(true); }} />
+          <span className="inline-flex items-center text-[#D32F2F] hover:text-[#D32F2F] transition-colors duration-200 cursor-pointer" onClick={() => { setDeleteId(record?.glbTypeId); setModalDelete(true); }}>
+            <IconDeleteMenu width={20} />
           </span>
         </Tooltip>
       ),
