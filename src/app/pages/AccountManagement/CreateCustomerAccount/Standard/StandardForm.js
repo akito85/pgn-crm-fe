@@ -1491,7 +1491,7 @@ const StandardForm = () => {
             : `${(caiObj?.firstName || "").toUpperCase()} ${(
                 caiObj?.middleName || ""
               ).toUpperCase()} ${(caiObj?.lastName || "").toUpperCase()}` || null,
-          foundedBirthDate2: caiObj?.birthDate ?
+          foundedBirthDate: caiObj?.birthDate ?
             moment(caiObj?.birthDate).format(dateFormatting.date) || null : null,
           foundedBirthPlace: caiObj?.birthPlace || null,
           sex: caiObj?.sex || null,
