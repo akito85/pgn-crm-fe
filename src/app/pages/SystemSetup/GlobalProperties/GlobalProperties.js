@@ -12,7 +12,7 @@ import {
   downloadExcelGlobalProperties,
   getAllGlobalPropertiesPaginate,
 } from "../../../../redux/slices/system_setup/globalProperties";
-import { PlusOutlined } from "@ant-design/icons";
+import { DownloadOutlined, PlusOutlined } from "@ant-design/icons";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
 import { useTryAgainHooks } from "../../../../utils/useTryAgainHooks";
 import IconViewList from "../../../../assets/Icon/Nx/IconViewList";
@@ -137,7 +137,7 @@ const GlobalProperties = () => {
     {
       action: "Download",
       render: (
-        <ButtonComponent type="submit" onClick={handleDownload}>
+        <ButtonComponent type="submit" icon={<DownloadOutlined style={{ fontSize: "24px" }} />} onClick={handleDownload}>
           Download List
         </ButtonComponent>
       ),

@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import {
+  DownloadOutlined,
   InfoCircleOutlined,
   PlusOutlined,
   UploadOutlined,
@@ -415,7 +416,7 @@ const ViewGasSource = () => {
         <ButtonComponent
           type={"submit"}
           border={false}
-          icon={<SVGIcon name="IconButtonDownload" width={24} />}
+          icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
           onClick={() => {
             handleDownload();
           }}

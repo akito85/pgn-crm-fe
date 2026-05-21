@@ -14,7 +14,7 @@ import {
 import { Tooltip } from "antd";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import ModalCustom from "../../../../components/Modal/ModalCustom";
-import { PlusOutlined, WarningOutlined } from "@ant-design/icons";
+import { DownloadOutlined, PlusOutlined, WarningOutlined } from "@ant-design/icons";
 import { Link, NavLink } from "react-router-dom";
 import { SYSTEM_SETUP_ROUTES } from "../../../../routes/system_setup/setup_routes";
 import { hasValue, toTitleCase } from "../../../../utils";
@@ -193,7 +193,7 @@ const Action = () => {
     {
       action: "download",
       render: (
-        <ButtonComponent type="submit" onClick={handleDownload}>Download List</ButtonComponent>
+        <ButtonComponent type="submit" icon={<DownloadOutlined style={{ fontSize: "24px" }} />} onClick={handleDownload}>Download List</ButtonComponent>
       ),
     },
     {

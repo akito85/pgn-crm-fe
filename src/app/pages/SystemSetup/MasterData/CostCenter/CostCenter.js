@@ -12,6 +12,7 @@ import {
   getCostCenterDetail,
   downloadMasterCostCenter,
 } from "../../../../../redux/slices/system_setup/master_data/master_cost_center";
+import { DownloadOutlined } from "@ant-design/icons";
 import { Spin, Form, Tooltip } from "antd";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
@@ -430,7 +431,7 @@ const CostCenter = () => {
         <ButtonComponent
           type={"submit"}
           border={false}
-          icon={<SVGIcon name="IconButtonDownload" width={24} />}
+          icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
           onClick={() => {
             handleDownload();
           }}

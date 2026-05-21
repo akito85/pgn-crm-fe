@@ -38,7 +38,7 @@ import { useColumnActionPermission } from "../../../../../components/ColumnActio
 import ModalInactivateWithHierarchy from "../../../../../components/Modal/ModalInactivateWithHierarchy";
 import ModalHistory from "../../../../../components/Modal/ModalHistory";
 import { ModalError } from "../../../../../components/Modal/ModalPopUp";
-import { DownloadOutlined, PlusOutlined } from "@ant-design/icons"; // eslint-disable-line no-unused-vars
+import { DownloadOutlined, PlusOutlined } from "@ant-design/icons";
 import { SYSTEM_SETUP_ROUTES } from "../../../../../routes/system_setup/setup_routes";
 
 dayjs.extend(weekday);
@@ -446,9 +446,7 @@ const CalendarView = () => {
       render: (
         <ButtonComponent
           type={"submit"}
-          icon={
-            <SVGIcon name="IconButtonDownload" style={{ fontsSize: "20" }} />
-          }
+          icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
           onClick={() => handleDownload()}
         >
           Download List

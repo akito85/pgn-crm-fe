@@ -3,6 +3,7 @@ import { Alert, Form, Select, Spin, Tooltip } from "antd";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import {
+  DownloadOutlined,
   InfoCircleOutlined,
   PlusOutlined,
   UploadOutlined,
@@ -787,7 +788,7 @@ const ViewLocations = () => {
         <ButtonComponent
           type={"submit"}
           border={false}
-          icon={<SVGIcon name="IconButtonDownload" width={24} />}
+          icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
           onClick={() => {
             handleDownload();
           }}

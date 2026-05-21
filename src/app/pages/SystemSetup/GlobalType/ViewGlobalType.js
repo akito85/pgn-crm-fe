@@ -13,7 +13,7 @@ import {
   downloadExcelGlobalType,
   getAllGlobalTypesPaginate,
 } from "../../../../redux/slices/system_setup/globalTypes";
-import { WarningOutlined, PlusOutlined } from "@ant-design/icons";
+import { DownloadOutlined, WarningOutlined, PlusOutlined } from "@ant-design/icons";
 import { ModalConfirm } from "../../../../components/Modal/ModalPopUp";
 import useIsSuperUser from "../../../../components/useIsSuperUser";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
@@ -162,7 +162,7 @@ const ViewGlobalType = () => {
     {
       action: "Download",
       render: (
-        <ButtonComponent icon={<span style={{ fontSize: 18 }}>⬇</span>} type="submit" onClick={handleDownload}>
+        <ButtonComponent icon={<DownloadOutlined style={{ fontSize: "24px" }} />} type="submit" onClick={handleDownload}>
           Download List
         </ButtonComponent>
       ),

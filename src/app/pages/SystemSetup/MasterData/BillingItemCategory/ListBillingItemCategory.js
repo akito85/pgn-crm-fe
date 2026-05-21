@@ -321,7 +321,7 @@ const ListBillingItemCategory = () => {
       render: (
         <ButtonComponent
           type={"submit"}
-          icon={<DownloadOutlined style={{ fontSize: "20px" }} />}
+          icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
           onClick={() => handleDownload()}
         >
           Download List
