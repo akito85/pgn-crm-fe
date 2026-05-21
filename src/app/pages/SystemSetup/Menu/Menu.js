@@ -17,8 +17,12 @@ import {
   inactiveMenu,
 } from "../../../../redux/slices/system_setup/menu";
 import useIsSuperUser from "../../../../components/useIsSuperUser";
-import SVGIcon from "../../../../assets/Icon/index";
 import DetailMenuLayout from "./DetailMenuLayout";
+import IconViewList from "../../../../assets/Icon/Nx/IconViewList";
+import IconEditNx from "../../../../assets/Icon/Nx/IconEdit";
+import IconDeleteMenu from "../../../../assets/Icon/Nx/IconDeleteMenu";
+import IconActive from "../../../../assets/icons/nx/IconActive";
+import IconInactive from "../../../../assets/icons/nx/IconInactive";
 import { ModalConfirm } from "../../../../components/Modal/ModalPopUp";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
 import { useTryAgainHooks } from "../../../../utils/useTryAgainHooks";
@@ -312,11 +316,9 @@ const Menu = () => {
       type: "table",
       render: (record) => (
         <Tooltip title="Detail">
-          <SVGIcon
-            name="IconDetail"
-            width={24}
-            onClick={() => handleDetail(record?.menuId)}
-          />
+          <span className="text-gray-400 hover:text-[#1976D2] transition-colors duration-200">
+            <IconViewList width={20} onClick={() => handleDetail(record?.menuId)} />
+          </span>
         </Tooltip>
       ),
     },
@@ -332,11 +334,9 @@ const Menu = () => {
               state={active ? { id: record?.menuId } : undefined}
               style={{ pointerEvents: active ? "auto" : "none" }}
             >
-              <SVGIcon
-                name="IconEdit"
-                width={24}
-                color={active ? "#ACC424" : "#8D91A0"}
-              />
+              <span className={`transition-colors duration-200 ${active ? "text-gray-400 hover:text-[#1976D2]" : "text-gray-300 cursor-not-allowed"}`}>
+                <IconEditNx width={20} />
+              </span>
             </Link>
           </Tooltip>
         );
@@ -345,35 +345,30 @@ const Menu = () => {
     {
       action: "Activate",
       type: "table",
-      render: (record) => (
-        <Tooltip title={record?.status === "ACTIVE" ? "Inactivate" : "Activate"}>
-          <SVGIcon
-            name="IconEye"
-            width={24}
-            color={record?.status === "ACTIVE" ? "#ACC424" : "#8D91A0"}
-            onClick={() => {
-              setModalInactive(true);
-              setId(record?.menuId);
-              setStatus(record?.status);
-            }}
-          />
-        </Tooltip>
-      ),
+      render: (record) => {
+        const isActive = record?.status?.toUpperCase() === "ACTIVE";
+        return (
+          <Tooltip title={isActive ? "Inactivate" : "Activate"}>
+            {isActive
+              ? <span className="text-gray-400 hover:text-[#D32F2F] transition-colors duration-200">
+                  <IconActive width={20} onClick={() => { setModalInactive(true); setId(record?.menuId); setStatus(record?.status); }} />
+                </span>
+              : <span className="text-gray-400 hover:text-[#1976D2] transition-colors duration-200">
+                  <IconInactive width={20} onClick={() => { setModalInactive(true); setId(record?.menuId); setStatus(record?.status); }} />
+                </span>
+            }
+          </Tooltip>
+        );
+      },
     },
     ...(isSuperUser ? [{
       action: "Delete",
       type: "table",
       render: (record) => (
         <Tooltip title="Delete">
-          <SVGIcon
-            name="IconDelete"
-            width={24}
-            color="#D32F2F"
-            onClick={() => {
-              setDeleteId(record?.menuId);
-              setModalDelete(true);
-            }}
-          />
+          <span className="text-gray-400 hover:text-[#D32F2F] transition-colors duration-200">
+            <IconDeleteMenu width={20} onClick={() => { setDeleteId(record?.menuId); setModalDelete(true); }} />
+          </span>
         </Tooltip>
       ),
     }] : []),
