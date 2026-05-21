@@ -16,6 +16,8 @@ const useColumnLayout = ({
   initFixedColumns,
   initColumnWidths,
   initColumnOrder,
+  containerWidth = 0,
+  scrollX = 0,
 }) => {
   // ── Column visibility ────────────────────────────────────────────────────
   const [optionSelectedCol, setOptionSelectedCol] = useState(() => initHiddenColumns);
@@ -191,14 +193,14 @@ const useColumnLayout = ({
 
   // ── processColumn ─────────────────────────────────────────────────────────
   const processColumn = useCallback(
-    (col, fixedPos = null) => {
+    (col, fixedPos = null, effectiveWidthMap = null) => {
       const colKey = col.key || col.dataIndex || col.title;
 
       if (col.children && Array.isArray(col.children)) {
         return {
           ...col,
           key: colKey,
-          children: col.children.map((c) => processColumn(c, fixedPos)),
+          children: col.children.map((c) => processColumn(c, fixedPos, effectiveWidthMap)),
         };
       }
 
@@ -207,7 +209,15 @@ const useColumnLayout = ({
       else if (col.isClassification)              textAlign = 'center';
 
       const isDraggable = !fixedPos && !col.fixed;
-      const width = columnWidths[colKey] || col.width || DEFAULT_COL_WIDTH;
+      const isNoCol     = colKey === NO_COL_KEY;
+      const isActionCol = colKey === ACTION_COL_KEY;
+
+      // Use distributed effective width when available; otherwise fall back to
+      // stored user resize → column definition → default.
+      const width = effectiveWidthMap?.[colKey]
+        ?? columnWidths[colKey]
+        ?? col.width
+        ?? DEFAULT_COL_WIDTH;
 
       const newCol = {
         ...col,
@@ -226,10 +236,12 @@ const useColumnLayout = ({
             baseStyle.backgroundColor = '#f0f0f0';
           }
           return {
-            width: columnWidths[colKey] || col.width || DEFAULT_COL_WIDTH,
-            onResize: handleResize(colKey),
+            width,
+            onResize:  isNoCol ? undefined : handleResize(colKey),
+            noResize:  isNoCol,
+            minWidth:  isActionCol ? ACTION_COL_MIN_WIDTH : undefined,
             style: baseStyle,
-            draggable: isDraggable,
+            draggable:   isDraggable,
             onDragStart: isDraggable ? (e) => handleDragStart(e, colKey) : undefined,
             onDragOver:  isDraggable ? handleDragOver : undefined,
             onDrop:      isDraggable ? (e) => handleDrop(e, colKey) : undefined,
@@ -321,12 +333,20 @@ const useColumnLayout = ({
       else                      normal.push(rightFixed.shift());
     }
 
+    const allVisibleCols = [...leftFixed, ...normal, ...rightFixed];
+    const effectiveWidthMap = computeEffectiveWidths(
+      allVisibleCols,
+      columnWidths,
+      containerWidth,
+      scrollX,
+    );
+
     return [
-      ...leftFixed.map((c) => processColumn(c, 'left')),
-      ...normal.map((c) => processColumn(c, undefined)),
-      ...rightFixed.map((c) => processColumn(c, 'right')),
+      ...leftFixed.map((c) => processColumn(c, 'left',    effectiveWidthMap)),
+      ...normal.map((c)    => processColumn(c, undefined, effectiveWidthMap)),
+      ...rightFixed.map((c) => processColumn(c, 'right',  effectiveWidthMap)),
     ];
-  }, [resolvedColumns, optionSelectedCol, safeFixedColumns, staticFixedKeys, columnOrder, processColumn]);
+  }, [resolvedColumns, optionSelectedCol, safeFixedColumns, staticFixedKeys, columnOrder, processColumn, columnWidths, containerWidth, scrollX]);
 
   return {
     optionSelectedCol,
