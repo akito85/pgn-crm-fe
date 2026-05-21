@@ -170,7 +170,9 @@ const EntityPage = () => {
       title: "STATUS", dataIndex: "status", key: "status", align: "center", width: 120, sorter: true, fixed: "right",
       render: (text) => {
         const label = text ? text.charAt(0).toUpperCase() + text.slice(1).toLowerCase() : text;
-        return label ? <StatusComponent colour={text} size="small">{label}</StatusComponent> : text;
+        return label
+          ? <div className="flex justify-center"><StatusComponent colour={text} size="small">{label}</StatusComponent></div>
+          : text;
       },
     },
   ], []);
@@ -197,10 +199,12 @@ const EntityPage = () => {
       type: "table",
       render: (record) => (
         <Tooltip title="Detail">
-          <Link to={SYSTEM_SETUP_ROUTES.DETAIL_ENTITY} state={{ id: record?.entityId }}>
-            <span className="text-gray-400 hover:text-[#1976D2] transition-colors duration-200">
-              <IconViewList width={20} />
-            </span>
+          <Link
+            to={SYSTEM_SETUP_ROUTES.DETAIL_ENTITY}
+            state={{ id: record?.entityId }}
+            className="inline-flex items-center text-[#1976D2] hover:text-[#1976D2] transition-colors duration-200"
+          >
+            <IconViewList width={20} />
           </Link>
         </Tooltip>
       ),
@@ -216,10 +220,9 @@ const EntityPage = () => {
               <Link
                 to={!disabled ? SYSTEM_SETUP_ROUTES.UPDATE_ENTITY : undefined}
                 state={!disabled ? { id: record?.entityId } : undefined}
+                className={`inline-flex items-center transition-colors duration-200 ${disabled ? "text-gray-300 pointer-events-none" : "text-[#1976D2] hover:text-[#1976D2]"}`}
               >
-                <span className={`transition-colors duration-200 ${disabled ? "text-gray-300 cursor-not-allowed" : "text-gray-400 hover:text-[#1976D2]"}`}>
-                  <IconEditNx width={20} />
-                </span>
+                <IconEditNx width={20} />
               </Link>
             </div>
           </Tooltip>
@@ -231,22 +234,19 @@ const EntityPage = () => {
       type: "table",
       render: (record) => {
         const isActive = record?.status?.toUpperCase() === "ACTIVE";
+        const handleToggle = () => {
+          setEntityId(record?.entityId); setStatus(record?.status);
+          setOpenModalConfirm(true); setRecord(record);
+          setTypeModal(record.status === "ACTIVE" ? "INACTIVE" : "ACTIVE");
+        };
         return (
           <Tooltip title={isActive ? "Inactivate" : "Activate"}>
             {isActive
-              ? <span className="text-gray-400 hover:text-[#D32F2F] transition-colors duration-200">
-                  <IconActive width={20} onClick={() => {
-                    setEntityId(record?.entityId); setStatus(record?.status);
-                    setOpenModalConfirm(true); setRecord(record);
-                    setTypeModal(record.status === "ACTIVE" ? "INACTIVE" : "ACTIVE");
-                  }} />
+              ? <span className="inline-flex items-center text-[#D32F2F] hover:text-[#D32F2F] transition-colors duration-200 cursor-pointer" onClick={handleToggle}>
+                  <IconInactive width={20} />
                 </span>
-              : <span className="text-gray-400 hover:text-[#1976D2] transition-colors duration-200">
-                  <IconInactive width={20} onClick={() => {
-                    setEntityId(record?.entityId); setStatus(record?.status);
-                    setOpenModalConfirm(true); setRecord(record);
-                    setTypeModal(record.status === "ACTIVE" ? "INACTIVE" : "ACTIVE");
-                  }} />
+              : <span className="inline-flex items-center text-green-600 hover:text-green-600 transition-colors duration-200 cursor-pointer" onClick={handleToggle}>
+                  <IconActive width={20} />
                 </span>
             }
           </Tooltip>
