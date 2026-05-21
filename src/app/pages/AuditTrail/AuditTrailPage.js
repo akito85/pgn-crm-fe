@@ -123,7 +123,10 @@ const AuditTrailPage = () => {
     setAdvancedSearch(searchData);
   };
 
-  const routes = [{ path: "", breadcrumbName: "Audit Trail" }];
+  const routes = [
+    { path: "", breadcrumbName: "System Setup" },
+    { path: "/audit-trail", breadcrumbName: "Audit Trail" },
+  ];
 
   if (!isSuperUser) {
     return (
