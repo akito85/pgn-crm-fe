@@ -1,296 +1,275 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
-import { Spin, Tooltip } from "antd";
-import { NavLink, Link } from "react-router-dom";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { Tooltip } from "antd";
+import { Link, NavLink } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
-import SVGIcon from "../../../../assets/Icon/index";
+import NxCardContainer from "../../../../components/Nx/NxCardContainer";
+import NxTable from "../../../../components/Nx/NxTable";
+import StatusComponent from "../../../../components/StatusComponent";
 import { SYSTEM_SETUP_ROUTES } from "../../../../routes/system_setup/setup_routes";
 import {
   deleteGlobalType,
   downloadExcelGlobalType,
   getAllGlobalTypesPaginate,
 } from "../../../../redux/slices/system_setup/globalTypes";
-import { WarningOutlined } from "@ant-design/icons";
+import { WarningOutlined, PlusOutlined } from "@ant-design/icons";
 import { ModalConfirm } from "../../../../components/Modal/ModalPopUp";
 import useIsSuperUser from "../../../../components/useIsSuperUser";
-import BaseContainer from "../../../../components/BaseContainer";
-import TablePagination from "../../../../components/TablePagination";
-import Toolbar from "../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
 import { useTryAgainHooks } from "../../../../utils/useTryAgainHooks";
-import { getColumnSearchPropsPaging } from "../../../../utils/getColumnSearchProps";
-import { renderColumn } from "../../../../utils";
+import IconViewList from "../../../../assets/Icon/Nx/IconViewList";
+import IconEditNx from "../../../../assets/Icon/Nx/IconEdit";
+import IconDeleteMenu from "../../../../assets/Icon/Nx/IconDeleteMenu";
+
+const OPERATOR_MAP = {
+  "Contains": "LIKE", "Equal to": "EQUALS", "Not equal to": "NOT_EQUALS",
+  "Greater than": "GREATER_THAN", "Less than": "LESS_THAN",
+  "Is empty": "IS_NULL", "Is not empty": "IS_NOT_NULL",
+};
 
 const ViewGlobalType = () => {
-  // Selector
-  const { data, loading } = useSelector((state) => state.globalTypes);
-  const { bodyError } = useSelector(state => state?.general);
-  // Declaration
   const dispatch = useDispatch();
-  const searchInput = useRef(null);
-  const dataSource = data?.result;
-
-  // State
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const [searchText, setSearchText] = useState("");
-  const [searchedColumn, setSearchedColumn] = useState("");
-  const [sort, setSort] = useState("");
-  const [search, setSearch] = useState({});
-  const [modalDelete, setModalDelete] = useState(false);
-  const [deleteId, setDeleteId] = useState(null);
+  const { bodyError } = useSelector((state) => state?.general);
+  const rawToken = useSelector((state) => state.auth?.token);
+  const userId = useMemo(() => {
+    try { const t = JSON.parse(rawToken || "{}"); return t?.userId || t?.id || t?.username || null; }
+    catch { return null; }
+  }, [rawToken]);
   const isSuperUser = useIsSuperUser();
 
-  // handle fetch
-  const handleFetch = useCallback(() => {
-    dispatch(
-      getAllGlobalTypesPaginate({ search: encodeURIComponent(JSON?.stringify(search)), page, pageSize, sort })
-    );
-  }, [dispatch, page, pageSize, search, sort]);
+  const [allData, setAllData] = useState([]);
+  const [totalElements, setTotalElements] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [pageSize, setPageSize] = useState(30);
+  const [sort, setSort] = useState("");
+  const [advancedSearch, setAdvancedSearch] = useState(null);
+  const [fixedColumns, setFixedColumns] = useState({ left: [], right: [] });
+  const [modalDelete, setModalDelete] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
 
+  const pageRef = useRef(0);
+  const isFetchingRef = useRef(false);
+  const hasMoreRef = useRef(false);
+  const handleCancelTryAgainRef = useRef(null);
 
-  // Use Effect
+  const buildSearch = useCallback((advSearch) => {
+    const combined = {};
+    const applyFilter = (f) => {
+      if (!f.column) return;
+      const selector = OPERATOR_MAP[f.operator] || "LIKE";
+      const isNullOp = selector === "IS_NULL" || selector === "IS_NOT_NULL";
+      if (isNullOp) { combined[f.column] = `~${selector}`; }
+      else if (f.value) { combined[f.column] = `${f.value}~${selector}`; }
+    };
+    if (advSearch?.filters) advSearch.filters.forEach(applyFilter);
+    if (advSearch?.filterRules) advSearch.filterRules.forEach((r) => r.filters.forEach(applyFilter));
+    return encodeURIComponent(JSON.stringify(combined));
+  }, []);
+
+  const fetchPage = useCallback(async (page, replace = false, signal = null) => {
+    if (isFetchingRef.current) return;
+    if (signal?.aborted) return;
+    isFetchingRef.current = true;
+    setIsLoading(true);
+    try {
+      const reqSearch = buildSearch(advancedSearch);
+      const result = await dispatch(
+        getAllGlobalTypesPaginate({ page: page + 1, pageSize, sort, search: reqSearch })
+      ).unwrap();
+      if (signal?.aborted) return;
+      const rows = result?.result ?? [];
+      const pageInfo = result?.page ?? {};
+      const nextHasMore = page < (pageInfo.totalPages ?? 0) - 1;
+      setAllData((prev) => (replace ? rows : [...prev, ...rows]));
+      setTotalElements(pageInfo.totalElements ?? 0);
+      setHasMore(nextHasMore);
+      hasMoreRef.current = nextHasMore;
+      pageRef.current = page;
+    } catch (e) {
+      if (!signal?.aborted) console.error("GlobalType fetchPage error", e);
+    } finally {
+      isFetchingRef.current = false;
+      if (!signal?.aborted) setIsLoading(false);
+    }
+  }, [advancedSearch, sort, pageSize, dispatch, buildSearch]);
+
   useEffect(() => {
-    handleFetch()
-  }, [handleFetch]);
+    const signal = { aborted: false };
+    pageRef.current = 0;
+    setAllData([]);
+    setHasMore(false);
+    setIsLoading(true);
+    fetchPage(0, true, signal);
+    return () => { signal.aborted = true; isFetchingRef.current = false; };
+  }, [advancedSearch, sort, pageSize]); // intentionally excludes fetchPage
 
-  // Breadcrumbs
-  const routes = [
-    {
-      path: "",
-      breadcrumbName: "System Setup",
-    },
-    {
-      path: SYSTEM_SETUP_ROUTES.VIEW_GLOBAL_TYPE,
-      breadcrumbName: "Global Type",
-    },
-  ];
+  const onLoadMore = useCallback(() => {
+    if (!hasMoreRef.current || isFetchingRef.current) return;
+    return fetchPage(pageRef.current + 1, false);
+  }, [fetchPage]);
 
-
-  // Function Search Column
-  const handleSearch = (selectedKeys, confirm, dataIndex) => {
-    confirm();
-    setSearchText(selectedKeys[0]);
-    setSearchedColumn(dataIndex);
-    setSearch((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
-      }
-      return {
-        ...prevState,
-        [dataIndex]: selectedKeys[0],
-      };
-    });
-  };
-
-  // Function Change Pagination
-  const handleChange = (page, pageSize) => {
-    setPage(page);
-    setPageSize(pageSize);
-  };
-
-  // Column
-  const columns = [
-    {
-      title: "NO",
-      align: "center",
-      width: 60,
-      render: (text, object, index) => (page - 1) * pageSize + index + 1,
-    },
-    {
-      title: "GROUP NAME",
-      dataIndex: "groupName",
-      ...getColumnSearchPropsPaging(
-        "groupName",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch
-      ),
-      sorter: true,
-      render: (text) => renderColumn('groupName', searchedColumn, searchText, text, false, 'input', search)
-    },
-    {
-      title: "SORT BY",
-      dataIndex: "sortBy",
-      ...getColumnSearchPropsPaging(
-        "sortBy",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch
-      ),
-      sorter: true,
-      render: (text) => renderColumn('sortBy', searchedColumn, searchText, text, false, 'input', search)
-    },
-    {
-      title: "DESCRIPTION",
-      dataIndex: "description",
-      ...getColumnSearchPropsPaging(
-        "description",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch
-      ),
-      sorter: true,
-      ellipsis: {
-        showTitle: false,
-      },
-      render: (text) => renderColumn('description', searchedColumn, searchText, text, true, 'input', search)
-    },
-  ];
-
-  // handle download
-  const handleDownload = () => {
-    dispatch(downloadExcelGlobalType({
-      search: encodeURIComponent(JSON?.stringify(search)),
-      page,
-      pageSize,
-      sort,
-    }));
-  };
-
-
-  const onSort = (_, __, sort) => {
-    const dataSort =
-      sort.order !== undefined
-        ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
-        : "";
+  const onSort = useCallback((_, __, sortInfo) => {
+    const dataSort = sortInfo.order
+      ? `${sortInfo.field}~${sortInfo.order === "ascend" ? "asc" : "desc"}`
+      : "";
     setSort(dataSort);
+  }, []);
+
+  const onAdvanceSearch = useCallback((searchData) => setAdvancedSearch(searchData), []);
+  const handleChange = useCallback((_, pageSizeChange) => setPageSize(pageSizeChange), []);
+
+  const resetAndReload = useCallback(() => {
+    const signal = { aborted: false };
+    pageRef.current = 0;
+    setAllData([]);
+    setHasMore(false);
+    setIsLoading(true);
+    fetchPage(0, true, signal);
+  }, [fetchPage]);
+
+  const handleDownload = useCallback(() => {
+    dispatch(downloadExcelGlobalType({
+      page: 1,
+      pageSize: totalElements || 1000,
+      sort,
+      search: buildSearch(advancedSearch),
+    }));
+  }, [dispatch, sort, totalElements, advancedSearch, buildSearch]);
+
+  const handleDelete = async () => {
+    setModalDelete(false);
+    try { await dispatch(deleteGlobalType(deleteId))?.unwrap(); } catch {}
+    resetAndReload();
   };
 
-  // item actions
-  const itemActions = [
-    // toolbar items
+  const columns = useMemo(() => [
+    { title: "NO", key: "no", width: 60, align: "center", render: (_, __, index) => index + 1 },
+    { title: "GROUP NAME", dataIndex: "groupName", key: "groupName", sorter: true },
+    { title: "SORT BY", dataIndex: "sortBy", key: "sortBy", sorter: true, width: 120, align: "center" },
+    { title: "DESCRIPTION", dataIndex: "description", key: "description", sorter: true, ellipsis: { showTitle: false } },
     {
-      action: 'Download',
+      title: "STATUS", dataIndex: "status", key: "status", align: "center", width: 120, sorter: true, fixed: "right",
+      render: (text) => {
+        const label = text ? text.charAt(0).toUpperCase() + text.slice(1).toLowerCase() : text;
+        return label ? <StatusComponent colour={text} size="small">{label}</StatusComponent> : text;
+      },
+    },
+  ], []);
+
+  const itemActions = useMemo(() => [
+    {
+      action: "Download",
       render: (
-        <ButtonComponent
-          icon={<SVGIcon name="IconButtonDownload" width={24} />}
-          type="submit"
-          onClick={handleDownload}
-        >
+        <ButtonComponent icon={<span style={{ fontSize: 18 }}>⬇</span>} type="submit" onClick={handleDownload}>
           Download List
         </ButtonComponent>
-      )
+      ),
     },
     {
-      action: 'Create',
+      action: "Create",
       render: (
         <NavLink to={SYSTEM_SETUP_ROUTES.CREATE_GLOBAL_TYPE}>
-          <ButtonComponent
-            icon={<SVGIcon name="IconButtonCreate" width={24} />}
-            type="submit"
-          >
+          <ButtonComponent icon={<PlusOutlined style={{ fontSize: "24px" }} />} type="submit">
             Create Global Type
           </ButtonComponent>
         </NavLink>
-      )
-    },
-
-    // column action
-    {
-      action: 'View',
-      type: 'table',
-      render: (record, data_length) => {
-        return (
-          <Tooltip title="Detail">
-            <Link
-              to={SYSTEM_SETUP_ROUTES.DETAIL_GLOBAL_TYPE}
-              state={{ id: record?.glbTypeId }}
-            >
-              <SVGIcon name="IconDetail" width={24} />
-            </Link>
-          </Tooltip>
-        )
-      }
+      ),
     },
     {
-      action: 'Update',
-      type: 'table',
-      render: (record, data_length) => {
-        return (
-          <Tooltip title="Update">
-            <Link
-              to={SYSTEM_SETUP_ROUTES.UPDATE_GLOBAL_TYPE}
-              state={{ id: record?.glbTypeId }}
-            >
-              <SVGIcon name="IconEdit" width={24} />
-            </Link>
-          </Tooltip>
-        )
-      }
+      action: "View",
+      type: "table",
+      render: (record) => (
+        <Tooltip title="Detail">
+          <Link to={SYSTEM_SETUP_ROUTES.DETAIL_GLOBAL_TYPE} state={{ id: record?.glbTypeId }}>
+            <span className="text-gray-400 hover:text-[#1976D2] transition-colors duration-200">
+              <IconViewList width={20} />
+            </span>
+          </Link>
+        </Tooltip>
+      ),
+    },
+    {
+      action: "Update",
+      type: "table",
+      render: (record) => (
+        <Tooltip title="Update">
+          <Link to={SYSTEM_SETUP_ROUTES.UPDATE_GLOBAL_TYPE} state={{ id: record?.glbTypeId }}>
+            <span className="text-gray-400 hover:text-[#1976D2] transition-colors duration-200">
+              <IconEditNx width={20} />
+            </span>
+          </Link>
+        </Tooltip>
+      ),
     },
     ...(isSuperUser ? [{
-      action: 'Delete',
-      type: 'table',
+      action: "Delete",
+      type: "table",
       render: (record) => (
         <Tooltip title="Delete">
-          <SVGIcon
-            name="IconDelete"
-            width={24}
-            style={{ cursor: 'pointer' }}
-            onClick={() => {
-              setDeleteId(record?.glbTypeId);
-              setModalDelete(true);
-            }}
-          />
+          <span className="text-gray-400 hover:text-[#D32F2F] transition-colors duration-200">
+            <IconDeleteMenu width={20} onClick={() => { setDeleteId(record?.glbTypeId); setModalDelete(true); }} />
+          </span>
         </Tooltip>
-      )
+      ),
     }] : []),
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  ], [isSuperUser, handleDownload]);
+
+  const actionColumns = useColumnActionPermission(
+    ["View", "Update", ...(isSuperUser ? ["Delete"] : [])],
+    itemActions
+  );
+  const allColumns = useMemo(() => [...columns, ...actionColumns], [columns, actionColumns]);
+
+  const handleRetry = useCallback(() => {
+    handleCancelTryAgainRef.current?.();
+    if (bodyError?.action === "DOWNLOAD_GLOBAL_PROPERTIES_EXCEL") handleDownload();
+    resetAndReload();
+  }, [bodyError, handleDownload, resetAndReload]);
+
+  const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
+  handleCancelTryAgainRef.current = handleCancelTryAgain;
+
+  const routes = [
+    { path: "", breadcrumbName: "System Setup" },
+    { path: SYSTEM_SETUP_ROUTES.VIEW_GLOBAL_TYPE, breadcrumbName: "Global Type" },
   ];
 
-  const handleDelete = async () => {
-    try {
-      setModalDelete(false);
-      await dispatch(deleteGlobalType(deleteId))?.unwrap();
-      await handleFetch()?.unwrap();
-    } catch (error) {
-      await handleFetch()?.unwrap();
-    }
-  };
-
-  // handle retry modal error
-  const handleRetry = () => {
-    try {
-      handleCancelTryAgain();
-      if (bodyError?.action === "DOWNLOAD_GLOBAL_PROPERTIES_EXCEL") {
-        handleDownload()
-      }
-      handleFetch();
-    } catch (error) {
-      handleFetch();
-    }
-  };
-
-  // use hooks handle retry
-  const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
   return (
     <>
-      <Spin spinning={loading}>
-        <BreadCrumb routes={routes} />
-        <Toolbar items={itemActions} />
+      <BreadCrumb routes={routes} />
 
-        <BaseContainer header={"global type list"}>
-          <div className="w-full">
-            <TablePagination
-              // loading={loading}
-              dataSource={dataSource}
-              columns={[...columns, ...useColumnActionPermission(['update', 'view', ...(isSuperUser ? ['delete'] : [])], itemActions)]}
-              current={page}
-              pageSize={pageSize}
-              onChange={handleChange}
-              totalData={data?.page?.totalElements}
-              tableScrolled={{ x: 1200 }}
-              onSort={onSort}
-            />
-          </div>
-        </BaseContainer>
-      </Spin>
+      <NxCardContainer header="GLOBAL TYPE LIST" className="mt-4" actions={itemActions}>
+        <NxTable
+          idTable="global-type-list"
+          userId={userId}
+          dataSource={allData}
+          columns={allColumns}
+          columnDefinitions={columns}
+          rowKey={(r) => r.glbTypeId ?? r.id}
+          loading={isLoading}
+          totalData={totalElements}
+          current={pageRef.current + 1}
+          pageSize={pageSize}
+          onChange={handleChange}
+          onSizeChanger={handleChange}
+          onSort={onSort}
+          onAdvanceSearch={onAdvanceSearch}
+          fixedColumns={fixedColumns}
+          setFixedColumns={setFixedColumns}
+          useInfiniteScroll={true}
+          onLoadMore={onLoadMore}
+          hasMore={hasMore}
+          handleDownload={handleDownload}
+          showExport={true}
+          showAdvanceSearch={true}
+          showSearchBar={true}
+          tableScrolled={{ x: 1200, y: 525 }}
+        />
+      </NxCardContainer>
 
-      {/* MODAL DELETE */}
       <ModalConfirm
         isOpen={modalDelete}
         handleCancel={() => setModalDelete(false)}
@@ -300,16 +279,15 @@ const ViewGlobalType = () => {
         useOk={true}
       >
         <div className="w-full flex flex-col mt-10 justify-end">
-          <div className={"w-full flex flex-row items-center px-10"}>
-            <WarningOutlined style={{ color: "red" }} className={"text-4xl"} />
-            <span className={"text-lg text-black font-bold h-auto mx-auto"}>
+          <div className="w-full flex flex-row items-center px-10">
+            <WarningOutlined style={{ color: "red" }} className="text-4xl" />
+            <span className="text-lg text-black font-bold h-auto mx-auto">
               Are you sure you want to permanently delete this global type? All associated values will also be removed. This cannot be undone.
             </span>
           </div>
         </div>
       </ModalConfirm>
 
-      {/* modal try again */}
       {renderModal()}
     </>
   );
