@@ -97,10 +97,10 @@ const FormMenu = (props) => {
     }
   }, [dispatch, id]);
   useEffect(() => {
-    if (type === 'update') {
+    if (type === 'update' && data_detail && data) {
       assert();
     }
-  }, [data_detail, form, type]);
+  }, [data_detail, data, form, type]);
 
   const routes = [
     {
@@ -364,7 +364,14 @@ const FormMenu = (props) => {
                     <SelectComponent
                       placeholder="Choose from available icons"
                       onChange={handleIconSelect}
+                      allowClear
                     >
+                      <Option key="none" value="">
+                        <Space size="small">
+                          <span style={{ display: "inline-block", width: 16 }} />
+                          <span style={{ color: "#8D91A0" }}>(No Icon)</span>
+                        </Space>
+                      </Option>
                       {availableIcons.map((icon) => (
                         <Option key={icon} value={icon}>
                           <Space size="small">
