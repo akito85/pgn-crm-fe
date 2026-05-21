@@ -646,7 +646,7 @@ const CalendarView = () => {
       {
         title: "NO",
         key: "no",
-        width: 60,
+        width: 90,
         align: "center",
         render: (text, object, index) => index + 1,
       },

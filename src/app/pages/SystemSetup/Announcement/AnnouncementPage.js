@@ -158,7 +158,7 @@ const AnnouncementPage = () => {
   };
 
   const columns = useMemo(() => [
-    { title: "NO", key: "no", width: 60, align: "center", render: (_, __, index) => index + 1 },
+    { title: "NO", key: "no", width: 90, align: "center", render: (_, __, index) => index + 1 },
     { title: "NAME", dataIndex: "annName", key: "annName", sorter: true },
     {
       title: "START DATE", dataIndex: "startDate", key: "startDate", sorter: true, align: "center", width: 140,
@@ -173,7 +173,7 @@ const AnnouncementPage = () => {
       title: "STATUS", dataIndex: "status", key: "status", align: "center", width: 120, sorter: true, fixed: "right",
       render: (text) => {
         const label = text ? text.charAt(0).toUpperCase() + text.slice(1).toLowerCase() : text;
-        return label ? <StatusComponent colour={text} size="small">{label}</StatusComponent> : text;
+        return label ? <div className="flex justify-center"><StatusComponent colour={text} size="small">{label}</StatusComponent></div> : text;
       },
     },
   ], []);

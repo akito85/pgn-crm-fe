@@ -257,7 +257,7 @@ const CreateGasSource = ({ type }) => {
       title: "NO",
       dataIndex: "no",
       align: "center",
-      width: 60,
+      width: 90,
       render: (t, r, i) => i + 1,
     },
     {

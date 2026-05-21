@@ -154,7 +154,7 @@ const EntityPage = () => {
   };
 
   const columns = useMemo(() => [
-    { title: "NO", key: "no", width: 60, align: "center", render: (_, __, index) => index + 1 },
+    { title: "NO", key: "no", width: 90, align: "center", render: (_, __, index) => index + 1 },
     { title: "NAME", dataIndex: "entityName", key: "entityName", sorter: true, width: 300 },
     { title: "ENTITY CODE", dataIndex: "entityCode", key: "entityCode", sorter: true, align: "left" },
     { title: "EMAIL", dataIndex: "email", key: "email", sorter: true, align: "left" },

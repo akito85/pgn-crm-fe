@@ -66,7 +66,7 @@ const DetailCostCenter = (props) => {
     {
       title: "NO",
       align: "center",
-      width: 60,
+      width: 90,
       render: (text, object, index) => (currentLog - 1) * sizeLog + index + 1,
     },
     {

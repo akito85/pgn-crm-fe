@@ -216,7 +216,7 @@ const Menu = () => {
     {
       title: "NO",
       key: "no",
-      width: 60,
+      width: 90,
       align: "center",
       render: (_, __, index) => index + 1,
     },
@@ -289,7 +289,7 @@ const Menu = () => {
           ? text.charAt(0).toUpperCase() + text.slice(1).toLowerCase()
           : text;
         return label ? (
-          <StatusComponent colour={text} size="small">{label}</StatusComponent>
+          <div className="flex justify-center"><StatusComponent colour={text} size="small">{label}</StatusComponent></div>
         ) : text;
       },
     },

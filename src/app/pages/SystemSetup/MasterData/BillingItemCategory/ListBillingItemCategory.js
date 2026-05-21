@@ -505,7 +505,7 @@ const ListBillingItemCategory = () => {
       {
         title: "NO",
         key: "no",
-        width: 60,
+        width: 90,
         dataIndex: "key",
         align: "center",
         isClassification: true,

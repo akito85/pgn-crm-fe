@@ -120,7 +120,7 @@ const GlobalProperties = () => {
   }, [dispatch, sort, totalElements, advancedSearch, buildSearch]);
 
   const columns = useMemo(() => [
-    { title: "NO", key: "no", width: 60, align: "center", render: (_, __, index) => index + 1 },
+    { title: "NO", key: "no", width: 90, align: "center", render: (_, __, index) => index + 1 },
     { title: "TYPE", dataIndex: "gpType", key: "gpType", align: "center", sorter: true, width: 160 },
     { title: "PROPERTIES NAME", dataIndex: "name", key: "name", sorter: true },
     { title: "DESCRIPTION", dataIndex: "description", key: "description", sorter: true, ellipsis: { showTitle: false } },
@@ -128,7 +128,7 @@ const GlobalProperties = () => {
       title: "STATUS", dataIndex: "status", key: "status", align: "center", width: 120, sorter: true, fixed: "right",
       render: (text) => {
         const label = text ? text.charAt(0).toUpperCase() + text.slice(1).toLowerCase() : text;
-        return label ? <StatusComponent colour={text} size="small">{label}</StatusComponent> : text;
+        return label ? <div className="flex justify-center"><StatusComponent colour={text} size="small">{label}</StatusComponent></div> : text;
       },
     },
   ], []);

@@ -129,7 +129,7 @@ const ViewLateCharges = () => {
       {
         key: "no",
         title: "NO",
-        width: 60,
+        width: 90,
         align: "center",
         render: (text, object, index) => (page - 1) * pageSize + index + 1,
       },

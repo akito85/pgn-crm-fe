@@ -64,7 +64,7 @@ const ListPaymentCycle = () => {
         STATUS: 110,
         STATUS_APPROVAL: 160,
         ACTION: 60,
-        NO: 60,
+        NO: 90,
     };
 
     const initialPageSize = 100;
