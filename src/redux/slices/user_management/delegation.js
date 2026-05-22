@@ -80,7 +80,7 @@ export const approveRejectDelegation = createAsyncThunk(
 
 export const getPositionDelegation = createAsyncThunk(
   "GET_POSITION_DELEGATION",
-  async (thunkAPI) => {
+  async (_, thunkAPI) => {
     try {
       const url = "/v1/dbs/api/user-delegation/get-position";
       const response = await userHttpService.getAll(url);
@@ -90,7 +90,7 @@ export const getPositionDelegation = createAsyncThunk(
         validateError({ error: error, action: "GET_POSITION_DELEGATION" })
       );
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response?.data?.code === 419 ? null : error.response?.data
       );
     }
   }
@@ -105,12 +105,13 @@ export const getDelegateTo = createAsyncThunk(
         const response = await userHttpService.getDetail(url);
         return response.data;
       }
+      return [];
     } catch (error) {
       thunkAPI.dispatch(
         validateError({ error: error, action: "GET_DELEGATE_TO" })
       );
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error.response?.data?.code === 419 ? null : error.response?.data
       );
     }
   }
