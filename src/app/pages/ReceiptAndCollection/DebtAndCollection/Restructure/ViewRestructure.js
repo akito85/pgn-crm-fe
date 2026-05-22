@@ -35,6 +35,7 @@ import {
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import ModalHistory from "../../../../../components/Modal/ModalHistory";
 import ModalApprovalRestructure from "./Modal/ModalApprovalRestructure";
+import ModalCancelRestructure from "./Modal/ModalCancelRestructure";
 import ListDetailRestructure from "./ListDetailRestructure";
 
 const ViewRestructure = () => {
@@ -56,6 +57,8 @@ const ViewRestructure = () => {
     const [selectedId, setSelectedId] = useState(null);
     const [modalHistory, setModalHistory] = useState(false);
     const [modalApproval, setModalApproval] = useState(false);
+    const [modalCancel, setModalCancel] = useState(false);
+    const [selectedRecord, setSelectedRecord] = useState(null);
     const [search, setSearch] = useState({});
 
     const handleRefresh = () => {
@@ -180,20 +183,8 @@ const ViewRestructure = () => {
     };
 
     const handleCancel = (record) => {
-        Modal.confirm({
-            title: "Cancel Payment Plan",
-            icon: <ExclamationCircleOutlined style={{ color: "#BE3036" }} />,
-            content: "Apakah Anda yakin ingin membatalkan (Cancel) Payment Plan ini?",
-            okText: "Ya, Batalkan",
-            okType: "danger",
-            cancelText: "Tidak",
-            onOk() {
-                return dispatch(cancelRestructure(record?.id)).then(() => {
-                    message.success("Payment Plan berhasil dicancel!");
-                    dispatch(getAllRestructureListPaginate({ page: 1, limit: 10 }));
-                });
-            }
-        });
+        setSelectedRecord(record);
+        setModalCancel(true);
     };
 
     const handleRePlan = (record) => {
@@ -547,6 +538,13 @@ const ViewRestructure = () => {
                     </div>
                 )}
 
+                <ModalCancelRestructure
+                    isOpen={modalCancel}
+                    handleCancel={() => setModalCancel(false)}
+                    record={selectedRecord}
+                    onSuccess={() => dispatch(getAllRestructureListPaginate({ page: 1, limit: 10 }))}
+                />
+
                 <ModalHistory
                     isOpen={modalHistory}
                     handleClose={() => setModalHistory(false)}
@@ -559,6 +557,8 @@ const ViewRestructure = () => {
                     tabOptions={[
                         { label: "Payment Plan", value: "payment_plan" },
                         { label: "Early Repayment", value: "early_repayment" },
+                        { label: "Re-Plan", value: "re_plan" },
+                        { label: "Cancel", value: "cancel" },
                     ]}
                     dataApprover={{
                         payment_plan: Array.isArray(dataApprovalHistory?.payment_plan?.dataApprover) 
@@ -566,7 +566,13 @@ const ViewRestructure = () => {
                             : (dataApprovalHistory?.payment_plan?.dataApprover?.RESTRUCTURE || []),
                         early_repayment: Array.isArray(dataApprovalHistory?.early_repayment?.dataApprover)
                             ? dataApprovalHistory.early_repayment.dataApprover
-                            : (dataApprovalHistory?.early_repayment?.dataApprover?.EARLY_REPAYMENT || [])
+                            : (dataApprovalHistory?.early_repayment?.dataApprover?.EARLY_REPAYMENT || []),
+                        re_plan: Array.isArray(dataApprovalHistory?.re_plan?.dataApprover)
+                            ? dataApprovalHistory.re_plan.dataApprover
+                            : (dataApprovalHistory?.re_plan?.dataApprover?.REPLAN || []),
+                        cancel: Array.isArray(dataApprovalHistory?.cancel?.dataApprover)
+                            ? dataApprovalHistory.cancel.dataApprover
+                            : (dataApprovalHistory?.cancel?.dataApprover?.CANCEL || [])
                     }}
                     dataHistory={{
                         payment_plan: Array.isArray(dataApprovalHistory?.payment_plan?.dataHistory)
@@ -574,7 +580,13 @@ const ViewRestructure = () => {
                             : (dataApprovalHistory?.payment_plan?.dataHistory?.RESTRUCTURE || []),
                         early_repayment: Array.isArray(dataApprovalHistory?.early_repayment?.dataHistory)
                             ? dataApprovalHistory.early_repayment.dataHistory
-                            : (dataApprovalHistory?.early_repayment?.dataHistory?.EARLY_REPAYMENT || [])
+                            : (dataApprovalHistory?.early_repayment?.dataHistory?.EARLY_REPAYMENT || []),
+                        re_plan: Array.isArray(dataApprovalHistory?.re_plan?.dataHistory)
+                            ? dataApprovalHistory.re_plan.dataHistory
+                            : (dataApprovalHistory?.re_plan?.dataHistory?.REPLAN || []),
+                        cancel: Array.isArray(dataApprovalHistory?.cancel?.dataHistory)
+                            ? dataApprovalHistory.cancel.dataHistory
+                            : (dataApprovalHistory?.cancel?.dataHistory?.CANCEL || [])
                     }}
                 />
 

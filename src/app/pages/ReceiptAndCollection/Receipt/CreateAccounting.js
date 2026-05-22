@@ -38,7 +38,7 @@ const ReadOnlyField = ({ label, value }) => (
             {label}
         </span>
         <span className="text-[13px] text-gray-800 font-semibold border-b border-gray-200 pb-1">
-            {value || "-"}
+            {value || ""}
         </span>
     </div>
 );
@@ -296,7 +296,7 @@ const CreateAccounting = () => {
             : "-";
         const billingPeriodFormatted = receiptData?.paymentPeriod
             ? new Date(receiptData.paymentPeriod).toLocaleDateString("id-ID")
-            : (receiptData?.paymentPeriod || "-");
+            : (receiptData?.paymentPeriod || "");
 
         return (
             <div className="w-full">

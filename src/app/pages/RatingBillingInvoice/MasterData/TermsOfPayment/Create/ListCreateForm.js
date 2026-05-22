@@ -667,6 +667,67 @@ const ListCreateForm = ({ type }) => {
 
   //handle submit setelah muncul modal
   const handleSubmitForm = async (formValue) => {
+    // Jika draft, langsung simpan tanpa validasi ketat
+    if (!flagRef.current) {
+      // Save as Draft - skip strict validation
+      const dataValue = {
+        id: type === "update" ? data_detail?.information?.id : undefined,
+        name: formValue?.name,
+        startDate: formValue?.startDate,
+        endDate: formValue?.endDate,
+        type: formValue?.type,
+        term: formValue?.terms,
+        isCalendar: isC,
+        isSunday: isSun,
+        isSaturday: isSat,
+        apphierId: formValue?.apphierId,
+        criterias: (formValue?.criteria || []).map((item) => {
+          const tempData =
+            id && data_detail_draft?.id === id
+              ? data_detail_draft?.criteria || []
+              : data_detail?.criteria || [];
+          const temp = tempData?.filter((a) => item === a.criteria);
+          return {
+            termOfPaymentCriteriaId: temp[0]?.id || null,
+            criteria: item,
+          };
+        }),
+        criteriaData: list.map((item) => ({
+          id: item?.id || null,
+          referenceId: item?.referenceId || null,
+          startDate: item.startDate
+            ? moment(item.startDate).format(dateFormatting.date)
+            : null,
+          endDate: item.endDate
+            ? moment(item.endDate).format(dateFormatting.date)
+            : null,
+          customer: item.customer?.value || null,
+          budget: item.budget?.value || null,
+          subDistrict: item.subDistrict?.value || null,
+          district: item.district?.value || null,
+          city: item.city?.value || null,
+          province: item.province?.value || null,
+          area: item.area?.value || null,
+          sor: item.sor?.value || null,
+          industrialSector: item.industrialSector?.value || null,
+          product: item.product?.value || null,
+          gsizes: item.gsizes?.value || null,
+          customerSegment: item.customerSegment?.value || null,
+          accountGroup: item.accountGroup?.value || null,
+          serviceType: item.serviceType?.value || null,
+          accountCategory: item.accountCategory?.value || null,
+          allCriteria: item.all?.value || null,
+        })),
+        description: formValue?.description,
+        isSubmit: flagRef.current,
+      };
+
+      setModalConfirm(true);
+      setKirimBody(dataValue);
+      return;
+    }
+
+    // Submit - validasi ketat
     let errorBody = {};
     if (listDataAttachment.length === 0) {
       handleMandatory(setTabData, listDataAttachment);
@@ -998,6 +1059,7 @@ const ListCreateForm = ({ type }) => {
               handleStartDate={handleStartDate}
               handleEndDate={handleEndDate}
               disbaledDate={isDisabledDate}
+              isDraft={!flagRef.current}
             />
           </div>
 
@@ -1103,10 +1165,19 @@ const ListCreateForm = ({ type }) => {
         type={"confirmation"}
         footer={
           <div className="w-full flex justify-end gap-2 p-4">
-            <ButtonComponent onClick={handleCancelModalConfirm} type="default" disabled={loadingForm}>
+            <ButtonComponent
+              onClick={handleCancelModalConfirm}
+              type="default"
+              disabled={loadingForm}
+            >
               Cancel
             </ButtonComponent>
-            <ButtonComponent type="submit" onClick={handleProcessModalConfirm} isLoading={loadingForm} disabled={loadingForm}>
+            <ButtonComponent
+              type="submit"
+              onClick={handleProcessModalConfirm}
+              isLoading={loadingForm}
+              disabled={loadingForm}
+            >
               Confirm
             </ButtonComponent>
           </div>

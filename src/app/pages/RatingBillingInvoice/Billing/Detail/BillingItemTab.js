@@ -108,11 +108,11 @@ const BillingItemTab = ({ billingCodeId, calculationCodeId, billHeaderId }) => {
       <div className="grid grid-cols-2 gap-x-8 gap-y-4 mb-4">
         <div>
           <p className="text-[13px] text-gray-600 mb-1">Calculation Code</p>
-          <p className="text-[15px] text-primary">{calculationCodeId || "-"}</p>
+          <p className="text-[15px] text-primary">{calculationCodeId || ""}</p>
         </div>
         <div>
           <p className="text-[13px] text-gray-600 mb-1">Source Number</p>
-          <p className="text-[15px] text-primary">{billHeaderId || "-"}</p>
+          <p className="text-[15px] text-primary">{billHeaderId || ""}</p>
         </div>
       </div>
 

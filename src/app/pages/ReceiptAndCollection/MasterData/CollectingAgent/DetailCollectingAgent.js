@@ -28,11 +28,11 @@ const DetailCollectingAgent = ({ data_detail, data_req }) => {
                             </div>
                             <div>
                                 <p className="font-semibold text-sm">Requested By</p>
-                                <p className="text-sm">{data_req?.requestedBy || "-"}</p>
+                                <p className="text-sm">{data_req?.requestedBy || ""}</p>
                             </div>
                             <div className="col-span-3">
                                 <p className="font-semibold text-sm">Remark</p>
-                                <p className="text-sm">{data_req?.remarks || "-"}</p>
+                                <p className="text-sm">{data_req?.remarks || ""}</p>
                             </div>
                         </div>
                     </CardContainer>
@@ -54,7 +54,7 @@ const DetailCollectingAgent = ({ data_detail, data_req }) => {
                     </div>
                     <div>
                         <p className="font-semibold text-sm">Name</p>
-                        <p className="text-sm">{data_detail?.name || "-"}</p>
+                        <p className="text-sm">{data_detail?.name || ""}</p>
                     </div>
                     <div>
                         <p className="font-semibold text-sm">Start Date</p>
@@ -78,11 +78,11 @@ const DetailCollectingAgent = ({ data_detail, data_req }) => {
                     </div>
                     <div>
                         <p className="font-semibold text-sm">Status</p>
-                        <p className="text-sm">{data_detail?.status || "-"}</p>
+                        <p className="text-sm">{data_detail?.status || ""}</p>
                     </div>
                     <div>
                         <p className="font-semibold text-sm">Status Approval</p>
-                        <p className="text-sm">{data_detail?.statusApproval || "-"}</p>
+                        <p className="text-sm">{data_detail?.statusApproval || ""}</p>
                     </div>
                 </div>
             </CardContainer>
@@ -99,7 +99,7 @@ const DetailCollectingAgent = ({ data_detail, data_req }) => {
                 <div className="w-full grid grid-cols-5 gap-4">
                     <div>
                         <p className="font-semibold text-sm">Record ID</p>
-                        <p className="text-sm">{data_detail?.id || "-"}</p>
+                        <p className="text-sm">{data_detail?.id || ""}</p>
                     </div>
                     <div>
                         <p className="font-semibold text-sm">Created Date</p>
@@ -111,7 +111,7 @@ const DetailCollectingAgent = ({ data_detail, data_req }) => {
                     </div>
                     <div>
                         <p className="font-semibold text-sm">Created By</p>
-                        <p className="text-sm">{data_detail?.createdBy || "-"}</p>
+                        <p className="text-sm">{data_detail?.createdBy || ""}</p>
                     </div>
                     <div>
                         <p className="font-semibold text-sm">Updated Date</p>
@@ -123,7 +123,7 @@ const DetailCollectingAgent = ({ data_detail, data_req }) => {
                     </div>
                     <div>
                         <p className="font-semibold text-sm">Updated By</p>
-                        <p className="text-sm">{data_detail?.updatedBy || "-"}</p>
+                        <p className="text-sm">{data_detail?.updatedBy || ""}</p>
                     </div>
                 </div>
             </CardContainer>

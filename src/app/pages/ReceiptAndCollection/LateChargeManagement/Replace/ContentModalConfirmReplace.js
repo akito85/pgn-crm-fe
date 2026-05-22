@@ -27,20 +27,20 @@ const ContentModalConfirmReplace = ({
                             </div>
                             <div className="grid grid-cols-3 w-full gap-4">
                                 <DetailText label={"Area Code"}>
-                                    {data?.areaCode || "-"}
+                                    {data?.areaCode || ""}
                                 </DetailText>
                                 <DetailText label={"Area Name"}>
-                                    {data?.areaName || "-"}
+                                    {data?.areaName || ""}
                                 </DetailText>
                                 <DetailText label={"Customer ID"}>
-                                    {data?.customerNumber || "-"}
+                                    {data?.customerNumber || ""}
                                 </DetailText>
 
                                 <DetailText label={"Customer Name"}>
-                                    {data?.customerName || "-"}
+                                    {data?.customerName || ""}
                                 </DetailText>
                                 <DetailText label={"Type"}>
-                                    {data?.type || "-"}
+                                    {data?.type || ""}
                                 </DetailText>
                                 <DetailText label={"Period Tagihan"}>
                                     {data?.periodTagihan ? moment(data?.periodTagihan).format("MMM YYYY") : "-"}
@@ -57,7 +57,7 @@ const ContentModalConfirmReplace = ({
                                 </DetailText>
 
                                 <DetailText label={"Remark"}>
-                                    {data?.remark || "-"}
+                                    {data?.remark || ""}
                                 </DetailText>
                             </div>
                         </div>

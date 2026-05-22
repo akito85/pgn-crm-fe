@@ -114,27 +114,35 @@ const ContentModalConfirmEarlyRepayment = ({
 
             return (
                 <div key={currency} className="mb-4">
-                    <div className="text-[12px] font-bold mb-2">CURRENCY {currency}</div>
-                    <TableRBI
-                        idTable={`open-item-confirm-${currency}`}
-                        dataSource={rows}
-                        columns={columns}
-                        usePagination={false}
-                        showAdvanceSearch={false}
-                        showSearchBar={false}
-                    />
-                    <div className="flex bg-[#F5F5F5] border border-t-0 p-2 font-bold text-[12px]">
-                        <div className="flex-[4] text-center">TOTAL</div>
-                        <div className="flex-1 text-right pr-4">
-                            {total.toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 })}
+                    <SectionCard title={`CURRENCY ${currency}`}>
+                        <TableRBI
+                            idTable={`open-item-confirm-${currency}`}
+                            dataSource={rows}
+                            columns={columns}
+                            usePagination={false}
+                            showAdvanceSearch={false}
+                            showSearchBar={false}
+                        />
+                        <div className="flex bg-[#F5F5F5] border border-t-0 p-2 font-bold text-[12px]">
+                            <div className="flex-[4] text-center">TOTAL</div>
+                            <div className="flex-1 text-right pr-4">
+                                {total.toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 })}
+                            </div>
                         </div>
-                    </div>
+                    </SectionCard>
                 </div>
             );
         });
     };
 
     const renderEarlyPaymentCalculation = () => {
+        const openItemTotals = openItems.reduce((acc, item) => {
+            const cur = item.currency || "IDR";
+            const amount = parseFloat(String(item.amount).replace(/,/g, "")) || 0;
+            acc[cur] = (acc[cur] || 0) + amount;
+            return acc;
+        }, {});
+
         const currencies = Object.keys(installmentsByCurrency);
         if (currencies.length === 0) return <DetailText label="">No data available</DetailText>;
 
@@ -142,6 +150,7 @@ const ContentModalConfirmEarlyRepayment = ({
             const rows = installmentsByCurrency[currency] || [];
             const isIdr = currency === "IDR";
             const currentSum = rows.reduce((sum, r) => sum + (parseFloat(r.amount) || 0), 0);
+            const targetTotal = openItemTotals[currency] || 0;
 
             const columns = [
                 { title: "NO", dataIndex: "key", width: 50, align: "center", render: (_, __, i) => i + 1 },
@@ -151,6 +160,20 @@ const ContentModalConfirmEarlyRepayment = ({
                     dataIndex: "amount",
                     align: "right",
                     render: (val) => parseFloat(val).toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 })
+                },
+                {
+                    title: "BALANCE",
+                    dataIndex: "balance",
+                    align: "right",
+                    render: (_, __, index) => {
+                        const sumPaidUpToThisRow = rows
+                            .slice(0, index + 1)
+                            .reduce((sum, r) => sum + (parseFloat(String(r.amount).replace(/,/g, "")) || 0), 0);
+                        const balance = Math.max(0, targetTotal - sumPaidUpToThisRow);
+                        return balance.toLocaleString(isIdr ? "id-ID" : "en-US", {
+                            maximumFractionDigits: 2,
+                        });
+                    }
                 },
                 {
                     title: "STATUS",
@@ -166,20 +189,22 @@ const ContentModalConfirmEarlyRepayment = ({
 
             return (
                 <div key={currency} className="mb-4">
-                    <div className="text-[12px] font-bold mb-2">CURRENCY {currency}</div>
-                    <TableRBI
-                        dataSource={rows}
-                        columns={columns}
-                        usePagination={false}
-                        showAdvanceSearch={false}
-                        showSearchBar={false}
-                    />
-                    <div className="flex bg-[#F5F5F5] border border-t-0 p-2 font-bold text-[12px]">
-                        <div className="flex-[3] text-center">TOTAL</div>
-                        <div className="flex-1 text-right pr-[150px]">
-                            {currentSum.toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 })}
+                    <SectionCard title={`CURRENCY ${currency}`}>
+                        <TableRBI
+                            dataSource={rows}
+                            columns={columns}
+                            usePagination={false}
+                            showAdvanceSearch={false}
+                            showSearchBar={false}
+                        />
+                        <div className="flex bg-[#F5F5F5] border border-t-0 p-2 font-bold text-[12px]">
+                            <div className="flex-[2] text-center">TOTAL</div>
+                            <div className="flex-1 text-right pr-4">
+                                {currentSum.toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 })}
+                            </div>
+                            <div className="flex-[4]"></div>
                         </div>
-                    </div>
+                    </SectionCard>
                 </div>
             );
         });
@@ -193,31 +218,31 @@ const ContentModalConfirmEarlyRepayment = ({
                 <div className="p-5 bg-[#f8f7fa] min-h-[400px] flex flex-col gap-4">
                     <SectionCard title="ACCOUNT INFORMATION">
                         <div className="grid grid-cols-5 gap-y-4 gap-x-4 w-full">
-                            <DetailText label="Customer Number">{detail?.customerNumber || formValues?.customerNumber || "-"}</DetailText>
-                            <DetailText label="Customer Name">{detail?.customerName || formValues?.customerName || "-"}</DetailText>
-                            <DetailText label="Account Number">{detail?.accountNumber || formValues?.accountNumber || "-"}</DetailText>
-                            <DetailText label="Account Name">{detail?.accountName || formValues?.accountName || "-"}</DetailText>
-                            <DetailText label="Account Group Type">{detail?.accountGroupType || formValues?.accountGroupType || "-"}</DetailText>
-                            <DetailText label="SOR">{detail?.sor || formValues?.sor || "-"}</DetailText>
-                            <DetailText label="Cost Center">{detail?.costCenter || formValues?.costCenter || "-"}</DetailText>
-                            <DetailText label="Account Segment">{detail?.accountSegment || formValues?.accountSegment || "-"}</DetailText>
-                            <DetailText label="Meter Reading Code">{detail?.meterReadingCode || formValues?.meterReadingCode || "-"}</DetailText>
-                            <DetailText label="Account Type">{detail?.accountType || formValues?.accountType || "-"}</DetailText>
-                            <DetailText label="Classification Type">{detail?.classificationType || formValues?.classificationType || "-"}</DetailText>
-                            <DetailText label="SAP Cust ID">{detail?.sapCustId || formValues?.sapCustId || "-"}</DetailText>
-                            <DetailText label="Account Status">{detail?.accountStatus || formValues?.accountStatus || "-"}</DetailText>
+                            <DetailText label="Customer Number">{detail?.customerNumber || formValues?.customerNumber || ""}</DetailText>
+                            <DetailText label="Customer Name">{detail?.customerName || formValues?.customerName || ""}</DetailText>
+                            <DetailText label="Account Number">{detail?.accountNumber || formValues?.accountNumber || ""}</DetailText>
+                            <DetailText label="Account Name">{detail?.accountName || formValues?.accountName || ""}</DetailText>
+                            <DetailText label="Account Group Type">{detail?.accountGroupType || formValues?.accountGroupType || ""}</DetailText>
+                            <DetailText label="SOR">{detail?.sor || formValues?.sor || ""}</DetailText>
+                            <DetailText label="Cost Center">{detail?.costCenter || formValues?.costCenter || ""}</DetailText>
+                            <DetailText label="Account Segment">{detail?.accountSegment || formValues?.accountSegment || ""}</DetailText>
+                            <DetailText label="Meter Reading Code">{detail?.meterReadingCode || formValues?.meterReadingCode || ""}</DetailText>
+                            <DetailText label="Account Type">{detail?.accountType || formValues?.accountType || ""}</DetailText>
+                            <DetailText label="Classification Type">{detail?.classificationType || formValues?.classificationType || ""}</DetailText>
+                            <DetailText label="SAP Cust ID">{detail?.sapCustId || formValues?.sapCustId || ""}</DetailText>
+                            <DetailText label="Account Status">{detail?.accountStatus || formValues?.accountStatus || ""}</DetailText>
                         </div>
                     </SectionCard>
 
                     <SectionCard title="INSTALMENT INFORMATION">
                         <div className="grid grid-cols-5 gap-y-4 gap-x-4 w-full">
-                            <DetailText label="Type">{formValues?.type || "-"}</DetailText>
+                            <DetailText label="Type">{formValues?.type || ""}</DetailText>
                             <DetailText label="Tenor">{formValues?.tenor ? `${formValues.tenor} Months` : "-"}</DetailText>
                             <DetailText label="Start Period">{formValues?.startPeriod ? moment(formValues.startPeriod).format("MMM YYYY") : "-"}</DetailText>
-                            <DetailText label="Source">{formValues?.source || "-"}</DetailText>
+                            <DetailText label="Source">{formValues?.source || ""}</DetailText>
                             <DetailText label="Request Date">{formValues?.requestDate ? moment(formValues.requestDate).format("DD MMM YYYY") : "-"}</DetailText>
                             <div className="col-span-5">
-                                <DetailText label="Remark">{formValues?.remark || "-"}</DetailText>
+                                <DetailText label="Remark">{formValues?.remark || ""}</DetailText>
                             </div>
                         </div>
                     </SectionCard>

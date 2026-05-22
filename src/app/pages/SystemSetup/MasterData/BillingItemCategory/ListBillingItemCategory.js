@@ -20,7 +20,7 @@ import {
   getAvailableApproval,
   getSelectedApproval,
 } from "../../../../../redux/slices/system_setup/master_data/billingItemCategory";
-import { renderColumn, renderDateColumn } from "../../../../../utils";
+import { hasValue, renderColumn, renderDateColumn } from "../../../../../utils";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
 import { useColumnActionPermission } from "../../../../../components/ColumnActionPermission";
 import ModalInactivateWithHierarchy from "../../../../../components/Modal/ModalInactivateWithHierarchy";
@@ -515,6 +515,7 @@ const ListBillingItemCategory = () => {
         title: "CATEGORY CODE",
         dataIndex: "code",
         key: "code",
+        width: 60,
         align: "left",
         sorter: true,
         filteredValue: search?.code ? [search.code] : null,
@@ -531,7 +532,7 @@ const ListBillingItemCategory = () => {
         render: (text) =>
           renderColumn(
             "code",
-            searchedColumn,
+            hasValue(search["code"]),
             searchText,
             text,
             true,
@@ -543,6 +544,7 @@ const ListBillingItemCategory = () => {
         title: "CATEGORY NAME",
         dataIndex: "name",
         key: "name",
+        width: 50,
         align: "left",
         sorter: true,
         filteredValue: search?.name ? [search.name] : null,
@@ -559,7 +561,7 @@ const ListBillingItemCategory = () => {
         render: (text) =>
           renderColumn(
             "name",
-            searchedColumn,
+            hasValue(search["name"]),
             searchText,
             text,
             true,
@@ -571,6 +573,7 @@ const ListBillingItemCategory = () => {
         title: "START DATE",
         dataIndex: "startDate",
         key: "startDate",
+        width: 100,
         sorter: true,
         align: "center",
         filteredValue: search?.startDate ? [search.startDate] : null,
@@ -587,7 +590,7 @@ const ListBillingItemCategory = () => {
         render: (v) =>
           renderDateColumn(
             "startDate",
-            searchedColumn,
+            hasValue(search["startDate"]),
             searchText,
             v,
             "date",
@@ -598,6 +601,7 @@ const ListBillingItemCategory = () => {
         title: "END DATE",
         dataIndex: "endDate",
         key: "endDate",
+        width: 100,
         sorter: true,
         align: "center",
         filteredValue: search?.endDate ? [search.endDate] : null,
@@ -614,7 +618,7 @@ const ListBillingItemCategory = () => {
         render: (v) =>
           renderDateColumn(
             "endDate",
-            searchedColumn,
+            hasValue(search["endDate"]),
             searchText,
             v,
             "date",
@@ -622,14 +626,13 @@ const ListBillingItemCategory = () => {
           ),
       },
       {
-        title: "DESCRIPTION",
         key: "description",
+        title: "DESCRIPTION",
         dataIndex: "description",
         sorter: true,
-        ellipsis: {
-          showTitle: false,
-        },
-        filteredValue: search?.description ? [search.description] : null,
+        width: 80,
+        filteredValue: [search?.description] || null,
+        ellipsis: { showTitle: false },
         ...getColumnSearchPropsUseFilteredValue(
           search,
           "description",
@@ -637,13 +640,12 @@ const ListBillingItemCategory = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          false,
-          "input",
+          true,
         ),
         render: (text) =>
           renderColumn(
             "description",
-            searchedColumn,
+            hasValue(search["description"]),
             searchText,
             text,
             true,
@@ -655,7 +657,7 @@ const ListBillingItemCategory = () => {
         title: "STATUS",
         dataIndex: "status",
         key: "status",
-        width: 100,
+        width: 85,
         sorter: true,
         filteredValue: search?.status ? [search.status] : null,
         ...getColumnSearchPropsUseFilteredValue(
@@ -671,7 +673,7 @@ const ListBillingItemCategory = () => {
         render: (text) =>
           renderColumn(
             "status",
-            searchedColumn,
+            hasValue(search["status"]),
             searchText,
             text ? text.toUpperCase() : text,
             false,
@@ -682,7 +684,7 @@ const ListBillingItemCategory = () => {
         title: "APPROVAL STATUS",
         dataIndex: "statusApproval",
         key: "statusApproval",
-        width: 150,
+        width: 90,
         sorter: true,
         filteredValue: search?.statusApproval ? [search.statusApproval] : null,
         ...getColumnSearchPropsUseFilteredValue(
@@ -698,7 +700,7 @@ const ListBillingItemCategory = () => {
         render: (text) =>
           renderColumn(
             "statusApproval",
-            searchedColumn,
+            hasValue(search["statusApproval"]),
             searchText,
             text ? text.toUpperCase() : text,
             false,
@@ -715,7 +717,7 @@ const ListBillingItemCategory = () => {
     itemGrantAccess,
   ).map((col) => ({
     ...col,
-    width: 30,
+    width: 75,
     align: "center",
   }));
 
@@ -833,7 +835,7 @@ const ListBillingItemCategory = () => {
           onLoadMore={handleLoadMore}
           hasMore={hasMore}
           loadMoreThreshold={20}
-          tableScrolled={{ y: 525, x: "max-content" }}
+          tableScrolled={{ y: 525, x: 500 }}
           onRefresh={handleRefresh}
           showRefresh={true}
           onAdvanceSearch={handleAdvanceSearch}

@@ -194,11 +194,11 @@ const HistoryLog = ({ recordId, createdDate, createdBy, updatedDate, updatedBy }
     return (
         <BaseContainer header={"HISTORY LOG INFORMATION"}>
             <GridLayout cols={5} className="p-4">
-                <DetailText label={"Record Id"}>{recordId || "-"}</DetailText>
-                <DetailText label={"Created Date"}>{createdDate || "-"}</DetailText>
-                <DetailText label={"Created By"}>{createdBy || "-"}</DetailText>
-                <DetailText label={"Updated Date"}>{updatedDate || "-"}</DetailText>
-                <DetailText label={"Updated By"}>{updatedBy || "-"}</DetailText>
+                <DetailText label={"Record Id"}>{recordId || ""}</DetailText>
+                <DetailText label={"Created Date"}>{createdDate || ""}</DetailText>
+                <DetailText label={"Created By"}>{createdBy || ""}</DetailText>
+                <DetailText label={"Updated Date"}>{updatedDate || ""}</DetailText>
+                <DetailText label={"Updated By"}>{updatedBy || ""}</DetailText>
             </GridLayout>
         </BaseContainer>
     );

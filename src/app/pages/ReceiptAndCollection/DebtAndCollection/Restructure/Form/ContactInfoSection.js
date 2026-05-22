@@ -65,7 +65,7 @@ const ContactInfoSection = forwardRef(({ onContactsChange, accountNumber, initia
         cpName: item.cpName || [item.firstName, item.middleName, item.lastName].filter(Boolean).join(" "),
         job: item.job,
         position: item.position,
-        address: item.address || item.contactAddress || "-",
+        address: item.address || item.contactAddress || "",
         details: item.details || item.criteria || item.contactDetails || []
       }));
       setContacts(formatted);
@@ -87,7 +87,7 @@ const ContactInfoSection = forwardRef(({ onContactsChange, accountNumber, initia
         : [item.firstName, item.middleName, item.lastName].filter(Boolean).join(" "),
       job: item.job,
       position: item.position,
-      address: item.address || item.contactAddress || "-",
+      address: item.address || item.contactAddress || "",
       details: item.details || item.criteria || item.contactDetails || []
     }));
     setContacts(prev => [...formattedContacts, ...prev]);

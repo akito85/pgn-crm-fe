@@ -320,6 +320,8 @@ const NxTable = ({
   // fetchFailed: set to true when the data fetch errored so the table can show
   //              an actionable empty state instead of the generic Ant Design one.
   fetchFailed = false,
+  // emptyText: custom message shown in the table body when data is empty and fetchFailed is false.
+  emptyText,
   // onInitialLoad: called once on mount when dataSource is empty and not loading,
   //                giving the parent a chance to trigger the first fetch if it
   //                hasn't been called yet (e.g. RTK Query with skip=true).
@@ -2060,7 +2062,7 @@ const NxTable = ({
                 )}
               </div>
             )
-          } : undefined}
+          } : emptyText ? { emptyText } : undefined}
         />
 
         {showFooter && (useInfiniteScroll ? (

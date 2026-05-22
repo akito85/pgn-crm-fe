@@ -61,6 +61,12 @@ const DetailEarlyRepayment = ({
                     align: "right",
                     render: (val) => (parseFloat(val) || 0).toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 })
                 },
+                {
+                    title: "BALANCE",
+                    dataIndex: "balance",
+                    align: "right",
+                    render: (val) => (parseFloat(val) || 0).toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 })
+                },
                 { 
                     title: "STATUS", 
                     dataIndex: "status", 
@@ -100,19 +106,19 @@ const DetailEarlyRepayment = ({
                 <div className="p-5 min-h-[400px] flex flex-col gap-4">
                     <SectionCard title="ACCOUNT INFORMATION">
                         <div className="grid grid-cols-5 gap-y-4 gap-x-4 w-full">
-                            <DetailText label="Account Number">{dataHeader?.accountNumber || "-"}</DetailText>
-                            <DetailText label="Account Name">{dataHeader?.accountName || "-"}</DetailText>
-                            <DetailText label="Customer Number">{dataHeader?.customerNumber || "-"}</DetailText>
-                            <DetailText label="Customer Name">{dataHeader?.customerName || "-"}</DetailText>
-                            <DetailText label="Account Group Type">{dataHeader?.accountGroupType || "-"}</DetailText>
-                            <DetailText label="SOR">{dataHeader?.sor || "-"}</DetailText>
-                            <DetailText label="Cost Center">{dataHeader?.costCenter || "-"}</DetailText>
-                            <DetailText label="Account Segment">{dataHeader?.accountSegment || "-"}</DetailText>
-                            <DetailText label="Meter Reading Code">{dataHeader?.meterReadingCode || "-"}</DetailText>
-                            <DetailText label="Account Type">{dataHeader?.accountType || "-"}</DetailText>
-                            <DetailText label="Classification Type">{dataHeader?.classificationType || "-"}</DetailText>
-                            <DetailText label="SAP Cust ID">{dataHeader?.sapCustId || "-"}</DetailText>
-                            <DetailText label="Account Status">{dataHeader?.accountStatus || "-"}</DetailText>
+                            <DetailText label="Account Number">{dataHeader?.accountNumber || ""}</DetailText>
+                            <DetailText label="Account Name">{dataHeader?.accountName || ""}</DetailText>
+                            <DetailText label="Customer Number">{dataHeader?.customerNumber || ""}</DetailText>
+                            <DetailText label="Customer Name">{dataHeader?.customerName || ""}</DetailText>
+                            <DetailText label="Account Group Type">{dataHeader?.accountGroupType || ""}</DetailText>
+                            <DetailText label="SOR">{dataHeader?.sor || ""}</DetailText>
+                            <DetailText label="Cost Center">{dataHeader?.costCenter || ""}</DetailText>
+                            <DetailText label="Account Segment">{dataHeader?.accountSegment || ""}</DetailText>
+                            <DetailText label="Meter Reading Code">{dataHeader?.meterReadingCode || ""}</DetailText>
+                            <DetailText label="Account Type">{dataHeader?.accountType || ""}</DetailText>
+                            <DetailText label="Classification Type">{dataHeader?.classificationType || ""}</DetailText>
+                            <DetailText label="SAP Cust ID">{dataHeader?.sapCustId || ""}</DetailText>
+                            <DetailText label="Account Status">{dataHeader?.accountStatus || ""}</DetailText>
                         </div>
                     </SectionCard>
 
@@ -122,7 +128,7 @@ const DetailEarlyRepayment = ({
                                 label="Type"
                                 mandatory={true}
                                 disabled={true}
-                                value={dataHeader?.type || "-"}
+                                value={dataHeader?.type || ""}
                             />
                             <InputComponent
                                 label="Tenor"
@@ -142,7 +148,7 @@ const DetailEarlyRepayment = ({
                                 label="Source"
                                 mandatory={true}
                                 disabled={true}
-                                value={data_detail?.earlyRepayment?.source || dataHeader?.source || "-"}
+                                value={data_detail?.earlyRepayment?.source || dataHeader?.source || ""}
                             />
                             <DateComponent
                                 label="Request Date"
@@ -167,7 +173,7 @@ const DetailEarlyRepayment = ({
                                         boxShadow: "0 1px 2px 0 rgb(0 0 0 / 0.05)",
                                         marginTop: "8px"
                                     }}
-                                    value={dataHeader?.description || "-"}
+                                    value={dataHeader?.description || ""}
                                     disabled={true}
                                 />
                             </div>
@@ -180,7 +186,7 @@ const DetailEarlyRepayment = ({
                                         boxShadow: "0 1px 2px 0 rgb(0 0 0 / 0.05)",
                                         marginTop: "8px"
                                     }}
-                                    value={data_detail?.earlyRepayment?.reason || data_detail?.tApprovalDto?.remarks || "-"}
+                                    value={data_detail?.earlyRepayment?.reason || data_detail?.tApprovalDto?.remarks || ""}
                                     disabled={true}
                                 />
                             </div>
@@ -331,11 +337,11 @@ const DetailEarlyRepayment = ({
                 <div className="mt-5">
                     <LogHistoryInfo
                         data={{
-                            recordId: dataHeader?.id || "-",
+                            recordId: dataHeader?.id || "",
                             createdDate: dataHeader?.createdDate ? moment(dataHeader?.createdDate).format("DD MMM YYYY HH:mm:ss") : "-",
-                            createdBy: dataHeader?.createdBy || "-",
+                            createdBy: dataHeader?.createdBy || "",
                             updatedDate: dataHeader?.updatedDate ? moment(dataHeader?.updatedDate).format("DD MMM YYYY HH:mm:ss") : "-",
-                            updatedBy: dataHeader?.updatedBy || "-"
+                            updatedBy: dataHeader?.updatedBy || ""
                         }} 
                     />
                 </div>
