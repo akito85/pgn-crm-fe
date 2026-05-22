@@ -170,8 +170,10 @@ const JobGroupPage = () => {
     render: (_, record) => {
       if (permissionsLoading) {
         return (
-          <div style={{ width: "100%", height: 14, overflow: "hidden", borderRadius: 20 }}>
-            <Skeleton.Button active size="small" shape="round" block />
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <div style={{ width: "100%", transform: "scaleY(0.55)", transformOrigin: "center" }}>
+              <Skeleton.Button active size="small" shape="round" block />
+            </div>
           </div>
         );
       }
@@ -394,6 +396,20 @@ const JobGroupPage = () => {
           onLoadMore={handleLoadMore}
           hasMore={hasMore}
           showExport={true}
+          emptyText={
+            !loading && tableDataWithJobs.length === 0 ? (
+              <div style={{ padding: "32px 0", textAlign: "center" }}>
+                <div style={{ fontSize: "28px", marginBottom: "8px" }}>🔒</div>
+                <div style={{ fontSize: "14px", fontWeight: 500, color: "#374151", marginBottom: "6px" }}>
+                  No job groups available
+                </div>
+                <div style={{ fontSize: "13px", color: "#6B7280" }}>
+                  Your account has not been assigned to any job group yet.<br />
+                  Please contact your administrator to request access.
+                </div>
+              </div>
+            ) : undefined
+          }
         />
       </NxCardContainer>
 
