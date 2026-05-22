@@ -78,7 +78,7 @@ const JobExecutionPage = () => {
     () => new Set(["PENDING", "SCHEDULED", "PROCESSING", "ON_HOLD", "SUSPENDED"]),
     []
   );
-  const POLL_INTERVAL_MS = 5000;
+  const POLL_INTERVAL_MS = 60000;
 
   useEffect(() => {
     const anyRunning = accumulatedData.some(
