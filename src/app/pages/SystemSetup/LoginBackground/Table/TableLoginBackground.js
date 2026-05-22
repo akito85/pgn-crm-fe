@@ -8,7 +8,7 @@ export const columnsLoginBackground = [
   {
     title: "NO",
     align: "center",
-    width: 60,
+    width: 90,
     key: "no",
     render: (text, object, index) => index + 1,
     fixed: "left",

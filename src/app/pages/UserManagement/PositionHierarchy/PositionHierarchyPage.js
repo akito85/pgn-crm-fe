@@ -1,4 +1,4 @@
-import { Alert, DatePicker, Form } from "antd";
+import { Alert, DatePicker, Form, Tooltip } from "antd";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { NavLink } from "react-router-dom";
@@ -15,8 +15,9 @@ import {
 } from "../../../../redux/slices/user_management/position_hirarchy";
 import ViewListIcon from "../../../../assets/Icon/Nx/IconViewList";
 import IconEditNx from "../../../../assets/Icon/Nx/IconEdit";
-import IconPower from "../../../../assets/Icon/Nx/IconPower";
 import IconCopy from "../../../../assets/Icon/Nx/IconCopy";
+import IconActive from "../../../../assets/icons/nx/IconActive";
+import IconInactive from "../../../../assets/icons/nx/IconInactive";
 import InputComponent from "../../../../components/InputComponent";
 import { dateFormatting } from "../../../../utils";
 import { useTryAgainHooks } from "../../../../utils/useTryAgainHooks";
@@ -293,16 +294,17 @@ const PositionHierarchyPage = () => {
         type: "table",
         render: (record) => {
           const isDraft = record?.status === "DRAFT";
-          const color = isDraft ? "#1976D2" : "#C0BEC6";
           return (
-            <span
-              className={`flex items-center gap-2 ${isDraft ? "cursor-pointer" : "cursor-not-allowed"}`}
-              style={{ color, padding: "5px 8px" }}
-              onClick={() => isDraft && handleOpenModal(record, "activation")}
-            >
-              <IconPower color={color} width="18" height="18" />
-              <span style={{ fontSize: 14 }}>{isDraft ? "Activate" : "Inactivate"}</span>
-            </span>
+            <Tooltip title={isDraft ? "Activate" : "Inactivate"}>
+              {isDraft
+                ? <span className="inline-flex items-center text-green-600 hover:text-green-600 transition-colors duration-200 cursor-pointer" onClick={() => handleOpenModal(record, "activation")}>
+                    <IconActive width={20} />
+                  </span>
+                : <span className="inline-flex items-center text-gray-300 cursor-not-allowed">
+                    <IconInactive width={20} />
+                  </span>
+              }
+            </Tooltip>
           );
         },
       },
@@ -310,18 +312,19 @@ const PositionHierarchyPage = () => {
         action: "Update",
         type: "table",
         render: (record) => {
-          const enabled = record?.status !== "INACTIVE";
-          const color = enabled ? "#1976D2" : "#C0BEC6";
+          const disabled = record?.status === "INACTIVE";
           return (
-            <NavLink
-              to={enabled ? USER_ROUTES.UPDATE_POSITION : undefined}
-              state={enabled ? { id: record?.hierId } : undefined}
-              style={{ pointerEvents: enabled ? "auto" : "none", padding: "5px 8px" }}
-              className="flex items-center gap-2"
-            >
-              <IconEditNx color={color} width="18" height="18" />
-              <span style={{ fontSize: 14, color }}>Update</span>
-            </NavLink>
+            <Tooltip title="Update">
+              <div className={`inline-flex items-center ${disabled ? "cursor-not-allowed text-gray-300" : ""}`}>
+                <NavLink
+                  to={!disabled ? USER_ROUTES.UPDATE_POSITION : undefined}
+                  state={!disabled ? { id: record?.hierId } : undefined}
+                  className={`inline-flex items-center transition-colors duration-200 ${disabled ? "text-gray-300 pointer-events-none" : "text-[#1976D2] hover:text-[#1976D2]"}`}
+                >
+                  <IconEditNx width={20} />
+                </NavLink>
+              </div>
+            </Tooltip>
           );
         },
       },
@@ -329,14 +332,14 @@ const PositionHierarchyPage = () => {
         action: "duplicate",
         type: "table",
         render: (record) => (
-          <span
-            className="flex items-center gap-2 cursor-pointer"
-            style={{ color: "#1976D2", padding: "5px 8px" }}
-            onClick={() => handleOpenModal(record, "duplicate")}
-          >
-            <IconCopy color="#1976D2" width="18" height="18" />
-            <span style={{ fontSize: 14 }}>Duplicate</span>
-          </span>
+          <Tooltip title="Duplicate">
+            <span
+              className="inline-flex items-center text-[#1976D2] hover:text-[#1976D2] transition-colors duration-200 cursor-pointer"
+              onClick={() => handleOpenModal(record, "duplicate")}
+            >
+              <IconCopy width={20} />
+            </span>
+          </Tooltip>
         ),
       },
     ],

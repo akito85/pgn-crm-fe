@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Alert, Form } from "antd";
+import { Alert, Form, Tooltip } from "antd";
 import { Link, NavLink } from "react-router-dom";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
@@ -281,19 +281,19 @@ const Employee = () => {
       action: "Update",
       type: "table",
       render: (record) => {
-        const active = record?.status === "ACTIVE";
-        const color = active ? "#1976D2" : "#C0BEC6";
+        const disabled = record?.status !== "ACTIVE";
         return (
-          <Link
-            to={active ? USER_ROUTES.UPDATE_EMPLOYEE : undefined}
-            state={active ? { id: record?.employeeCode } : undefined}
-            style={{ pointerEvents: active ? "auto" : "none" }}
-          >
-            <span className="flex items-center gap-2" style={{ color, padding: "5px 8px" }}>
-              <IconEditNx color={color} width="18" height="18" />
-              <span style={{ fontSize: 14 }}>Update</span>
-            </span>
-          </Link>
+          <Tooltip title="Update">
+            <div className={`inline-flex items-center ${disabled ? "cursor-not-allowed text-gray-300" : ""}`}>
+              <Link
+                to={!disabled ? USER_ROUTES.UPDATE_EMPLOYEE : undefined}
+                state={!disabled ? { id: record?.employeeCode } : undefined}
+                className={`inline-flex items-center transition-colors duration-200 ${disabled ? "text-gray-300 pointer-events-none" : "text-[#1976D2] hover:text-[#1976D2]"}`}
+              >
+                <IconEditNx width={20} />
+              </Link>
+            </div>
+          </Tooltip>
         );
       },
     },
@@ -301,19 +301,19 @@ const Employee = () => {
       action: "forward",
       type: "table",
       render: (record) => {
-        const active = record?.status === "ACTIVE";
-        const color = active ? "#1976D2" : "#C0BEC6";
+        const disabled = record?.status !== "ACTIVE";
         return (
-          <Link
-            to={active ? USER_ROUTES.FORWARD_TASK : undefined}
-            state={active ? { id: record?.employeeCode } : undefined}
-            style={{ pointerEvents: active ? "auto" : "none" }}
-          >
-            <span className="flex items-center gap-2" style={{ color, padding: "5px 8px" }}>
-              <IconForwardTask color={color} width="18" height="18" />
-              <span style={{ fontSize: 14 }}>Forward</span>
-            </span>
-          </Link>
+          <Tooltip title="Forward Task">
+            <div className={`inline-flex items-center ${disabled ? "cursor-not-allowed text-gray-300" : ""}`}>
+              <Link
+                to={!disabled ? USER_ROUTES.FORWARD_TASK : undefined}
+                state={!disabled ? { id: record?.employeeCode } : undefined}
+                className={`inline-flex items-center transition-colors duration-200 ${disabled ? "text-gray-300 pointer-events-none" : "text-[#1976D2] hover:text-[#1976D2]"}`}
+              >
+                <IconForwardTask width={20} />
+              </Link>
+            </div>
+          </Tooltip>
         );
       },
     },
@@ -322,21 +322,20 @@ const Employee = () => {
       type: "table",
       render: (record) => {
         const active = record?.status === "ACTIVE";
-        const color = active ? "#BE3036" : "#C0BEC6";
         return (
-          <span
-            className={`flex items-center gap-2 ${active ? "cursor-pointer" : "cursor-not-allowed"}`}
-            style={{ color, padding: "5px 8px" }}
-            onClick={() => {
-              if (active) {
-                setEmpId(record?.employeeId);
-                setModalTerm(true);
-              }
-            }}
-          >
-            <IconTerminate color={color} width="18" height="18" />
-            <span style={{ fontSize: 14 }}>Terminate</span>
-          </span>
+          <Tooltip title="Terminate">
+            <span
+              className={`inline-flex items-center transition-colors duration-200 ${active ? "text-[#BE3036] hover:text-[#BE3036] cursor-pointer" : "text-gray-300 cursor-not-allowed"}`}
+              onClick={() => {
+                if (active) {
+                  setEmpId(record?.employeeId);
+                  setModalTerm(true);
+                }
+              }}
+            >
+              <IconTerminate width={20} />
+            </span>
+          </Tooltip>
         );
       },
     },

@@ -1,6 +1,13 @@
 // src/components/Nx/NxTable/hooks/useColumnLayout.js
 import React, { useState, useCallback, useMemo } from 'react';
-import { DEFAULT_COL_WIDTH } from '../constants';
+import {
+  DEFAULT_COL_WIDTH,
+  MIN_COL_WIDTH_PX,
+  NO_COL_KEY,
+  NO_COL_WIDTH,
+  ACTION_COL_KEY,
+  ACTION_COL_MIN_WIDTH,
+} from '../constants';
 
 const useColumnLayout = ({
   resolvedColumns,
@@ -9,6 +16,8 @@ const useColumnLayout = ({
   initFixedColumns,
   initColumnWidths,
   initColumnOrder,
+  containerWidth = 0,
+  scrollX = 0,
 }) => {
   // ── Column visibility ────────────────────────────────────────────────────
   const [optionSelectedCol, setOptionSelectedCol] = useState(() => initHiddenColumns);
@@ -184,14 +193,14 @@ const useColumnLayout = ({
 
   // ── processColumn ─────────────────────────────────────────────────────────
   const processColumn = useCallback(
-    (col, fixedPos = null) => {
+    (col, fixedPos = null, effectiveWidthMap = null) => {
       const colKey = col.key || col.dataIndex || col.title;
 
       if (col.children && Array.isArray(col.children)) {
         return {
           ...col,
           key: colKey,
-          children: col.children.map((c) => processColumn(c, fixedPos)),
+          children: col.children.map((c) => processColumn(c, fixedPos, effectiveWidthMap)),
         };
       }
 
@@ -200,7 +209,15 @@ const useColumnLayout = ({
       else if (col.isClassification)              textAlign = 'center';
 
       const isDraggable = !fixedPos && !col.fixed;
-      const width = columnWidths[colKey] || col.width || DEFAULT_COL_WIDTH;
+      const isNoCol     = colKey === NO_COL_KEY;
+      const isActionCol = colKey === ACTION_COL_KEY;
+
+      // Use distributed effective width when available; otherwise fall back to
+      // stored user resize → column definition → default.
+      const width = effectiveWidthMap?.[colKey]
+        ?? columnWidths[colKey]
+        ?? col.width
+        ?? DEFAULT_COL_WIDTH;
 
       const newCol = {
         ...col,
@@ -219,10 +236,12 @@ const useColumnLayout = ({
             baseStyle.backgroundColor = '#f0f0f0';
           }
           return {
-            width: columnWidths[colKey] || col.width || DEFAULT_COL_WIDTH,
-            onResize: handleResize(colKey),
+            width,
+            onResize:  isNoCol ? undefined : handleResize(colKey),
+            noResize:  isNoCol,
+            minWidth:  isActionCol ? ACTION_COL_MIN_WIDTH : undefined,
             style: baseStyle,
-            draggable: isDraggable,
+            draggable:   isDraggable,
             onDragStart: isDraggable ? (e) => handleDragStart(e, colKey) : undefined,
             onDragOver:  isDraggable ? handleDragOver : undefined,
             onDrop:      isDraggable ? (e) => handleDrop(e, colKey) : undefined,
@@ -314,12 +333,20 @@ const useColumnLayout = ({
       else                      normal.push(rightFixed.shift());
     }
 
+    const allVisibleCols = [...leftFixed, ...normal, ...rightFixed];
+    const effectiveWidthMap = computeEffectiveWidths(
+      allVisibleCols,
+      columnWidths,
+      containerWidth,
+      scrollX,
+    );
+
     return [
-      ...leftFixed.map((c) => processColumn(c, 'left')),
-      ...normal.map((c) => processColumn(c, undefined)),
-      ...rightFixed.map((c) => processColumn(c, 'right')),
+      ...leftFixed.map((c) => processColumn(c, 'left',    effectiveWidthMap)),
+      ...normal.map((c)    => processColumn(c, undefined, effectiveWidthMap)),
+      ...rightFixed.map((c) => processColumn(c, 'right',  effectiveWidthMap)),
     ];
-  }, [resolvedColumns, optionSelectedCol, safeFixedColumns, staticFixedKeys, columnOrder, processColumn]);
+  }, [resolvedColumns, optionSelectedCol, safeFixedColumns, staticFixedKeys, columnOrder, processColumn, columnWidths, containerWidth, scrollX]);
 
   return {
     optionSelectedCol,
@@ -353,6 +380,62 @@ function getAllColumnKeys(cols) {
   };
   traverse(cols || []);
   return keys;
+}
+
+// ── computeEffectiveWidths ────────────────────────────────────────────────────
+// Pure helper. Returns a { colKey: pxWidth } map when column distribution is
+// needed (container wider than total defined widths, no active horizontal scroll).
+// Returns null when distribution should not run so callers can skip the override.
+export function computeEffectiveWidths(allCols, columnWidths, containerWidth, scrollX) {
+  if (!containerWidth || containerWidth <= 0) return null;
+
+  // Only distribute when no horizontal scroll is visible.
+  // When scrollX > containerWidth the scrollbar is active; leave that CSS behaviour
+  // untouched to avoid unexpected width jumps on horizontally-scrolling tables.
+  if (scrollX > 0 && scrollX > containerWidth) return null;
+
+  // Target width = the visible container (scroll.x is ≤ containerWidth here, so
+  // the table stretches to fill the container, not the smaller scroll.x value).
+  const effectiveTableWidth = containerWidth;
+
+  const pinnedWidths  = {};
+  const lockedFlex    = {};
+  const unresizedFlex = [];
+
+  allCols.forEach((col) => {
+    const key = col.key || col.dataIndex || col.title;
+    if (!key) return;
+
+    if (key === NO_COL_KEY) {
+      pinnedWidths[key] = NO_COL_WIDTH;
+    } else if (key === ACTION_COL_KEY) {
+      pinnedWidths[key] = Math.max(ACTION_COL_MIN_WIDTH, columnWidths[key] || 0);
+    } else if (columnWidths[key]) {
+      lockedFlex[key] = columnWidths[key];
+    } else {
+      unresizedFlex.push({ key, base: col.width || DEFAULT_COL_WIDTH });
+    }
+  });
+
+  const pinnedTotal = Object.values(pinnedWidths).reduce((s, w) => s + w, 0);
+  const lockedTotal = Object.values(lockedFlex).reduce((s, w) => s + w, 0);
+  const totalDefined = pinnedTotal + lockedTotal
+    + unresizedFlex.reduce((s, c) => s + c.base, 0);
+
+  if (totalDefined >= effectiveTableWidth) return null;
+
+  const available = effectiveTableWidth - pinnedTotal - lockedTotal;
+  if (available <= 0) return null;
+
+  const totalUnresizedBase = unresizedFlex.reduce((s, c) => s + c.base, 0);
+  const scale = totalUnresizedBase > 0 ? available / totalUnresizedBase : 1;
+
+  const result = { ...pinnedWidths, ...lockedFlex };
+  unresizedFlex.forEach(({ key, base }) => {
+    result[key] = Math.max(MIN_COL_WIDTH_PX, Math.floor(base * scale));
+  });
+
+  return result;
 }
 
 export { getAllColumnKeys };
