@@ -29,4 +29,4 @@ export const PREFS_VERSION = 1;
 export const NO_COL_KEY           = 'no';
 export const NO_COL_WIDTH         = 90;
 export const ACTION_COL_KEY       = 'action';
-export const ACTION_COL_MIN_WIDTH = 90;
+export const ACTION_COL_MIN_WIDTH = 111;

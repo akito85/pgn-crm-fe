@@ -141,7 +141,7 @@ export const useColumnActionPermission = (
           title: "ACTION",
           dataIndex: "action",
           fixed: "right",
-          width: 90,
+          width: 111,
           render: () => (
             <div style={{ width: "100%", height: 14, overflow: "hidden", borderRadius: 20 }}>
               <Skeleton.Button active size="small" shape="round" block />
