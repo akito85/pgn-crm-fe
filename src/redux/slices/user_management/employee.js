@@ -253,7 +253,7 @@ export const updateEmployee = createAsyncThunk(
           back: false,
         })
       );
-      return thunk.rejectWithValue(error.response.data);
+      return thunkAPI.rejectWithValue(error.response.data);
     }
   }
 );
@@ -411,7 +411,7 @@ export const saveUploadEmployee = createAsyncThunk(
           back: false,
         })
       );
-      return thunk.rejectWithValue(error.response.data);
+      return thunkAPI.rejectWithValue(error.response.data);
     }
   }
 );

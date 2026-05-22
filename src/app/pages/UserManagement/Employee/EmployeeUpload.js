@@ -67,7 +67,7 @@ const EmployeeUpload = () => {
             lastName: item?.lastName,
             email: item?.email,
             phone: item?.phone,
-            empType: item?.empType,
+            empType: item?.empTypeId,
             empTypeId: item?.empTypeId,
             startDate: moment(item?.startDate).clone(),
             endDate: moment(item?.endDate).clone(),
@@ -91,7 +91,7 @@ const EmployeeUpload = () => {
       );
     } else {
       setFirstStep(true);
-      setClearDataUpload()
+      dispatch(setClearDataUpload());
     }
   }, [showListUpload, data_list_upload, firstStep, location]);
 
@@ -106,7 +106,6 @@ const EmployeeUpload = () => {
   // handle change file
   const handleFileChange = ({ fileList }) => {
     setFileList(fileList);
-    handleUpload();
   };
 
   // props dragger
@@ -119,6 +118,7 @@ const EmployeeUpload = () => {
     maxCount: 1,
     beforeUpload: async (file) => {
       setFileName(file);
+      handleUpload(file);
       return false;
     },
     onChange: handleFileChange,
@@ -134,11 +134,13 @@ const EmployeeUpload = () => {
     });
   };
 
-  // handle upload 
-  const handleUpload = async () => {
+  // handle upload
+  const handleUpload = async (fileToUpload) => {
+    const uploadFile = fileToUpload || fileName;
+    if (!uploadFile) return;
     try {
       setFileProgress(0)
-      const body = { image: fileName, onProgress: (progress) => setFileProgress(progress) };
+      const body = { image: uploadFile, onProgress: (progress) => setFileProgress(progress) };
       await dispatch(uploadEmployee(body)).unwrap();
 
     } catch (error) {
