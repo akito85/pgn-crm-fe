@@ -535,6 +535,10 @@ const NxTable = ({
   const [draggedColumnKey, setDraggedColumnKey] = useState(null);
   const [columnOrder, setColumnOrder] = useState(() => initColumnOrder);
   const [searchValue, setSearchValue] = useState('');
+  // Declared here (before displayedColumns useMemo) to avoid TDZ — the memo
+  // references containerWidth in its dependency array.
+  const containerRef = React.useRef(null);
+  const [containerWidth, setContainerWidth] = React.useState(0);
 
   // ── Persist column preferences on every relevant state change ─────────────
   // Debounced 400 ms inside writePrefs so rapid resize events don't thrash
@@ -1304,10 +1308,9 @@ const NxTable = ({
   );
 
   // ── Container width measurement ───────────────────────────────────────────
-  // Track the actual rendered width of the table wrapper so the fixed-column
-  // warning can compare real pixel widths, not assumed/prop values.
-  const containerRef = React.useRef(null);
-  const [containerWidth, setContainerWidth] = React.useState(0);
+  // containerRef and containerWidth are declared near the other state declarations
+  // (above displayedColumns useMemo) to avoid a TDZ error. This effect wires up
+  // the ResizeObserver that keeps containerWidth in sync with the rendered width.
   React.useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
