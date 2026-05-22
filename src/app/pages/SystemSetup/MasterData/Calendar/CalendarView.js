@@ -271,9 +271,9 @@ const CalendarView = () => {
 
   // Calendar helpers
   const HOLIDAY_TYPE_STATUS = {
-    NATIONAL: "error", // red
-    JOINT: "processing", // blue
-    OTHER: "success", // green
+    national_holidays: "error", // red
+    joint_holidays: "processing", // blue
+    other: "success", // green
   };
 
   const getEventsForDate = (date) => {
