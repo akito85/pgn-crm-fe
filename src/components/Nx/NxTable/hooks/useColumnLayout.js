@@ -389,11 +389,14 @@ function getAllColumnKeys(cols) {
 export function computeEffectiveWidths(allCols, columnWidths, containerWidth, scrollX) {
   if (!containerWidth || containerWidth <= 0) return null;
 
-  // Effective table width: scroll.x sets AntD's min-width for the inner table.
-  // When scrollX > containerWidth the scrollbar is visible and the table is scrollX
-  // wide. When scrollX <= containerWidth (or unset) the table fills the container.
-  // In both cases we distribute to this effective width so NO and ACTION stay pinned.
-  const effectiveTableWidth = scrollX > 0 ? Math.max(scrollX, containerWidth) : containerWidth;
+  // Only distribute when no horizontal scroll is visible.
+  // When scrollX > containerWidth the scrollbar is active; leave that CSS behaviour
+  // untouched to avoid unexpected width jumps on horizontally-scrolling tables.
+  if (scrollX > 0 && scrollX > containerWidth) return null;
+
+  // Target width = the visible container (scroll.x is ≤ containerWidth here, so
+  // the table stretches to fill the container, not the smaller scroll.x value).
+  const effectiveTableWidth = containerWidth;
 
   const pinnedWidths  = {};
   const lockedFlex    = {};

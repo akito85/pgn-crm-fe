@@ -10,14 +10,8 @@ describe('computeEffectiveWidths', () => {
     expect(computeEffectiveWidths([noCol, colA], {}, 0, undefined)).toBeNull();
   });
 
-  it('distributes to fill scrollX when horizontal scroll is active (scrollX > containerWidth)', () => {
-    // effectiveTableWidth = max(900, 800) = 900
-    // NO pinned at 90; colA unresized base=200; totalDefined=290 < 900 → runs
-    // available = 900 - 90 = 810; colA = floor(200 * 810/200) = 810
-    const result = computeEffectiveWidths([noCol, colA], {}, 800, 900);
-    expect(result).not.toBeNull();
-    expect(result['no']).toBe(90);
-    expect(result['colA']).toBe(810);
+  it('returns null when scrollX > containerWidth (horizontal scroll active — leave CSS behaviour untouched)', () => {
+    expect(computeEffectiveWidths([noCol, colA], {}, 800, 900)).toBeNull();
   });
 
   it('returns null when total defined widths already fill the container', () => {
