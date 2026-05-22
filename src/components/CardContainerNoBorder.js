@@ -12,8 +12,8 @@ const CardContainerNoBorder = ({ header, subHeader, children, type, element, cla
 
   const renderHeaderContent = () => (
     <div className="flex justify-between items-center w-full">
-      <div>
-        <div className="text-[16px] text-primary">{header}</div>
+      <div className="flex-1 w-full mr-4 flex flex-col">
+        <div className="text-[16px] text-primary w-full flex">{header}</div>
         {subHeader && <div className="text-primary text-sm">{subHeader}</div>}
       </div>
       {collapsible && (

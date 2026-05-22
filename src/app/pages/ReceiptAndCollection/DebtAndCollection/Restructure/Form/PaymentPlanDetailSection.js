@@ -10,6 +10,10 @@ const formatMonth = (dayjsObj, offset) => {
   return dayjsObj.add(offset, "month").format("MMM YYYY");
 };
 
+const formatDueDate = (dayjsObj, offset) => {
+  return dayjsObj.add(offset, "month").date(25).format("DD/MM/YYYY");
+};
+
 const PaymentPlanDetailSection = ({ planInfo = {}, openItems = [], onValidationChange, onInstallmentsChange }) => {
   const { data_detail } = useSelector((state) => state.restructure);
   const { type, tenor, startPeriod } = planInfo;
@@ -117,6 +121,7 @@ const PaymentPlanDetailSection = ({ planInfo = {}, openItems = [], onValidationC
           key: i + 1,
           periode: formatMonth(startPeriod, i),
           amount: isIdr ? amount.toString() : amount.toFixed(2),
+          dueDate: formatDueDate(startPeriod, i),
           currency,
         };
       });
@@ -194,6 +199,29 @@ const PaymentPlanDetailSection = ({ planInfo = {}, openItems = [], onValidationC
             }}
             onChange={(val) => handleAmountChange(currency, record.key, val)}
           />
+        );
+      },
+    },
+    { title: "DUE DATE", dataIndex: "dueDate" },
+    {
+      title: "BALANCE",
+      dataIndex: "balance",
+      align: "right",
+      render: (_, record, index) => {
+        const isIdr = currency === "IDR";
+        const targetTotal = openItemTotals[currency] || 0;
+        const rows = installmentsByCurrency[currency] || [];
+        const sumPaidUpToThisRow = rows
+          .slice(0, index + 1)
+          .reduce((sum, r) => sum + (parseFloat(String(r.amount).replace(/,/g, "")) || 0), 0);
+        const balance = Math.max(0, targetTotal - sumPaidUpToThisRow);
+
+        return (
+          <span className="font-medium text-gray-500">
+            {balance.toLocaleString(isIdr ? "id-ID" : "en-US", {
+              maximumFractionDigits: 2,
+            })}
+          </span>
         );
       },
     },

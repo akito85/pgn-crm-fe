@@ -128,6 +128,7 @@ import warrantyReducer from "../slices/receipt_collection/warranty";
 import transferToReceiptReducer from "../slices/receipt_collection/transferToReceipt";
 import transferToCustomerReducer from "../slices/receipt_collection/transferToCustomer";
 import restructureReducer from "../slices/receipt_collection/restructure";
+import restructureMonitoringReducer from "../slices/receipt_collection/restructureMonitoring";
 import notificationsReducer from "../slices/notifications";
 import multiDestinationReducer from "../slices/account_management/detailAccount/MultiDestinationSlice";
 import gasDepositReducer from "../slices/account_management/detailAccount/GasDepositSlice";
@@ -306,6 +307,7 @@ const reducer = combineReducers({
   transferToReceipt: transferToReceiptReducer,
   transferToCustomer: transferToCustomerReducer,
   restructure: restructureReducer,
+  restructureMonitoring: restructureMonitoringReducer,
   deduction: deductionReducer,
   gapuraManagement: gapuraManagementReducer,
   historyWarranty: historyWarrantyReducer,

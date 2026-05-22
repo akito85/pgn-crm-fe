@@ -130,27 +130,35 @@ const ContentModalConfirmRestructure = ({
 
             return (
                 <div key={currency} className="mb-4">
-                    <div className="text-[12px] font-bold mb-2">CURRENCY {currency}</div>
-                    <TableRBI
-                        idTable={`open-item-confirm-${currency}`}
-                        dataSource={rows}
-                        columns={columns}
-                        usePagination={false}
-                        showAdvanceSearch={false}
-                        showSearchBar={false}
-                    />
-                    <div className="flex bg-[#F5F5F5] border border-t-0 p-2 font-bold text-[12px]">
-                        <div className="flex-[4] text-center">TOTAL</div>
-                        <div className="flex-1 text-right pr-4">
-                            {total.toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 })}
+                    <SectionCard title={`CURRENCY ${currency}`}>
+                        <TableRBI
+                            idTable={`open-item-confirm-${currency}`}
+                            dataSource={rows}
+                            columns={columns}
+                            usePagination={false}
+                            showAdvanceSearch={false}
+                            showSearchBar={false}
+                        />
+                        <div className="flex bg-[#F5F5F5] border border-t-0 p-2 font-bold text-[12px]">
+                            <div className="flex-[4] text-center">TOTAL</div>
+                            <div className="flex-1 text-right pr-4">
+                                {total.toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 })}
+                            </div>
                         </div>
-                    </div>
+                    </SectionCard>
                 </div>
             );
         });
     };
 
     const renderPaymentPlanDetail = () => {
+        const openItemTotals = openItems.reduce((acc, item) => {
+            const cur = item.currency || "IDR";
+            const amount = parseFloat(String(item.amount).replace(/,/g, "")) || 0;
+            acc[cur] = (acc[cur] || 0) + amount;
+            return acc;
+        }, {});
+
         const currencies = Object.keys(installmentsByCurrency);
         if (currencies.length === 0) return <DetailText label="">No data available</DetailText>;
 
@@ -158,6 +166,7 @@ const ContentModalConfirmRestructure = ({
             const rows = installmentsByCurrency[currency] || [];
             const isIdr = currency === "IDR";
             const currentSum = rows.reduce((sum, r) => sum + (parseFloat(r.amount) || 0), 0);
+            const targetTotal = openItemTotals[currency] || 0;
 
             const columns = [
                 { title: "NO", dataIndex: "key", width: 50, align: "center", render: (_, __, i) => i + 1 },
@@ -168,24 +177,42 @@ const ContentModalConfirmRestructure = ({
                     align: "right",
                     render: (val) => parseFloat(val).toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 })
                 },
+                { title: "DUE DATE", dataIndex: "dueDate" },
+                {
+                    title: "BALANCE",
+                    dataIndex: "balance",
+                    align: "right",
+                    render: (_, __, index) => {
+                        const sumPaidUpToThisRow = rows
+                            .slice(0, index + 1)
+                            .reduce((sum, r) => sum + (parseFloat(String(r.amount).replace(/,/g, "")) || 0), 0);
+                        const balance = Math.max(0, targetTotal - sumPaidUpToThisRow);
+                        return balance.toLocaleString(isIdr ? "id-ID" : "en-US", {
+                            maximumFractionDigits: 2,
+                        });
+                    }
+                }
             ];
 
             return (
                 <div key={currency} className="mb-4">
-                    <div className="text-[12px] font-bold mb-2">CURRENCY {currency}</div>
-                    <TableRBI
-                        dataSource={rows}
-                        columns={columns}
-                        usePagination={false}
-                        showAdvanceSearch={false}
-                        showSearchBar={false}
-                    />
-                    <div className="flex bg-[#F5F5F5] border border-t-0 p-2 font-bold text-[12px]">
-                        <div className="flex-[2] text-center">TOTAL</div>
-                        <div className="flex-1 text-right pr-4">
-                            {currentSum.toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 })}
+                    <SectionCard title={`CURRENCY ${currency}`}>
+                        <TableRBI
+                            idTable={`plan-detail-confirm-${currency}`}
+                            dataSource={rows}
+                            columns={columns}
+                            usePagination={false}
+                            showAdvanceSearch={false}
+                            showSearchBar={false}
+                        />
+                        <div className="flex bg-[#F5F5F5] border border-t-0 p-2 font-bold text-[12px]">
+                            <div className="flex-[2] text-center">TOTAL</div>
+                            <div className="flex-1 text-right pr-4">
+                                {currentSum.toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 })}
+                            </div>
+                            <div className="flex-[4]"></div>
                         </div>
-                    </div>
+                    </SectionCard>
                 </div>
             );
         });
@@ -199,32 +226,32 @@ const ContentModalConfirmRestructure = ({
                 <div className="p-5 bg-[#f8f7fa] min-h-[400px] flex flex-col gap-4">
                     <SectionCard title="ACCOUNT INFORMATION">
                         <div className="grid grid-cols-5 gap-y-4 gap-x-4 w-full">
-                            <DetailText label="Account Number">{formValues?.accountNumber || "-"}</DetailText>
-                            <DetailText label="Account Name">{formValues?.accountName || "-"}</DetailText>
-                            <DetailText label="Customer Number">{formValues?.customerNumber || "-"}</DetailText>
-                            <DetailText label="Customer Name">{formValues?.customerName || "-"}</DetailText>
-                            <DetailText label="Account Group Type">{formValues?.accountGroupType || "-"}</DetailText>
-                            <DetailText label="SOR">{formValues?.sor || "-"}</DetailText>
-                            <DetailText label="Cost Center">{formValues?.costCenter || "-"}</DetailText>
-                            <DetailText label="Account Segment">{formValues?.accountSegment || "-"}</DetailText>
-                            <DetailText label="Meter Reading Code">{formValues?.meterReadingCode || "-"}</DetailText>
-                            <DetailText label="Account Type">{formValues?.accountType || "-"}</DetailText>
-                            <DetailText label="Classification Type">{formValues?.classificationType || "-"}</DetailText>
-                            <DetailText label="SAP Cust ID">{formValues?.sapCustId || "-"}</DetailText>
-                            <DetailText label="Account Status">{formValues?.accountStatus || "-"}</DetailText>
+                            <DetailText label="Account Number">{formValues?.accountNumber || ""}</DetailText>
+                            <DetailText label="Account Name">{formValues?.accountName || ""}</DetailText>
+                            <DetailText label="Customer Number">{formValues?.customerNumber || ""}</DetailText>
+                            <DetailText label="Customer Name">{formValues?.customerName || ""}</DetailText>
+                            <DetailText label="Account Group Type">{formValues?.accountGroupType || ""}</DetailText>
+                            <DetailText label="SOR">{formValues?.sor || ""}</DetailText>
+                            <DetailText label="Cost Center">{formValues?.costCenter || ""}</DetailText>
+                            <DetailText label="Account Segment">{formValues?.accountSegment || ""}</DetailText>
+                            <DetailText label="Meter Reading Code">{formValues?.meterReadingCode || ""}</DetailText>
+                            <DetailText label="Account Type">{formValues?.accountType || ""}</DetailText>
+                            <DetailText label="Classification Type">{formValues?.classificationType || ""}</DetailText>
+                            <DetailText label="SAP Cust ID">{formValues?.sapCustId || ""}</DetailText>
+                            <DetailText label="Account Status">{formValues?.accountStatus || ""}</DetailText>
                         </div>
                     </SectionCard>
 
                     <SectionCard title="SERVICE AGREEMENT INFORMATION">
                         <div className="grid grid-cols-5 gap-y-4 gap-x-4 w-full">
-                            <DetailText label="Service Agreement Number">{formValues?.saNumber || "-"}</DetailText>
-                            <DetailText label="Service Agreement Name">{formValues?.saName || "-"}</DetailText>
+                            <DetailText label="Service Agreement Number">{formValues?.saNumber || ""}</DetailText>
+                            <DetailText label="Service Agreement Name">{formValues?.saName || ""}</DetailText>
                             <DetailText label="Service Agreement Date">{formValues?.saDate ? moment(formValues.saDate).format("DD MMM YYYY") : "-"}</DetailText>
                             <DetailText label="Start Date">{formValues?.startDate ? moment(formValues.startDate).format("DD MMM YYYY") : "-"}</DetailText>
                             <DetailText label="End Date">{formValues?.endDate ? moment(formValues.endDate).format("DD MMM YYYY") : "-"}</DetailText>
-                            <DetailText label="Minimum Contract">{formValues?.minContract || "-"}</DetailText>
-                            <DetailText label="Maximum Contract">{formValues?.maxContract || "-"}</DetailText>
-                            <DetailText label="UOM">{formValues?.uom || "-"}</DetailText>
+                            <DetailText label="Minimum Contract">{formValues?.minContract || ""}</DetailText>
+                            <DetailText label="Maximum Contract">{formValues?.maxContract || ""}</DetailText>
+                            <DetailText label="UOM">{formValues?.uom || ""}</DetailText>
                         </div>
                     </SectionCard>
 
@@ -242,13 +269,13 @@ const ContentModalConfirmRestructure = ({
 
                     <SectionCard title="PAYMENT PLAN INFORMATION">
                         <div className="grid grid-cols-5 gap-y-4 gap-x-4 w-full">
-                            <DetailText label="Type">{formValues?.type || "-"}</DetailText>
+                            <DetailText label="Type">{formValues?.type || ""}</DetailText>
                             <DetailText label="Tenor">{formValues?.tenor ? `${formValues.tenor} Months` : "-"}</DetailText>
                             <DetailText label="Start Period">{formValues?.startPeriod ? moment(formValues.startPeriod).format("MMM YYYY") : "-"}</DetailText>
                             <DetailText label="Source">{formValues?.source }</DetailText>
                             <DetailText label="Request Date">{formValues?.requestDate ? moment(formValues.requestDate).format("DD MMM YYYY") : "-"}</DetailText>
                             <div className="col-span-5">
-                                <DetailText label="Description">{formValues?.description || "-"}</DetailText>
+                                <DetailText label="Description">{formValues?.description || ""}</DetailText>
                             </div>
                         </div>
                     </SectionCard>

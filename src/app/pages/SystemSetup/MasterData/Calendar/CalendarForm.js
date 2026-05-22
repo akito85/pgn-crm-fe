@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Form, Select, Spin } from "antd";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -13,7 +13,6 @@ import {
   FormFooter,
 } from "../../../../../components/FormStepNavigation";
 import { getConfigFileRBIData } from "../../../../../redux/slices/attachmentSlice";
-import { hasValue } from "../../../../../utils";
 import {
   showModalError,
   validateCreateUpdate,
@@ -93,7 +92,14 @@ const CalendarForm = ({ type }) => {
   const [listSectionInfo, setListSectionInfo] = useState([
     {
       value: "Calendar",
-      paramValue: ["name", "startDate", "holidayType", "criteria"],
+      paramValue: [
+        "name",
+        "startDate",
+        "endDate",
+        "holidayType",
+        "criteria",
+        "description",
+      ],
     },
     { value: "Approval", paramValue: ["apphierId"] },
     { value: "Attachment" },
@@ -154,22 +160,10 @@ const CalendarForm = ({ type }) => {
     }
   };
 
-  // Disable end date logic
-  const isDisabledDate = useMemo(() => {
-    if (
-      hasValue(form?.getFieldsValue()?.endDate) === true &&
-      listDataCriteria?.length > 0
-    ) {
-      return true;
-    }
-    return false;
-  }, [form, listDataCriteria]);
-
   // Use Effect
   useEffect(() => {
     dispatch(getCriteria());
     dispatch(getAvailableApproval());
-    dispatch(getSelectedApproval({ id: 0 }));
     dispatch(getHolidayType());
   }, [dispatch]);
 
@@ -231,6 +225,7 @@ const CalendarForm = ({ type }) => {
 
     const callendar = data_detail?.callendar || {};
     if (!callendar.calendarId) return;
+    const calendarAppHierId = callendar.appHierId ?? callendar.apphierId;
 
     const criterias = Array.isArray(data_detail?.criterias)
       ? data_detail.criterias
@@ -240,10 +235,10 @@ const CalendarForm = ({ type }) => {
     const criteriaSelect = allCriteria
       ? [24]
       : Object.entries(CRITERIA_FIELD_TO_ID)
-        .filter(([field]) =>
-          criterias.some((row) => row[field]?.label != null),
-        )
-        .map(([, criteriaId]) => criteriaId);
+          .filter(([field]) =>
+            criterias.some((row) => row[field]?.label != null),
+          )
+          .map(([, criteriaId]) => criteriaId);
 
     const dataCriteriaList = criterias
       .filter((item) => !item.allCriteria)
@@ -276,12 +271,12 @@ const CalendarForm = ({ type }) => {
       holidayType: callendar.holidayType,
       criteria: criteriaSelect,
       description: callendar.description,
-      apphierId: callendar.apphierId,
+      apphierId: calendarAppHierId,
     });
 
     setStartDate(callendar.startDate ? moment(callendar.startDate) : undefined);
     setEndDate(callendar.endDate ? moment(callendar.endDate) : undefined);
-    setSelectedHierarchy(callendar.apphierId);
+    setSelectedHierarchy(calendarAppHierId);
     setListDataAttachment(mapAttachments(data_detail?.attachments));
     setCriteriaValues(criteriaSelect || []);
     setListDataCriteria(dataCriteriaList);
@@ -318,6 +313,33 @@ const CalendarForm = ({ type }) => {
       setAppHierOptions(tempAppHier);
     }
   }, [dataListAppHierId]);
+
+  useEffect(() => {
+    if (!id || type !== "update") return;
+
+    const appHierId =
+      data_detail?.callendar?.appHierId ?? data_detail?.callendar?.apphierId;
+    if (appHierId === undefined || appHierId === null || !appHierOptions.length)
+      return;
+
+    const matchedOption = appHierOptions.find(
+      (option) => String(option.value) === String(appHierId),
+    );
+    const normalizedAppHierId = matchedOption ? matchedOption.value : appHierId;
+
+    setSelectedHierarchy(normalizedAppHierId);
+    form.setFieldsValue({ apphierId: normalizedAppHierId });
+  }, [id, type, data_detail, appHierOptions, form]);
+
+  useEffect(() => {
+    if (
+      selectedHierarchy !== undefined &&
+      selectedHierarchy !== null &&
+      selectedHierarchy !== ""
+    ) {
+      form.setFieldsValue({ apphierId: selectedHierarchy });
+    }
+  }, [selectedHierarchy, form]);
 
   // Breadcrumbs
   const routes = [
@@ -568,12 +590,12 @@ const CalendarForm = ({ type }) => {
         const errorBadge =
           item.value !== "Attachment"
             ? (errorFields || []).reduce(
-              (current, next) =>
-                item.paramValue?.includes(next.name[0])
-                  ? current + 1
-                  : current,
-              0,
-            )
+                (current, next) =>
+                  item.paramValue?.includes(next.name[0])
+                    ? current + 1
+                    : current,
+                0,
+              )
             : listDataAttachment.length < 1
               ? 1
               : 0;
@@ -655,7 +677,14 @@ const CalendarForm = ({ type }) => {
           setListSectionInfo([
             {
               value: "Calendar",
-              paramValue: ["name", "startDate", "holidayType", "criteria"],
+              paramValue: [
+                "name",
+                "startDate",
+                "endDate",
+                "holidayType",
+                "criteria",
+                "description",
+              ],
             },
             { value: "Approval", paramValue: ["apphierId"] },
             { value: "Attachment" },
@@ -685,7 +714,7 @@ const CalendarForm = ({ type }) => {
             await ratingBillingHttpService.uploadAttachment(
               `/v1/dbs/api/calendar/create-attachment?categoryId=${element.fileCategoryId}&referenceId=${referenceId}`,
               formData,
-              () => { },
+              () => {},
             );
           }
           setLoadingForm(false);
@@ -724,7 +753,7 @@ const CalendarForm = ({ type }) => {
             await ratingBillingHttpService.uploadAttachment(
               `/v1/dbs/api/calendar/create-attachment?categoryId=${element.fileCategoryId}&referenceId=${referenceId}`,
               formData,
-              () => { },
+              () => {},
             );
           }
           setLoadingForm(false);
@@ -759,7 +788,14 @@ const CalendarForm = ({ type }) => {
       setListSectionInfo([
         {
           value: "Calendar",
-          paramValue: ["name", "startDate", "holidayType", "criteria"],
+          paramValue: [
+            "name",
+            "startDate",
+            "endDate",
+            "holidayType",
+            "criteria",
+            "description",
+          ],
         },
         { value: "Approval", paramValue: ["apphierId"] },
         { value: "Attachment" },
@@ -845,12 +881,16 @@ const CalendarForm = ({ type }) => {
                   name={"endDate"}
                   rules={[
                     {
+                      required: true,
+                      message: "Please input your End Date!",
+                    },
+                    {
                       validator: (_, value) =>
-                        (value && moment(startDate) <= moment(value)) || !value
+                        value && moment(startDate) <= moment(value)
                           ? Promise.resolve()
                           : Promise.reject(
-                            new Error("End date must be after Start date"),
-                          ),
+                              new Error("End date must be after Start date"),
+                            ),
                     },
                   ]}
                 >
@@ -915,6 +955,12 @@ const CalendarForm = ({ type }) => {
                   <Form.Item
                     label={"Description"}
                     name={"description"}
+                    rules={[
+                      {
+                        required: true,
+                        message: "Please input your Description!",
+                      },
+                    ]}
                     className={"w-full"}
                   >
                     <InputComponent type="textarea" />
@@ -1040,8 +1086,9 @@ const CalendarForm = ({ type }) => {
               <SVGIcon name="IconFailed" width={48} />
               <p className="text-[18px] font-bold">{"Failed"}</p>
             </div>
-            <p className="pl-[70px]">{`Your data was not ${flag ? "submitted" : "saved"
-              }. ${bodyError.message}.`}</p>
+            <p className="pl-[70px]">{`Your data was not ${
+              flag ? "submitted" : "saved"
+            }. ${bodyError.message}.`}</p>
             <p className="pl-[70px]">Please try again.</p>
           </div>
         </ModalError>

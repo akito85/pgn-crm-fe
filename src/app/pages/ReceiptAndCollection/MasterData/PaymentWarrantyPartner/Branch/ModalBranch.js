@@ -217,7 +217,7 @@ const ModalBranch = ({
   };
 
   const renderConfirmationContent = () => {
-    const selectedHierName = dataListAppHierId?.find(h => h.id === selectedHierarchy)?.name || "-";
+    const selectedHierName = dataListAppHierId?.find(h => h.id === selectedHierarchy)?.name || "";
 
     return (
       <div className="w-full">
@@ -226,8 +226,8 @@ const ModalBranch = ({
         <div style={{ display: valuePage !== "Branch Details" ? "none" : undefined }}>
           <p className="text-primary uppercase font-bold mb-4">BRANCH INFORMATION</p>
           <div className="grid grid-cols-2 gap-4">
-            <DetailText label="Branch Code">{DOMPurify.sanitize(branchData.branchCode) || "-"}</DetailText>
-            <DetailText label="Branch Name">{DOMPurify.sanitize(branchData.branchName) || "-"}</DetailText>
+            <DetailText label="Branch Code">{DOMPurify.sanitize(branchData.branchCode) || ""}</DetailText>
+            <DetailText label="Branch Name">{DOMPurify.sanitize(branchData.branchName) || ""}</DetailText>
           </div>
         </div>
 

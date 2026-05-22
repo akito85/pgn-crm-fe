@@ -122,6 +122,7 @@ const FunctionalApproval = ({
   showSelect = true,
   disableSelect = false,
   approvalName,
+  loading = false,
 }) => {
   const handleSelectHierarchy = (value) => {
     updateSelectHierarchy(value);
@@ -165,13 +166,14 @@ const FunctionalApproval = ({
         <DetailText label={"Approval Hierarchy:"}>{approvalName}</DetailText>
       ) : null}
 
-      {selectedHierarchy && dataTable.length > 0 ? (
+      {selectedHierarchy && (dataTable.length > 0 || loading) ? (
         <div className="w-full">
           <TablePaginationNew
             type="FE"
             useSelect={false}
             usePagination={false}
             dataSource={dataTableWithKeys}
+            loading={loading}
             columns={columnInactivateData(
               searchInput,
               searchedColumn,

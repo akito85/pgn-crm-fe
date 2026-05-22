@@ -8,9 +8,9 @@ import { numberFormatting } from "../../../../../utils/formatCurrency";
 
 // Helper render date — return "-" jika null
 const renderDate = (text, format = "DD MMM YYYY") => {
-  if (!text) return "-";
+  if (!text) return "";
   const m = moment(text);
-  return m.isValid() ? m.format(format) : "-";
+  return m.isValid() ? m.format(format) : "";
 };
 
 export const columnsRequestBilling = (

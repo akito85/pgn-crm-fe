@@ -4,7 +4,7 @@ import TableRBI from "../../../../../../components/TableRBI";
 import SubSectionCard from "../../../../../../components/SubSectionCard";
 import StatusComponent from "../../../../../../components/StatusComponent";
 
-const EREarlyRepaymentDetailSection = ({ installmentsByCurrency = {}, onInstallmentDetailIdsChange }) => {
+const EREarlyRepaymentDetailSection = ({ installmentsByCurrency = {}, onInstallmentDetailIdsChange, openItems = [] }) => {
   const currencies = Object.keys(installmentsByCurrency);
 
   return (
@@ -17,6 +17,15 @@ const EREarlyRepaymentDetailSection = ({ installmentsByCurrency = {}, onInstallm
             const rows = installmentsByCurrency[currency] || [];
             const isIdr = currency === "IDR";
             const currentSum = rows.reduce((sum, r) => sum + (parseFloat(r.amount) || 0), 0);
+            
+            // Group items by currency to get total per currency
+            const openItemTotals = openItems.reduce((acc, item) => {
+              const cur = item.currency || "IDR";
+              const amount = parseFloat(String(item.amount).replace(/,/g, "")) || 0;
+              acc[cur] = (acc[cur] || 0) + amount;
+              return acc;
+            }, {});
+            const targetTotal = openItemTotals[currency] || 0;
 
             const columns = [
               {
@@ -35,6 +44,24 @@ const EREarlyRepaymentDetailSection = ({ installmentsByCurrency = {}, onInstallm
                   return (
                     <span className="font-medium">
                       {parseFloat(record.amount).toLocaleString(isIdr ? "id-ID" : "en-US", {
+                        maximumFractionDigits: 2,
+                      })}
+                    </span>
+                  );
+                },
+              },
+              {
+                title: "BALANCE",
+                dataIndex: "balance",
+                align: "right",
+                render: (_, __, index) => {
+                  const sumPaidUpToThisRow = rows
+                    .slice(0, index + 1)
+                    .reduce((sum, r) => sum + (parseFloat(String(r.amount).replace(/,/g, "")) || 0), 0);
+                  const balance = Math.max(0, targetTotal - sumPaidUpToThisRow);
+                  return (
+                    <span className="font-medium text-gray-500">
+                      {balance.toLocaleString(isIdr ? "id-ID" : "en-US", {
                         maximumFractionDigits: 2,
                       })}
                     </span>

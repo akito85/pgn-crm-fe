@@ -490,17 +490,17 @@ const DetailAccounting = () => {
                 <div className="flex flex-col gap-1 p-5">
                     <SectionCard title="CUSTOMER INFORMATION">
                         <div className="grid grid-cols-5 w-full gap-y-4 gap-x-4">
-                            <DetailText label="Customer Number">{data_detail?.customerNumber || "-"}</DetailText>
-                            <DetailText label="Customer Name">{data_detail?.customer || "-"}</DetailText>
-                            <DetailText label="Bill Period">{data_detail?.paymentPeriod || "-"}</DetailText>
+                            <DetailText label="Customer Number">{data_detail?.customerNumber || ""}</DetailText>
+                            <DetailText label="Customer Name">{data_detail?.customer || ""}</DetailText>
+                            <DetailText label="Bill Period">{data_detail?.paymentPeriod || ""}</DetailText>
                         </div>
                     </SectionCard>
 
                     <SectionCard title="ACCOUNT INFORMATION">
                         <div className="grid grid-cols-5 w-full gap-y-4 gap-x-4">
-                            <DetailText label="Account Number">{data_detail?.accountNumber || "-"}</DetailText>
-                            <DetailText label="Account Name">{data_detail?.accountName || "-"}</DetailText>
-                            <DetailText label="Account Reference ID">{data_detail?.accountRefId || "-"}</DetailText>
+                            <DetailText label="Account Number">{data_detail?.accountNumber || ""}</DetailText>
+                            <DetailText label="Account Name">{data_detail?.accountName || ""}</DetailText>
+                            <DetailText label="Account Reference ID">{data_detail?.accountRefId || ""}</DetailText>
                         </div>
                     </SectionCard>
                 </div>
@@ -545,22 +545,22 @@ const DetailAccounting = () => {
                     <div className="p-5">
                         <SectionCard>
                             <div className="w-full grid grid-cols-5 gap-y-4 gap-x-4">
-                                <DetailText label="Receipt Code">{data_detail?.receiptCode || "-"}</DetailText>
-                                <DetailText label="Receipt Number">{data_detail?.receiptNumber || "-"}</DetailText>
-                                <DetailText label="Receipt Channel">{data_detail?.receiptChannel || "-"}</DetailText>
-                                <DetailText label="Payment Type">{data_detail?.paymentType || "-"}</DetailText>
-                                <DetailText label="Partner">{data_detail?.partner || "-"}</DetailText>
-                                <DetailText label="Collecting Agent">{data_detail?.collectingAgent || "-"}</DetailText>
-                                <DetailText label="Delivery Channel">{data_detail?.deliveryChannel || "-"}</DetailText>
-                                <DetailText label="Receipt Method">{data_detail?.paymentMethod || "-"}</DetailText>
-                                <DetailText label="Bank">{data_detail?.bank || "-"}</DetailText>
+                                <DetailText label="Receipt Code">{data_detail?.receiptCode || ""}</DetailText>
+                                <DetailText label="Receipt Number">{data_detail?.receiptNumber || ""}</DetailText>
+                                <DetailText label="Receipt Channel">{data_detail?.receiptChannel || ""}</DetailText>
+                                <DetailText label="Payment Type">{data_detail?.paymentType || ""}</DetailText>
+                                <DetailText label="Partner">{data_detail?.partner || ""}</DetailText>
+                                <DetailText label="Collecting Agent">{data_detail?.collectingAgent || ""}</DetailText>
+                                <DetailText label="Delivery Channel">{data_detail?.deliveryChannel || ""}</DetailText>
+                                <DetailText label="Receipt Method">{data_detail?.paymentMethod || ""}</DetailText>
+                                <DetailText label="Bank">{data_detail?.bank || ""}</DetailText>
                                 <DetailText label="Receipt Date">
                                     {data_detail?.receiptDate ? moment(data_detail.receiptDate).format(dateFormatting.dateTime) : "-"}
                                 </DetailText>
-                                <DetailText label="Source">{data_detail?.source || "-"}</DetailText>
-                                <DetailText label="Status">{data_detail?.status || "-"}</DetailText>
+                                <DetailText label="Source">{data_detail?.source || ""}</DetailText>
+                                <DetailText label="Status">{data_detail?.status || ""}</DetailText>
                                 <div className="col-span-5">
-                                    <DetailText label="Remark">{data_detail?.remark || "-"}</DetailText>
+                                    <DetailText label="Remark">{data_detail?.remark || ""}</DetailText>
                                 </div>
                             </div>
                         </SectionCard>
@@ -598,11 +598,11 @@ const DetailAccounting = () => {
 
                 <LogHistoryInfo
                     data={{
-                        recordId: data_detail?.id || "-",
+                        recordId: data_detail?.id || "",
                         createdDate: data_detail?.createdDate ? moment(data_detail.createdDate).format("DD MMM YYYY HH:mm:ss") : "-",
-                        createdBy: data_detail?.createdBy || "-",
+                        createdBy: data_detail?.createdBy || "",
                         updatedDate: data_detail?.updatedDate ? moment(data_detail.updatedDate).format("DD MMM YYYY HH:mm:ss") : "-",
-                        updatedBy: data_detail?.updatedBy || "-"
+                        updatedBy: data_detail?.updatedBy || ""
                     }}
                 />
 

@@ -47,7 +47,11 @@ const AdditionalCodeSection = ({
       width: 120,
       sorter: true,
       render: (text) => {
-        return <StatusComponent colour={text}>{text}</StatusComponent>;
+        return (
+          <StatusComponent colour={text} size="small">
+            {text}
+          </StatusComponent>
+        );
       },
     },
   ];

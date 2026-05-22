@@ -110,46 +110,73 @@ const ContentModalConfirmRePlan = ({
 
         return Object.entries(grouped).map(([currency, items]) => (
             <div key={currency} className="mb-4">
-                <div className="font-bold text-[14px] mb-2">{currency}</div>
-                <TableRBI
-                    idTable={`confirm-open-items-${currency}`}
-                    columns={columns}
-                    dataSource={items.map((it, idx) => ({ ...it, key: idx }))}
-                    usePagination={false}
-                    showAdvanceSearch={false}
-                    showSearchBar={false}
-                />
+                <SectionCard title={`CURRENCY ${currency}`}>
+                    <TableRBI
+                        idTable={`confirm-open-items-${currency}`}
+                        columns={columns}
+                        dataSource={items.map((it, idx) => ({ ...it, key: idx }))}
+                        usePagination={false}
+                        showAdvanceSearch={false}
+                        showSearchBar={false}
+                    />
+                </SectionCard>
             </div>
         ));
     };
 
     const renderPaymentPlanDetail = () => {
-        const columns = [
-            { title: "PERIOD", dataIndex: "periode", width: 100 },
-            { 
-              title: "TOTAL AMOUNT", 
-              dataIndex: "amount", 
-              align: "right", 
-              render: (val) => {
-                const numeric = typeof val === "string" ? parseFloat(val.replace(/,/g, "")) : val;
-                return numeric?.toLocaleString() || "0";
-              } 
-            },
-        ];
+        const openItemTotals = openItems.reduce((acc, item) => {
+            const cur = item.currency || "IDR";
+            const amount = parseFloat(String(item.amount).replace(/,/g, "")) || 0;
+            acc[cur] = (acc[cur] || 0) + amount;
+            return acc;
+        }, {});
 
-        return Object.entries(installmentsByCurrency).map(([currency, items]) => (
-            <div key={currency} className="mb-4">
-                <div className="font-bold text-[14px] mb-2">{currency}</div>
-                <TableRBI
-                    idTable={`confirm-payment-plan-${currency}`}
-                    columns={columns}
-                    dataSource={items.map((it, idx) => ({ ...it, key: idx }))}
-                    usePagination={false}
-                    showAdvanceSearch={false}
-                    showSearchBar={false}
-                />
-            </div>
-        ));
+        return Object.entries(installmentsByCurrency).map(([currency, items]) => {
+            const targetTotal = openItemTotals[currency] || 0;
+            const columns = [
+                { title: "PERIOD", dataIndex: "periode", width: 100 },
+                { 
+                  title: "TOTAL AMOUNT", 
+                  dataIndex: "amount", 
+                  align: "right", 
+                  render: (val) => {
+                    const numeric = typeof val === "string" ? parseFloat(val.replace(/,/g, "")) : val;
+                    return numeric?.toLocaleString() || "0";
+                  } 
+                },
+                { title: "DUE DATE", dataIndex: "dueDate" },
+                {
+                  title: "BALANCE",
+                  dataIndex: "balance",
+                  align: "right",
+                  render: (_, __, index) => {
+                    const sumPaidUpToThisRow = items
+                      .slice(0, index + 1)
+                      .reduce((sum, r) => sum + (parseFloat(String(r.amount).replace(/,/g, "")) || 0), 0);
+                    const balance = Math.max(0, targetTotal - sumPaidUpToThisRow);
+                    return balance.toLocaleString(currency === "IDR" ? "id-ID" : "en-US", {
+                      maximumFractionDigits: 2,
+                    });
+                  }
+                }
+            ];
+
+            return (
+                <div key={currency} className="mb-4">
+                    <SectionCard title={`CURRENCY ${currency}`}>
+                        <TableRBI
+                            idTable={`confirm-payment-plan-${currency}`}
+                            columns={columns}
+                            dataSource={items.map((it, idx) => ({ ...it, key: idx }))}
+                            usePagination={false}
+                            showAdvanceSearch={false}
+                            showSearchBar={false}
+                        />
+                    </SectionCard>
+                </div>
+            );
+        });
     };
 
     const items = [
@@ -160,33 +187,33 @@ const ContentModalConfirmRePlan = ({
                 <div className="p-5 bg-[#f8f7fa] min-h-[400px] flex flex-col gap-6">
                     <SectionCard title="ACCOUNT INFORMATION">
                         <div className="grid grid-cols-5 gap-y-4 gap-x-6 text-[14px]">
-                            <DetailText label="Account Number">{formValues?.accountNumber || "-"}</DetailText>
-                            <DetailText label="Account Name">{formValues?.accountName || "-"}</DetailText>
-                            <DetailText label="Customer Number">{formValues?.customerNumber || "-"}</DetailText>
-                            <DetailText label="Customer Name">{formValues?.customerName || "-"}</DetailText>
-                            <DetailText label="Account Group Type">{formValues?.accountGroupType || "-"}</DetailText>
-                            <DetailText label="SOR">{formValues?.sor || "-"}</DetailText>
-                            <DetailText label="Cost Center">{formValues?.costCenter || "-"}</DetailText>
-                            <DetailText label="Account Segment">{formValues?.accountSegment || "-"}</DetailText>
-                            <DetailText label="Meter Reading Code">{formValues?.meterReadingCode || "-"}</DetailText>
-                            <DetailText label="Account Type">{formValues?.accountType || "-"}</DetailText>
-                            <DetailText label="Classification Type">{formValues?.classificationType || "-"}</DetailText>
-                            <DetailText label="SAP Cust ID">{formValues?.sapCustId || "-"}</DetailText>
-                            <DetailText label="Account Status">{formValues?.accountStatus || "-"}</DetailText>
-                            <DetailText label="Reference Payment Plan Code">{formValues?.saNumber || "-"}</DetailText>
+                            <DetailText label="Account Number">{formValues?.accountNumber || ""}</DetailText>
+                            <DetailText label="Account Name">{formValues?.accountName || ""}</DetailText>
+                            <DetailText label="Customer Number">{formValues?.customerNumber || ""}</DetailText>
+                            <DetailText label="Customer Name">{formValues?.customerName || ""}</DetailText>
+                            <DetailText label="Account Group Type">{formValues?.accountGroupType || ""}</DetailText>
+                            <DetailText label="SOR">{formValues?.sor || ""}</DetailText>
+                            <DetailText label="Cost Center">{formValues?.costCenter || ""}</DetailText>
+                            <DetailText label="Account Segment">{formValues?.accountSegment || ""}</DetailText>
+                            <DetailText label="Meter Reading Code">{formValues?.meterReadingCode || ""}</DetailText>
+                            <DetailText label="Account Type">{formValues?.accountType || ""}</DetailText>
+                            <DetailText label="Classification Type">{formValues?.classificationType || ""}</DetailText>
+                            <DetailText label="SAP Cust ID">{formValues?.sapCustId || ""}</DetailText>
+                            <DetailText label="Account Status">{formValues?.accountStatus || ""}</DetailText>
+                            <DetailText label="Reference Payment Plan Code">{formValues?.saNumber || ""}</DetailText>
                         </div>
                     </SectionCard>
 
                     <SectionCard title="SERVICE AGREEMENT INFORMATION">
                         <div className="grid grid-cols-5 gap-y-4 gap-x-6 text-[14px]">
-                            <DetailText label="Service Agreement Number">{formValues?.saNumber || "-"}</DetailText>
-                            <DetailText label="Service Agreement Name">{formValues?.saName || "-"}</DetailText>
+                            <DetailText label="Service Agreement Number">{formValues?.saNumber || ""}</DetailText>
+                            <DetailText label="Service Agreement Name">{formValues?.saName || ""}</DetailText>
                             <DetailText label="Service Agreement Date">{formValues?.saDate ? moment(formValues?.saDate).format("DD/MM/YYYY") : "-"}</DetailText>
                             <DetailText label="Start Date">{formValues?.saStartDate ? moment(formValues?.saStartDate).format("DD/MM/YYYY") : "-"}</DetailText>
                             <DetailText label="End Date">{formValues?.saEndDate ? moment(formValues?.saEndDate).format("DD/MM/YYYY") : "-"}</DetailText>
-                            <DetailText label="Minimum Contract">{formValues?.minContract || "-"}</DetailText>
-                            <DetailText label="Maximum Contract">{formValues?.maxContract || "-"}</DetailText>
-                            <DetailText label="UOM">{formValues?.uom || "-"}</DetailText>
+                            <DetailText label="Minimum Contract">{formValues?.minContract || ""}</DetailText>
+                            <DetailText label="Maximum Contract">{formValues?.maxContract || ""}</DetailText>
+                            <DetailText label="UOM">{formValues?.uom || ""}</DetailText>
                         </div>
                     </SectionCard>
 
@@ -204,12 +231,14 @@ const ContentModalConfirmRePlan = ({
 
                     <SectionCard title="RE-PLAN INFORMATION">
                         <div className="grid grid-cols-5 gap-y-4 gap-x-6 text-[14px]">
-                            <DetailText label="Type">{formValues?.type || "-"}</DetailText>
-                            <DetailText label="Tenor">{formValues?.tenor || "-"}</DetailText>
-                            <DetailText label="Start Period">{formValues?.startPeriod ? moment(formValues?.startPeriod).format("MMMM YYYY") : "-"}</DetailText>
-                            <DetailText label="Source">{formValues?.source || "-"}</DetailText>
-                            <div className="col-span-5">
-                                <DetailText label="Description">{DOMPurify.sanitize(formValues?.description) || "-"}</DetailText>
+                            <DetailText label="Payment Plan Code">{formValues?.restructureCode || ""}</DetailText>
+                            <DetailText label="Type">{formValues?.type || ""}</DetailText>
+                            <DetailText label="Tenor">{formValues?.tenor ? `${formValues.tenor} Months` : "-"}</DetailText>
+                            <DetailText label="Start Period">{formValues?.startPeriod ? moment(formValues?.startPeriod).format("MMM YYYY") : "-"}</DetailText>
+                            <DetailText label="Source">{formValues?.source || ""}</DetailText>
+                            <DetailText label="Request Date">{formValues?.requestDate ? moment(formValues?.requestDate).format("DD MMM YYYY") : "-"}</DetailText>
+                            <div className="col-span-4">
+                                <DetailText label="Description">{DOMPurify.sanitize(formValues?.description) || ""}</DetailText>
                             </div>
                         </div>
                     </SectionCard>

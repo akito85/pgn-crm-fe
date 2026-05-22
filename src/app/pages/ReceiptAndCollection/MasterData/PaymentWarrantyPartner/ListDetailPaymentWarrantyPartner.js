@@ -198,11 +198,11 @@ const ListDetailPaymentWarrantyPartner = () => {
 
         <LogHistoryInfo 
           data={{
-            recordId: data_detail?.partner?.id || "-",
+            recordId: data_detail?.partner?.id || "",
             createdDate: data_detail?.partner?.createdDate ? renderDateConverter(data_detail?.partner?.createdDate) : "-",
-            createdBy: data_detail?.partner?.createdBy || "-",
+            createdBy: data_detail?.partner?.createdBy || "",
             updatedDate: data_detail?.partner?.updatedDate ? renderDateConverter(data_detail?.partner?.updatedDate) : "-",
-            updatedBy: data_detail?.partner?.updatedBy || "-"
+            updatedBy: data_detail?.partner?.updatedBy || ""
           }} 
         />
 
