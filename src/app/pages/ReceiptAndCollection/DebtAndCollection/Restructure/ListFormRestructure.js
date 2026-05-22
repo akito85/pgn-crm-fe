@@ -173,7 +173,7 @@ const ListFormRestructure = (props) => {
                         cpName: item.cpName || [item.firstName, item.middleName, item.lastName].filter(Boolean).join(" "),
                         job: item.job,
                         position: item.position,
-                        address: item.address || item.contactAddress || "-",
+                        address: item.address || item.contactAddress || "",
                         details: item.details || item.criteria || item.contactDetails || []
                     }));
                     console.log("Formatted contacts for setting:", formattedContacts);

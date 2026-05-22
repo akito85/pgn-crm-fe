@@ -43,7 +43,7 @@ const DetailLiborRate = (props) => {
       <SectionCard title={"SOURCE"}>
         <div className="flex flex-col gap-4">
           <div className="grid grid-cols-3 gap-5">
-            <DetailText label="Code">{currentSource.sourceCode || "-"}</DetailText>
+            <DetailText label="Code">{currentSource.sourceCode || ""}</DetailText>
             <div className="flex flex-col gap-1">
               <span className="text-[#8D91A0] text-[12px]">Source</span>
                 <SelectComponent
@@ -54,7 +54,7 @@ const DetailLiborRate = (props) => {
                   onChange={(val) => setSelectedSource(val)}
                 />
             </div>
-            <DetailText label="Source Name">{currentSource.description || "-"}</DetailText>
+            <DetailText label="Source Name">{currentSource.description || ""}</DetailText>
           </div>
           <div className="flex justify-end mt-2">
              <ButtonComponent 
@@ -80,7 +80,7 @@ const DetailLiborRate = (props) => {
           <DetailText label="Start Date">{rateIndex.startDate ? dayjs(rateIndex.startDate).format("YYYY-MM-DD") : "-"}</DetailText>
           <DetailText label="End Date">{rateIndex.endDate ? dayjs(rateIndex.endDate).format("YYYY-MM-DD") : "-"}</DetailText>
           <div className="col-span-5">
-            <DetailText label="Description">{rateIndex.remarks || "-"}</DetailText>
+            <DetailText label="Description">{rateIndex.remarks || ""}</DetailText>
           </div>
         </div>
       </SectionCard>

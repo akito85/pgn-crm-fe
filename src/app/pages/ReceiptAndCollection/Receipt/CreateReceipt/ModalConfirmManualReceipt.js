@@ -119,7 +119,7 @@ const ModalConfirmManualReceipt = ({
               <div className="w-full grid grid-cols-5 gap-5">
                 <DetailText label={"Receipt Method"}>{method}</DetailText>
                 <DetailText label={"Receipt Code"}>{data?.receiptCode}</DetailText>
-                <DetailText label={"Receipt Number"}>{data?.receiptNumber || "-"}</DetailText>
+                <DetailText label={"Receipt Number"}>{data?.receiptNumber || ""}</DetailText>
                 <DetailText label={"Receipt Date"}>
                   {data?.receiptDate
                     ? moment(data?.receiptDate).format(dateFormatting.dateTime)
@@ -144,7 +144,7 @@ const ModalConfirmManualReceipt = ({
               <div className="w-full grid grid-cols-5 gap-5">
                 <DetailText label={"Currency"}>{currency}</DetailText>
                 <DetailText label={"Amount"}>{roundToTwoDecimal(data.amount)}</DetailText>
-                <DetailText label={"Converted Currency"}>{data?.convertedCurrency || "-"}</DetailText>
+                <DetailText label={"Converted Currency"}>{data?.convertedCurrency || ""}</DetailText>
                 <DetailText label={"Rate Type"}>{rateType}</DetailText>
                 <DetailText label={"Rate Date"}>
                   {data?.rateDate

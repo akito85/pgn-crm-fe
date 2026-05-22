@@ -31,17 +31,17 @@ const ContentModalConfirm = ({
             <SectionCard title="DEDUCTION INFORMATION">
               <div className="grid grid-cols-3 w-full gap-5">
                 <DetailText label={"Deduction Period"}>
-                  {data?.deductionPeriod || "-"}
+                  {data?.deductionPeriod || ""}
                 </DetailText>
                 <DetailText label={"Type"}>
-                  {data?.type || "-"}
+                  {data?.type || ""}
                 </DetailText>
                 <DetailText label={"Deduction Date"}>
                   {data?.deductionDate ? moment(data?.deductionDate).format("DD MMM YYYY") : "-"}
                 </DetailText>
                 <div className="col-span-3">
                   <DetailText label={"Description"}>
-                    {data?.description || "-"}
+                    {data?.description || ""}
                   </DetailText>
                 </div>
               </div>

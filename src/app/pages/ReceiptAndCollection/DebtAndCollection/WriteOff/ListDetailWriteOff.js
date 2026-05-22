@@ -343,19 +343,19 @@ const HistoryLog = ({
         )}
 
         <DetailText label={"Created Date"}>
-          {createdDate || "-"}
+          {createdDate || ""}
         </DetailText>
 
         <DetailText label={"Created By"}>
-          {createdBy || "-"}
+          {createdBy || ""}
         </DetailText>
 
         <DetailText label={"Updated Date"}>
-          {updatedDate || "-"}
+          {updatedDate || ""}
         </DetailText>
 
         <DetailText label={"Updated By"}>
-          {updatedBy || "-"}
+          {updatedBy || ""}
         </DetailText>
       </GridLayout>
     </BaseContainer>
