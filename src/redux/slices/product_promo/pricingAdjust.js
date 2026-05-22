@@ -513,7 +513,7 @@ export const getCustomerSegmentList = createAsyncThunk(
   "GET_CUSTOMER_SEGMENT_LIST_PRICE_ADJUST",
   async (thunkAPI) => {
     try {
-      const url = `/v1/dbs/api//price-adjustment/customer-segment`;
+      const url = `/v1/dbs/api/price-adjustment/customer-segment`;
       const response = await productPromoHttpService.getAll(url);
       return (response.data || []).map((item) => {
         return {
