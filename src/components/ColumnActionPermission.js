@@ -143,8 +143,10 @@ export const useColumnActionPermission = (
           fixed: "right",
           width: 111,
           render: () => (
-            <div style={{ width: "100%", height: 14, overflow: "hidden", borderRadius: 20 }}>
-              <Skeleton.Button active size="small" shape="round" block />
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <div style={{ width: "100%", transform: "scaleY(0.55)", transformOrigin: "center" }}>
+                <Skeleton.Button active size="small" shape="round" block />
+              </div>
             </div>
           ),
         },
