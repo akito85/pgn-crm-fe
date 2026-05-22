@@ -24,8 +24,8 @@ export const getAllJobExecutionPaginate = createAsyncThunk(
         thunkAPI.dispatch(setBodyError(error));
       } else {
         thunkAPI.dispatch(showModalError({
-          title: "Failed to load executions",
-          description: error?.response?.data?.message ?? error?.message ?? "Unknown error",
+          title: "Failed to load execution list",
+          description: error?.response?.data?.message ?? error?.message ?? "Something went wrong while retrieving the execution list. Please try again or contact support if the problem continues.",
         }));
       }
       return { content: [], totalElements: 0, totalPages: 0 };

@@ -80,9 +80,8 @@ export const getAllJobGroupPaginate = createAsyncThunk(
     } catch (error) {
       thunkAPI.dispatch(
         showModalError({
-          title: "Failed to load job groups",
-          description:
-            error?.response?.data?.message ?? error?.message ?? "Unknown error",
+          title: "Failed to load job group list",
+          description: error?.response?.data?.message ?? error?.message ?? "Something went wrong while retrieving the job group list. Please try again or contact support if the problem continues.",
         })
       );
       return DUMMY;
