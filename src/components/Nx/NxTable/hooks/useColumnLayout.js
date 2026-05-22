@@ -388,7 +388,12 @@ function getAllColumnKeys(cols) {
 // Returns null when distribution should not run so callers can skip the override.
 export function computeEffectiveWidths(allCols, columnWidths, containerWidth, scrollX) {
   if (!containerWidth || containerWidth <= 0) return null;
-  if (scrollX > 0 && scrollX >= containerWidth) return null;
+
+  // Effective table width: scroll.x sets AntD's min-width for the inner table.
+  // When scrollX > containerWidth the scrollbar is visible and the table is scrollX
+  // wide. When scrollX <= containerWidth (or unset) the table fills the container.
+  // In both cases we distribute to this effective width so NO and ACTION stay pinned.
+  const effectiveTableWidth = scrollX > 0 ? Math.max(scrollX, containerWidth) : containerWidth;
 
   const pinnedWidths  = {};
   const lockedFlex    = {};
@@ -414,9 +419,9 @@ export function computeEffectiveWidths(allCols, columnWidths, containerWidth, sc
   const totalDefined = pinnedTotal + lockedTotal
     + unresizedFlex.reduce((s, c) => s + c.base, 0);
 
-  if (totalDefined >= containerWidth) return null;
+  if (totalDefined >= effectiveTableWidth) return null;
 
-  const available = containerWidth - pinnedTotal - lockedTotal;
+  const available = effectiveTableWidth - pinnedTotal - lockedTotal;
   if (available <= 0) return null;
 
   const totalUnresizedBase = unresizedFlex.reduce((s, c) => s + c.base, 0);
