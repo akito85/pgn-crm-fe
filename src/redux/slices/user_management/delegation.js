@@ -18,7 +18,7 @@ export const getDelegationList = createAsyncThunk(
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      const url = `/vi/dbs/api/user-delegation/view-paging?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
+      const url = `/v1/dbs/api/user-delegation/view-paging?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
       const response = await userHttpService.getPagination(url);
       return response.data;
     } catch (error) {
@@ -36,7 +36,7 @@ export const getDelegationDetail = createAsyncThunk(
   "GET_DELEGATION_DETAIL",
   async (id, thunkAPI) => {
     try {
-      const url = `/vi/dbs/api/user-delegation/detail/${id}`;
+      const url = `/v1/dbs/api/user-delegation/detail/${id}`;
       const response = await userHttpService.getDetail(url);
       return response.data;
     } catch (error) {
@@ -54,7 +54,7 @@ export const approveRejectDelegation = createAsyncThunk(
   "APPROVE_REJECT_DELEGATION",
   async ({ body }, thunkAPI) => {
     try {
-      const url = `/vi/dbs/api/user-delegation/approval-user-delegation`;
+      const url = `/v1/dbs/api/user-delegation/approval-user-delegation`;
       const response = await userHttpService.activationWithRemark(url, body);
       const successBody = {
         title: "Successful",
@@ -82,7 +82,7 @@ export const getPositionDelegation = createAsyncThunk(
   "GET_POSITION_DELEGATION",
   async (thunkAPI) => {
     try {
-      const url = "/vi/dbs/api/user-delegation/get-position";
+      const url = "/v1/dbs/api/user-delegation/get-position";
       const response = await userHttpService.getAll(url);
       return response.data;
     } catch (error) {
@@ -101,7 +101,7 @@ export const getDelegateTo = createAsyncThunk(
   async (id, thunkAPI) => {
     try {
       if (hasValue(id)) {
-        const url = `/vi/dbs/api/user-delegation/get-delegate-to/${id}`;
+        const url = `/v1/dbs/api/user-delegation/get-delegate-to/${id}`;
         const response = await userHttpService.getDetail(url);
         return response.data;
       }
@@ -120,7 +120,7 @@ export const createDelegation = createAsyncThunk(
   "CREATE_DELEGATION",
   async (body, thunkAPI) => {
     try {
-      const url = `/vi/dbs/api/user-delegation/create`;
+      const url = `/v1/dbs/api/user-delegation/create`;
       const response = await userHttpService.createData(url, body);
       const successBody = {
         title: "Successful",
