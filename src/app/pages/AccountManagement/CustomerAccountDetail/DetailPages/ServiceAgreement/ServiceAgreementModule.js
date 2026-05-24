@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Spin } from "antd";
 import { useNavigate } from "react-router-dom";
@@ -63,6 +63,7 @@ const ServiceAgreementModule = ({ idAccount, idCustomer, type, variant }) => {
     searchInput,
     searchText,
     totalElements,
+    isExistMain,
   } = useServiceAgreementListController({
     scope,
     listConfig: variant.list,
@@ -111,22 +112,25 @@ const ServiceAgreementModule = ({ idAccount, idCustomer, type, variant }) => {
     setDataApprovalHistoryFix({});
   }, [dataApprovalHistory]);
 
-  const handleApprovalHistoryModal = (show, recordId = 0) => {
-    if (show) {
-      dispatch(getApprovalHistory(recordId));
-      setShowApprovalHistoryModal(true);
-      return;
-    }
+  const handleApprovalHistoryModal = useCallback(
+    (show, recordId = 0) => {
+      if (show) {
+        dispatch(getApprovalHistory(recordId));
+        setShowApprovalHistoryModal(true);
+        return;
+      }
 
-    setShowApprovalHistoryModal(false);
-  };
+      setShowApprovalHistoryModal(false);
+    },
+    [dispatch]
+  );
 
-  const handleOpenInactivate = (recordId, saNumber) => {
+  const handleOpenInactivate = useCallback((recordId, saNumber) => {
     setSaId(recordId);
     setNamed(saNumber);
     setActiveOrInactive("Inactivate");
     setModalActivate(true);
-  };
+  }, []);
 
   const handleCancelModalInactivate = () => {
     setModalActivate(false);
@@ -152,10 +156,10 @@ const ServiceAgreementModule = ({ idAccount, idCustomer, type, variant }) => {
       });
   };
 
-  const handleOpenDeleteDraft = (recordId) => {
+  const handleOpenDeleteDraft = useCallback((recordId) => {
     setSaId(recordId);
     setModalDeleteDraft(true);
-  };
+  }, []);
 
   const handleSubmitDeleteDraft = () => {
     dispatch(deleteDraftSa(saId))
@@ -181,10 +185,11 @@ const ServiceAgreementModule = ({ idAccount, idCustomer, type, variant }) => {
       buildServiceAgreementToolbarActions({
         variant,
         scope,
+        isExistMain,
         onDownload: handleDownload,
         onOpenApproval: () => setShowApprovalModal(true),
       }),
-    [handleDownload, scope, variant]
+    [handleDownload, isExistMain, scope, variant]
   );
 
   const itemActions = useMemo(
@@ -198,7 +203,7 @@ const ServiceAgreementModule = ({ idAccount, idCustomer, type, variant }) => {
         scope,
         variant,
       }),
-    [navigate, scope, variant]
+    [handleOpenDeleteDraft, handleOpenInactivate, handleApprovalHistoryModal, navigate, scope, variant]
   );
 
   return (

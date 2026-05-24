@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import TableContact from "../../Table/Contact/TableContact";
-import ModalCustom from "../ModalCustom";
-import { Checkbox, Form } from "antd";
+import NxModal from "../../Nx/NxModal";
+import { Button, Checkbox, Form } from "antd";
 import ButtonComponent from "../../ButtonComponent";
 import ModalChooseContact from "./ModalChooseContact";
 import { sorterFunction } from "../../../utils/sorterFunction";
@@ -350,31 +350,33 @@ const ModalContact = ({
 
   return (
     <>
-      <ModalCustom
+      <NxModal
         isOpen={open}
-        type="confirmation"
-        header={typeContact === "update" ? "Update Contact" : "Create Contact"}
+        title={typeContact === "update" ? "Update Contact" : "Create Contact"}
         handleCancel={handleCancelContact}
         footer={[
-          <div key="footer" className="w-full flex">
-            <ButtonComponent onClick={handleCancelContact} type={"submit"}>
-              Back
-            </ButtonComponent>
-            <div className="justify-end flex gap-2 w-full">
-              <ButtonComponent
-                icon={<SVGIcon name={`IconButtonClear`} width={24} />}
+          <div key="footer" className="w-full flex justify-between">
+            <Button
+              type={"menu"}
+              onClick={handleCancelContact}
+            >
+              Cancel
+            </Button>
+            <div className="flex">
+              <Button
                 onClick={handleCancelContact}
-                type={"submit"}
+                type={"reject"}
+                icon={<SVGIcon name="IconButtonClear" width={14} />}
               >
-                Clear
-              </ButtonComponent>
-              <ButtonComponent
+                Clear Data
+              </Button>
+              <Button
                 type={"submit"}
                 htmlType={"submit"}
                 form={"modalContact"}
               >
-                Save
-              </ButtonComponent>
+                Next
+              </Button>
             </div>
           </div>,
         ]}
@@ -393,7 +395,7 @@ const ModalContact = ({
           }}
           layout="vertical"
         >
-          <div className="flex flex-col gap-4 pt-2">
+          <div className="flex flex-col gap-4 p-4">
 
             {/* Contact Information */}
             <NxCardContainer
@@ -410,11 +412,12 @@ const ModalContact = ({
                 ) : null
               }
             >
-              <div className="grid grid-cols-3 gap-5 mb-4">
+              <div className="grid grid-cols-3 gap-4">
                 <Form.Item
                   label={"First Name"}
                   name={"firstName"}
                   rules={formMessageRequired("First Name")}
+                  className="no-margin-form"
                 >
                   <InputComponent
                     onInput={onInputUpperCase}
@@ -423,7 +426,11 @@ const ModalContact = ({
                     }
                   />
                 </Form.Item>
-                <Form.Item label={"Middle Name"} name={"middleName"}>
+                <Form.Item
+                  label={"Middle Name"}
+                  name={"middleName"}
+                  className="no-margin-form"
+                >
                   <InputComponent
                     onInput={onInputUpperCase}
                     disabled={
@@ -431,7 +438,11 @@ const ModalContact = ({
                     }
                   />
                 </Form.Item>
-                <Form.Item label={"Last Name"} name={"lastName"}>
+                <Form.Item
+                  label={"Last Name"}
+                  name={"lastName"}
+                  className="no-margin-form"
+                >
                   <InputComponent
                     onInput={onInputUpperCase}
                     disabled={
@@ -439,9 +450,11 @@ const ModalContact = ({
                     }
                   />
                 </Form.Item>
-              </div>
-              <div className="grid grid-cols-3 gap-5">
-                <Form.Item label={"Job"} name={"jobId"}>
+                <Form.Item
+                  label={"Job"}
+                  name={"jobId"}
+                  className="no-margin-form"
+                >
                   <SelectComponent
                     options={datas_option?.data_job}
                     disabled={
@@ -449,7 +462,11 @@ const ModalContact = ({
                     }
                   />
                 </Form.Item>
-                <Form.Item label={"Position"} name={"positionId"}>
+                <Form.Item
+                  label={"Position"}
+                  name={"positionId"}
+                  className="no-margin-form"
+                >
                   <SelectComponent
                     options={datas_option?.data_position}
                     disabled={
@@ -463,7 +480,6 @@ const ModalContact = ({
             {/* Contact Detail */}
             <NxCardContainer
               header="Contact Detail"
-              withoutPadding
               actionElement={
                 typeContact === "default" ? (
                   <ButtonComponent
@@ -497,9 +513,13 @@ const ModalContact = ({
 
             {/* Contact Purpose Information */}
             <NxCardContainer header="Contact Purpose Information">
-              <div className="grid grid-cols-3 gap-5 mb-4">
+              <div className="grid grid-cols-3 gap-4 mb-4">
                 <div className="flex flex-col pt-[12px]">
-                  <Form.Item name={"isPrimary"} valuePropName={"checked"}>
+                  <Form.Item
+                    name={"isPrimary"}
+                    valuePropName={"checked"}
+                    className="no-margin-form"
+                  >
                     <Checkbox
                       disabled={
                         typeContact === "update" &&
@@ -519,6 +539,7 @@ const ModalContact = ({
                     <Form.Item
                       label={"Contact Address"}
                       name={"contactAddressId"}
+                      className="no-margin-form"
                     >
                       <SelectComponent
                         options={datas_option?.data_contact_address}
@@ -528,20 +549,25 @@ const ModalContact = ({
                     <Form.Item
                       label={"Contact Address Additional Note"}
                       name={"additionalNote"}
+                      className="no-margin-form"
                     >
                       <InputComponent disabled={typeContact === "update"} />
                     </Form.Item>
                   </>
                 )}
               </div>
-              <Form.Item label={"Description"} name={"description"}>
+              <Form.Item
+                label={"Description"} 
+                name={"description"}
+                className="no-margin-form"
+              >
                 <InputComponent rows={5} type="textarea" />
               </Form.Item>
             </NxCardContainer>
 
           </div>
         </Form>
-      </ModalCustom>
+      </NxModal>
 
       <ModalChooseContact
         isOpen={openModalChoose}

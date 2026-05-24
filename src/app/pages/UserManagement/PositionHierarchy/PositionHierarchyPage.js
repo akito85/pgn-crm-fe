@@ -1,565 +1,454 @@
-import { Alert, Checkbox, DatePicker, Form, Spin, Tooltip } from 'antd';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import BaseContainer from '../../../../components/BaseContainer';
-import BreadCrumb from '../../../../components/BreadCrumb';
-import ButtonComponent from '../../../../components/ButtonComponent';
-import { DownloadOutlined, CopyOutlined, PlusOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
-import { dateFormatting,  hasValue,  renderColumn, renderDateColumn } from '../../../../utils';
-import { NavLink } from 'react-router-dom';
-import ModalCustom from '../../../../components/Modal/ModalCustom';
-import { USER_ROUTES } from '../../../../routes/user_management/user_routes';
-import TablePagination from '../../../../components/TablePagination';
-import { useDispatch, useSelector } from 'react-redux';
-import SVGIcon from "../../../../assets/Icon/index";
-import {  getColumnSearchPropsUseFilteredValue } from '../../../../utils/getColumnSearchProps';
-import moment from 'moment';
-import InputComponent from '../../../../components/InputComponent';
-import { activationPositionHierarchy, downloadPositionHierarchy, duplicatePositionHierarchy, getPositionHierarchyPaginate } from '../../../../redux/slices/user_management/position_hirarchy';
-import Toolbar from '../../../../components/Toolbar';
-import { useColumnActionPermission } from '../../../../components/ColumnActionPermission';
-import { useTryAgainHooks } from '../../../../utils/useTryAgainHooks';
+import { Alert, DatePicker, Form } from "antd";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { NavLink } from "react-router-dom";
+import BreadCrumb from "../../../../components/BreadCrumb";
+import ButtonComponent from "../../../../components/ButtonComponent";
+import ModalCustom from "../../../../components/Modal/ModalCustom";
+import NxCardContainer from "../../../../components/Nx/NxCardContainer";
+import { USER_ROUTES } from "../../../../routes/user_management/user_routes";
+import {
+  activationPositionHierarchy,
+  downloadPositionHierarchy,
+  duplicatePositionHierarchy,
+  getPositionHierarchyPaginate,
+} from "../../../../redux/slices/user_management/position_hirarchy";
+import ViewListIcon from "../../../../assets/Icon/Nx/IconViewList";
+import IconEditNx from "../../../../assets/Icon/Nx/IconEdit";
+import IconPower from "../../../../assets/Icon/Nx/IconPower";
+import IconCopy from "../../../../assets/Icon/Nx/IconCopy";
+import InputComponent from "../../../../components/InputComponent";
+import { dateFormatting } from "../../../../utils";
+import { useTryAgainHooks } from "../../../../utils/useTryAgainHooks";
+import { TablePositionHierarchy, columnsPositionHierarchy } from "./TablePositionHierarchy";
+import { DownloadOutlined, PlusOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
+import moment from "moment";
 
+const OPERATOR_SELECTOR_MAP = {
+  Contains: "LIKE",
+  "Equal to": "EQUALS",
+  "Not equal to": "NOT_EQUALS",
+  "Greater than": "GREATER_THAN",
+  "Less than": "LESS_THAN",
+  "Is empty": "IS_NULL",
+  "Is not empty": "IS_NOT_NULL",
+};
 
 const PositionHierarchyPage = () => {
-    const { loading, data } = useSelector(state => state?.position_hierarchy);
-    const { bodyError } = useSelector(state => state?.general);
-    const dispatch = useDispatch();
-    const [form] = Form.useForm();
-
-    // use state
-    const [openModal, setOpenModal] = useState(false);
-    const [page, setPage] = useState(1);
-    const [pageSize, setPageSize] = useState(10);
-    const searchInput = useRef(null);
-    const [searchText, setSearchText] = useState("");
-    const [searchedColumn, setSearchedColumn] = useState("");
-    const [sort, setSort] = useState("");
-    const [search, setSearch] = useState({});
-    const [modalType, setModalType] = useState('');
-    const [recordSelected, setRecordSelected] = useState({});
-    const [body, setBody] = useState({});
-
-    const handleFetch = useCallback(() => {
-        dispatch(getPositionHierarchyPaginate({ search: encodeURIComponent(JSON.stringify(search)), page, pageSize, sort }))
-    }, [dispatch, page, pageSize, search, sort]);
-
-
-    // use effect
-    useEffect(() => {
-        handleFetch()
-    }, [handleFetch]);
-
-
-    // handle search pagination
-    const handleSearch = (selectedKeys, confirm, dataIndex) => {
-        confirm();
-        setSearchText(selectedKeys[0]);
-        setSearchedColumn(dataIndex);
-        setSearch((prevState) => {
-            if (prevState[dataIndex] !== selectedKeys[0]) {
-                setPage(1);
-            }
-            return {
-                ...prevState,
-                [dataIndex]: selectedKeys[0],
-            };
-        });
-    };
-
-
-    //  handle sort pagination
-    const onSort = (_, __, sort) => {
-        const dataSort =
-            sort.order !== undefined
-                ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
-                : "";
-        setSort(dataSort);
-    };
-
-    // handle cancel modals
-    const handleCancel = () => {
-        setOpenModal(false);
-        setModalType('');
-        setRecordSelected({});
-        form.resetFields();
+  const dispatch = useDispatch();
+  const { bodyError } = useSelector((state) => state?.general);
+  const rawToken = useSelector((state) => state.auth?.token);
+  const userId = useMemo(() => {
+    try {
+      const t = JSON.parse(rawToken || "{}");
+      return t?.userId || t?.id || t?.username || null;
+    } catch {
+      return null;
     }
+  }, [rawToken]);
 
-    // handle open modals
-    const handleOpenModal = (record, type) => {
-        setModalType(type);
-        setRecordSelected(record);
-        if (type === 'activation') {
-            form.setFieldsValue({
-                startDate:
-                    record?.startDate === null
-                        ? moment()
-                        : moment(record?.startDate).clone(dateFormatting?.dateTime),
-                endDate:
-                    record?.endDate === null
-                        ? null
-                        : moment(record?.endDate).clone(dateFormatting?.dateTime),
-            });
-        } else {
-            form.setFieldsValue({ name: record.name + " Copy" });
-        }
-        setOpenModal(true);
+  // Pagination & filter state
+  const [pageSize, setPageSize] = useState(30);
+  const [sort, setSort] = useState("");
+  const [search, setSearch] = useState({});
+  const [advancedSearch, setAdvancedSearch] = useState(null);
+  const [fixedColumns, setFixedColumns] = useState({ left: [], right: [] });
+
+  // Local infinite-scroll data state
+  const [allData, setAllData] = useState([]);
+  const [totalElements, setTotalElements] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Modal state
+  const [openModal, setOpenModal] = useState(false);
+  const [modalType, setModalType] = useState("");
+  const [recordSelected, setRecordSelected] = useState({});
+  const [body, setBody] = useState({});
+  const [form] = Form.useForm();
+
+  // Refs for safe access inside async callbacks
+  const pageRef = useRef(0);
+  const isFetchingRef = useRef(false);
+  const hasMoreRef = useRef(false);
+
+  const buildSearch = useCallback((basicSearch, advSearch) => {
+    let combined = { ...basicSearch };
+    const applyFilter = (f) => {
+      if (!f.column) return;
+      const selector = OPERATOR_SELECTOR_MAP[f.operator] || "LIKE";
+      const isNullOp = selector === "IS_NULL" || selector === "IS_NOT_NULL";
+      if (isNullOp) {
+        combined[f.column] = `~${selector}`;
+      } else if (f.value) {
+        combined[f.column] = `${f.value}~${selector}`;
+      }
     };
-
-
-    // handle activation
-    const handleActivation = async (formValue) => {
-        try {
-            const payload = {
-                ...formValue,
-                hierId: recordSelected?.hierId,
-                saveAs: "ACTIVE"
-            }
-            setBody(payload);
-            handleCancel();
-            await dispatch(activationPositionHierarchy(payload))?.unwrap();
-            await handleFetch()?.unwrap();
-        } catch (error) {
-            await handleFetch()?.unwrap();
-        }
+    if (advSearch?.filters) advSearch.filters.forEach(applyFilter);
+    if (advSearch?.filterRules) {
+      advSearch.filterRules.forEach((rule) => rule.filters.forEach(applyFilter));
     }
+    return encodeURIComponent(JSON.stringify(combined));
+  }, []);
 
-    // handle duplicate
-    const handleDuplicate = async (formValue) => {
-        try {
-            const payload = {
-                ...formValue,
-                hierId: recordSelected?.hierId
-            };
-            setBody(payload);
-            handleCancel();
-            await dispatch(duplicatePositionHierarchy(payload))?.unwrap();
-            await handleFetch()?.unwrap();
-        } catch (error) {
-            await handleFetch()?.unwrap();
+  const fetchPage = useCallback(
+    async (page, replace = false, signal = null) => {
+      if (isFetchingRef.current) return;
+      if (signal?.aborted) return;
+      isFetchingRef.current = true;
+      setIsLoading(true);
+      try {
+        const reqSearch = buildSearch(search, advancedSearch);
+        const result = await dispatch(
+          getPositionHierarchyPaginate({ page: page + 1, pageSize, sort, search: reqSearch })
+        ).unwrap();
+        if (signal?.aborted) return;
+        const rows = result?.result ?? [];
+        const pageInfo = result?.page ?? {};
+        const nextHasMore = page < (pageInfo.totalPages ?? 0) - 1;
+        setAllData((prev) => (replace ? rows : [...prev, ...rows]));
+        setTotalElements(pageInfo.totalElements ?? 0);
+        setHasMore(nextHasMore);
+        hasMoreRef.current = nextHasMore;
+        pageRef.current = page;
+      } catch (e) {
+        if (!signal?.aborted) console.error("fetchPage error", e);
+      } finally {
+        isFetchingRef.current = false;
+        if (!signal?.aborted) setIsLoading(false);
+      }
+    },
+    [search, advancedSearch, sort, pageSize, dispatch, buildSearch]
+  );
 
-        }
+  useEffect(() => {
+    const signal = { aborted: false };
+    pageRef.current = 0;
+    setAllData([]);
+    setHasMore(false);
+    setIsLoading(true);
+    fetchPage(0, true, signal);
+    return () => {
+      signal.aborted = true;
+      isFetchingRef.current = false;
     };
+  }, [search, advancedSearch, sort, pageSize]); // intentionally excludes fetchPage
 
-    // handle download
-    const handleDownload = async () => {
-        try {
-            await dispatch(downloadPositionHierarchy({ search: encodeURIComponent(JSON.stringify(search)), page, pageSize, sort }))?.unwrap();
-        } catch (error) {
-            await handleFetch()?.unwrap()
-        }
-    };
+  const reload = useCallback(() => {
+    const signal = { aborted: false };
+    pageRef.current = 0;
+    setAllData([]);
+    setHasMore(false);
+    setIsLoading(true);
+    fetchPage(0, true, signal);
+  }, [fetchPage]);
 
+  const handleChange = (_, pageSizeChange) => {
+    setPageSize(pageSizeChange);
+  };
 
-    // handle change pagination
-    const handleChange = (pageChange, pageSizeChange) => {
-        setPage(pageSize !== pageSizeChange ? 1 : pageChange);
-        setPageSize(pageSizeChange);
-    };
+  const onLoadMore = useCallback(() => {
+    if (!hasMoreRef.current || isFetchingRef.current) return;
+    return fetchPage(pageRef.current + 1, false);
+  }, [fetchPage]);
 
-    // handle retry modal error
-    const handleRetry = () => {
-        try {
-            handleCancelTryAgain();
-            if (bodyError?.action === "ACTIVATION_POSITION_HIERARCHY") {
-                dispatch(activationPositionHierarchy(body));
-            } else if (bodyError?.action === "DUPLICATE_POSITION_HIERARCHY") {
-                dispatch(duplicatePositionHierarchy(body));
-            } else if (bodyError?.action === 'DOWNLOAD_POSITION_HIERARCHY') {
-                handleDownload();
-            }
-            handleFetch();
-        } catch (error) {
-            handleFetch();
-        }
-    };
+  const onSort = (_, __, sortInfo) => {
+    const dataSort =
+      sortInfo.order !== undefined
+        ? `${sortInfo.field}~${sortInfo.order === "ascend" ? "asc" : "desc"}`
+        : "";
+    setSort(dataSort);
+  };
 
-    // use hooks handle retry
-    const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
+  const onAdvanceSearch = (searchData) => {
+    setAdvancedSearch(searchData);
+  };
 
+  // Modal handlers
+  const handleCancel = () => {
+    setOpenModal(false);
+    setModalType("");
+    setRecordSelected({});
+    form.resetFields();
+  };
 
-    //    render content modal
-    const renderContentModal = (type) => {
-        if (type === 'activation') {
-            return (
-                <>
-                    <div className="w-full modalTerminate">
-                        <Alert
-                            icon={
-                                <ExclamationCircleOutlined
-                                    style={{ fontSize: "24px", color: "#65481C" }}
-                                />
-                            }
-                            message={
-                                "Are you sure you want to activate Position Hierarchy?"
-                            }
-                            description={
-                                "Warning! If you activate this hierarchy, the current active hierarchy will be inactivated."
-                            }
-                            type={"warning"}
-                            showIcon
-                        />
-                    </div>
-                    <Form form={form} layout='vertical' onFinish={handleActivation}>
-                        <Form.Item name={"startDate"} label={"Start Date"}>
-                            <DatePicker
-                                className="w-full"
-                                format={dateFormatting?.dateTime}
-                                disabled
-                            />
-                        </Form.Item>
-                        <Form.Item name={"endDate"} label={"End Date"}>
-                            <DatePicker
-                                className="w-full"
-                                format={dateFormatting?.dateTime}
-                                disabledDate={(current) => {
-                                    return (
-                                        current &&
-                                        current < moment(form.getFieldValue("startDate"))
-                                    );
-                                }}
-                            />
-                        </Form.Item>
-                        <div className={"w-full flex justify-end gap-2"}>
-                            <Form.Item>
-                                <ButtonComponent
-                                    type={"default"}
-                                    onClick={() => setOpenModal(false)}
-                                    border={true}
-                                >
-                                    Cancel
-                                </ButtonComponent>
-                            </Form.Item>
-                            <Form.Item>
-                                <ButtonComponent
-                                    type={"submit"}
-                                    htmlType={"submit"}
-                                    border={false}
-                                >
-                                    Confirm
-                                </ButtonComponent>
-                            </Form.Item>
-                        </div>
-                    </Form>
-                </>
-            );
-        } else {
-            return (
-                <>
-                    <Form
-                        form={form}
-                        layout="vertical"
-                        className="mt-3"
-                        onFinish={handleDuplicate}
-                    >
-                        <Form.Item name={"name"} label={"Hierarchy Name"}>
-                            <InputComponent placeholder="Type your remark" />
-                        </Form.Item>
-                        <div className={"w-full flex justify-end gap-3"}>
-                            <Form.Item>
-                                <ButtonComponent
-                                    type={"default"}
-                                    onClick={handleCancel}
-                                    border={true}
-                                >
-                                    Back
-                                </ButtonComponent>
-                            </Form.Item>
-                            <Form.Item>
-                                <ButtonComponent
-                                    type={"submit"}
-                                    htmlType={"submit"}
-                                    border={false}
-                                >
-                                    Save
-                                </ButtonComponent>
-                            </Form.Item>
-                        </div>
-                    </Form>
-                </>
-            );
-
-        }
+  const handleOpenModal = (record, type) => {
+    setModalType(type);
+    setRecordSelected(record);
+    if (type === "activation") {
+      form.setFieldsValue({
+        startDate:
+          record?.startDate === null
+            ? moment()
+            : moment(record?.startDate).clone(dateFormatting?.dateTime),
+        endDate:
+          record?.endDate === null ? null : moment(record?.endDate).clone(dateFormatting?.dateTime),
+      });
+    } else {
+      form.setFieldsValue({ name: record.name + " Copy" });
     }
+    setOpenModal(true);
+  };
 
-    // columns
-    const columns = [
-        // tableNumbering,
-        {
-            title: "NO",
-            dataIndex: "no",
-            width: 60,
-            align: "center",
-            render: (text, object, index) => (page - 1) * pageSize + index + 1,
-        },
-        {
-            title: "NAME",
-            dataIndex: "name",
-            ellipsis: {
-                showTitle: false,
-            },
-            ...getColumnSearchPropsUseFilteredValue(
-                search,
-                "name",
-                searchInput,
-                searchedColumn,
-                searchText,
-                handleSearch,
-                true,
-            ),
-            render: (text) => renderColumn('name', searchedColumn, searchText, text, true, 'input', search)
-        },
-        {
-            title: "START DATE",
-            dataIndex: "startDate",
-            sorter: true,
-            align: "center",
-            width: 140,
-            ...getColumnSearchPropsUseFilteredValue(
-                search,
-                "startDate",
-                searchInput,
-                searchedColumn,
-                searchText,
-                handleSearch,
-                false,
-                "date"),
-            render: (v) => renderDateColumn('startDate', hasValue(search['startDate']), searchText, v, 'date', search),
-        },
-        {
-            title: "END DATE",
-            dataIndex: "endDate",
-            sorter: true,
-            align: "center",
-            width: 140,
-            ...getColumnSearchPropsUseFilteredValue(
-                search,
-                "endDate",
-                searchInput,
-                searchedColumn,
-                searchText,
-                handleSearch,
-                false,
-                "date"),
-            render: (v) => renderDateColumn('endDate', hasValue(search['endDate']), searchText, v, 'date', search),
-        },
-        {
-            title: "DESCRIPTION",
-            dataIndex: "description",
-            sorter: true,
-            ellipsis: {
-                showTitle: false,
-            },
-            ...getColumnSearchPropsUseFilteredValue(
-                search,
-                "description",
-                searchInput,
-                searchedColumn,
-                searchText,
-                handleSearch,
-                false,
-            ),
-            render: (text) => renderColumn('description', searchedColumn, searchText, text, true, 'input', search)
-        },
-        {
-            title: "STATUS",
-            dataIndex: "status",
-            sorter: true,
-            align: "center",
-            width: 120,
-            fixed: 'right',
-            ...getColumnSearchPropsUseFilteredValue(
-                search,
-                "status",
-                searchInput,
-                searchedColumn,
-                searchText,
-                handleSearch,
-                false,
-            ),
-            render: (text) => renderColumn('status', searchedColumn, searchText, text, false, 'status')
-        },
-    ];
+  const handleActivation = async (formValue) => {
+    try {
+      const payload = { ...formValue, hierId: recordSelected?.hierId, saveAs: "ACTIVE" };
+      setBody(payload);
+      handleCancel();
+      await dispatch(activationPositionHierarchy(payload)).unwrap();
+      reload();
+    } catch {
+      reload();
+    }
+  };
 
-    // breadcrumbs
-    const routes = [
-        {
-            path: "",
-            breadcrumbName: "User Management",
-        },
-        {
-            path: "",
-            breadcrumbName: "Position Hierarchy List",
-        },
-    ];
+  const handleDuplicate = async (formValue) => {
+    try {
+      const payload = { ...formValue, hierId: recordSelected?.hierId };
+      setBody(payload);
+      handleCancel();
+      await dispatch(duplicatePositionHierarchy(payload)).unwrap();
+      reload();
+    } catch {
+      reload();
+    }
+  };
 
-    const itemActions = [
-        // toolbar items
-        {
-            action: 'Download',
-            render: (
-                <ButtonComponent
-                    onClick={handleDownload}
-                    type={"submit"}
-                    border={false}
-                    icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
-                >
-                    Download List
-                </ButtonComponent>
-            )
-        },
-        {
-            action: 'Create',
-            render: (
-                <NavLink to={USER_ROUTES.CREATE_POSITION}>
-                    <ButtonComponent
-                        type={"submit"}
-                        border={false}
-                        icon={<PlusOutlined style={{ fontSize: "24px" }} />}
-                    > Create New Position Hierarchy
-                    </ButtonComponent>
-                </NavLink>
-            )
-        },
-
-        // column action
-        {
-            action: 'View',
-            type: 'table',
-            render: (record, data_length) => {
-                return (
-                    <Tooltip title={'Detail'}>
-                        <NavLink to={USER_ROUTES.DETAIL_POSITION} state={{ id: record?.hierId }}>
-                            <div>
-                                <SVGIcon name="IconDetail" width={24} />
-                            </div>
-                        </NavLink>
-                    </Tooltip>
-                )
-            }
-        },
-        {
-            action: 'Activate',
-            type: 'table',
-            render: (record, data_length) => {
-                return (
-                    <>
-                        {data_length > 3 ?
-                            <ButtonComponent
-                                onClick={() => handleOpenModal(record, 'activation')}
-                                border={false}
-                                disabled={record?.status === "ACTIVE" || record?.status === "INACTIVE"}
-                            >
-                                <Checkbox
-                                    checked={record?.status === "INACTIVE"}
-                                />
-
-                                <span className={"text-black"}> {record?.status === "ACTIVE" ? "Inactivate Draft" : "Activate Draft"}</span>
-                            </ButtonComponent>
-                            :
-                            <Tooltip title={record?.status === 'ACTIVE' ? 'Inactivate' : 'Activate'}>
-                                <div className={record?.status !== "ACTIVE" ? 'cursor-not-allowed' : 'cursor-pointer'}
-                                    onClick={() => record?.status === "DRAFT" && handleOpenModal(record, 'activation')}>
-                                    <Checkbox checked={record.status === "INACTIVE"} className={record?.status !== "DRAFT" ? 'cursor-not-allowed' : 'cursor-pointer'} disabled={record?.status === "ACTIVE" || record?.status === "INACTIVE"} />
-                                </div>
-                            </Tooltip>
-                        }
-
-                    </>
-                )
-            }
-        },
-        {
-            action: 'Update',
-            type: 'table',
-            render: (record, data_length) => {
-                return (
-                    <Tooltip title="Update">
-                        <NavLink
-                            to={record?.status !== "INACTIVE" && USER_ROUTES.UPDATE_POSITION}
-                            state={record?.status !== "INACTIVE" && { id: record?.hierId }}
-                            className={record?.status === "INACTIVE" ? "cursor-not-allowed" :'cursor-pointer'}>
-                            {data_length > 3 ?
-                                <ButtonComponent
-                                    icon={<SVGIcon name="IconEdit" color={record?.status === "INACTIVE" ? "#8D91A0" : "#0075bf"} width={24} className={record?.status === "INACTIVE" && "cursor-not-allowed"} />}
-                                    border={false}
-                                    disabled={record?.status === "INACTIVE"}>
-                                    <span className={record?.status?.toLowerCase() === 'inactive' ? "text-[#8D91A0]" :"text-black"}> Update</span>
-                                </ButtonComponent>
-                                :
-                                <SVGIcon name="IconEdit" color={record?.status === "INACTIVE" ? "#C0BEC6" : "#ACC424"} width={24} className={record?.status === "INACTIVE" && "cursor-not-allowed"} />
-                            }
-                        </NavLink>
-                    </Tooltip>
-                )
-            }
-        },
-        {
-            action: 'duplicate',
-            type: 'table',
-            render: (record, data_length) => {
-                return (
-                    <>
-                        {data_length > 3 ?
-                            <ButtonComponent
-                                icon={<CopyOutlined style={{ fontSize: "24px" }} />}
-                                border={false}
-                                onClick={() => handleOpenModal(record, 'duplicate')}>
-                                {data_length > 3 &&
-                                    <span className={'text-black'}> Duplicate</span>
-
-                                }
-                            </ButtonComponent>
-                            :
-                            <Tooltip title="Duplicate">
-                                <div className={`cursor-pointer`}
-                                    onClick={() => handleOpenModal(record, 'duplicate')}>
-                                    <CopyOutlined style={{ fontSize: "24px", color: "var(--primary)" }} />
-                                </div>
-                            </Tooltip>
-                        }
-                    </>
-                )
-            }
-        },
-    ];
-
-    return (
-        <>
-            <BreadCrumb routes={routes} />
-            <Spin spinning={loading}>
-                <Toolbar items={itemActions} />
-                <BaseContainer header={'Position Hierarchy List'}>
-                    <div className={'w-full'}>
-                        <TablePagination
-                            dataSource={data?.result}
-                            columns={[...columns, ...useColumnActionPermission(['view', 'duplicate', 'update', 'activate'], itemActions)]}
-                            totalData={data?.page?.totalElements}
-                            current={page}
-                            pageSize={pageSize}
-                            tableScrolled={{ y: 500, x: 1200 }}
-                            onChange={handleChange}
-                            onSizeChanger={handleChange}
-                            onSort={onSort}
-                        />
-                    </div>
-                </BaseContainer>
-
-                {/* modal activation or duplicate */}
-                <ModalCustom
-                    header={modalType === 'activation' ? 'Activation Confirmation' : 'Duplicate Position Hierarchy'}
-                    isOpen={openModal}
-                    handleCancel={handleCancel}
-                    type={'confirmation'}
-                    width={750}
-                >
-                    {renderContentModal(modalType)}
-                </ModalCustom>
-
-                {/* modal try again hooks */}
-                {renderModal()}
-            </Spin>
-        </>
+  const handleDownload = useCallback(() => {
+    dispatch(
+      downloadPositionHierarchy({
+        search: buildSearch(search, advancedSearch),
+        page: pageRef.current + 1,
+        pageSize,
+        sort,
+      })
     );
-}
+  }, [dispatch, search, advancedSearch, pageSize, sort, buildSearch]);
+
+  const handleRetry = () => {
+    handleCancelTryAgain();
+    if (bodyError?.action === "ACTIVATION_POSITION_HIERARCHY") {
+      dispatch(activationPositionHierarchy(body));
+    } else if (bodyError?.action === "DUPLICATE_POSITION_HIERARCHY") {
+      dispatch(duplicatePositionHierarchy(body));
+    } else if (bodyError?.action === "DOWNLOAD_POSITION_HIERARCHY") {
+      handleDownload();
+    }
+    reload();
+  };
+
+  const { handleCancelTryAgain, renderModal } = useTryAgainHooks(handleRetry);
+
+  const routes = [
+    { path: "", breadcrumbName: "User Management" },
+    { path: USER_ROUTES.VIEW_POSITION, breadcrumbName: "Position Hierarchy List" },
+  ];
+
+  const itemActions = useMemo(
+    () => [
+      // Toolbar actions
+      {
+        action: "Download",
+        render: (
+          <ButtonComponent
+            onClick={handleDownload}
+            type="submit"
+            icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
+          >
+            Download List
+          </ButtonComponent>
+        ),
+      },
+      {
+        action: "Create",
+        render: (
+          <NavLink to={USER_ROUTES.CREATE_POSITION}>
+            <ButtonComponent
+              type="submit"
+              icon={<PlusOutlined style={{ fontSize: "24px" }} />}
+            >
+              Create New Position Hierarchy
+            </ButtonComponent>
+          </NavLink>
+        ),
+      },
+
+      // Table column actions
+      {
+        action: "View",
+        type: "table",
+        render: (record) => (
+          <NavLink
+            to={USER_ROUTES.DETAIL_POSITION}
+            state={{ id: record?.hierId }}
+            className="flex items-center justify-center"
+            style={{ color: "#1976D2" }}
+          >
+            <ViewListIcon />
+          </NavLink>
+        ),
+      },
+      {
+        action: "Activate",
+        type: "table",
+        render: (record) => {
+          const isDraft = record?.status === "DRAFT";
+          const color = isDraft ? "#1976D2" : "#C0BEC6";
+          return (
+            <span
+              className={`flex items-center gap-2 ${isDraft ? "cursor-pointer" : "cursor-not-allowed"}`}
+              style={{ color, padding: "5px 8px" }}
+              onClick={() => isDraft && handleOpenModal(record, "activation")}
+            >
+              <IconPower color={color} width="18" height="18" />
+              <span style={{ fontSize: 14 }}>{isDraft ? "Activate" : "Inactivate"}</span>
+            </span>
+          );
+        },
+      },
+      {
+        action: "Update",
+        type: "table",
+        render: (record) => {
+          const enabled = record?.status !== "INACTIVE";
+          const color = enabled ? "#1976D2" : "#C0BEC6";
+          return (
+            <NavLink
+              to={enabled ? USER_ROUTES.UPDATE_POSITION : undefined}
+              state={enabled ? { id: record?.hierId } : undefined}
+              style={{ pointerEvents: enabled ? "auto" : "none", padding: "5px 8px" }}
+              className="flex items-center gap-2"
+            >
+              <IconEditNx color={color} width="18" height="18" />
+              <span style={{ fontSize: 14, color }}>Update</span>
+            </NavLink>
+          );
+        },
+      },
+      {
+        action: "duplicate",
+        type: "table",
+        render: (record) => (
+          <span
+            className="flex items-center gap-2 cursor-pointer"
+            style={{ color: "#1976D2", padding: "5px 8px" }}
+            onClick={() => handleOpenModal(record, "duplicate")}
+          >
+            <IconCopy color="#1976D2" width="18" height="18" />
+            <span style={{ fontSize: 14 }}>Duplicate</span>
+          </span>
+        ),
+      },
+    ],
+    [handleDownload] // eslint-disable-line react-hooks/exhaustive-deps
+  );
+
+  const renderContentModal = (type) => {
+    if (type === "activation") {
+      return (
+        <>
+          <div className="w-full modalTerminate">
+            <Alert
+              icon={
+                <ExclamationCircleOutlined style={{ fontSize: "24px", color: "#65481C" }} />
+              }
+              message="Are you sure you want to activate Position Hierarchy?"
+              description="Warning! If you activate this hierarchy, the current active hierarchy will be inactivated."
+              type="warning"
+              showIcon
+            />
+          </div>
+          <Form form={form} layout="vertical" onFinish={handleActivation}>
+            <Form.Item name="startDate" label="Start Date">
+              <DatePicker className="w-full" format={dateFormatting?.dateTime} disabled />
+            </Form.Item>
+            <Form.Item name="endDate" label="End Date">
+              <DatePicker
+                className="w-full"
+                format={dateFormatting?.dateTime}
+                disabledDate={(current) =>
+                  current && current < moment(form.getFieldValue("startDate"))
+                }
+              />
+            </Form.Item>
+            <div className="w-full flex justify-end gap-2">
+              <Form.Item>
+                <ButtonComponent type="default" onClick={handleCancel} border={true}>
+                  Cancel
+                </ButtonComponent>
+              </Form.Item>
+              <Form.Item>
+                <ButtonComponent type="submit" htmlType="submit" border={false}>
+                  Confirm
+                </ButtonComponent>
+              </Form.Item>
+            </div>
+          </Form>
+        </>
+      );
+    }
+    return (
+      <Form form={form} layout="vertical" className="mt-3" onFinish={handleDuplicate}>
+        <Form.Item name="name" label="Hierarchy Name">
+          <InputComponent placeholder="Type hierarchy name" />
+        </Form.Item>
+        <div className="w-full flex justify-end gap-3">
+          <Form.Item>
+            <ButtonComponent type="default" onClick={handleCancel} border={true}>
+              Back
+            </ButtonComponent>
+          </Form.Item>
+          <Form.Item>
+            <ButtonComponent type="submit" htmlType="submit" border={false}>
+              Save
+            </ButtonComponent>
+          </Form.Item>
+        </div>
+      </Form>
+    );
+  };
+
+  return (
+    <>
+      <BreadCrumb routes={routes} />
+
+      <NxCardContainer header="POSITION HIERARCHY LIST" className="mt-4" actions={itemActions}>
+        <div className="w-full">
+          <TablePositionHierarchy
+            dataSource={allData}
+            loading={isLoading}
+            totalData={totalElements}
+            current={pageRef.current + 1}
+            pageSize={pageSize}
+            onChange={handleChange}
+            onSizeChanger={handleChange}
+            onSort={onSort}
+            onAdvanceSearch={onAdvanceSearch}
+            fixedColumns={fixedColumns}
+            setFixedColumns={setFixedColumns}
+            useInfiniteScroll={true}
+            onLoadMore={onLoadMore}
+            hasMore={hasMore}
+            itemActions={itemActions}
+            columnDefinitions={columnsPositionHierarchy}
+            userId={userId}
+          />
+        </div>
+      </NxCardContainer>
+
+      <ModalCustom
+        header={modalType === "activation" ? "Activation Confirmation" : "Duplicate Position Hierarchy"}
+        isOpen={openModal}
+        handleCancel={handleCancel}
+        type="confirmation"
+        width={750}
+      >
+        {renderContentModal(modalType)}
+      </ModalCustom>
+
+      {renderModal()}
+    </>
+  );
+};
 
 export default PositionHierarchyPage;

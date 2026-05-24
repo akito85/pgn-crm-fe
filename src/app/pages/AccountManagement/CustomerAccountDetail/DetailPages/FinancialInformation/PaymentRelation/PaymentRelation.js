@@ -3,7 +3,7 @@ import { useState } from "react";
 import PaymentRelationTable from "./PaymentRelationTable";
 import { useDispatch, useSelector } from "react-redux";
 import PaymentRelationApprovalModal from "./PaymentRelationApprovalModal";
-import NxInactivateModal from "../../../../../../../components/Nx/NxInactivateModal";
+import NxActivateInactivateModal from "../../../../../../../components/Nx/NxActivateInactivateModal";
 import { getPrApprovalHierarchies, getPrApprovalHierarchy, getPrApprovalHistory, inactivatePaymentRelation } from "../../../../../../../redux/slices/account_management/detailAccount/PaymentRelationSlice";
 import NxHistoryModal from "../../../../../../../components/Nx/NxHistoryModal";
 
@@ -127,7 +127,7 @@ const PaymentRelation = ({
       />
 
       {/* Inactivate Modal */}
-      <NxInactivateModal
+      <NxActivateInactivateModal
         isOpen={showInactiveModal}
         header={"INACTIVATE"}
         handleCloseModal={() => handleInactivateModal(false)}

@@ -1,107 +1,146 @@
-import {  hasValue, renderColumn, renderDateColumn } from "../../../../../utils";
-import {  getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
+import { useMemo } from "react";
+import { Tooltip } from "antd";
+import NxTable from "../../../../../components/Nx/NxTable";
+import StatusComponent from "../../../../../components/StatusComponent";
+import { useColumnActionPermission } from "../../../../../components/ColumnActionPermission";
 
-export const columnsLoginBackground = (
-  search,
-  page,
-  pageSize,
-  searchInput,
-  searchedColumn,
-  searchText,
-  handleSearch = () => {},
-  handleInactive = () => {}
-) => [
+export const columnsLoginBackground = [
   {
     title: "NO",
     align: "center",
     width: 60,
-    render: (text, object, index) => (page - 1) * pageSize + index + 1,
+    key: "no",
+    render: (text, object, index) => index + 1,
+    fixed: "left",
   },
   {
-    title: "LOGIN BACKGROUND NAME",
+    title: "BACKGROUND NAME",
     dataIndex: "backgroundName",
+    key: "backgroundName",
     align: "left",
     sorter: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "backgroundName",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true
-    ),
-    render: (text) => renderColumn('backgroundName', hasValue(search["backgroundName"]), searchText, text, false, 'input', search)
   },
   {
     title: "START DATE",
-    sorter: true,
-    align: "center",
     dataIndex: "startDate",
+    key: "startDate",
+    align: "center",
     width: 140,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "startDate",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true,
-      "date"
-    ),
-    render: (v) => renderDateColumn('startDate', hasValue(search["startDate"]), searchText, v, 'date', search),
+    sorter: true,
   },
   {
     title: "END DATE",
-    sorter: true,
-    align: "center",
     dataIndex: "endDate",
+    key: "endDate",
+    align: "center",
     width: 140,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "endDate",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true,
-      "date"
-    ),
-    render: (v) => renderDateColumn('endDate', hasValue(search["endDate"]), searchText, v, 'date', search),
+    sorter: true,
   },
   {
     title: "DESCRIPTION",
     dataIndex: "description",
+    key: "description",
     align: "left",
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "description",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true
-    ),
-    ellipsis: {
-      showTitle: false,
-    },
     sorter: true,
-    render: (text) => renderColumn('description',hasValue(search["description"]), searchText, text, true, 'input', search)
+    ellipsis: { showTitle: false },
+    render: (text) =>
+      text ? (
+        <Tooltip placement="topLeft" title={text}>
+          {text}
+        </Tooltip>
+      ) : (
+        ""
+      ),
   },
   {
     title: "STATUS",
     dataIndex: "status",
+    key: "status",
+    align: "center",
+    width: 120,
     sorter: true,
     fixed: "right",
-    width: 120,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "status",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (text) => renderColumn('status', hasValue(search["status"]), searchText, text, false, 'status', search)
+    render: (value) => {
+      const text = value
+        ? value.charAt(0).toUpperCase() + value.slice(1).toLowerCase()
+        : value;
+      return text ? (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "22px",
+            overflow: "hidden",
+          }}
+        >
+          <StatusComponent colour={value} size="small">
+            {text}
+          </StatusComponent>
+        </div>
+      ) : (
+        text
+      );
+    },
   },
 ];
+
+export const TableLoginBackground = ({
+  idTable = "login-background-table",
+  userId,
+  dataSource,
+  loading,
+  totalData,
+  current,
+  pageSize,
+  onChange,
+  onSizeChanger,
+  onSort,
+  onAdvanceSearch,
+  fixedColumns,
+  setFixedColumns,
+  useInfiniteScroll = false,
+  onLoadMore = () => {},
+  hasMore = false,
+  itemActions = [],
+  ...rest
+}) => {
+  const actionColumns = useColumnActionPermission(
+    ["View", "Update", "Activate"],
+    itemActions
+  );
+
+  const allColumns = useMemo(
+    () => [...columnsLoginBackground, ...actionColumns],
+    [actionColumns]
+  );
+
+  return (
+    <NxTable
+      idTable={idTable}
+      userId={userId}
+      dataSource={dataSource}
+      columns={allColumns}
+      loading={loading}
+      totalData={totalData}
+      current={current}
+      pageSize={pageSize}
+      onChange={onChange}
+      onSizeChanger={onSizeChanger}
+      onSort={onSort}
+      onAdvanceSearch={onAdvanceSearch}
+      columnDefinitions={columnsLoginBackground}
+      fixedColumns={fixedColumns}
+      setFixedColumns={setFixedColumns}
+      useInfiniteScroll={useInfiniteScroll}
+      onLoadMore={onLoadMore}
+      hasMore={hasMore}
+      showExport={false}
+      showAdvanceSearch={true}
+      showSearchBar={true}
+      showRefresh={false}
+      tableScrolled={{ x: 1300, y: 600 }}
+      {...rest}
+    />
+  );
+};

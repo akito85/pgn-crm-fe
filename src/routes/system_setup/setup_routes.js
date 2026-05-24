@@ -104,4 +104,9 @@ export const SYSTEM_SETUP_ROUTES = {
   CREATE_COLLECTION_TEMPLATE: "/system-setup/template-collection/create",
   UPDATE_COLLECTION_TEMPLATE: "/system-setup/template-collection/update",
   DETAIL_COLLECTION_TEMPLATE: "/system-setup/template-collection/view",
+  // Pre Requisite Template
+  VIEW_PRE_REQUISITE_TEMPLATE: "/system-setup/pre-requisite-template",
+  DETAIL_PRE_REQUISITE_TEMPLATE: "/system-setup/pre-requisite-template/view",
+  CREATE_PRE_REQUISITE_TEMPLATE: "/system-setup/pre-requisite-template/create",
+  UPDATE_PRE_REQUISITE_TEMPLATE: "/system-setup/pre-requisite-template/update",
 };
