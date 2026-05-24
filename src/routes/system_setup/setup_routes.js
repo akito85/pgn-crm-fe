@@ -98,4 +98,10 @@ export const SYSTEM_SETUP_ROUTES = {
   DETAIL_CALENDAR: "/system-setup/calendar/view",
   CREATE_CALENDAR: "/system-setup/calendar/create",
   UPDATE_CALENDAR: "/system-setup/calendar/update",
+
+  // Collection Template
+  VIEW_COLLECTION_TEMPLATE: "/system-setup/template-collection",
+  CREATE_COLLECTION_TEMPLATE: "/system-setup/template-collection/create",
+  UPDATE_COLLECTION_TEMPLATE: "/system-setup/template-collection/update",
+  DETAIL_COLLECTION_TEMPLATE: "/system-setup/template-collection/view",
 };
