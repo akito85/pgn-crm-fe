@@ -43,6 +43,8 @@ import BillingItemCategoryDetail from "../../app/pages/SystemSetup/MasterData/Bi
 import CalendarView from "../../app/pages/SystemSetup/MasterData/Calendar/CalendarView";
 import CalendarForm from "../../app/pages/SystemSetup/MasterData/Calendar/CalendarForm";
 import CalendarDetail from "../../app/pages/SystemSetup/MasterData/Calendar/CalendarDetail";
+import ListCollectionTemplate from "../../app/pages/SystemSetup/MasterData/CollectionTemplate/ListCollectionTemplate";
+import CollectionTemplateForm from "../../app/pages/SystemSetup/MasterData/CollectionTemplate/CollectionTemplateForm";
 
 export const SYSTEM_SETUP_ELEMENTS = {
   // menu
@@ -143,4 +145,9 @@ export const SYSTEM_SETUP_ELEMENTS = {
   DETAIL_CALENDAR_PAGE: <CalendarDetail />,
   CREATE_CALENDAR_PAGE: <CalendarForm type="create" />,
   UPDATE_CALENDAR_PAGE: <CalendarForm type="update" />,
+
+  // Collection Template
+  VIEW_COLLECTION_TEMPLATE_PAGE: <ListCollectionTemplate />,
+  CREATE_COLLECTION_TEMPLATE_PAGE: <CollectionTemplateForm type="create" />,
+  UPDATE_COLLECTION_TEMPLATE_PAGE: <CollectionTemplateForm type="update" />,
 };
