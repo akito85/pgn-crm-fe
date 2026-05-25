@@ -26,7 +26,7 @@ const AccountInfoSection = ({ form, dataAccNumber, handleAccountChange, disabled
                 placeholder="Select Account"
                 onChange={handleAccountChange}
                 showSearch
-                optionFilterProp="children"
+                optionFilterProp="label"
                 options={dataAccNumber?.data?.map((item) => ({ label: item.name, value: item.id })) || []}
                 disabled={disabled}
               />

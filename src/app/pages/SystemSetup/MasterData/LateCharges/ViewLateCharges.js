@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
-import { Alert, Checkbox, Form, Spin, Tooltip } from "antd";
+import { Alert, Form, Spin, Tooltip } from "antd";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import {
+  DownloadOutlined,
   InfoCircleOutlined,
   PlusOutlined,
   UploadOutlined,
@@ -17,6 +18,10 @@ import {
 } from "../../../../../redux/slices/account_management/MasterData/late_charges";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
 import SVGIcon from "../../../../../assets/Icon/index";
+import IconViewList from "../../../../../assets/Icon/Nx/IconViewList";
+import IconEditNx from "../../../../../assets/Icon/Nx/IconEdit";
+import IconActive from "../../../../../assets/icons/nx/IconActive";
+import IconInactive from "../../../../../assets/icons/nx/IconInactive";
 import { ModalError } from "../../../../../components/Modal/ModalPopUp";
 import {
   formMessageRequired,
@@ -125,7 +130,7 @@ const ViewLateCharges = () => {
       {
         key: "no",
         title: "NO",
-        width: 60,
+        width: 90,
         align: "center",
         render: (text, object, index) => (page - 1) * pageSize + index + 1,
       },
@@ -412,7 +417,7 @@ const ViewLateCharges = () => {
         <ButtonComponent
           type={"submit"}
           border={false}
-          icon={<SVGIcon name="IconButtonDownload" width={24} />}
+          icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
           onClick={() => {
             handleDownload();
           }}
@@ -455,13 +460,8 @@ const ViewLateCharges = () => {
       render: (record, data) => {
         return (
           <Tooltip title="Detail">
-            <Link
-              to={ACCOUNT_MANAGEMENT_ROUTES.DETAIL_LATE_CHARGES}
-              state={{ id: record?.lateChargeId }}
-            >
-              <div>
-                <SVGIcon name="IconDetail" width={24} />
-              </div>
+            <Link to={ACCOUNT_MANAGEMENT_ROUTES.DETAIL_LATE_CHARGES} state={{ id: record?.lateChargeId }} className="inline-flex items-center text-[#1976D2] hover:text-[#1976D2] transition-colors duration-200">
+              <IconViewList width={20} />
             </Link>
           </Tooltip>
         );
@@ -471,27 +471,18 @@ const ViewLateCharges = () => {
       action: "Update",
       type: "table",
       render: (record, data) => {
+        const disabled = record?.status === "INACTIVE";
         return (
           <Tooltip title="Update">
-            {record?.status === "INACTIVE" ? (
-              <div className={"cursor-not-allowed"}>
-                <SVGIcon
-                  name="IconEdit"
-                  width={24}
-                  color={"#C0BEC6"}
-                  className={"cursor-not-allowed"}
-                />
-              </div>
-            ) : (
+            <div className={`inline-flex items-center ${disabled ? "cursor-not-allowed text-gray-300" : ""}`}>
               <Link
-                to={ACCOUNT_MANAGEMENT_ROUTES.UPDATE_LATE_CHARGES}
-                state={{ id: record?.lateChargeId }}
+                to={!disabled ? ACCOUNT_MANAGEMENT_ROUTES.UPDATE_LATE_CHARGES : undefined}
+                state={!disabled ? { id: record?.lateChargeId } : undefined}
+                className={`inline-flex items-center transition-colors duration-200 ${disabled ? "text-gray-300 pointer-events-none" : "text-[#1976D2] hover:text-[#1976D2]"}`}
               >
-                <div>
-                  <SVGIcon name="IconEdit" width={24} />
-                </div>
+                <IconEditNx width={20} />
               </Link>
-            )}
+            </div>
           </Tooltip>
         );
       },
@@ -500,18 +491,18 @@ const ViewLateCharges = () => {
       action: "Activate",
       type: "table",
       render: (record, data) => {
+        const isActive = record?.status?.toUpperCase() === "ACTIVE";
+        const handleToggle = () => { handleActiveOrInactive(record); };
         return (
-          <Tooltip
-            title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}
-          >
-            <div>
-              <Checkbox
-                onClick={() => {
-                  handleActiveOrInactive(record);
-                }}
-                checked={record?.status === "ACTIVE" ? false : true}
-              />
-            </div>
+          <Tooltip title={isActive ? "Inactivate" : "Activate"}>
+            {isActive
+              ? <span className="inline-flex items-center text-[#D32F2F] hover:text-[#D32F2F] transition-colors duration-200 cursor-pointer" onClick={handleToggle}>
+                  <IconInactive width={20} />
+                </span>
+              : <span className="inline-flex items-center text-green-600 hover:text-green-600 transition-colors duration-200 cursor-pointer" onClick={handleToggle}>
+                  <IconActive width={20} />
+                </span>
+            }
           </Tooltip>
         );
       },

@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { PlusCircleOutlined, EyeOutlined } from "@ant-design/icons";
+import { PlusCircleOutlined } from "@ant-design/icons";
 import { Dropdown, Skeleton, Spin } from "antd";
 import { JOB_MGMT_ROUTES } from "../../../../routes/job_management/job_routes";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
@@ -27,6 +27,7 @@ import IconRestart from "../../../../assets/Icon/Nx/IconRestart";
 import IconOnHold from "../../../../assets/Icon/Nx/IconOnHold";
 import IconSuspend from "../../../../assets/Icon/Nx/IconSuspend";
 import IconCancel from "../../../../assets/Icon/Nx/IconCancel";
+import ViewListIcon from "../../../../assets/Icon/Nx/IconViewList";
 
 const PAGE_SIZE = 30;
 
@@ -72,6 +73,30 @@ const JobExecutionPage = () => {
   }, [dispatch, page, sort, refreshToken]);
 
   useEffect(() => { handleFetch(); }, [handleFetch]);
+
+  const NON_TERMINAL_STATUSES = useMemo(
+    () => new Set(["PENDING", "SCHEDULED", "PROCESSING", "ON_HOLD", "SUSPENDED"]),
+    []
+  );
+  const POLL_INTERVAL_MS = 60000;
+
+  useEffect(() => {
+    const anyRunning = accumulatedData.some(
+      (r) => r && NON_TERMINAL_STATUSES.has(r.status)
+    );
+    if (!anyRunning) return undefined;
+
+    const id = setInterval(() => {
+      dispatch(getAllJobExecutionPaginate({
+        search: "",
+        page: 1,
+        pageSize: PAGE_SIZE,
+        sort,
+      }));
+    }, POLL_INTERVAL_MS);
+
+    return () => clearInterval(id);
+  }, [accumulatedData, dispatch, sort, NON_TERMINAL_STATUSES]);
 
   useEffect(() => {
     if (!data?.content) return;
@@ -122,14 +147,16 @@ const JobExecutionPage = () => {
   const actionColumn = useMemo(() => ({
     title: "ACTIONS",
     key: "actions",
-    width: 100,
+    width: 120,
     align: "center",
     fixed: "right",
     render: (_, record) => {
       if (permissionsLoading) {
         return (
-          <div style={{ width: "100%", height: 14, overflow: "hidden", borderRadius: 20 }}>
-            <Skeleton.Button active size="small" shape="round" block />
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <div style={{ width: "100%", transform: "scaleY(0.55)", transformOrigin: "center" }}>
+              <Skeleton.Button active size="small" shape="round" block />
+            </div>
           </div>
         );
       }
@@ -141,19 +168,40 @@ const JobExecutionPage = () => {
 
       const menuItems = [
         {
-          key: "view",
+          key: "cancel",
           label: (
-            <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <EyeOutlined /> View Details
+            <span style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, padding: "2px 0", opacity: ["PENDING","SCHEDULED","PROCESSING","ON_HOLD","SUSPENDED"].includes(status) ? 1 : 0.4 }}>
+              <IconCancel width="18" height="18" /> Cancel
             </span>
           ),
-          onClick: () => navigate(JOB_MGMT_ROUTES.VIEW_JOB_EXECUTION_DETAIL, { state: { id: record.executionId } }),
+          disabled: !["PENDING","SCHEDULED","PROCESSING","ON_HOLD","SUSPENDED"].includes(status),
+          onClick: () => handleAction(cancelExecution, record.executionId),
+        },
+        {
+          key: "hold",
+          label: (
+            <span style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, padding: "2px 0", opacity: status === "PENDING" ? 1 : 0.4 }}>
+              <IconOnHold width="18" height="18" /> On-Hold
+            </span>
+          ),
+          disabled: status !== "PENDING",
+          onClick: () => handleAction(holdExecution, record.executionId),
+        },
+        {
+          key: "restart",
+          label: (
+            <span style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, padding: "2px 0", opacity: ["FAILED","CANCELLED","SUCCEEDED"].includes(status) ? 1 : 0.4 }}>
+              <IconRestart width="18" height="18" /> Restart
+            </span>
+          ),
+          disabled: !["FAILED","CANCELLED","SUCCEEDED"].includes(status),
+          onClick: () => handleAction(restartExecution, record.executionId),
         },
         {
           key: "stop",
           label: (
-            <span style={{ display: "flex", alignItems: "center", gap: 8, opacity: status === "PROCESSING" ? 1 : 0.4 }}>
-              <IconStop width="16" height="16" /> Stop
+            <span style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, padding: "2px 0", opacity: status === "PROCESSING" ? 1 : 0.4 }}>
+              <IconStop width="18" height="18" /> Stop
             </span>
           ),
           disabled: status !== "PROCESSING",
@@ -162,47 +210,17 @@ const JobExecutionPage = () => {
         {
           key: "suspend",
           label: (
-            <span style={{ display: "flex", alignItems: "center", gap: 8, opacity: (status === "SCHEDULED" && isRecurring) ? 1 : 0.4 }}>
-              <IconSuspend width="16" height="16" /> Suspend
+            <span style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, padding: "2px 0", opacity: (status === "SCHEDULED" && isRecurring) ? 1 : 0.4 }}>
+              <IconSuspend width="18" height="18" /> Suspend
             </span>
           ),
           disabled: !(status === "SCHEDULED" && isRecurring),
           onClick: () => handleAction(suspendExecution, record.executionId),
         },
-        {
-          key: "hold",
-          label: (
-            <span style={{ display: "flex", alignItems: "center", gap: 8, opacity: status === "PENDING" ? 1 : 0.4 }}>
-              <IconOnHold width="16" height="16" /> On-Hold
-            </span>
-          ),
-          disabled: status !== "PENDING",
-          onClick: () => handleAction(holdExecution, record.executionId),
-        },
-        {
-          key: "cancel",
-          label: (
-            <span style={{ display: "flex", alignItems: "center", gap: 8, opacity: ["PENDING","SCHEDULED","PROCESSING","ON_HOLD","SUSPENDED"].includes(status) ? 1 : 0.4 }}>
-              <IconCancel width="16" height="16" /> Cancel
-            </span>
-          ),
-          disabled: !["PENDING","SCHEDULED","PROCESSING","ON_HOLD","SUSPENDED"].includes(status),
-          onClick: () => handleAction(cancelExecution, record.executionId),
-        },
-        {
-          key: "restart",
-          label: (
-            <span style={{ display: "flex", alignItems: "center", gap: 8, opacity: ["FAILED","CANCELLED","SUCCEEDED"].includes(status) ? 1 : 0.4 }}>
-              <IconRestart width="16" height="16" /> Restart
-            </span>
-          ),
-          disabled: !["FAILED","CANCELLED","SUCCEEDED"].includes(status),
-          onClick: () => handleAction(restartExecution, record.executionId),
-        },
       ];
 
       return (
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
           <Dropdown menu={{ items: menuItems }} trigger={["click"]}>
             <button
               style={{ background: "none", border: "none", cursor: "pointer", padding: 4, display: "flex", alignItems: "center" }}
@@ -212,6 +230,13 @@ const JobExecutionPage = () => {
               <IconThreeDots />
             </button>
           </Dropdown>
+          <button
+            style={{ background: "none", border: "none", cursor: "pointer", padding: 4, display: "flex", alignItems: "center", color: "#1976D2" }}
+            onClick={() => navigate(JOB_MGMT_ROUTES.VIEW_JOB_EXECUTION_DETAIL, { state: { id: record.executionId } })}
+            type="button"
+          >
+            <ViewListIcon />
+          </button>
         </div>
       );
     },
@@ -358,8 +383,24 @@ const JobExecutionPage = () => {
           hasMore={hasMore}
           onLoadMore={handleLoadMore}
           loadMoreThreshold={20}
+          showRefresh={true}
+          onRefresh={handleRefresh}
           showExport={true}
           handleDownload={() => {}}
+          emptyText={
+            !loading && accumulatedData.length === 0 ? (
+              <div style={{ padding: "32px 0", textAlign: "center" }}>
+                <div style={{ fontSize: "28px", marginBottom: "8px" }}>🔒</div>
+                <div style={{ fontSize: "14px", fontWeight: 500, color: "#374151", marginBottom: "6px" }}>
+                  No executions available
+                </div>
+                <div style={{ fontSize: "13px", color: "#6B7280" }}>
+                  Your account has not been assigned to any job group yet.<br />
+                  Please contact your administrator to request access.
+                </div>
+              </div>
+            ) : undefined
+          }
         />
       </NxCardContainer>
 

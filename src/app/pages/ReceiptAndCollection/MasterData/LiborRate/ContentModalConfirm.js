@@ -28,13 +28,13 @@ const ContentModalConfirm = ({
               onClick={() => setExpandedInfo(!expandedInfo)}
             >
               <div className="text-[#0075bf] text-sm font-semibold uppercase">
-                SOURCE INFORMATION
+                CREATE SOURCE
               </div>
               <div>{expandedInfo ? <UpOutlined /> : <DownOutlined />}</div>
             </div>
             {expandedInfo && (
               <div className="grid grid-cols-5 gap-y-4 gap-x-2 w-full">
-                <DetailText label={"Creation Type"}>{data?.createNewSource ? "Create New Source" : "Use Existing Source"}</DetailText>
+                {/* <DetailText label={"Creation Type"}>{data?.createNewSource ? "Create New Source" : "Use Existing Source"}</DetailText>
                 {data?.createNewSource ? (
                   <>
                     <DetailText label={"Source Code"}>{data?.sourceCodeNew}</DetailText>
@@ -51,7 +51,12 @@ const ContentModalConfirm = ({
                        <DetailText label={"Source Description"}>{data?.description}</DetailText>
                     </div>
                   </>
-                )}
+                )} */}
+                <DetailText label={"Code"}>{data?.sourceCode}</DetailText>
+                <DetailText label={"Source"}>{data?.sourceName}</DetailText>
+                <div className="col-span-2">
+                   <DetailText label={"Source Name"}>{data?.description}</DetailText>
+                </div>
               </div>
             )}
           </div>

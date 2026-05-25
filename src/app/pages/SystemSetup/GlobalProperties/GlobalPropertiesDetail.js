@@ -85,7 +85,7 @@ const GlobalPropertiesDetail = () => {
     {
       title: "NO",
       align: "center",
-      width: 60,
+      width: 90,
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {

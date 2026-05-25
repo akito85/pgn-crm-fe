@@ -1090,7 +1090,7 @@ export const columns = (
             textToHighlight={text ? text.toString() : ""}
           />
         ) : (
-          moment(text).format(dateFormatting?.dateTime) || "-"
+          moment(text).format(dateFormatting?.dateTime) || ""
         ),
     },
     {

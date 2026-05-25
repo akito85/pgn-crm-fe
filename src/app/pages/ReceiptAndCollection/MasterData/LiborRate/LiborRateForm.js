@@ -55,8 +55,9 @@ const LiborRateForm = (props) => {
 
   return (
     <div className="flex flex-col gap-5">
-      <BaseContainer header={"SOURCE INFORMATION"}>
-        <div className="mb-5 flex items-center gap-3">
+      <BaseContainer header={"CREATE SOURCE"}>
+        {/* Logika lama di-comment agar aman kalau mau rollback */}
+        {/* <div className="mb-5 flex items-center gap-3">
           <span className="font-semibold">Create New Source?</span>
           <Form.Item name="createNewSource" valuePropName="checked" noStyle initialValue={false}>
             <Switch checkedChildren="Yes" unCheckedChildren="No" />
@@ -90,13 +91,20 @@ const LiborRateForm = (props) => {
             </Form.Item>
           </div>
         ) : (
-          <div className="w-full grid grid-cols-5 gap-5">
+          <div className="w-full grid grid-cols-3 gap-5">
             <Form.Item
-              label={"Select Source"}
+              label={"Code"}
+              name={"sourceCode"}
+              rules={isSourceEditable ? formMessageRequired("Code") : []}
+            >
+              <InputComponent disabled={!isSourceEditable} placeholder="Input Code.." />
+            </Form.Item>
+            <Form.Item
+              label={"Source"}
               name={"sourceId"}
               rules={formMessageRequired("Source")}
             >
-              <Select placeholder="Select Existing Source" showSearch optionFilterProp="children">
+              <Select placeholder="Input Source.." showSearch optionFilterProp="children">
                 {dataSourceList?.map((item) => (
                   <Option key={item.id} value={item.id}>
                     {`[${item.sourceCode}] ${item.sourceName}`}
@@ -105,31 +113,43 @@ const LiborRateForm = (props) => {
               </Select>
             </Form.Item>
             <Form.Item
-              label={"Source Code"}
-              name={"sourceCode"}
-              rules={isSourceEditable ? formMessageRequired("Source Code") : []}
-            >
-              <InputComponent disabled={!isSourceEditable} placeholder="Source Code" />
-            </Form.Item>
-            <Form.Item
               label={"Source Name"}
               name={"sourceName"}
               rules={isSourceEditable ? formMessageRequired("Source Name") : []}
             >
-              <InputComponent disabled={!isSourceEditable} placeholder="Source Name" />
-            </Form.Item>
-             <Form.Item
-              label={"Description"}
-              name={"description"}
-              className="col-span-2"
-            >
-              <Input.TextArea disabled={!isSourceEditable} placeholder="Description" rows={1} />
+              <InputComponent disabled={!isSourceEditable} placeholder="Type Source Name.." />
             </Form.Item>
           </div>
-        )}
+        )} */}
+
+        <div className="w-full grid grid-cols-3 gap-5">
+          <Form.Item
+            label={"Code"}
+            name={"sourceCode"}
+            rules={formMessageRequired("Code")}
+          >
+            <InputComponent placeholder="Input Code.." maxLength={50} />
+          </Form.Item>
+
+          <Form.Item
+            label={"Source"}
+            name={"sourceName"}
+            rules={formMessageRequired("Source")}
+          >
+            <InputComponent placeholder="Input Source.." maxLength={100} />
+          </Form.Item>
+
+          <Form.Item
+            label={"Source Name"}
+            name={"description"}
+            rules={formMessageRequired("Source Name")}
+          >
+            <InputComponent placeholder="Type Source Name.." maxLength={255} />
+          </Form.Item>
+        </div>
       </BaseContainer>
 
-      <BaseContainer header={"RATE INDEX INFORMATION"}>
+      <BaseContainer header={"CREATE RATE INDEX"}>
         <div className="w-full grid grid-cols-5 gap-5">
           <Form.Item
             label={"Rate Index Code"}
@@ -169,7 +189,7 @@ const LiborRateForm = (props) => {
           </Form.Item>
 
           <Form.Item
-            label={"Rate Value (%)"}
+            label={"Rate Value"}
             name={"ratePercentage"}
             rules={formMessageRequired("Rate Value")}
           >

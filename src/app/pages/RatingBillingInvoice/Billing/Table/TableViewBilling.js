@@ -280,7 +280,7 @@ export const columnsBilling = (
       "datePeriod"
     ),
     // billingPeriod sekarang berupa string "Dec 2025", bukan ISO date
-    render: (text) => text || "-",
+    render: (text) => text || "",
   },
   {
     key: "accountRegistrationNumber",

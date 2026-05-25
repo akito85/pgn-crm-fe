@@ -55,13 +55,13 @@ const UploadUser = () => {
             key: (index + 1).toString(),
             userName: item?.userName,
             authType: item?.authType,
-            authTypeId: parseInt(item?.authTypeId),
+            authTypeId: item?.authTypeValue,
             employeeName: item?.employeeName,
             employee: item?.employee === "" ? null : parseInt(item?.employee),
             userType: item?.userType,
-            userTypeId: parseInt(item?.userTypeId),
+            userTypeId: item?.userTypeValue,
             userLevel: item?.userLevel,
-            userLevelId: item?.userLevelId,
+            userLevelId: item?.userLevelValue,
             email: item?.email,
             phone: item?.phoneNumber,
             groupAccess: item?.groupAccess,
@@ -102,9 +102,6 @@ const UploadUser = () => {
   // handle change file
   const handleFileChange = ({ fileList }) => {
     setFileList(fileList);
-    if (fileName) {
-      handleUpload(fileName);
-    }
   };
 
   // props dragger
@@ -117,6 +114,7 @@ const UploadUser = () => {
     maxCount: 1,
     beforeUpload: async (file) => {
       setFileName(file);
+      handleUpload(file);
       return false;
     },
     onChange: ({ fileList }) => handleFileChange({ fileList }),
@@ -191,13 +189,13 @@ const UploadUser = () => {
           return {
             userName: item?.userName?.toString(),
             authType: item?.authType?.toString(),
-            authTypeId: item?.authTypeId?.toString(),
+            authTypeValue: item?.authTypeId?.toString(),
             employeeName: item?.employeeName?.toString(),
             employee: item?.employee === null ? "" : item?.employee?.toString(),
             userType: item?.userType?.toString(),
-            userTypeId: item?.userTypeId?.toString(),
+            userTypeValue: item?.userTypeId?.toString(),
             userLevel: item?.userLevel?.toString(),
-            userLevelId: item?.userLevelId?.toString(),
+            userLevelValue: item?.userLevelId?.toString(),
             email: item?.email?.toString(),
             phoneNumber: item?.phone?.toString(),
             groupAccess:
@@ -209,16 +207,16 @@ const UploadUser = () => {
                 ? item?.groupAccessId?.toString()
                 : item?.groupAccess?.toString(),
             endDate: moment(item?.endDate).isValid()
-              ? moment(item?.endDate).format(dateFormatting.dateFormal)
+              ? moment(item?.endDate).format(dateFormatting.dateCapital)
               : moment(),
             startDate: moment(item?.startDate).isValid()
-              ? moment(item?.startDate).format(dateFormatting.dateFormal)
+              ? moment(item?.startDate).format(dateFormatting.dateCapital)
               : moment(),
             endDateGa: moment(item?.endDateGa).isValid()
-              ? moment(item?.endDateGa).format(dateFormatting.dateFormal)
+              ? moment(item?.endDateGa).format(dateFormatting.dateCapital)
               : moment(),
             startDateGa: moment(item?.startDateGa).isValid()
-              ? moment(item?.startDateGa).format(dateFormatting.dateFormal)
+              ? moment(item?.startDateGa).format(dateFormatting.dateCapital)
               : moment(),
           };
         });

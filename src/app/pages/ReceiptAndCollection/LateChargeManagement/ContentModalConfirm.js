@@ -28,13 +28,13 @@ const ContentModalConfirm = ({
                             </div>
                             <div className="grid grid-cols-3 w-full gap-4 text-xs font-semibold">
                                 <DetailText label={"Cost Center"}>
-                                    {data?.costCenter || "-"}
+                                    {data?.costCenter || ""}
                                 </DetailText>
                                 <DetailText label={"Customer ID"}>
-                                    {data?.customerNumber || "-"}
+                                    {data?.customerNumber || ""}
                                 </DetailText>
                                 <DetailText label={"Customer Name"}>
-                                    {data?.customerName || "-"}
+                                    {data?.customerName || ""}
                                 </DetailText>
                             </div>
                         </div>
@@ -52,11 +52,11 @@ const ContentModalConfirm = ({
                                     {data?.paymentAmount ? data.paymentAmount.toLocaleString() : "0"}
                                 </DetailText>
                                 <DetailText label={"Type"}>
-                                    {data?.type || "-"}
+                                    {data?.type || ""}
                                 </DetailText>
 
                                 <DetailText label={"Invoice No"}>
-                                    {data?.invoiceNo || "-"}
+                                    {data?.invoiceNo || ""}
                                 </DetailText>
                                 <DetailText label={"Total Days Late"}>
                                     {data?.totalDaysLate || "0"}
@@ -76,12 +76,12 @@ const ContentModalConfirm = ({
                                 </DetailText>
 
                                 <DetailText label={"Late Charge Time Unit"}>
-                                    {data?.lateChargeTimeUnit || "-"}
+                                    {data?.lateChargeTimeUnit || ""}
                                 </DetailText>
                             </div>
                             <div className="grid grid-cols-1 w-full gap-4 mt-2">
                                 <DetailText label={"Remark"}>
-                                    {data?.remark || "-"}
+                                    {data?.remark || ""}
                                 </DetailText>
                             </div>
                         </div>

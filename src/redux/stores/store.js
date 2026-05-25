@@ -123,10 +123,12 @@ import installmentReducer from "../slices/rating_billing_invoice/installment";
 import accountPromoReducer from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/Promo/store/slices/promoSlice";
 import accountingReducer from "../slices/receipt_collection/accounting";
 import relationshipReducer from "../slices/account_management/detailAccount/relationshipSlice";
+import standaloneRelationshipReducer from "../slices/relationship/standaloneRelationshipSlice";
 import warrantyReducer from "../slices/receipt_collection/warranty";
 import transferToReceiptReducer from "../slices/receipt_collection/transferToReceipt";
 import transferToCustomerReducer from "../slices/receipt_collection/transferToCustomer";
 import restructureReducer from "../slices/receipt_collection/restructure";
+import restructureMonitoringReducer from "../slices/receipt_collection/restructureMonitoring";
 import notificationsReducer from "../slices/notifications";
 import multiDestinationReducer from "../slices/account_management/detailAccount/MultiDestinationSlice";
 import gasDepositReducer from "../slices/account_management/detailAccount/GasDepositSlice";
@@ -152,8 +154,11 @@ import jobExecutionReducer from "../slices/job_management/jobExecutionSlice";
 import oracleMetadataReducer from "../slices/job_management/oracleMetadataSlice";
 import taskQueueReducer from "../slices/job_management/taskQueueSlice";
 import handlerRegistryReducer from "../slices/job_management/handlerRegistrySlice";
+import jobScheduleReducer from "../slices/job_management/jobScheduleSlice";
 import { jobApiSlice } from "../slices/job_management/jobApiSlice";
 import { jobGroupApiSlice } from "../slices/job_management/jobGroupApiSlice";
+import auditTrailReducer from "../slices/user_management/audit_trail";
+import preRequisiteTemplateReducer from "../slices/system_setup/preRequisiteTemplate";
 
 const reducer = combineReducers({
   jobManagement: jobManagementReducer,
@@ -162,6 +167,7 @@ const reducer = combineReducers({
   oracleMetadata: oracleMetadataReducer,
   taskQueue: taskQueueReducer,
   handlerRegistry: handlerRegistryReducer,
+  jobSchedule: jobScheduleReducer,
   auth: authReducer,
   message: messageReducer,
   entity: entityReducer,
@@ -225,6 +231,7 @@ const reducer = combineReducers({
   accountEquipment: equpmentReducer,
   accountPromo: accountPromoReducer,
   relationship: relationshipReducer,
+  standaloneRelationship: standaloneRelationshipReducer,
   multiDestination: multiDestinationReducer,
   gasDeposit: gasDepositReducer,
 
@@ -300,6 +307,7 @@ const reducer = combineReducers({
   transferToReceipt: transferToReceiptReducer,
   transferToCustomer: transferToCustomerReducer,
   restructure: restructureReducer,
+  restructureMonitoring: restructureMonitoringReducer,
   deduction: deductionReducer,
   gapuraManagement: gapuraManagementReducer,
   historyWarranty: historyWarrantyReducer,
@@ -342,6 +350,11 @@ const reducer = combineReducers({
 
   // notifications
   notifications: notificationsReducer,
+
+  // audit trail
+  audit_trail: auditTrailReducer,
+  // system setup
+  preRequisiteTemplate: preRequisiteTemplateReducer,
 });
 
 // add throttle middlewares

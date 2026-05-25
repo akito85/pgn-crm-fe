@@ -11,6 +11,67 @@ import {
 } from "../general_slice";
 import { errorBody, errorCode, errorMessage } from "../../../utils";
 
+// ─── Granted-access TTL cache ─────────────────────────────────────────────
+// Avoids re-flashing the action-button skeleton on every route change.
+// Fresh cache (within TTL) skips the network round-trip entirely.
+// Stale cache (expired) falls through to a full refresh.
+const GRANTED_ACCESS_CACHE_PREFIX = "granted-access:";
+const GRANTED_ACCESS_TTL_MS = 15 * 60 * 1000; // 15 min
+
+const hashToken = (token) => {
+  if (!token) return "anon";
+  let h = 0;
+  for (let i = 0; i < token.length; i++) {
+    h = ((h << 5) - h) + token.charCodeAt(i);
+    h |= 0;
+  }
+  return h.toString(36);
+};
+
+const grantedAccessCacheKey = (pathname) => {
+  const tok =
+    (typeof localStorage !== "undefined" && localStorage.getItem("token")) ||
+    (typeof sessionStorage !== "undefined" && sessionStorage.getItem("token")) ||
+    "";
+  return GRANTED_ACCESS_CACHE_PREFIX + hashToken(tok) + ":" + (pathname || "");
+};
+
+const readGrantedAccessCache = (pathname) => {
+  try {
+    const raw = sessionStorage.getItem(grantedAccessCacheKey(pathname));
+    if (!raw) return null;
+    const { payload, expiresAt } = JSON.parse(raw);
+    if (!expiresAt || expiresAt < Date.now()) return null;
+    return payload;
+  } catch {
+    return null;
+  }
+};
+
+const writeGrantedAccessCache = (pathname, payload) => {
+  try {
+    sessionStorage.setItem(
+      grantedAccessCacheKey(pathname),
+      JSON.stringify({ payload, expiresAt: Date.now() + GRANTED_ACCESS_TTL_MS })
+    );
+  } catch {
+    // sessionStorage quota or disabled — degrade gracefully
+  }
+};
+
+export const clearGrantedAccessCache = () => {
+  try {
+    for (let i = sessionStorage.length - 1; i >= 0; i--) {
+      const k = sessionStorage.key(i);
+      if (k && k.startsWith(GRANTED_ACCESS_CACHE_PREFIX)) {
+        sessionStorage.removeItem(k);
+      }
+    }
+  } catch {
+    // ignore
+  }
+};
+
 const initialState = {
   isLoggedIn: false,
   user: null,
@@ -33,6 +94,7 @@ const initialState = {
     localStorage.getItem("remember") ||
     window.sessionStorage.getItem("remember"),
   data_entities: null,
+  entitiesLoadFailed: false,
   data_check: null,
   data_entity: null,
   data_position: [],
@@ -206,6 +268,7 @@ export const logout = createAsyncThunk("LOGOUT", async (_, thunkAPI) => {
 export const logoutTokenExpired = createAsyncThunk(
   "INJECT_LOGOUT",
   async (thunkAPI) => {
+    clearGrantedAccessCache();
     try {
       const data = await authService.injectLogout();
       return data;
@@ -424,11 +487,22 @@ export const confirmNewPassword = createAsyncThunk(
 
 export const checkGrantedAccess = createAsyncThunk(
   "CHECK_GRANTED_ACCESS",
-  async (body, thunkAPI) => {
+  async (pathname, thunkAPI) => {
+    // Fresh cache hit — dispatch immediately and skip the network round-trip.
+    // Permissions rarely change mid-session; the next page load after TTL
+    // expires will refresh from the server.
+    const cached = readGrantedAccessCache(pathname);
+    if (cached) {
+      thunkAPI.dispatch(grantedAccess(cached));
+      return;
+    }
+    // No cache or expired — show skeleton while fetching.
     thunkAPI.dispatch(grantedAccess(null));
     try {
-      const data = await authService.checkGrantedAccess(body);
-      thunkAPI.dispatch(grantedAccess(data?.data));
+      const data = await authService.checkGrantedAccess(pathname);
+      const payload = data?.data;
+      writeGrantedAccessCache(pathname, payload);
+      thunkAPI.dispatch(grantedAccess(payload));
       return data;
     } catch (error) {
       thunkAPI.dispatch(
@@ -472,6 +546,7 @@ export const getListSwitchEntity = createAsyncThunk(
 export const changeEntity = createAsyncThunk(
   "CHANGE_ENTITY",
   async ({ entityId, remember }, thunkAPI) => {
+    clearGrantedAccessCache();
     try {
       const url = "/v1/dbs/api/auth/switch-entity";
       const body = { entityId: entityId };
@@ -560,6 +635,7 @@ export const getListSwitchPosition = createAsyncThunk(
 export const changePosition = createAsyncThunk(
   "CHANGE_POSITION",
   async ({ positionId, remember }, thunkAPI) => {
+    clearGrantedAccessCache();
     try {
       const url = "/v1/dbs/api/auth/switch-pos";
       const body = { positionId: positionId };
@@ -966,14 +1042,17 @@ const authSlice = createSlice({
     // get entities
     [getEntities.pending]: (state) => {
       state.loading = true;
+      state.entitiesLoadFailed = false;
     },
     [getEntities.fulfilled]: (state, action) => {
       state.loading = false;
       state.data_entities = action.payload;
+      state.entitiesLoadFailed = false;
     },
-    [getEntities.rejected]: (state, action) => {
+    [getEntities.rejected]: (state) => {
       state.loading = false;
-      state.data_entities = action.payload;
+      state.data_entities = null;
+      state.entitiesLoadFailed = true;
     },
     // forgot password
     [forgotPassword.pending]: (state) => {

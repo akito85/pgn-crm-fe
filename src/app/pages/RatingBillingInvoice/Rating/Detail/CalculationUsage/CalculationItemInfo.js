@@ -9,7 +9,7 @@ const CalculationItemInfo = ({ calculationCode, ratingCode, accountNumber }) => 
             Calculation Code
           </p>
           <p className="text-[15px] font-semibold text-gray-900">
-            {calculationCode || "-"}
+            {calculationCode || ""}
           </p>
         </div>
         <div className="flex flex-col gap-1">
@@ -17,7 +17,7 @@ const CalculationItemInfo = ({ calculationCode, ratingCode, accountNumber }) => 
             Rating Code
           </p>
           <p className="text-[15px] font-semibold text-gray-900">
-            {ratingCode || "-"}
+            {ratingCode || ""}
           </p>
         </div>
       </div>

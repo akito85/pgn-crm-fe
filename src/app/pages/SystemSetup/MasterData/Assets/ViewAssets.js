@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { Alert, Checkbox, Form, Spin, Tooltip } from 'antd';
+import { Alert, Form, Spin, Tooltip } from 'antd';
 import BreadCrumb from '../../../../../components/BreadCrumb';
 import ButtonComponent from '../../../../../components/ButtonComponent';
 import { DownloadOutlined, InfoCircleOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons';
@@ -10,6 +10,10 @@ import { SYSTEM_SETUP_ROUTES } from '../../../../../routes/system_setup/setup_ro
 import { useDispatch, useSelector } from 'react-redux';
 import { getColumnSearchPropsUseFilteredValue } from '../../../../../utils/getColumnSearchProps';
 import SVGIcon from "../../../../../assets/Icon/index";
+import IconViewList from "../../../../../assets/Icon/Nx/IconViewList";
+import IconEditNx from "../../../../../assets/Icon/Nx/IconEdit";
+import IconActive from "../../../../../assets/icons/nx/IconActive";
+import IconInactive from "../../../../../assets/icons/nx/IconInactive";
 import { useState } from 'react';
 import { useRef } from 'react';
 import { useEffect } from 'react';
@@ -109,7 +113,7 @@ const ViewAssets = () => {
         return [
             {
                 title: "NO",
-                width: 60,
+                width: 90,
                 align: "center",
                 render: (text, object, index) => (page - 1) * pageSize + index + 1,
             },
@@ -616,14 +620,9 @@ const ViewAssets = () => {
             render: (record, data) => {
                 return (
                     <Tooltip title="Detail">
-                        <div className="pt-1">
-                            <Link
-                                to={SYSTEM_SETUP_ROUTES.DETAIL_MASTER_ASSETS}
-                                state={{ id: record.id }}
-                            >
-                                <SVGIcon name="IconDetail" width={24} />
-                            </Link>
-                        </div>
+                        <Link to={SYSTEM_SETUP_ROUTES.DETAIL_MASTER_ASSETS} state={{ id: record.id }} className="inline-flex items-center text-[#1976D2] hover:text-[#1976D2] transition-colors duration-200">
+                            <IconViewList width={20} />
+                        </Link>
                     </Tooltip>
                 )
             }
@@ -633,31 +632,18 @@ const ViewAssets = () => {
             action: "Update",
             type: "table",
             render: (record, data) => {
+                const disabled = record?.status === "ASSIGNED" || record?.status?.toLowerCase() === "inactive";
                 return (
                     <Tooltip title="Update">
-                        {record?.status === "ASSIGNED" ?
-                            <Link>
-                                <div
-                                    className={"cursor-not-allowed"}>
-                                    <SVGIcon name="IconEdit" width={24} color={"#C0BEC6"} className={"cursor-not-allowed"} />
-                                </div>
+                        <div className={`inline-flex items-center ${disabled ? "cursor-not-allowed text-gray-300" : ""}`}>
+                            <Link
+                                to={!disabled ? SYSTEM_SETUP_ROUTES.UPDATE_MASTER_ASSETS : undefined}
+                                state={!disabled ? { id: record?.id } : undefined}
+                                className={`inline-flex items-center transition-colors duration-200 ${disabled ? "text-gray-300 pointer-events-none" : "text-[#1976D2] hover:text-[#1976D2]"}`}
+                            >
+                                <IconEditNx width={20} />
                             </Link>
-                            :
-                            <div className={`${record?.status?.toLowerCase() === "inactive" && 'cursor-not-allowed'}`}>
-                                <Link
-                                    to={record?.status?.toLowerCase() !== "inactive" && SYSTEM_SETUP_ROUTES.UPDATE_MASTER_ASSETS}
-                                    state={record?.status?.toLowerCase() !== "inactive" && { id: record?.id }}
-                                >
-                                    <div>
-                                        <SVGIcon
-                                            name="IconEdit"
-                                            width={24}
-                                            className={`${record?.status?.toLowerCase() === "inactive" && 'cursor-not-allowed'}`}
-                                            color={record?.status?.toLowerCase() === 'inactive' ? "#8D91A0" : "#ACC424"} />
-                                    </div>
-                                </Link>
-                            </div>
-                        }
+                        </div>
                     </Tooltip>
                 )
             }
@@ -667,29 +653,27 @@ const ViewAssets = () => {
             action: "Activate",
             type: "table",
             render: (record, data) => {
+                const isActive = record?.status?.toUpperCase() === "ACTIVE";
+                const isAssigned = record?.status === "ASSIGNED";
+                if (isAssigned) {
+                    return (
+                        <Tooltip title="Inactivate">
+                            <span className="inline-flex items-center text-gray-300 cursor-not-allowed">
+                                <IconInactive width={20} />
+                            </span>
+                        </Tooltip>
+                    );
+                }
+                const handleToggle = () => { handleActiveOrInactive(record); };
                 return (
-                    <Tooltip
-                        title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}
-                    >
-                        {
-                            record?.status === "ASSIGNED" ?
-                                <div>
-                                    <Checkbox
-                                        // onClick={() => { handleActiveOrInactive(record) }}
-                                        checked={record?.status !== "INACTIVE" ? true : false}
-                                        disabled
-                                    />
-                                </div>
-                                :
-                                <Link>
-                                    <div>
-                                        <Checkbox
-                                            onClick={() => { handleActiveOrInactive(record) }}
-                                            checked={record?.status === "ACTIVE" ? false : true}
-                                        />
-                                    </div>
-                                </Link>
-
+                    <Tooltip title={isActive ? "Inactivate" : "Activate"}>
+                        {isActive
+                            ? <span className="inline-flex items-center text-[#D32F2F] hover:text-[#D32F2F] transition-colors duration-200 cursor-pointer" onClick={handleToggle}>
+                                <IconInactive width={20} />
+                              </span>
+                            : <span className="inline-flex items-center text-green-600 hover:text-green-600 transition-colors duration-200 cursor-pointer" onClick={handleToggle}>
+                                <IconActive width={20} />
+                              </span>
                         }
                     </Tooltip>
                 )
