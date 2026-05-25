@@ -66,7 +66,8 @@ import {
   getSrPrerequisiteTypes,
   getSrAttachmentCategories,
   createServiceRequest,
-  updateServiceRequest
+  updateServiceRequest,
+  resetCreateSr,
 } from "../../../../../../../redux/slices/account_management/detailAccount/ServiceRequestSlice";
 import { validateCreateUpdate } from "../../../../../../../redux/slices/general_slice";
 import accountManagementService from "../../../../../../../redux/services/account_management/accountManagementService";
@@ -112,7 +113,8 @@ const CreateCustomerServiceRequest = (props) => {
     list_srAttachmentCategories,
     detail_serviceRequest: serviceRequestDetail,
     detailDraft_serviceRequest: serviceRequestDetailDraft,
-    loading_createUpdateSr
+    loading_createUpdateSr,
+    create_sr,
   } = useSelector((state) => state.serviceRequest);
 
   // Map state keys to the dropdowns structure expected by child components
@@ -328,6 +330,17 @@ const CreateCustomerServiceRequest = (props) => {
     }
   }, [isUpdate, serviceRequestDetail, serviceRequestDetailDraft]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Populate attachments from loaded detail in UPDATE mode (Gap 3)
+  useEffect(() => {
+    if (!isUpdate) return;
+    const detail = serviceRequestDetail || serviceRequestDetailDraft;
+    if (detail?.attachments?.length) {
+      setAttachmentDataSource(
+        detail.attachments.map((att) => ({ ...att, key: att.id }))
+      );
+    }
+  }, [isUpdate, serviceRequestDetail, serviceRequestDetailDraft]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const handleSelectHierarchy = (value, label) => {
     formCreate.setFieldsValue({ appHierId: value, appHierName: label });
     if (value) dispatch(getSrApprovalHierarchy(value));
@@ -386,20 +399,17 @@ const CreateCustomerServiceRequest = (props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
 
-  // Restore wizard form data from sessionStorage when returning from prerequisite create page
+  // Restore wizard state from Redux when returning from prerequisite create page
   useEffect(() => {
     if (location?.state?.returnToStep !== undefined) {
-      try {
-        const saved = sessionStorage.getItem("srWizardFormData");
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          if (parsed.requestDate) {
-            parsed.requestDate = moment(parsed.requestDate);
-          }
-          formCreate.setFieldsValue(parsed);
-          sessionStorage.removeItem("srWizardFormData");
-        }
-      } catch (_) {}
+      if (create_sr?.formData) {
+        const { srFormPreRequisites, ...rest } = create_sr.formData;
+        if (rest.requestDate) rest.requestDate = moment(rest.requestDate);
+        formCreate.setFieldsValue(rest);
+      }
+      if (create_sr?.attachments?.length) {
+        setAttachmentDataSource(create_sr.attachments);
+      }
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -494,6 +504,7 @@ const CreateCustomerServiceRequest = (props) => {
           customer={data_customerDetail}
           dropdowns={dropdowns}
           currentStep={current}
+          attachments={attachmentDataSource}
         />
       ),
       disabled: false
@@ -618,7 +629,7 @@ const CreateCustomerServiceRequest = (props) => {
         requirementValue: dr.value || null,
         requirementDesc: null
       })),
-      prerequisites: (values.srFormPreRequisites || []).map((pr) => ({
+      prerequisites: (create_sr?.prerequisites || []).map((pr) => ({
         prerequisiteId: pr.prerequisiteId,
         prerequisiteName: pr.prerequisiteName,
         prerequisiteComments: pr.prerequisiteComments || null,
@@ -742,6 +753,7 @@ const CreateCustomerServiceRequest = (props) => {
           })
         ).unwrap();
       }
+      dispatch(resetCreateSr());
       navigate(ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD, {
         state: {
           idAccount,
@@ -783,6 +795,15 @@ const CreateCustomerServiceRequest = (props) => {
         srFormLatitude: premiseAddress?.latitude || "",
         srFormLongitude: premiseAddress?.longitude || ""
       });
+    }
+
+    // Gap 4: restore attachments to original state on reset
+    if (isUpdate && serviceRequestDetail?.attachments?.length) {
+      setAttachmentDataSource(
+        serviceRequestDetail.attachments.map((att) => ({ ...att, key: att.id }))
+      );
+    } else if (!isUpdate) {
+      setAttachmentDataSource([]);
     }
   };
 
@@ -882,15 +903,21 @@ const CreateCustomerServiceRequest = (props) => {
         dropdowns={dropdowns}
         approvalTableData={detail_srApprovalHierarchy}
         attachmentsData={attachmentDataSource}
+        prerequisites={create_sr?.prerequisites || []}
         type={confirmationType}
         loading={loadingForm}
+        service={accountManagementService}
+        configApplication={configApp.ACCOUNT_SERVICE}
       />
 
       {/* Modal Back */}
       <ModalConfirm
         isOpen={modalBack}
         handleCancel={() => setModalBack(false)}
-        handleOk={() => navigate(-1)}
+        handleOk={() => {
+          dispatch(resetCreateSr());
+          navigate(-1);
+        }}
         width={400}
       >
         <div className="flex justify-center mt-5 gap-[20px]">

@@ -56,6 +56,12 @@ const initialState = {
   list_srActionLogs: [],
   pagination_listSrActionLogs: { totalPage: 0, totalElement: 0, currentPage: 0, pageSize: 10 },
   loading_listSrActionLogs: false,
+  // Create SR wizard state (persists across navigation to prereq create page)
+  create_sr: {
+    formData: null,
+    prerequisites: [],
+    attachments: [],
+  },
   // UI State
   loading: false,
   loading_detailSr: false,
@@ -241,7 +247,7 @@ export const createServiceRequest = createAsyncThunk(
   "CREATE_SERVICE_REQUEST",
   async ({ accountId, body, attachments = [], action = "SUBMIT", successBodyExtra = {} }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/create`;
+      const url = `/v1/dbs/api/account/${accountId}/service-request/create`;
       const response = await accountManagementService.createData(url, body);
       const { id } = response.data;
 
@@ -996,6 +1002,23 @@ const serviceRequestSlice = createSlice({
     resetSrDetailDraft: (state) => {
       state.detailDraft_serviceRequest = null;
     },
+    saveCreateSrFormData: (state, action) => {
+      state.create_sr.formData = action.payload;
+    },
+    addCreateSrPrerequisite: (state, action) => {
+      state.create_sr.prerequisites.push(action.payload);
+    },
+    removeCreateSrPrerequisite: (state, action) => {
+      state.create_sr.prerequisites = state.create_sr.prerequisites.filter(
+        (pr) => pr.key !== action.payload
+      );
+    },
+    saveCreateSrAttachments: (state, action) => {
+      state.create_sr.attachments = action.payload;
+    },
+    resetCreateSr: (state) => {
+      state.create_sr = { formData: null, prerequisites: [], attachments: [] };
+    },
   },
   extraReducers: {
     // =====================================================
@@ -1565,5 +1588,10 @@ export const {
   clearSrActivities,
   clearSrDataRequirements,
   resetSrDetailDraft,
+  saveCreateSrFormData,
+  addCreateSrPrerequisite,
+  removeCreateSrPrerequisite,
+  saveCreateSrAttachments,
+  resetCreateSr,
 } = serviceRequestSlice.actions;
 export default reducer;

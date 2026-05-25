@@ -1,7 +1,10 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { createSrPrerequisite } from "../../../../../../../../../../redux/slices/account_management/detailAccount/ServiceRequestSlice";
+import {
+  createSrPrerequisite,
+  addCreateSrPrerequisite,
+} from "../../../../../../../../../../redux/slices/account_management/detailAccount/ServiceRequestSlice";
 import { Form, Select, Input, Spin, message } from "antd";
 import { UpOutlined, DownOutlined } from "@ant-design/icons";
 
@@ -98,6 +101,16 @@ const PreRequisiteCreateFrom = () => {
     }));
   };
 
+  const getPrerequisiteTypeLabel = (value) => {
+    const options = Array.isArray(list_srPrerequisiteTypes) ? list_srPrerequisiteTypes : [];
+    const matched = options.find(
+      (item) =>
+        item?.glbTypeValId?.toString() === value?.toString() ||
+        item?.id?.toString() === value?.toString(),
+    );
+    return matched?.name || matched?.glbTypeValName || value || "-";
+  };
+
   const getDropdownLabel = (dropdownKey, value) => {
     if (!value) return "-";
     const options = getDropdownOptions(dropdownKey);
@@ -159,8 +172,21 @@ const PreRequisiteCreateFrom = () => {
         ).unwrap();
         navigateBack();
       } else {
-        // CREATE flow: SR belum ada, kirim data kembali ke wizard untuk disimpan lokal
-        navigateBack({ newPrerequisite: prerequisiteData });
+        // CREATE flow: SR belum ada, simpan ke Redux agar wizard membacanya saat remount
+        dispatch(
+          addCreateSrPrerequisite({
+            key: `local-${Date.now()}`,
+            ...prerequisiteData,
+            type: getPrerequisiteTypeLabel(prerequisiteData.prerequisiteId),
+            name: prerequisiteData.prerequisiteName || getPrerequisiteTypeLabel(prerequisiteData.prerequisiteId),
+            description: prerequisiteData.prerequisiteComments || "-",
+            status: "-",
+            dueDateLabel: "-",
+            completedDateLabel: "-",
+            assignedToLabel: "-",
+          }),
+        );
+        navigateBack();
       }
     } catch (err) {
       if (err?.errorFields) {
