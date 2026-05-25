@@ -13,8 +13,11 @@ const ConfirmationModal = ({
   dropdowns,
   approvalTableData = [],
   attachmentsData = [],
+  prerequisites = [],
   type = "submit",
   loading = false,
+  service,
+  configApplication,
 }) => {
   const [activeTab, setActiveTab] = useState(0);
 
@@ -72,9 +75,12 @@ const ConfirmationModal = ({
         dropdowns={dropdowns}
         approvalTableData={approvalTableData}
         attachmentsData={attachmentsData}
+        prerequisites={prerequisites}
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         disabled={loading}
+        service={service}
+        configApplication={configApplication}
       />
     </NxModal>
   );
