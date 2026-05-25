@@ -22,17 +22,17 @@ const ConfirmationException = ({
   handleConfirm = () => {},
   isLoading = false,
 }) => {
-  const [valuePage, setValuePage] = useState("Exception Information");
+  const [valuePage, setValuePage] = useState("Exception");
 
   const tabPages = [
-    { value: "Exception Information" },
+    { value: "Exception" },
     { value: "Approval" },
     { value: "Attachment" },
   ];
 
   const renderSection = () => {
     switch (valuePage) {
-      case "Exception Information":
+      case "Exception":
         return (
           <ExceptionInfo
             kirimBody={kirimBody}

@@ -1,11 +1,13 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import receiptCollectionHttpService from "../../services/receiptCollectionHttpService";
-import { validateError } from "../general_slice";
+import { showModalSuccess, validateError } from "../general_slice";
 
 const initialState = {
   loading: false,
   data: null,
   data_detail: null,
+  approval_list_data: null,
+  approval_list_loading: false,
   dataApprovalHistory: null,
   dataListAppHierId: [],
   dataListAppHierDetail: [],
@@ -24,7 +26,7 @@ export const getPaginateException = createAsyncThunk(
   "exception/getPaginateException",
   async ({ search, page, pageSize, sort }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/exception?searchs=${search ?? ""}&page=${page - 1}&size=${pageSize}&sort=${sort || "createdDate~desc"}`;
+      const url = `/v1/dbs/api/exception?searchs=${search ?? ""}&page=${page - 1}&size=${pageSize}&sort=${sort || "exceptionId~desc"}`;
       const response = await receiptCollectionHttpService.getPagination(url);
       return response.data;
     } catch (error) {
@@ -246,9 +248,13 @@ export const getCriteriaOptionsList = createAsyncThunk(
 
 export const searchAccountForException = createAsyncThunk(
   "exception/searchAccountForException",
-  async ({ activityId, billingCycleId, billingPeriodId, page = 0, pageSize = 10 }, thunkAPI) => {
+  async ({ activityId, billingCycleId, billingPeriodId, page = 0, pageSize = 10, filters = {} }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/exception/search-account?activityId=${activityId ?? ""}&billingCycleId=${billingCycleId ?? ""}&billingPeriodId=${billingPeriodId ?? ""}&page=${page}&size=${pageSize}`;
+      let url = `/v1/dbs/api/exception/search-account?activityId=${activityId ?? ""}&billingCycleId=${billingCycleId ?? ""}&billingPeriodId=${billingPeriodId ?? ""}&page=${page}&size=${pageSize}`;
+      if (filters.customerNumber) url += `&customerNumber=${encodeURIComponent(filters.customerNumber)}`;
+      if (filters.customerName)   url += `&customerName=${encodeURIComponent(filters.customerName)}`;
+      if (filters.accountNumber)  url += `&accountNumber=${encodeURIComponent(filters.accountNumber)}`;
+      if (filters.accountName)    url += `&accountName=${encodeURIComponent(filters.accountName)}`;
       const response = await receiptCollectionHttpService.getPagination(url);
       return response.data;
     } catch (error) {
@@ -269,6 +275,52 @@ export const searchAccountByCriteriaForException = createAsyncThunk(
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(validateError({ error, action: "SEARCH_ACCOUNT_BY_CRITERIA_EXCEPTION" }));
+      return thunkAPI.rejectWithValue(error?.response?.data);
+    }
+  }
+);
+
+// ── Bulk Approve ─────────────────────────────────────────────────────────────
+
+export const getPaginateExceptionForApproval = createAsyncThunk(
+  "exception/getPaginateExceptionForApproval",
+  async ({ search = {}, page = 1, pageSize = 100, sort = "exceptionId~desc" }, thunkAPI) => {
+    try {
+      const merged = { ...search, statusApproval: "Waiting Approval" };
+      const url = `/v1/dbs/api/exception?searchs=${encodeURIComponent(JSON.stringify(merged))}&page=${page - 1}&size=${pageSize}&sort=${sort}`;
+      const response = await receiptCollectionHttpService.getPagination(url);
+      return response.data;
+    } catch (error) {
+      thunkAPI.dispatch(validateError({ error, action: "GET_PAGINATE_EXCEPTION_FOR_APPROVAL" }));
+      return thunkAPI.rejectWithValue(error?.response?.data);
+    }
+  }
+);
+
+export const bulkApproveException = createAsyncThunk(
+  "exception/bulkApproveException",
+  async (body, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/exception/bulk-approve`;
+      const response = await receiptCollectionHttpService.createData(url, body);
+      const action = body.action === "APPROVE" ? "approved" : "rejected";
+      thunkAPI.dispatch(showModalSuccess({ title: "Success", description: `Exceptions have been ${action} successfully`, return: false }));
+      return response.data;
+    } catch (error) {
+      thunkAPI.dispatch(validateError({ error, action: "BULK_APPROVE_EXCEPTION" }));
+      return thunkAPI.rejectWithValue(error?.response?.data);
+    }
+  }
+);
+
+export const checkDuplicateException = createAsyncThunk(
+  "exception/checkDuplicate",
+  async (payload, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/exception/check-duplicate`;
+      const response = await receiptCollectionHttpService.createData(url, payload);
+      return response?.data?.data;
+    } catch (error) {
       return thunkAPI.rejectWithValue(error?.response?.data);
     }
   }
@@ -457,6 +509,21 @@ const exceptionSlice = createSlice({
         state.dataListCategory = action.payload ?? [];
       })
       .addCase(getListCategory.rejected, (state) => { state.loading = false; });
+
+    // getPaginateExceptionForApproval
+    builder
+      .addCase(getPaginateExceptionForApproval.pending, (state) => { state.approval_list_loading = true; })
+      .addCase(getPaginateExceptionForApproval.fulfilled, (state, action) => {
+        state.approval_list_loading = false;
+        state.approval_list_data = action.payload;
+      })
+      .addCase(getPaginateExceptionForApproval.rejected, (state) => { state.approval_list_loading = false; });
+
+    // bulkApproveException
+    builder
+      .addCase(bulkApproveException.pending, (state) => { state.loading = true; })
+      .addCase(bulkApproveException.fulfilled, (state) => { state.loading = false; })
+      .addCase(bulkApproveException.rejected, (state) => { state.loading = false; });
   },
 });
 

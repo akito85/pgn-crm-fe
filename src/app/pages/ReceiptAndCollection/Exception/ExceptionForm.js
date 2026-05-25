@@ -1,6 +1,6 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import dayjs from "dayjs";
-import { Form, Spin, message } from "antd";
+import { Form, Spin, message, Modal } from "antd";
 import { useNavigate, useLocation } from "react-router-dom";
 import { WarningOutlined } from "@ant-design/icons";
 import { useDispatch, useSelector } from "react-redux";
@@ -26,11 +26,13 @@ import {
   getActivityList,
   getCriteriaOptionsList,
   searchAccountForException,
+  searchAccountByCriteriaForException,
   createValidasiException,
   createException,
   updateException,
   getExceptionDetailByHeaderId,
   resetBillingPeriod,
+  checkDuplicateException,
 } from "../../../../redux/slices/receipt_collection/exceptionSlice";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../routes/Receipt&Collection/rc_routes";
 import ExceptionCreate from "./ExceptionCreate";
@@ -55,11 +57,11 @@ const ExceptionForm = ({ type }) => {
     data_detail,
   } = useSelector((state) => state.exception);
 
+  const initializedRef = useRef(false);
+
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [modalBack, setModalBack] = useState(false);
   const [loadingForm, setLoadingForm] = useState(false);
-
-  const [exceptionMode, setExceptionMode] = useState("ACCOUNT");
 
   const [selectedAccounts, setSelectedAccounts] = useState([]);
   const [criteriaData, setCriteriaData] = useState([]);
@@ -111,6 +113,9 @@ const ExceptionForm = ({ type }) => {
 
   useEffect(() => {
     if (type === "update" && data_detail && Number(data_detail.id) === Number(idException)) {
+      if (initializedRef.current) return;
+      initializedRef.current = true;
+
       form.setFieldsValue({
         activity: data_detail.activityIds ?? [],
         billingCycle: data_detail.billingCycleId,
@@ -122,12 +127,9 @@ const ExceptionForm = ({ type }) => {
 
       setSelectedHierarchy(data_detail.appHierId);
 
-      // F4: use persisted exceptionMode first, then fall back to criteriaList presence
-      // (avoids wrong ACCOUNT mode after B4 fix materializes accounts for criteria exceptions)
-      const detectedMode = data_detail.exceptionMode
-        || (data_detail.criteriaList?.length > 0 ? "CRITERIA" : "ACCOUNT");
-      setExceptionMode(detectedMode);
-      setSelectedAccounts(data_detail.accounts ?? []);
+      if (!data_detail.criteriaList?.length) {
+        setSelectedAccounts(data_detail.accounts ?? []);
+      }
 
       if (data_detail.criteriaList?.length > 0) {
         // Reverse map: field name → glbTypeValId (for converting backend criteriaType back to IDs)
@@ -144,6 +146,7 @@ const ExceptionForm = ({ type }) => {
               criteriaGroupId: c.criteriaGroupId,
               startDate: c.startDate,
               endDate: c.endDate,
+              description: c.description,
               // Keep criteriaValues in the format handleSaveSubmit expects: [{glbTypeValId, value, fieldName}]
               criteriaValues: (c.criteriaValues || []).map((cv) => ({
                 glbTypeValId: fieldToCriteriaId[cv.criteriaType] ?? null,
@@ -273,14 +276,82 @@ const ExceptionForm = ({ type }) => {
           "description",
         ]);
 
-        if (exceptionMode === "ACCOUNT" && selectedAccounts.length === 0) {
-          message.error("Account Information cannot be empty. Please search and select at least one account!");
+        if (selectedAccounts.length === 0 && criteriaData.length === 0) {
+          message.error("Please fill Account Information or Criteria Information before proceeding!");
           return;
         }
 
-        if (exceptionMode === "CRITERIA" && criteriaData.length === 0) {
-          message.error("Criteria Information cannot be empty. Please add at least one criteria row!");
-          return;
+        // Criteria mode: preview how many accounts match before advancing
+        if (selectedAccounts.length === 0 && criteriaData.length > 0) {
+          const criteriaFieldMap = {
+            11: "sor", 12: "customer", 13: "subDistrict", 14: "district",
+            15: "province", 16: "costCenter", 17: "budget", 18: "industrialSector",
+            19: "customerSegment", 20: "accountGroup", 21: "serviceType",
+            22: "accountCategory", 23: "gsizes", 39: "city",
+          };
+          const criteriaRows = criteriaData.map((c) => {
+            let values = (c.criteriaValues || []).map((cv) => {
+              const id = Number(cv.glbTypeValId);
+              return { glbTypeValId: id, value: cv.value, fieldName: criteriaFieldMap[id] || cv.fieldName || "" };
+            });
+            if (!values.length) {
+              values = Object.keys(criteriaFieldMap)
+                .map((k) => {
+                  const id = Number(k);
+                  const fld = criteriaFieldMap[id];
+                  return { glbTypeValId: id, value: c[fld] ?? null, fieldName: fld };
+                })
+                .filter((v) => v.value != null && v.value !== "");
+            }
+            return { criteriaValues: values };
+          });
+          try {
+            const previewResult = await dispatch(
+              searchAccountByCriteriaForException({ criteriaRows, page: 0, size: 1 })
+            ).unwrap();
+            const totalMatched = previewResult?.page?.totalElements ?? 0;
+            if (totalMatched === 0) {
+              message.warning("No accounts match the specified criteria. Please adjust your criteria before proceeding.");
+              return;
+            }
+            if (criteriaData.length > 1) {
+              Modal.confirm({
+                title: "Multiple Criteria Warning",
+                icon: <WarningOutlined />,
+                content: `${totalMatched} account(s) match at least one of the specified criteria. Do you want to continue?`,
+                okText: "Yes, Continue",
+                cancelText: "Cancel",
+                onOk: () => setCurrentStepIndex(currentStepIndex + 1),
+              });
+              return;
+            }
+          } catch {
+            // non-blocking — proceed if preview check fails
+          }
+        }
+
+        if (type === "update") {
+          try {
+            const billingPeriodId = form.getFieldValue("billingPeriod");
+            const activityIds = [...new Set(form.getFieldValue("activity") ?? [])];
+            const accountIds = selectedAccounts
+              .map((a) => a.id ?? a.accountId)
+              .filter(Boolean);
+            const result = await dispatch(
+              checkDuplicateException({
+                currentExceptionId: idException,
+                billingPeriodId,
+                activityIds,
+                accountIds,
+              })
+            ).unwrap();
+            if (result?.isDuplicate) {
+              message.error("An exception data already exist");
+              return;
+            }
+          } catch {
+            // non-blocking — proceed if check fails
+          }
         }
 
         setCurrentStepIndex(currentStepIndex + 1);
@@ -314,7 +385,6 @@ const ExceptionForm = ({ type }) => {
   const handleClear = () => {
     form.resetFields();
     setCurrentStepIndex(0);
-    setExceptionMode("ACCOUNT");
     setSelectedAccounts([]);
     setCriteriaData([]);
     setSelectedHierarchy(null);
@@ -385,28 +455,33 @@ const ExceptionForm = ({ type }) => {
           id: c.id || null,
           startDate: c.startDate,
           endDate: c.endDate,
+          description: c.description,
           criteriaValues: values,
         };
       });
 
-      const formattedAccounts = selectedAccounts.map((a) => ({
-        accountId: a.id ?? a.accountId,
-        accountNumber: a.accountNumber,
-      }));
+      const seenAccounts = new Set();
+      const formattedAccounts = selectedAccounts
+        .map((a) => ({ accountId: a.id ?? a.accountId, accountNumber: a.accountNumber }))
+        .filter((a) => {
+          if (seenAccounts.has(a.accountNumber)) return false;
+          seenAccounts.add(a.accountNumber);
+          return true;
+        });
 
       const dataValue = {
         id: type === "update" ? idException : null,
-        activityIds: formValue.activity,
+        activityIds: [...new Set(formValue.activity ?? [])],
         billingCycleId: formValue.billingCycle,
         billingPeriodId: formValue.billingPeriod,
         startDate: formValue.startDate,
         endDate: formValue.endDate,
-        criteriaIds: formValue.criteria ?? [],
+        criteriaIds: [...new Set(formValue.criteria ?? [])],
         description: formValue.description,
         appHierId: selectedHierarchy,
         accounts: formattedAccounts,
         criteriaList: formattedCriteria,
-        exceptionMode,
+        exceptionMode: selectedAccounts.length > 0 ? "ACCOUNT" : "CRITERIA",
         isSubmit,
       };
 
@@ -469,15 +544,14 @@ const ExceptionForm = ({ type }) => {
       for (const element of listDataAttachment) {
         if (element.dataType !== "exist") {
           try {
-            const body = {
-              files: element.file,
-              fileCategoryId: element.fileCategoryId,
-              referensiId: exceptionId,
-              category: "PAYMENT_EXCEPTION",
-            };
+            const formData = new FormData();
+            formData.append("files", element.file);
+            formData.append("fileCategoryId", element.fileCategoryId);
+            formData.append("referensiId", exceptionId);
+            formData.append("category", "PAYMENT_EXCEPTION");
             const uploadResult = await receiptCollectionHttpService.uploadImage(
               `/v1/dbs/api/attachment/upload/v1`,
-              body
+              formData
             );
             if (uploadResult?.data?.id) uploadedAttachmentIds.push(uploadResult.data.id);
           } catch {
@@ -547,7 +621,7 @@ const ExceptionForm = ({ type }) => {
         </div>
 
         <Spin spinning={loading || loadingForm}>
-          <Form layout="vertical" form={form} preserve={true}>
+          <Form layout="vertical" form={form} preserve={true} size="small">
             {/* Step 0 — Exception Information */}
             <div className={currentStepIndex !== 0 ? "hidden" : ""}>
               <ExceptionCreate
@@ -564,8 +638,6 @@ const ExceptionForm = ({ type }) => {
                 onBillingCycleChange={handleBillingCycleChange}
                 onSearchAccount={handleSearchAccount}
                 loadingAccount={loading}
-                exceptionMode={exceptionMode}
-                onExceptionModeChange={setExceptionMode}
               />
             </div>
 

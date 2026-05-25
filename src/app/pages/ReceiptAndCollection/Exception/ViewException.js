@@ -7,6 +7,8 @@ import ButtonComponent from "../../../../components/ButtonComponent";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../routes/Receipt&Collection/rc_routes";
 import SVGIcon from "../../../../assets/Icon/index";
 import { Checkbox, Spin, Tooltip } from "antd";
+import { debounce } from "lodash";
+import { UpOutlined, DownOutlined } from "@ant-design/icons";
 import { DownloadOutlined } from "@ant-design/icons";
 import TableRBI from "../../../../components/TableRBI";
 import {
@@ -17,9 +19,10 @@ import {
   getDownloadException,
   getAllApprovalListException,
   getListApprovalByIdException,
-  resetDetail,
+  resetDetail
 } from "../../../../redux/slices/receipt_collection/exceptionSlice";
 import ExceptionDetailPanel from "./_components/ExceptionDetailPanel";
+import ModalBulkApproveException from "./_components/ModalBulkApproveException";
 import ModalInactivateWithHierarchy from "../../../../components/Modal/ModalInactivateWithHierarchy";
 import {
   getColumnSearchPropsUseFilteredValue,
@@ -29,6 +32,7 @@ import { useTryAgainHooks } from "../../../../utils/useTryAgainHooks";
 import Toolbar from "../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
 import { disabledActionByStatus, hasValue, renderColumn } from "../../../../utils";
+import StatusComponent from "../../../../components/StatusComponent";
 import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 
 export const columnsException = (
@@ -106,7 +110,7 @@ export const columnsException = (
     dataIndex: "sor",
     key: "sor",
     sorter: true,
-    align: "left",
+    align: "center",
     filteredValue: [search?.sor] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search, "sor", searchInput, searchedColumn, searchText, handleSearch, true
@@ -119,7 +123,7 @@ export const columnsException = (
     dataIndex: "costCenter",
     key: "costCenter",
     sorter: true,
-    align: "left",
+    align: "center",
     filteredValue: [search?.costCenter] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search, "costCenter", searchInput, searchedColumn, searchText, handleSearch, true
@@ -132,7 +136,7 @@ export const columnsException = (
     dataIndex: "accountSegment",
     key: "accountSegment",
     sorter: true,
-    align: "left",
+    align: "center",
     filteredValue: [search?.accountSegment] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search, "accountSegment", searchInput, searchedColumn, searchText, handleSearch, true
@@ -145,7 +149,7 @@ export const columnsException = (
     dataIndex: "accountGroupType",
     key: "accountGroupType",
     sorter: true,
-    align: "left",
+    align: "center",
     filteredValue: [search?.accountGroupType] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search, "accountGroupType", searchInput, searchedColumn, searchText, handleSearch, true
@@ -158,7 +162,7 @@ export const columnsException = (
     dataIndex: "meterReadingCode",
     key: "meterReadingCode",
     sorter: true,
-    align: "left",
+    align: "center",
     filteredValue: [search?.meterReadingCode] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search, "meterReadingCode", searchInput, searchedColumn, searchText, handleSearch, true
@@ -171,7 +175,7 @@ export const columnsException = (
     dataIndex: "accountType",
     key: "accountType",
     sorter: true,
-    align: "left",
+    align: "center",
     filteredValue: [search?.accountType] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search, "accountType", searchInput, searchedColumn, searchText, handleSearch, true
@@ -184,7 +188,7 @@ export const columnsException = (
     dataIndex: "accountStatus",
     key: "accountStatus",
     sorter: true,
-    align: "left",
+    align: "center",
     filteredValue: [search?.accountStatus] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search, "accountStatus", searchInput, searchedColumn, searchText, handleSearch, true
@@ -197,7 +201,7 @@ export const columnsException = (
     dataIndex: "customerSegment",
     key: "customerSegment",
     sorter: true,
-    align: "left",
+    align: "center",
     filteredValue: [search?.customerSegment] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search, "customerSegment", searchInput, searchedColumn, searchText, handleSearch, true
@@ -210,7 +214,7 @@ export const columnsException = (
     dataIndex: "corporateCustomer",
     key: "corporateCustomer",
     sorter: true,
-    align: "left",
+    align: "center",
     filteredValue: [search?.corporateCustomer] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search, "corporateCustomer", searchInput, searchedColumn, searchText, handleSearch, true
@@ -223,7 +227,7 @@ export const columnsException = (
     dataIndex: "classificationType",
     key: "classificationType",
     sorter: true,
-    align: "left",
+    align: "center",
     filteredValue: [search?.classificationType] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search, "classificationType", searchInput, searchedColumn, searchText, handleSearch, true
@@ -236,7 +240,7 @@ export const columnsException = (
     dataIndex: "activity",
     key: "activity",
     sorter: true,
-    align: "left",
+    align: "center",
     filteredValue: [search?.activity] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search, "activity", searchInput, searchedColumn, searchText, handleSearch, true
@@ -249,7 +253,7 @@ export const columnsException = (
     dataIndex: "billingCycle",
     key: "billingCycle",
     sorter: true,
-    align: "left",
+    align: "center",
     filteredValue: [search?.billingCycle] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search, "billingCycle", searchInput, searchedColumn, searchText, handleSearch, true
@@ -262,7 +266,7 @@ export const columnsException = (
     dataIndex: "billingPeriod",
     key: "billingPeriod",
     sorter: true,
-    align: "left",
+    align: "center",
     filteredValue: [search?.billingPeriod] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search, "billingPeriod", searchInput, searchedColumn, searchText, handleSearch, true
@@ -316,12 +320,16 @@ export const columnsException = (
     sorter: true,
     fixed: "right",
     width: 150,
+    align: "center",
     filteredValue: [search?.status] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search, "status", searchInput, searchedColumn, searchText, handleSearch, true
     ),
-    render: (text) =>
-      renderColumn("status", hasValue(search["status"]), searchText, text, false, "status", search),
+    render: (text) => (
+      <div className="flex justify-center">
+        <StatusComponent colour={text}>{text?.toUpperCase()}</StatusComponent>
+      </div>
+    ),
   },
   {
     key: "statusApproval",
@@ -330,12 +338,16 @@ export const columnsException = (
     sorter: true,
     fixed: "right",
     width: 150,
+    align: "center",
     filteredValue: [search?.statusApproval] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search, "statusApproval", searchInput, searchedColumn, searchText, handleSearch, true
     ),
-    render: (text) =>
-      renderColumn("statusApproval", hasValue(search["statusApproval"]), searchText, text, false, "status", search),
+    render: (text) => (
+      <div className="flex justify-center">
+        <StatusComponent colour={text}>{text?.toUpperCase()}</StatusComponent>
+      </div>
+    ),
   },
 ];
 
@@ -353,8 +365,7 @@ const ViewException = () => {
   const { bodyError } = useSelector((state) => state?.general);
   const dispatch = useDispatch();
 
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize] = useState(20);
   const searchInput = useRef(null);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
@@ -367,42 +378,123 @@ const ViewException = () => {
   const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
   const [body, setBody] = useState({});
   const [selectedRecord, setSelectedRecord] = useState(null);
+  const [detailCollapsed, setDetailCollapsed] = useState(false);
+  const [openBulkApprove, setOpenBulkApprove] = useState(false);
   const [fixedColumns, setFixedColumns] = useState(() => ({
     left: ["no"],
     right: ["status", "statusApproval", "action"],
   }));
 
-  const handleFetch = useCallback(() => {
-    dispatch(
-      getPaginateException({
-        search: encodeURIComponent(JSON.stringify(search)),
-        page,
-        pageSize,
-        sort,
-      })
-    );
-  }, [dispatch, page, pageSize, search, sort]);
+  // Infinite scroll state
+  const [allData, setAllData] = useState([]);
+  const [hasMore, setHasMore] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const pageRef = useRef(0);
+  const isFetchingRef = useRef(false);
+  const hasMoreRef = useRef(false);
+
+  const fetchPage = useCallback(
+    async (page, replace = false, signal = null) => {
+      if (isFetchingRef.current) return;
+      if (signal?.aborted) return;
+      isFetchingRef.current = true;
+      setIsLoading(true);
+      try {
+        const result = await dispatch(
+          getPaginateException({
+            search: encodeURIComponent(JSON.stringify(search)),
+            page: page + 1,
+            pageSize,
+            sort,
+          })
+        ).unwrap();
+        if (signal?.aborted) return;
+        const rows = result?.result ?? [];
+        const pageInfo = result?.page ?? {};
+        const nextHasMore = page < (pageInfo.totalPages ?? 0) - 1;
+        setAllData((prev) => (replace ? rows : [...prev, ...rows]));
+        setHasMore(nextHasMore);
+        hasMoreRef.current = nextHasMore;
+        pageRef.current = page;
+      } catch (e) {
+        if (!signal?.aborted) console.error("fetchPage error", e);
+      } finally {
+        isFetchingRef.current = false;
+        if (!signal?.aborted) setIsLoading(false);
+      }
+    },
+    [dispatch, search, pageSize, sort]
+  );
 
   useEffect(() => {
-    handleFetch();
-  }, [handleFetch]);
+    const signal = { aborted: false };
+    pageRef.current = 0;
+    setAllData([]);
+    setHasMore(false);
+    setIsLoading(true);
+    fetchPage(0, true, signal);
+    return () => {
+      signal.aborted = true;
+      isFetchingRef.current = false;
+    };
+  }, [search, sort]); // intentionally excludes fetchPage
+
+  const onLoadMore = useCallback(() => {
+    if (!hasMoreRef.current || isFetchingRef.current) return Promise.resolve();
+    return fetchPage(pageRef.current + 1, false);
+  }, [fetchPage]);
+
+  // Auto-load next page if the table body has no scrollable overflow after data loads
+  useEffect(() => {
+    if (!hasMore || allData.length === 0) return;
+    const timer = setTimeout(() => {
+      const tableBody = document.querySelector("#exception-list .ant-table-body");
+      if (tableBody && tableBody.scrollHeight <= tableBody.clientHeight + 5) {
+        onLoadMore();
+      }
+    }, 150);
+    return () => clearTimeout(timer);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allData, hasMore]);
+
+  const handleFetch = useCallback(() => {
+    const signal = { aborted: false };
+    pageRef.current = 0;
+    setAllData([]);
+    setHasMore(false);
+    setIsLoading(true);
+    fetchPage(0, true, signal);
+  }, [fetchPage]);
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
-    setSearch((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
-      }
-      return { ...prevState, [dataIndex]: selectedKeys[0] };
-    });
+    setSearch((prevState) => ({
+      ...prevState,
+      [dataIndex]: selectedKeys[0],
+    }));
   };
 
-  const handleChange = (p, ps) => {
-    setPage(p);
-    setPageSize(ps);
-  };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const handleGlobalSearch = useCallback(
+    debounce((value) => {
+      setSearch((prev) => {
+        const next = { ...prev };
+        if (value) {
+          next.all = value;
+        } else {
+          delete next.all;
+        }
+        return next;
+      });
+    }, 500),
+    []
+  );
+
+  useEffect(() => () => handleGlobalSearch.cancel(), [handleGlobalSearch]);
+
+  const handleChange = () => {};
 
   const handleInactive = (r) => {
     setOpenModalInactivate(true);
@@ -442,27 +534,14 @@ const ViewException = () => {
   useEffect(() => {
     if (dataApprovalHistory?.dataApprover) {
       const temp = {
-        dataApprover: {
-          create: dataApprovalHistory?.dataApprover?.EXCEPTION || [],
-          inactive: dataApprovalHistory?.dataApprover?.INACTIVE_EXCEPTION || [],
-        },
-        dataHistory: {
-          create: dataApprovalHistory?.dataHistory?.EXCEPTION || [],
-          inactive: dataApprovalHistory?.dataHistory?.INACTIVE_EXCEPTION || [],
-        },
+        dataApprover: dataApprovalHistory?.dataApprover?.EXCEPTION || [],
+        dataHistory: dataApprovalHistory?.dataHistory?.EXCEPTION || [],
       };
       setDataApprovalHistoryFix(temp);
     } else {
       setDataApprovalHistoryFix({});
     }
   }, [dataApprovalHistory]);
-
-  const handleOptions = () => {
-    const historyData = dataApprovalHistoryFix?.dataApprover || {};
-    return Object.keys(historyData).map((item) => ({
-      value: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase(),
-    }));
-  };
 
   const handleApprovalHistory = async (recordData) => {
     try {
@@ -475,8 +554,13 @@ const ViewException = () => {
   };
 
   const handleViewDetail = (record) => {
-    setSelectedRecord(record);
-    dispatch(getExceptionDetail(record.excAccountId));
+    if (selectedRecord?.excAccountId === record.excAccountId) {
+      setDetailCollapsed((c) => !c);
+    } else {
+      setSelectedRecord(record);
+      setDetailCollapsed(false);
+      dispatch(getExceptionDetail(record.excAccountId));
+    }
   };
 
   useEffect(() => {
@@ -494,7 +578,7 @@ const ViewException = () => {
     dispatch(
       getDownloadException({
         search: encodeURIComponent(JSON.stringify(search)),
-        page,
+        page: pageRef.current + 1,
         pageSize,
         sort,
       })
@@ -507,6 +591,18 @@ const ViewException = () => {
   ];
 
   const itemActions = [
+    {
+      action: "approve",
+      render: (
+        <ButtonComponent
+          onClick={() => setOpenBulkApprove(true)}
+          type="submit"
+          icon={<SVGIcon name="IconApprove" width={24} color={"#ffffff"} />}
+        >
+          Approval
+        </ButtonComponent>
+      ),
+    },
     {
       action: "Download",
       render: (
@@ -531,17 +627,6 @@ const ViewException = () => {
             Create
           </ButtonComponent>
         </NavLink>
-      ),
-    },
-    {
-      action: "View",
-      type: "table",
-      render: (record) => (
-        <Tooltip title="Detail">
-          <div className="pt-0" onClick={() => handleViewDetail(record)} style={{ cursor: "pointer" }}>
-            <SVGIcon name="IconDetail" width={24} />
-          </div>
-        </Tooltip>
       ),
     },
     {
@@ -596,57 +681,6 @@ const ViewException = () => {
       },
     },
     {
-      action: "Activate",
-      type: "table",
-      render: (record, data) => {
-        const statusLowerCase = record?.status?.toLowerCase();
-        const isDisabled = disabledActionByStatus(
-          "activate",
-          record?.status,
-          record?.statusApproval
-        );
-        const Content =
-          data > 3 ? (
-            <ButtonComponent
-              icon={
-                <Checkbox
-                  className="inactive-check"
-                  onClick={() => handleInactive(record)}
-                  disabled={isDisabled}
-                  checked={record?.status !== "Active"}
-                />
-              }
-              type={"action"}
-              border={false}
-              disabled={isDisabled}
-              onClick={() => handleInactive(record)}
-            >
-              <span className="text-black ml-1">
-                {record?.status === "Active" ? "Inactivate" : "Activate"}
-              </span>
-            </ButtonComponent>
-          ) : (
-            <Tooltip
-              title={
-                statusLowerCase === "active" || statusLowerCase === "draft"
-                  ? "Inactivate"
-                  : "Activate"
-              }
-            >
-              <div className="pt-1">
-                <Checkbox
-                  className="inactive-check"
-                  onClick={() => handleInactive(record)}
-                  checked={record?.status !== "Active"}
-                  disabled={isDisabled}
-                />
-              </div>
-            </Tooltip>
-          );
-        return Content;
-      },
-    },
-    {
       action: "history",
       type: "table",
       render: (record, data) =>
@@ -691,14 +725,14 @@ const ViewException = () => {
   };
 
   const actionCols = useColumnActionPermission(
-    ["view", "update", "history"],
+    ["update", "history"],
     itemActions
   );
 
   const allColumns = useMemo(() => {
     return [
       ...columnsException(
-        page,
+        1,
         pageSize,
         searchInput,
         searchedColumn,
@@ -713,7 +747,7 @@ const ViewException = () => {
       ...col,
       key: col.key || col.dataIndex || col.title,
     }));
-  }, [actionCols, page, pageSize, search, searchText, searchedColumn]);
+  }, [actionCols, pageSize, search, searchText, searchedColumn]);
 
   const processedColumns = useMemo(() => {
     return applyFixedColumns(allColumns, fixedColumns);
@@ -723,7 +757,7 @@ const ViewException = () => {
 
   return (
     <>
-      <Spin spinning={loading}>
+      <Spin spinning={isLoading}>
         <BreadCrumb routes={routes} />
 
         <CardContainer
@@ -735,19 +769,29 @@ const ViewException = () => {
           }
         >
           <TableRBI
-            dataSource={data?.result}
+            dataSource={allData}
             pageSize={pageSize}
             showExport={true}
             handleDownload={handleDownload}
             columns={processedColumns}
-            current={page}
             onChange={handleChange}
             onSizeChanger={handleChange}
-            totalData={data?.page?.totalElements}
             onSort={onSort}
+            onSearch={(e) => handleGlobalSearch(e.target.value)}
             tableScrolled={{ x: "max-content", y: 525 }}
             fixedColumns={fixedColumns}
             setFixedColumns={setFixedColumns}
+            useInfiniteScroll={true}
+            onLoadMore={onLoadMore}
+            hasMore={hasMore}
+            idTable="exception-list"
+            onRow={(record) => ({
+              onClick: () => handleViewDetail(record),
+              style: { cursor: "pointer" },
+            })}
+            rowClassName={(record) =>
+              record.excAccountId === selectedRecord?.excAccountId ? "bg-blue-50" : ""
+            }
           />
         </CardContainer>
 
@@ -756,23 +800,27 @@ const ViewException = () => {
           <CardContainer
             header={
               <div className="flex -my-4 justify-between items-center">
-                <p className="mt-[15px] font-bold text-primary">EXCEPTION DETAIL</p>
-                <ButtonComponent
-                  type="default"
-                  onClick={handleCloseDetail}
-                  className="mt-[10px]"
-                >
-                  Close
-                </ButtonComponent>
+                <p className="mt-[15px] font-bold text-primary">DETAIL EXCEPTION</p>
+                <div className="flex items-center gap-3 mt-[10px]">
+                  <span
+                    className="cursor-pointer text-gray-500"
+                    onClick={() => setDetailCollapsed((c) => !c)}
+                  >
+                    {detailCollapsed ? <DownOutlined /> : <UpOutlined />}
+                  </span>
+                </div>
               </div>
             }
           >
-            <ExceptionDetailPanel
-              data_detail={data_detail}
-              dataListAppHierDetail={dataListAppHierDetail}
-              appHierOptions={appHierOptions}
-              loading={loading}
-            />
+            {!detailCollapsed && (
+              <ExceptionDetailPanel
+                data_detail={data_detail}
+                selectedRecord={selectedRecord ?? {}}
+                dataListAppHierDetail={dataListAppHierDetail}
+                appHierOptions={appHierOptions}
+                loading={loading}
+              />
+            )}
           </CardContainer>
         )}
 
@@ -792,13 +840,18 @@ const ViewException = () => {
           handleClose={() => setOpenModalHistory(false)}
           header="Approval History"
           width={850}
-          tabOptions={handleOptions()}
           dataApprover={dataApprovalHistoryFix?.dataApprover}
           dataHistory={dataApprovalHistoryFix?.dataHistory}
         />
 
         {renderModal()}
       </Spin>
+
+      <ModalBulkApproveException
+        isOpen={openBulkApprove}
+        handleClose={() => setOpenBulkApprove(false)}
+        onSuccess={handleFetch}
+      />
     </>
   );
 };

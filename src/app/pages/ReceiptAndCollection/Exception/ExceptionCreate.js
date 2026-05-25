@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
-import { DatePicker, Form, Modal, Spin, Tooltip, Select, Segmented } from "antd";
-import { WarningOutlined, DeleteOutlined } from "@ant-design/icons";
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { DatePicker, Form, Modal, Spin, Tooltip, Select, Checkbox, Tag } from "antd";
+import { DeleteOutlined } from "@ant-design/icons";
 import { useDispatch, useSelector } from "react-redux";
 import CardContainer from "../../../../components/CardContainer";
 import InputComponent from "../../../../components/InputComponent";
@@ -8,6 +8,7 @@ import SelectComponent from "../../../../components/SelectComponent";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import TableRBI from "../../../../components/TableRBI";
 import { formMessageRequired } from "../../../../utils";
+import { getColumnSearchProps } from "../../../../utils/getColumnSearchProps";
 import SVGIcon from "../../../../assets/Icon/index";
 import {
   getBudget,
@@ -25,6 +26,7 @@ import {
   getCustomerSegment,
   getCustomer,
 } from "../../../../redux/slices/rating_billing_invoice/MasterData/billingBucket";
+import { searchAccountForException } from "../../../../redux/slices/receipt_collection/exceptionSlice";
 import dayjs from "dayjs";
 
 const ExceptionCreate = ({
@@ -41,8 +43,6 @@ const ExceptionCreate = ({
   onBillingCycleChange,
   onSearchAccount,
   loadingAccount = false,
-  exceptionMode = "ACCOUNT",
-  onExceptionModeChange,
 }) => {
   const dispatch = useDispatch();
   const {
@@ -65,7 +65,92 @@ const ExceptionCreate = ({
   const [editingKey, setEditingKey] = useState("");
   const [tempRow, setTempRow] = useState(null);
   const [pendingMode, setPendingMode] = useState(null);
-  const [modalSwitchMode, setModalSwitchMode] = useState(false);
+  const [periodStartDate, setPeriodStartDate] = useState(null);
+
+  const [allAccounts, setAllAccounts] = useState([]);
+  const [hasMoreAccounts, setHasMoreAccounts] = useState(false);
+  const accountPageRef = useRef(0);
+  const isFetchingAccountsRef = useRef(false);
+  const hasMoreAccountsRef = useRef(false);
+  const isLoadMoreRef = useRef(false);
+  const lastAccountSearchParamsRef = useRef(null);
+
+  const accountSearchInput = useRef(null);
+  const [accountSearchedColumn, setAccountSearchedColumn] = useState("");
+  const [accountSearchText, setAccountSearchText] = useState("");
+  const [accountModalGlobalFilter, setAccountModalGlobalFilter] = useState("");
+  const [accountColumnFilters, setAccountColumnFilters] = useState({});
+
+  useEffect(() => {
+    if (!dataAccountSearch) return;
+    const rows = (dataAccountSearch.result ?? []).map((a) => ({ ...a, key: a.accountNumber ?? a.id }));
+    const totalPages = dataAccountSearch.page?.totalPages ?? 0;
+    const nextHasMore = accountPageRef.current < totalPages - 1;
+    setAllAccounts((prev) => (isLoadMoreRef.current ? [...prev, ...rows] : rows));
+    setHasMoreAccounts(nextHasMore);
+    hasMoreAccountsRef.current = nextHasMore;
+    isFetchingAccountsRef.current = false;
+  }, [dataAccountSearch]);
+
+  // Auto-load next page if table body content doesn't produce a scrollbar
+  useEffect(() => {
+    if (!hasMoreAccounts || allAccounts.length === 0) return;
+    const timer = setTimeout(() => {
+      const tableBody = document.querySelector("#exception-account-search .ant-table-body");
+      if (tableBody && tableBody.scrollHeight <= tableBody.clientHeight + 5) {
+        handleLoadMoreAccounts();
+      }
+    }, 150);
+    return () => clearTimeout(timer);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allAccounts, hasMoreAccounts]);
+
+  const handleLoadMoreAccounts = useCallback(() => {
+    if (!hasMoreAccountsRef.current || isFetchingAccountsRef.current) return Promise.resolve();
+    if (!lastAccountSearchParamsRef.current) return Promise.resolve();
+    isFetchingAccountsRef.current = true;
+    isLoadMoreRef.current = true;
+    const nextPage = accountPageRef.current + 1;
+    accountPageRef.current = nextPage;
+    const { activityId, billingCycleId, billingPeriodId, columnFilters = {} } = lastAccountSearchParamsRef.current;
+    return dispatch(searchAccountForException({
+      activityId: Array.isArray(activityId) ? activityId.join(",") : activityId,
+      billingCycleId,
+      billingPeriodId,
+      page: nextPage,
+      pageSize: 10,
+      filters: columnFilters,
+    }));
+  }, [dispatch]);
+
+  const handleAccountColumnSearch = (selectedKeys, confirm, dataIndex) => {
+    confirm();
+    setAccountSearchText(selectedKeys[0]);
+    setAccountSearchedColumn(selectedKeys[0] ? dataIndex : "");
+    // Build updated filters
+    const next = { ...accountColumnFilters };
+    if (selectedKeys[0]) { next[dataIndex] = selectedKeys[0]; } else { delete next[dataIndex]; }
+    setAccountColumnFilters(next);
+    // Reset pagination state
+    accountPageRef.current = 0;
+    isLoadMoreRef.current = false;
+    isFetchingAccountsRef.current = false;
+    hasMoreAccountsRef.current = false;
+    setAllAccounts([]);
+    setHasMoreAccounts(false);
+    // Store updated filters in ref for load-more continuity
+    const params = lastAccountSearchParamsRef.current;
+    if (!params) return;
+    lastAccountSearchParamsRef.current = { ...params, columnFilters: next };
+    dispatch(searchAccountForException({
+      activityId: Array.isArray(params.activityId) ? params.activityId.join(",") : params.activityId,
+      billingCycleId: params.billingCycleId,
+      billingPeriodId: params.billingPeriodId,
+      page: 0,
+      pageSize: 10,
+      filters: next,
+    }));
+  };
 
   const activityValue = Form.useWatch("activity", form);
   const billingCycleValue = Form.useWatch("billingCycle", form);
@@ -73,31 +158,31 @@ const ExceptionCreate = ({
   const criteriaValue = Form.useWatch("criteria", form) ?? [];
 
   const canSearch =
-    activityValue?.length > 0 && billingCycleValue && billingPeriodValue;
+    activityValue?.length > 0 && billingCycleValue && billingPeriodValue && criteriaData.length === 0;
+
+  const filteredAccounts = accountModalGlobalFilter
+    ? allAccounts.filter((row) =>
+        Object.values(row).some(
+          (v) => typeof v === "string" && v.toLowerCase().includes(accountModalGlobalFilter.toLowerCase())
+        )
+      )
+    : allAccounts;
 
   useEffect(() => {
     if (!billingPeriodValue) {
-      form.setFieldsValue({
-        startDate: null,
-        endDate: null,
-      });
+      form.setFieldsValue({ startDate: null, endDate: null });
+      setPeriodStartDate(null);
       return;
     }
 
     const selectedBillingPeriod = dataBillingPeriod.find(
-        (item) => (item.id ?? item.periodId) === billingPeriodValue
+      (item) => (item.id ?? item.periodId) === billingPeriodValue
     );
 
     if (selectedBillingPeriod) {
-      form.setFieldsValue({
-        startDate: selectedBillingPeriod.startDate
-            ? dayjs(selectedBillingPeriod.startDate)
-            : null,
-
-        endDate: selectedBillingPeriod.endDate
-            ? dayjs(selectedBillingPeriod.endDate)
-            : null,
-      });
+      const start = selectedBillingPeriod.startDate ? dayjs(selectedBillingPeriod.startDate) : null;
+      setPeriodStartDate(start);
+      form.setFieldsValue({ startDate: start, endDate: null });
     }
   }, [billingPeriodValue, dataBillingPeriod, form]);
 
@@ -161,43 +246,69 @@ const ExceptionCreate = ({
     return config.options ?? [];
   };
 
-  const handleModeChangeRequest = (newMode) => {
-    if (newMode === exceptionMode) return;
-    const hasAccountData = selectedAccounts.length > 0;
-    const hasCriteriaData = criteriaData.length > 0;
-    if ((exceptionMode === "ACCOUNT" && hasAccountData) || (exceptionMode === "CRITERIA" && hasCriteriaData)) {
-      setPendingMode(newMode);
-      setModalSwitchMode(true);
-    } else {
-      onExceptionModeChange(newMode);
-    }
+  const primaryTagStyle = {
+    backgroundColor: "var(--primary)",
+    color: "white",
+    border: "none",
+    borderRadius: "4px",
+    maxWidth: 130,
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
+    marginRight: 4,
   };
 
-  const handleModeConfirm = () => {
-    if (pendingMode === "ACCOUNT") {
-      setCriteriaData([]);
-      form.setFieldsValue({ criteria: [] });
-    } else if (pendingMode === "CRITERIA") {
-      setSelectedAccounts([]);
-    }
-    onExceptionModeChange(pendingMode);
-    setModalSwitchMode(false);
-    setPendingMode(null);
+  const activityTagRender = ({ value, closable, onClose }) => {
+    const found = dataActivity.find((a) => a.glbTypeValId === value);
+    const label = found ? (found.glbValue ?? found.name) : String(value);
+    return (
+      <Tag closable={closable} onMouseDown={(e) => e.preventDefault()} onClose={onClose} style={primaryTagStyle}>
+        {label}
+      </Tag>
+    );
   };
 
-  const handleBillingCycleChange = (value) => {
+  const criteriaTagRender = ({ value, closable, onClose }) => {
+    const found = dataCriteriaOptions.find((a) => a.glbTypeValId === value);
+    const label = found ? (found.name ?? found.glbValue) : String(value);
+    return (
+      <Tag closable={closable} onMouseDown={(e) => e.preventDefault()} onClose={onClose} style={primaryTagStyle}>
+        {label}
+      </Tag>
+    );
+  };
+
+  const billingCycleFirstRenderRef = useRef(true);
+  useEffect(() => {
+    if (billingCycleFirstRenderRef.current) {
+      billingCycleFirstRenderRef.current = false;
+      return;
+    }
     form.setFieldsValue({ billingPeriod: undefined });
-    if (onBillingCycleChange) onBillingCycleChange(value);
-  };
+    if (onBillingCycleChange) onBillingCycleChange(billingCycleValue);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [billingCycleValue]);
+
 
   const handleOpenSearchAccount = () => {
     setSelectedRowKeys(selectedAccounts.map((a) => a.accountNumber));
     setTempSelectedRows([...selectedAccounts]);
-    onSearchAccount({
+    const params = {
       activityId: activityValue,
       billingCycleId: billingCycleValue,
       billingPeriodId: billingPeriodValue,
-    });
+    };
+    lastAccountSearchParamsRef.current = { activityId: activityValue, billingCycleId: billingCycleValue, billingPeriodId: billingPeriodValue, columnFilters: {} };
+    isLoadMoreRef.current = false;
+    accountPageRef.current = 0;
+    isFetchingAccountsRef.current = false;
+    setAllAccounts([]);
+    setHasMoreAccounts(false);
+    hasMoreAccountsRef.current = false;
+    setAccountColumnFilters({});
+    setAccountSearchText("");
+    setAccountSearchedColumn("");
+    onSearchAccount({ activityId: activityValue, billingCycleId: billingCycleValue, billingPeriodId: billingPeriodValue });
     setModalSearchAccount(true);
   };
 
@@ -213,54 +324,21 @@ const ExceptionCreate = ({
   };
 
   const accountSearchColumns = [
-    {
-      title: "ACCOUNT NUMBER",
-      dataIndex: "accountNumber",
-      key: "accountNumber",
-      align: "left",
-    },
-    {
-      title: "ACCOUNT NAME",
-      dataIndex: "accountName",
-      key: "accountName",
-      align: "left",
-    },
-    {
-      title: "CUSTOMER NUMBER",
-      dataIndex: "customerNumber",
-      key: "customerNumber",
-      align: "left",
-    },
-    {
-      title: "CUSTOMER NAME",
-      dataIndex: "customerName",
-      key: "customerName",
-      align: "left",
-    },
-    {
-      title: "SOR",
-      dataIndex: "sor",
-      key: "sor",
-      align: "left",
-    },
-    {
-      title: "COST CENTER",
-      dataIndex: "costCenter",
-      key: "costCenter",
-      align: "left",
-    },
-    {
-      title: "ACCOUNT SEGMENT",
-      dataIndex: "accountSegment",
-      key: "accountSegment",
-      align: "left",
-    },
-    {
-      title: "ACCOUNT GROUP TYPE",
-      dataIndex: "accountGroupType",
-      key: "accountGroupType",
-      align: "left",
-    },
+    { title: "NO", key: "no", width: 60, align: "left", render: (_, __, index) => index + 1 },
+    { title: "CUSTOMER NUMBER", dataIndex: "customerNumber", key: "customerNumber", align: "left", ...getColumnSearchProps("customerNumber", accountSearchInput, accountSearchedColumn, accountSearchText, handleAccountColumnSearch), onFilter: () => true },
+    { title: "CUSTOMER NAME", dataIndex: "customerName", key: "customerName", align: "left", ...getColumnSearchProps("customerName", accountSearchInput, accountSearchedColumn, accountSearchText, handleAccountColumnSearch), onFilter: () => true },
+    { title: "ACCOUNT NUMBER", dataIndex: "accountNumber", key: "accountNumber", align: "left", ...getColumnSearchProps("accountNumber", accountSearchInput, accountSearchedColumn, accountSearchText, handleAccountColumnSearch), onFilter: () => true },
+    { title: "ACCOUNT NAME", dataIndex: "accountName", key: "accountName", align: "left", ...getColumnSearchProps("accountName", accountSearchInput, accountSearchedColumn, accountSearchText, handleAccountColumnSearch), onFilter: () => true },
+    { title: "SOR", dataIndex: "sor", key: "sor", align: "left", ...getColumnSearchProps("sor", accountSearchInput, accountSearchedColumn, accountSearchText, handleAccountColumnSearch), onFilter: () => true },
+    { title: "COST CENTER", dataIndex: "costCenter", key: "costCenter", align: "left", ...getColumnSearchProps("costCenter", accountSearchInput, accountSearchedColumn, accountSearchText, handleAccountColumnSearch), onFilter: () => true },
+    { title: "ACCOUNT SEGMENT", dataIndex: "accountSegment", key: "accountSegment", align: "left", ...getColumnSearchProps("accountSegment", accountSearchInput, accountSearchedColumn, accountSearchText, handleAccountColumnSearch), onFilter: () => true },
+    { title: "ACCOUNT GROUP TYPE", dataIndex: "accountGroupType", key: "accountGroupType", align: "left", ...getColumnSearchProps("accountGroupType", accountSearchInput, accountSearchedColumn, accountSearchText, handleAccountColumnSearch), onFilter: () => true },
+    { title: "METER READING CODE", dataIndex: "meterReadingCode", key: "meterReadingCode", align: "left", ...getColumnSearchProps("meterReadingCode", accountSearchInput, accountSearchedColumn, accountSearchText, handleAccountColumnSearch), onFilter: () => true },
+    { title: "ACCOUNT TYPE", dataIndex: "accountType", key: "accountType", align: "left", ...getColumnSearchProps("accountType", accountSearchInput, accountSearchedColumn, accountSearchText, handleAccountColumnSearch), onFilter: () => true },
+    { title: "ACCOUNT STATUS", dataIndex: "accountStatus", key: "accountStatus", align: "left", ...getColumnSearchProps("accountStatus", accountSearchInput, accountSearchedColumn, accountSearchText, handleAccountColumnSearch), onFilter: () => true },
+    { title: "CUSTOMER SEGMENT", dataIndex: "customerSegment", key: "customerSegment", align: "left", ...getColumnSearchProps("customerSegment", accountSearchInput, accountSearchedColumn, accountSearchText, handleAccountColumnSearch), onFilter: () => true },
+    { title: "CORPORATE CUSTOMER", dataIndex: "corporateCustomer", key: "corporateCustomer", align: "left", ...getColumnSearchProps("corporateCustomer", accountSearchInput, accountSearchedColumn, accountSearchText, handleAccountColumnSearch), onFilter: () => true },
+    { title: "CLASSIFICATION TYPE", dataIndex: "classificationType", key: "classificationType", align: "left", ...getColumnSearchProps("classificationType", accountSearchInput, accountSearchedColumn, accountSearchText, handleAccountColumnSearch), onFilter: () => true },
   ];
 
   const accountInfoColumns = [
@@ -285,12 +363,6 @@ const ExceptionCreate = ({
     { title: "CUSTOMER SEGMENT", dataIndex: "customerSegment", key: "customerSegment", align: "left" },
     { title: "CORPORATE CUSTOMER", dataIndex: "corporateCustomer", key: "corporateCustomer", align: "left" },
     { title: "CLASSIFICATION TYPE", dataIndex: "classificationType", key: "classificationType", align: "left" },
-    { title: "ACTIVITY", dataIndex: "activity", key: "activity", align: "left" },
-    { title: "BILLING CYCLE", dataIndex: "billingCycle", key: "billingCycle", align: "left" },
-    { title: "BILLING PERIOD", dataIndex: "billingPeriod", key: "billingPeriod", align: "left" },
-    { title: "START DATE", dataIndex: "startDate", key: "startDate", align: "left" },
-    { title: "END DATE", dataIndex: "endDate", key: "endDate", align: "left" },
-    { title: "DESCRIPTION", dataIndex: "description", key: "description", align: "left" },
     {
       title: "ACTION",
       key: "action",
@@ -408,6 +480,7 @@ const ExceptionCreate = ({
       key: Date.now(),
       startDate: null,
       endDate: null,
+      description: null,
     };
     setCriteriaData((prev) => [...prev, newRow]);
     setEditingKey(newRow.key);
@@ -564,7 +637,18 @@ const ExceptionCreate = ({
         return (
           <DatePicker
             value={tempRow?.startDate ?? record.startDate}
-            onChange={(val) => handleCriteriaDateChange(record.key, "startDate", val)}
+            onChange={(val) => {
+              handleCriteriaDateChange(record.key, "startDate", val);
+              // clear criteria endDate if it's no longer valid
+              const currentEnd = tempRow?.endDate ?? record.endDate;
+              if (currentEnd && val && currentEnd.valueOf() <= val.valueOf()) {
+                handleCriteriaDateChange(record.key, "endDate", null);
+              }
+            }}
+            disabledDate={(d) => {
+              const exStart = form.getFieldValue("startDate");
+              return exStart && d && d.valueOf() < exStart.valueOf();
+            }}
             style={{ width: "100%" }}
           />
         );
@@ -580,11 +664,33 @@ const ExceptionCreate = ({
           const label = v && v.format ? v.format("YYYY-MM-DD") : v || "";
           return <div className="py-1">{label}</div>;
         }
+        const critRowStart = tempRow?.startDate ?? record.startDate;
         return (
           <DatePicker
             value={tempRow?.endDate ?? record.endDate}
             onChange={(val) => handleCriteriaDateChange(record.key, "endDate", val)}
+            disabledDate={(d) => {
+              if (critRowStart && d && d.valueOf() <= critRowStart.valueOf()) return true;
+              return false;
+            }}
             style={{ width: "100%" }}
+          />
+        );
+      },
+    },
+    {
+      title: "DESCRIPTION",
+      key: "description",
+      align: "left",
+      render: (_, record) => {
+        if (editingKey !== record.key) {
+          return <div className="py-1">{record.description ?? ""}</div>;
+        }
+        return (
+          <InputComponent
+            value={tempRow?.description ?? ""}
+            onChange={(e) => setTempRow((prev) => ({ ...(prev || {}), description: e.target.value }))}
+            placeholder="Input Description"
           />
         );
       },
@@ -608,7 +714,7 @@ const ExceptionCreate = ({
                   return { glbTypeValId: id, value: (tempRow || {})[fld] ?? null };
                 });
                 // save tempRow into criteriaData and include criteriaValues for backend
-                setCriteriaData((prev) => prev.map((r) => (r.key === record.key ? { ...r, ...(tempRow || {}), criteriaValues: mapped } : r)));
+                setCriteriaData((prev) => prev.map((r) => (r.key === record.key ? { ...r, ...(tempRow || {}), criteriaValues: mapped, description: (tempRow || {}).description ?? null } : r)));
                 setEditingKey("");
                 setTempRow(null);
               }} type="submit">Save</ButtonComponent>
@@ -668,12 +774,18 @@ const ExceptionCreate = ({
           >
             <SelectComponent
               mode="multiple"
-              placeholder="Select Activity"
+              placeholder="Choose Multiple Activity"
               allowClear
               optionFilterProp="children"
+              maxTagCount={null}
+              tagRender={activityTagRender}
             >
               {dataActivity.map((item) => (
                 <Select.Option key={item.glbTypeValId} value={item.glbTypeValId}>
+                  <Checkbox
+                    checked={Array.isArray(activityValue) && activityValue.includes(item.glbTypeValId)}
+                    style={{ marginRight: 8 }}
+                  />
                   {item.glbValue ?? item.name}
                 </Select.Option>
               ))}
@@ -687,12 +799,11 @@ const ExceptionCreate = ({
           >
             <SelectComponent
               placeholder="Select Billing Cycle"
-              onChange={handleBillingCycleChange}
               allowClear
             >
               {dataBillingCycle.map((item) => (
                 <Select.Option key={item.id ?? item.billingCycleId} value={item.id ?? item.billingCycleId}>
-                  {item.description ?? item.name}
+                  {`${item.beginCycle} - ${item.endCycle} ${item.timeUnit}`}
                 </Select.Option>
               ))}
             </SelectComponent>
@@ -719,16 +830,62 @@ const ExceptionCreate = ({
           <Form.Item
             label="Start Date"
             name="startDate"
+            rules={formMessageRequired("Start Date")}
           >
-            <DatePicker disabled style={{ width: "100%" }} />
+            <DatePicker
+              style={{ width: "100%", borderRadius: "6px", boxShadow: "0 1px 2px 0 rgb(0 0 0 / 0.05)" }}
+              disabled={!billingPeriodValue}
+              disabledDate={(d) => periodStartDate && d && d.valueOf() < periodStartDate.valueOf()}
+              onChange={(val) => {
+                const endDate = form.getFieldValue("endDate");
+                if (endDate && val && val.valueOf() > endDate.valueOf()) {
+                  form.setFieldsValue({ endDate: null });
+                }
+              }}
+            />
           </Form.Item>
 
           <Form.Item
             label="End Date"
             name="endDate"
           >
-            <DatePicker disabled style={{ width: "100%" }} />
+            <DatePicker
+              style={{ width: "100%", borderRadius: "6px", boxShadow: "0 1px 2px 0 rgb(0 0 0 / 0.05)" }}
+              disabled={!billingPeriodValue}
+              disabledDate={(d) => {
+                const startDate = form.getFieldValue("startDate");
+                return startDate && d && d.valueOf() <= startDate.valueOf();
+              }}
+              placeholder="Select Date (empty = no expiry)"
+            />
           </Form.Item>
+
+          <div className="col-span-5">
+            <Form.Item
+              label="Criteria"
+              name="criteria"
+            >
+              <SelectComponent
+                mode="multiple"
+                placeholder="Select Criteria"
+                allowClear
+                optionFilterProp="children"
+                onSelect={handleSelectCriteria}
+                onDeselect={handleDeselectCriteria}
+                onClear={handleClearCriteria}
+                disabled={selectedAccounts.length > 0 || criteriaData.length > 0}
+                tagRender={criteriaTagRender}
+              >
+                {dataCriteriaOptions
+                  .filter((item) => [11, 12, 16, 17, 18, 22].includes(item.glbTypeValId))
+                  .map((item) => (
+                    <Select.Option key={item.glbTypeValId} value={item.glbTypeValId}>
+                      {item.name ?? item.glbValue}
+                    </Select.Option>
+                  ))}
+              </SelectComponent>
+            </Form.Item>
+          </div>
 
           <div className="col-span-5">
             <Form.Item
@@ -740,157 +897,66 @@ const ExceptionCreate = ({
             </Form.Item>
           </div>
 
-          <div className="col-span-5">
-            <Form.Item label="Apply Exception To">
-              <Segmented
-                  block
-                  options={[
-                    { label: "Specific Accounts", value: "ACCOUNT" },
-                    { label: "Criteria-Based Accounts", value: "CRITERIA" },
-                  ]}
-                  value={exceptionMode}
-                  onChange={handleModeChangeRequest}
-              />
-            </Form.Item>
-          </div>
-
         </div>
       </CardContainer>
 
-
-
       {/* ── Section 2: Account Information ── */}
-      <div className={exceptionMode !== "ACCOUNT" ? "opacity-50" : ""}>
-        <CardContainer
-            header={
-              <div className="flex -my-4 justify-between items-center">
-                <p className="mt-[15px] font-bold text-primary">ACCOUNT INFORMATION</p>
-                <ButtonComponent
-                    type="submit"
-                    disabled={!canSearch || exceptionMode !== "ACCOUNT"}
-                    onClick={handleOpenSearchAccount}
-                    icon={<SVGIcon name="IconSearch" width={18} />}
-                >
-                  Search Account
-                </ButtonComponent>
-              </div>
-            }>
-          <div className="flex justify-end">
-
-          </div>
-          <TableRBI
-            dataSource={selectedAccounts.map((a, i) => ({ ...a, key: a.accountNumber ?? i }))}
-            columns={accountInfoColumns}
-            pageSize={selectedAccounts.length || 10}
-            current={1}
-            totalData={selectedAccounts.length}
-            tableScrolled={{ x: "max-content" }}
-            showExport={false}
-            usePagination={false}
-          />
-        </CardContainer>
-      </div>
-
-      {/*/!* ── Section 3: Criteria Information ── *!/*/}
-
-      <div className={exceptionMode !== "CRITERIA" ? "opacity-50" : ""}>
-        <CardContainer header={renderSectionHeader("Criteria Information")}>
-          <div className="w-full grid grid-cols-5 gap-4">
-            <div className="col-span-4">
-              <Form.Item
-                  label="Criteria"
-                  name="criteria"
-                  rules={
-                    exceptionMode === "CRITERIA"
-                        ? formMessageRequired("Criteria")
-                        : undefined
-                  }
-              >
-                <SelectComponent
-                    mode="multiple"
-                    placeholder="Select Criteria"
-                    allowClear
-                    optionFilterProp="children"
-                    onSelect={handleSelectCriteria}
-                    onDeselect={handleDeselectCriteria}
-                    onClear={handleClearCriteria}
-                    disabled={
-                        exceptionMode !== "CRITERIA" ||
-                        criteriaData.length > 0
-                    }
-                >
-                  {dataCriteriaOptions.map((item) => (
-                      <Select.Option
-                          key={item.glbTypeValId}
-                          value={item.glbTypeValId}
-                      >
-                        {item.name ?? item.glbValue}
-                      </Select.Option>
-                  ))}
-                </SelectComponent>
-              </Form.Item>
-            </div>
-
-            <div className="col-span-1 flex justify-end items-center">
-              <ButtonComponent
-                  className="min-w-[120px]"
-                  type="submit"
-                  disabled={
-                      exceptionMode !== "CRITERIA" ||
-                      !criteriaValue?.length ||
-                      !!editingKey
-                  }
-                  onClick={handleAddCriteriaRow}
-                  icon={<SVGIcon name="IconButtonCreate" width={20} />}
-              >
-                Create
-              </ButtonComponent>
-            </div>
-          </div>
-
-          <TableRBI
-            key={criteriaValue.join(",")}
-            dataSource={criteriaData}
-            columns={criteriaColumns}
-            pageSize={criteriaData.length || 10}
-            current={1}
-            totalData={criteriaData.length}
-            tableScrolled={{ x: "max-content" }}
-            showExport={false}
-            usePagination={false}
-          />
-        </CardContainer>
-      </div>
-
-      {/* ── Mode Switch Confirmation Modal ── */}
-      <Modal
-        open={modalSwitchMode}
-        onCancel={() => { setModalSwitchMode(false); setPendingMode(null); }}
-        title="Change Selection Mode"
-        width={450}
-        footer={
-          <div className="flex justify-end gap-3 p-2">
-            <ButtonComponent type="default" onClick={() => { setModalSwitchMode(false); setPendingMode(null); }}>
-              Cancel
-            </ButtonComponent>
-            <ButtonComponent type="submit" onClick={handleModeConfirm}>
-              Confirm
+      <CardContainer
+        header={
+          <div className="flex -my-4 justify-between items-center">
+            <p className="mt-[15px] font-bold text-primary">ACCOUNT INFORMATION</p>
+            <ButtonComponent
+              type="submit"
+              disabled={!canSearch}
+              onClick={handleOpenSearchAccount}
+              icon={<SVGIcon name="IconSearch" width={18} />}
+            >
+              Search Account
             </ButtonComponent>
           </div>
         }
       >
-        <div className="flex items-start gap-3 p-4">
-          <WarningOutlined style={{ fontSize: "24px", color: "#BE3036", marginTop: 2 }} />
-          <div>
-            <p className="font-bold text-base mb-1">Are you sure you want to switch mode?</p>
-            <p className="text-sm text-gray-600">
-              {pendingMode === "CRITERIA"
-                ? "Switching to Criteria-Based mode will clear all selected accounts."
-                : "Switching to Specific Accounts mode will clear all criteria rows."}
-            </p>
+        <TableRBI
+          dataSource={selectedAccounts.map((a, i) => ({ ...a, key: a.accountNumber ?? i }))}
+          columns={accountInfoColumns}
+          pageSize={selectedAccounts.length || 10}
+          current={1}
+          totalData={selectedAccounts.length}
+          tableScrolled={{ x: "max-content" }}
+          showExport={false}
+          usePagination={false}
+        />
+      </CardContainer>
+
+      {/* ── Section 3: Criteria Information ── */}
+      <CardContainer
+        header={
+          <div className="flex -my-4 justify-between items-center">
+            <p className="mt-[15px] font-bold text-primary">CRITERIA INFORMATION</p>
+            <ButtonComponent
+              className="min-w-[120px]"
+              type="submit"
+              disabled={selectedAccounts.length > 0 || !criteriaValue?.length || !!editingKey}
+              onClick={handleAddCriteriaRow}
+              icon={<SVGIcon name="IconButtonCreate" width={20} />}
+            >
+              Create
+            </ButtonComponent>
           </div>
-        </div>
-      </Modal>
+        }
+      >
+        <TableRBI
+          key={criteriaValue.join(",")}
+          dataSource={criteriaData}
+          columns={criteriaColumns}
+          pageSize={criteriaData.length || 10}
+          current={1}
+          totalData={criteriaData.length}
+          tableScrolled={{ x: "max-content" }}
+          showExport={false}
+          usePagination={false}
+        />
+      </CardContainer>
 
       {/* ── Search Account Modal ── */}
       <Modal
@@ -911,22 +977,30 @@ const ExceptionCreate = ({
       >
         <Spin spinning={loadingAccount}>
           <TableRBI
-            dataSource={(dataAccountSearch?.result ?? []).map((a) => ({
-              ...a,
-              key: a.accountNumber ?? a.id,
-            }))}
+            idTable="exception-account-search"
+            dataSource={filteredAccounts}
             columns={accountSearchColumns}
-            pageSize={10}
-            current={1}
-            totalData={dataAccountSearch?.page?.totalElements ?? 0}
-            tableScrolled={{ x: "max-content" }}
+            tableScrolled={{ x: "max-content", y: 400 }}
             showExport={false}
+            useInfiniteScroll={true}
+            hasMore={hasMoreAccounts}
+            onLoadMore={handleLoadMoreAccounts}
+            onSearch={(e) => setAccountModalGlobalFilter(e.target.value)}
             rowSelection={{
               type: "checkbox",
               selectedRowKeys,
               onChange: (keys, rows) => {
-                setSelectedRowKeys(keys);
-                setTempSelectedRows(rows);
+                // Preserve selections from rows NOT in the current filtered dataset
+                // (e.g. selections made under a different column filter)
+                const currentKeys = new Set(
+                  filteredAccounts.map((a) => a.key ?? a.accountNumber)
+                );
+                const preserved = tempSelectedRows.filter(
+                  (r) => !currentKeys.has(r.key ?? r.accountNumber)
+                );
+                const preservedKeys = preserved.map((r) => r.key ?? r.accountNumber);
+                setSelectedRowKeys([...preservedKeys, ...keys]);
+                setTempSelectedRows([...preserved, ...rows]);
               },
             }}
           />

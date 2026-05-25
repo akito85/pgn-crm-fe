@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Spin } from "antd";
+import { UpOutlined, DownOutlined } from "@ant-design/icons";
 import RadioTabs from "../../../../../components/RadioTabs";
-import CardComponent from "../../../../../components/Card/CardComponent";
 import DetailText from "../../../../../components/DetailText";
 import TableRBI from "../../../../../components/TableRBI";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
@@ -18,50 +18,92 @@ const formatDate = (val) => {
   }
 };
 
+const CollapsibleCard = ({ title, children, defaultCollapsed = false }) => {
+  const [collapsed, setCollapsed] = useState(defaultCollapsed);
+  return (
+    <div className="bg-white p-4 mb-3 rounded-lg" style={{ border: "1px solid #d1d5db", boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
+      <div
+        className="flex justify-between items-center cursor-pointer"
+        onClick={() => setCollapsed((c) => !c)}
+      >
+        <span className="text-primary text-xs font-semibold uppercase">{title}</span>
+        {collapsed ? <DownOutlined /> : <UpOutlined />}
+      </div>
+      {!collapsed && <div className="mt-4">{children}</div>}
+    </div>
+  );
+};
+
 const ExceptionDetailPanel = ({
   data_detail,
+  selectedRecord = {},
   dataListAppHierDetail = [],
   appHierOptions = [],
   loading = false,
 }) => {
-  const [valuePage, setValuePage] = useState("Exception Information");
+  const [valuePage, setValuePage] = useState("Exception");
 
   const tabPages = [
-    { value: "Exception Information" },
+    { value: "Exception" },
     { value: "Approval" },
     { value: "Attachment" },
   ];
 
-  // ── Account table columns ──────────────────────────────────────────────────
-  const accountColumns = [
-    { title: "NO", key: "no", width: 50, render: (_, __, i) => i + 1 },
-    { title: "ACCOUNT NUMBER", dataIndex: "accountNumber", key: "accountNumber" },
-    { title: "ACCOUNT NAME", dataIndex: "accountName", key: "accountName" },
-    { title: "CUSTOMER NUMBER", dataIndex: "customerNumber", key: "customerNumber" },
-    { title: "CUSTOMER NAME", dataIndex: "customerName", key: "customerName" },
-    { title: "SOR", dataIndex: "sor", key: "sor" },
-    { title: "COST CENTER", dataIndex: "costCenter", key: "costCenter" },
-    { title: "ACCOUNT SEGMENT", dataIndex: "accountSegment", key: "accountSegment" },
-    { title: "ACCOUNT STATUS", dataIndex: "accountStatus", key: "accountStatus" },
-  ];
+  const account = data_detail?.accounts?.[0] ?? {};
+  const hasAccounts = (data_detail?.accounts?.length ?? 0) > 0;
+  const hasCriteria = (data_detail?.criteriaList?.length ?? 0) > 0;
 
-  // ── Criteria table — one row per criteriaGroupId ───────────────────────────
-  // criteriaList shape: [{criteriaGroupId, startDate, endDate, criteriaValues:[{id, criteriaType, criteriaValueId}]}]
+  // ── Dynamic criteria columns ────────────────────────────────────────────────
+  const criteriaTypeToLabel = {
+    sor: "SOR",
+    customer: "CUSTOMER",
+    subDistrict: "SUB DISTRICT",
+    district: "DISTRICT",
+    province: "PROVINCE",
+    costCenter: "COST CENTER",
+    budget: "BUDGET",
+    industrialSector: "INDUSTRIAL SECTOR",
+    customerSegment: "CUSTOMER SEGMENT",
+    accountGroup: "ACCOUNT GROUP",
+    serviceType: "SERVICE TYPE",
+    accountCategory: "ACCOUNT CATEGORY",
+    gsizes: "G SIZES",
+    city: "CITY",
+    accountGroupType: "ACCOUNT GROUP TYPE",
+  };
+
+  const uniqueCriteriaTypes = hasCriteria
+    ? [...new Set(
+        data_detail.criteriaList.flatMap((row) =>
+          (row.criteriaValues ?? []).map((cv) => cv.criteriaType)
+        )
+      )]
+    : [];
+
   const criteriaColumns = [
     { title: "NO", key: "no", width: 50, render: (_, __, i) => i + 1 },
-    {
-      title: "CRITERIA",
-      key: "criteria",
-      render: (_, record) =>
-        (record.criteriaValues || [])
-          .map((cv) => `${cv.criteriaType}: ${cv.criteriaValueId}`)
-          .join(" | ") || "-",
-    },
-    { title: "START DATE", key: "startDate", render: (_, r) => formatDate(r.startDate) },
-    { title: "END DATE", key: "endDate", render: (_, r) => formatDate(r.endDate) },
+    ...uniqueCriteriaTypes.map((type) => ({
+      title: criteriaTypeToLabel[type] ?? type.toUpperCase(),
+      key: type,
+      dataIndex: type,
+      render: (val) => val ?? "-",
+    })),
+    { title: "START DATE", key: "startDate", dataIndex: "startDate", render: (v) => formatDate(v) },
+    { title: "END DATE", key: "endDate", dataIndex: "endDate", render: (v) => formatDate(v) },
+    { title: "DESCRIPTION", key: "description", dataIndex: "description", render: (v) => v ?? "-" },
   ];
 
-  // ── Attachment table ────────────────────────────────────────────────────────
+  const criteriaDataSource = hasCriteria
+    ? data_detail.criteriaList.map((row, i) => {
+        const flat = { key: row.criteriaGroupId ?? i, startDate: row.startDate, endDate: row.endDate, description: row.description };
+        (row.criteriaValues ?? []).forEach((cv) => {
+          flat[cv.criteriaType] = cv.criteriaValueName ?? cv.criteriaValueId;
+        });
+        return flat;
+      })
+    : [];
+
+  // ── Attachment columns ────────────────────────────────────────────────────
   const attachmentColumns = [
     { title: "NO", key: "no", width: 50, render: (_, __, i) => i + 1 },
     { title: "FILE NAME", dataIndex: "fileName", key: "fileName" },
@@ -79,61 +121,57 @@ const ExceptionDetailPanel = ({
     { title: "UPLOADED AT", key: "createdDate", render: (_, r) => formatDate(r.createdDate) },
   ];
 
-  const hasAccounts = (data_detail?.accounts?.length ?? 0) > 0;
-  const hasCriteria = (data_detail?.criteriaList?.length ?? 0) > 0;
-
   const approvalName =
     (appHierOptions || []).find((opt) => opt.value === data_detail?.appHierId)?.name || "";
 
   const renderSection = () => {
     switch (valuePage) {
-      case "Exception Information":
+      case "Exception":
         return (
           <div className="flex flex-col gap-3 mt-3">
-            <CardComponent header="Exception Information" cols={2}>
-              <DetailText label="Exception Number">{data_detail?.exceptionNumber || "-"}</DetailText>
-              <DetailText label="Status">{data_detail?.status || "-"}</DetailText>
-              <DetailText label="Status Approval">{data_detail?.statusApproval || "-"}</DetailText>
-              <DetailText label="Billing Cycle">{data_detail?.billingCycle || "-"}</DetailText>
-              <DetailText label="Billing Period">{data_detail?.billingPeriod || "-"}</DetailText>
-              <DetailText label="Start Date">{formatDate(data_detail?.startDate)}</DetailText>
-              <DetailText label="End Date">{formatDate(data_detail?.endDate)}</DetailText>
-              <DetailText label="Description" className="col-span-2">{data_detail?.description || "-"}</DetailText>
-            </CardComponent>
-
+            {/* Account Information — default collapsed */}
             {hasAccounts && (
-              <div>
-                <p className="text-primary text-xs font-bold uppercase pb-2">Account Information</p>
-                <TableRBI
-                  dataSource={(data_detail.accounts).map((a, i) => ({ ...a, key: a.excAccountId ?? i }))}
-                  columns={accountColumns}
-                  pageSize={data_detail.accounts.length || 10}
-                  current={1}
-                  totalData={data_detail.accounts.length}
-                  tableScrolled={{ x: "max-content" }}
-                  showExport={false}
-                  usePagination={false}
-                />
-              </div>
+              <CollapsibleCard title="Account Information" defaultCollapsed={true}>
+                <div className="grid grid-cols-5 gap-y-2.5 gap-x-2 py-1">
+                  <DetailText label="Account Number">{account.accountNumber || "-"}</DetailText>
+                  <DetailText label="Account Name">{account.accountName || "-"}</DetailText>
+                  <DetailText label="Customer Number">{account.customerNumber || "-"}</DetailText>
+                  <DetailText label="Customer Name">{account.customerName || "-"}</DetailText>
+                  <DetailText label="Cost Center">{selectedRecord.costCenter || account.costCenter || "-"}</DetailText>
+                  <DetailText label="Customer Segment">{selectedRecord.customerSegment || account.customerSegment || "-"}</DetailText>
+                  <DetailText label="Customer Group">{selectedRecord.accountGroupType || account.accountGroupType || "-"}</DetailText>
+                </div>
+              </CollapsibleCard>
             )}
 
+            {/* Exception Information — default expanded */}
+            <CollapsibleCard title="Exception Information" defaultCollapsed={false}>
+              <div className="grid grid-cols-5 gap-y-2.5 gap-x-2 py-1">
+                <DetailText label="Activity">{selectedRecord.activity || data_detail?.activity || "-"}</DetailText>
+                <DetailText label="Billing Cycle">{data_detail?.billingCycle || "-"}</DetailText>
+                <DetailText label="Billing Period">{data_detail?.billingPeriod || "-"}</DetailText>
+                <DetailText label="Start Date">{formatDate(data_detail?.startDate)}</DetailText>
+                <DetailText label="End Date">{formatDate(data_detail?.endDate)}</DetailText>
+                <div className="col-span-5">
+                  <DetailText label="Description">{data_detail?.description || "-"}</DetailText>
+                </div>
+              </div>
+            </CollapsibleCard>
+
+            {/* Criteria Information — only if hasCriteria */}
             {hasCriteria && (
-              <div>
-                <p className="text-primary text-xs font-bold uppercase pb-2">Criteria Information</p>
+              <CollapsibleCard title="Criteria Information" defaultCollapsed={false}>
                 <TableRBI
-                  dataSource={(data_detail.criteriaList).map((c, i) => ({
-                    ...c,
-                    key: c.criteriaGroupId ?? i,
-                  }))}
+                  dataSource={criteriaDataSource}
                   columns={criteriaColumns}
-                  pageSize={data_detail.criteriaList.length || 10}
+                  pageSize={criteriaDataSource.length || 10}
                   current={1}
-                  totalData={data_detail.criteriaList.length}
+                  totalData={criteriaDataSource.length}
                   tableScrolled={{ x: "max-content" }}
                   showExport={false}
                   usePagination={false}
                 />
-              </div>
+              </CollapsibleCard>
             )}
           </div>
         );
@@ -189,3 +227,4 @@ const ExceptionDetailPanel = ({
 };
 
 export default ExceptionDetailPanel;
+
