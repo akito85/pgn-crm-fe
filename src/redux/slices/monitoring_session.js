@@ -10,9 +10,11 @@ const initialState = {
 
 export const getMonitoringSession = createAsyncThunk(
   "GET_MONITORING_SESSION",
-  async ({ page, pageSize }, thunkAPI) => {
+  async ({ page, pageSize, sort, search }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/monitoring/show-session?page=${page}&size=${pageSize}`;
+      const searchParams = search ?? "";
+      const sortParams = sort || "lastAccess~desc";
+      const url = `/v1/dbs/api/monitoring/show-session?page=${page}&size=${pageSize}&searchs=${searchParams}&sort=${sortParams}`;
       const data = await userHttpService.getPagination(url);
       return data?.data;
     } catch (error) {

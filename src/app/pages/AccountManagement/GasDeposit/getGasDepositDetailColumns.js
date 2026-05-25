@@ -37,6 +37,7 @@ const getGasDepositDetailColumns = ({
     title: "PERIOD",
     dataIndex: "period",
     width: 180,
+    sorter: true,
     align: "center",
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
@@ -55,6 +56,7 @@ const getGasDepositDetailColumns = ({
     title: "BALANCE (M3)",
     dataIndex: "balanceM3",
     width: 150,
+    sorter: true,
     align: "right",
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
@@ -71,6 +73,7 @@ const getGasDepositDetailColumns = ({
     title: "BALANCE (MSCF)",
     dataIndex: "balanceMscf",
     width: 160,
+    sorter: true,
     align: "right",
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
@@ -87,6 +90,7 @@ const getGasDepositDetailColumns = ({
     title: "BALANCE (MMBTU)",
     dataIndex: "balanceMmbtu",
     width: 170,
+    sorter: true,
     align: "right",
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
@@ -103,6 +107,7 @@ const getGasDepositDetailColumns = ({
     title: "BALANCE AMOUNT",
     dataIndex: "balanceAmount",
     width: 170,
+    sorter: true,
     align: "right",
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
@@ -119,6 +124,7 @@ const getGasDepositDetailColumns = ({
     title: "AVAILABLE AMOUNT",
     dataIndex: "availableAmount",
     width: 180,
+    sorter: true,
     align: "right",
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
@@ -136,15 +142,6 @@ const getGasDepositDetailColumns = ({
     dataIndex: "status",
     width: 120,
     fixed: "right",
-    ...getColumnSearchPropsUseFilteredValueFE(
-      search,
-      "status",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true
-    ),
     render: (status) => {
       const displayText = {
         "active": "Active",

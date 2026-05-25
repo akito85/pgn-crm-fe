@@ -124,7 +124,7 @@ const ListDetailRestructure = ({ selectedId: propId, onClose, onRefresh, approva
     const [installmentsByCurrency, setInstallmentsByCurrency] = useState({});
     const [listDataAttachment, setListDataAttachment] = useState([]);
 
-    const approvalName = (dataListAppHierId || []).find(x => x.appHierId === data_detail?.restructure?.appHierId)?.approvalName || dataHeader?.approvalName || dataHeader?.appHierId || "-";
+    const approvalName = (dataListAppHierId || []).find(x => x.appHierId === data_detail?.restructure?.appHierId)?.approvalName || dataHeader?.approvalName || dataHeader?.appHierId || "";
 
     const isApprover = propIsApprover || location?.state?.isApprover || false;
     const approvalType = propApprovalType || location?.state?.approvalType || data_detail?.tApprovalDto?.category;

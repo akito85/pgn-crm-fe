@@ -271,9 +271,9 @@ const CalendarView = () => {
 
   // Calendar helpers
   const HOLIDAY_TYPE_STATUS = {
-    NATIONAL: "error", // red
-    JOINT: "processing", // blue
-    OTHER: "success", // green
+    national_holidays: "error", // red
+    joint_holidays: "processing", // blue
+    other: "success", // green
   };
 
   const getEventsForDate = (date) => {
@@ -555,7 +555,8 @@ const CalendarView = () => {
       type: "table",
       render: (record, data_length) => {
         const canInactivate =
-          record.statusApproval === "APPROVED" && record.status === "ACTIVE";
+          record.statusApproval !== "WAITING_APPROVAL" &&
+          record.status === "ACTIVE";
         const canActivate =
           record.statusApproval === "APPROVED" && record.status === "INACTIVE";
         const isActivateOrInactivate = canInactivate || canActivate;

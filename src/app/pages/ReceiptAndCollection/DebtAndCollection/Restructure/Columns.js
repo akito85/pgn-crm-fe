@@ -230,7 +230,7 @@ export const columns = (
             fixed: "right",
             render: (text) => (
                 <div className="flex justify-center w-full">
-                    <StatusComponent colour={text || 'none'}>{text || '-'}</StatusComponent>
+                    <StatusComponent colour={text || 'none'}>{text || ""}</StatusComponent>
                 </div>
             )
         },
@@ -243,7 +243,7 @@ export const columns = (
             fixed: "right",
             render: (text) => (
                 <div className="flex justify-center w-full">
-                    <StatusComponent colour={text || 'none'}>{text || '-'}</StatusComponent>
+                    <StatusComponent colour={text || 'none'}>{text || ""}</StatusComponent>
                 </div>
             )
         },
@@ -256,7 +256,7 @@ export const columns = (
             fixed: "right",
             render: (text) => (
                 <div className="flex justify-center w-full">
-                    <StatusComponent colour={text || 'none'}>{text || '-'}</StatusComponent>
+                    <StatusComponent colour={text || 'none'}>{text || ""}</StatusComponent>
                 </div>
             )
         },

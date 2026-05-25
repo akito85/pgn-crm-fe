@@ -25,7 +25,6 @@ import GasDepositDetailTable from "./GasDepositDetailTable";
 const GasDepositApprovalModal = ({
   accountId,
   isOpen,
-  isUnderAccount,
   handleCancel = () => {},
   afterFinish = () => {}
 }) => {
@@ -312,7 +311,6 @@ const GasDepositApprovalModal = ({
         searchText,
         handleSearch,
         isApproval: true,
-        isUnderAccount
       }),
     [search, searchInput, searchedColumn, searchText]
   );
