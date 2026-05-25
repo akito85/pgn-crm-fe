@@ -171,7 +171,6 @@ const ModalViewMutationDetail = ({
 }) => {
   const mutationReferenceId =
     selectedMutationDetail?.mutationId ??
-    selectedMutationDetail?.stgMutId ??
     selectedMutationDetail?.id;
   const mutationApphierId = selectedMutationDetail?.apphierId;
   const [approvalRows, setApprovalRows] = useState([]);

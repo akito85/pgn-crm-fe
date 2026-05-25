@@ -21,6 +21,7 @@ const ModalAttachment = ({
   updateData = () => {},
   handleCancel = () => {},
   categoryOptions = [],
+  uploadCategory = "",
   withLink = true,
   valueGuard = {},
 }) => {
@@ -123,6 +124,7 @@ const ModalAttachment = ({
           return {
             ...file,
             key: key++,
+            category: uploadCategory,
             fileCategoryName: category.label,
             fileCategoryId: category.value,
           };
@@ -144,6 +146,7 @@ const ModalAttachment = ({
         const data = {
           ...dataLink,
           key: key++,
+          category: uploadCategory,
           fileCategoryName: category.label,
           fileCategoryId: category.value,
         };

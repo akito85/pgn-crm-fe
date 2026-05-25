@@ -31,6 +31,7 @@ import {
   getTypeOptions,
   createMutationSummary,
   getCategoryListGasDeposit,
+  getAttachmentList,
   getMutationDetailPaginate,
 } from "../../../../redux/slices/rating_billing_invoice/gasDeposit";
 
@@ -59,7 +60,23 @@ const toMomentOrNull = (value) => {
   return parsed.isValid() ? parsed : null;
 };
 
+const normalizeEarnBoundary = (value, boundary) => {
+  const parsed = toMomentOrNull(value);
+  if (!parsed) return null;
+  return boundary === "end" ? parsed.clone().endOf("month") : parsed.clone().startOf("month");
+};
+
+const normalizeEarnRange = (value) => {
+  if (!Array.isArray(value) || value.length < 2) return null;
+
+  const start = normalizeEarnBoundary(value[0], "start");
+  const end = normalizeEarnBoundary(value[1], "end");
+
+  return start && end ? [start, end] : null;
+};
+
 const TYPE_VALUE_SET = new Set(["Billing", "Adjustment"]);
+const SOURCE_VALUE_SET = new Set(["Billing", "Manual"]);
 
 const normalizeTypeValue = (selectedData) => {
   if (TYPE_VALUE_SET.has(selectedData?.type)) return selectedData.type;
@@ -96,6 +113,22 @@ const normalizePeriodValue = (selectedData, periodOptions = []) => {
   return directPeriod;
 };
 
+const mapExistingAttachment = (item, index) => ({
+  ...item,
+  key: item?.id ?? `attachment-${index}`,
+  fileName: item?.fileName || "-",
+  fileSize: item?.fileSize ?? 0,
+  fileType: item?.fileType || item?.type || "",
+  type: item?.type || item?.fileType || "",
+  fileCategoryName: item?.fileCategoryName || item?.categoryName || item?.category || "-",
+  category: item?.category || item?.fileCategoryName || item?.categoryName || "-",
+  urlFile1: `/v1/dbs/api/attachment/download/${item?.id}`,
+  dataType: "exist",
+});
+
+const isApprovedMutationRow = (row) =>
+  String(row?.statusApproval || "").trim().toLowerCase() === "approved";
+
 const GasDepositCreatePage = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -131,9 +164,11 @@ const GasDepositCreatePage = () => {
   const [listDataAttachment, setListDataAttachment] = useState([]);
   const [accountSearch, setAccountSearch] = useState("");
   const accountPageInfo = accountOptionsData?.page || {};
-  const accountList = accountOptionsData?.result || [];
+  const accountList = useMemo(() => accountOptionsData?.result || [], [accountOptionsData]);
   const ACCOUNT_PAGE_SIZE = 20;
   const [loadingSubmit, setLoadingSubmit] = useState(false);
+  const selectedSummaryPeriod = Form.useWatch("period", form);
+  const selectedSummaryUom = Form.useWatch("uom", form);
 
   const SOURCE_OPTIONS = [
     { label: "Billing", value: "Billing" },
@@ -193,16 +228,13 @@ const GasDepositCreatePage = () => {
     const fallbackPeriod = String(selectedData.period || "").split(" - ");
     const periodEarnStart = toMomentOrNull(selectedData.periodEarn || fallbackPeriod[0]);
     const periodEarnEnd = toMomentOrNull(selectedData.periodEarnEnd || selectedData.earnEndDate || fallbackPeriod[1]);
-    const periodEarnRange =
-      periodEarnStart && periodEarnEnd
-        ? [periodEarnStart, periodEarnEnd]
-        : null;
+    const periodEarnRange = normalizeEarnRange([periodEarnStart, periodEarnEnd]);
 
     const normalizedPeriod = normalizePeriodValue(selectedData, periodOptions);
     const normalizedType = normalizeTypeValue(selectedData);
-    const normalizedSource = TYPE_VALUE_SET.has(selectedData?.source)
+    const normalizedSource = SOURCE_VALUE_SET.has(selectedData?.source)
       ? selectedData.source
-      : (TYPE_VALUE_SET.has(selectedData?.type) ? selectedData.type : "Billing");
+      : "Billing";
 
     form.setFieldsValue({
       accountNumber: selectedData.accountNumber,
@@ -254,6 +286,9 @@ const GasDepositCreatePage = () => {
       if (Array.isArray(mutationDetailData) && mutationDetailData.length > 0) {
         const transformedRows = mutationDetailData.map((row, index) => ({
           no: index + 1,
+          mutationId: row.mutationId || row.id || null,
+          gasDepositId: row.gasDepositId || gasDepositId,
+          source: row.source || "MANUAL",
           billingPeriod: row.billingPeriod || "",
           mutationDate: row.mutationDate || "",
           mutationType: row.mutationType || "",
@@ -263,10 +298,46 @@ const GasDepositCreatePage = () => {
           price: row.price || "",
           amount: row.amount || "",
           description: row.description || "",
-          key: index + 1,
+          status: row.status || "",
+          statusApproval: row.statusApproval || "",
+          key: row.mutationId || row.id || index + 1,
         }));
         setMutationRows(transformedRows);
       }
+    });
+  }, [dispatch, isUpdateMode, selectedData]);
+
+  useEffect(() => {
+    if (!isUpdateMode || !selectedData) {
+      setListDataAttachment([]);
+      return;
+    }
+
+    const referenceId =
+      selectedData.referenceId
+      || selectedData.masterGasDepositId
+      || selectedData.gasDepositId
+      || selectedData.id;
+
+    if (!referenceId) {
+      setListDataAttachment([]);
+      return;
+    }
+
+    dispatch(
+      getAttachmentList({
+        referenceId,
+        category: "GAS_DEPOSIT_SUMMARY",
+      }),
+    ).then((action) => {
+      let attachmentRows = [];
+      if (Array.isArray(action.payload?.data)) {
+        attachmentRows = action.payload.data;
+      } else if (Array.isArray(action.payload)) {
+        attachmentRows = action.payload;
+      }
+
+      setListDataAttachment(attachmentRows.map(mapExistingAttachment));
     });
   }, [dispatch, isUpdateMode, selectedData]);
 
@@ -326,25 +397,31 @@ const GasDepositCreatePage = () => {
         width: 100,
         align: "center",
         fixed: "right",
-        render: (_, __, idx) => (
-          <div className="flex items-center justify-center gap-2">
-            <SVGIcon
-              name="IconEdit"
-              width={18}
-              color="#0075bf"
-              onClick={() => {
-                setEditingMutationIndex(idx);
-                setIsModalCreateMutationOpen(true);
-              }}
-            />
-            <SVGIcon
-              name="IconDelete"
-              width={18}
-              color="#ef4444"
-              onClick={() => setMutationRows((prev) => prev.filter((_, i) => i !== idx))}
-            />
-          </div>
-        ),
+        render: (_, record, idx) => {
+          if (isApprovedMutationRow(record)) {
+            return <span>-</span>;
+          }
+
+          return (
+            <div className="flex items-center justify-center gap-2">
+              <SVGIcon
+                name="IconEdit"
+                width={18}
+                color="#0075bf"
+                onClick={() => {
+                  setEditingMutationIndex(idx);
+                  setIsModalCreateMutationOpen(true);
+                }}
+              />
+              <SVGIcon
+                name="IconDelete"
+                width={18}
+                color="#ef4444"
+                onClick={() => setMutationRows((prev) => prev.filter((_, i) => i !== idx))}
+              />
+            </div>
+          );
+        },
       },
     ],
     [],
@@ -425,6 +502,12 @@ const GasDepositCreatePage = () => {
     setCurrentStep((prev) => Math.min(steps.length - 1, prev + 1));
   };
 
+  const handlePeriodEarnChange = (value) => {
+    form.setFieldsValue({
+      periodEarn: normalizeEarnRange(value),
+    });
+  };
+
   const handlePersist = async (isDraft = false) => {
     setLoadingSubmit(true);
 
@@ -482,26 +565,27 @@ const GasDepositCreatePage = () => {
         return;
       }
 
-      // Normalize the ID: use stgSumId if available, otherwise convert negative ID to positive
       const resolvedId = isUpdateMode ? (
-        selectedData?.stgSumId ||
+        selectedData?.referenceId ||
         selectedData?.masterGasDepositId ||
-        (selectedData?.id ? Math.abs(selectedData.id) : undefined) ||
-        (selectedData?.gasDepositId ? Math.abs(selectedData.gasDepositId) : undefined)
+        selectedData?.gasDepositId ||
+        selectedData?.id
       ) : undefined;
+      const normalizedPeriodEarn = normalizeEarnRange(values.periodEarn);
 
       const body = {
-        id: resolvedId,
+        gasDepositId: resolvedId,
         accountId: account?.accountId,
         apphierId: isDraft ? (values.apphierId || selectedHierarchy) : values.apphierId,
         period: values.period,
+        billingPeriod: values.period,
         type: values.type,
         balanceVolume: resolvedBalanceVolume,
         balanceAmount: values.amount,
         currency: values.currency || account?.currency || selectedData?.currency || "IDR",
         uom: values.uom,
-        schemeStartDate: values.periodEarn?.[0]?.format ? values.periodEarn[0].format("YYYY-MM-DD") : undefined,
-        schemeEndDate: values.periodEarn?.[1]?.format ? values.periodEarn[1].format("YYYY-MM-DD") : account?.earnEndDate,
+        schemeStartDate: normalizedPeriodEarn?.[0]?.format ? normalizedPeriodEarn[0].format("YYYY-MM-DD") : undefined,
+        schemeEndDate: normalizedPeriodEarn?.[1]?.format ? normalizedPeriodEarn[1].format("YYYY-MM-DD") : account?.earnEndDate,
         redeemStartDate: values.periodStartRedeem?.format ? values.periodStartRedeem.format("YYYY-MM-DD") : undefined,
         redeemEndDate: values.periodEndRedeem?.format ? values.periodEndRedeem.format("YYYY-MM-DD") : undefined,
         termsEarn: values.termsEarn ? Number(values.termsEarn) : undefined,
@@ -516,10 +600,12 @@ const GasDepositCreatePage = () => {
         sapCustId: account?.sapCustId == null ? undefined : String(account.sapCustId),
         attachments: [],
         gasDepositMutationDetailDtos: mutationRows.map((row) => ({
+          mutationId: row.mutationId,
+          gasDepositId: row.gasDepositId || resolvedId,
           billPeriode: row.billingPeriod,
           mutationDate: row.mutationDate,
           transType: row.mutationType,
-          source: "MANUAL",
+          source: row.source || "MANUAL",
           mutationType: row.mutationType,
           category: row.category,
           uom: row.uom,
@@ -527,16 +613,17 @@ const GasDepositCreatePage = () => {
           price: row.price,
           amountValue: row.amount,
           description: row.description,
+          status: row.status,
+          statusApproval: row.statusApproval,
         })),
       };
 
       const res = await dispatch(createMutationSummary(body)).unwrap();
       const responseData = res?.data || res || {};
       const idGasDeposit =
-        responseData?.stgSumId ||
         responseData?.id ||
         responseData?.gasDepositId ||
-        responseData?.pendingStgSumId ||
+        responseData?.referenceId ||
         resolvedId;
       const pendingAttachments = (listDataAttachment || []).filter(
         (item) => item?.dataType !== "exist" && item?.file,
@@ -708,7 +795,13 @@ const GasDepositCreatePage = () => {
               <InputComponent disabled={!isUpdateMode} placeholder="Select Terms Redeem" />
             </Form.Item>
             <Form.Item name="periodEarn" label="Period Earn" rules={[{ required: true, message: "Period Earn is required" }]} style={{ marginBottom: 0 }}>
-              <DatePicker.RangePicker className="w-full" picker="month" format="MMM YY" placeholder={["Start Date", "End Date"]} />
+              <DatePicker.RangePicker
+                className="w-full"
+                picker="month"
+                format="MMM YY"
+                placeholder={["Start Date", "End Date"]}
+                onChange={handlePeriodEarnChange}
+              />
             </Form.Item>
             <Form.Item name="periodStartRedeem" label="Period Start Redeem" rules={[{ required: true, message: "Period Start Redeem is required" }]} style={{ marginBottom: 0 }}>
               <DatePicker className="w-full" placeholder="Select Period Start Redeem" />
@@ -884,6 +977,8 @@ const GasDepositCreatePage = () => {
         }
         submitLabel={editingMutationIndex !== null ? "Update" : "Submit"}
         modalTitle={editingMutationIndex !== null ? "Edit Mutation Detail" : "Create Mutation Detail"}
+        defaultBillingPeriod={selectedSummaryPeriod}
+        defaultUom={selectedSummaryUom}
         selectedData={{}}
       />
     </>

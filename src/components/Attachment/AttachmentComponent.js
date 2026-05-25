@@ -241,6 +241,7 @@ const AttachmentComponent = ({
   updateData = () => {},
   type,
   typeSelector,
+  uploadCategory,
   dispatch = () => {},
   getAPICategory = () => {},
   service,
@@ -395,6 +396,7 @@ const AttachmentComponent = ({
           updateData={updateData}
           categoryOptions={categoryOptions}
           handleCancel={() => setModalUpload(false)}
+          uploadCategory={uploadCategory}
           withLink
           valueGuard={handleValueGuard()}
         />

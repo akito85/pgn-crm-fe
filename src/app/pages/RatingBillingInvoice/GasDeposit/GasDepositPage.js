@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Tooltip, Tabs, Dropdown } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
@@ -93,6 +93,7 @@ const GasDepositPage = () => {
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
   const searchInput = useRef(null);
   const suppressNextRowClickRef = useRef(false);
   const dataSource = data?.result;
@@ -108,7 +109,7 @@ const GasDepositPage = () => {
   const [pageDetail, setPageDetail] = useState(false);
   const [activeRowKey, setActiveRowKey] = useState(null);
   const [selectedGasDepositData, setSelectedGasDepositData] = useState(null);
-  const [activeTab, setActiveTab] = useState("gasDeposit");
+  const [activeTab, setActiveTab] = useState(location.state?.activeTab || "gasDeposit");
   const [modalApprovalHistory, setModalApprovalHistory] = useState(false);
   const [modalApprovalExpired, setModalApprovalExpired] = useState(false);
   const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
@@ -140,8 +141,6 @@ const GasDepositPage = () => {
     }
 
     const currentIds = [
-      selectedGasDepositData?.stgSumId,
-      selectedGasDepositData?.pendingStgSumId,
       selectedGasDepositData?.referenceId,
       selectedGasDepositData?.recordId,
       selectedGasDepositData?.masterGasDepositId,
@@ -153,8 +152,6 @@ const GasDepositPage = () => {
 
     const matchedRow = dataSource.find((item) => {
       const candidateIds = [
-        item?.stgSumId,
-        item?.pendingStgSumId,
         item?.referenceId,
         item?.recordId,
         item?.masterGasDepositId,
@@ -171,8 +168,8 @@ const GasDepositPage = () => {
 
     const nextRowKey =
       matchedRow.key
-      ?? matchedRow.stgSumId
-      ?? matchedRow.pendingStgSumId
+      ?? matchedRow.referenceId
+      ?? matchedRow.masterGasDepositId
       ?? matchedRow.gasDepositId;
 
     setSelectedGasDepositData((prev) => {
@@ -255,10 +252,14 @@ const GasDepositPage = () => {
   }, [data_approval_history]);
 
   useEffect(() => {
+    if (location.state?.activeTab) {
+      setActiveTab(location.state.activeTab);
+    }
+  }, [location.state]);
+
+  useEffect(() => {
     if (activeTab !== "gasDeposit") {
       setPageDetail(false);
-      setActiveRowKey(null);
-      setSelectedGasDepositData(null);
     }
   }, [activeTab]);
 
@@ -368,7 +369,7 @@ const GasDepositPage = () => {
   }, []);
 
   const toggleDetail = useCallback((record) => {
-    const recordKey = record.key ?? record.stgSumId ?? record.pendingStgSumId ?? record.gasDepositId;
+    const recordKey = record.key ?? record.referenceId ?? record.masterGasDepositId ?? record.gasDepositId ?? record.id;
 
     if (activeRowKey === recordKey && pageDetail) {
       setPageDetail(false);
@@ -392,7 +393,7 @@ const GasDepositPage = () => {
 
   const handleApprovalHistory = useCallback((record) => {
     suppressNextRowClick();
-    dispatch(getApprovalHistory(record.pendingStgSumId || record.stgSumId || record.gasDepositId));
+    dispatch(getApprovalHistory(record.referenceId || record.masterGasDepositId || record.gasDepositId || record.id));
     setModalApprovalHistory(true);
   }, [dispatch, suppressNextRowClick]);
 
@@ -553,11 +554,14 @@ const GasDepositPage = () => {
     () =>
       (dataSource ?? []).filter(Boolean).map((item) => ({
         ...item,
-        key: item.stgSumId ?? item.pendingStgSumId ?? item.masterGasDepositId ?? item.accountId,
+        key: item.referenceId ?? item.masterGasDepositId ?? item.gasDepositId ?? item.id ?? item.accountId,
         gasDepositId:
           item.masterGasDepositId ??
-          ((item.stgSumId ?? item.pendingStgSumId) ? -Math.abs(item.stgSumId ?? item.pendingStgSumId) : item.accountId),
-        stgSumId: item.stgSumId ?? item.pendingStgSumId ?? null,
+          item.gasDepositId ??
+          item.referenceId ??
+          item.id ??
+          item.accountId,
+        referenceId: item.referenceId ?? item.masterGasDepositId ?? item.gasDepositId ?? item.id ?? null,
         expiredFlow: Boolean(item.expiredFlow),
         status: getDisplayStatus(item, Boolean(item.expiredFlow)),
         statusApproval: item.statusApproval || null,
@@ -571,9 +575,9 @@ const GasDepositPage = () => {
         termsRedeem: item.termsRedeem ?? null,
         periodEarn: item.earnStartDate || null,
         periodEarnEnd: item.earnEndDate || null,
-        period: item.earnStartDate && item.earnEndDate
+        period: item.billingPeriod || item.period || (item.earnStartDate && item.earnEndDate
           ? `${item.earnStartDate} - ${item.earnEndDate}`
-          : item.earnStartDate || null,
+          : item.earnStartDate || null),
         periodRedeemStart: item.redeemStartDate || null,
         periodRedeemEnd: item.redeemEndDate || null,
         timeUnit: item.timeUnit || null,
@@ -593,7 +597,7 @@ const GasDepositPage = () => {
         updatedDate: item.updatedDate || null,
         updatedBy: item.updatedBy || null,
         headerType: null,
-        billingPeriod: null,
+        billingPeriod: item.billingPeriod || item.period || null,
       })),
     [dataSource],
   );
@@ -635,30 +639,36 @@ const GasDepositPage = () => {
     () =>
       (data_mutation_summary?.result ?? []).filter(Boolean).map((item) => ({
         ...item,
-        key: item.accountNumber,
+        key: item.gasDepositId || item.accountNumber,
         termsEarn:            item.termsEarn            ?? null,
         termsRedeem:          item.termsRedeem          ?? null,
-        earnPeriod:           item.earnStartDate        ?? null,
-        redeemStartDate:      item.periodRedeemStart    ?? null,
-        redeemEndDate:        item.periodRedeemEnd      ?? null,
-        billingPeriod:        item.billingPeriod        ?? null,
+        earnPeriod:           item.earnStartDate        ?? item.startDate ?? null,
+        redeemStartDate:      item.periodRedeemStart    ?? item.redeemStartDate ?? null,
+        redeemEndDate:        item.periodRedeemEnd      ?? item.redeemEndDate ?? null,
+        billingPeriod:        item.billingPeriod        ?? item.period ?? null,
         timeUnit:             item.timeUnit             ?? null,
-        quantity:             item.quantity             ?? null,
-        balanceAmount:        item.balanceAmount        ?? null,
+        quantity:             item.quantity             ?? item.currentBalanceQuantity ?? item.balanceVolume ?? null,
+        balanceVolume:        item.balanceVolume        ?? item.currentBalanceQuantity ?? null,
+        balanceAmount:        item.balanceAmount        ?? item.currentBalanceAmount ?? null,
         headerType:           item.headerType           ?? null,
-        classificationType:   item.classificationType   ?? null,
+        classificationType:   item.classificationType   ?? item.classificationTypeName ?? null,
         source:               item.source               ?? null,
-        period:               item.period               ?? null,
-        mutationDate:         item.mutationDate         ?? null,
-        mutationType:         item.mutationType         ?? null,
+        period:               item.period               ?? item.billingPeriod ?? null,
+        startDate:            item.startDate            ?? item.earnStartDate ?? null,
+        endDate:              item.endDate              ?? item.earnEndDate ?? null,
+        redemPeriod:          item.redemPeriod          ?? ((item.periodRedeemStart || item.redeemStartDate || item.periodRedeemEnd || item.redeemEndDate)
+          ? `${item.periodRedeemStart || item.redeemStartDate || ""}${(item.periodRedeemStart || item.redeemStartDate) && (item.periodRedeemEnd || item.redeemEndDate) ? " - " : ""}${item.periodRedeemEnd || item.redeemEndDate || ""}`
+          : null),
+        mutationDate:         item.mutationDate         ?? item.latestMutationDate ?? null,
+        mutationType:         item.mutationType         ?? item.latestMutationType ?? null,
         volume:               item.volume               ?? null,
         price:                item.price                ?? null,
         detailType:           item.detailType           ?? null,
-        amount:               item.amount               ?? null,
+        amount:               item.amount               ?? item.currentAmount ?? null,
         status:               item.status               ?? null,
         statusApproval:       item.statusApproval       ?? null,
-        mutationStatus:       item.mutationStatus       ?? null,
-        mutationApprovalStatus: item.mutationApprovalStatus ?? null,
+        mutationStatus:       item.mutationStatus       ?? item.latestMutationStatus ?? null,
+        mutationApprovalStatus: item.mutationApprovalStatus ?? item.latestMutationApprovalStatus ?? null,
       })),
     [data_mutation_summary],
   );
@@ -667,15 +677,18 @@ const GasDepositPage = () => {
     () =>
       (data_history?.result ?? []).map((item) => ({
         ...item,
-        key: item.referenceId || item.accountNumber,
-        gasDepositId: item.gasDepositId || item.accountNumber,
+        key: item.referenceId || item.gasDepositId || item.accountNumber,
+        gasDepositId: item.gasDepositId || item.referenceId || item.accountNumber,
+        referenceId: item.referenceId || item.gasDepositId || null,
         expiredFlow: true,
-        status: getDisplayStatus(item, true),
-        statusApproval: item.statusApproval || null,
+        status: item.historyStatus ?? item.status ?? getDisplayStatus(item, true),
+        statusApproval: item.historyStatusApproval ?? item.statusApproval ?? null,
         quantity: item.quantity ?? item.balanceVolume ?? null,
+        cashBalance: item.remainingVolume ?? item.cashBalance ?? null,
+        description: item.historyAction ?? item.description ?? item.documentNumber ?? null,
         periodEarn: item.earnStartDate || null,
         periodEarnEnd: item.earnEndDate || null,
-        period: item.period || (item.earnStartDate && item.earnEndDate
+        period: item.billingPeriod || item.period || item.gasDepositBillingPeriod || (item.earnStartDate && item.earnEndDate
           ? `${item.earnStartDate} - ${item.earnEndDate}`
           : item.earnStartDate || null),
         periodRedeemStart: item.periodRedeemStart || null,
@@ -730,7 +743,7 @@ const GasDepositPage = () => {
                 Approval Expired
               </ButtonComponent>
               <ButtonComponent
-                icon={<SVGIcon name="IconCalendarEvent" width={16} />}
+                icon={<SVGIcon name="IconCalendarEvent" width={16} color={"#FFFFFF"} />}
                 type="submit"
                 border={false}
                 onClick={() => navigate(RBI_ROUTES.GAS_DEPOSIT_EXPIRED_CREATE)}

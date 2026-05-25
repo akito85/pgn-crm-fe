@@ -549,11 +549,12 @@ export const getAllGasDepositPaginate = createAsyncThunk(
 
 export const getHistoryGasDepositPaginate = createAsyncThunk(
   "GET_HISTORY_GAS_DEPOSIT_PAGINATE",
-  async ({ page, pageSize, search, sort, isLoadMore = false } = {}, thunkAPI) => {
+  async ({ gasDepositId, page, pageSize, search, sort, isLoadMore = false } = {}, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams = sort === undefined || sort === "" ? "accountNumber~asc" : sort;
-      const url = `/v1/dbs/api/gas-deposit/history?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
+      const gasDepositParam = gasDepositId != null ? `&gasDepositId=${gasDepositId}` : "";
+      const url = `/v1/dbs/api/gas-deposit/history?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}${gasDepositParam}`;
       const response = await ratingBillingHttpService.getPagination(url);
       const responseData = response?.data ?? response;
       return { ...responseData, isLoadMore };
@@ -589,14 +590,14 @@ export const getMutationSummaryPaginate = createAsyncThunk(
 
 export const getMutationDetailPaginate = createAsyncThunk(
   "GET_MUTATION_DETAIL_PAGINATE",
-  async ({ gasDepositId, summaryRefId, page, pageSize, search, sort } = {}, thunkAPI) => {
+  async ({ gasDepositId, referenceId, page, pageSize, search, sort } = {}, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams = sort === undefined || sort === "" ? "mutationId~desc" : sort;
-      const summaryParam = summaryRefId !== undefined && summaryRefId !== null
-        ? `&summaryRefId=${summaryRefId}`
+      const referenceParam = referenceId !== undefined && referenceId !== null
+        ? `&referenceId=${referenceId}`
         : "";
-      const url = `/v1/dbs/api/gas-deposit/mutation-detail?gasDepositId=${gasDepositId}${summaryParam}&page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
+      const url = `/v1/dbs/api/gas-deposit/mutation-detail?gasDepositId=${gasDepositId}${referenceParam}&page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
       const response = await ratingBillingHttpService.getPagination(url);
       return response?.data ?? response;
     } catch (error) {
@@ -746,7 +747,7 @@ export const createMutationSummary = createAsyncThunk(
             title: "Success",
             description: body?.isDraft === true
               ? "Gas Deposit draft saved successfully"
-              : body.id && body.id > 0
+              : body.gasDepositId && body.gasDepositId > 0
                 ? "Gas Deposit updated successfully"
                 : "Gas Deposit created successfully",
             return: false,
@@ -758,6 +759,21 @@ export const createMutationSummary = createAsyncThunk(
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
       thunkAPI.dispatch(showModalError({ title: "Failed", description: message }));
+      return thunkAPI.rejectWithValue(message);
+    }
+  },
+);
+
+export const createExpiredMutationSummaryBatch = createAsyncThunk(
+  "CREATE_EXPIRED_MUTATION_SUMMARY_BATCH",
+  async (body, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/gas-deposit/mutation-summary/create-expired-batch`;
+      const response = await ratingBillingHttpService.createData(url, body);
+      return response?.data ?? response;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
       return thunkAPI.rejectWithValue(message);
     }
   },

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
+import PropTypes from "prop-types";
 import { useDispatch, useSelector } from "react-redux";
 import { Form, Select, Spin } from "antd";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
@@ -38,6 +39,8 @@ const ModalCreateMutationDetail = ({
   initialValues = null,
   submitLabel = "Submit",
   modalTitle = "Create Mutation Detail",
+  defaultBillingPeriod,
+  defaultUom,
 }) => {
   const dispatch = useDispatch();
   const [form] = Form.useForm();
@@ -72,10 +75,12 @@ const ModalCreateMutationDetail = ({
   const [loadingPriceOptions, setLoadingPriceOptions] = useState(false);
   const [priceSearch, setPriceSearch] = useState("");
   const selectedBillingPeriod = Form.useWatch("billingPeriod", form);
+  const selectedMutationType = Form.useWatch("mutationType", form);
   const activeAccountNumber = accountNumber || selectedData?.accountNumber;
   const priceOptions = priceOptionsData?.result || [];
   const pricePageInfo = priceOptionsData?.page || {};
   const PRICE_PAGE_SIZE = 20;
+  const isRedeemMutation = String(selectedMutationType || "").trim().toUpperCase() === "REDEEM";
 
   const getSelectedPriceOption = (priceValue) =>
     priceOptions.find((item) => String(item?.value) === String(priceValue));
@@ -91,9 +96,11 @@ const ModalCreateMutationDetail = ({
       form.setFieldsValue({
         source: "MANUAL",
         type: "Adjustment",
+        billingPeriod: initialValues?.billingPeriod || defaultBillingPeriod,
+        uom: initialValues?.uom || defaultUom,
       });
     }
-  }, [dispatch, isOpen, form]);
+  }, [dispatch, isOpen, form, defaultBillingPeriod, defaultUom, initialValues?.billingPeriod, initialValues?.uom]);
 
   useEffect(() => {
     if (!isOpen || !initialValues) return;
@@ -345,7 +352,7 @@ const ModalCreateMutationDetail = ({
 
     dispatch(createMutationDetail(body)).then(async (res) => {
       if (!res.error) {
-        const mutationId = res.payload?.data?.stgMutId;
+        const mutationId = res.payload?.data?.mutationId || res.payload?.data?.id;
 
         if (listDataAttachment.length > 0 && mutationId) {
           await uploadAttachments(
@@ -503,8 +510,9 @@ const ModalCreateMutationDetail = ({
               >
                 <InputComponent
                   placeholder="Input.."
-                  onChange={(e) => {
-                    const qty = Number.parseFloat(e.target.value) || 0;
+                  prefix={isRedeemMutation ? "-" : undefined}
+                  onChange={(event) => {
+                    const qty = Math.abs(Number.parseFloat(event?.target?.value) || 0);
                     const selectedPriceOption = getSelectedPriceOption(
                       form.getFieldValue("price"),
                     );
@@ -541,7 +549,7 @@ const ModalCreateMutationDetail = ({
                     </>
                   )}
                   onChange={(val) => {
-                    const qty = Number.parseFloat(form.getFieldValue("quantity")) || 0;
+                    const qty = Math.abs(Number.parseFloat(form.getFieldValue("quantity")) || 0);
                     const selectedPriceOption = getSelectedPriceOption(val);
                     const p = Number.parseFloat(selectedPriceOption?.price) || 0;
                     form.setFieldsValue({ amount: qty * p || "" });
@@ -560,7 +568,11 @@ const ModalCreateMutationDetail = ({
                 rules={[{ required: true, message: "Amount is required!" }]}
                 style={{ marginBottom: 0 }}
               >
-                <InputComponent disabled placeholder="auto" />
+                <InputComponent
+                  prefix={isRedeemMutation ? "-" : undefined}
+                  disabled
+                  placeholder="auto"
+                />
               </Form.Item>
 
               <Form.Item
@@ -633,3 +645,17 @@ const ModalCreateMutationDetail = ({
 };
 
 export default ModalCreateMutationDetail;
+
+ModalCreateMutationDetail.propTypes = {
+  isOpen: PropTypes.bool,
+  handleCancel: PropTypes.func,
+  handleRefresh: PropTypes.func,
+  selectedData: PropTypes.object,
+  withApprovalAndAttachment: PropTypes.bool,
+  accountNumber: PropTypes.string,
+  initialValues: PropTypes.object,
+  submitLabel: PropTypes.string,
+  modalTitle: PropTypes.string,
+  defaultBillingPeriod: PropTypes.string,
+  defaultUom: PropTypes.string,
+};

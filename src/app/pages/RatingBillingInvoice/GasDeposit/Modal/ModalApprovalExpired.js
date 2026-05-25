@@ -74,6 +74,7 @@ const ModalApprovalExpired = ({
   const dispatch = useDispatch();
   const containerRef = useRef(null);
   const [form] = Form.useForm();
+  const remarkValue = Form.useWatch("remark", form);
 
   const {
     data_approval_expired_list,
@@ -229,17 +230,26 @@ const ModalApprovalExpired = ({
     },
   };
 
+  const hasRemark = typeof remarkValue === "string" && remarkValue.trim().length > 0;
+
   const steps = [
     {
       title: "GAS DEPOSIT INFORMATION",
-      disabled: selectedRows.length === 0 || !form.getFieldValue()?.remark,
+      disabled: selectedRows.length === 0 || !hasRemark,
     },
     { title: "CONFIRMATION" },
   ];
 
   const items = steps.map((item) => ({ key: item.title, title: item.title }));
 
-  const handleButtonNext = () => setCurrent(1);
+  const handleButtonNext = async () => {
+    if (!selectedRows.length) return;
+
+    try {
+      await form.validateFields(["remark"]);
+      setCurrent(1);
+    } catch (error) {}
+  };
   const handlePrev = () => setCurrent(0);
 
   const handleClose = () => {

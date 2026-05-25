@@ -93,6 +93,8 @@ const mapApprovalHistoryData = (approvalHistory, preferredKeys = []) => {
 
 const pickFirstValue = (...values) => values.find((value) => value !== undefined && value !== null && value !== "");
 
+const isWaitingApprovalStatus = (value) => String(value || "").trim().toLowerCase() === "waiting approval";
+
 const extractApprovalRows = (payload) => {
   const approverSource = payload?.dataApprover;
 
@@ -216,30 +218,33 @@ const normalizeGasDepositDetailData = (item) => {
   const normalizedGasDepositId =
     item.gasDepositId ??
     item.masterGasDepositId ??
-    ((item.stgSumId ?? item.pendingStgSumId)
-      ? -Math.abs(item.stgSumId ?? item.pendingStgSumId)
-      : item.accountId);
+    item.referenceId ??
+    item.id ??
+    item.accountId;
+
+  const normalizedReferenceId =
+    item.referenceId ??
+    item.masterGasDepositId ??
+    item.gasDepositId ??
+    item.id ??
+    null;
 
   const normalizedRecordId =
     item.recordId ??
-    item.referenceId ??
-    item.stgSumId ??
-    item.pendingStgSumId ??
-    item.masterGasDepositId ??
-    item.id ??
-    (Number(normalizedGasDepositId) > 0 ? normalizedGasDepositId : null);
+    normalizedReferenceId ??
+    normalizedGasDepositId;
 
   return {
     ...item,
-    key: item.key ?? item.stgSumId ?? item.pendingStgSumId ?? item.masterGasDepositId ?? item.accountId,
+    key: item.key ?? normalizedReferenceId ?? normalizedGasDepositId ?? item.accountId,
     gasDepositId: normalizedGasDepositId,
+    referenceId: normalizedReferenceId,
     recordId: normalizedRecordId,
-    stgSumId: item.stgSumId ?? item.pendingStgSumId ?? null,
-    pendingStgSumId: item.pendingStgSumId ?? item.stgSumId ?? null,
     expiredFlow: Boolean(item.expiredFlow),
     status: getDisplayStatus(item, Boolean(item.expiredFlow)),
     statusApproval: item.statusApproval || null,
-    period: item.period || (item.earnStartDate && item.earnEndDate
+    billingPeriod: item.billingPeriod || item.period || null,
+    period: item.billingPeriod || item.period || (item.earnStartDate && item.earnEndDate
       ? `${item.earnStartDate} - ${item.earnEndDate}`
       : item.earnStartDate || null),
     periodEarn: item.periodEarn || item.earnStartDate || null,
@@ -304,18 +309,11 @@ const GasDepositDetail = (props) => {
   );
   const selectedGasDepositId = currentSelectedData?.gasDepositId || currentSelectedData?.id;
   const selectedSummaryReferenceId = useMemo(() => {
-    const explicitSummaryId = currentSelectedData?.pendingStgSumId || currentSelectedData?.stgSumId;
-    if (explicitSummaryId !== undefined && explicitSummaryId !== null) {
-      return explicitSummaryId;
-    }
-
-    const parsedId = Number(selectedGasDepositId);
-    if (!Number.isNaN(parsedId) && parsedId < 0) {
-      return Math.abs(parsedId);
-    }
-
-    return selectedGasDepositId;
-  }, [currentSelectedData?.pendingStgSumId, currentSelectedData?.stgSumId, selectedGasDepositId]);
+    return currentSelectedData?.referenceId
+      || currentSelectedData?.masterGasDepositId
+      || currentSelectedData?.id
+      || selectedGasDepositId;
+  }, [currentSelectedData?.referenceId, currentSelectedData?.masterGasDepositId, currentSelectedData?.id, selectedGasDepositId]);
 
   const [modalCreateMD, setModalCreateMD] = useState(false);
   const [modalViewMD, setModalViewMD] = useState(false);
@@ -347,8 +345,6 @@ const GasDepositDetail = (props) => {
     if (!Array.isArray(refreshedRows) || !refreshedRows.length) return;
 
     const currentIds = [
-      currentSelectedData?.stgSumId,
-      currentSelectedData?.pendingStgSumId,
       currentSelectedData?.referenceId,
       currentSelectedData?.recordId,
       currentSelectedData?.masterGasDepositId,
@@ -360,8 +356,6 @@ const GasDepositDetail = (props) => {
 
     const matchedRow = refreshedRows.find((item) => {
       const candidateIds = [
-        item?.stgSumId,
-        item?.pendingStgSumId,
         item?.referenceId,
         item?.recordId,
         item?.masterGasDepositId,
@@ -382,12 +376,10 @@ const GasDepositDetail = (props) => {
     currentSelectedData?.gasDepositId,
     currentSelectedData?.id,
     currentSelectedData?.masterGasDepositId,
-    currentSelectedData?.pendingStgSumId,
     currentSelectedData?.recordId,
     currentSelectedData?.referenceId,
     currentSelectedData?.status,
     currentSelectedData?.statusApproval,
-    currentSelectedData?.stgSumId,
     data,
   ]);
 
@@ -411,7 +403,7 @@ const GasDepositDetail = (props) => {
       dispatch(
         getMutationDetailPaginate({
           gasDepositId: selectedGasDepositId,
-          summaryRefId: selectedSummaryReferenceId,
+          referenceId: selectedSummaryReferenceId,
           page: 1,
           pageSize: 100,
           search: "",
@@ -470,10 +462,10 @@ const GasDepositDetail = (props) => {
         return waitingMutation || dataSourceMutationDetail[0];
       }
 
-      const prevId = prev?.mutationId || prev?.stgMutId || prev?.id;
+      const prevId = prev?.mutationId || prev?.id;
       return (
         dataSourceMutationDetail.find(
-          (item) => (item?.mutationId || item?.stgMutId || item?.id) === prevId,
+          (item) => (item?.mutationId || item?.id) === prevId,
         ) || waitingMutation || dataSourceMutationDetail[0]
       );
     });
@@ -492,7 +484,7 @@ const GasDepositDetail = (props) => {
   const handleApprovalHistoryMD = (record) => {
     dispatch(
       getApprovalHistory(
-        record?.mutationId || record?.stgMutId || record?.id || selectedGasDepositId,
+        record?.mutationId || record?.id || selectedGasDepositId,
       ),
     );
     setModalApprovalHistoryMD(true);
@@ -507,6 +499,23 @@ const GasDepositDetail = (props) => {
     if (!approvalTarget?.referenceId || !approvalTarget?.referenceType) return;
 
     const isSummaryApproval = approvalTarget.referenceType === "SUMMARY";
+
+    const refreshMutationDetail = () => {
+      if (!selectedGasDepositId) {
+        return Promise.resolve();
+      }
+
+      return dispatch(
+        getMutationDetailPaginate({
+          gasDepositId: selectedGasDepositId,
+          referenceId: selectedSummaryReferenceId,
+          page: 1,
+          pageSize: 100,
+          search: "",
+          sort: "",
+        }),
+      );
+    };
 
     await dispatch(
       processGasDepositApproval({
@@ -536,16 +545,7 @@ const GasDepositDetail = (props) => {
     );
 
     if (!isSummaryApproval) {
-      await dispatch(
-        getMutationDetailPaginate({
-          gasDepositId: selectedGasDepositId,
-          summaryRefId: selectedSummaryReferenceId,
-          page: 1,
-          pageSize: 100,
-          search: "",
-          sort: "",
-        }),
-      );
+      await refreshMutationDetail();
       return;
     }
 
@@ -559,6 +559,8 @@ const GasDepositDetail = (props) => {
           isLoadMore: false,
         }),
       );
+
+      refreshMutationDetail();
     }, 1000);
   };
 
@@ -668,8 +670,8 @@ const GasDepositDetail = (props) => {
     () =>
       dataSourceMutationDetail?.map((item) => ({
         ...item,
-        key: item.mutationId ?? item.stgMutId ?? item.id,
-        id: item.mutationId ?? item.stgMutId ?? item.id,
+        key: item.mutationId ?? item.id,
+        id: item.mutationId ?? item.id,
         documentNumber: item.documentNumber || null,
         source: item.source || null,
         billingPeriod: item.billingPeriod || null,
@@ -684,46 +686,72 @@ const GasDepositDetail = (props) => {
         description: item.description || null,
         status: item.status || null,
         statusApproval: item.statusApproval || null,
+        apphierId: item.apphierId || null,
       })),
     [dataSourceMutationDetail],
   );
 
   const waitingMutationDetail = useMemo(
     () =>
-      dataSourceMD?.find((item) => item?.statusApproval === "Waiting Approval") || null,
+      dataSourceMD?.find((item) => isWaitingApprovalStatus(item?.statusApproval)) || null,
     [dataSourceMD],
   );
 
-  const approvalTarget = useMemo(() => {
-    const hasPendingSummaryContext = Boolean(
-      currentSelectedData?.pendingStgSumId
-      || currentSelectedData?.stgSumId
-      || Number(currentSelectedData?.gasDepositId) < 0,
-    );
+  const approvalHistoryDataSource = useMemo(
+    () => extractApprovalRows(dataApprovalHistoryFixMD),
+    [dataApprovalHistoryFixMD],
+  );
 
-    if (currentSelectedData?.statusApproval === "Waiting Approval") {
+  const hasWaitingApprovalRows = useMemo(
+    () => [...approvalHierarchyRows, ...approvalHistoryDataSource]
+      .some((item) => isWaitingApprovalStatus(item?.status)),
+    [approvalHierarchyRows, approvalHistoryDataSource],
+  );
+
+  const approvalTarget = useMemo(() => {
+    const hasPendingSummaryContext = isWaitingApprovalStatus(currentSelectedData?.statusApproval);
+
+    if (hasPendingSummaryContext) {
       return {
         referenceType: "SUMMARY",
-        referenceId: currentSelectedData?.pendingStgSumId || currentSelectedData?.stgSumId || currentSelectedData?.id,
+        referenceId:
+          currentSelectedData?.referenceId
+          || currentSelectedData?.masterGasDepositId
+          || currentSelectedData?.gasDepositId
+          || currentSelectedData?.id,
         name: currentSelectedData?.accountNumber || currentSelectedData?.customerNumber || "-",
       };
     }
 
     const mutationTarget =
-      (selectedMutationDetail?.statusApproval === "Waiting Approval" && selectedMutationDetail) ||
+      (isWaitingApprovalStatus(selectedMutationDetail?.statusApproval) && selectedMutationDetail) ||
       waitingMutationDetail;
 
     if (mutationTarget && !hasPendingSummaryContext) {
       return {
         referenceType: "MUTATION",
-        referenceId:
-          mutationTarget?.mutationId || mutationTarget?.stgMutId || mutationTarget?.id,
+        referenceId: mutationTarget?.mutationId || mutationTarget?.id,
         name: mutationTarget?.documentNumber || mutationTarget?.mutationId || "-",
       };
     }
 
+    if (selectedSummaryReferenceId && data_approval_history?.isApprover === true && hasWaitingApprovalRows) {
+      return {
+        referenceType: "SUMMARY",
+        referenceId: selectedSummaryReferenceId,
+        name: currentSelectedData?.accountNumber || currentSelectedData?.customerNumber || "-",
+      };
+    }
+
     return null;
-  }, [currentSelectedData, selectedMutationDetail, waitingMutationDetail]);
+  }, [
+    currentSelectedData,
+    data_approval_history?.isApprover,
+    hasWaitingApprovalRows,
+    selectedMutationDetail,
+    selectedSummaryReferenceId,
+    waitingMutationDetail,
+  ]);
 
   const approvalHierarchyId = useMemo(() => {
     if (currentSelectedData?.apphierId) return currentSelectedData.apphierId;
@@ -742,7 +770,14 @@ const GasDepositDetail = (props) => {
     if (approvalTarget?.referenceId) {
       dispatch(getApprovalHistory(approvalTarget.referenceId));
     }
-  }, [approvalTarget?.referenceId, dispatch]);
+  }, [
+    approvalTarget?.referenceId,
+    approvalTarget?.referenceType,
+    currentSelectedData?.statusApproval,
+    selectedMutationDetail?.statusApproval,
+    waitingMutationDetail?.statusApproval,
+    dispatch,
+  ]);
 
   useEffect(() => {
     if (!approvalHierarchyId) {
@@ -776,24 +811,32 @@ const GasDepositDetail = (props) => {
     };
   }, [approvalHierarchyId]);
 
+  const hasPendingApprovalContext = useMemo(
+    () => isWaitingApprovalStatus(currentSelectedData?.statusApproval)
+      || isWaitingApprovalStatus(selectedMutationDetail?.statusApproval)
+      || isWaitingApprovalStatus(waitingMutationDetail?.statusApproval)
+      || hasWaitingApprovalRows,
+    [
+      currentSelectedData?.statusApproval,
+      hasWaitingApprovalRows,
+      selectedMutationDetail?.statusApproval,
+      waitingMutationDetail?.statusApproval,
+    ],
+  );
+
   const canProcessApproval = useMemo(() => {
-    const headerWaitingApproval = currentSelectedData?.statusApproval === "Waiting Approval";
-    const mutationWaitingApproval = Boolean(
-      selectedMutationDetail?.statusApproval === "Waiting Approval" || waitingMutationDetail,
-    );
     const isApprover = data_approval_history?.isApprover === true;
 
     return Boolean(
       isApprover
-      && (headerWaitingApproval || mutationWaitingApproval)
+      && (hasPendingApprovalContext || hasWaitingApprovalRows)
       && approvalTarget,
     );
   }, [
     approvalTarget,
-    currentSelectedData?.statusApproval,
     data_approval_history?.isApprover,
-    selectedMutationDetail?.statusApproval,
-    waitingMutationDetail,
+    hasPendingApprovalContext,
+    hasWaitingApprovalRows,
   ]);
 
   // ===================== Approval / Attachment Columns (Gas Deposit Detail tab) =====================
@@ -813,14 +856,15 @@ const GasDepositDetail = (props) => {
     { key: "fileSize", title: "FILE SIZE", dataIndex: "fileSize", width: 100 },
   ], []);
 
-  const approvalHistoryDataSource = useMemo(
-    () => extractApprovalRows(dataApprovalHistoryFixMD),
-    [dataApprovalHistoryFixMD],
-  );
-
   const approvalDataSource = useMemo(
-    () => (approvalHistoryDataSource.length > 0 ? approvalHistoryDataSource : approvalHierarchyRows),
-    [approvalHierarchyRows, approvalHistoryDataSource],
+    () => {
+      if (hasPendingApprovalContext && approvalHierarchyRows.length > 0) {
+        return approvalHierarchyRows;
+      }
+
+      return approvalHistoryDataSource.length > 0 ? approvalHistoryDataSource : approvalHierarchyRows;
+    },
+    [approvalHierarchyRows, approvalHistoryDataSource, hasPendingApprovalContext],
   );
 
   const attachmentDataSource = useMemo(() =>
@@ -862,7 +906,7 @@ const GasDepositDetail = (props) => {
           </DetailText>
           <DetailText label="Period Start Redeem">{formatShortDate(currentSelectedData?.periodRedeemStart)}</DetailText>
           <DetailText label="Period End Redeem">{formatShortDate(currentSelectedData?.periodRedeemEnd)}</DetailText>
-          <DetailText label="Period">{formatShortPeriod(currentSelectedData?.period)}</DetailText>
+          <DetailText label="Period">{formatShortPeriod(currentSelectedData?.billingPeriod || currentSelectedData?.period)}</DetailText>
           <DetailText label="Time Unit">{currentSelectedData?.timeUnit || "-"}</DetailText>
           <DetailText label="UOM">{currentSelectedData?.uom || "-"}</DetailText>
           <DetailText label="Quantity">{renderFormattedNumber(currentSelectedData?.quantity)}</DetailText>
@@ -965,7 +1009,6 @@ const GasDepositDetail = (props) => {
           enableRowClick={true}
           selectedRowKey={
             selectedMutationDetail?.mutationId ||
-            selectedMutationDetail?.stgMutId ||
             selectedMutationDetail?.id ||
             null
           }

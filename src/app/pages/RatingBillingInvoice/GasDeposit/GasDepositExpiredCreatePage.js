@@ -14,6 +14,7 @@ import DateComponent from "../../../../components/DateComponent";
 import SelectComponent from "../../../../components/SelectComponent";
 import InputComponent from "../../../../components/InputComponent";
 import ModalCustom from "../../../../components/Modal/ModalCustom";
+import DetailText from "../../../../components/DetailText";
 import ApprovalComponentGeneral from "../../../../components/Approval/ApprovalComponentGeneral";
 import AttachmentComponent from "../../../../components/Attachment/AttachmentComponent";
 import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
@@ -30,7 +31,7 @@ import {
   getListApprovalById,
 } from "../../../../redux/slices/rating_billing_invoice/billing";
 import {
-  createMutationSummary,
+  createExpiredMutationSummaryBatch,
   getCategoryListGasDeposit,
   getAllGasDepositPaginate,
 } from "../../../../redux/slices/rating_billing_invoice/gasDeposit";
@@ -80,16 +81,20 @@ const parseDate = (value) => {
   return fallback.isValid() ? fallback : null;
 };
 
+const resolveExpiredEligibilityDate = (row) => {
+  const redeemEndDate = parseDate(row?.redeemEndDate || row?.periodRedeemEnd);
+  return redeemEndDate ? redeemEndDate.clone().add(1, "day") : null;
+};
+
 const resolveExpiredBillingPeriod = (row, expiredDate) => {
-  const rawBillingPeriod = row?.billingPeriod;
+  const rawBillingPeriod = row?.billingPeriod || row?.latestApprovedBillingPeriod;
   if (rawBillingPeriod && String(rawBillingPeriod).length <= 10) {
     return rawBillingPeriod;
   }
 
   const candidateDate =
     parseDate(row?.earnEndDate) ||
-    parseDate(row?.periodRedeemEnd) ||
-    parseDate(expiredDate);
+    parseDate(row?.periodRedeemEnd);
 
   if (candidateDate) {
     return candidateDate.format("MMM YYYY");
@@ -100,11 +105,14 @@ const resolveExpiredBillingPeriod = (row, expiredDate) => {
 
 const mapGasDepositRow = (item) => ({
   ...item,
-  key: item.stgSumId ?? item.pendingStgSumId ?? item.masterGasDepositId ?? item.accountId ?? item.accountNumber,
+  key: item.referenceId ?? item.masterGasDepositId ?? item.gasDepositId ?? item.id ?? item.accountId ?? item.accountNumber,
   gasDepositId:
     item.masterGasDepositId ??
-    ((item.stgSumId ?? item.pendingStgSumId) ? -Math.abs(item.stgSumId ?? item.pendingStgSumId) : item.accountId),
-  stgSumId: item.stgSumId ?? item.pendingStgSumId ?? null,
+    item.gasDepositId ??
+    item.referenceId ??
+    item.id ??
+    item.accountId,
+  referenceId: item.referenceId ?? item.masterGasDepositId ?? item.gasDepositId ?? item.id ?? null,
   status: item.statusMaster || item.status || null,
   statusApproval: item.statusApproval || null,
   mutationApprovalStatus: null,
@@ -138,7 +146,11 @@ const mapGasDepositRow = (item) => ({
   updatedDate: item.updatedDate || null,
   updatedBy: item.updatedBy || null,
   headerType: null,
-  billingPeriod: null,
+  billingPeriod:
+    item.billingPeriod
+    || (item.period && String(item.period).length <= 10 ? item.period : null)
+    || item.latestApprovedBillingPeriod
+    || null,
 });
 
 const GAS_DEPOSIT_COLUMN_WIDTHS = {
@@ -205,25 +217,35 @@ const ExpiredGasDepositSummary = ({ values, selectedRows, infoColumns }) => {
   ];
 
   return (
-    <div className="space-y-4">
-      <CardContainer header={<p className="mt-[15px] text-primary">EXPIRED GAS DEPOSIT INFORMATION</p>}>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-x-6 gap-y-5 text-[12px]">
+    <div className="space-y-3">
+      <CardContainer
+        className="!mt-0"
+        header={<p className="text-primary text-xs uppercase font-bold">EXPIRED GAS DEPOSIT INFORMATION</p>}
+      >
+        <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-5 gap-x-6 gap-y-3">
           {infoItems.map((item) => (
-            <div key={item.label} className={item.fullWidth ? "md:col-span-4" : ""}>
-              <p className="mb-1 font-semibold text-[#4B465C]">{item.label}</p>
-              <p className="text-[#4B465C]">{item.value}</p>
+            <div key={item.label} className={item.fullWidth ? "md:col-span-3 xl:col-span-5" : ""}>
+              <DetailText
+                label={item.label}
+                classTextAdditional={item.fullWidth ? "whitespace-pre-wrap" : ""}
+              >
+                {item.value}
+              </DetailText>
             </div>
           ))}
         </div>
       </CardContainer>
 
-      <CardContainer header={<p className="mt-[15px] text-primary">GAS DEPOSIT INFORMATION</p>}>
+      <CardContainer
+        className="!mt-0"
+        header={<p className="text-primary text-xs uppercase font-bold">GAS DEPOSIT INFORMATION</p>}
+      >
         <TableRBI
           idTable="expired-gd-confirm-info-table"
           dataSource={selectedRows}
           columns={infoColumns}
           totalData={selectedRows.length}
-          tableScrolled={{ x: 5200, y: 300 }}
+          tableScrolled={{ x: 5200, y: 260 }}
           showExport={false}
           usePagination={false}
           showRefresh={false}
@@ -342,22 +364,7 @@ const GasDepositExpiredCreatePage = () => {
   );
 
   const filteredSearchRows = useMemo(() => {
-    const expiredDate = parseDate(form.getFieldValue("expiredDate"));
-    const selectedCurrency = form.getFieldValue("currency");
-    if (!expiredDate) return [];
-
     return gasDepositRows
-      .filter((row) => {
-        const periodEarnEnd = parseDate(row.earnEndDate || row.periodEarnEnd);
-        const status = String(row.status || "").trim().toLowerCase();
-        const currency = String(row.currency || "").trim().toUpperCase();
-        const amount = parseAmount(row.amount);
-        return periodEarnEnd
-          && periodEarnEnd.isSame(expiredDate, "day")
-          && status === "inactive"
-          && (!selectedCurrency || currency === String(selectedCurrency).trim().toUpperCase())
-          && amount > 0;
-      })
       .map((row) => {
         const defaultExpiredQuantity = normalizeWholeNumberString(parseAmount(row.quantity ?? row.cashBalance));
         const defaultExpiredAmount = normalizeWholeNumberString(parseAmount(row.amount));
@@ -574,7 +581,10 @@ const GasDepositExpiredCreatePage = () => {
       key: "approval",
       label: "Approval",
       children: (
-        <CardContainer header={<p className="mt-[15px] text-primary">APPROVAL INFORMATION</p>}>
+        <CardContainer
+          className="!mt-0"
+          header={<p className="text-primary text-xs uppercase font-bold">APPROVAL INFORMATION</p>}
+        >
           <ApprovalComponentGeneral
             type="confirmation"
             dataTable={appHierDataDetail}
@@ -590,7 +600,10 @@ const GasDepositExpiredCreatePage = () => {
       key: "attachment",
       label: "Attachment",
       children: (
-        <CardContainer header={<p className="mt-[15px] text-primary">ATTACHMENT</p>}>
+        <CardContainer
+          className="!mt-0"
+          header={<p className="text-primary text-xs uppercase font-bold">ATTACHMENT</p>}
+        >
           <AttachmentComponent
             type="confirmation"
             data={listDataAttachment}
@@ -622,8 +635,8 @@ const GasDepositExpiredCreatePage = () => {
         search: encodeURIComponent(JSON.stringify({
           ...searchFilters,
           status: "Inactive",
+          expiredDate: formattedExpiredDate,
           currency,
-          schemeEndDate: formattedExpiredDate,
           positiveAmountOnly: true,
         })),
         page: 1,
@@ -694,7 +707,7 @@ const GasDepositExpiredCreatePage = () => {
   };
 
   const persistExpiredEntries = async () => {
-    const values = form.getFieldsValue();
+    const values = form.getFieldsValue(true);
 
     if (!selectedDepositRows.length) return;
 
@@ -702,6 +715,7 @@ const GasDepositExpiredCreatePage = () => {
       (item) => item?.dataType !== "exist" && item?.file,
     );
 
+    const entries = [];
     for (const row of selectedDepositRows) {
       const expiredAmount = parseAmount(row.expiredAmount);
       const resolvedCurrency = row.currency || values.currency;
@@ -716,58 +730,47 @@ const GasDepositExpiredCreatePage = () => {
         return;
       }
 
-      const body = {
+      if (!(row.masterGasDepositId ?? row.gasDepositId)) {
+        dispatch(showModalError({ title: "Failed", description: "Gas deposit header is required for expired flow" }));
+        return;
+      }
+
+      entries.push({
         accountId: row.accountId,
-        apphierId: selectedHierarchy,
         balanceVolume: parseAmount(row.expiredQuantity),
         balanceAmount: expiredAmount,
         currency: resolvedCurrency,
         uom: row.uom,
+        gasDepositId: row.masterGasDepositId ?? row.gasDepositId,
         schemeStartDate: row.periodEarn || row.earnStartDate || undefined,
         schemeEndDate: row.earnEndDate || undefined,
         redeemStartDate: row.periodRedeemStart || undefined,
-        redeemEndDate: values.expiredDate?.format
-          ? values.expiredDate.format("YYYY-MM-DD")
-          : values.expiredDate,
         termsEarn: row.termsEarn ?? undefined,
         termsRedeem: row.termsRedeem ?? undefined,
         timeUnit: row.timeUnit || undefined,
         source: resolvedSource,
-        actionType: "CREATE",
-        isDraft: false,
-        description: values.description,
         sapCustId: row.sapCustId ?? undefined,
-        attachments: [],
-        silentSuccess: true,
-        gasDepositMutationDetailDtos: [
-          {
-            gasDepositId: row.masterGasDepositId ?? undefined,
-            billPeriode: resolveExpiredBillingPeriod(row, values.expiredDate),
-            mutationDate: values.expiredDate?.format
-              ? values.expiredDate.format("YYYY-MM-DD")
-              : values.expiredDate,
-            transType: "EXPIRE",
-            volumeAmount: parseAmount(row.expiredQuantity),
-            price: null,
-            amountValue: expiredAmount,
-            source: "Expired Gas Deposit",
-            mutationType: "EXPIRE",
-            category: "Expired",
-            uom: row.uom,
-            description: values.description,
-          },
-        ],
-      };
+        billingPeriod: resolveExpiredBillingPeriod(row, values.expiredDate),
+      });
+    }
 
-      const res = await dispatch(createMutationSummary(body)).unwrap();
-      const responseData = res?.data || res || {};
-      const referenceId =
-        responseData?.stgSumId ||
-        responseData?.id ||
-        responseData?.gasDepositId ||
-        responseData?.pendingStgSumId;
+    const body = {
+      apphierId: selectedHierarchy,
+      expiredDate: values.expiredDate?.format
+        ? values.expiredDate.format("YYYY-MM-DD")
+        : values.expiredDate,
+      description: values.description,
+      entries,
+    };
 
-      if (pendingAttachments.length > 0 && referenceId) {
+    const res = await dispatch(createExpiredMutationSummaryBatch(body)).unwrap();
+    const responseData = res?.data || res || {};
+    const referenceIds = Array.isArray(responseData?.referenceIds)
+      ? responseData.referenceIds.filter(Boolean)
+      : [];
+
+    if (pendingAttachments.length > 0 && referenceIds.length > 0) {
+      for (const referenceId of referenceIds) {
         for (const element of pendingAttachments) {
           await ratingBillingHttpService.uploadAttachment(
             `/v1/dbs/api/gas-deposit/upload-attachment`,
@@ -792,7 +795,7 @@ const GasDepositExpiredCreatePage = () => {
         return: false,
       }),
     );
-    navigate(RBI_ROUTES.GAS_DEPOSIT_VIEW);
+    navigate(RBI_ROUTES.GAS_DEPOSIT_VIEW, { state: { activeTab: "history" } });
   };
 
   const handleConfirmCreateExpired = async () => {
@@ -1012,7 +1015,7 @@ const GasDepositExpiredCreatePage = () => {
         handleCancel={() => setIsConfirmationModalOpen(false)}
         header="CONFIRMATION"
         type="confirmation"
-        width={1500}
+        width={1180}
         hidePadding={{ top: true }}
         footer={(
           <div className="flex w-full items-center justify-between">
@@ -1027,7 +1030,7 @@ const GasDepositExpiredCreatePage = () => {
       >
         <Tabs
           items={confirmationItems}
-          className="[&_.ant-tabs-nav]:mb-4 [&_.ant-tabs-tab]:pb-3 [&_.ant-tabs-content-holder]:pt-2"
+          className="[&_.ant-tabs-nav]:mb-2 [&_.ant-tabs-nav]:px-1 [&_.ant-tabs-tab]:pb-2 [&_.ant-tabs-content-holder]:pt-0"
         />
       </ModalCustom>
     </>
