@@ -93,6 +93,9 @@ import ViewCaCiMapping from "../../app/pages/ReceiptAndCollection/MasterData/CaC
 import ListDetailCaCiMapping from "../../app/pages/ReceiptAndCollection/MasterData/CaCiMapping/ListDetailCaCiMapping";
 import ListFormCaCiMapping from "../../app/pages/ReceiptAndCollection/MasterData/CaCiMapping/ListFormCaCiMapping";
 
+import CollectionActivitiesView from "../../app/pages/ReceiptAndCollection/MasterData/CollectionActivities/CollectionActivitiesView";
+import CollectionActivitiesForm from "../../app/pages/ReceiptAndCollection/MasterData/CollectionActivities/CollectionActivitiesForm";
+
 
 
 export const RECEIPT_AND_COLLECTION_ELEMENTS = {
@@ -258,4 +261,9 @@ export const RECEIPT_AND_COLLECTION_ELEMENTS = {
   DETAIL_CA_CI_MAPPING: <ListDetailCaCiMapping />,
   CREATE_CA_CI_MAPPING: <ListFormCaCiMapping type={"create"} />,
   UPDATE_CA_CI_MAPPING: <ListFormCaCiMapping type={"update"} />,
+
+  // Collection Activities
+  VIEW_COLLECTION_ACTIVITIES: <CollectionActivitiesView />,
+  CREATE_COLLECTION_ACTIVITIES: <CollectionActivitiesForm type="create" />,
+  UPDATE_COLLECTION_ACTIVITIES: <CollectionActivitiesForm type="update" />,
 };
