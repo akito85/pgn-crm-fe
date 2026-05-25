@@ -708,9 +708,9 @@ export const createBillingItemColumns = (renderValue) => [
     render: renderValue,
   },
   {
-    key: "currencyId",
-    title: "CURRENCY ID",
-    dataIndex: "currencyId",
+    key: "currencyCode",
+    title: "CURRENCY",
+    dataIndex: "currencyCode",
     width: 120,
     isClassification: true,
     render: renderValue,
