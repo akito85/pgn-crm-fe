@@ -43,6 +43,8 @@ import BillingItemCategoryDetail from "../../app/pages/SystemSetup/MasterData/Bi
 import CalendarView from "../../app/pages/SystemSetup/MasterData/Calendar/CalendarView";
 import CalendarForm from "../../app/pages/SystemSetup/MasterData/Calendar/CalendarForm";
 import CalendarDetail from "../../app/pages/SystemSetup/MasterData/Calendar/CalendarDetail";
+import ListCollectionTemplate from "../../app/pages/SystemSetup/MasterData/CollectionTemplate/ListCollectionTemplate";
+import CollectionTemplateForm from "../../app/pages/SystemSetup/MasterData/CollectionTemplate/CollectionTemplateForm";
 import PreRequisiteTemplate from "../../app/pages/SystemSetup/PreRequisiteTemplate/PreRequisiteTemplate";
 import PreRequisiteTemplateDetail from "../../app/pages/SystemSetup/PreRequisiteTemplate/Details/PreRequisiteTemplateDetail";
 import CreateUpdatePreRequisiteTemplate from "../../app/pages/SystemSetup/PreRequisiteTemplate/CreateUpdate/CreateUpdatePreRequisiteTemplate";
@@ -147,9 +149,17 @@ export const SYSTEM_SETUP_ELEMENTS = {
   CREATE_CALENDAR_PAGE: <CalendarForm type="create" />,
   UPDATE_CALENDAR_PAGE: <CalendarForm type="update" />,
 
+  // Collection Template
+  VIEW_COLLECTION_TEMPLATE_PAGE: <ListCollectionTemplate />,
+  CREATE_COLLECTION_TEMPLATE_PAGE: <CollectionTemplateForm type="create" />,
+  UPDATE_COLLECTION_TEMPLATE_PAGE: <CollectionTemplateForm type="update" />,
   // Pre Requisite Template
   VIEW_PRE_REQUISITE_TEMPLATE_PAGE: <PreRequisiteTemplate />,
   DETAIL_PRE_REQUISITE_TEMPLATE_PAGE: <PreRequisiteTemplateDetail />,
-  CREATE_PRE_REQUISITE_TEMPLATE_PAGE: <CreateUpdatePreRequisiteTemplate type="create" />,
-  UPDATE_PRE_REQUISITE_TEMPLATE_PAGE: <CreateUpdatePreRequisiteTemplate type="update" />,
+  CREATE_PRE_REQUISITE_TEMPLATE_PAGE: (
+    <CreateUpdatePreRequisiteTemplate type="create" />
+  ),
+  UPDATE_PRE_REQUISITE_TEMPLATE_PAGE: (
+    <CreateUpdatePreRequisiteTemplate type="update" />
+  ),
 };

@@ -148,6 +148,7 @@ import paymentCycleReducer from "../slices/receipt_collection/paymentCycle";
 import paymentPeriodReducer from "../slices/receipt_collection/paymentPeriod";
 import billingItemCategoryReducer from "../slices/system_setup/master_data/billingItemCategory";
 import calendarReducer from "../slices/system_setup/master_data/calendar";
+import collectionTemplateReducer from "../slices/system_setup/master_data/collectionTemplate";
 import jobManagementReducer from "../slices/job_management/jobSlice";
 import jobGroupReducer from "../slices/job_management/jobGroupSlice";
 import jobExecutionReducer from "../slices/job_management/jobExecutionSlice";
@@ -318,6 +319,7 @@ const reducer = combineReducers({
   paymentPeriod: paymentPeriodReducer,
   billingItemCategory: billingItemCategoryReducer,
   calendar: calendarReducer,
+  collectionTemplate: collectionTemplateReducer,
   caCiMapping: caCiMappingReducer,
 
   // Attachment

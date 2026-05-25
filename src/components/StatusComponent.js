@@ -53,7 +53,7 @@ const StatusComponent = ({
         break;
 
       case "submitted":
-        bgColor = "bg-[#28C76F]";
+        bgColor = "bg-[#1B76D2]";
         tColor = "text-white";
         break;
 
@@ -152,7 +152,7 @@ const StatusComponent = ({
         bgColor = "status-active";
         tColor = "text-white";
         break;
-      
+
       case "break":
         bgColor = "bg-[#0075BF]";
         tColor = "text-white";
@@ -245,7 +245,7 @@ const StatusComponent = ({
         bgColor = "bg-[#00CFE8]";
         tColor = "text-white";
         break;
-        
+
       case "early payoff":
         bgColor = "bg-[#0075BF]";
         tColor = "text-white";
@@ -368,7 +368,9 @@ const StatusComponent = ({
   if (!children) return null;
 
   const sizeClasses =
-    size === "small" ? `px-2 py-0 text-xs ${margin ? "my-0.5" : ""}` : `px-3 py-0 ${margin ? "my-1" : ""}`;
+    size === "small"
+      ? `px-2 py-0 text-xs ${margin ? "my-0.5" : ""}`
+      : `px-3 py-0 ${margin ? "my-1" : ""}`;
 
   return (
     <div
