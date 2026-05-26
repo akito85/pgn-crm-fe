@@ -1,240 +1,146 @@
-import { FilterOutlined } from "@ant-design/icons";
-import { DatePicker, Input } from "antd";
 import moment from "moment";
-import { useRef, useState } from "react";
-import Highlighter from "react-highlight-words";
+import { useCallback, useMemo } from "react";
 import StatusComponent from "../../../../components/StatusComponent";
-import DynamicTableInline from "../../../../components/Table/DynamicTableInline";
-import { dateFormatting } from "../../../../utils";
+import NxTableInlineEdit from "../../../../components/Nx/NxTableInlineEdit";
 
 const EmployeeUploadList = ({
   dataEmp,
   dataEmployeeType,
   onChangeData = () => {},
 }) => {
-  const [sort, setSort] = useState("");
-  const [searchText, setSearchText] = useState("");
-  const [search, setSearch] = useState("");
-  const searchInput = useRef(null);
-  const [searchedColumn, setSearchedColumn] = useState("");
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const columns = useMemo(
+    () => [
+      {
+        title: "NO",
+        dataIndex: "no",
+        width: 60,
+        isClassification: true,
+        render: (_, __, index) => index + 1,
+      },
+      {
+        title: "EMPLOYEE NUMBER",
+        dataIndex: "empNumber",
+        editable: true,
+        inputType: "text",
+        width: 170,
+        placeholder: "Employee number",
+      },
+      {
+        title: "FIRST NAME",
+        dataIndex: "firstName",
+        editable: true,
+        inputType: "text",
+        width: 140,
+        placeholder: "First name",
+      },
+      {
+        title: "LAST NAME",
+        dataIndex: "lastName",
+        editable: true,
+        inputType: "text",
+        width: 140,
+        placeholder: "Last name",
+      },
+      {
+        title: "EMAIL",
+        dataIndex: "email",
+        editable: true,
+        inputType: "text",
+        width: 200,
+        placeholder: "Email",
+      },
+      {
+        title: "PHONE NUMBER",
+        dataIndex: "phone",
+        editable: true,
+        inputType: "text",
+        width: 160,
+        placeholder: "Phone number",
+      },
+      {
+        title: "EMPLOYEE TYPE",
+        dataIndex: "empType",
+        editable: true,
+        inputType: "select",
+        width: 160,
+        selectOptions: dataEmployeeType ?? [],
+        render: (value) => {
+          const match = (dataEmployeeType ?? []).find((a) => a?.value === value);
+          return match ? match.label : (value ?? "—");
+        },
+      },
+      {
+        title: "START DATE",
+        dataIndex: "startDate",
+        editable: true,
+        inputType: "text",
+        width: 130,
+        placeholder: "DD MMM YYYY",
+        render: (value) =>
+          value ? moment(value, "DD MMM YYYY").format("YYYY-MM-DD") : "—",
+      },
+      {
+        title: "END DATE",
+        dataIndex: "endDate",
+        editable: true,
+        inputType: "text",
+        width: 130,
+        placeholder: "DD MMM YYYY",
+        render: (value) =>
+          value ? moment(value, "DD MMM YYYY").format("YYYY-MM-DD") : "—",
+      },
+      {
+        title: "DESCRIPTION",
+        dataIndex: "description",
+        editable: true,
+        inputType: "text",
+      },
+      {
+        title: "STATUS",
+        dataIndex: "status",
+        editable: false,
+        width: 110,
+        isClassification: true,
+        render: (text) =>
+          text ? (
+            <div className="flex justify-center">
+              <StatusComponent colour={text}>{text}</StatusComponent>
+            </div>
+          ) : null,
+      },
+    ],
+    [dataEmployeeType]
+  );
 
-  const handleSearch = (selectedKeys, confirm, dataIndex) => {
-    confirm();
-    setSearchText(selectedKeys[0]);
-    setSearchedColumn(dataIndex);
-    setSearch(
-      selectedKeys.length === 0 ? "" : `${dataIndex}~${selectedKeys[0]}`
-    );
-  };
+  // Clear the parse-time validation status when a row is edited by the user,
+  // since the status is stale after inline edits and only reflects the initial
+  // Excel parse result — actual re-validation happens on final save.
+  const handleDataChange = useCallback(
+    (newData) => {
+      const updated = newData.map((newRow) => {
+        const oldRow = dataEmp?.find((r) => r.key === newRow.key);
+        if (!oldRow) return newRow;
+        const rowEdited = Object.keys(newRow).some(
+          (k) => k !== "status" && newRow[k] !== oldRow[k]
+        );
+        return rowEdited ? { ...newRow, status: null } : newRow;
+      });
+      onChangeData(updated);
+    },
+    [dataEmp, onChangeData]
+  );
 
-  const getColumnSearchProps = (dataIndex, type) => ({
-    filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }) => {
-      const onDataChange = (value, dateString) => {
-        setSelectedKeys(dateString ? [dateString] : []);
-        handleSearch(dateString ? [dateString] : [], confirm, dataIndex);
-      };
-      return (
-        <div
-          style={{
-            padding: 8,
-          }}
-          onKeyDown={(e) => e.stopPropagation()}
-        >
-          {type === "date" ? (
-            <DatePicker onChange={onDataChange} />
-          ) : (
-            <Input
-              ref={searchInput}
-              placeholder={`Search`}
-              value={selectedKeys[0]}
-              onChange={(e) =>
-                setSelectedKeys(e.target.value ? [e.target.value] : [])
-              }
-              onPressEnter={() => {
-                handleSearch(selectedKeys, confirm, dataIndex);
-              }}
-              style={{
-                marginBottom: 8,
-                display: "block",
-              }}
-            />
-          )}
-        </div>
-      );
-    },
-    filterIcon: (filtered) => (
-      <FilterOutlined
-        style={{
-          color: filtered ? "#1890ff" : undefined,
-        }}
-      />
-    ),
-    onFilter: (value, record) =>
-      record[dataIndex]?.toString().toLowerCase().includes(value.toLowerCase()),
-    onFilterDropdownOpenChange: (visible) => {
-      if (visible) {
-        setTimeout(() => searchInput.current?.select(), 5000);
-      }
-    },
-    render: (text) =>
-      searchedColumn === dataIndex ? (
-        <Highlighter
-          highlightStyle={{
-            backgroundColor: "#ffc069",
-            padding: 0,
-          }}
-          searchWords={
-            type === "date"
-              ? moment([searchText]).format(dateFormatting.date)
-              : [searchText]
-          }
-          autoEscape
-          textToHighlight={text ? text.toString() : ""}
-        />
-      ) : (
-        text
-      ),
-  });
-
-  const onSort = (_, __, sort) => {
-    const dataSort =
-      sort.order !== undefined
-        ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
-        : "";
-    setSort(dataSort);
-  };
-
-  const column = [
-    {
-      title: "NO",
-      width: 60,
-      align: "center",
-      dataIndex: "no",
-      editable: true,
-      render: (text, object, index) => index + 1,
-    },
-    {
-      title: "EMPLOYEE NUMBER",
-      dataIndex: "empNumber",
-      key: "empNumber",
-      align: "left",
-      ...getColumnSearchProps("empNumber"),
-      sorter: true,
-    },
-    {
-      title: "FIRST NAME",
-      dataIndex: "firstName",
-      align: "left",
-      ...getColumnSearchProps("firstName"),
-      sorter: true,
-    },
-    {
-      title: "LAST NAME",
-      dataIndex: "lastName",
-      align: "left",
-      ...getColumnSearchProps("lastName"),
-      sorter: true,
-    },
-    {
-      title: "EMAIL",
-      dataIndex: "email",
-      align: "left",
-      sorter: true,
-      ...getColumnSearchProps("email"),
-    },
-    {
-      title: "PHONE NUMBER",
-      dataIndex: "phone",
-      align: "left",
-      sorter: true,
-      ...getColumnSearchProps("phone"),
-    },
-    {
-      title: "EMPLOYEE TYPE",
-      dataIndex: "empType",
-      align: "left",
-      key: "empType",
-      inputType: "select",
-      options: dataEmployeeType,
-      ...getColumnSearchProps("empType"),
-      sorter: true,
-      editable: true,
-      render: (employeeType) => (
-        <span>
-          <span>
-            {
-              dataEmployeeType
-                ?.filter((a) => a?.value === employeeType)
-                .find((b) => b.label)?.label
-            }
-          </span>
-        </span>
-      ),
-    },
-    {
-      title: "START DATE",
-      dataIndex: "startDate",
-      align: "left",
-      editable: true,
-      sorter: true,
-      inputType: "date",
-      ...getColumnSearchProps("startDate", "date"),
-      render: (endDate) => endDate ? moment(endDate).format("YYYY-MM-DD") : '-',
-    },
-    {
-      title: "END DATE",
-      dataIndex: "endDate",
-      align: "left",
-      editable: true,
-      sorter: true,
-      inputType: "date",
-      ...getColumnSearchProps("endDate", "date"),
-      render: (endDate) => endDate ? moment(endDate).format("YYYY-MM-DD") : '-',
-    },
-    {
-      title: "DESCRIPTION",
-      dataIndex: "description",
-    },
-    {
-      title: "STATUS",
-      dataIndex: "status",
-      key: "status",
-      align: "center",
-      render: (text) => (
-        <div className={" flex justify-center"}>
-          <StatusComponent colour={text}>{text}</StatusComponent>
-        </div>
-      ),
-    },
-  ];
-  const handleChangePage = (page, pageSize) => {
-    setPage(page);
-    setPageSize(pageSize);
-  };
   return (
-    <>
-      <DynamicTableInline
-        // header={"LIST UPLOAD EMPLOYEE"}
-        tableData={dataEmp}
-        onDataChange={onChangeData}
-        cols={column}
-        mode={"update"}
-        showCreateButton={false}
-        scrollTable={{ x: 3000, y: 500 }}
-        onSort={onSort}
-        actionButton={["update", "delete"]}
-        usePagination={true}
-        totalData={dataEmp?.length}
-        pageSize={pageSize}
-        current={page}
-        onChangePage={handleChangePage}
-        onSizeChanger={handleChangePage}
-        useSelect={true}
-        useContainer={false}
-      />
-    </>
+    <NxTableInlineEdit
+      idTable="employee-upload-table"
+      dataSource={dataEmp ?? []}
+      onDataChange={handleDataChange}
+      columns={columns}
+      rowKey="key"
+      showDelete
+      emptyText="No employee data uploaded yet."
+      autoEditOnAppend={false}
+    />
   );
 };
 
