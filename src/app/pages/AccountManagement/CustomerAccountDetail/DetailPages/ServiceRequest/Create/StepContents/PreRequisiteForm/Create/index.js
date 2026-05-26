@@ -151,9 +151,9 @@ const PreRequisiteCreateFrom = () => {
       setLoading(true);
 
       const prerequisiteData = {
-        prerequisiteId: values["prerequesite-type"],
+        prerequisiteType: values["prerequesite-type"],
         prerequisiteName: values["prerequisite-name"],
-        prerequisiteComments: values["description"] || "",
+        prerequisiteDesc: values["description"] || "",
         ...(values["billing-cycle"] && { billingCycle: values["billing-cycle"] }),
         ...(values["period"] && { period: values["period"] }),
         ...(values["currency"] && { currency: values["currency"] }),
