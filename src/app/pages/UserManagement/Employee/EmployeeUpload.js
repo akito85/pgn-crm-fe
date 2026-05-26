@@ -69,8 +69,8 @@ const EmployeeUpload = () => {
             phone: item?.phone,
             empType: item?.empTypeId,
             empTypeId: item?.empTypeId,
-            startDate: moment(item?.startDate).clone(),
-            endDate: moment(item?.endDate).clone(),
+            startDate: item?.startDate ? moment(item.startDate).clone() : null,
+            endDate: item?.endDate ? moment(item.endDate).clone() : null,
             description: item?.description,
             status: item?.status,
           };
@@ -80,12 +80,11 @@ const EmployeeUpload = () => {
         dataConverter?.uploadAssignmentDTO?.map((item) => {
           return {
             empNumber: item?.empNumber,
-            endDate: moment(item?.endDate).clone(),
+            endDate: item?.endDate ? moment(item.endDate).clone() : null,
             isMain: item?.isMain,
             jobId: item?.jobId,
             positionId: item?.positionId,
-            startDate: moment(item?.startDate).clone(),
-            status: item?.status,
+            startDate: item?.startDate ? moment(item.startDate).clone() : null,
           };
         })
       );
@@ -175,17 +174,17 @@ const EmployeeUpload = () => {
           ...item,
           empType: item?.empType?.toString(),
           empTypeId: typeof item?.empType === 'string' ? item?.empTypeId?.toString() : item?.empType?.toString(),
-          startDate: moment(item?.startDate).format(dateFormatting?.dateCapital),
-          endDate: moment(item?.endDate).format(dateFormatting?.dateCapital),
+          startDate: item?.startDate ? moment(item.startDate).format(dateFormatting?.dateCapital) : null,
+          endDate: item?.endDate ? moment(item.endDate).format(dateFormatting?.dateCapital) : null,
         }
       });
-      const assignmentEmployeeListItem = dataAssignmentEmployeeList?.map((item) => {
+      const assignmentEmployeeListItem = dataAssignmentEmployeeList?.map(({ status: _status, ...item }) => {
         return {
           ...item,
           jobId: item?.jobId?.toString(),
           positionId: item?.positionId.toString(),
-          startDate: moment(item?.startDate).format(dateFormatting?.dateCapital),
-          endDate: moment(item?.endDate).format(dateFormatting?.dateCapital),
+          startDate: item?.startDate ? moment(item.startDate).format(dateFormatting?.dateCapital) : null,
+          endDate: item?.endDate ? moment(item.endDate).format(dateFormatting?.dateCapital) : null,
         }
       });
       const body = {
