@@ -75,13 +75,12 @@ import moment from "moment";
 import NxBreadCrumb from "../../../../../../../components/Nx/NxBreadCrumb";
 import NxCardContainer from "../../../../../../../components/Nx/NxCardContainer";
 
-const CreateCustomerServiceRequest = (props) => {
+const CreateUpdateCustomerServiceRequest = ({ formType = "create" }) => {
   const location = useLocation();
 
   // Restore step from location state if returning from prerequisite create
   const [current, setCurrent] = useState(location?.state?.returnToStep || 0);
-  const { type } = props;
-  const isUpdate = type === "update";
+  const isUpdate = formType === "update";
 
   const dispatch = useDispatch();
 
@@ -235,7 +234,7 @@ const CreateCustomerServiceRequest = (props) => {
     },
     {
       path: "",
-      breadcrumbName: "Create"
+      breadcrumbName: isUpdate ? "Update Service Request" : "Create Service Request"
     }
   ];
   // Fetch Account Standard/OneTime Detail
@@ -679,7 +678,7 @@ const CreateCustomerServiceRequest = (props) => {
         body: payload,
         services: accountManagementService,
         endPoint: `/v1/dbs/api/accounts/${idAccount}/servicerequests/validate-step`,
-        type: "create"
+        type: formType
       })
     ).unwrap();
   };
@@ -720,8 +719,8 @@ const CreateCustomerServiceRequest = (props) => {
           validateCreateUpdate({
             body: payload,
             services: accountManagementService,
-            endPoint: `/v1/dbs/api/accounts/${idAccount}/servicerequests/validate-create`,
-            type: "create"
+            endPoint: `/v1/dbs/api/accounts/${idAccount}/servicerequests/validate-${formType}`,
+            type: formType
           })
         ).unwrap();
 
@@ -958,4 +957,4 @@ const CreateCustomerServiceRequest = (props) => {
   );
 };
 
-export default CreateCustomerServiceRequest;
+export default CreateUpdateCustomerServiceRequest;

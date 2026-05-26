@@ -25,6 +25,7 @@ import { nxGetAccountActions } from "../../../../../../components/Nx/NxGetAccoun
 const ServiceRequestTable = ({
   idAccount = 0,
   idCustomer = 0,
+  accountType = "standard",
   handleApproval = () => {},
   refreshSignal = 0,
 }) => {
@@ -145,7 +146,7 @@ const ServiceRequestTable = ({
     },
     handleUpdate: (record) => {
       navigate(ACCOUNT_MANAGEMENT_ROUTES.UPDATE_SERVICE_REQUEST, {
-        state: { id: record?.id, idAccount, idCustomer, type: "update" },
+        state: { id: record?.id, idAccount, idCustomer, type: accountType },
       });
     },
     handleApproval,

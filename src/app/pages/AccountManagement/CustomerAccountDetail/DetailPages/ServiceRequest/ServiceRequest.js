@@ -55,6 +55,7 @@ const ServiceRequest = ({ idAccount, idCustomer, type }) => {
           <ServiceRequestTable
             idAccount={idAccount}
             idCustomer={idCustomer}
+            accountType={type}
             handleApproval={setShowApprovalModal}
             refreshSignal={refreshSignal}
           />
