@@ -67,22 +67,10 @@ const UploadUser = () => {
             groupAccess: item?.groupAccess,
             groupAccessId: parseInt(item?.groupAccessId),
             status: item?.status,
-            startDate:
-              !item?.startDate
-                ? moment()
-                : moment(item?.startDate).clone(),
-            endDate:
-              !item?.endDate
-                ? moment()
-                : moment(item?.endDate).clone(),
-            startDateGa:
-              !item?.startDateGa
-                ? moment()
-                : moment(item?.startDateGa).clone(),
-            endDateGa:
-              !item?.endDateGa
-                ? moment()
-                : moment(item?.endDateGa).clone(),
+            startDate: item?.startDate ? moment(item.startDate).clone() : null,
+            endDate: item?.endDate ? moment(item.endDate).clone() : null,
+            startDateGa: item?.startDateGa ? moment(item.startDateGa).clone() : null,
+            endDateGa: item?.endDateGa ? moment(item.endDateGa).clone() : null,
             message: item?.message,
           };
         })
@@ -206,18 +194,10 @@ const UploadUser = () => {
               typeof item?.groupAccess === "string"
                 ? item?.groupAccessId?.toString()
                 : item?.groupAccess?.toString(),
-            endDate: moment(item?.endDate).isValid()
-              ? moment(item?.endDate).format(dateFormatting.dateCapital)
-              : moment(),
-            startDate: moment(item?.startDate).isValid()
-              ? moment(item?.startDate).format(dateFormatting.dateCapital)
-              : moment(),
-            endDateGa: moment(item?.endDateGa).isValid()
-              ? moment(item?.endDateGa).format(dateFormatting.dateCapital)
-              : moment(),
-            startDateGa: moment(item?.startDateGa).isValid()
-              ? moment(item?.startDateGa).format(dateFormatting.dateCapital)
-              : moment(),
+            endDate: item?.endDate ? moment(item.endDate).format(dateFormatting.dateCapital) : null,
+            startDate: item?.startDate ? moment(item.startDate).format(dateFormatting.dateCapital) : null,
+            endDateGa: item?.endDateGa ? moment(item.endDateGa).format(dateFormatting.dateCapital) : null,
+            startDateGa: item?.startDateGa ? moment(item.startDateGa).format(dateFormatting.dateCapital) : null,
           };
         });
         await dispatch(finalUploadUser(body)).unwrap();
