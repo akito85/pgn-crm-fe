@@ -24,7 +24,7 @@ import {
   setClearDataUpload,
   uploadEmployee,
 } from "../../../../redux/slices/user_management/employee";
-import { ModalConfirm } from "../../../../components/Modal/ModalPopUp";
+import { ModalConfirm, ModalError } from "../../../../components/Modal/ModalPopUp";
 import SVGIcon from "../../../../assets/Icon/index";
 import moment from "moment";
 import { dateFormatting } from "../../../../utils";
@@ -38,6 +38,8 @@ const EmployeeUpload = () => {
   const [fileName, setFileName] = useState("");
   const [fileList, setFileList] = useState([]);
   const [modalBack, setModalBack] = useState(false);
+  const [modalUploadError, setModalUploadError] = useState(false);
+  const [uploadErrorMessage, setUploadErrorMessage] = useState("");
   const [showListUpload, setShowListUpload] = useState(false);
   const [firstStep, setFirstStep] = useState(true);
   const [dataExcel, setDataExcel] = useState([]);
@@ -152,6 +154,12 @@ const EmployeeUpload = () => {
           return file;
         })
       );
+      const msg =
+        error?.data?.message ||
+        error?.data?.error ||
+        "Failed to process the uploaded file. Please check the file contents and try again.";
+      setUploadErrorMessage(msg);
+      setModalUploadError(true);
     }
   };
 
@@ -379,6 +387,22 @@ const EmployeeUpload = () => {
             </p>
           </div>
         </ModalConfirm>
+
+        {/* modal upload error */}
+        <ModalError
+          isOpen={modalUploadError}
+          handleOk={() => setModalUploadError(false)}
+          handleCancel={() => setModalUploadError(false)}
+          width={480}
+        >
+          <div className="flex px-4 py-4 gap-4 items-start">
+            <WarningOutlined style={{ fontSize: "24px", color: "#BE3036", marginTop: 2 }} />
+            <div className="flex flex-col gap-2">
+              <span className="text-lg font-bold text-[#BE3036]">Upload Failed</span>
+              <span className="text-sm">{uploadErrorMessage}</span>
+            </div>
+          </div>
+        </ModalError>
       </Spin>
     </>
   );
