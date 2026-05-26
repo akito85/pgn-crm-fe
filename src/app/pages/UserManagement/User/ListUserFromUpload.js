@@ -264,7 +264,7 @@ const ListUserFromUpload = ({ data, onChangeData = () => {} }) => {
       sorter: true,
       inputType: "date",
       ...getColumnSearchProps("startDate", "date"),
-      render: (endDate) => moment(endDate).format("YYYY-MM-DD"),
+      render: (startDate) => startDate ? moment(startDate).format("YYYY-MM-DD") : '-',
     },
     {
       title: "END DATE",
@@ -274,7 +274,7 @@ const ListUserFromUpload = ({ data, onChangeData = () => {} }) => {
       sorter: true,
       inputType: "date",
       ...getColumnSearchProps("endDate", "date"),
-      render: (endDate) => moment(endDate).format("YYYY-MM-DD"),
+      render: (endDate) => endDate ? moment(endDate).format("YYYY-MM-DD") : '-',
     },
     {
       title: "EMAIL",
@@ -324,7 +324,7 @@ const ListUserFromUpload = ({ data, onChangeData = () => {} }) => {
       inputType: "date",
       sorter: true,
       ...getColumnSearchProps("startDateGa", "date"),
-      render: (endDate) => moment(endDate).format("YYYY-MM-DD"),
+      render: (startDateGa) => startDateGa ? moment(startDateGa).format("YYYY-MM-DD") : '-',
     },
     {
       title: "END DATE GA",
@@ -334,7 +334,7 @@ const ListUserFromUpload = ({ data, onChangeData = () => {} }) => {
       inputType: "date",
       sorter: true,
       ...getColumnSearchProps("endDateGa", "date"),
-      render: (endDate) => moment(endDate).format("YYYY-MM-DD"),
+      render: (endDateGa) => endDateGa ? moment(endDateGa).format("YYYY-MM-DD") : '-',
     },
     {
       title: "STATUS",
