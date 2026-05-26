@@ -126,6 +126,32 @@ const ListCollectionTemplate = () => {
     setPage(1);
   }, [dispatch, search, sort]);
 
+  const handleRefreshMainAndDetail = useCallback(async () => {
+    const searchObject = Object.keys(search)
+      .filter((key) => search[key])
+      .reduce((obj, key) => {
+        obj[key] = search[key];
+        return obj;
+      }, {});
+
+    const sortArray = sort ? [sort] : [];
+
+    await dispatch(
+      getListCollectionTemplate({
+        page: 1,
+        size: 100,
+        sort: sortArray,
+        search: searchObject,
+        isLoadMore: false,
+      }),
+    );
+    setPage(1);
+
+    if (selectedId) {
+      await dispatch(getDetailCollectionTemplate(selectedId));
+    }
+  }, [dispatch, search, sort, selectedId]);
+
   useEffect(() => {
     handleRefresh();
   }, [handleRefresh]);
@@ -829,6 +855,7 @@ const ListCollectionTemplate = () => {
             data={data_detail}
             loading={loading}
             onCreateDetail={true}
+            onRefresh={handleRefreshMainAndDetail}
           />
         </div>
       )}
