@@ -5,20 +5,22 @@ import { useDispatch, useSelector } from "react-redux";
 import CardContainer from "../../../../../components/CardContainer";
 import SVGIcon from "../../../../../assets/Icon/index";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import { NavLink } from "react-router-dom";
-import { SYSTEM_SETUP_ROUTES } from "../../../../../routes/system_setup/setup_routes";
+import ModalCreateDetailTemplate from "./ModalCreateDetailTemplate";
 import CollapsibleContainer from "../../../../../components/CollapsibleContainer";
-import BaseContainer from "../../../../../components/BaseContainer";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 import debtAndCollectionHttpService from "../../../../../redux/services/debtAndCollectionHttpService";
 import { configApp } from "../../../../../constants/configApp";
 import {
   getSelectedApproval,
+  getDetailCollectionTemplate,
   approveCollectionTemplate,
   rejectCollectionTemplate,
   approveInactiveCollectionTemplate,
   approveActivatedCollectionTemplate,
+  getTemplateDetailApprovalInfo,
+  approveTemplateDetail,
+  rejectTemplateDetail,
 } from "../../../../../redux/slices/system_setup/master_data/collectionTemplate";
 import StatusComponent from "../../../../../components/StatusComponent";
 import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrReject";
@@ -52,6 +54,7 @@ const DetailCollectionTemplate = ({ data, loading, onCreateDetail }) => {
   const [listDataAttachment, setListDataAttachment] = useState([]);
 
   // Approval modal state (BillingBucketDetail pattern)
+  const [modalCreateDetail, setModalCreateDetail] = useState(false);
   const [modalConfirm, setModalConfirm] = useState(false);
   const [modalErrorServer, setModalErrorServer] = useState(false);
   const [bodyError, setBodyError] = useState({});
@@ -66,6 +69,11 @@ const DetailCollectionTemplate = ({ data, loading, onCreateDetail }) => {
 
   const details = useMemo(() => data?.details || [], [data]);
 
+  const waitingDetails = useMemo(
+    () => details.filter((d) => d.statusApproval === "Waiting Approval"),
+    [details],
+  );
+
   // Fetch approval hierarchy detail when appHierId changes
   useEffect(() => {
     if (data?.appHierId) {
@@ -73,18 +81,25 @@ const DetailCollectionTemplate = ({ data, loading, onCreateDetail }) => {
     }
   }, [dispatch, data?.appHierId]);
 
-  // Sync approval info from data
+  // Sync approval info: template header takes priority; fall back to detail items
   useEffect(() => {
-    if (data?.approvalInfo) {
+    if (data?.approvalInfo?.isApprover) {
       setBodyApproval({
         isApprover: data.approvalInfo.isApprover,
         tAppId: data.approvalInfo.tAppId,
         approvalType: data.approvalInfo.approvalType,
       });
+    } else if (waitingDetails.length > 0) {
+      // Detail items (activities/criteria) are waiting — show the bottom approve button
+      setBodyApproval({
+        isApprover: true,
+        tAppId: null,
+        approvalType: "PAY_COLLECTION_TEMPLATE_DETAIL",
+      });
     } else {
       setBodyApproval({ isApprover: false, tAppId: null, approvalType: null });
     }
-  }, [data?.approvalInfo]);
+  }, [data?.approvalInfo, waitingDetails]);
 
   // Map hierarchy detail rows
   useEffect(() => {
@@ -267,51 +282,80 @@ const DetailCollectionTemplate = ({ data, loading, onCreateDetail }) => {
 
   if (!data) return null;
 
-  const handleConfirm = (res, handleClear) => {
+  const handleConfirm = async (res, handleClear) => {
     const action = approveOrReject === "Approve" ? "APPROVE" : "REJECT";
     const isInactiveApproval =
       bodyApproval.approvalType === "INACTIVE_PAY_COLLECTION_TEMPLATE";
     const isActivatedApproval =
       bodyApproval.approvalType === "ACTIVATED_PAY_COLLECTION_TEMPLATE";
+    const isDetailApproval =
+      bodyApproval.approvalType === "PAY_COLLECTION_TEMPLATE_DETAIL";
 
-    let thunkCall;
-    if (isInactiveApproval) {
-      thunkCall = approveInactiveCollectionTemplate({
-        id: data.collectionTemplateId,
-        body: { remark: res.remark, action },
-      });
-    } else if (isActivatedApproval) {
-      thunkCall = approveActivatedCollectionTemplate({
-        id: data.collectionTemplateId,
-        body: { remark: res.remark, action },
-      });
-    } else {
-      thunkCall =
-        approveOrReject === "Approve"
-          ? approveCollectionTemplate({
-              id: data.collectionTemplateId,
-              body: { approvalId: bodyApproval.tAppId, remark: res.remark },
-            })
-          : rejectCollectionTemplate({
-              id: data.collectionTemplateId,
-              body: { approvalId: bodyApproval.tAppId, remark: res.remark },
-            });
-    }
-
-    return dispatch(thunkCall)
-      .unwrap()
-      .then(() => {
+    try {
+      if (isDetailApproval) {
+        // Approve / reject ALL waiting detail items sequentially
+        for (const detail of waitingDetails) {
+          const infoResult = await dispatch(
+            getTemplateDetailApprovalInfo(detail.templateDetailId),
+          ).unwrap();
+          const approvalInfo = infoResult?.data || infoResult;
+          if (approvalInfo?.approvalId) {
+            await dispatch(
+              approveOrReject === "Approve"
+                ? approveTemplateDetail({
+                    detailId: detail.templateDetailId,
+                    body: {
+                      approvalId: approvalInfo.approvalId,
+                      remark: res.remark,
+                    },
+                  })
+                : rejectTemplateDetail({
+                    detailId: detail.templateDetailId,
+                    body: {
+                      approvalId: approvalInfo.approvalId,
+                      remark: res.remark,
+                    },
+                  }),
+            ).unwrap();
+          }
+        }
         setModalConfirm(false);
         handleClear();
-      })
-      .catch((error) => {
-        const message =
-          error?.response?.data?.message ||
-          error?.message ||
-          "An error occurred";
-        setBodyError({ message });
-        setModalErrorServer(true);
-      });
+        dispatch(getDetailCollectionTemplate(data.collectionTemplateId));
+      } else {
+        let thunkCall;
+        if (isInactiveApproval) {
+          thunkCall = approveInactiveCollectionTemplate({
+            id: data.collectionTemplateId,
+            body: { remark: res.remark, action },
+          });
+        } else if (isActivatedApproval) {
+          thunkCall = approveActivatedCollectionTemplate({
+            id: data.collectionTemplateId,
+            body: { remark: res.remark, action },
+          });
+        } else {
+          thunkCall =
+            approveOrReject === "Approve"
+              ? approveCollectionTemplate({
+                  id: data.collectionTemplateId,
+                  body: { approvalId: bodyApproval.tAppId, remark: res.remark },
+                })
+              : rejectCollectionTemplate({
+                  id: data.collectionTemplateId,
+                  body: { approvalId: bodyApproval.tAppId, remark: res.remark },
+                });
+        }
+        await dispatch(thunkCall).unwrap();
+        setModalConfirm(false);
+        handleClear();
+      }
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || "An error occurred";
+      setBodyError({ message });
+      setModalErrorServer(true);
+    }
   };
 
   const handleCloseModalError = () => {
@@ -367,26 +411,18 @@ const DetailCollectionTemplate = ({ data, loading, onCreateDetail }) => {
             >
               <div className="flex justify-end mb-4">
                 {onCreateDetail && (
-                  <NavLink
-                    to={SYSTEM_SETUP_ROUTES.UPDATE_COLLECTION_TEMPLATE}
-                    state={{
-                      id: data.collectionTemplateId,
-                      status: data.status,
-                      statusApproval: data.statusApproval,
-                    }}
+                  <ButtonComponent
+                    icon={
+                      <SVGIcon
+                        name="IconButtonCreate"
+                        style={{ fontSize: "20px" }}
+                      />
+                    }
+                    type="submit"
+                    onClick={() => setModalCreateDetail(true)}
                   >
-                    <ButtonComponent
-                      icon={
-                        <SVGIcon
-                          name="IconButtonCreate"
-                          style={{ fontSize: "20px" }}
-                        />
-                      }
-                      type="submit"
-                    >
-                      Create
-                    </ButtonComponent>
-                  </NavLink>
+                    Create
+                  </ButtonComponent>
                 )}
               </div>
               <div className="flex flex-col gap-y-4">
@@ -539,6 +575,18 @@ const DetailCollectionTemplate = ({ data, loading, onCreateDetail }) => {
           <p className="pl-[70px]">Please try again.</p>
         </div>
       </ModalError>
+
+      {/* Modal Create Activity/Criteria */}
+      <ModalCreateDetailTemplate
+        open={modalCreateDetail}
+        onClose={() => setModalCreateDetail(false)}
+        templateId={data.collectionTemplateId}
+        templateStartDate={data.startDate}
+        templateEndDate={data.endDate}
+        onRefresh={() =>
+          dispatch(getDetailCollectionTemplate(data.collectionTemplateId))
+        }
+      />
     </>
   );
 };

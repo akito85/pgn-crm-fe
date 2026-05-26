@@ -52,6 +52,14 @@ const CollectionTemplateForm = ({ type }) => {
 
   const [current, setCurrent] = useState(0);
   const [appHierOptions, setAppHierOptions] = useState([]);
+
+  // An approver has no approval hierarchies where they are a submitter.
+  // Only meaningful after the approval API has loaded (loading = false).
+  const isApproverUser = useMemo(
+    () => !loading && appHierOptions.length === 0,
+    [loading, appHierOptions],
+  );
+
   const [appHierDataDetail, setAppHierDataDetail] = useState([]);
   const [listDataAttachment, setListDataAttachment] = useState([]);
   const [deletedAttachmentIds, setDeletedAttachmentIds] = useState([]);
@@ -333,6 +341,16 @@ const CollectionTemplateForm = ({ type }) => {
   };
 
   const handleSaveDraft = () => {
+    if (isApproverUser) {
+      dispatch(
+        showModalError({
+          title: "Failed",
+          description:
+            "You don't have permission to create or update this data. Only submitters are allowed.",
+        }),
+      );
+      return;
+    }
     isSubmitRef.current = false;
     setTimeout(() => {
       const formValue = form.getFieldsValue();
@@ -341,6 +359,17 @@ const CollectionTemplateForm = ({ type }) => {
   };
 
   const handleSave = async (formValue) => {
+    if (isApproverUser) {
+      dispatch(
+        showModalError({
+          title: "Failed",
+          description:
+            "You don't have permission to create or update this data. Only submitters are allowed.",
+        }),
+      );
+      return;
+    }
+
     if (!isSubmitRef.current) {
       try {
         await form.validateFields(["templateName"]);
@@ -536,6 +565,7 @@ const CollectionTemplateForm = ({ type }) => {
                 dataTable={appHierDataDetail}
                 dataOption={appHierOptions}
                 selectedHierarchy={selectedHierarchy}
+                showSelect={!isApproverUser}
                 updateSelectedHierarchy={(val) => {
                   setSelectedHierarchy(val);
                   form.setFieldsValue({ apphierId: val });
@@ -579,6 +609,7 @@ const CollectionTemplateForm = ({ type }) => {
             type={type}
             disabled={storedDataInline}
             isLoading={loadingForm}
+            isApprover={isApproverUser}
           />
         </Form>
 
