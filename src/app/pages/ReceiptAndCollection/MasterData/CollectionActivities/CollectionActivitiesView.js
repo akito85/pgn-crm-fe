@@ -827,9 +827,8 @@ const CollectionActivitiesView = () => {
               showRefresh={true}
               onRefresh={handleRefresh}
               refreshLabel="Refresh"
-              enableRowClick={true}
+              enableRowClick={false}
               selectedRowKey={selectedRowKey}
-              onRowClick={handleRowClick}
             />
           </div>
         </CardContainer>
