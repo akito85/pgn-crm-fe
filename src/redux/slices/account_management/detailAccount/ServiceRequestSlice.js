@@ -89,7 +89,7 @@ export const getServiceRequests = createAsyncThunk(
   "GET_SERVICE_REQUESTS",
   async ({ idAccount, body, isLoadMore }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${idAccount}/servicerequests/list`;
+      const url = `/v1/dbs/api/account/${idAccount}/service-request`;
       const response = await accountManagementService.updateDataWithMethodPost(url, body);
       return { ...response.data, isLoadMore };
     } catch (error) {
@@ -103,7 +103,7 @@ export const getServiceRequestApprovals = createAsyncThunk(
   "GET_SERVICE_REQUEST_APPROVALS",
   async ({ idAccount, body, isLoadMore }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${idAccount}/servicerequests/list`;
+      const url = `/v1/dbs/api/account/${idAccount}/service-request`;
       const response = await accountManagementService.updateDataWithMethodPost(url, {
         ...body,
         listType: "approval",
@@ -139,22 +139,6 @@ export const approveOrRejectAllServiceRequest = createAsyncThunk(
         description: `Your data was not ${action === "APPROVE" ? "approved" : "rejected"}. ${message}.`,
       };
       thunkAPI.dispatch(showModalError(errorBody));
-      return thunkAPI.rejectWithValue(error?.response);
-    }
-  }
-);
-
-// Get Service Requests by Account
-export const getSrListByAccount = createAsyncThunk(
-  "GET_SR_LIST_BY_ACCOUNT",
-  async ({ accountId, page = 1, size = 10, sort, search }, thunkAPI) => {
-    try {
-      let url = `/v1/dbs/api/accounts/${accountId}/servicerequests/list?page=${page}&size=${size}`;
-      if (sort) url += `&sort=${sort}`;
-      if (search) url += `&search=${encodeURIComponent(search)}`;
-      const response = await accountManagementService.getAll(url);
-      return response.data;
-    } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
   }
@@ -211,34 +195,6 @@ export const getServiceRequestDataRequirements = createAsyncThunk(
       const response = await accountManagementService.updateDataWithMethodPost(url, body);
       return { ...response.data, isLoadMore };
     } catch (error) {
-      return thunkAPI.rejectWithValue(error?.response);
-    }
-  }
-);
-
-// Create Service Request for Account
-export const createSrForAccount = createAsyncThunk(
-  "CREATE_SR_FOR_ACCOUNT",
-  async ({ accountId, body }, thunkAPI) => {
-    try {
-      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests`;
-      const response = await accountManagementService.createData(url, body);
-      const successBody = {
-        title: "Successful",
-        description: "Service Request has been created.",
-      };
-      thunkAPI.dispatch(showModalSuccess(successBody));
-      return response.data;
-    } catch (error) {
-      const message =
-        (error.response && error.response.data && error.response.data.message) ||
-        error.message ||
-        error.toString();
-      const errorBody = {
-        title: "Failed",
-        description: `Service Request was not created. ${message}. Please try again.`,
-      };
-      thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(error?.response);
     }
   }
@@ -364,50 +320,6 @@ export const updateServiceRequest = createAsyncThunk(
           : `Service Request was not submitted. ${message}. Please try again.`,
       };
       thunkAPI.dispatch(showModalError(errorBody));
-      return thunkAPI.rejectWithValue(error?.response);
-    }
-  }
-);
-
-// Delete Service Request for Account
-export const deleteSr = createAsyncThunk(
-  "DELETE_SR",
-  async ({ accountId, id }, thunkAPI) => {
-    try {
-      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/${id}`;
-      const response = await accountManagementService.deleteData(url);
-      const successBody = {
-        title: "Successful",
-        description: "Service Request has been deleted.",
-      };
-      thunkAPI.dispatch(showModalSuccess(successBody));
-      return response.data;
-    } catch (error) {
-      const message =
-        (error.response && error.response.data && error.response.data.message) ||
-        error.message ||
-        error.toString();
-      const errorBody = {
-        title: "Failed",
-        description: `Service Request was not deleted. ${message}. Please try again.`,
-      };
-      thunkAPI.dispatch(showModalError(errorBody));
-      return thunkAPI.rejectWithValue(error?.response);
-    }
-  }
-);
-
-// Get All Service Requests (Independent)
-export const getAllSr = createAsyncThunk(
-  "GET_ALL_SR",
-  async ({ page = 1, size = 10, search, sort }, thunkAPI) => {
-    try {
-      let url = `/v1/dbs/api/servicerequests/list?page=${page}&size=${size}`;
-      if (search) url += `&search=${encodeURIComponent(search)}`;
-      if (sort) url += `&sort=${sort}`;
-      const response = await accountManagementService.getAll(url);
-      return response.data;
-    } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
   }
@@ -1102,34 +1014,6 @@ const serviceRequestSlice = createSlice({
       }
     },
 
-    [getSrListByAccount.pending]: (state) => {
-      state.loading = true;
-      state.isFailed = false;
-      state.isSuccess = false;
-    },
-    [getSrListByAccount.fulfilled]: (state, action) => {
-      state.loading = false;
-      state.data = action.payload;
-    },
-    [getSrListByAccount.rejected]: (state, action) => {
-      state.loading = false;
-      state.isFailed = true;
-    },
-
-    [getAllSr.pending]: (state) => {
-      state.loading = true;
-      state.isFailed = false;
-      state.isSuccess = false;
-    },
-    [getAllSr.fulfilled]: (state, action) => {
-      state.loading = false;
-      state.data = action.payload;
-    },
-    [getAllSr.rejected]: (state, action) => {
-      state.loading = false;
-      state.isFailed = true;
-    },
-
     // =====================================================
     // SERVICE REQUEST DETAIL
     // =====================================================
@@ -1176,18 +1060,6 @@ const serviceRequestSlice = createSlice({
     // =====================================================
     // SERVICE REQUEST CRUD
     // =====================================================
-    [createSrForAccount.pending]: (state) => {
-      state.loading = true;
-    },
-    [createSrForAccount.fulfilled]: (state, action) => {
-      state.loading = false;
-      state.isSuccess = true;
-    },
-    [createSrForAccount.rejected]: (state) => {
-      state.loading = false;
-      state.isFailed = true;
-    },
-
     [createServiceRequest.pending]: (state) => {
       state.loading_createUpdateSr = true;
     },
@@ -1234,18 +1106,6 @@ const serviceRequestSlice = createSlice({
     },
     [updateSrStatus.rejected]: (state) => {
       state.loading_statusUpdateSr = false;
-      state.isFailed = true;
-    },
-
-    [deleteSr.pending]: (state) => {
-      state.loading = true;
-    },
-    [deleteSr.fulfilled]: (state) => {
-      state.loading = false;
-      state.isSuccess = true;
-    },
-    [deleteSr.rejected]: (state) => {
-      state.loading = false;
       state.isFailed = true;
     },
 
