@@ -3,6 +3,7 @@ import React, {
   useRef,
   useState,
   useMemo,
+  useCallback,
 } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -51,10 +52,12 @@ const ViewFaktur = () => {
   const navigate = useNavigate();
   const searchInput = useRef(null);
   const dataSource = list_efaktur || [];
-
+  const [allData, setAllData] = useState([]);
+  const shouldResetRef = useRef(true);
   // State
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(50);
+  const [loadMoreSize] = useState(50);
   const [sort, setSort] = useState("invoiceDate~desc");
   const [search, setSearch] = useState({});
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -73,7 +76,9 @@ const ViewFaktur = () => {
 
   const [fixedColumns, setFixedColumns] = useState(() => ({
     left: ["no"],
-    right: ["status", "statusApproval", "action"],
+    // Right fixed columns in exact order requested by user.
+    // Note: 'fakturType' in screenshot corresponds to column key 'type' in code.
+    right: ["status", "statusApproval", "type", "statusPjap", "action"],
   }));
 
   // Breadcrumbs
@@ -100,6 +105,22 @@ const ViewFaktur = () => {
     );
   }, [dispatch, search, page, pageSize, sort]);
 
+  // Accumulate data for infinite scroll similar to BillingBucket pattern
+  useEffect(() => {
+    if (dataSource && dataSource.length >= 0) {
+      if (shouldResetRef.current || page === 1) {
+        setAllData(dataSource);
+        shouldResetRef.current = false;
+      } else {
+        setAllData((prev) => {
+          const ids = new Set(prev.map((item) => item.efakturId || item.key));
+          const newItems = dataSource.filter((item) => !ids.has(item.efakturId || item.key));
+          return [...prev, ...newItems];
+        });
+      }
+    }
+  }, [dataSource, page]);
+
   useEffect(() => {
     if (data_approval_history?.dataApprover) {
       const temp = {
@@ -117,6 +138,7 @@ const ViewFaktur = () => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
+    shouldResetRef.current = true;
     setSearch((prevState) => {
       if (prevState[dataIndex] !== selectedKeys[0]) {
         setPage(1);
@@ -215,12 +237,28 @@ const ViewFaktur = () => {
     dispatch(
       getListEFaktur({
         search: encodeURIComponent(JSON.stringify(search)),
-        page,
+        page: 1,
         pageSize,
         sort,
       })
     );
   };
+
+  const handleLoadMore = useCallback(async () => {
+    // follow BillingBucket pattern: compute nextPage based on currently loaded items
+    if (allData.length >= (pagination?.totalElements || 0)) return;
+    const nextPage = Math.floor(allData.length / loadMoreSize) + 1;
+    setPage(nextPage);
+    await dispatch(
+      getListEFaktur({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page: nextPage,
+        pageSize: loadMoreSize,
+        sort,
+        isLoadMore: true,
+      }),
+    );
+  }, [allData.length, pagination?.totalElements, search, sort, dispatch, loadMoreSize]);
 
   // Close Modal Functions
   const closeModalGenerateXML = () => {
@@ -280,18 +318,21 @@ const ViewFaktur = () => {
     }),
   ];
 
-  const actionCols = useColumnActionPermission(
-    ["view", "update"],
-    itemGrantAccess
-  );
+  const actionCols = useColumnActionPermission(["view", "update"], itemGrantAccess);
+
+  // fallback: if permissions filter out all action columns, keep a minimal action column
+  // so table layout and fixedColumns targeting remain stable.
+  const actionColsFinal = (actionCols && actionCols.length > 0)
+    ? actionCols
+    : getActionColumn({ handleApprovalHistory, handleLogAktivitas });
 
   const allColumns = useMemo(() => {
-    const columnsWithKeys = [...baseColumns, ...actionCols].map((col) => ({
+    const columnsWithKeys = [...baseColumns, ...actionColsFinal].map((col) => ({
       ...col,
       key: col.key || col.dataIndex || col.title,
     }));
     return columnsWithKeys;
-  }, [baseColumns, actionCols]);
+  }, [baseColumns, actionColsFinal]);
 
   const processedColumns = useMemo(() => {
     const columnsWithFixed = applyFixedColumns(allColumns, fixedColumns);
@@ -390,7 +431,8 @@ const ViewFaktur = () => {
           {/* Table Section */}
           <div className="my-0">
             <TableRBI
-              dataSource={dataSource}
+              idTable={"efaktur-table"}
+              dataSource={allData.length > 0 ? allData : dataSource}
               columns={processedColumns}
               current={page}
               pageSize={pageSize}
@@ -408,6 +450,11 @@ const ViewFaktur = () => {
               onRefresh={() => setModalSync(true)}
               refreshLabel="Sync"
               refreshIcon={<SyncOutlined style={{ fontSize: "14px" }} />}
+              usePagination={false}
+              useInfiniteScroll={true}
+              onLoadMore={handleLoadMore}
+              hasMore={dataSource?.length < (pagination?.totalElements || 0)}
+              loadMoreThreshold={20}
             />
           </div>
         </CardContainer>

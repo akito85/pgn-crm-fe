@@ -71,7 +71,7 @@ export const getEFakturColumns = ({
       key: "type",
       title: "FAKTUR TYPE",
       dataIndex: "type",
-      width: 180,
+      width: 120,
       sorter: true,
       filteredValue: [search?.type] || null,
       ...getColumnSearchPropsUseFilteredValue(
@@ -83,16 +83,18 @@ export const getEFakturColumns = ({
         handleSearch,
         true,
       ),
-      render: (text) =>
-        renderColumn(
-          "type",
-          hasValue(search["type"]),
-          searchText,
-          text || " ",
-          false,
-          "input",
-          search,
-        ),
+      render: (text) => {
+        const displayType = text || "-";
+        const typeLabel = String(displayType).replace(/_/g, " ");
+
+        return (
+          <div className="flex justify-center">
+            <StatusComponent colour={String(displayType).toLowerCase()}>
+              {typeLabel}
+            </StatusComponent>
+          </div>
+        );
+      },
     },
     // 3. BILLING CODE
     {
@@ -972,7 +974,7 @@ export const getEFakturColumns = ({
       key: "statusApproval",
       title: "STATUS APPROVAL",
       dataIndex: "statusApproval",
-      width: 300,
+      width: 160,
       isClassification: true,
       sorter: true,
       filteredValue: [search?.statusApproval] || null,
@@ -998,6 +1000,37 @@ export const getEFakturColumns = ({
         );
       },
     },
+    // STATUS PJAP
+    {
+      key: "statusPjap",
+      title: "STATUS PJAP",
+      dataIndex: "statusPjap",
+      width: 120,
+      isClassification: true,
+      sorter: true,
+      filteredValue: [search?.statusPjap] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "statusPjap",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+      ),
+      render: (status) => {
+        const displayStatus = status || "-";
+        const statusLabel = String(displayStatus).replace(/_/g, " ");
+
+        return (
+          <div className="flex justify-center">
+            <StatusComponent colour={String(displayStatus).toLowerCase()}>
+              {statusLabel}
+            </StatusComponent>
+          </div>
+        );
+      },
+    },
   ];
 };
 
@@ -1009,6 +1042,7 @@ export const getActionColumn = ({
 }) => {
   return [
     {
+      key: "action",
       action: "Update",
       type: "table",
       width: 40,
@@ -1060,6 +1094,7 @@ export const getActionColumn = ({
       },
     },
     {
+      key: "action_view",
       action: "View",
       type: "table",
       width: 40,
