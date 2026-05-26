@@ -243,8 +243,8 @@ export const jobApiSlice = createApi({
           };
         } catch (error) {
           api.dispatch(showModalError({
-            title: "Failed to load jobs",
-            description: error?.response?.data?.message ?? error?.message ?? "Unknown error",
+            title: "Failed to load job list",
+            description: error?.response?.data?.message ?? error?.message ?? "Something went wrong while retrieving the job list. Please try again or contact support if the problem continues.",
           }));
           return { error: { status: error?.response?.status, data: error?.response?.data } };
         }
@@ -317,6 +317,10 @@ export const jobApiSlice = createApi({
           const res = await axios.get(`${JOB_BASE}/access-groups`, { headers: getHeaders() });
           return { data: res.data };
         } catch (error) {
+          api.dispatch(showModalError({
+            title: "Could not load job groups",
+            description: "Job group names are temporarily unavailable. Group IDs may appear in the table instead. Please refresh the page or contact support if the issue persists.",
+          }));
           return { error: { status: error?.response?.status, data: error?.response?.data } };
         }
       },

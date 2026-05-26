@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
-import { GoogleMap, useLoadScript, MarkerF } from "@react-google-maps/api";
+import { GoogleMap, useLoadScript } from "@react-google-maps/api";
 
-const libraries = ["places"];
+const libraries = ["places", "marker"];
 const mapContainerStyle = {
   width: "100%",
   height: "400px",
@@ -50,74 +50,64 @@ const Maps = ({ keyword, type = "select", setSelectedLocationFront }) => {
     setMap(map);
   }, []);
 
-  const handleSearch = useCallback(() => {
-    // if (searchInputRef.current.value === '') return;
-    if (keyword === "") return;
+  const handleSearch = useCallback(async () => {
+    if (keyword === "" || !map) return;
 
-    const service = new window.google.maps.places.PlacesService(map);
+    const { Place } = window.google.maps.places;
 
-    const request = {
-      // query: searchInputRef.current.value,
-      query: keyword,
-      fields: ["name", "geometry"],
+    const applyLocation = (place) => {
+      const location = place.location;
+      map.setCenter(location);
+      map.setZoom(14);
+      const lat = location.lat();
+      const lng = location.lng();
+      setSelectedLocation({ lat, lng });
+      setSelectedLocationFront({ lat, lng });
     };
 
-    const keywordTemp = keyword;
-    const alamatParts = keywordTemp.split(",");
-    const resultSecond = alamatParts.slice(-5).join(",").trim();
-    const requestSecond = {
-      query: resultSecond,
-      fields: ["name", "geometry"],
-    };
+    try {
+      const { places } = await Place.searchByText({
+        textQuery: keyword,
+        fields: ["displayName", "location"],
+      });
 
-    service.textSearch(request, (results, status) => {
-      if (status === window.google.maps.places.PlacesServiceStatus.OK) {
-        setResults(results);
-
-        const firstResultLocation = results[0].geometry.location;
-        map.setCenter(firstResultLocation);
-        map.setZoom(14);
-
-        // Extract latitude and longitude
-        const lat = firstResultLocation.lat();
-        const lng = firstResultLocation.lng();
-
-        // Store selected location
-        setSelectedLocation({ lat, lng });
-        setSelectedLocationFront({ lat, lng });
+      if (places && places.length > 0) {
+        setResults(places);
+        applyLocation(places[0]);
       } else {
-        service.textSearch(requestSecond, (fallbackResults, fallbackStatus) => {
-          if (
-            fallbackStatus ===
-              window.google.maps.places.PlacesServiceStatus.OK &&
-            fallbackResults &&
-            fallbackResults.length > 0
-          ) {
-            setResults(fallbackResults);
-
-            const firstResultLocation = fallbackResults[0].geometry.location;
-            map.setCenter(firstResultLocation);
-            map.setZoom(14);
-
-            // Extract latitude and longitude
-            const lat = firstResultLocation.lat();
-            const lng = firstResultLocation.lng();
-
-            // Store selected location
-            setSelectedLocation({ lat, lng });
-            setSelectedLocationFront({ lat, lng });
-          }
+        const fallbackQuery = keyword.split(",").slice(-5).join(",").trim();
+        const { places: fallbackPlaces } = await Place.searchByText({
+          textQuery: fallbackQuery,
+          fields: ["displayName", "location"],
         });
+
+        if (fallbackPlaces && fallbackPlaces.length > 0) {
+          setResults(fallbackPlaces);
+          applyLocation(fallbackPlaces[0]);
+        }
       }
-    });
+    } catch (error) {
+      console.error("Places search error:", error);
+    }
   }, [keyword, map, setSelectedLocationFront]);
 
-  // const debouncedSearch = useCallback(debounce(handleSearch, 800), [map]);
   useEffect(() => {
     const debouncedSearch = debounce(handleSearch, 1000);
-
     debouncedSearch();
   }, [handleSearch, keyword]);
+
+  useEffect(() => {
+    if (!map || !selectedLocation?.lat) return;
+
+    const marker = new window.google.maps.marker.AdvancedMarkerElement({
+      position: selectedLocation,
+      map,
+    });
+
+    return () => {
+      marker.map = null;
+    };
+  }, [map, selectedLocation]);
 
   // const handleChange = () => {
   //   debouncedSearch();
@@ -139,13 +129,9 @@ const Maps = ({ keyword, type = "select", setSelectedLocationFront }) => {
         zoom={13}
         center={center}
         onLoad={onMapLoad}
-        onClick={type === "select" ? onMapClick : null} // Only trigger onMapClick}
+        onClick={type === "select" ? onMapClick : null}
+        options={{ mapId: "DEMO_MAP_ID" }}
       >
-        {selectedLocation && (
-          <MarkerF
-            position={{ lat: selectedLocation.lat, lng: selectedLocation.lng }}
-          />
-        )}
       </GoogleMap>
       {/* <div>
         {results.map((place, index) => (

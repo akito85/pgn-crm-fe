@@ -630,8 +630,8 @@ const LayoutMenu = ({ children }) => {
                 </div>
               </ModalError>
             ) : null}
-            {location.pathname === '/' ? (
-              // Always render dashboard regardless of permission check state
+            {location.pathname === '/' ||
+            tokenJSON?.userLevel === "Super User" ? (
               <div className="mt-[15px]">{children}</div>
             ) :
             (data_grant_access?.response?.data?.data?.isGranted === false &&

@@ -166,7 +166,7 @@ const EmployeeUploadList = ({
           <span>
             {
               dataEmployeeType
-                ?.filter((a) => a?.label === employeeType)
+                ?.filter((a) => a?.value === employeeType)
                 .find((b) => b.label)?.label
             }
           </span>
@@ -211,7 +211,7 @@ const EmployeeUploadList = ({
   ];
   const handleChangePage = (page, pageSize) => {
     setPage(page);
-    setPage(pageSize);
+    setPageSize(pageSize);
   };
   return (
     <>

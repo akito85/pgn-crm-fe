@@ -3,7 +3,7 @@ import {
   ExclamationCircleOutlined,
   UploadOutlined,
 } from "@ant-design/icons";
-import { Alert, Form } from "antd";
+import { Alert, Form, Tooltip } from "antd";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, NavLink } from "react-router-dom";
@@ -22,8 +22,9 @@ import PendingTaskLayout from "./PendingTaskLayout";
 import SVGIcon from "../../../../assets/Icon/index";
 import ViewListIcon from "../../../../assets/Icon/Nx/IconViewList";
 import IconEditNx from "../../../../assets/Icon/Nx/IconEdit";
-import IconGenerateLink from "../../../../assets/Icon/Nx/IconGenerateLink";
-import IconPower from "../../../../assets/Icon/Nx/IconPower";
+import IconActive from "../../../../assets/icons/nx/IconActive";
+import IconGeneratePassword from "../../../../assets/icons/nx/IconGeneratePassword";
+import IconInactive from "../../../../assets/icons/nx/IconInactive";
 import InputComponent from "../../../../components/InputComponent";
 import { formMessageRequired, hasValue } from "../../../../utils";
 import { useTryAgainHooks } from "../../../../utils/useTryAgainHooks";
@@ -303,19 +304,19 @@ const UserPage = () => {
       action: "Update",
       type: "table",
       render: (record) => {
-        const active = record?.status === "ACTIVE";
-        const color = active ? "#1976D2" : "#C0BEC6";
+        const disabled = record?.status !== "ACTIVE";
         return (
-          <Link
-            to={active ? USER_ROUTES.UPDATE_USER : undefined}
-            state={active ? { id: record?.userCode } : undefined}
-            style={{ pointerEvents: active ? "auto" : "none" }}
-          >
-            <span className="flex items-center gap-2" style={{ color, padding: "5px 8px" }}>
-              <IconEditNx color={color} width="18" height="18" />
-              <span style={{ fontSize: 14 }}>Update</span>
-            </span>
-          </Link>
+          <Tooltip title="Update">
+            <div className={`inline-flex items-center ${disabled ? "cursor-not-allowed text-gray-300" : ""}`}>
+              <Link
+                to={!disabled ? USER_ROUTES.UPDATE_USER : undefined}
+                state={!disabled ? { id: record?.userCode } : undefined}
+                className={`inline-flex items-center transition-colors duration-200 ${disabled ? "text-gray-300 pointer-events-none" : "text-[#1976D2] hover:text-[#1976D2]"}`}
+              >
+                <IconEditNx width={20} />
+              </Link>
+            </div>
+          </Tooltip>
         );
       },
     },
@@ -323,19 +324,19 @@ const UserPage = () => {
       action: "Generate",
       type: "table",
       render: (record) => {
-        const enabled = record?.status === "ACTIVE" && record.authType !== "LDAP";
-        const color = enabled ? "#1976D2" : "#C0BEC6";
+        const disabled = !(record?.status === "ACTIVE" && record.authType !== "LDAP");
         return (
-          <Link
-            to={enabled ? USER_ROUTES.GENERATE_PASSWORD : undefined}
-            state={enabled ? { id: record?.userId } : undefined}
-            style={{ pointerEvents: enabled ? "auto" : "none" }}
-          >
-            <span className="flex items-center gap-2" style={{ color, padding: "5px 8px" }}>
-              <IconGenerateLink color={color} width="18" height="18" />
-              <span style={{ fontSize: 14 }}>Generate</span>
-            </span>
-          </Link>
+          <Tooltip title="Generate Password">
+            <div className={`inline-flex items-center ${disabled ? "cursor-not-allowed text-gray-300" : ""}`}>
+              <Link
+                to={!disabled ? USER_ROUTES.GENERATE_PASSWORD : undefined}
+                state={!disabled ? { id: record?.userId } : undefined}
+                className={`inline-flex items-center transition-colors duration-200 ${disabled ? "text-gray-300 pointer-events-none" : "text-[#1976D2] hover:text-[#1976D2]"}`}
+              >
+                <IconGeneratePassword width={20} />
+              </Link>
+            </div>
+          </Tooltip>
         );
       },
     },
@@ -344,21 +345,23 @@ const UserPage = () => {
       type: "table",
       render: (record) => {
         const isActive = record?.status === "ACTIVE";
-        const color = "#1976D2";
+        const handleToggle = () => {
+          setOpenModal(true);
+          setSelectedUserId(record?.userId);
+          setActivate(record?.status);
+          setRecord(record);
+        };
         return (
-          <span
-            className="flex items-center gap-2 cursor-pointer"
-            style={{ color, padding: "5px 8px" }}
-            onClick={() => {
-              setOpenModal(true);
-              setSelectedUserId(record?.userId);
-              setActivate(record?.status);
-              setRecord(record);
-            }}
-          >
-            <IconPower color={color} width="18" height="18" />
-            <span style={{ fontSize: 14 }}>{isActive ? "Inactivate" : "Activate"}</span>
-          </span>
+          <Tooltip title={isActive ? "Inactivate" : "Activate"}>
+            {isActive
+              ? <span className="inline-flex items-center text-[#D32F2F] hover:text-[#D32F2F] transition-colors duration-200 cursor-pointer" onClick={handleToggle}>
+                  <IconInactive width={20} />
+                </span>
+              : <span className="inline-flex items-center text-green-600 hover:text-green-600 transition-colors duration-200 cursor-pointer" onClick={handleToggle}>
+                  <IconActive width={20} />
+                </span>
+            }
+          </Tooltip>
         );
       },
     },

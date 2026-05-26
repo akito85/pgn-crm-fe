@@ -94,6 +94,7 @@ const initialState = {
     localStorage.getItem("remember") ||
     window.sessionStorage.getItem("remember"),
   data_entities: null,
+  entitiesLoadFailed: false,
   data_check: null,
   data_entity: null,
   data_position: [],
@@ -504,6 +505,30 @@ export const checkGrantedAccess = createAsyncThunk(
       thunkAPI.dispatch(grantedAccess(payload));
       return data;
     } catch (error) {
+      // Action paths (e.g. /module/feature/create) are not registered as menu
+      // paths in the backend. When the current path fails, retry with the parent
+      // path so the menu-level grant is used for access control instead.
+      const parentPath = pathname
+        ? pathname.split("/").slice(0, -1).join("/") || "/"
+        : null;
+      if (parentPath && parentPath !== "/" && parentPath !== pathname) {
+        const parentCached = readGrantedAccessCache(parentPath);
+        if (parentCached) {
+          writeGrantedAccessCache(pathname, parentCached);
+          thunkAPI.dispatch(grantedAccess(parentCached));
+          return;
+        }
+        try {
+          const parentData = await authService.checkGrantedAccess(parentPath);
+          const parentPayload = parentData?.data;
+          writeGrantedAccessCache(parentPath, parentPayload);
+          writeGrantedAccessCache(pathname, parentPayload);
+          thunkAPI.dispatch(grantedAccess(parentPayload));
+          return parentData;
+        } catch {
+          // parent path also failed — fall through to original error handling
+        }
+      }
       thunkAPI.dispatch(
         validateError({ error: error, action: "CHECK_GRANTED_ACCESS" })
       );
@@ -1041,14 +1066,17 @@ const authSlice = createSlice({
     // get entities
     [getEntities.pending]: (state) => {
       state.loading = true;
+      state.entitiesLoadFailed = false;
     },
     [getEntities.fulfilled]: (state, action) => {
       state.loading = false;
       state.data_entities = action.payload;
+      state.entitiesLoadFailed = false;
     },
-    [getEntities.rejected]: (state, action) => {
+    [getEntities.rejected]: (state) => {
       state.loading = false;
-      state.data_entities = action.payload;
+      state.data_entities = null;
+      state.entitiesLoadFailed = true;
     },
     // forgot password
     [forgotPassword.pending]: (state) => {
