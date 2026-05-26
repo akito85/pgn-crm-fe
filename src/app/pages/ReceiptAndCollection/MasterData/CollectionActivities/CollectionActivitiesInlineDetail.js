@@ -11,6 +11,7 @@ import AttachmentComponent from "../../../../../components/Attachment/Attachment
 import TableRBI from "../../../../../components/TableRBI";
 import StatusComponent from "../../../../../components/StatusComponent";
 import ModalHistory from "../../../../../components/Modal/ModalHistory";
+import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import SVGIcon from "../../../../../assets/Icon/index";
 import { toTitleCase } from "../../../../../utils";
 import debtAndCollectionHttpService from "../../../../../redux/services/debtAndCollectionHttpService";
@@ -760,110 +761,86 @@ const CollectionActivitiesInlineDetail = ({
       />
 
       {/* ── Criteria Detail Modal ── */}
-      <Modal
-        open={criteriaDetailModal.open}
-        onCancel={() => setCriteriaDetailModal({ open: false, row: null })}
-        footer={null}
+      <ModalCustom
+        isOpen={criteriaDetailModal.open}
+        handleCancel={() => setCriteriaDetailModal({ open: false, row: null })}
+        header="Detail Criteria Information"
         width={700}
-        title={null}
-        destroyOnClose
+        type="detail"
+        footer={null}
       >
         {criteriaDetailModal.row ? (
-          <div className="p-2">
-            <div className="mb-4 border-b border-[#C8CDD4] pb-2">
-              <p className="text-primary font-semibold uppercase">
-                Detail Criteria Information
-              </p>
-            </div>
-
-            {/* Criteria Information */}
-            <div className="mb-4 rounded-lg border border-[#C8CDD4] bg-white overflow-hidden">
-              <div className="border-b border-[#C8CDD4] px-4 py-3">
-                <p className="text-primary uppercase text-sm font-semibold">
-                  Criteria Information
-                </p>
+          <div className="flex flex-col gap-y-3">
+            <CollapsibleContainer header="Criteria Information" border defaultOpen>
+              <div className="grid grid-cols-2 gap-4 md:grid-cols-3 pt-2 pb-4">
+                {criteriaTable.dynamicColumns.map((col) => (
+                  <DetailText key={col.key} label={col.title}>
+                    {criteriaDetailModal.row[col.key] || "-"}
+                  </DetailText>
+                ))}
+                <DetailText label="Start Date">
+                  {formatDate(criteriaDetailModal.row.startDate)}
+                </DetailText>
+                <DetailText label="End Date">
+                  {formatDate(criteriaDetailModal.row.endDate)}
+                </DetailText>
+                <DetailText label="Status">
+                  {criteriaDetailModal.row.status
+                    ? toTitleCase(criteriaDetailModal.row.status.replace(/_/g, " "))
+                    : "-"}
+                </DetailText>
+                <DetailText label="Approval Status">
+                  {criteriaDetailModal.row.statusApproval
+                    ? toTitleCase(criteriaDetailModal.row.statusApproval.replace(/_/g, " "))
+                    : "-"}
+                </DetailText>
+                <DetailText label="Description" className="col-span-2 md:col-span-3">
+                  {(criteriaDetailModal.rawItems || []).find(
+                    (item) => item.description
+                  )?.description || "-"}
+                </DetailText>
               </div>
-              <div className="p-4">
-                <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
-                  {criteriaTable.dynamicColumns.map((col) => (
-                    <DetailText key={col.key} label={col.title}>
-                      {criteriaDetailModal.row[col.key] || "-"}
-                    </DetailText>
-                  ))}
-                  <DetailText label="Start Date">
-                    {formatDate(criteriaDetailModal.row.startDate)}
-                  </DetailText>
-                  <DetailText label="End Date">
-                    {formatDate(criteriaDetailModal.row.endDate)}
-                  </DetailText>
-                  <DetailText label="Status">
-                    {criteriaDetailModal.row.status
-                      ? toTitleCase(criteriaDetailModal.row.status.replace(/_/g, " "))
-                      : "-"}
-                  </DetailText>
-                  <DetailText label="Approval Status">
-                    {criteriaDetailModal.row.statusApproval
-                      ? toTitleCase(criteriaDetailModal.row.statusApproval.replace(/_/g, " "))
-                      : "-"}
-                  </DetailText>
-                  <DetailText label="Description" className="col-span-2 md:col-span-3">
-                    {(criteriaDetailModal.rawItems || []).find(
-                      (item) => item.description
-                    )?.description || "-"}
-                  </DetailText>
-                </div>
-              </div>
-            </div>
+            </CollapsibleContainer>
 
-            {/* History Log Information */}
             {(criteriaDetailModal.rawItems || []).length > 0 && (
-              <div className="rounded-lg border border-[#C8CDD4] bg-white overflow-hidden">
-                <div className="border-b border-[#C8CDD4] px-4 py-3">
-                  <p className="text-primary uppercase text-sm font-semibold">
-                    History Log Information
-                  </p>
-                </div>
-                <div className="p-4">
-                  {(() => {
-                    const firstItem = criteriaDetailModal.rawItems[0];
-                    return (
-                      <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
-                        <DetailText label="Record ID">
-                          {firstItem.id || "-"}
-                        </DetailText>
-                        <DetailText label="Created Date">
-                          {firstItem.createdDate
-                            ? moment(firstItem.createdDate).format("DD MMM YYYY HH:mm")
-                            : "-"}
-                        </DetailText>
-                        <DetailText label="Created By">
-                          {firstItem.createdBy || "-"}
-                        </DetailText>
-                        <DetailText label="Update Date">
-                          {firstItem.updatedDate
-                            ? moment(firstItem.updatedDate).format("DD MMM YYYY HH:mm")
-                            : "-"}
-                        </DetailText>
-                        <DetailText label="Updated By">
-                          {firstItem.updatedBy || "-"}
-                        </DetailText>
-                      </div>
-                    );
-                  })()}
-                </div>
-              </div>
+              <CollapsibleContainer header="History Log Information" border defaultOpen>
+                {(() => {
+                  const firstItem = criteriaDetailModal.rawItems[0];
+                  return (
+                    <div className="grid grid-cols-2 gap-4 md:grid-cols-3 pt-2 pb-4">
+                      <DetailText label="Record ID">
+                        {firstItem.id || "-"}
+                      </DetailText>
+                      <DetailText label="Created Date">
+                        {firstItem.createdDate
+                          ? moment(firstItem.createdDate).format("DD MMM YYYY HH:mm")
+                          : "-"}
+                      </DetailText>
+                      <DetailText label="Created By">
+                        {firstItem.createdBy || "-"}
+                      </DetailText>
+                      <DetailText label="Update Date">
+                        {firstItem.updatedDate
+                          ? moment(firstItem.updatedDate).format("DD MMM YYYY HH:mm")
+                          : "-"}
+                      </DetailText>
+                      <DetailText label="Updated By">
+                        {firstItem.updatedBy || "-"}
+                      </DetailText>
+                    </div>
+                  );
+                })()}
+              </CollapsibleContainer>
             )}
 
-            <div className="mt-4">
-              <Button
-                onClick={() => setCriteriaDetailModal({ open: false, row: null })}
-              >
+            <div className="mt-2">
+              <Button onClick={() => setCriteriaDetailModal({ open: false, row: null })}>
                 Back
               </Button>
             </div>
           </div>
         ) : null}
-      </Modal>
+      </ModalCustom>
 
       {/* ── Criteria Approval History Modal ── */}
       <ModalHistory

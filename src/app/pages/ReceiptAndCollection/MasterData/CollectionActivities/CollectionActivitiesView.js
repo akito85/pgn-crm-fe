@@ -72,6 +72,7 @@ const CollectionActivitiesView = () => {
   const [inlineAttachments, setInlineAttachments] = useState([]);
   const [inlineDetailRefreshKey, setInlineDetailRefreshKey] = useState(0);
   const [approvalHierarchyOptions, setApprovalHierarchyOptions] = useState([]);
+  const approvalHierarchyOptionsRef = useRef([]);
   const [approvalHierarchyDetail, setApprovalHierarchyDetail] = useState([]);
   const [loadingInlineApproval, setLoadingInlineApproval] = useState(false);
 
@@ -176,13 +177,6 @@ const CollectionActivitiesView = () => {
         setInlineDetail(detailResponse || null);
         setInlineAttachments(detailResponse?.mattachmentLists || []);
 
-        if (detailContainerRef.current) {
-          detailContainerRef.current.scrollIntoView({
-            behavior: "smooth",
-            block: "start",
-          });
-        }
-
         try {
           const attachmentResponse = await debtAndCollectionHttpService.getPagination(
             `/v1/dbs/api/collection-activities/list-attachment/${selectedActivityId}`
@@ -216,7 +210,7 @@ const CollectionActivitiesView = () => {
         setLoadingInlineApproval(true);
 
         try {
-          if (approvalHierarchyOptions.length === 0) {
+          if (approvalHierarchyOptionsRef.current.length === 0) {
             const hierarchyOptionResponse = await dispatch(
               getListApprovalHierarchyCA()
             ).unwrap();
@@ -225,12 +219,12 @@ const CollectionActivitiesView = () => {
               return;
             }
 
-            setApprovalHierarchyOptions(
-              (hierarchyOptionResponse || []).map((appHier) => ({
-                label: appHier.approvalName || appHier.name,
-                value: appHier.appHierId || appHier.id,
-              }))
-            );
+            const mappedOptions = (hierarchyOptionResponse || []).map((appHier) => ({
+              label: appHier.approvalName || appHier.name,
+              value: appHier.appHierId || appHier.id,
+            }));
+            approvalHierarchyOptionsRef.current = mappedOptions;
+            setApprovalHierarchyOptions(mappedOptions);
           }
 
           const hierarchyDetailResponse = await dispatch(
@@ -283,11 +277,20 @@ const CollectionActivitiesView = () => {
       isActive = false;
     };
   }, [
-    approvalHierarchyOptions.length,
     dispatch,
     inlineDetailRefreshKey,
     selectedActivityId,
   ]);
+
+  // ─── Scroll to detail after it renders ────────────────────────────────────
+  useEffect(() => {
+    if (inlineDetail && detailContainerRef.current) {
+      detailContainerRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }
+  }, [inlineDetail]);
 
   // ─── Approval History ──────────────────────────────────────────────────────
   useEffect(() => {
