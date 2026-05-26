@@ -37,7 +37,7 @@ const ActivityTemplateTable = ({
 
     const onSort = (_, __, sort) => {
         const dataSort = sort.order
-            ? `${sort.field},${sort.order === "ascend" ? "asc" : "desc"}`
+            ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
             : "";
         setSort(dataSort);
     };
