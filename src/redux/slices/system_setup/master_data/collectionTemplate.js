@@ -192,6 +192,7 @@ export const approveCollectionTemplate = createAsyncThunk(
       const successMessage = {
         title: "Successful",
         description: "Template has been approved",
+        return: false,
       };
       thunkAPI.dispatch(showModalSuccess(successMessage));
       return response.data;
@@ -221,6 +222,7 @@ export const rejectCollectionTemplate = createAsyncThunk(
       const successMessage = {
         title: "Successful",
         description: "Template has been rejected",
+        return: false,
       };
       thunkAPI.dispatch(showModalSuccess(successMessage));
       return response.data;
@@ -253,6 +255,7 @@ export const approveInactiveCollectionTemplate = createAsyncThunk(
           body.action === "APPROVE"
             ? "Inactive request has been approved"
             : "Inactive request has been rejected",
+        return: false,
       };
       thunkAPI.dispatch(showModalSuccess(successMessage));
       return response.data;
@@ -285,6 +288,7 @@ export const approveActivatedCollectionTemplate = createAsyncThunk(
           body.action === "APPROVE"
             ? "Activate request has been approved"
             : "Activate request has been rejected",
+        return: false,
       };
       thunkAPI.dispatch(showModalSuccess(successMessage));
       return response.data;

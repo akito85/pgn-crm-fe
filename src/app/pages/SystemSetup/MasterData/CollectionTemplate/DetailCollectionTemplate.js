@@ -44,7 +44,12 @@ const InfoRow = ({ label, value }) => (
   </div>
 );
 
-const DetailCollectionTemplate = ({ data, loading, onCreateDetail }) => {
+const DetailCollectionTemplate = ({
+  data,
+  loading,
+  onCreateDetail,
+  onRefresh,
+}) => {
   const dispatch = useDispatch();
   const { dataListAppHierDetail } = useSelector(
     (state) => state.collectionTemplate,
@@ -81,25 +86,75 @@ const DetailCollectionTemplate = ({ data, loading, onCreateDetail }) => {
     }
   }, [dispatch, data?.appHierId]);
 
-  // Sync approval info: template header takes priority; fall back to detail items
+  // Sync approval info: template header takes priority; for detail items,
+  // ask backend whether current user is approver before showing action buttons.
   useEffect(() => {
-    if (data?.approvalInfo?.isApprover) {
-      setBodyApproval({
-        isApprover: data.approvalInfo.isApprover,
-        tAppId: data.approvalInfo.tAppId,
-        approvalType: data.approvalInfo.approvalType,
-      });
-    } else if (waitingDetails.length > 0) {
-      // Detail items (activities/criteria) are waiting — show the bottom approve button
-      setBodyApproval({
-        isApprover: true,
-        tAppId: null,
-        approvalType: "PAY_COLLECTION_TEMPLATE_DETAIL",
-      });
-    } else {
-      setBodyApproval({ isApprover: false, tAppId: null, approvalType: null });
-    }
-  }, [data?.approvalInfo, waitingDetails]);
+    let isMounted = true;
+
+    const syncApprovalInfo = async () => {
+      if (data?.approvalInfo?.isApprover) {
+        setBodyApproval({
+          isApprover: data.approvalInfo.isApprover,
+          tAppId: data.approvalInfo.tAppId,
+          approvalType: data.approvalInfo.approvalType,
+        });
+        return;
+      }
+
+      if (waitingDetails.length === 0) {
+        setBodyApproval({
+          isApprover: false,
+          tAppId: null,
+          approvalType: null,
+        });
+        return;
+      }
+
+      try {
+        const firstWaitingDetail = waitingDetails[0];
+        const infoResult = await dispatch(
+          getTemplateDetailApprovalInfo(firstWaitingDetail.templateDetailId),
+        ).unwrap();
+        const approvalInfo = infoResult?.data || infoResult;
+
+        if (!isMounted) return;
+
+        if (approvalInfo?.isApprover) {
+          setBodyApproval({
+            isApprover: true,
+            tAppId: null,
+            approvalType: "PAY_COLLECTION_TEMPLATE_DETAIL",
+          });
+        } else {
+          setBodyApproval({
+            isApprover: false,
+            tAppId: null,
+            approvalType: null,
+          });
+        }
+      } catch {
+        if (isMounted) {
+          setBodyApproval({
+            isApprover: false,
+            tAppId: null,
+            approvalType: null,
+          });
+        }
+      }
+    };
+
+    syncApprovalInfo();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [
+    dispatch,
+    data?.approvalInfo?.isApprover,
+    data?.approvalInfo?.tAppId,
+    data?.approvalInfo?.approvalType,
+    waitingDetails,
+  ]);
 
   // Map hierarchy detail rows
   useEffect(() => {
@@ -283,6 +338,7 @@ const DetailCollectionTemplate = ({ data, loading, onCreateDetail }) => {
   if (!data) return null;
 
   const handleConfirm = async (res, handleClear) => {
+    const templateId = data.collectionTemplateId;
     const action = approveOrReject === "Approve" ? "APPROVE" : "REJECT";
     const isInactiveApproval =
       bodyApproval.approvalType === "INACTIVE_PAY_COLLECTION_TEMPLATE";
@@ -321,34 +377,43 @@ const DetailCollectionTemplate = ({ data, loading, onCreateDetail }) => {
         }
         setModalConfirm(false);
         handleClear();
-        dispatch(getDetailCollectionTemplate(data.collectionTemplateId));
+        if (typeof onRefresh === "function") {
+          await onRefresh();
+        } else {
+          await dispatch(getDetailCollectionTemplate(templateId)).unwrap();
+        }
       } else {
         let thunkCall;
         if (isInactiveApproval) {
           thunkCall = approveInactiveCollectionTemplate({
-            id: data.collectionTemplateId,
+            id: templateId,
             body: { remark: res.remark, action },
           });
         } else if (isActivatedApproval) {
           thunkCall = approveActivatedCollectionTemplate({
-            id: data.collectionTemplateId,
+            id: templateId,
             body: { remark: res.remark, action },
           });
         } else {
           thunkCall =
             approveOrReject === "Approve"
               ? approveCollectionTemplate({
-                  id: data.collectionTemplateId,
+                  id: templateId,
                   body: { approvalId: bodyApproval.tAppId, remark: res.remark },
                 })
               : rejectCollectionTemplate({
-                  id: data.collectionTemplateId,
+                  id: templateId,
                   body: { approvalId: bodyApproval.tAppId, remark: res.remark },
                 });
         }
         await dispatch(thunkCall).unwrap();
         setModalConfirm(false);
         handleClear();
+        if (typeof onRefresh === "function") {
+          await onRefresh();
+        } else {
+          await dispatch(getDetailCollectionTemplate(templateId)).unwrap();
+        }
       }
     } catch (error) {
       const message =
