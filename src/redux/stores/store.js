@@ -102,6 +102,7 @@ import templateRemindingReducer from "../slices/debt_and_collection/templateRemi
 import activityTypeReducer from "../slices/debt_and_collection/activityType";
 import activityActionReducer from "../slices/debt_and_collection/activityAction";
 import activitiesReducer from "../slices/debt_and_collection/activities";
+import collectionActivitiesReducer from "../slices/debt_and_collection/collectionActivities";
 import transactionReportReducer from "../slices/debt_and_collection/transactionReport";
 import managementDeliveryInvoiceReducer from "../slices/rating_billing_invoice/managementDeliveryInvoice";
 import masterEfakturCodeReducer from "../slices/rating_billing_invoice/MasterData/efakturCode";
@@ -349,6 +350,7 @@ const reducer = combineReducers({
   activityType: activityTypeReducer,
   activityAction: activityActionReducer,
   activities: activitiesReducer,
+  collectionActivities: collectionActivitiesReducer,
   transactionReport: transactionReportReducer,
   writeOff: writeOffReducer,
 
