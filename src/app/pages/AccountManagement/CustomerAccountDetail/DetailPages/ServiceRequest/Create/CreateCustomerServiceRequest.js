@@ -114,6 +114,10 @@ const CreateCustomerServiceRequest = (props) => {
     detail_serviceRequest: serviceRequestDetail,
     detailDraft_serviceRequest: serviceRequestDetailDraft,
     loading_createUpdateSr,
+    loading_detailSr,
+    loading_detailDraftSr,
+    loading_listSrApprovalHierarchy,
+    loading_detailSrApprovalHierarchy,
     create_sr,
   } = useSelector((state) => state.serviceRequest);
 
@@ -180,7 +184,6 @@ const CreateCustomerServiceRequest = (props) => {
   const [data, setData] = useState({});
   const [dataSend, setDataSend] = useState({});
   const [modalSuccess, setModalSuccess] = useState(false);
-  const [loadingForm, setLoadingForm] = useState(false);
   const [modalConfirm, setModalConfirm] = useState(false);
   const [confirmationType, setConfirmationType] = useState("submit");
   const [dataConfirm, setDataConfirm] = useState({});
@@ -203,7 +206,13 @@ const CreateCustomerServiceRequest = (props) => {
   const [attachmentDataSource, setAttachmentDataSource] = useState([]);
   const [deletedAttachments, setDeletedAttachments] = useState([]);
 
-  const isLoading = loading || loadingForm || loadingAccount;
+  const isLoading =
+    loading ||
+    loadingAccount ||
+    loading_detailSr ||
+    loading_detailDraftSr ||
+    loading_listSrApprovalHierarchy ||
+    loading_detailSrApprovalHierarchy;
 
   const { InformationForm, ContactForm, PreRequisiteForm } = StepContents;
 
@@ -361,7 +370,6 @@ const CreateCustomerServiceRequest = (props) => {
       middleName: (temp[1] || "").toUpperCase(),
       lastName: (temp[2] || "").toUpperCase(),
       customerName: (e?.customerName || "").toUpperCase(),
-      description: e?.description
     });
     setFirstName((temp[0] || "").toUpperCase());
     setMiddleName((temp[1] || "").toUpperCase());
@@ -521,6 +529,8 @@ const CreateCustomerServiceRequest = (props) => {
               options={list_srApprovalHierarchy}
               hierarchyDetails={detail_srApprovalHierarchy}
               handleSelectHierarchy={handleSelectHierarchy}
+              loading={loading_listSrApprovalHierarchy}
+              tableLoading={loading_detailSrApprovalHierarchy}
             />
           </NxBaseContainer>
         </NxCardContainer>
@@ -630,9 +640,9 @@ const CreateCustomerServiceRequest = (props) => {
         requirementDesc: null
       })),
       prerequisites: (create_sr?.prerequisites || []).map((pr) => ({
-        prerequisiteId: pr.prerequisiteId,
+        prerequisiteType: pr.prerequisiteType,
         prerequisiteName: pr.prerequisiteName,
-        prerequisiteComments: pr.prerequisiteComments || null,
+        prerequisiteDesc: pr.prerequisiteDesc || null,
         ...(pr.prerequisiteStatus && {
           prerequisiteStatus: pr.prerequisiteStatus
         }),
@@ -724,48 +734,52 @@ const CreateCustomerServiceRequest = (props) => {
     }
   };
 
-  const handleConfirmSubmit = async () => {
-    setModalConfirm(false);
-    setLoadingForm(true);
+  const handleConfirmSubmit = () => {
     const newAttachments = attachmentDataSource.filter(
       (a) => a.dataType === "new"
     );
-    try {
-      if (isUpdate && id) {
-        await dispatch(
-          updateServiceRequest({
-            accountId: idAccount,
-            id,
-            body: { ...dataSend, serviceRequestId: id },
-            attachments: newAttachments,
-            action: confirmationType.toUpperCase(),
-            successBodyExtra: { return: false }
-          })
-        ).unwrap();
-      } else {
-        await dispatch(
-          createServiceRequest({
-            accountId: idAccount,
-            body: dataSend,
-            attachments: newAttachments,
-            action: confirmationType.toUpperCase(),
-            successBodyExtra: { return: false }
-          })
-        ).unwrap();
-      }
-      dispatch(resetCreateSr());
-      navigate(ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD, {
-        state: {
-          idAccount,
-          idCustomer,
-          type: accountType,
-          section: "Service Request"
-        }
-      });
-    } catch (error) {
-      // thunk sudah dispatch showModalError
-    } finally {
-      setLoadingForm(false);
+
+    const onSuccess = () => {
+      setTimeout(() => {
+        dispatch(resetCreateSr());
+        navigate(ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD, {
+          state: {
+            idAccount,
+            idCustomer,
+            type: accountType,
+            section: "Service Request"
+          }
+        });
+      }, 2000);
+    };
+
+    if (isUpdate && id) {
+      dispatch(
+        updateServiceRequest({
+          accountId: idAccount,
+          id,
+          body: { ...dataSend, serviceRequestId: id },
+          attachments: newAttachments,
+          action: confirmationType.toUpperCase(),
+          successBodyExtra: { return: false }
+        })
+      )
+        .unwrap()
+        .then(onSuccess)
+        .catch(() => {});
+    } else {
+      dispatch(
+        createServiceRequest({
+          accountId: idAccount,
+          body: dataSend,
+          attachments: newAttachments,
+          action: confirmationType.toUpperCase(),
+          successBodyExtra: { return: false }
+        })
+      )
+        .unwrap()
+        .then(onSuccess)
+        .catch(() => {});
     }
   };
 
@@ -809,22 +823,9 @@ const CreateCustomerServiceRequest = (props) => {
 
   return (
     <>
-      <Spin spinning={isLoading}>
-        <Form
-          id="accountForm"
-          form={formCreate}
-          layout={"vertical"}
-          preserve={true}
-          onFinish={() => {
-            if (current === steps.length - 1) {
-              handleOpenConfirmation("submit");
-            }
-          }}
-          scrollToFirstError={true}
-          className="flex flex-col gap-y-4"
-        >
-          <NxBreadCrumb routes={routes} />
-          <HeaderDetail
+      <div className="flex flex-col gap-y-4">
+        <NxBreadCrumb routes={routes} />
+        <HeaderDetail
             data_header={["CUSTOMER INFORMATION", "ACCOUNT INFORMATION"]}
             dispatch={dispatch}
             idAccount={idAccount}
@@ -832,67 +833,80 @@ const CreateCustomerServiceRequest = (props) => {
             type={accountType}
             collapsible={true}
           />
+          <Spin spinning={isLoading}>
+            <Form
+              id="accountForm"
+              form={formCreate}
+              layout={"vertical"}
+              preserve={true}
+              onFinish={() => {
+                if (current === steps.length - 1) {
+                  handleOpenConfirmation("submit");
+                }
+              }}
+              scrollToFirstError={true}
+              className="flex flex-col gap-y-4"
+            >
+              <NxFormStepper
+                steps={steps}
+                current={current}
+                onPrev={prev}
+                onNext={handleButtonNext}
+              />
 
-          <NxFormStepper
-            steps={steps}
-            current={current}
-            onPrev={prev}
-            onNext={handleButtonNext}
-          />
+              <div className="steps-content flex flex-col gap-y-4">{steps[current].content}</div>
 
-          <div className="steps-content flex flex-col gap-y-4">{steps[current].content}</div>
-
-          {/* Section Action Steps */}
-          <NxBaseContainer border>
-            <div className="flex justify-between">
-              <Button
-                type={"menu"}
-                onClick={() => {
-                  setModalBack(true);
-                }}
-              >
-                Cancel
-              </Button>
-              <div className="flex w-full justify-end gap-x-2">
-                <Button
-                  onClick={handleClear}
-                  type={"reject"}
-                  icon={<SVGIcon name="IconButtonClear" width={14} />}
-                >
-                  {isUpdate ? "Reset" : "Clear"}
-                </Button>
-                <Button
-                  onClick={() => handleOpenConfirmation("draft")}
-                  type={"secondary"}
-                >
-                  Save as Draft
-                </Button>
-                <Button onClick={prev} type={"menu"} disabled={current < 1}>
-                  Previous
-                </Button>
-                {current < steps.length - 1 && (
+              {/* Section Action Steps */}
+              <NxBaseContainer border>
+                <div className="flex justify-between">
                   <Button
-                    onClick={handleButtonNext}
-                    type={"submit"}
-                    disabled={steps[current].disabled}
+                    type={"menu"}
+                    onClick={() => {
+                      setModalBack(true);
+                    }}
                   >
-                    Next
+                    Cancel
                   </Button>
-                )}
-                {current === steps.length - 1 && (
-                  <Button
-                    onClick={() => handleOpenConfirmation("submit")}
-                    type={"submit"}
-                    loading={loadingForm}
-                  >
-                    Save & Submit
-                  </Button>
-                )}
-              </div>
-            </div>
-          </NxBaseContainer>
-        </Form>
-      </Spin>
+                  <div className="flex w-full justify-end gap-x-2">
+                    <Button
+                      onClick={handleClear}
+                      type={"reject"}
+                      icon={<SVGIcon name="IconButtonClear" width={14} />}
+                    >
+                      {isUpdate ? "Reset" : "Clear"}
+                    </Button>
+                    <Button
+                      onClick={() => handleOpenConfirmation("draft")}
+                      type={"secondary"}
+                    >
+                      Save as Draft
+                    </Button>
+                    <Button onClick={prev} type={"menu"} disabled={current < 1}>
+                      Previous
+                    </Button>
+                    {current < steps.length - 1 && (
+                      <Button
+                        onClick={handleButtonNext}
+                        type={"submit"}
+                        disabled={steps[current].disabled}
+                      >
+                        Next
+                      </Button>
+                    )}
+                    {current === steps.length - 1 && (
+                      <Button
+                        onClick={() => handleOpenConfirmation("submit")}
+                        type={"submit"}
+                      >
+                        Save & Submit
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </NxBaseContainer>
+            </Form>
+          </Spin>
+        </div>
 
       {/* Confirmation Modal */}
       <ConfirmationModal
@@ -905,7 +919,7 @@ const CreateCustomerServiceRequest = (props) => {
         attachmentsData={attachmentDataSource}
         prerequisites={create_sr?.prerequisites || []}
         type={confirmationType}
-        loading={loadingForm}
+        loading={loading_createUpdateSr}
         service={accountManagementService}
         configApplication={configApp.ACCOUNT_SERVICE}
       />

@@ -19,6 +19,8 @@ const initialState = {
   detailDraft_serviceRequest: null,
   loading_detailDraftSr: false,
   loading_createUpdateSr: false,
+  loading_listSrApprovalHierarchy: false,
+  loading_detailSrApprovalHierarchy: false,
   loading_statusUpdateSr: false,
   list_srPrerequisites: [],
   pagination_listSrPrerequisites: { totalPage: 0, totalElement: 0, currentPage: 0, pageSize: 10 },
@@ -1146,14 +1148,14 @@ const serviceRequestSlice = createSlice({
     },
 
     [getServiceRequestDraft.pending]: (state) => {
-      state.loading_detailSrDraftSr = true;
+      state.loading_detailDraftSr = true;
     },
     [getServiceRequestDraft.fulfilled]: (state, action) => {
-      state.loading_detailSrDraftSr = false;
+      state.loading_detailDraftSr = false;
       state.detailDraft_serviceRequest = action.payload;
     },
     [getServiceRequestDraft.rejected]: (state) => {
-      state.loading_detailSrDraftSr = false;
+      state.loading_detailDraftSr = false;
       state.detailDraft_serviceRequest = null;
     },
 
@@ -1187,14 +1189,14 @@ const serviceRequestSlice = createSlice({
     },
 
     [createServiceRequest.pending]: (state) => {
-      state.loading = true;
+      state.loading_createUpdateSr = true;
     },
     [createServiceRequest.fulfilled]: (state, action) => {
-      state.loading = false;
+      state.loading_createUpdateSr = false;
       state.isSuccess = true;
     },
     [createServiceRequest.rejected]: (state) => {
-      state.loading = false;
+      state.loading_createUpdateSr = false;
       state.isFailed = true;
     },
 
@@ -1281,17 +1283,27 @@ const serviceRequestSlice = createSlice({
       state.list_srSources = action.payload;
     },
 
+    [getSrApprovalHierarchies.pending]: (state) => {
+      state.loading_listSrApprovalHierarchy = true;
+    },
     [getSrApprovalHierarchies.fulfilled]: (state, action) => {
+      state.loading_listSrApprovalHierarchy = false;
       state.list_srApprovalHierarchy = action.payload;
+    },
+    [getSrApprovalHierarchies.rejected]: (state) => {
+      state.loading_listSrApprovalHierarchy = false;
     },
 
     [getSrApprovalHierarchy.pending]: (state) => {
+      state.loading_detailSrApprovalHierarchy = true;
       state.detail_srApprovalHierarchy = [];
     },
     [getSrApprovalHierarchy.fulfilled]: (state, action) => {
+      state.loading_detailSrApprovalHierarchy = false;
       state.detail_srApprovalHierarchy = action.payload;
     },
     [getSrApprovalHierarchy.rejected]: (state) => {
+      state.loading_detailSrApprovalHierarchy = false;
       state.detail_srApprovalHierarchy = [];
     },
 
