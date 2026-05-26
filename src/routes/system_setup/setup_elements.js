@@ -46,6 +46,9 @@ import CalendarDetail from "../../app/pages/SystemSetup/MasterData/Calendar/Cale
 import PreRequisiteTemplate from "../../app/pages/SystemSetup/PreRequisiteTemplate/PreRequisiteTemplate";
 import PreRequisiteTemplateDetail from "../../app/pages/SystemSetup/PreRequisiteTemplate/Details/PreRequisiteTemplateDetail";
 import CreateUpdatePreRequisiteTemplate from "../../app/pages/SystemSetup/PreRequisiteTemplate/CreateUpdate/CreateUpdatePreRequisiteTemplate";
+import ActivityTemplate from "../../app/pages/SystemSetup/ActivityTemplate/ActivityTemplate";
+import ActivityTemplateDetail from "../../app/pages/SystemSetup/ActivityTemplate/Details/ActivityTemplateDetail";
+import CreateUpdateActivityTemplate from "../../app/pages/SystemSetup/ActivityTemplate/CreateUpdate/CreateUpdateActivityTemplate";
 
 export const SYSTEM_SETUP_ELEMENTS = {
   // menu
@@ -152,4 +155,10 @@ export const SYSTEM_SETUP_ELEMENTS = {
   DETAIL_PRE_REQUISITE_TEMPLATE_PAGE: <PreRequisiteTemplateDetail />,
   CREATE_PRE_REQUISITE_TEMPLATE_PAGE: <CreateUpdatePreRequisiteTemplate type="create" />,
   UPDATE_PRE_REQUISITE_TEMPLATE_PAGE: <CreateUpdatePreRequisiteTemplate type="update" />,
+
+  // Activity Template
+  VIEW_ACTIVITY_TEMPLATE_PAGE: <ActivityTemplate />,
+  DETAIL_ACTIVITY_TEMPLATE_PAGE: <ActivityTemplateDetail />,
+  CREATE_ACTIVITY_TEMPLATE_PAGE: <CreateUpdateActivityTemplate type="create" />,
+  UPDATE_ACTIVITY_TEMPLATE_PAGE: <CreateUpdateActivityTemplate type="update" />,
 };

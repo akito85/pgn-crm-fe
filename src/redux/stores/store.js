@@ -159,6 +159,7 @@ import { jobApiSlice } from "../slices/job_management/jobApiSlice";
 import { jobGroupApiSlice } from "../slices/job_management/jobGroupApiSlice";
 import auditTrailReducer from "../slices/user_management/audit_trail";
 import preRequisiteTemplateReducer from "../slices/system_setup/preRequisiteTemplate";
+import activityTemplateReducer from "../slices/system_setup/activityTemplate";
 
 const reducer = combineReducers({
   jobManagement: jobManagementReducer,
@@ -355,6 +356,7 @@ const reducer = combineReducers({
   audit_trail: auditTrailReducer,
   // system setup
   preRequisiteTemplate: preRequisiteTemplateReducer,
+  activityTemplate: activityTemplateReducer,
 });
 
 // add throttle middlewares
