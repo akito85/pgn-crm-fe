@@ -147,6 +147,7 @@ const TableRBI = ({
   onRowClick = () => {},
   onSearch = () => {},
   tableSize = "default",
+  rowKey,
 }) => {
   const [optionSelectedCol, setOptionSelectedCol] = useState([]);
   const [isAdvanceOpen, setIsAdvanceOpen] = useState(false);
@@ -473,29 +474,48 @@ const TableRBI = ({
       });
     }
 
-    // Separate into left, normal, right
+    // Separate into left, normal, right while preserving the exact order
+    // declared in fixedColumns.left and fixedColumns.right arrays.
     const leftFixed = [];
     const rightFixed = [];
     const normal = [];
 
-    visible.forEach((col) => {
-      const isLeftFixed =
-        (Array.isArray(fixedColumns.left) &&
-          fixedColumns.left.includes(col.key)) ||
-        col.fixed === "left";
+    const visibleMap = new Map(visible.map((c) => [c.key, c]));
+
+    // Preserve left order based on fixedColumns.left
+    if (Array.isArray(fixedColumns.left)) {
+      fixedColumns.left.forEach((key) => {
+        if (visibleMap.has(key)) {
+          leftFixed.push(visibleMap.get(key));
+          visibleMap.delete(key);
+        }
+      });
+    }
+
+    // Collect remaining visible columns into normal/right based on their fixed prop
+    for (const col of visibleMap.values()) {
       const isRightFixed =
         (Array.isArray(fixedColumns.right) &&
           fixedColumns.right.includes(col.key)) ||
         col.fixed === "right";
 
-      if (isLeftFixed) {
-        leftFixed.push(col);
-      } else if (isRightFixed) {
-        rightFixed.push(col);
-      } else {
-        normal.push(col);
+      if (isRightFixed) {
+        // skip here; right will be ordered explicitly below
+        continue;
       }
-    });
+      normal.push(col);
+    }
+
+    // Preserve right order based on fixedColumns.right
+    if (Array.isArray(fixedColumns.right)) {
+      fixedColumns.right.forEach((key) => {
+        // prefer columns that are remaining in visibleMap (not already in leftFixed)
+        const col = visible.find((c) => c.key === key);
+        if (col) {
+          rightFixed.push(col);
+        }
+      });
+    }
 
     const finalCols = [
       ...leftFixed.map((c) => processColumn(c, "left")),
@@ -837,6 +857,7 @@ const TableRBI = ({
         onRow={customOnRow}
         rowClassName={customRowClassName}
         size={tableSize}
+        rowKey={rowKey}
       />
 
       {useInfiniteScroll ? (

@@ -167,4 +167,8 @@ export const RECEIPT_AND_COLLECTION_ROUTES = {
   CREATE_COLLECTION_ACTIVITIES: "/receipt-and-collection/collection-activities/create",
   DETAIL_COLLECTION_ACTIVITIES: "/receipt-and-collection/collection-activities/view",
   UPDATE_COLLECTION_ACTIVITIES: "/receipt-and-collection/collection-activities/update",
+  // Exception
+  VIEW_EXCEPTION: "/receipt-and-collection/exception",
+  CREATE_EXCEPTION: "/receipt-and-collection/exception/create",
+  UPDATE_EXCEPTION: "/receipt-and-collection/exception/update",
 };
