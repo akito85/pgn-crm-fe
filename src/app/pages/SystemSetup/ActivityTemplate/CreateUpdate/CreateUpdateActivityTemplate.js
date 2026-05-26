@@ -219,7 +219,7 @@ const CreateUpdateActivityTemplate = ({ type = "create" }) => {
 
     const handleSubmit = useCallback(() => {
         const hasUnsaved = activityItems.some((i) => i.isEditing);
-        if (hasUnsaved) return; // blocked if any row is still editing
+        if (hasUnsaved || activityItems.length === 0) return; // blocked if any row is still editing
 
         const values = form.getFieldsValue(true);
         const payload = {
@@ -366,7 +366,7 @@ const CreateUpdateActivityTemplate = ({ type = "create" }) => {
                             type="approve"
                             onClick={() => form.submit()}
                             loading={loading_create_update_at}
-                            disabled={loading_create_update_at || activityItems.some((i) => i.isEditing)}
+                            disabled={loading_create_update_at || activityItems.length === 0 || activityItems.some((i) => i.isEditing)}
                         >
                             Submit
                         </Button>
