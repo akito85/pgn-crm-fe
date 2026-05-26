@@ -400,6 +400,7 @@ export const saveUploadEmployee = createAsyncThunk(
       const successBody = {
         title: "Successful",
         description: `Your file has been uploaded`,
+        return: true,
       };
       thunkAPI.dispatch(showModalSuccess(successBody));
       return data;
