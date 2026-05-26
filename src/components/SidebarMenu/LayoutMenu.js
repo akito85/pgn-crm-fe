@@ -207,7 +207,7 @@ const LayoutMenu = ({ children }) => {
   useEffect(() => {
     dispatch(checkGrantedAccess(location?.pathname));
     dispatch(getProfile());
-  }, [dispatch, location, data_switch]);
+  }, [dispatch, location.pathname, data_switch]);
 
   // useEffect(() => {
   //   dispatch(getGlobalFormatConfig());
