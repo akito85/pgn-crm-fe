@@ -181,7 +181,7 @@ const EmployeeUploadList = ({
       sorter: true,
       inputType: "date",
       ...getColumnSearchProps("startDate", "date"),
-      render: (endDate) => moment(endDate).format("YYYY-MM-DD"),
+      render: (endDate) => endDate ? moment(endDate).format("YYYY-MM-DD") : '-',
     },
     {
       title: "END DATE",
@@ -191,7 +191,7 @@ const EmployeeUploadList = ({
       sorter: true,
       inputType: "date",
       ...getColumnSearchProps("endDate", "date"),
-      render: (endDate) => moment(endDate).format("YYYY-MM-DD"),
+      render: (endDate) => endDate ? moment(endDate).format("YYYY-MM-DD") : '-',
     },
     {
       title: "DESCRIPTION",
