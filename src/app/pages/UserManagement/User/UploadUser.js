@@ -178,7 +178,6 @@ const UploadUser = () => {
             userName: item?.userName?.toString(),
             authType: item?.authType?.toString(),
             authTypeValue: item?.authTypeId?.toString(),
-            employeeName: item?.employeeName?.toString(),
             employee: item?.employee === null ? "" : item?.employee?.toString(),
             userType: item?.userType?.toString(),
             userTypeValue: item?.userTypeId?.toString(),
