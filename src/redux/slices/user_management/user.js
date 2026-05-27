@@ -233,7 +233,7 @@ export const uploadUser = createAsyncThunk(
     } catch (e) {
       thunkAPI.dispatch(
         validateError({
-          error: errorBody(errorCode(e), "updated", errorMessage(e)),
+          error: errorBody(errorCode(e), "uploaded", errorMessage(e)),
           action: "UPLOAD_USER",
           back: false,
         })
@@ -365,8 +365,9 @@ export const finalUploadUser = createAsyncThunk(
       const url = "/v1/dbs/api/mu/upload/step2";
       const data = await userHttpService.createData(url, body);
       const successMessage = {
-        title: "Successfull",
-        description: "Your data has been created",
+        title: "Successful",
+        description: "Your file has been uploaded",
+        return: true,
       };
       thunkAPI.dispatch(showModalSuccess(successMessage));
       return data?.data;
@@ -606,7 +607,7 @@ const userSlice = createSlice({
     // upload user
     [uploadUser.pending]: (state, action) => {
       state.data_list_upload = action.payload;
-      // state.loading = true;
+      state.loading = true;
     },
     [uploadUser.fulfilled]: (state, action) => {
       state.data_list_upload = action.payload;

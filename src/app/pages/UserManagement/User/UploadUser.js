@@ -57,7 +57,7 @@ const UploadUser = () => {
             authType: item?.authType,
             authTypeId: item?.authTypeValue,
             employeeName: item?.employeeName,
-            employee: item?.employee === "" ? null : parseInt(item?.employee),
+            employee: (n => Number.isFinite(n) ? n : null)(parseInt(item?.employee)),
             userType: item?.userType,
             userTypeId: item?.userTypeValue,
             userLevel: item?.userLevel,
@@ -67,10 +67,10 @@ const UploadUser = () => {
             groupAccess: item?.groupAccess,
             groupAccessId: parseInt(item?.groupAccessId),
             status: item?.status,
-            startDate: item?.startDate ? moment(item.startDate).clone() : null,
-            endDate: item?.endDate ? moment(item.endDate).clone() : null,
-            startDateGa: item?.startDateGa ? moment(item.startDateGa).clone() : null,
-            endDateGa: item?.endDateGa ? moment(item.endDateGa).clone() : null,
+            startDate: item?.startDate ? moment(item.startDate).format("DD MMM YYYY") : null,
+            endDate: item?.endDate ? moment(item.endDate).format("DD MMM YYYY") : null,
+            startDateGa: item?.startDateGa ? moment(item.startDateGa).format("DD MMM YYYY") : null,
+            endDateGa: item?.endDateGa ? moment(item.endDateGa).format("DD MMM YYYY") : null,
             message: item?.message,
           };
         })
@@ -194,10 +194,10 @@ const UploadUser = () => {
               typeof item?.groupAccess === "string"
                 ? item?.groupAccessId?.toString()
                 : item?.groupAccess?.toString(),
-            endDate: item?.endDate ? moment(item.endDate).format(dateFormatting.dateCapital) : null,
-            startDate: item?.startDate ? moment(item.startDate).format(dateFormatting.dateCapital) : null,
-            endDateGa: item?.endDateGa ? moment(item.endDateGa).format(dateFormatting.dateCapital) : null,
-            startDateGa: item?.startDateGa ? moment(item.startDateGa).format(dateFormatting.dateCapital) : null,
+            endDate: item?.endDate ? moment(item.endDate, "DD MMM YYYY").format(dateFormatting.dateCapital) : null,
+            startDate: item?.startDate ? moment(item.startDate, "DD MMM YYYY").format(dateFormatting.dateCapital) : null,
+            endDateGa: item?.endDateGa ? moment(item.endDateGa, "DD MMM YYYY").format(dateFormatting.dateCapital) : null,
+            startDateGa: item?.startDateGa ? moment(item.startDateGa, "DD MMM YYYY").format(dateFormatting.dateCapital) : null,
           };
         });
         await dispatch(finalUploadUser(body)).unwrap();
