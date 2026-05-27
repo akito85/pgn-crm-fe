@@ -3,6 +3,12 @@ import { useCallback, useMemo } from "react";
 import StatusComponent from "../../../../components/StatusComponent";
 import NxTableInlineEdit from "../../../../components/Nx/NxTableInlineEdit";
 
+// Strip "at row N" suffix and translate BE format token → FE-facing format.
+const normalizeMessage = (msg) =>
+  msg
+    .replace(/\s+at row \d+\.?$/i, "")
+    .replace(/yyyy-mm-dd/gi, "DD MMM YYYY");
+
 const EmployeeUploadList = ({
   dataEmp,
   dataEmployeeType,
@@ -99,14 +105,25 @@ const EmployeeUploadList = ({
         title: "STATUS",
         dataIndex: "status",
         editable: false,
-        width: 110,
-        isClassification: true,
-        render: (text) =>
-          text ? (
-            <div className="flex justify-center">
-              <StatusComponent colour={text}>{text}</StatusComponent>
+        width: 220,
+        render: (text, record) => {
+          if (!text) return null;
+          const errors = Array.isArray(record?.message) ? record.message : [];
+          return (
+            <div>
+              <div style={{ textAlign: "center" }}>
+                <StatusComponent colour={text}>{text}</StatusComponent>
+              </div>
+              {text === "FAILED" && errors.length > 0 && (
+                <ul style={{ margin: "4px 0 0", paddingLeft: 14, fontSize: 11, color: "#BE3036", lineHeight: "1.5" }}>
+                  {errors.map((msg, i) => (
+                    <li key={i}>{normalizeMessage(msg)}</li>
+                  ))}
+                </ul>
+              )}
             </div>
-          ) : null,
+          );
+        },
       },
     ],
     [dataEmployeeType]
@@ -123,7 +140,7 @@ const EmployeeUploadList = ({
         const rowEdited = Object.keys(newRow).some(
           (k) => k !== "status" && newRow[k] !== oldRow[k]
         );
-        return rowEdited ? { ...newRow, status: null } : newRow;
+        return rowEdited ? { ...newRow, status: null, message: [] } : newRow;
       });
       onChangeData(updated);
     },
