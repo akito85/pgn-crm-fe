@@ -84,6 +84,7 @@ const ListUserFromUpload = ({ data, onChangeData = () => {} }) => {
         dataIndex: "employee",
         editable: true,
         inputType: "select",
+        searchable: true,
         width: 180,
         selectOptions: dataEmployee,
         render: (value) => {
