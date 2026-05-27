@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useMemo } from "react";
 import moment from "moment";
+import { useQuery } from "@tanstack/react-query";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getAllAuthType,
-  getAllEmployees,
   getAllUserLevel,
   getAllUserType,
 } from "../../../../redux/slices/user_management/user";
+import userHttpService from "../../../../redux/services/userHttpService";
 import StatusComponent from "../../../../components/StatusComponent";
 import NxTableInlineEdit from "../../../../components/Nx/NxTableInlineEdit";
 import BaseContainer from "../../../../components/BaseContainer";
@@ -23,20 +24,19 @@ const ListUserFromUpload = ({ data, onChangeData = () => {} }) => {
     data_user_level,
     data_user_type,
     data_auth_type,
-    data_employee,
   } = useSelector((state) => state.user);
 
   useEffect(() => {
-    dispatch(getAllEmployees(0));
     dispatch(getAllUserLevel());
     dispatch(getAllUserType());
     dispatch(getAllAuthType());
   }, [dispatch]);
 
-  const dataEmployee = useMemo(
-    () => data_employee?.data?.map((item) => ({ value: item?.id, label: item?.name })) ?? [],
-    [data_employee]
-  );
+  const { data: dataEmployee = [] } = useQuery({
+    queryKey: ["employees", 0],
+    queryFn: () => userHttpService.getAll("/v1/dbs/api/mu/get-all-employee/0"),
+    select: (res) => res?.data?.map((item) => ({ value: item?.id, label: item?.name })) ?? [],
+  });
   const dataUserLevel = useMemo(
     () => data_user_level?.data?.map((item) => ({ value: item.value, label: item.name })) ?? [],
     [data_user_level]
