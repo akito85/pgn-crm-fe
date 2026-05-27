@@ -74,6 +74,7 @@ const EmployeeUpload = () => {
             endDate: item?.endDate ? moment(item.endDate).format("DD MMM YYYY") : null,
             description: item?.description,
             status: item?.status,
+            message: item?.message ?? [],
           };
         })
       );
