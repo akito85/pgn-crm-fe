@@ -5,6 +5,7 @@ import {
 import { DatePicker, Form, Input, Select, Spin } from "antd";
 import moment from "moment";
 import React, { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import BaseContainer from "../../../../components/BaseContainer";
@@ -16,7 +17,6 @@ import ModalCustom from "../../../../components/Modal/ModalCustom";
 import {
   createUser,
   getAllAuthType,
-  getAllEmployees,
   getAllGroupAccess,
   getAllUserLevel,
   getAllUserType,
@@ -41,7 +41,6 @@ const UserForm = (props) => {
   const dispatch = useDispatch();
   const [modalBack, setModalBack] = useState(false);
   const {
-    data_employee,
     data_group_access,
     data_user_level,
     data_auth_type,
@@ -54,6 +53,15 @@ const UserForm = (props) => {
   const [openModal, setOpenModal] = useState(false);
   const [employeeType, setEmployeeType] = useState("");
   const dataDetail = data_user?.data;
+  const employeeQueryId = hasValue(dataDetail?.employeeId) ? dataDetail.employeeId : 0;
+
+  const { data: employeeOptions = [] } = useQuery({
+    queryKey: ["employees", employeeQueryId],
+    queryFn: () =>
+      userHttpService.getAll(`/v1/dbs/api/mu/get-all-employee/${employeeQueryId}`),
+    select: (res) => res?.data?.map((e) => ({ value: e.id, label: e.name })) ?? [],
+  });
+
   const [form] = Form.useForm();
   const formValue = Form.useWatch([], form);
   const id = location?.state?.id;
@@ -102,15 +110,6 @@ const UserForm = (props) => {
       assert(dataDetail);
     }
   }, [assert, dataDetail, id]);
-
-  // get all employee use effect
-  useEffect(() => {
-    if (hasValue(dataDetail?.employeeId)) {
-      dispatch(getAllEmployees(dataDetail?.employeeId))
-    } else {
-      dispatch(getAllEmployees(0))
-    }
-  }, [dataDetail, dispatch]);
 
   useEffect(() => {
     if (id && levelId) {
@@ -225,7 +224,7 @@ const UserForm = (props) => {
   const getName = () => {
     const userTypeName = data_user_type?.data?.filter((item) => item?.value === formValue?.userType)[0]?.name;
     const authTypeName = data_auth_type?.data?.filter((item) => item?.value === formValue?.authType)[0]?.name;
-    const employeeName = data_employee?.data?.filter((item) => item?.id === formValue?.employeeId)[0]?.name;
+    const employeeName = employeeOptions.find((item) => item?.value === formValue?.employeeId)?.label;
     const userLevelName = data_user_level?.data?.filter((item) => item?.value === formValue?.userLevel)[0]?.name;
     const gaName = data_group_access?.data?.filter((item) => item?.id === formValue?.gaId)[0]?.name;
 
@@ -321,8 +320,6 @@ const UserForm = (props) => {
       dispatch(getAllAuthType())
     } else if (bodyError?.action === 'GET_ALL_GROUP_ACCES' && levelId && id) {
       dispatch(getAllGroupAccess(levelId))
-    } else {
-      dispatch(getAllEmployees(dataDetail?.employeeId || 0))
     }
   }
 
@@ -380,8 +377,8 @@ const UserForm = (props) => {
                             form.getFieldValue('userType') === "NON_EMP" || form.getFieldValue('userType') === undefined
                           }
                         >
-                          {data_employee?.data?.map((index, key) => (
-                            <Option value={index?.id}>{index?.name}</Option>
+                          {employeeOptions.map((item) => (
+                            <Option key={item.value} value={item.value}>{item.label}</Option>
                           ))}
                         </SelectComponent>
                       </Form.Item>
