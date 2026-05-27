@@ -7,7 +7,6 @@ const initialState = {
   data: null,
   data_status: null,
   data_detail: null,
-  data_employee: null,
   data_user_level: null,
   data_group_access: null,
   data_auth_type: null,
@@ -262,25 +261,6 @@ export const getDetailGroupAccess = createAsyncThunk(
   }
 );
 
-export const getAllEmployees = createAsyncThunk(
-  "GET_ALL_EMPLOYEE",
-  async (id, thunkAPI) => {
-    try {
-      const url = `/v1/dbs/api/mu/get-all-employee/${id}`;
-      const data = await userHttpService.getAll(url);
-      return data;
-    } catch (error) {
-      thunkAPI.dispatch(
-        validateError({
-          error: error,
-          action: "GET_ALL_EMPLOYEE",
-          back: false,
-        })
-      );
-      return thunkAPI.rejectWithValue([]);
-    }
-  }
-);
 export const getAllGroupAccess = createAsyncThunk(
   "GET_ALL_GROUP_ACCES",
   async (id, thunkAPI) => {
@@ -641,19 +621,6 @@ const userSlice = createSlice({
     },
     [getAllGroupAccess.rejected]: (state, action) => {
       state.data_group_access = action.payload;
-      state.loading = false;
-    },
-    // get all employee
-    [getAllEmployees.pending]: (state, action) => {
-      state.data_employee = action.payload;
-      state.loading = true;
-    },
-    [getAllEmployees.fulfilled]: (state, action) => {
-      state.data_employee = action.payload;
-      state.loading = false;
-    },
-    [getAllEmployees.rejected]: (state, action) => {
-      state.data_employee = action.payload;
       state.loading = false;
     },
     // get all user level
