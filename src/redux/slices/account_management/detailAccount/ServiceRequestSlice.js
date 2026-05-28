@@ -859,13 +859,11 @@ export const getSrInstallmentSchedule = createAsyncThunk(
 
 export const updateSrStatus = createAsyncThunk(
   "UPDATE_SR_STATUS",
-  async ({ accountId, id, status, remark = "" }, thunkAPI) => {
+  async ({ accountId, id, status }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/${id}`;
-      const response = await accountManagementService.updateData(url, {
-        serviceRequestId: id,
-        requestStatus: status,
-        remark,
+      const url = `/v1/dbs/api/account/${accountId}/service-request/${id}/status`;
+      const response = await accountManagementService.patchData(url, {
+        status,
       });
       thunkAPI.dispatch(showModalSuccess({
         title: "Successful",
