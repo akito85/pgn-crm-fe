@@ -44,7 +44,8 @@ const DetailPaymentPlan = ({
     getListCategory,
     receiptCollectionHttpService,
     configApp,
-    openItems
+    openItems,
+    onEvaluationChange
 }) => {
     const dispatchRedux = useDispatch();
     const { restructureTypes } = useSelector((state) => state.restructure);
@@ -55,6 +56,23 @@ const DetailPaymentPlan = ({
     const [evalStartPeriod, setEvalStartPeriod] = useState(null);
     const [evalRequestDate, setEvalRequestDate] = useState(null);
     const [evalDescription, setEvalDescription] = useState("");
+
+    useEffect(() => {
+        if (onEvaluationChange) {
+            if (isRequestEvaluation) {
+                onEvaluationChange({
+                    isRequestEvaluation: true,
+                    evalType,
+                    evalTenor,
+                    evalStartPeriod: evalStartPeriod ? evalStartPeriod.format("YYYY-MM-DD") : null,
+                    evalRequestDate: evalRequestDate ? evalRequestDate.format("YYYY-MM-DD") : null,
+                    evalDescription
+                });
+            } else {
+                onEvaluationChange(null);
+            }
+        }
+    }, [isRequestEvaluation, evalType, evalTenor, evalStartPeriod, evalRequestDate, evalDescription, onEvaluationChange]);
 
     const [evalInstallments, setEvalInstallments] = useState({});
 

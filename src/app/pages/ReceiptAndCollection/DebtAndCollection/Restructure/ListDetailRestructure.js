@@ -125,6 +125,7 @@ const ListDetailRestructure = ({ selectedId: propId, onClose, onRefresh, approva
     const [listDataAttachment, setListDataAttachment] = useState([]);
     const [refreshedOpenItems, setRefreshedOpenItems] = useState(null);
     const [isUpdateActive, setIsUpdateActive] = useState(false);
+    const [evaluationData, setEvaluationData] = useState(null);
 
     const approvalName = (dataListAppHierId || []).find(x => x.appHierId === data_detail?.restructure?.appHierId)?.approvalName || dataHeader?.approvalName || dataHeader?.appHierId || "";
 
@@ -528,6 +529,7 @@ const ListDetailRestructure = ({ selectedId: propId, onClose, onRefresh, approva
             approvalId: data_detail?.tApprovalDto?.tAppId,
             action: approveOrReject.toUpperCase(),
             category: isEarlyRepayment ? "EARLY_REPAYMENT_RESTRUCTURE" : "RESTRUCTURE",
+            ...(evaluationData || {})
         };
 
         dispatch(approveOrRejectRestructure({ body })).then((action) => {
@@ -672,6 +674,7 @@ const ListDetailRestructure = ({ selectedId: propId, onClose, onRefresh, approva
                     receiptCollectionHttpService={receiptCollectionHttpService}
                     configApp={configApp}
                     openItems={openItems}
+                    onEvaluationChange={setEvaluationData}
                 />
             )}
 
