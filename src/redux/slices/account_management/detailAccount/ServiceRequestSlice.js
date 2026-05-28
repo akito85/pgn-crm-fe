@@ -13,6 +13,9 @@ const initialState = {
   loading_listSrApprovals: false,
   loading_approveSr: false,
   loading_rejectSr: false,
+  // Approval History
+  detail_srApprovalHistory: null,
+  loading_srApprovalHistory: false,
   // Detail / Create state
   data: [],
   detail_serviceRequest: null,
@@ -885,6 +888,20 @@ export const updateSrStatus = createAsyncThunk(
   }
 );
 
+// Get Approval History for a Service Request
+export const getSrApprovalHistory = createAsyncThunk(
+  "GET_SR_APPROVAL_HISTORY",
+  async (id, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/service-request/approval-history/${id}`;
+      const response = await accountManagementService.getDetail(url);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
 // =====================================================
 // SLICE DEFINITION
 // =====================================================
@@ -1445,6 +1462,22 @@ const serviceRequestSlice = createSlice({
     [approveOrRejectAllServiceRequest.rejected]: (state) => {
       state.loading_approveSr = false;
       state.loading_rejectSr = false;
+    },
+
+    // =====================================================
+    // SERVICE REQUEST APPROVAL HISTORY
+    // =====================================================
+    [getSrApprovalHistory.pending]: (state) => {
+      state.detail_srApprovalHistory = null;
+      state.loading_srApprovalHistory = true;
+    },
+    [getSrApprovalHistory.fulfilled]: (state, action) => {
+      state.detail_srApprovalHistory = action.payload;
+      state.loading_srApprovalHistory = false;
+    },
+    [getSrApprovalHistory.rejected]: (state) => {
+      state.loading_srApprovalHistory = false;
+      state.detail_srApprovalHistory = null;
     },
   },
 });
