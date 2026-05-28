@@ -164,6 +164,7 @@ const UserForm = (props) => {
       setOpenModal(false);
       await dispatch(createUser(payload?.requestBody))?.unwrap();
     }
+    navigate(USER_ROUTES.VIEW_USER);
   };
 
 
@@ -496,7 +497,7 @@ const UserForm = (props) => {
             </BaseContainer>
             <div className={"w-full flex my-5"}>
               <ButtonComponent
-                type={"submit"}
+                type={"button"}
                 onClick={() => setModalBack(true)}
                 icon={
                   <LeftOutlined
@@ -523,7 +524,7 @@ const UserForm = (props) => {
                       width={24}
                     />
                   }
-                  type={"submit"}
+                  type={"button"}
                   border={false}
                   onClick={handleClear}
                 >
