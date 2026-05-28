@@ -166,7 +166,7 @@ export const getServiceRequestDraft = createAsyncThunk(
   "GET_SERVICE_REQUEST_DRAFT",
   async ({ accountId, id }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/${id}/draft`;
+      const url = `/v1/dbs/api/account/${accountId}/service-request/${id}/draft`;
       const response = await accountManagementService.getDetail(url);
       return response.data;
     } catch (error) {
