@@ -123,6 +123,8 @@ const ListDetailRestructure = ({ selectedId: propId, onClose, onRefresh, approva
     const [openItems, setOpenItems] = useState([]);
     const [installmentsByCurrency, setInstallmentsByCurrency] = useState({});
     const [listDataAttachment, setListDataAttachment] = useState([]);
+    const [refreshedOpenItems, setRefreshedOpenItems] = useState(null);
+    const [isUpdateActive, setIsUpdateActive] = useState(false);
 
     const approvalName = (dataListAppHierId || []).find(x => x.appHierId === data_detail?.restructure?.appHierId)?.approvalName || dataHeader?.approvalName || dataHeader?.appHierId || "";
 
@@ -298,12 +300,25 @@ const ListDetailRestructure = ({ selectedId: propId, onClose, onRefresh, approva
             return acc;
         }, {});
 
-        const currencies = Object.keys(grouped);
+        const groupedRefreshed = refreshedOpenItems ? refreshedOpenItems.reduce((acc, item) => {
+            const cur = item.currency || "IDR";
+            if (!acc[cur]) acc[cur] = [];
+            acc[cur].push(item);
+            return acc;
+        }, {}) : null;
+
+        const currencies = Array.from(new Set([
+            ...Object.keys(grouped),
+            ...(groupedRefreshed ? Object.keys(groupedRefreshed) : [])
+        ]));
+
         if (currencies.length === 0) return <DetailText label="">No data available</DetailText>;
 
         return currencies.map(currency => {
-            const rows = grouped[currency];
+            const rows = grouped[currency] || [];
+            const refreshedRows = groupedRefreshed ? (groupedRefreshed[currency] || []) : null;
             const isIdr = currency === "IDR";
+            
             const total = rows.reduce((sum, r) => {
                 const num = parseFloat(String(r.totalAmount || r.amount).replace(/,/g, "")) || 0;
                 return sum + num;
@@ -323,7 +338,7 @@ const ListDetailRestructure = ({ selectedId: propId, onClose, onRefresh, approva
                         return num.toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 });
                     }
                 },
-                {
+                ...(!data_detail?.tApprovalDto?.isApprover ? [{
                     title: "ACTION",
                     dataIndex: "action",
                     width: 100,
@@ -333,33 +348,82 @@ const ListDetailRestructure = ({ selectedId: propId, onClose, onRefresh, approva
                             <SVGIcon name="IconDetail" width="20px" height="20px" color="#0075bf" />
                         </div>
                     )
-                }
+                }] : [])
             ];
+
+            const originalTable = (
+                <TableRBI
+                    idTable={`open-item-detail-${currency}`}
+                    dataSource={rows}
+                    columns={columns}
+                    usePagination={false}
+                    showAdvanceSearch={false}
+                    showSearchBar={false}
+                    summary={() => (
+                        <Table.Summary fixed>
+                            <Table.Summary.Row className="font-bold text-[12px] bg-[#F5F5F5]">
+                                <Table.Summary.Cell index={0} colSpan={4} className="text-center font-bold">
+                                    TOTAL
+                                </Table.Summary.Cell>
+                                <Table.Summary.Cell index={1} className="text-right font-bold pr-4">
+                                    {total.toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 })}
+                                </Table.Summary.Cell>
+                                {!data_detail?.tApprovalDto?.isApprover && <Table.Summary.Cell index={2} />}
+                            </Table.Summary.Row>
+                        </Table.Summary>
+                    )}
+                />
+            );
+
+            let refreshedTable = null;
+            if (refreshedRows) {
+                const refreshedTotal = refreshedRows.reduce((sum, r) => {
+                    const num = parseFloat(String(r.totalAmount || r.amount).replace(/,/g, "")) || 0;
+                    return sum + num;
+                }, 0);
+
+                refreshedTable = (
+                    <TableRBI
+                        idTable={`open-item-refreshed-${currency}`}
+                        dataSource={refreshedRows}
+                        columns={columns}
+                        usePagination={false}
+                        showAdvanceSearch={false}
+                        showSearchBar={false}
+                        summary={() => (
+                            <Table.Summary fixed>
+                                <Table.Summary.Row className="font-bold text-[12px] bg-[#F5F5F5]">
+                                    <Table.Summary.Cell index={0} colSpan={4} className="text-center font-bold">
+                                        TOTAL
+                                    </Table.Summary.Cell>
+                                    <Table.Summary.Cell index={1} className="text-right font-bold pr-4">
+                                        {refreshedTotal.toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 })}
+                                    </Table.Summary.Cell>
+                                    {!data_detail?.tApprovalDto?.isApprover && <Table.Summary.Cell index={2} />}
+                                </Table.Summary.Row>
+                            </Table.Summary>
+                        )}
+                    />
+                );
+            }
 
             return (
                 <div key={currency} className="mb-4">
                     <SectionCard title={`CURRENCY ${currency}`}>
-                        <TableRBI
-                            idTable={`open-item-detail-${currency}`}
-                            dataSource={rows}
-                            columns={columns}
-                            usePagination={false}
-                            showAdvanceSearch={false}
-                            showSearchBar={false}
-                            summary={() => (
-                                <Table.Summary fixed>
-                                    <Table.Summary.Row className="font-bold text-[12px] bg-[#F5F5F5]">
-                                        <Table.Summary.Cell index={0} colSpan={4} className="text-center font-bold">
-                                            TOTAL
-                                        </Table.Summary.Cell>
-                                        <Table.Summary.Cell index={1} className="text-right font-bold pr-4">
-                                            {total.toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 })}
-                                        </Table.Summary.Cell>
-                                        <Table.Summary.Cell index={2} />
-                                    </Table.Summary.Row>
-                                </Table.Summary>
-                            )}
-                        />
+                        {refreshedTable ? (
+                            <div className="grid grid-cols-2 gap-6 w-full">
+                                <SubSectionCard title="OPEN ITEM INFORMATION">
+                                    {originalTable}
+                                </SubSectionCard>
+                                <SubSectionCard title="UPDATE OPEN ITEM INFORMATION">
+                                    {refreshedTable}
+                                </SubSectionCard>
+                            </div>
+                        ) : (
+                            <SubSectionCard title="OPEN ITEM INFORMATION">
+                                {originalTable}
+                            </SubSectionCard>
+                        )}
                     </SectionCard>
                 </div>
             );
@@ -481,6 +545,35 @@ const ListDetailRestructure = ({ selectedId: propId, onClose, onRefresh, approva
         setModalApprove(false);
     };
 
+    const handleRefreshOpenItem = () => {
+        setLocalLoading(true);
+        receiptCollectionHttpService.getDetail(`/v1/dbs/api/restructure/refresh-open-item/${id}`)
+            .then((response) => {
+                setLocalLoading(false);
+                if (response?.success && response?.data) {
+                    setRefreshedOpenItems(response.data);
+                    setIsUpdateActive(true);
+                    message.success("Open items refreshed successfully from ERP! Gap detected, Update Open Item is now enabled.");
+                } else {
+                    message.error("Failed to refresh open items.");
+                }
+            })
+            .catch((err) => {
+                setLocalLoading(false);
+                console.error(err);
+                message.error("Error refreshing open items.");
+            });
+    };
+
+    const handleUpdateOpenItem = () => {
+        if (refreshedOpenItems) {
+            setOpenItems(refreshedOpenItems);
+            setRefreshedOpenItems(null);
+            setIsUpdateActive(false);
+            message.success("Open items successfully updated to the latest refreshed list!");
+        }
+    };
+
     return (
         <Spin spinning={localLoading || loading}>
             {!isEmbedded && <BreadCrumb routes={routes} />}
@@ -558,6 +651,10 @@ const ListDetailRestructure = ({ selectedId: propId, onClose, onRefresh, approva
                     segmentedPage={segmentedPage}
                     setSegmentedPage={setSegmentedPage}
                     dataHeader={dataHeader}
+                    data_detail={data_detail}
+                    onRefreshOpenItem={handleRefreshOpenItem}
+                    isUpdateActive={isUpdateActive}
+                    onUpdateOpenItem={handleUpdateOpenItem}
                     contacts={contacts}
                     contactColumns={contactColumns}
                     expandable={expandable}
@@ -574,6 +671,7 @@ const ListDetailRestructure = ({ selectedId: propId, onClose, onRefresh, approva
                     getListCategory={getListCategory}
                     receiptCollectionHttpService={receiptCollectionHttpService}
                     configApp={configApp}
+                    openItems={openItems}
                 />
             )}
 

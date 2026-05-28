@@ -150,21 +150,24 @@ const ContentModalConfirmRePlan = ({
 
         return Object.entries(installmentsByCurrency).map(([currency, items]) => {
             const targetTotal = openItemTotals[currency] || 0;
+            const isIdr = currency === "IDR";
             const columns = [
-                { title: "PERIOD", dataIndex: "periode", width: 100 },
+                { title: "PERIOD", dataIndex: "periode", width: "20%" },
                 {
                     title: "TOTAL AMOUNT",
                     dataIndex: "amount",
+                    width: "30%",
                     align: "right",
                     render: (val) => {
                         const numeric = typeof val === "string" ? parseFloat(val.replace(/,/g, "")) : val;
-                        return numeric?.toLocaleString() || "0";
+                        return numeric?.toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 }) || "0";
                     }
                 },
-                { title: "DUE DATE", dataIndex: "dueDate" },
+                { title: "DUE DATE", dataIndex: "dueDate", width: "20%", render: (val) => val || "-" },
                 {
                     title: "BALANCE",
                     dataIndex: "balance",
+                    width: "30%",
                     align: "right",
                     render: (_, __, index) => {
                         const sumPaidUpToThisRow = items
@@ -179,7 +182,6 @@ const ContentModalConfirmRePlan = ({
             ];
 
             const currentSum = items.reduce((sum, r) => sum + (parseFloat(String(r.amount).replace(/,/g, "")) || 0), 0);
-            const isIdr = currency === "IDR";
 
             return (
                 <div key={currency} className="mb-4">
@@ -191,10 +193,11 @@ const ContentModalConfirmRePlan = ({
                             usePagination={false}
                             showAdvanceSearch={false}
                             showSearchBar={false}
+                            style={{ width: "100%" }}
                             summary={() => (
                                 <Table.Summary fixed>
                                     <Table.Summary.Row className="font-bold text-[12px] bg-[#F5F5F5]">
-                                        <Table.Summary.Cell index={0} colSpan={2} className="text-center font-bold">
+                                        <Table.Summary.Cell index={0} className="text-center font-bold">
                                             TOTAL
                                         </Table.Summary.Cell>
                                         <Table.Summary.Cell index={1} className="text-right font-bold pr-4">

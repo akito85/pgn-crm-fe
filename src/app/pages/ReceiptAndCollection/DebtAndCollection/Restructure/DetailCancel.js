@@ -1,5 +1,6 @@
 import moment from "moment";
 import { Tabs } from "antd";
+import { InfoCircleFilled } from "@ant-design/icons";
 import CardContainerNoBorder from "../../../../../components/CardContainerNoBorder";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 import DetailText from "../../../../../components/DetailText";
@@ -35,6 +36,24 @@ const DetailCancel = ({
             label: "Cancel Plan",
             children: (
                 <div className="p-5 min-h-[400px] flex flex-col gap-4">
+                    {data_detail?.tApprovalDto?.isApprover && (
+                        <div
+                            className="flex items-start gap-3 p-4 border mb-4"
+                            style={{
+                                backgroundColor: "#FFF3E6",
+                                borderColor: "#FFE0B2",
+                                borderRadius: "8px",
+                                color: "#B36214"
+                            }}
+                        >
+                            <InfoCircleFilled style={{ fontSize: "18px", marginTop: "2px", color: "#D97706" }} />
+                            <div className="flex flex-col gap-1 text-[14px]">
+                                <span style={{ color: "#B36214", fontWeight: "600" }}>
+                                    This Approval for Cancel
+                                </span>
+                            </div>
+                        </div>
+                    )}
                     <SectionCard title="ACCOUNT INFORMATION" defaultActiveKey={[]}>
                         <div className="grid grid-cols-5 gap-y-4 gap-x-4 w-full">
                             <DetailText label="Account Number">{dataHeader?.accountNumber || ""}</DetailText>

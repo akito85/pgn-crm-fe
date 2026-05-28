@@ -135,7 +135,7 @@ const ListFormRePlan = (props) => {
                     sapCustId: rest.sapCustId,
                     accountStatus: rest.accountStatus,
                     saNumber: rest.saNumber,
-                    restructureCode: rest.restructureNumber || rest.restructureCode || rest.saNumber,
+                    restructureCode: rest.restructureNumber || rest.restructureCode,
                     saName: rest.saName,
                     saDate: rest.saDate ? moment(rest.saDate) : null,
                     saStartDate: rest.saStartDate ? moment(rest.saStartDate) : null,
@@ -143,11 +143,6 @@ const ListFormRePlan = (props) => {
                     minContract: rest.minContract,
                     maxContract: rest.maxContract,
                     uom: rest.uom,
-                    type: rest.type,
-                    tenor: rest.tenor,
-                    startPeriod: rest.startPeriod ? moment(rest.startPeriod) : null,
-                    source: rest.source,
-                    description: rest.description,
                 });
 
                 if (rest.contactList) {
