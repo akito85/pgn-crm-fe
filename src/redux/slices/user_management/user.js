@@ -25,7 +25,7 @@ export const getListUser = createAsyncThunk(
   "GET_LIST_USER",
   async (_, thunkAPI) => {
     try {
-      const url = "/v1/dbs/api/mu/get-all";
+      const url = "/v1/dbs/api/mu/view-paging";
       const response = await userHttpService.getAll(url);
       return response.data;
     } catch (error) {
@@ -82,7 +82,7 @@ export const createUser = createAsyncThunk(
       const url = "/v1/dbs/api/mu/create-user";
       const response = await userHttpService.createData(url, body);
       const successMessage = {
-        title: "Successfull",
+        title: "Successful",
         description: response?.message,
       };
       thunkAPI.dispatch(showModalSuccess(successMessage));
@@ -106,7 +106,7 @@ export const updateUser = createAsyncThunk(
       const url = "/v1/dbs/api/mu/update-user";
       const response = await userHttpService.updateData(url, data);
       const successMessage = {
-        title: "Successfull",
+        title: "Successful",
         description: "Your data has been updated",
       };
       thunkAPI.dispatch(showModalSuccess(successMessage));
@@ -133,7 +133,7 @@ export const inactiveUser = createAsyncThunk(
       const url = "/v1/dbs/api/mu/active-inactivate";
       const data = await userHttpService.activationWithRemark(url, body);
       const successMessage = {
-        title: "Successfull",
+        title: "Successful",
         description: `Your data has been ${status}`,
         return: false,
       };
@@ -409,7 +409,7 @@ export const changeAuthType = createAsyncThunk(
       const url = `/v1/dbs/api/mu/change-auth-type`;
       const response = await userHttpService.createData(url, body);
       const successMessage = {
-        title: "Successfull",
+        title: "Successful",
         description: "Your data has been updated",
       };
       thunkAPI.dispatch(showModalSuccess(successMessage));
@@ -461,7 +461,7 @@ export const forwardTaskUser = createAsyncThunk(
       const url = `/v1/dbs/api/forward-task/forward`;
       const data = await userHttpService.createData(url, body);
       const successBody = {
-        title: "Successfull",
+        title: "Successful",
         description: `Your data has been forwarded`,
       };
       thunkAPI.dispatch(showModalSuccess(successBody));
@@ -489,8 +489,7 @@ const userSlice = createSlice({
   },
   extraReducers: {
     // get user reducer
-    [getListUser.pending]: (state, action) => {
-      state.data = action.payload;
+    [getListUser.pending]: (state) => {
       state.loading = true;
     },
     [getListUser.fulfilled]: (state, action) => {
@@ -504,8 +503,7 @@ const userSlice = createSlice({
     },
 
     // detail user reducers
-    [getDetailUser.pending]: (state, action) => {
-      state.data_user = action.payload;
+    [getDetailUser.pending]: (state) => {
       state.loading = true;
       state.isFailed = false;
     },
@@ -520,8 +518,7 @@ const userSlice = createSlice({
       state.isFailed = true;
     },
     // create user reducer
-    [createUser.pending]: (state, action) => {
-      state.data_status = action.payload;
+    [createUser.pending]: (state) => {
       state.loading = true;
     },
     [createUser.fulfilled]: (state, action) => {
@@ -533,8 +530,7 @@ const userSlice = createSlice({
       state.loading = false;
     },
     // update user reducer
-    [updateUser.pending]: (state, action) => {
-      state.data_status = action.payload;
+    [updateUser.pending]: (state) => {
       state.loading = true;
     },
     [updateUser.fulfilled]: (state, action) => {
@@ -571,8 +567,7 @@ const userSlice = createSlice({
       state.isFailed = true;
     },
     // get all user paginate
-    [getAllUserPaginate.pending]: (state, action) => {
-      state.data = action.payload;
+    [getAllUserPaginate.pending]: (state) => {
       state.data_employee_id = [];
       state.loading = true;
     },
@@ -585,8 +580,7 @@ const userSlice = createSlice({
       state.loading = false;
     },
     // upload user
-    [uploadUser.pending]: (state, action) => {
-      state.data_list_upload = action.payload;
+    [uploadUser.pending]: (state) => {
       state.loading = true;
     },
     [uploadUser.fulfilled]: (state, action) => {
@@ -598,8 +592,7 @@ const userSlice = createSlice({
       state.loading = false;
     },
     // detail group access
-    [getDetailGroupAccess.pending]: (state, action) => {
-      state.data_detail = action.payload;
+    [getDetailGroupAccess.pending]: (state) => {
       state.loading = true;
     },
     [getDetailGroupAccess.fulfilled]: (state, action) => {
@@ -611,8 +604,7 @@ const userSlice = createSlice({
       state.loading = false;
     },
     // get all group access
-    [getAllGroupAccess.pending]: (state, action) => {
-      state.data_group_access = action.payload;
+    [getAllGroupAccess.pending]: (state) => {
       state.loading = true;
     },
     [getAllGroupAccess.fulfilled]: (state, action) => {
@@ -624,8 +616,7 @@ const userSlice = createSlice({
       state.loading = false;
     },
     // get all user level
-    [getAllUserLevel.pending]: (state, action) => {
-      state.data_user_level = action.payload;
+    [getAllUserLevel.pending]: (state) => {
       state.loading = true;
     },
     [getAllUserLevel.fulfilled]: (state, action) => {
@@ -637,8 +628,7 @@ const userSlice = createSlice({
       state.loading = false;
     },
     // get all auth type
-    [getAllAuthType.pending]: (state, action) => {
-      state.data_auth_type = action.payload;
+    [getAllAuthType.pending]: (state) => {
       state.loading = true;
     },
     [getAllAuthType.fulfilled]: (state, action) => {
@@ -650,8 +640,7 @@ const userSlice = createSlice({
       state.loading = false;
     },
     // get all user type
-    [getAllUserType.pending]: (state, action) => {
-      state.data_user_type = action.payload;
+    [getAllUserType.pending]: (state) => {
       state.loading = true;
     },
     [getAllUserType.fulfilled]: (state, action) => {
@@ -663,8 +652,7 @@ const userSlice = createSlice({
       state.loading = false;
     },
     // generate link password
-    [generatePasswordLink.pending]: (state, action) => {
-      state.data_generate_link = action.payload;
+    [generatePasswordLink.pending]: (state) => {
       state.loading = true;
     },
     [generatePasswordLink.fulfilled]: (state, action) => {
@@ -676,8 +664,7 @@ const userSlice = createSlice({
       state.loading = false;
     },
     // downlaod template
-    [downloadTemplate.pending]: (state, action) => {
-      state.data_template = action.payload;
+    [downloadTemplate.pending]: (state) => {
       state.loading = true;
     },
     [downloadTemplate.fulfilled]: (state, action) => {
@@ -688,8 +675,7 @@ const userSlice = createSlice({
       state.loading = false;
     },
     // final upload user
-    [finalUploadUser.pending]: (state, action) => {
-      state.data_final_upload = action.payload;
+    [finalUploadUser.pending]: (state) => {
       state.loading = true;
     },
     [finalUploadUser.fulfilled]: (state, action) => {

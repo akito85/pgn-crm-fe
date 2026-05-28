@@ -170,7 +170,7 @@ export const createForwardTask = createAsyncThunk(
       const url = `/v1/dbs/api/forward-task/forward`;
       const data = await userHttpService.createData(url, body);
       const successBody = {
-        title: "Successfull",
+        title: "Successful",
         description: `Your data has been created`,
       };
       thunkAPI.dispatch(showModalSuccess(successBody));
@@ -215,7 +215,7 @@ export const createEmployee = createAsyncThunk(
       const url = `/v1/dbs/api/employees/createNewEmployee`;
       const data = await userHttpService.createData(url, body);
       const successBody = {
-        title: "Successfull",
+        title: "Successful",
         description: `Your data has been created`,
       };
       thunkAPI.dispatch(showModalSuccess(successBody));
@@ -240,7 +240,7 @@ export const updateEmployee = createAsyncThunk(
       const url = `/v1/dbs/api/employees/updateEmployee`;
       const data = await userHttpService.updateData(url, body);
       const successBody = {
-        title: "Successfull",
+        title: "Successful",
         description: `Your data has been updated`,
       };
       thunkAPI.dispatch(showModalSuccess(successBody));
@@ -265,7 +265,7 @@ export const terminateEmployee = createAsyncThunk(
       const url = `/v1/dbs/api/employees/terminateEmployee`;
       const response = await userHttpService.terminateData(url, body);
       const successMessage = {
-        title: "Successfull",
+        title: "Successful",
         description: "Your data has been terminate",
         return: false,
       };
