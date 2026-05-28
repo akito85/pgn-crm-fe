@@ -5,7 +5,7 @@ import ModalCustom from "../../../../../../components/Modal/ModalCustom";
 import SectionCard from "../../../../../../components/SectionCard";
 import TableRBI from "../../../../../../components/TableRBI";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
-import { PlusCircleOutlined, MinusCircleOutlined } from "@ant-design/icons";
+import { PlusOutlined, MinusOutlined } from "@ant-design/icons";
 import { getContactsByAccount, getAllContactsRestructure } from "../../../../../../redux/slices/receipt_collection/restructure";
 
 const ModalChooseContact = ({ isOpen, handleCancel, onSelect, accountNumber, selectedContactIds = [] }) => {
@@ -15,7 +15,10 @@ const ModalChooseContact = ({ isOpen, handleCancel, onSelect, accountNumber, sel
 
   // Use account-specific contacts if available, otherwise show all
   const rawData = accountNumber ? restructureContacts : allContacts;
-  const data = (rawData || []).filter(item => !selectedContactIds.includes(item.contactId));
+  const data = (rawData || []).filter(item => !selectedContactIds.includes(item.contactId)).map(item => ({
+    ...item,
+    key: item.contactId,
+  }));
 
   useEffect(() => {
     if (isOpen) {
@@ -35,12 +38,12 @@ const ModalChooseContact = ({ isOpen, handleCancel, onSelect, accountNumber, sel
     }
   }, [isOpen]);
 
-  const toggleSelect = (id) => {
-    if (selectedKeys.includes(id)) {
-      setSelectedKeys(selectedKeys.filter((k) => k !== id));
-    } else {
-      setSelectedKeys([...selectedKeys, id]);
-    }
+  const rowSelection = {
+    selectedRowKeys: selectedKeys,
+    onChange: (selectedRowKeys) => {
+      setSelectedKeys(selectedRowKeys);
+    },
+    columnWidth: 50,
   };
 
   const subColumns = [
@@ -57,26 +60,6 @@ const ModalChooseContact = ({ isOpen, handleCancel, onSelect, accountNumber, sel
     // { title: "CONTACT NAME", dataIndex: "contactName", width: 250 },
     { title: "JOB", dataIndex: "job", width: 150 },
     { title: "POSITION", dataIndex: "position", width: 150 },
-    {
-      title: "ACTION",
-      align: "center",
-      width: 80,
-      render: (_, record) => {
-        const isSelected = selectedKeys.includes(record.contactId);
-        return (
-          <div 
-            className="cursor-pointer text-xl flex justify-center items-center"
-            onClick={() => toggleSelect(record.contactId)}
-          >
-            {isSelected ? (
-              <MinusCircleOutlined style={{ color: "#0075BF" }} />
-            ) : (
-              <PlusCircleOutlined style={{ color: "#0075BF" }} />
-            )}
-          </div>
-        );
-      },
-    },
   ];
 
 
@@ -96,6 +79,16 @@ const ModalChooseContact = ({ isOpen, handleCancel, onSelect, accountNumber, sel
       </div>
     ),
     rowExpandable: (record) => !!record.contactDetails && record.contactDetails.length > 0,
+    expandIconColumnIndex: 0,
+    columnWidth: 50,
+    expandIcon: ({ expanded, onExpand, record }) =>
+      record.contactDetails && record.contactDetails.length > 0 ? (
+        expanded ? (
+          <MinusOutlined className="cursor-pointer" onClick={(e) => onExpand(record, e)} />
+        ) : (
+          <PlusOutlined className="cursor-pointer" onClick={(e) => onExpand(record, e)} />
+        )
+      ) : null,
   };
 
   return (
@@ -148,7 +141,7 @@ const ModalChooseContact = ({ isOpen, handleCancel, onSelect, accountNumber, sel
               showSearchBar={true}
               usePagination={false}
               headerBg={true}
-              rowKey="contactId"
+              rowSelection={rowSelection}
             />
             <div className="flex justify-end gap-4 mt-2 text-[11px] text-gray-400 font-normal">
               <span>Showing {data?.length || 0} of {data?.length || 0} entries</span>

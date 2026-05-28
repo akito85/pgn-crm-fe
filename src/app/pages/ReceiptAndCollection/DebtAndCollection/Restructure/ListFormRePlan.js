@@ -325,7 +325,7 @@ const ListFormRePlan = (props) => {
         type: values.type !== undefined ? values.type : null,
         tenor: values.tenor !== undefined ? values.tenor : null,
         startPeriod: values.startPeriod ? moment(values.startPeriod).format("YYYY-MM-DD") : null,
-        source: values.source ,
+        source: values.source,
         description: values.description !== undefined ? values.description : null,
         contactIds: contacts.map((c) => c.id || c.contactId).filter(Boolean),
         appHierId: selectedHierarchy !== undefined && selectedHierarchy !== null ? selectedHierarchy : null,
@@ -341,6 +341,7 @@ const ListFormRePlan = (props) => {
             periode: item.periode,
             currency: item.currency,
             amount: parseFloat(String(item.amount).replace(/,/g, "")) || 0,
+            dueDate: item.dueDate,
         })),
         isDraft,
     });
@@ -436,10 +437,10 @@ const ListFormRePlan = (props) => {
             <BreadCrumb routes={routes} />
             <Spin spinning={loading}>
                 <FormStepper steps={steps} current={current} onPrev={prev} onNext={next} />
-                
-                <Form 
-                    layout="vertical" 
-                    form={form} 
+
+                <Form
+                    layout="vertical"
+                    form={form}
                     id="formRequest"
                     onFinish={handleSubmit}
                 >
@@ -472,29 +473,38 @@ const ListFormRePlan = (props) => {
                     </div>
 
                     <div style={{ display: current !== 2 ? "none" : "block" }} className="mt-8">
-                        {strictlyMandatoryMissing.length > 0 && (
-                            <div 
-                                className="flex items-start gap-3 p-4 mb-4 border" 
-                                style={{ 
-                                    backgroundColor: "#FFF3E6", 
-                                    borderColor: "#FFE0B2",
-                                    borderRadius: "8px",
-                                    color: "#B36214"
-                                }}
-                            >
-                                <InfoCircleFilled style={{ fontSize: "18px", marginTop: "2px", color: "#D97706" }} />
-                                <div className="flex flex-col gap-1 text-[14px]">
-                                    <span style={{ color: "#B36214", fontWeight: "600" }}>
-                                        Please upload the required documents below to continue the process.
-                                    </span>
-                                    <span style={{ color: "#B36214", fontWeight: "500" }}>
-                                        {missingCategories.join(", ")}
-                                    </span>
-                                </div>
-                            </div>
-                        )}
                         <BaseContainer header={"ATTACHMENT INFORMATION"}>
                             <SubSectionCard>
+                                {(() => {
+                                    const mandatory = getMandatoryAttachments(accountSegment);
+                                    const uploadedCategories = (listDataAttachment || []).map(a => a.fileCategoryName);
+                                    const missingCategories = mandatory.filter(cat => !uploadedCategories.includes(cat));
+                                    const mandatoryMissing = missingCategories.filter(cat => !cat.toLowerCase().includes("optional"));
+
+                                    if (mandatoryMissing.length === 0) return null;
+
+                                    return (
+                                        <div
+                                            className="flex items-start gap-3 p-4 border mb-4"
+                                            style={{
+                                                backgroundColor: "#FFF3E6",
+                                                borderColor: "#FFE0B2",
+                                                borderRadius: "8px",
+                                                color: "#B36214"
+                                            }}
+                                        >
+                                            <InfoCircleFilled style={{ fontSize: "18px", marginTop: "2px", color: "#D97706" }} />
+                                            <div className="flex flex-col gap-1 text-[14px]">
+                                                <span style={{ color: "#B36214", fontWeight: "600" }}>
+                                                    Please upload the required documents below to continue the process.
+                                                </span>
+                                                <span style={{ color: "#B36214", fontWeight: "500" }}>
+                                                    {missingCategories.join(", ")}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    );
+                                })()}
                                 <AttachmentComponent
                                     type={"create"}
                                     data={listDataAttachment || []}
@@ -506,7 +516,7 @@ const ListFormRePlan = (props) => {
                                     service={receiptCollectionHttpService}
                                     configApplication={configApp.PAYMENT_SERVICE}
                                     typeRBI={"data"}
-                                    mandatory={strictlyMandatoryMissing.length > 0}
+                                    mandatory={true}
                                 />
                             </SubSectionCard>
                         </BaseContainer>
@@ -518,11 +528,11 @@ const ListFormRePlan = (props) => {
                         onPrev={prev}
                         onNext={next}
                         onCancel={onBack}
-                        onClear={() => { 
-                            form.resetFields(); 
+                        onClear={() => {
+                            form.resetFields();
                             setCurrent(0);
-                            setSelectedHierarchy(null); 
-                            setListDataAttachment([]); 
+                            setSelectedHierarchy(null);
+                            setListDataAttachment([]);
                         }}
                         onSaveDraft={handleSaveDraft}
                         onSubmit={() => form.submit()}

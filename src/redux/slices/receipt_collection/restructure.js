@@ -41,6 +41,7 @@ const initialState = {
     rePlanReasons: [],
     cancelReasons: [],
     loadingCancelReasons: false,
+    earlyRepaymentReasons: [],
     openItemDetail: null,
     loadingOpenItemDetail: false,
     paymentPlanDetail: null,
@@ -144,7 +145,7 @@ export const getListApprovalRestructure = createAsyncThunk(
     async ({ page, pageSize, search, isLoadMore }, thunkAPI) => {
         try {
             const searchObj = search ? JSON.parse(decodeURIComponent(search)) : {};
-            searchObj.statusApproval = "Pending";
+            searchObj.statusApproval = "Waiting Approval";
             const searchParams = encodeURIComponent(JSON.stringify(searchObj));
             const url = `/v1/dbs/api/restructure/get-list?page=${page}&size=${pageSize}&searchs=${searchParams}`;
             const response = await receiptCollectionHttpService.getAll(url);
@@ -159,7 +160,7 @@ export const getListApprovalRestructure = createAsyncThunk(
 
 export const getListApprovalEarlyRepayment = createAsyncThunk(
     "GET_LIST_APPROVAL_EARLY_REPAYMENT",
-    async ({ statusApproval = "Pending", isLoadMore = false } = {}, thunkAPI) => {
+    async ({ statusApproval = "Waiting Approval", isLoadMore = false } = {}, thunkAPI) => {
         try {
             const url = `/v1/dbs/api/early-repayment/get-list?statusApproval=${encodeURIComponent(statusApproval)}`;
             const response = await receiptCollectionHttpService.getAll(url);
@@ -448,6 +449,19 @@ export const getCancelReasons = createAsyncThunk(
     async (_, thunkAPI) => {
         try {
             const url = "/v1/dbs/api/restructure/get-cancel-reasons";
+            const response = await receiptCollectionHttpService.getAll(url);
+            return response?.data || [];
+        } catch (error) {
+            return thunkAPI.rejectWithValue(error);
+        }
+    }
+);
+
+export const getEarlyRepaymentReasons = createAsyncThunk(
+    "GET_EARLY_REPAYMENT_REASONS",
+    async (_, thunkAPI) => {
+        try {
+            const url = "/v1/dbs/api/early-repayment/get-reasons";
             const response = await receiptCollectionHttpService.getAll(url);
             return response?.data || [];
         } catch (error) {
@@ -906,6 +920,10 @@ const restructureSlice = createSlice({
         },
         [getCancelReasons.rejected]: (state) => {
             state.loadingCancelReasons = false;
+        },
+        // Early Repayment Reasons
+        [getEarlyRepaymentReasons.fulfilled]: (state, action) => {
+            state.earlyRepaymentReasons = action.payload;
         },
         // Contacts
         [getContactsByAccount.pending]: (state) => {

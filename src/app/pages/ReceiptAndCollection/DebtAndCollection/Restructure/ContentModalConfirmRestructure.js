@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Tabs } from "antd";
+import { Tabs, Table } from "antd";
 import { PlusOutlined, MinusOutlined, InfoCircleFilled } from "@ant-design/icons";
 import moment from "moment";
 import DetailText from "../../../../../components/DetailText";
@@ -40,11 +40,11 @@ const ContentModalConfirmRestructure = ({
 
     const contactColumns = [
         { title: "NO", dataIndex: "key", width: 50, align: "center", render: (_, __, i) => i + 1 },
-        { 
-          title: "PRIMARY", 
-          dataIndex: "isPrimary", 
-          width: 120,
-          render: (val) => val ? <StatusComponent colour="primary">Primary</StatusComponent> : "-" 
+        {
+            title: "PRIMARY",
+            dataIndex: "isPrimary",
+            width: 120,
+            render: (val) => val ? <StatusComponent colour="primary">Primary</StatusComponent> : "-"
         },
         { title: "CONTACT NAME", dataIndex: "cpName", width: 250 },
         { title: "JOB", dataIndex: "job", width: 150 },
@@ -116,10 +116,10 @@ const ContentModalConfirmRestructure = ({
                 { title: "NO", dataIndex: "key", width: 50, render: (_, __, i) => i + 1 },
                 { title: "INVOICE NO", dataIndex: "invoiceNo" },
                 { title: "INVOICE PERIOD", dataIndex: "invoicePeriod" },
-                { title: "ALLOCATION", dataIndex: "allocation" },
-                { 
-                    title: "AMOUNT", 
-                    dataIndex: "amount", 
+                { title: "BILLING ITEM", dataIndex: "billingItem" },
+                {
+                    title: "AMOUNT",
+                    dataIndex: "amount",
                     align: "right",
                     render: (amount) => {
                         const num = parseFloat(String(amount).replace(/,/g, "")) || 0;
@@ -138,13 +138,19 @@ const ContentModalConfirmRestructure = ({
                             usePagination={false}
                             showAdvanceSearch={false}
                             showSearchBar={false}
+                            summary={() => (
+                                <Table.Summary fixed>
+                                    <Table.Summary.Row className="font-bold text-[12px] bg-[#F5F5F5]">
+                                        <Table.Summary.Cell index={0} colSpan={4} className="text-center font-bold">
+                                            TOTAL
+                                        </Table.Summary.Cell>
+                                        <Table.Summary.Cell index={1} className="text-right font-bold pr-4">
+                                            {total.toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 })}
+                                        </Table.Summary.Cell>
+                                    </Table.Summary.Row>
+                                </Table.Summary>
+                            )}
                         />
-                        <div className="flex bg-[#F5F5F5] border border-t-0 p-2 font-bold text-[12px]">
-                            <div className="flex-[4] text-center">TOTAL</div>
-                            <div className="flex-1 text-right pr-4">
-                                {total.toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 })}
-                            </div>
-                        </div>
                     </SectionCard>
                 </div>
             );
@@ -204,14 +210,23 @@ const ContentModalConfirmRestructure = ({
                             usePagination={false}
                             showAdvanceSearch={false}
                             showSearchBar={false}
+                            summary={() => (
+                                <Table.Summary fixed>
+                                    <Table.Summary.Row className="font-bold text-[12px] bg-[#F5F5F5]">
+                                        <Table.Summary.Cell index={0} colSpan={2} className="text-center font-bold">
+                                            TOTAL
+                                        </Table.Summary.Cell>
+                                        <Table.Summary.Cell index={1} className="text-right font-bold pr-4">
+                                            {currentSum.toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 })}
+                                        </Table.Summary.Cell>
+                                        <Table.Summary.Cell index={2} />
+                                        <Table.Summary.Cell index={3} className="text-right font-bold pr-4 text-gray-500">
+                                            {targetTotal.toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 })}
+                                        </Table.Summary.Cell>
+                                    </Table.Summary.Row>
+                                </Table.Summary>
+                            )}
                         />
-                        <div className="flex bg-[#F5F5F5] border border-t-0 p-2 font-bold text-[12px]">
-                            <div className="flex-[2] text-center">TOTAL</div>
-                            <div className="flex-1 text-right pr-4">
-                                {currentSum.toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 })}
-                            </div>
-                            <div className="flex-[4]"></div>
-                        </div>
                     </SectionCard>
                 </div>
             );
@@ -272,7 +287,7 @@ const ContentModalConfirmRestructure = ({
                             <DetailText label="Type">{formValues?.type || ""}</DetailText>
                             <DetailText label="Tenor">{formValues?.tenor ? `${formValues.tenor} Months` : "-"}</DetailText>
                             <DetailText label="Start Period">{formValues?.startPeriod ? moment(formValues.startPeriod).format("MMM YYYY") : "-"}</DetailText>
-                            <DetailText label="Source">{formValues?.source }</DetailText>
+                            <DetailText label="Source">{formValues?.source}</DetailText>
                             <DetailText label="Request Date">{formValues?.requestDate ? moment(formValues.requestDate).format("DD MMM YYYY") : "-"}</DetailText>
                             <div className="col-span-5">
                                 <DetailText label="Description">{formValues?.description || ""}</DetailText>
@@ -323,10 +338,10 @@ const ContentModalConfirmRestructure = ({
                 return (
                     <div className="p-5 bg-[#f8f7fa] min-h-[400px] flex flex-col gap-4">
                         {mandatoryMissing.length > 0 && (
-                            <div 
-                                className="flex items-start gap-3 p-4 border" 
-                                style={{ 
-                                    backgroundColor: "#FFF3E6", 
+                            <div
+                                className="flex items-start gap-3 p-4 border"
+                                style={{
+                                    backgroundColor: "#FFF3E6",
                                     borderColor: "#FFE0B2",
                                     borderRadius: "8px",
                                     color: "#B36214"

@@ -147,6 +147,7 @@ const TableRBI = ({
   onRowClick = () => {},
   onSearch = () => {},
   tableSize = "default",
+  summary,
 }) => {
   const [optionSelectedCol, setOptionSelectedCol] = useState([]);
   const [isAdvanceOpen, setIsAdvanceOpen] = useState(false);
@@ -837,6 +838,7 @@ const TableRBI = ({
         onRow={customOnRow}
         rowClassName={customRowClassName}
         size={tableSize}
+        summary={summary}
       />
 
       {useInfiniteScroll ? (

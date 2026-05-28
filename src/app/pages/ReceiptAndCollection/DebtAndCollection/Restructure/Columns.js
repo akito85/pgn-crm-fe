@@ -17,6 +17,21 @@ export const columns = (
             fixed: "left",
         },
         {
+            key: "paymentPlanCode",
+            title: "PAYMENT PLAN CODE",
+            dataIndex: "paymentPlanCode",
+            width: 180,
+            align: "left",
+            sorter: (a, b) => a?.paymentPlanCode?.localeCompare(b?.paymentPlanCode),
+            ...getColumnSearchPropsPaging(
+                "paymentPlanCode",
+                searchInput,
+                searchedColumn,
+                searchText,
+                handleSearch
+            ),
+        },
+        {
             key: "customerNumber",
             title: "CUSTOMER NUMBER",
             dataIndex: "customerNumber",
@@ -236,7 +251,7 @@ export const columns = (
         },
         {
             key: "statusCustomer",
-            title: "STATUS CUSTOMER",
+            title: "ACCOUNT STATUS",
             dataIndex: "statusCustomer",
             width: 150,
             align: "center",
@@ -249,7 +264,7 @@ export const columns = (
         },
         {
             key: "statusApproval",
-            title: "STATUS APPROVAL",
+            title: "APPROVAL STATUS",
             dataIndex: "statusApproval",
             width: 180,
             align: "center",

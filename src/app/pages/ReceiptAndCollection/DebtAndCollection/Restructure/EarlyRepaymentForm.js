@@ -25,21 +25,21 @@ const EarlyRepaymentForm = ({
 
     return (
         <div className="flex flex-col gap-1">
-            <CardContainerNoBorder header="INSTALLMENT DETAIL" collapsible={true}>
+            <CardContainerNoBorder header="EARLY PAYOFF DETAIL" collapsible={true}>
                 <ERAccountInfoSection data_detail={data_detail} />
                 <div className="mt-4"></div>
-                <ERInstallmentInfoSection 
+                <ERInstallmentInfoSection
                     form={form}
                     disabled={disabled}
                     onPlanInfoChange={setPlanInfo}
                 />
             </CardContainerNoBorder>
             <ContactInfoSection initialContacts={contacts} onContactsChange={onContactChange} />
-            <EREarlyRepaymentDetailSection 
+            {/* <EREarlyRepaymentDetailSection 
                 installmentsByCurrency={installmentsByCurrency} 
                 onInstallmentDetailIdsChange={onInstallmentDetailIdsChange}
                 openItems={openItems}
-            />
+            /> */}
             <EROpenItemInfoSection openItems={openItems} />
             <ERInstallmentCalculationDetailSection installmentsByCurrency={installmentsByCurrency} />
         </div>

@@ -158,6 +158,7 @@ const ListFormRestructure = (props) => {
                     tenor: rest.tenor,
                     startPeriod: rest.startPeriod ? moment(rest.startPeriod) : null,
                     description: rest.remark || rest.description,
+                    apphierId: rest.appHierId,
                 });
 
                 if (rest.appHierId) {
@@ -340,6 +341,7 @@ const ListFormRestructure = (props) => {
             periode: item.periode,
             currency: item.currency,
             amount: parseFloat(String(item.amount).replace(/,/g, "")) || 0,
+            dueDate: item.dueDate,
         })),
         isDraft,
     });

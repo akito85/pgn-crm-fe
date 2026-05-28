@@ -73,7 +73,7 @@ const ModalApprovalRestructure = ({
         setSelectedRowKeys([]);
         setDataTableSelect([]);
         if (activeTab === "early_repayment") {
-            dispatch(getListApprovalEarlyRepayment({ statusApproval: "Pending", isLoadMore: false }));
+            dispatch(getListApprovalEarlyRepayment({ statusApproval: "Waiting Approval", isLoadMore: false }));
         } else {
             dispatch(
                 getListApprovalRestructure({
@@ -96,7 +96,7 @@ const ModalApprovalRestructure = ({
             setSearch(prev => ({
                 ...prev,
                 approvalType: category, 
-                statusApproval: "Pending"
+                statusApproval: "Waiting Approval"
             }));
             setPage(1);
             setSelectedRowKeys([]);
@@ -192,7 +192,7 @@ const ModalApprovalRestructure = ({
         onChange: onSelectChange,
         getCheckboxProps: (record) => {
             // In Restructure, we check if it's waiting for approval
-            const isWaitingApproval = record.statusApproval === "Pending" || record.statusApproval === "WAITING APPROVAL";
+            const isWaitingApproval = record.statusApproval === "Waiting Approval" || record.statusApproval === "WAITING APPROVAL";
             return {
                 disabled: !isWaitingApproval,
                 name: record.restructureNumber,
@@ -206,7 +206,7 @@ const ModalApprovalRestructure = ({
 
     const handleRefresh = () => {
         if (activeTab === "early_repayment") {
-            dispatch(getListApprovalEarlyRepayment({ statusApproval: "Pending", isLoadMore: false }));
+            dispatch(getListApprovalEarlyRepayment({ statusApproval: "Waiting Approval", isLoadMore: false }));
         } else {
             const reqSearch = encodeURIComponent(JSON.stringify(search));
             dispatch(

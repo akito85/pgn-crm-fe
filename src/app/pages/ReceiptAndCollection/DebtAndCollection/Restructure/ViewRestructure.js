@@ -280,7 +280,7 @@ const ViewRestructure = () => {
                         type="text"
                         icon={<SVGIcon name="IconEarlyRepayment" width={16} color={"#000"} />}
                     >
-                        <span className="text-black">Early Repayment</span>
+                        <span className="text-black">Early Payoff</span>
                     </ButtonComponent>
                 );
             },
@@ -556,7 +556,7 @@ const ViewRestructure = () => {
                     }
                     tabOptions={[
                         { label: "Payment Plan", value: "payment_plan" },
-                        { label: "Early Repayment", value: "early_repayment" },
+                        { label: "Early Payoff", value: "early_repayment" },
                         { label: "Re-Plan", value: "re_plan" },
                         { label: "Cancel", value: "cancel" },
                     ]}

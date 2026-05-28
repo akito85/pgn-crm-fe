@@ -3,7 +3,7 @@ import moment from "moment";
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Form, message, Tabs, Spin } from "antd";
+import { Form, message, Tabs, Spin, Table } from "antd";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrReject";
@@ -346,14 +346,20 @@ const ListDetailRestructure = ({ selectedId: propId, onClose, onRefresh, approva
                             usePagination={false}
                             showAdvanceSearch={false}
                             showSearchBar={false}
+                            summary={() => (
+                                <Table.Summary fixed>
+                                    <Table.Summary.Row className="font-bold text-[12px] bg-[#F5F5F5]">
+                                        <Table.Summary.Cell index={0} colSpan={4} className="text-center font-bold">
+                                            TOTAL
+                                        </Table.Summary.Cell>
+                                        <Table.Summary.Cell index={1} className="text-right font-bold pr-4">
+                                            {total.toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 })}
+                                        </Table.Summary.Cell>
+                                        <Table.Summary.Cell index={2} />
+                                    </Table.Summary.Row>
+                                </Table.Summary>
+                            )}
                         />
-                        <div className="flex bg-[#F5F5F5] border border-t-0 p-2 font-bold text-[12px]">
-                            <div className="flex-[4] text-center">TOTAL</div>
-                            <div className="flex-1 text-right pr-4">
-                                {total.toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 })}
-                            </div>
-                            <div className="w-[100px]"></div>
-                        </div>
                     </SectionCard>
                 </div>
             );
@@ -404,6 +410,8 @@ const ListDetailRestructure = ({ selectedId: propId, onClose, onRefresh, approva
                 }
             ];
 
+            const totalBalance = rows.reduce((sum, r) => sum + (parseFloat(r.balance) || 0), 0);
+
             return (
                 <div key={currency} className="mb-4">
                     <SectionCard title={`CURRENCY ${currency}`}>
@@ -414,15 +422,24 @@ const ListDetailRestructure = ({ selectedId: propId, onClose, onRefresh, approva
                             usePagination={false}
                             showAdvanceSearch={false}
                             showSearchBar={false}
+                            summary={() => (
+                                <Table.Summary fixed>
+                                    <Table.Summary.Row className="font-bold text-[12px] bg-[#F5F5F5]">
+                                        <Table.Summary.Cell index={0} colSpan={2} className="text-center font-bold">
+                                            TOTAL
+                                        </Table.Summary.Cell>
+                                        <Table.Summary.Cell index={1} className="text-right font-bold pr-4">
+                                            {currentSum.toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 })}
+                                        </Table.Summary.Cell>
+                                        <Table.Summary.Cell index={2} />
+                                        <Table.Summary.Cell index={3} className="text-right font-bold pr-4 text-gray-500">
+                                            {totalBalance.toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 })}
+                                        </Table.Summary.Cell>
+                                        <Table.Summary.Cell index={4} colSpan={3} />
+                                    </Table.Summary.Row>
+                                </Table.Summary>
+                            )}
                         />
-                        <div className="flex bg-[#F5F5F5] border border-t-0 p-2 font-bold text-[12px]">
-                            <div className="flex-[2] text-center">TOTAL</div>
-                            <div className="flex-1 text-right pr-4">
-                                {currentSum.toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 })}
-                            </div>
-                            <div className="flex-[4]"></div>
-                            <div className="w-[100px]"></div>
-                        </div>
                     </SectionCard>
                 </div>
             );

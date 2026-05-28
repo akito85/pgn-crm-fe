@@ -127,7 +127,7 @@ const ListFormEarlyRepayment = (props) => {
     useEffect(() => {
         if (data_detail && data_detail.restructure) {
             const res = data_detail.restructure;
-            
+
             // Pre-populate account and installment fields
             form.setFieldsValue({
                 accountNumber: res.accountNumber,
@@ -142,13 +142,14 @@ const ListFormEarlyRepayment = (props) => {
                 accountType: res.accountType,
                 classificationType: res.classificationType,
                 accountStatus: res.accountStatus,
-                
+
                 type: res.type,
                 tenor: res.tenor,
                 startPeriod: res.startPeriod ? moment(res.startPeriod).format("MMMM YYYY") : "",
                 source: res.source || "Manual",
                 requestDate: res.createdDate ? moment(res.createdDate).format("DD MMMM YYYY") : moment().format("DD MMMM YYYY"),
                 remark: res.description,
+                restructureNumber: res.restructureNumber || res.id,
             });
 
             // Populate contacts
@@ -205,10 +206,16 @@ const ListFormEarlyRepayment = (props) => {
             // Validation 1: Mandatory Fields for Step 0
             form.validateFields([
                 "accountNumber",
+                "restructureNumber",
                 "type",
                 "tenor",
                 "startPeriod",
-                "description"
+                "source",
+                "requestDate",
+                "earlyRepaymentDate",
+                "reason",
+                "termOfPaymentValue",
+                "earlyRepaymentReason"
             ]).then(() => {
                 // Validation 2: Contact Information cannot be empty
                 if (contacts.length === 0) {
@@ -313,7 +320,7 @@ const ListFormEarlyRepayment = (props) => {
                     (body) => receiptCollectionHttpService.uploadImage(`/v1/dbs/api/attachment/upload/v1`, body)
                 );
             }
-            message.success("Early Repayment berhasil disubmit!");
+            message.success("Early Payoff berhasil disubmit!");
             navigate(DEBT_AND_COLLECTION_ROUTES.VIEW_RESTRUCTURE);
         }
     };
@@ -321,8 +328,8 @@ const ListFormEarlyRepayment = (props) => {
     const routes = [
         { path: "", breadcrumbName: "Payment & Collection" },
         { path: "", breadcrumbName: "Debt & Collection" },
-        { path: DEBT_AND_COLLECTION_ROUTES.VIEW_RESTRUCTURE, breadcrumbName: "Early Repayment" },
-        { path: "", breadcrumbName: type === "create" ? "Create Early Repayment" : "Update Early Repayment" },
+        { path: DEBT_AND_COLLECTION_ROUTES.VIEW_RESTRUCTURE, breadcrumbName: "Early Payoff" },
+        { path: "", breadcrumbName: type === "create" ? "Create Early Payoff" : "Update Early Payoff" },
     ];
 
     const handlePlanDetailValidation = useCallback((isValid) => {
@@ -342,10 +349,10 @@ const ListFormEarlyRepayment = (props) => {
             <BreadCrumb routes={routes} />
             <Spin spinning={loading}>
                 <FormStepper steps={steps} current={current} onPrev={prev} onNext={next} />
-                
-                <Form 
-                    layout="vertical" 
-                    form={form} 
+
+                <Form
+                    layout="vertical"
+                    form={form}
                     id="formRequest"
                     onFinish={handleSubmit}
                 >
@@ -393,6 +400,7 @@ const ListFormEarlyRepayment = (props) => {
                                     service={receiptCollectionHttpService}
                                     configApplication={configApp.PAYMENT_SERVICE}
                                     typeRBI={"data"}
+                                    mandatory={true}
                                 />
                             </SubSectionCard>
                         </BaseContainer>
@@ -404,11 +412,11 @@ const ListFormEarlyRepayment = (props) => {
                         onPrev={prev}
                         onNext={next}
                         onCancel={onBack}
-                        onClear={() => { 
-                            form.resetFields(); 
+                        onClear={() => {
+                            form.resetFields();
                             setCurrent(0);
-                            setSelectedHierarchy(null); 
-                            setListDataAttachment([]); 
+                            setSelectedHierarchy(null);
+                            setListDataAttachment([]);
                         }}
                         onSaveDraft={handleSaveDraft}
                         onSubmit={() => form.submit()}

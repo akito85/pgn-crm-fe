@@ -1,17 +1,24 @@
 import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
-import { InputNumber, message } from "antd";
+import { InputNumber, message, Table, DatePicker } from "antd";
+import moment from "moment";
 import CardContainerNoBorder from "../../../../../../components/CardContainerNoBorder";
 import TableRBI from "../../../../../../components/TableRBI";
 import SubSectionCard from "../../../../../../components/SubSectionCard";
 import { PAYMENT_PLAN_TYPES } from "../../../../../../constants/restructure";
 
 const formatMonth = (dayjsObj, offset) => {
+  if (typeof dayjsObj.clone === "function") {
+    return dayjsObj.clone().add(offset, "month").format("MMM YYYY");
+  }
   return dayjsObj.add(offset, "month").format("MMM YYYY");
 };
 
 const formatDueDate = (dayjsObj, offset) => {
-  return dayjsObj.add(offset, "month").date(25).format("DD/MM/YYYY");
+  if (typeof dayjsObj.clone === "function") {
+    return dayjsObj.clone().add(offset, "month").endOf("month").format("DD/MM/YYYY");
+  }
+  return dayjsObj.add(offset, "month").endOf("month").format("DD/MM/YYYY");
 };
 
 const PaymentPlanDetailSection = ({ planInfo = {}, openItems = [], onValidationChange, onInstallmentsChange }) => {
@@ -142,6 +149,16 @@ const PaymentPlanDetailSection = ({ planInfo = {}, openItems = [], onValidationC
     }));
   };
 
+  const handleDueDateChange = (currency, key, date) => {
+    const formattedDate = date ? date.format("DD/MM/YYYY") : "";
+    setInstallmentsByCurrency((prev) => ({
+      ...prev,
+      [currency]: prev[currency].map((row) =>
+        row.key === key ? { ...row, dueDate: formattedDate } : row
+      ),
+    }));
+  };
+
   const buildColumns = (currency) => [
     {
       title: "NO",
@@ -202,7 +219,29 @@ const PaymentPlanDetailSection = ({ planInfo = {}, openItems = [], onValidationC
         );
       },
     },
-    { title: "DUE DATE", dataIndex: "dueDate" },
+    {
+      title: "DUE DATE",
+      dataIndex: "dueDate",
+      render: (text, record) => {
+        if (isAutomatic) {
+          return <span>{text}</span>;
+        }
+        const momentVal = record.dueDate ? moment(record.dueDate, "DD/MM/YYYY") : null;
+        return (
+          <DatePicker
+            value={momentVal}
+            format="DD/MM/YYYY"
+            style={{ width: "100%" }}
+            allowClear={false}
+            disabledDate={(current) => {
+              if (!startPeriod) return false;
+              return current && current < startPeriod.clone().startOf("month");
+            }}
+            onChange={(date) => handleDueDateChange(currency, record.key, date)}
+          />
+        );
+      }
+    },
     {
       title: "BALANCE",
       dataIndex: "balance",
@@ -261,15 +300,27 @@ const PaymentPlanDetailSection = ({ planInfo = {}, openItems = [], onValidationC
               showAdvanceSearch={false}
               showSearchBar={false}
               showColumnSettings={false}
+              summary={() => (
+                <Table.Summary fixed>
+                  <Table.Summary.Row className={`font-bold text-[12px] ${isError ? "bg-red-50 text-red-500" : "bg-[#F5F5F5]"}`}>
+                    <Table.Summary.Cell index={0} colSpan={2} className="text-center font-bold">
+                      TOTAL
+                    </Table.Summary.Cell>
+                    <Table.Summary.Cell index={1} className="text-right font-bold pr-4">
+                      {currentSum.toLocaleString(isIdr ? "id-ID" : "en-US", {
+                        maximumFractionDigits: 2,
+                      })}
+                    </Table.Summary.Cell>
+                    <Table.Summary.Cell index={2} />
+                    <Table.Summary.Cell index={3} className="text-right font-bold pr-4 text-gray-500">
+                      {targetTotal.toLocaleString(isIdr ? "id-ID" : "en-US", {
+                        maximumFractionDigits: 2,
+                      })}
+                    </Table.Summary.Cell>
+                  </Table.Summary.Row>
+                </Table.Summary>
+              )}
             />
-            <div className={`flex border border-t-0 p-2 font-bold text-[12px] ${isError ? "bg-red-50 text-red-500" : "bg-[#F5F5F5]"}`}>
-              <div className="flex-[2] text-center">TOTAL</div>
-              <div className="flex-1 text-right pr-4">
-                {currentSum.toLocaleString(isIdr ? "id-ID" : "en-US", {
-                  maximumFractionDigits: 2,
-                })}
-              </div>
-            </div>
             {isError && (
               <p className="text-red-500 text-[11px] mt-1 text-right italic font-normal">
                 * Total must be equal to {targetTotal.toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 })}

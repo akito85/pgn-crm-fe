@@ -36,7 +36,7 @@ const DetailPaymentPlan = ({
             label: "Payment Plan",
             children: (
                 <div className="p-5 min-h-[400px] flex flex-col gap-4">
-                    <SectionCard title="ACCOUNT INFORMATION">
+                    <SectionCard title="ACCOUNT INFORMATION" defaultActiveKey={[]}>
                         <div className="grid grid-cols-5 gap-y-4 gap-x-4 w-full">
                             <DetailText label="Account Number">{dataHeader?.accountNumber || ""}</DetailText>
                             <DetailText label="Account Name">{dataHeader?.accountName || ""}</DetailText>

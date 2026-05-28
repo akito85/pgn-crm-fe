@@ -1,5 +1,5 @@
 import moment from "moment";
-import { Tabs, Input } from "antd";
+import { Tabs, Input, Table } from "antd";
 import CardContainerNoBorder from "../../../../../components/CardContainerNoBorder";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 import DetailText from "../../../../../components/DetailText";
@@ -47,30 +47,60 @@ const DetailEarlyRepayment = ({
         const currencies = Object.keys(grouped);
         if (currencies.length === 0) return <DetailText label="">No data available</DetailText>;
 
+        const getStatusColour = (status) => {
+            const s = (status || "Open").toLowerCase();
+            if (s === "partially paid") return "warning";
+            if (s === "broken") return "danger";
+            if (s === "release") return "info";
+            return "success";
+        };
+
         return currencies.map(currency => {
             const rows = grouped[currency] || [];
             const isIdr = currency === "IDR";
-            const currentSum = rows.reduce((sum, r) => sum + (parseFloat(r.amount) || 0), 0);
+            const totalAmount = rows.reduce((sum, r) => sum + (parseFloat(String(r.amount).replace(/,/g, "")) || 0), 0);
+            const lastBalance = rows.length > 0 && rows[rows.length - 1].balance != null
+                ? parseFloat(rows[rows.length - 1].balance)
+                : 0;
 
             const columns = [
                 { title: "NO", dataIndex: "key", width: 50, align: "center", render: (_, __, i) => i + 1 },
-                { title: "PERIODE", dataIndex: "periode" },
+                { title: "PERIOD", dataIndex: "periode" },
                 {
-                    title: "AMOUNT",
+                    title: "TOTAL AMOUNT",
                     dataIndex: "amount",
                     align: "right",
-                    render: (val) => (parseFloat(val) || 0).toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 })
+                    render: (val) => {
+                        const num = parseFloat(String(val).replace(/,/g, "")) || 0;
+                        return <span className="font-medium">{num.toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 })}</span>;
+                    }
+                },
+                {
+                    title: "DUE DATE",
+                    dataIndex: "dueDate",
+                    render: (val) => val || "-",
                 },
                 {
                     title: "BALANCE",
                     dataIndex: "balance",
                     align: "right",
-                    render: (val) => (parseFloat(val) || 0).toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 })
+                    render: (balance) => {
+                        const num = balance != null ? parseFloat(balance) : 0;
+                        return <span className="font-medium text-gray-500">{num.toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 })}</span>;
+                    }
                 },
-                { 
-                    title: "STATUS", 
-                    dataIndex: "status", 
-                    render: (text) => <div className="flex justify-center w-full"><StatusComponent colour={text}>{text}</StatusComponent></div> 
+                {
+                    title: "STATUS",
+                    dataIndex: "status",
+                    align: "center",
+                    render: (status) => {
+                        const finalStatus = status || "Open";
+                        return (
+                            <div className="flex justify-center">
+                                <StatusComponent colour={getStatusColour(finalStatus)}>{finalStatus}</StatusComponent>
+                            </div>
+                        );
+                    }
                 }
             ];
 
@@ -82,16 +112,26 @@ const DetailEarlyRepayment = ({
                             dataSource={rows}
                             columns={columns}
                             usePagination={false}
-                            showAdvanceSearch={false}
-                            showSearchBar={false}
+                            showAdvanceSearch={true}
+                            showSearchBar={true}
+                            summary={() => (
+                                <Table.Summary fixed>
+                                    <Table.Summary.Row className="font-bold text-[12px] bg-[#F5F5F5]">
+                                        <Table.Summary.Cell index={0} colSpan={2} className="text-center font-bold">
+                                            Total
+                                        </Table.Summary.Cell>
+                                        <Table.Summary.Cell index={1} className="text-right font-bold pr-4">
+                                            {totalAmount.toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 })}
+                                        </Table.Summary.Cell>
+                                        <Table.Summary.Cell index={2} />
+                                        <Table.Summary.Cell index={3} className="text-right font-bold pr-4 text-gray-500">
+                                            {lastBalance.toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 })}
+                                        </Table.Summary.Cell>
+                                        <Table.Summary.Cell index={4} />
+                                    </Table.Summary.Row>
+                                </Table.Summary>
+                            )}
                         />
-                        <div className="flex bg-[#F5F5F5] border border-t-0 p-2 font-bold text-[12px]">
-                            <div className="flex-[2] text-center">TOTAL</div>
-                            <div className="flex-1 text-right pr-4">
-                                {currentSum.toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 })}
-                            </div>
-                            <div className="flex-1"></div>
-                        </div>
                     </SectionCard>
                 </div>
             );
@@ -101,10 +141,10 @@ const DetailEarlyRepayment = ({
     const earlyRepaymentItems = [
         {
             key: "Payment Plan",
-            label: "Early Repayment",
+            label: "Payment Plan",
             children: (
                 <div className="p-5 min-h-[400px] flex flex-col gap-4">
-                    <SectionCard title="ACCOUNT INFORMATION">
+                    <SectionCard title="ACCOUNT INFORMATION" defaultActiveKey={[]}>
                         <div className="grid grid-cols-5 gap-y-4 gap-x-4 w-full">
                             <DetailText label="Account Number">{dataHeader?.accountNumber || ""}</DetailText>
                             <DetailText label="Account Name">{dataHeader?.accountName || ""}</DetailText>
@@ -122,8 +162,14 @@ const DetailEarlyRepayment = ({
                         </div>
                     </SectionCard>
 
-                    <SectionCard title="INSTALMENT INFORMATION">
+                    <SectionCard title="PAYMENT PLAN INFORMATION">
                         <div className="grid grid-cols-5 gap-y-4 gap-x-4 w-full">
+                            <InputComponent
+                                label="Payment Plan Code"
+                                mandatory={true}
+                                disabled={true}
+                                value={dataHeader?.restructureNumber || dataHeader?.id || ""}
+                            />
                             <InputComponent
                                 label="Type"
                                 mandatory={true}
@@ -158,12 +204,37 @@ const DetailEarlyRepayment = ({
                                 value={data_detail?.earlyRepayment?.createdDate ? moment(data_detail.earlyRepayment.createdDate) : (dataHeader?.requestDate ? moment(dataHeader.requestDate) : null)}
                             />
                             <DateComponent
-                                label="Early Repayment Date"
+                                label="Early Payoff Date"
                                 mandatory={true}
                                 disabled={true}
                                 format="DD MMM YYYY"
                                 value={data_detail?.earlyRepayment?.repaymentDate ? moment(data_detail.earlyRepayment.repaymentDate) : (data_detail?.tApprovalDto?.requestedDate ? moment(data_detail.tApprovalDto.requestedDate) : null)}
                             />
+                            <InputComponent
+                                label="Reason"
+                                mandatory={true}
+                                disabled={true}
+                                value={data_detail?.earlyRepayment?.reason || "-"}
+                            />
+                            <div className="flex flex-col">
+                                <InputLabel text="Term of Payment" mandatory={true} />
+                                <div className="flex gap-2 mt-2">
+                                    <div style={{ width: "90px", flexShrink: 0 }}>
+                                        <InputComponent
+                                            disabled={true}
+                                            value={data_detail?.earlyRepayment?.termOfPaymentType || "-"}
+                                        />
+                                    </div>
+                                    <div style={{ flex: 1 }}>
+                                        <DateComponent
+                                            disabled={true}
+                                            format="DD MMM YYYY"
+                                            value={data_detail?.earlyRepayment?.termOfPaymentValue ? moment(data_detail.earlyRepayment.termOfPaymentValue) : null}
+                                            style={{ width: "100%" }}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
                             <div className="col-span-5 flex flex-col w-auto">
                                 <InputLabel text="Remark" mandatory={true} />
                                 <Input.TextArea
@@ -178,7 +249,7 @@ const DetailEarlyRepayment = ({
                                 />
                             </div>
                             <div className="col-span-5 flex flex-col w-auto">
-                                <InputLabel text="Early Repayment Reason" mandatory={true} />
+                                <InputLabel text="Early Payoff Reason" mandatory={true} />
                                 <Input.TextArea
                                     rows={2}
                                     style={{
@@ -239,8 +310,8 @@ const DetailEarlyRepayment = ({
     return (
         <>
             <div className={isEmbedded ? "" : "mt-5"}>
-                <CardContainerNoBorder 
-                    header="EARLY REPAYMENT DETAIL"
+                <CardContainerNoBorder
+                    header="PAYMENT PLAN DETAIL"
                     className="!border-[1.5px] !border-[#0075bf] !rounded-md !bg-white !shadow-none"
                     noPadding
                     collapsible={true}
@@ -263,7 +334,7 @@ const DetailEarlyRepayment = ({
 
             {segmentedPage === "Payment Plan" && (
                 <div className="flex flex-col gap-4 mt-4">
-                    <CardContainerNoBorder 
+                    <CardContainerNoBorder
                         header="CONTACT INFORMATION"
                         className="!border-[1.5px] !border-[#0075bf] !rounded-md !bg-white !shadow-none"
                         collapsible={true}
@@ -311,23 +382,23 @@ const DetailEarlyRepayment = ({
                         </div>
                     </CardContainerNoBorder>
 
-                    <CardContainerNoBorder 
-                        header="EARLY PAY OFF DETAIL"
-                        className="!border-[1.5px] !border-[#0075bf] !rounded-md !bg-white !shadow-none"
-                        collapsible={true}
-                    >
-                        <div className="p-4">
-                            {renderEarlyPayoffDetail()}
-                        </div>
-                    </CardContainerNoBorder>
-
-                    <CardContainerNoBorder 
+                    <CardContainerNoBorder
                         header="OPEN ITEM INFORMATION"
                         className="!border-[1.5px] !border-[#0075bf] !rounded-md !bg-white !shadow-none"
                         collapsible={true}
                     >
                         <div className="p-4">
                             {renderOpenItems ? renderOpenItems() : "No open items available"}
+                        </div>
+                    </CardContainerNoBorder>
+
+                    <CardContainerNoBorder
+                        header="PAYMENT PLAN DETAIL"
+                        className="!border-[1.5px] !border-[#0075bf] !rounded-md !bg-white !shadow-none"
+                        collapsible={true}
+                    >
+                        <div className="p-4">
+                            {renderEarlyPayoffDetail()}
                         </div>
                     </CardContainerNoBorder>
                 </div>
@@ -342,7 +413,7 @@ const DetailEarlyRepayment = ({
                             createdBy: dataHeader?.createdBy || "",
                             updatedDate: dataHeader?.updatedDate ? moment(dataHeader?.updatedDate).format("DD MMM YYYY HH:mm:ss") : "-",
                             updatedBy: dataHeader?.updatedBy || ""
-                        }} 
+                        }}
                     />
                 </div>
             )}

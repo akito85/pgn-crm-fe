@@ -1,4 +1,5 @@
 import React from "react";
+import { Table } from "antd";
 import CardContainerNoBorder from "../../../../../../components/CardContainerNoBorder";
 import TableRBI from "../../../../../../components/TableRBI";
 import SubSectionCard from "../../../../../../components/SubSectionCard";
@@ -58,13 +59,19 @@ const OpenItemInfoSection = ({ openItems = [] }) => {
               usePagination={false}
               showAdvanceSearch={false}
               showSearchBar={false}
+              summary={() => (
+                <Table.Summary fixed>
+                  <Table.Summary.Row className="font-bold text-[12px] bg-[#F5F5F5]">
+                    <Table.Summary.Cell index={0} colSpan={4} className="text-center font-bold">
+                      TOTAL
+                    </Table.Summary.Cell>
+                    <Table.Summary.Cell index={1} className="text-right font-bold pr-4">
+                      {total.toLocaleString(currency === "IDR" ? "id-ID" : "en-US", { maximumFractionDigits: 2 })}
+                    </Table.Summary.Cell>
+                  </Table.Summary.Row>
+                </Table.Summary>
+              )}
             />
-            <div className="flex bg-[#F5F5F5] border border-t-0 p-2 font-bold text-[12px]">
-              <div className="flex-[4] text-center">TOTAL</div>
-              <div className="flex-1 text-right pr-4">
-                {total.toLocaleString(currency === "IDR" ? "id-ID" : "en-US", { maximumFractionDigits: 2 })}
-              </div>
-            </div>
           </SubSectionCard>
         );
       })}
