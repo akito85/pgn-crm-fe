@@ -63,7 +63,7 @@ const EmployeeForm = (props) => {
   const [pageSize, setPageSize] = useState(10);
   const [isAssigmentListIsNull, setIsAssignmentListIsNull] = useState(false);
   const deleteNumber62 = (numb) => {
-    let numbWithout62 = numb?.replace(/62/g, "");
+    let numbWithout62 = numb?.replace(/^62/, "");
     let result = parseInt(numbWithout62);
     return result;
   };
@@ -211,7 +211,9 @@ const EmployeeForm = (props) => {
         const positionNameFiltered = dataPost.filter((a) => a.value === findRow)
         message = `Position is already exist`;
       }
-      if (message || tableData?.length === 0) {
+      if (tableData?.length === 0) {
+        setIsAssignmentListIsNull(true);
+      } else if (message) {
         const errorBody = {
           title: "Attention",
           description: `Your data was not created. ${message}. Please try again.`,
@@ -469,10 +471,8 @@ const EmployeeForm = (props) => {
   };
 
   const handleDetailInline = (id) => {
-    console.log(id);
   };
   const handleInactiveInline = (id) => {
-    console.log(id);
   };
 
 
@@ -633,7 +633,7 @@ const EmployeeForm = (props) => {
               icon={
                 <LeftOutlined style={{ fontSize: "24px", color: "#fff" }} />
               }
-              type="submit"
+              type="button"
               onClick={() => setModalBack(true)}
               disabled={disabledButton}
             >
@@ -649,7 +649,7 @@ const EmployeeForm = (props) => {
                     width={24}
                   />
                 }
-                type="submit"
+                type="button"
                 onClick={handleClear}
                 disabled={disabledButton}
               >

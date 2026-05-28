@@ -57,7 +57,7 @@ const UploadUser = () => {
             authType: item?.authType,
             authTypeId: item?.authTypeValue,
             employeeName: item?.employeeName,
-            employee: item?.employee === "" ? null : parseInt(item?.employee),
+            employee: (n => Number.isFinite(n) ? n : null)(parseInt(item?.employee)),
             userType: item?.userType,
             userTypeId: item?.userTypeValue,
             userLevel: item?.userLevel,
@@ -67,22 +67,10 @@ const UploadUser = () => {
             groupAccess: item?.groupAccess,
             groupAccessId: parseInt(item?.groupAccessId),
             status: item?.status,
-            startDate:
-              !item?.startDate
-                ? moment()
-                : moment(item?.startDate).clone(),
-            endDate:
-              !item?.endDate
-                ? moment()
-                : moment(item?.endDate).clone(),
-            startDateGa:
-              !item?.startDateGa
-                ? moment()
-                : moment(item?.startDateGa).clone(),
-            endDateGa:
-              !item?.endDateGa
-                ? moment()
-                : moment(item?.endDateGa).clone(),
+            startDate: item?.startDate ? moment(item.startDate).format("DD MMM YYYY") : null,
+            endDate: item?.endDate ? moment(item.endDate).format("DD MMM YYYY") : null,
+            startDateGa: item?.startDateGa ? moment(item.startDateGa).format("DD MMM YYYY") : null,
+            endDateGa: item?.endDateGa ? moment(item.endDateGa).format("DD MMM YYYY") : null,
             message: item?.message,
           };
         })
@@ -190,7 +178,6 @@ const UploadUser = () => {
             userName: item?.userName?.toString(),
             authType: item?.authType?.toString(),
             authTypeValue: item?.authTypeId?.toString(),
-            employeeName: item?.employeeName?.toString(),
             employee: item?.employee === null ? "" : item?.employee?.toString(),
             userType: item?.userType?.toString(),
             userTypeValue: item?.userTypeId?.toString(),
@@ -206,18 +193,10 @@ const UploadUser = () => {
               typeof item?.groupAccess === "string"
                 ? item?.groupAccessId?.toString()
                 : item?.groupAccess?.toString(),
-            endDate: moment(item?.endDate).isValid()
-              ? moment(item?.endDate).format(dateFormatting.dateCapital)
-              : moment(),
-            startDate: moment(item?.startDate).isValid()
-              ? moment(item?.startDate).format(dateFormatting.dateCapital)
-              : moment(),
-            endDateGa: moment(item?.endDateGa).isValid()
-              ? moment(item?.endDateGa).format(dateFormatting.dateCapital)
-              : moment(),
-            startDateGa: moment(item?.startDateGa).isValid()
-              ? moment(item?.startDateGa).format(dateFormatting.dateCapital)
-              : moment(),
+            endDate: item?.endDate ? moment(item.endDate, "DD MMM YYYY").format(dateFormatting.dateCapital) : null,
+            startDate: item?.startDate ? moment(item.startDate, "DD MMM YYYY").format(dateFormatting.dateCapital) : null,
+            endDateGa: item?.endDateGa ? moment(item.endDateGa, "DD MMM YYYY").format(dateFormatting.dateCapital) : null,
+            startDateGa: item?.startDateGa ? moment(item.startDateGa, "DD MMM YYYY").format(dateFormatting.dateCapital) : null,
           };
         });
         await dispatch(finalUploadUser(body)).unwrap();

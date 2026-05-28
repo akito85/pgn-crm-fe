@@ -22,7 +22,7 @@ export const inactiveAppHierarchy = createAsyncThunk(
         id: id,
         remark: body.remark,
       };
-      const url = `/v1/dbs/api/apphier/active/inactive/`;
+      const url = `/v1/dbs/api/apphier/active/inactive`;
       const response = await userHttpService.activationWithRemark(url, reqBody);
       const message = response.message;
       const successMessage = {
@@ -324,6 +324,18 @@ const approvHierarchy = createSlice({
     },
     [createHierarchy.rejected]: (state, action) => {
       state.data = action.payload;
+      state.loading = false;
+    },
+
+    //update app hierarchy
+    [updateAppHier.pending]: (state) => {
+      state.loading = true;
+    },
+    [updateAppHier.fulfilled]: (state) => {
+      state.loading = false;
+    },
+    [updateAppHier.rejected]: (state) => {
+      state.isFailed = true;
       state.loading = false;
     },
 
