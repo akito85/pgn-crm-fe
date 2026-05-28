@@ -2,17 +2,7 @@ import { useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { Button, Spin } from "antd";
-import {
-  CloseOutlined,
-  PauseCircleOutlined,
-  PlayCircleOutlined,
-  LockOutlined,
-  CheckCircleOutlined,
-  LeftOutlined,
-} from "@ant-design/icons";
 
-import BreadCrumb from "../../../../../../../components/BreadCrumb";
-import ButtonComponent from "../../../../../../../components/ButtonComponent";
 import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
 import NxCardContainer from "../../../../../../../components/Nx/NxCardContainer";
 import NxDetailText from "../../../../../../../components/Nx/NxDetailText";
@@ -46,6 +36,7 @@ const CustomerServiceRequestDetails = ({ type = "standard" }) => {
 
   const isLoading = loadingAccountDetail || loading_detailSr;
   const srStatus = (detail_serviceRequest?.status || "").toUpperCase();
+  const srPreviousStatus = (detail_serviceRequest?.previousStatus || "").toUpperCase();
 
   useEffect(() => {
     if (id && idAccount) {
@@ -91,13 +82,15 @@ const CustomerServiceRequestDetails = ({ type = "standard" }) => {
 
   // Button config per status: ordered list of actions + which one is primary
   const STATUS_ACTIONS = {
-    OPEN:        { buttons: ["CANCELLED", "ON_HOLD", "CLOSED", "RESOLVED", "IN_PROGRESS"], primary: "IN_PROGRESS" },
-    IN_PROGRESS: { buttons: ["CANCELLED", "ON_HOLD", "CLOSED", "RESOLVED"],               primary: "RESOLVED"    },
-    ON_HOLD:     { buttons: ["CANCELLED", "IN_PROGRESS"],                                  primary: "IN_PROGRESS" },
-    RESOLVED:    { buttons: ["CANCELLED", "IN_PROGRESS", "CLOSED"],                        primary: "CLOSED"      },
+    OPEN: { buttons: ["CANCELLED", "ON_HOLD", "CLOSED", "RESOLVED", "IN_PROGRESS"], primary: "IN_PROGRESS" },
+    IN_PROGRESS: { buttons: ["CANCELLED", "ON_HOLD", "CLOSED", "RESOLVED"], primary: "RESOLVED" },
+    "ON_HOLD,OPEN": { buttons: ["CANCELLED", "OPEN"], primary: "OPEN" },
+    "ON_HOLD,ON_PROGRESS": { buttons: ["CANCELLED", "IN_PROGRESS"], primary: "IN_PROGRESS" },
+    RESOLVED: { buttons: ["CANCELLED", "IN_PROGRESS", "CLOSED"], primary: "CLOSED" },
   };
 
   const BUTTON_DEF = {
+    OPEN:        "Mark as Open",
     CANCELLED:   "Cancel Request",
     ON_HOLD:     "Mark as On Hold",
     CLOSED:      "Mark as Closed",
@@ -105,7 +98,7 @@ const CustomerServiceRequestDetails = ({ type = "standard" }) => {
     IN_PROGRESS: "Mark as In Progress",
   };
 
-  const currentActions = STATUS_ACTIONS[srStatus] || { buttons: [], primary: null };
+  const currentActions = STATUS_ACTIONS[[srStatus, srPreviousStatus].filter(Boolean).join(",")] || { buttons: [], primary: null };
 
   return (
     <>
