@@ -7,6 +7,7 @@ import { getGasDepositColumns } from "./getGasDepositColumns";
 import { nxGetAccountActions } from "../../../../components/Nx/NxGetAccountActions";
 import { useDispatch, useSelector } from "react-redux";
 import { downloadGasDeposit, getGasDeposits } from "../../../../redux/slices/account_management/detailAccount/GasDepositSlice";
+import { Spin } from "antd";
 
 /**
  * Level-0 gas deposit list table with search, sort, filter, and infinite scroll.
@@ -31,6 +32,7 @@ const GasDepositTable = ({
     list_gasDeposit: dataSource,
     pagination_listGd: pagination,
     loading_listGd: loading,
+    loading_detailGd,
   } = useSelector((state) => state.gasDeposit);
 
   // --- Derived values ---
@@ -202,7 +204,8 @@ const GasDepositTable = ({
   const columns = useMemo(() => [...baseColumns, ...actionCols], [baseColumns, actionCols]);
 
   return (
-    <div className="flex flex-col gap-y-4">
+    <Spin spinning={loading_detailGd} tip="Loading detail...">
+      <div className="flex flex-col gap-y-4">
       <Toolbar items={itemActions} type="detail" />
       <NxTable
         idTable="gas-deposit-table"
@@ -221,6 +224,7 @@ const GasDepositTable = ({
         loading={loading}
       />
     </div>
+    </Spin>
   );
 };
 
