@@ -151,6 +151,25 @@ export const getSummaryBalance = createAsyncThunk(
  * @param {number} arg.id   - Gas deposit ID.
  * @param {object} arg.body - Search / sort / filter body.
  */
+export const getGasDeposit = createAsyncThunk(
+  "GET_GAS_DEPOSIT",
+  async ({ id, body, isLoadMore }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/gas-deposit/detail/${id}`;
+      const response = await accountManagementService.updateDataWithMethodPost(
+        url,
+        body
+      );
+      return {
+        ...response.data,
+        isLoadMore
+      };
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
 export const downloadGasDeposit = createAsyncThunk(
   "DOWNLOAD_GAS_DEPOSIT",
   async ({ body, id }, thunkAPI) => {
@@ -289,6 +308,20 @@ const gasDepositSlice = createSlice({
           pageSize: 10
         };
       }
+    },
+
+    /** Get Gas Deposit Detail */
+    [getGasDeposit.pending]: (state) => {
+      state.loading_detailGd = true;
+      state.detail_gasDeposit = {};
+    },
+    [getGasDeposit.fulfilled]: (state, action) => {
+      state.loading_detailGd = false;
+      state.detail_gasDeposit = action.payload?.result || {};
+    },
+    [getGasDeposit.rejected]: (state) => {
+      state.loading_detailGd = false;
+      state.detail_gasDeposit = {};
     },
   }
 });

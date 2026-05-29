@@ -1,5 +1,4 @@
-import { useLocation, useNavigate } from "react-router-dom";
-import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../routes/account_management/customer_account_routes";
+import { useLocation } from "react-router-dom";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
 import Toolbar from "../../../../components/Toolbar";
 import NxTable from "../../../../components/Nx/NxTable";
@@ -14,21 +13,19 @@ import { downloadGasDeposit, getGasDeposits } from "../../../../redux/slices/acc
  * Tracks expand state in `openedMemo` to skip redundant detail fetches on re-expand.
  *
  * @param {{
- *   handleApproval?: (show: boolean) => void;
  *   accountId?: number;
  *   customerId?: number;
  *   refreshSignal?: number;
  * }} props
  */
 const GasDepositTable = ({
-  handleApproval = () => {},
+  onViewDetail = () => {},
   accountId,
   customerId,
   refreshSignal = 0,
 }) => {
   // --- Hooks ---
   const location = useLocation();
-  const navigate = useNavigate();
   const dispatch = useDispatch();
   const {
     list_gasDeposit: dataSource,
@@ -180,21 +177,7 @@ const GasDepositTable = ({
 
   // --- Column configuration ---
   const itemActions = nxGetAccountActions({
-    handleView: ({ id }) => navigate(
-      isStandard ?
-        ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_GAS_DEPOSIT :
-      isOneTime ?
-        ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_GAS_DEPOSIT_ONETIME :
-        "",
-      {
-        state: {
-          accountId,
-          customerId,
-          id,
-        }
-      }
-    ),
-    handleApproval,
+    handleView: ({ id }) => onViewDetail(id),
     handleDownload,
   });
 
