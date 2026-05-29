@@ -8,6 +8,7 @@ import { useLocation } from "react-router-dom";
 import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
 import NxTabs from "../../../../components/Nx/NxTabs";
 import NxTable from "../../../../components/Nx/NxTable";
+import NxAttachmentInput from "../../../../components/Nx/NxAttachmentInput";
 import NxDetailText from "../../../../components/Nx/NxDetailText";
 import NxDate from "../../../../components/Nx/NxDatePicker";
 import NxStatusComponent from "../../../../components/Nx/NxStatusComponent";
@@ -36,6 +37,9 @@ const GasDeposit = ({ accountId, customerId }) => {
   const [activeKey, setActiveKey] = useState(0);
   const [refreshSignal, setRefreshSignal] = useState(0);
   const [collapsed, setCollapsed] = useState({ detail: false, mutation: false, history: false });
+
+  // --- Detail inner tab ---
+  const [detailTabKey, setDetailTabKey] = useState(0);
 
   // --- Mutation table search state ---
   const mutationSearchInput = useRef(null);
@@ -196,38 +200,62 @@ const GasDeposit = ({ accountId, customerId }) => {
               hideChildren={collapsed.detail}
               actionElement={collapseBtn("detail")}
             >
+              <NxTabs
+                activeKey={detailTabKey}
+                onChange={setDetailTabKey}
+                items={[
+                  {
+                    key: 0,
+                    label: "Gas Deposit Information",
+                  },
+                  {
+                    key: 1,
+                    label: "Attachment",
+                  },
+                ]}
+              />
               <div className="p-4">
-                <NxBaseContainer border>
-                  <div className="w-full grid grid-cols-4 gap-4">
-                    <NxDetailText label="Record Id">{id}</NxDetailText>
-                    <NxDetailText label="Billing Period">{billingPeriod}</NxDetailText>
-                    <NxDetailText label="Time Unit">{timeUnit}</NxDetailText>
-                    <NxDetailText label="Currency">{currency}</NxDetailText>
-                    <NxDetailText label="UOM">{uom}</NxDetailText>
-                    <NxDetailText label="Quantity">{quantity}</NxDetailText>
-                    <NxDetailText label="Amount">{amount}</NxDetailText>
-                    <NxDetailText label="Cash Balance">{cashBalance}</NxDetailText>
-                    <NxDetailText label="Terms Earn">{termsEarn}</NxDetailText>
-                    <NxDetailText label="Terms Redeem">{termsRedeem}</NxDetailText>
-                    <NxDetailText label="Period Earn">{NxDate.formatDate(periodEarn, "DD MMM YYYY")}</NxDetailText>
-                    <NxDetailText label="Redeem Period Start">{NxDate.formatDate(redeemPeriodStart, "DD MMM YYYY")}</NxDetailText>
-                    <NxDetailText label="Redeem Period End">{NxDate.formatDate(redeemPeriodEnd, "DD MMM YYYY")}</NxDetailText>
-                    <NxDetailText label="Type">{type}</NxDetailText>
-                    <NxDetailText label="Account Type">{gdAccountType}</NxDetailText>
-                    <NxDetailText label="Classification">{classificationType}</NxDetailText>
-                    <NxDetailText label="Source">{source}</NxDetailText>
-                    <NxDetailText label="SAP Cust ID">{sapCustId}</NxDetailText>
-                    <NxDetailText label="Status">
-                      <NxStatusComponent colour={status} margin={false}>{status}</NxStatusComponent>
-                    </NxDetailText>
-                    <NxDetailText label="Status Approval">
-                      <NxStatusComponent colour={statusApproval} margin={false}>{statusApproval}</NxStatusComponent>
-                    </NxDetailText>
-                  </div>
-                  <div className="w-full mt-4">
-                    <NxDetailText label="Description">{description}</NxDetailText>
-                  </div>
-                </NxBaseContainer>
+                {detailTabKey === 0 && (
+                  <NxBaseContainer border>
+                    <div className="w-full grid grid-cols-4 gap-4">
+                      <NxDetailText label="Record Id">{id}</NxDetailText>
+                      <NxDetailText label="Billing Period">{billingPeriod}</NxDetailText>
+                      <NxDetailText label="Time Unit">{timeUnit}</NxDetailText>
+                      <NxDetailText label="Currency">{currency}</NxDetailText>
+                      <NxDetailText label="UOM">{uom}</NxDetailText>
+                      <NxDetailText label="Quantity">{quantity}</NxDetailText>
+                      <NxDetailText label="Amount">{amount}</NxDetailText>
+                      <NxDetailText label="Cash Balance">{cashBalance}</NxDetailText>
+                      <NxDetailText label="Terms Earn">{termsEarn}</NxDetailText>
+                      <NxDetailText label="Terms Redeem">{termsRedeem}</NxDetailText>
+                      <NxDetailText label="Period Earn">{NxDate.formatDate(periodEarn, "DD MMM YYYY")}</NxDetailText>
+                      <NxDetailText label="Redeem Period Start">{NxDate.formatDate(redeemPeriodStart, "DD MMM YYYY")}</NxDetailText>
+                      <NxDetailText label="Redeem Period End">{NxDate.formatDate(redeemPeriodEnd, "DD MMM YYYY")}</NxDetailText>
+                      <NxDetailText label="Type">{type}</NxDetailText>
+                      <NxDetailText label="Account Type">{gdAccountType}</NxDetailText>
+                      <NxDetailText label="Classification">{classificationType}</NxDetailText>
+                      <NxDetailText label="Source">{source}</NxDetailText>
+                      <NxDetailText label="SAP Cust ID">{sapCustId}</NxDetailText>
+                      <NxDetailText label="Status">
+                        <NxStatusComponent colour={status} margin={false}>{status}</NxStatusComponent>
+                      </NxDetailText>
+                      <NxDetailText label="Status Approval">
+                        <NxStatusComponent colour={statusApproval} margin={false}>{statusApproval}</NxStatusComponent>
+                      </NxDetailText>
+                    </div>
+                    <div className="w-full mt-4">
+                      <NxDetailText label="Description">{description}</NxDetailText>
+                    </div>
+                  </NxBaseContainer>
+                )}
+                {detailTabKey === 1 && (
+                  <NxBaseContainer border>
+                    <NxAttachmentInput
+                      data={detail_gasDeposit?.attachments || []}
+                      type="detail"
+                    />
+                  </NxBaseContainer>
+                )}
               </div>
             </NxCardContainer>
 
