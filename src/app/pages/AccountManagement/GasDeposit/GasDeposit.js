@@ -3,7 +3,7 @@ import GasDepositTable from "./GasDepositTable";
 import { useDispatch, useSelector } from "react-redux";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 import { getGrantedAccessAccount } from "../../../../redux/slices/account_management/accountManagement";
-import { getGasDeposit } from "../../../../redux/slices/account_management/detailAccount/GasDepositSlice";
+import { clearGasDepositDetail, getGasDeposit } from "../../../../redux/slices/account_management/detailAccount/GasDepositSlice";
 import { useLocation } from "react-router-dom";
 import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
 import NxTabs from "../../../../components/Nx/NxTabs";
@@ -83,6 +83,14 @@ const GasDeposit = ({ accountId, customerId }) => {
 
   // --- Handlers ---
   const triggerRefresh = () => setRefreshSignal((prev) => prev + 1);
+
+  const handleTabChange = (key) => {
+    setActiveKey(key);
+    if (key !== 0) {
+      dispatch(clearGasDepositDetail());
+      setDetailTabKey(0);
+    }
+  };
 
   const toggleCollapse = (key) =>
     setCollapsed((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -186,7 +194,7 @@ const GasDeposit = ({ accountId, customerId }) => {
       <NxCardContainer header="GAS DEPOSIT LIST" withoutPadding>
         <NxTabs
           activeKey={activeKey}
-          onChange={setActiveKey}
+          onChange={handleTabChange}
           items={tabOptions}
         />
       </NxCardContainer>

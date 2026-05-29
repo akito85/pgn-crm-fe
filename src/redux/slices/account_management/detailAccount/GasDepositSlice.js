@@ -196,6 +196,12 @@ export const downloadGasDeposit = createAsyncThunk(
 const gasDepositSlice = createSlice({
   name: "gasDeposit",
   initialState,
+  reducers: {
+    clearGasDepositDetail: (state) => {
+      state.detail_gasDeposit = {};
+      state.loading_detailGd = false;
+    },
+  },
   extraReducers: {
     /** Get Gas Deposits */
     [getGasDeposits.pending]: (state, action) => {
@@ -325,5 +331,6 @@ const gasDepositSlice = createSlice({
     },
   }
 });
-const { reducer } = gasDepositSlice;
+const { reducer, actions: { clearGasDepositDetail } } = gasDepositSlice;
+export { clearGasDepositDetail };
 export default reducer;
