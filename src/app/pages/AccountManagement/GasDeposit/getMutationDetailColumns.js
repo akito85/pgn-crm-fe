@@ -22,7 +22,6 @@ const getMutationDetailColumns = ({
   searchedColumn,
   searchText,
   handleSearch,
-  onViewDetail = () => {},
 }) => [
   {
     key: "no",
@@ -179,23 +178,6 @@ const getMutationDetailColumns = ({
     ),
     render: (status) => (
       <NxStatusComponent colour={status} margin={false}>{status}</NxStatusComponent>
-    ),
-  },
-  {
-    key: "action",
-    title: "ACTION",
-    align: "center",
-    width: 70,
-    fixed: "right",
-    render: (_, record) => (
-      <Tooltip title="Detail">
-        <Button
-          type="table-action"
-          onClick={() => onViewDetail(record)}
-        >
-          <SVGIcon name="IconDetail" width={20} />
-        </Button>
-      </Tooltip>
     ),
   },
 ];

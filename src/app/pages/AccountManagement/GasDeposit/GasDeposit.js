@@ -19,6 +19,7 @@ import { Button, Spin } from "antd";
 import HistoryTable from "./HistoryTable";
 import NxModal from "../../../../components/Nx/NxModal";
 import { nxGetAccountActions } from "../../../../components/Nx/NxGetAccountActions";
+import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
 
 /**
  * Top-level Gas Deposit module container. Renders a Gas Deposit List tab and a
@@ -140,6 +141,21 @@ const GasDeposit = ({ accountId, customerId }) => {
       dispatch(getGrantedAccessAccount(path));
   }, []);
 
+  const itemActions = nxGetAccountActions({
+    handleView: ({ id }) => handleMutationViewDetail(id),
+  })
+
+  const actionCols = useColumnActionPermission(
+    ["View"],
+    itemActions,
+    "table"
+  ).map((col) => ({
+    ...col,
+    width: 70,
+    align: "center",
+    fixed: "right",
+  }));
+
   const mutationColumns = useMemo(() =>
     getMutationDetailColumns({
       search: mutationSearch,
@@ -147,10 +163,14 @@ const GasDeposit = ({ accountId, customerId }) => {
       searchedColumn: mutationSearchedColumn,
       searchText: mutationSearchText,
       handleSearch: handleMutationSearch,
-      onViewDetail: handleMutationViewDetail,
     }),
   [mutationSearch, mutationSearchInput, mutationSearchedColumn, mutationSearchText]);
 
+  const columns = useMemo(
+    () => [...mutationColumns, ...actionCols],
+    [mutationColumns, actionCols]
+  );
+  
   const tabOptions = [
     {
       key: 0,
@@ -288,7 +308,7 @@ const GasDeposit = ({ accountId, customerId }) => {
                     idTable="gas-deposit-mutation-detail-table"
                     dataSource={list_mutation}
                     totalData={pagination_listMutation.totalElement}
-                    columns={mutationColumns}
+                    columns={columns}
                     tableScrolled={{ x: "max-content" }}
                     usePagination={false}
                     useInfiniteScroll={true}
