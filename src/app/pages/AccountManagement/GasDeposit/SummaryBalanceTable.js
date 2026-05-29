@@ -1,28 +1,37 @@
-import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
+import { useLocation, useNavigate } from "react-router-dom";
 import Toolbar from "../../../../components/Toolbar";
 import NxTable from "../../../../components/Nx/NxTable";
 import { useMemo, useState, useRef, useEffect } from "react";
-import { nxGetAccountActions } from "../../../../components/Nx/NxGetAccountActions";
+import { getGasDepositColumns } from "./getGasDepositColumns";
 import { useDispatch, useSelector } from "react-redux";
-import { downloadGasDeposit, getGasDepositHistories } from "../../../../redux/slices/account_management/detailAccount/GasDepositSlice";
-import { getGasDepositHistoryColumns } from "./getGasDepositHistoryColumns";
-import { useLocation, useNavigate } from "react-router-dom";
-import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../routes/account_management/customer_account_routes";
+import { getSummaryBalance } from "../../../../redux/slices/account_management/detailAccount/GasDepositSlice";
+import { getSummaryBalanceColumns } from "./getSummaryBalanceColumns";
 
-const GasDepositHistoryTable = ({
-  handleApprovalHistoryModal,
+/**
+ * Level-0 gas deposit list table with search, sort, filter, and infinite scroll.
+ * Tracks expand state in `openedMemo` to skip redundant detail fetches on re-expand.
+ *
+ * @param {{
+ *   handleApproval?: (show: boolean) => void;
+ *   accountId?: number;
+ *   customerId?: number;
+ *   refreshSignal?: number;
+ * }} props
+ */
+const SummaryBalanceTable = ({
+  handleApproval = () => {},
   accountId,
   customerId,
   refreshSignal = 0,
 }) => {
   // --- Hooks ---
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
   const location = useLocation();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
   const {
-    list_gasDepositHistory: dataSource,
-    pagination_listGdHistory: pagination,
-    loading_listGdHistory: loading,
+    list_summaryBalance: dataSource,
+    pagination_listSummaryBalance: pagination,
+    loading_listSummaryBalance: loading,
   } = useSelector((state) => state.gasDeposit);
 
   // --- Derived values ---
@@ -58,7 +67,7 @@ const GasDepositHistoryTable = ({
     };
 
     dispatch(
-      getGasDepositHistories({
+      getSummaryBalance({
         accountId,
         body,
         isLoadMore: false,
@@ -117,7 +126,7 @@ const GasDepositHistoryTable = ({
       };
 
       await dispatch(
-        getGasDepositHistories({
+        getSummaryBalance({
           accountId,
           body,
           isLoadMore: true,
@@ -125,22 +134,6 @@ const GasDepositHistoryTable = ({
       ).unwrap();
     }
     setPage(nextPage);
-  };
-
-  /**
-   * Dispatches a download action for the current filtered/sorted view.
-   */
-  const handleDownload = () => {
-    const body = {
-      page,
-      size: loadMoreSize,
-      sort,
-      filters,
-      filterRules,
-      searchs: search,
-    };
-
-    dispatch(downloadGasDeposit({ body, id: accountId }));
   };
 
   // --- Effects ---
@@ -158,7 +151,7 @@ const GasDepositHistoryTable = ({
     };
 
     setPage(0);
-    const promise = dispatch(getGasDepositHistories({ accountId, body, isLoadMore: false }));
+    const promise = dispatch(getSummaryBalance({ accountId, body, isLoadMore: false }));
     return () => { promise.abort(); };
   }, [sort, search, filters, filterRules]);
 
@@ -167,38 +160,8 @@ const GasDepositHistoryTable = ({
     if (refreshSignal > 0) handleRefresh();
   }, [refreshSignal]);
 
-  // --- Column configuration ---
-  const itemActions = nxGetAccountActions({
-    handleView: ({ gasDepositId }) => navigate(
-      isStandard ?
-        ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_GAS_DEPOSIT :
-      isOneTime ?
-        ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_GAS_DEPOSIT_ONETIME :
-        "",
-      {
-        state: {
-          accountId,
-          customerId,
-          id: gasDepositId,
-        }
-      }
-    ),
-    handleApprovalHistory: ({ gasDepositId }) => handleApprovalHistoryModal({ show: true, historyId: gasDepositId }),
-    handleDownload,
-  });
-
-  const toolbarItemActions = itemActions.filter(item => item.action === "Download");
-
-  const actionCols = useColumnActionPermission(["View", "History"], itemActions, "View", "table").map(
-    (col) => ({
-      ...col,
-      width: 70,
-      align: "center",
-    })
-  );
-
   const baseColumns = useMemo(() =>
-    getGasDepositHistoryColumns({
+    getSummaryBalanceColumns({
       search,
       searchInput,
       searchedColumn,
@@ -207,17 +170,17 @@ const GasDepositHistoryTable = ({
     }),
   [search, searchInput, searchText, searchedColumn]);
 
-  const columns = useMemo(() => [...baseColumns, ...actionCols], [baseColumns, actionCols]);
+  const columns = useMemo(() => [...baseColumns], [baseColumns]);
 
   return (
     <div className="flex flex-col gap-y-4">
-      <Toolbar items={toolbarItemActions} type="detail" />
       <NxTable
-        idTable="gas-deposit-history-table"
+        idTable="gas-deposit-table"
+        className="[&_.ant-table-expanded-row-fixed]:!pl-2"
         dataSource={dataSource}
         totalData={totalElement}
         current={page}
-        tableScrolled={{ x: dataSource.length ? "max-content" : 4000 }}
+        tableScrolled={{ x: "max-content" }}
         onSort={onSort}
         columns={columns}
         usePagination={false}
@@ -231,4 +194,4 @@ const GasDepositHistoryTable = ({
   );
 };
 
-export default GasDepositHistoryTable;
+export default SummaryBalanceTable;

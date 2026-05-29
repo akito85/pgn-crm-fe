@@ -18,6 +18,16 @@ const initialState = {
     pageSize: 10
   },
 
+  // --- Summary Balance List ---
+  loading_listSummaryBalance: false,
+  list_summaryBalance: [],
+  pagination_listSummaryBalance: {
+    totalPage: 0,
+    totalElement: 0,
+    currentPage: 0,
+    pageSize: 10
+  },
+
   // --- Approval List ---
   loading_listGdApproval: false,
   list_gasDepositApproval: [],
@@ -93,7 +103,6 @@ export const getGasDeposits = createAsyncThunk(
     try {
       body = {
         ...body,
-        listType: "all"
       };
 
       const url =
@@ -111,6 +120,30 @@ export const getGasDeposits = createAsyncThunk(
     }
   }
 );
+
+export const getSummaryBalance = createAsyncThunk(
+  "GET_SUMMARY_BALANCE",
+  async ({ accountId, body, isLoadMore }, thunkAPI) => {
+    try {
+      body = {
+        ...body,
+      };
+
+      const url = `/v1/dbs/api/gas-deposit/summary-balance/list/${accountId}`;
+      const response = await accountManagementService.updateDataWithMethodPost(
+        url,
+        body
+      );
+      return {
+        ...response.data,
+        isLoadMore
+      };
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
 
 /**
  * Fetches the paginated approval list for a given account's gas deposits.
@@ -823,6 +856,52 @@ const gasDepositSlice = createSlice({
       if (!action.meta.arg?.isLoadMore) {
         state.list_gasDeposit = [];
         state.pagination_listGd = {
+          totalPage: 0,
+          totalElement: 0,
+          currentPage: 0,
+          pageSize: 10
+        };
+      }
+    },
+
+    /** Get Summary Balance */
+    [getSummaryBalance.pending]: (state, action) => {
+      if (!action.meta.arg?.isLoadMore) {
+        state.loading_listSummaryBalance = true;
+      }
+    },
+    [getSummaryBalance.fulfilled]: (state, action) => {
+      state.loading_listSummaryBalance = false;
+      const { result, page, isLoadMore } = action.payload;
+      
+      if (Array.isArray(result)) {
+        if (isLoadMore) {
+          const currentIds = new Set(
+            state.list_summaryBalance.map((item) => item.id)
+          );
+          const filteredResult = result.filter(
+            (item) => !currentIds.has(item.id)
+          );
+          state.list_summaryBalance = [...state.list_summaryBalance, ...filteredResult];
+        } else {
+          state.list_summaryBalance = result;
+        }
+      }
+
+      state.pagination_listSummaryBalance = {
+        totalPage: page?.totalPages || 0,
+        totalElement: page?.totalElements || 0,
+        currentPage: page?.number || 0,
+        pageSize: page?.size || 10
+      };
+    },
+    [getSummaryBalance.rejected]: (state, action) => {
+      if (action.meta.aborted) return;
+      state.loading_listSummaryBalance = false;
+
+      if (!action.meta.arg?.isLoadMore) {
+        state.list_summaryBalance = [];
+        state.pagination_listSummaryBalance = {
           totalPage: 0,
           totalElement: 0,
           currentPage: 0,

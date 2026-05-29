@@ -2,21 +2,16 @@ import { memo, useEffect } from "react";
 import { useState } from "react";
 import GasDepositTable from "./GasDepositTable";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  getGasDepositHistory,
-  getGdApprovalHistory,
-} from "../../../../redux/slices/account_management/detailAccount/GasDepositSlice";
-import GasDepositApprovalModal from "./GasDepositApprovalModal";
 import NxHistoryModal from "../../../../components/Nx/NxHistoryModal";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 import { getGrantedAccessAccount } from "../../../../redux/slices/account_management/accountManagement";
 import { useLocation } from "react-router-dom";
 import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
 import NxTabs from "../../../../components/Nx/NxTabs";
-import GasDepositHistoryTable from "./GasDepositHistoryTable";
 import NxModal from "../../../../components/Nx/NxModal";
 import NxDetailText from "../../../../components/Nx/NxDetailText";
 import NxDate from "../../../../components/Nx/NxDatePicker";
+import SummaryBalanceTable from "./SummaryBalanceTable";
 
 /**
  * Top-level Gas Deposit module container. Renders a Gas Deposit List tab and a
@@ -65,20 +60,6 @@ const GasDeposit = ({ accountId, customerId }) => {
   /** Increments the refresh signal to trigger a page-0 re-fetch in child tables. */
   const triggerRefresh = () => setRefreshSignal((prev) => prev + 1);
 
-  /**
-   * @param {boolean} show
-   * @param {number} historyId
-   */
-  const handleApprovalHistoryModal = ({ show, historyId }) => {
-    if (show) {
-      if (historyId)
-        dispatch(getGdApprovalHistory(historyId));
-      setShowApprovalHistoryModal(true);
-    } else {
-      setShowApprovalHistoryModal(false);
-    }
-  };
-
   // --- Effects ---
   // Resolve the route-based path and fetch the user's granted access permissions.
   useEffect(() => {
@@ -95,7 +76,7 @@ const GasDeposit = ({ accountId, customerId }) => {
   const tabOptions = [
     {
       key: 0,
-      label: "Gas Deposit List",
+      label: "Gas Deposit",
       children: (
         <>
           <NxBaseContainer border>
@@ -106,41 +87,41 @@ const GasDeposit = ({ accountId, customerId }) => {
               refreshSignal={refreshSignal}
             />
           </NxBaseContainer>
-    
-          <GasDepositApprovalModal
-            accountId={accountId}
-            isOpen={showApprovalModal}
-            handleCancel={() => setShowApprovalModal(false)}
-            afterFinish={triggerRefresh}
-          />
         </>
       )
     },
     {
       key: 1,
-      label: "Recalculate/Expire Request History",
+      label: "Summary Balance",
       children: (
         <>
           <NxBaseContainer border>
-            <GasDepositHistoryTable
+            <SummaryBalanceTable
               accountId={accountId}
               customerId={customerId}
-              handleApprovalHistoryModal={handleApprovalHistoryModal}
+              handleApproval={setShowApprovalModal}
               refreshSignal={refreshSignal}
             />
-          </NxBaseContainer>
-
-          {/* Approval History Modal */}
-          <NxHistoryModal
-            isOpen={showApprovalHistoryModal}
-            handleClose={() => handleApprovalHistoryModal(false)}
-            header={"Approval History"}
-            dataApprover={dataApprovalHistoryFix?.dataApprover}
-            dataHistory={dataApprovalHistoryFix?.dataHistory}
-          />
+          </NxBaseContainer>    
         </>
       )
-    }
+    },
+    {
+      key: 2,
+      label: "History",
+      children: (
+        <>
+          <NxBaseContainer border>
+            <GasDepositTable
+              accountId={accountId}
+              customerId={customerId}
+              handleApproval={setShowApprovalModal}
+              refreshSignal={refreshSignal}
+            />
+          </NxBaseContainer>    
+        </>
+      )
+    },
   ];
 
   // Reshape raw API approval history into { create, inactive } buckets.
@@ -167,12 +148,33 @@ const GasDeposit = ({ accountId, customerId }) => {
 
   return (
     <div className="flex flex-col gap-y-4">
-      <NxCardContainer header="GAS DEPOSIT" withoutPadding>
+      <NxCardContainer header="GAS DEPOSIT LIST" withoutPadding>
         <NxTabs
           activeKey={activeKey}
           onChange={setActiveKey}
           items={tabOptions}
         />
+      </NxCardContainer>
+
+      {/* Nx Card container ini hanya tampil ketika user klik view detail dari GasDepositTable, dan NxCardContainer ini bisa di colapse */}
+      <NxCardContainer header="GAS DEPOSIT DETAIL" withoutPadding> 
+        <NxBaseContainer border>
+          <h1>Lorem Ipsum</h1>
+        </NxBaseContainer>
+      </NxCardContainer>
+
+      {/* Nx Card container ini hanya tampil ketika user klik view detail dari GasDepositTable, dan NxCardContainer ini bisa di colapse */}
+      <NxCardContainer header="MUTATION DETAIL" withoutPadding>
+        <NxBaseContainer border>
+          <h1>Lorem Ipsum</h1>
+        </NxBaseContainer>
+      </NxCardContainer>
+
+      {/* Nx Card container ini hanya tampil ketika user klik view detail dari GasDepositTable */}
+      <NxCardContainer header="HISTORY LOG INFORMATION" withoutPadding>
+        <NxBaseContainer border>
+          <h1>Lorem Ipsum</h1>
+        </NxBaseContainer>
       </NxCardContainer>
     </div>
   );
