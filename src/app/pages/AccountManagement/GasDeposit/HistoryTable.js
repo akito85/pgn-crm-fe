@@ -4,7 +4,7 @@ import NxTable from "../../../../components/Nx/NxTable";
 import { useMemo, useState, useRef, useEffect } from "react";
 import { getGasDepositColumns } from "./getGasDepositColumns";
 import { useDispatch, useSelector } from "react-redux";
-import { getSummaryBalance } from "../../../../redux/slices/account_management/detailAccount/GasDepositSlice";
+import { getHistoryGasDeposit, getSummaryBalance } from "../../../../redux/slices/account_management/detailAccount/GasDepositSlice";
 import { getHistoryColumns } from "./getHistoryColumns";
 
 /**
@@ -29,9 +29,9 @@ const HistoryTable = ({
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const {
-    list_summaryBalance: dataSource,
-    pagination_listSummaryBalance: pagination,
-    loading_listSummaryBalance: loading,
+    list_historyGd: dataSource,
+    pagination_historyGd: pagination,
+    loading_historyGd: loading,
   } = useSelector((state) => state.gasDeposit);
 
   // --- Derived values ---
@@ -67,7 +67,7 @@ const HistoryTable = ({
     };
 
     dispatch(
-      getSummaryBalance({
+      getHistoryGasDeposit({
         accountId,
         body,
         isLoadMore: false,
@@ -126,7 +126,7 @@ const HistoryTable = ({
       };
 
       await dispatch(
-        getSummaryBalance({
+        getHistoryGasDeposit({
           accountId,
           body,
           isLoadMore: true,
@@ -151,7 +151,7 @@ const HistoryTable = ({
     };
 
     setPage(0);
-    const promise = dispatch(getSummaryBalance({ accountId, body, isLoadMore: false }));
+    const promise = dispatch(getHistoryGasDeposit({ accountId, body, isLoadMore: false }));
     return () => { promise.abort(); };
   }, [sort, search, filters, filterRules]);
 

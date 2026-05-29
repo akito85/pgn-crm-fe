@@ -28,63 +28,19 @@ const initialState = {
     pageSize: 10
   },
 
-  // --- Approval List ---
-  loading_listGdApproval: false,
-  list_gasDepositApproval: [],
-  pagination_listGdApproval: {
-    totalPage: 0,
-    totalElement: 0,
-    currentPage: 0,
-    pageSize: 10
-  },
-
-  // --- Request History List ---
-  loading_listGdHistory: false,
-  list_gasDepositHistory: [],
-  pagination_listGdHistory: {
-    totalPage: 0,
-    totalElement: 0,
-    currentPage: 0,
-    pageSize: 10
-  },
-
-  // --- Form Options (approval hierarchy, attachment categories, account standard) ---
-  loading_listGdApprovalHierarchy: false,
-  list_gdApprovalHierarchy: [],
-  loading_detailGdApprovalHierarchy: false,
-  detail_gdApprovalHierarchy: [],
-  loading_listGdAttachmentCategory: false,
-  list_gdAttachmentCategory: [],
-  loading_listGdAccountStandard: false,
-  list_gdAccountStandard: [],
-  pagination_listGdAccount: {
-    totalPage: 0,
-    totalElement: 0,
-    currentPage: 0,
-    pageSize: 10
-  },
-
   // --- Detail ---
   loading_detailGd: false,
   detail_gasDeposit: {},
-  loading_detailDraftGd: false,
-  detailDraft_gasDeposit: {},
-
-  // --- History Detail ---
-  loading_detailGdHistory: false,
-  detail_gasDepositHistory: {},
 
   // --- History ---
-  loading_gdApprovalHistory: false,
-  detail_gdApprovalHistory: {},
-
-  // --- Approve / Reject ---
-  loading_approveRejectGd: false,
-  loading_approveGd: false,
-  loading_rejectGd: false,
-
-  // --- Recalculate / Expire ---
-  loading_recalculateExpireGd: false
+  loading_historyGd: false,
+  list_historyGd: [],
+  pagination_historyGd: {
+    totalPage: 0,
+    totalElement: 0,
+    currentPage: 0,
+    pageSize: 10
+  },
 };
 
 /**
@@ -130,6 +86,25 @@ export const getSummaryBalance = createAsyncThunk(
       };
 
       const url = `/v1/dbs/api/gas-deposit/summary-balance/list/${accountId}`;
+      const response = await accountManagementService.updateDataWithMethodPost(
+        url,
+        body
+      );
+      return {
+        ...response.data,
+        isLoadMore
+      };
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+export const getHistoryGasDeposit = createAsyncThunk(
+  "GET_GD_HISTORY",
+  async ({ accountId, body, isLoadMore }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/gas-deposit/history/list/${accountId}`;
       const response = await accountManagementService.updateDataWithMethodPost(
         url,
         body
@@ -314,6 +289,36 @@ const gasDepositSlice = createSlice({
           pageSize: 10
         };
       }
+    },
+
+    /** Get History */
+    [getHistoryGasDeposit.pending]: (state) => {
+      state.loading_historyGd = true;
+    },
+    [getHistoryGasDeposit.fulfilled]: (state, action) => {
+      state.loading_historyGd = false;
+      const { result, page } = action.payload;
+
+      if (Array.isArray(result)) {
+        state.list_historyGd = result;
+      }
+
+      state.pagination_historyGd = {
+        totalPage: page?.totalPages || 0,
+        totalElement: page?.totalElements || 0,
+        currentPage: page?.number || 0,
+        pageSize: page?.size || 10
+      };
+    },
+    [getHistoryGasDeposit.rejected]: (state) => {
+      state.loading_historyGd = false;
+      state.list_historyGd = [];
+      state.pagination_historyGd = {
+        totalPage: 0,
+        totalElement: 0,
+        currentPage: 0,
+        pageSize: 10
+      };
     },
 
     /** Get Gas Deposit Detail */

@@ -16,6 +16,7 @@ import SummaryBalanceTable from "./SummaryBalanceTable";
 import getMutationDetailColumns from "./getMutationDetailColumns";
 import SVGIcon from "../../../../assets/Icon/index";
 import { Spin } from "antd";
+import HistoryTable from "./HistoryTable";
 
 /**
  * Top-level Gas Deposit module container. Renders a Gas Deposit List tab and a
@@ -165,7 +166,7 @@ const GasDeposit = ({ accountId, customerId }) => {
       label: "History",
       children: (
         <NxBaseContainer border>
-          <GasDepositTable
+          <HistoryTable
             accountId={accountId}
             customerId={customerId}
             onViewDetail={handleViewDetail}
