@@ -6,7 +6,6 @@ import NxTable from "../../../../components/Nx/NxTable";
 import { useMemo, useState, useRef, useEffect } from "react";
 import { getGasDepositColumns } from "./getGasDepositColumns";
 import { nxGetAccountActions } from "../../../../components/Nx/NxGetAccountActions";
-import GasDepositDetailTable from "./GasDepositDetailTable";
 import { useDispatch, useSelector } from "react-redux";
 import { downloadGasDeposit, getGasDeposits } from "../../../../redux/slices/account_management/detailAccount/GasDepositSlice";
 
@@ -218,17 +217,6 @@ const GasDepositTable = ({
   [search, searchInput, searchText, searchedColumn]);
 
   const columns = useMemo(() => [...baseColumns, ...actionCols], [baseColumns, actionCols]);
-
-  /**
-   * Renders the expanded child row for a gas deposit record.
-   * @param {object} record - The parent gas deposit row record
-   */
-  const expandedRowRender = (record, index) => (
-    <GasDepositDetailTable
-      id={record.id}
-      index={index}
-    />
-  );
 
   return (
     <div className="flex flex-col gap-y-4">
