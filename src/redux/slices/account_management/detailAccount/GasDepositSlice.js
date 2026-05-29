@@ -41,6 +41,16 @@ const initialState = {
     currentPage: 0,
     pageSize: 10
   },
+
+  // --- Mutation List ---
+  loading_listMutation: false,
+  list_mutation: [],
+  pagination_listMutation: {
+    totalPage: 0,
+    totalElement: 0,
+    currentPage: 0,
+    pageSize: 10
+  },
 };
 
 /**
@@ -119,18 +129,24 @@ export const getHistoryGasDeposit = createAsyncThunk(
   }
 );
 
-/**
- * Downloads the gas deposit list as an Excel file for a given record.
- *
- * @param {object} arg
- * @param {number} arg.id   - Gas deposit ID.
- * @param {object} arg.body - Search / sort / filter body.
- */
 export const getGasDeposit = createAsyncThunk(
   "GET_GAS_DEPOSIT",
-  async ({ id, body, isLoadMore }, thunkAPI) => {
+  async ({ id }, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/gas-deposit/detail/${id}`;
+      const response = await accountManagementService.getDetail(url);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+export const getMutationList = createAsyncThunk(
+  "GET_MUTATION_LIST",
+  async ({ accountId, body, isLoadMore }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/gas-deposit/mutation/list/${accountId}`;
       const response = await accountManagementService.updateDataWithMethodPost(
         url,
         body
@@ -328,11 +344,52 @@ const gasDepositSlice = createSlice({
     },
     [getGasDeposit.fulfilled]: (state, action) => {
       state.loading_detailGd = false;
-      state.detail_gasDeposit = action.payload?.result || {};
+      state.detail_gasDeposit = action.payload || {};
     },
     [getGasDeposit.rejected]: (state) => {
       state.loading_detailGd = false;
       state.detail_gasDeposit = {};
+    },
+
+    /** Get Mutation List */
+    [getMutationList.pending]: (state) => {
+      state.loading_listMutation = true;
+    },
+    [getMutationList.fulfilled]: (state, action) => {
+      state.loading_listMutation = false;
+      const { result, page, isLoadMore } = action.payload;
+
+      if (Array.isArray(result)) {
+        if (isLoadMore) {
+          const currentIds = new Set(
+            state.list_mutation.map((item) => item.id)
+          );
+          const filteredResult = result.filter(
+            (item) => !currentIds.has(item.id)
+          );
+          state.list_mutation = [...state.list_mutation, ...filteredResult];
+        } else {
+          state.list_mutation = result;
+        }
+      }
+
+      state.pagination_listMutation = {
+        totalPage: page?.totalPages || 0,
+        totalElement: page?.totalElements || 0,
+        currentPage: page?.number || 0,
+        pageSize: page?.size || 10
+      };
+    },
+    [getMutationList.rejected]: (state, action) => {
+      if (action.meta.aborted) return;
+      state.loading_listMutation = false;
+      state.list_mutation = [];
+      state.pagination_listMutation = {
+        totalPage: 0,
+        totalElement: 0,
+        currentPage: 0,
+        pageSize: 10
+      };
     },
   }
 });
