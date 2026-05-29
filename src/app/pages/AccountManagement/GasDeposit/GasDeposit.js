@@ -142,7 +142,7 @@ const GasDeposit = ({ accountId, customerId }) => {
   }, []);
 
   const itemActions = nxGetAccountActions({
-    handleView: ({ id }) => handleMutationViewDetail(id),
+    handleView: (record) => handleMutationViewDetail(record),
   })
 
   const actionCols = useColumnActionPermission(
