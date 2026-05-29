@@ -15,8 +15,10 @@ import NxStatusComponent from "../../../../components/Nx/NxStatusComponent";
 import SummaryBalanceTable from "./SummaryBalanceTable";
 import getMutationDetailColumns from "./getMutationDetailColumns";
 import SVGIcon from "../../../../assets/Icon/index";
-import { Spin } from "antd";
+import { Button, Spin } from "antd";
 import HistoryTable from "./HistoryTable";
+import NxModal from "../../../../components/Nx/NxModal";
+import { nxGetAccountActions } from "../../../../components/Nx/NxGetAccountActions";
 
 /**
  * Top-level Gas Deposit module container. Renders a Gas Deposit List tab and a
@@ -45,6 +47,10 @@ const GasDeposit = ({ accountId, customerId }) => {
 
   // --- Detail inner tab ---
   const [detailTabKey, setDetailTabKey] = useState(0);
+
+  // --- Mutation detail modal ---
+  const [mutationModalOpen, setMutationModalOpen] = useState(false);
+  const [selectedMutation, setSelectedMutation] = useState(null);
 
   // --- Mutation table search state ---
   const mutationSearchInput = useRef(null);
@@ -100,6 +106,11 @@ const GasDeposit = ({ accountId, customerId }) => {
   const toggleCollapse = (key) =>
     setCollapsed((prev) => ({ ...prev, [key]: !prev[key] }));
 
+  const handleMutationViewDetail = (record) => {
+    setSelectedMutation(record);
+    setMutationModalOpen(true);
+  };
+
   const handleMutationSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setMutationSearchText(selectedKeys[0]);
@@ -136,6 +147,7 @@ const GasDeposit = ({ accountId, customerId }) => {
       searchedColumn: mutationSearchedColumn,
       searchText: mutationSearchText,
       handleSearch: handleMutationSearch,
+      onViewDetail: handleMutationViewDetail,
     }),
   [mutationSearch, mutationSearchInput, mutationSearchedColumn, mutationSearchText]);
 
@@ -301,6 +313,49 @@ const GasDeposit = ({ accountId, customerId }) => {
           </div>
         </Spin>
       )}
+      <NxModal
+        isOpen={mutationModalOpen}
+        title="MUTATION DETAIL"
+        width={1500}
+        handleCancel={() => setMutationModalOpen(false)}
+        footer={
+          <div className="flex justify-start">
+             <Button onClick={() => setMutationModalOpen(false)} type="menu">
+              Back
+            </Button>
+          </div>
+        }
+      >
+        <div className="flex flex-col p-4 gap-4">
+          <NxBaseContainer border header={"MUTATION DETAIL INFORMATION"}>
+            <div className="w-full grid grid-cols-5 gap-4">
+              <NxDetailText label="Document Number">{selectedMutation?.documentNumber}</NxDetailText>
+              <NxDetailText label="Source">{selectedMutation?.source}</NxDetailText>
+              <NxDetailText label="Billing Period">{selectedMutation?.billingPeriod}</NxDetailText>
+              <NxDetailText label="Mutation Date">{NxDate.formatDate(selectedMutation?.mutationDate, "DD MMM YYYY")}</NxDetailText>
+              <NxDetailText label="Mutation Type">{selectedMutation?.mutationType}</NxDetailText>
+              <NxDetailText label="Category">{selectedMutation?.category}</NxDetailText>
+              <NxDetailText label="Quantity">{selectedMutation?.quantity}</NxDetailText>
+              <NxDetailText label="Price">{selectedMutation?.price}</NxDetailText>
+              <NxDetailText label="Amount">{selectedMutation?.amount}</NxDetailText>
+              <NxDetailText label="Type">{selectedMutation?.type}</NxDetailText>
+              <NxDetailText label="UOM">{selectedMutation?.uom}</NxDetailText>
+            </div>
+            <div className="w-full mt-4">
+              <NxDetailText label="Description">{selectedMutation?.description}</NxDetailText>
+            </div>
+          </NxBaseContainer>
+          <NxBaseContainer border header={"HISTORY LOG INFORMATION"}>
+            <div className="w-full grid grid-cols-5 gap-4">
+              <NxDetailText label="Record ID">{selectedMutation?.id}</NxDetailText>
+              <NxDetailText label="Created Date">{NxDate.formatDate(selectedMutation?.createdDate)}</NxDetailText>
+              <NxDetailText label="Created By">{selectedMutation?.createdBy}</NxDetailText>
+              <NxDetailText label="Updated Date">{NxDate.formatDate(selectedMutation?.updatedDate)}</NxDetailText>
+              <NxDetailText label="Updated By">{selectedMutation?.updatedBy}</NxDetailText>
+            </div>
+          </NxBaseContainer>
+        </div>
+      </NxModal>
     </div>
   );
 };

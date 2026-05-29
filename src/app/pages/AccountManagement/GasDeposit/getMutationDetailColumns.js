@@ -1,6 +1,8 @@
+import { Button, Tooltip } from "antd";
 import { getColumnSearchPropsUseFilteredValueFE } from "../../../../utils/getColumnSearchProps";
 import NxDate from "../../../../components/Nx/NxDatePicker";
 import NxStatusComponent from "../../../../components/Nx/NxStatusComponent";
+import SVGIcon from "../../../../assets/Icon/index";
 
 /**
  * Returns the column definitions for the Mutation Detail table.
@@ -11,6 +13,7 @@ import NxStatusComponent from "../../../../components/Nx/NxStatusComponent";
  * @param {string}          params.searchedColumn
  * @param {string}          params.searchText
  * @param {Function}        params.handleSearch
+ * @param {Function}        [params.onViewDetail]
  * @returns {Array<Object>}
  */
 const getMutationDetailColumns = ({
@@ -19,6 +22,7 @@ const getMutationDetailColumns = ({
   searchedColumn,
   searchText,
   handleSearch,
+  onViewDetail = () => {},
 }) => [
   {
     key: "no",
@@ -175,6 +179,23 @@ const getMutationDetailColumns = ({
     ),
     render: (status) => (
       <NxStatusComponent colour={status} margin={false}>{status}</NxStatusComponent>
+    ),
+  },
+  {
+    key: "action",
+    title: "ACTION",
+    align: "center",
+    width: 70,
+    fixed: "right",
+    render: (_, record) => (
+      <Tooltip title="Detail">
+        <Button
+          type="table-action"
+          onClick={() => onViewDetail(record)}
+        >
+          <SVGIcon name="IconDetail" width={20} />
+        </Button>
+      </Tooltip>
     ),
   },
 ];
