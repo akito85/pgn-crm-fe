@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { PlusCircleOutlined } from "@ant-design/icons";
 import { Dropdown, Skeleton, Spin } from "antd";
@@ -11,14 +11,14 @@ import ModalRunJob from "./ModalRunJob";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import {
-  getAllJobExecutionPaginate,
-  startExecution,
-  stopExecution,
-  suspendExecution,
-  holdExecution,
-  cancelExecution,
-  restartExecution,
-} from "../../../../redux/slices/job_management/jobExecutionSlice";
+  useExecutionsList,
+  useStartExecution,
+  useStopExecution,
+  useSuspendExecution,
+  useHoldExecution,
+  useCancelExecution,
+  useRestartExecution,
+} from "../../../../hooks/jobManagement/useJobExecutions";
 import { nxApplyFixedColumns } from "../../../../utils/Nx/nxApplyFixedColumns";
 import useGrantAccessHooks from "../../../../components/useGrantAccessHooks";
 import IconThreeDots from "../../../../assets/Icon/Nx/IconThreeDots";
@@ -47,9 +47,29 @@ const formatDate = (val) => {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 const JobExecutionPage = () => {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { data, loading, actionLoading } = useSelector((state) => state.jobExecution);
+
+  const [page, setPage] = useState(1);
+  const [sort, setSort] = useState("");
+
+  // TanStack Query data layer (replaces jobExecutionSlice thunks).
+  // refetchInterval inside the hook handles live polling while runs are active.
+  const { data, isLoading: loading, refetch } = useExecutionsList({
+    search: "",
+    page,
+    pageSize: PAGE_SIZE,
+    sort,
+  });
+
+  const startMutation   = useStartExecution();
+  const stopMutation    = useStopExecution();
+  const suspendMutation = useSuspendExecution();
+  const holdMutation    = useHoldExecution();
+  const cancelMutation  = useCancelExecution();
+  const restartMutation = useRestartExecution();
+  const actionLoading =
+    startMutation.isPending || stopMutation.isPending || suspendMutation.isPending ||
+    holdMutation.isPending || cancelMutation.isPending || restartMutation.isPending;
 
   const rawToken = useSelector((state) => state.auth?.token);
   const userId = useMemo(() => {
@@ -61,42 +81,9 @@ const JobExecutionPage = () => {
 
   const { loading: permissionsLoading } = useGrantAccessHooks();
 
-  const [page, setPage] = useState(1);
-  const [sort, setSort] = useState("");
   const [accumulatedData, setAccumulatedData] = useState([]);
   const [fixedColumns, setFixedColumns] = useState({ left: [], right: ["actions"] });
   const [selectJobModalOpen, setSelectJobModalOpen] = useState(false);
-  const [refreshToken, setRefreshToken] = useState(0);
-
-  const handleFetch = useCallback(() => {
-    dispatch(getAllJobExecutionPaginate({ search: "", page, pageSize: PAGE_SIZE, sort }));
-  }, [dispatch, page, sort, refreshToken]);
-
-  useEffect(() => { handleFetch(); }, [handleFetch]);
-
-  const NON_TERMINAL_STATUSES = useMemo(
-    () => new Set(["PENDING", "SCHEDULED", "PROCESSING", "ON_HOLD", "SUSPENDED"]),
-    []
-  );
-  const POLL_INTERVAL_MS = 60000;
-
-  useEffect(() => {
-    const anyRunning = accumulatedData.some(
-      (r) => r && NON_TERMINAL_STATUSES.has(r.status)
-    );
-    if (!anyRunning) return undefined;
-
-    const id = setInterval(() => {
-      dispatch(getAllJobExecutionPaginate({
-        search: "",
-        page: 1,
-        pageSize: PAGE_SIZE,
-        sort,
-      }));
-    }, POLL_INTERVAL_MS);
-
-    return () => clearInterval(id);
-  }, [accumulatedData, dispatch, sort, NON_TERMINAL_STATUSES]);
 
   useEffect(() => {
     if (!data?.content) return;
@@ -114,7 +101,7 @@ const JobExecutionPage = () => {
   const handleRefresh = () => {
     setPage(1);
     setAccumulatedData([]);
-    setRefreshToken((n) => n + 1);
+    refetch();
   };
 
   const handleLoadMore = () => {
@@ -133,14 +120,13 @@ const JobExecutionPage = () => {
   const afterAction = useCallback(() => {
     setPage(1);
     setAccumulatedData([]);
-    setRefreshToken((n) => n + 1);
-  }, []);
+    refetch();
+  }, [refetch]);
 
-  const handleAction = useCallback((thunk, arg) => {
-    dispatch(thunk(arg)).then((res) => {
-      if (!res.error) afterAction();
-    });
-  }, [dispatch, afterAction]);
+  // Run a mutation hook against an execution id, then reset the list on success.
+  const runAction = useCallback((mutation, executionId) => {
+    mutation.mutate(executionId, { onSuccess: afterAction });
+  }, [afterAction]);
 
   // ─── Columns ────────────────────────────────────────────────────────────────
 
@@ -175,7 +161,7 @@ const JobExecutionPage = () => {
             </span>
           ),
           disabled: !["PENDING","SCHEDULED","PROCESSING","ON_HOLD","SUSPENDED"].includes(status),
-          onClick: () => handleAction(cancelExecution, record.executionId),
+          onClick: () => runAction(cancelMutation, record.executionId),
         },
         {
           key: "hold",
@@ -185,7 +171,7 @@ const JobExecutionPage = () => {
             </span>
           ),
           disabled: status !== "PENDING",
-          onClick: () => handleAction(holdExecution, record.executionId),
+          onClick: () => runAction(holdMutation, record.executionId),
         },
         {
           key: "restart",
@@ -195,7 +181,7 @@ const JobExecutionPage = () => {
             </span>
           ),
           disabled: !["FAILED","CANCELLED","SUCCEEDED"].includes(status),
-          onClick: () => handleAction(restartExecution, record.executionId),
+          onClick: () => runAction(restartMutation, record.executionId),
         },
         {
           key: "stop",
@@ -205,7 +191,7 @@ const JobExecutionPage = () => {
             </span>
           ),
           disabled: status !== "PROCESSING",
-          onClick: () => handleAction(stopExecution, record.executionId),
+          onClick: () => runAction(stopMutation, record.executionId),
         },
         {
           key: "suspend",
@@ -215,7 +201,7 @@ const JobExecutionPage = () => {
             </span>
           ),
           disabled: !(status === "SCHEDULED" && isRecurring),
-          onClick: () => handleAction(suspendExecution, record.executionId),
+          onClick: () => runAction(suspendMutation, record.executionId),
         },
       ];
 
@@ -240,7 +226,7 @@ const JobExecutionPage = () => {
         </div>
       );
     },
-  }), [permissionsLoading, handleAction, navigate]);
+  }), [permissionsLoading, runAction, cancelMutation, holdMutation, restartMutation, stopMutation, suspendMutation, navigate]);
 
   const baseColumns = useMemo(() => [
     {
@@ -291,6 +277,7 @@ const JobExecutionPage = () => {
           processing: "processing",
           on_hold: "hold",
           suspended: "suspended",
+          stalled: "failed",
         };
         return (
           <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "22px", overflow: "hidden" }}>
@@ -409,11 +396,11 @@ const JobExecutionPage = () => {
         loading={actionLoading}
         onClose={() => setSelectJobModalOpen(false)}
         onSubmit={(values) => {
-          dispatch(startExecution(values)).then((res) => {
-            if (!res.error) {
+          startMutation.mutate(values, {
+            onSuccess: () => {
               setSelectJobModalOpen(false);
               afterAction();
-            }
+            },
           });
         }}
       />
