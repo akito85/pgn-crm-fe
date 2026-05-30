@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { Dropdown, Skeleton, Spin } from "antd";
+import { Checkbox, Dropdown, Skeleton, Spin } from "antd";
 import { JOB_MGMT_ROUTES } from "../../../../routes/job_management/job_routes";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 import NxTable from "../../../../components/Nx/NxTable";
@@ -10,11 +10,11 @@ import StatusComponent from "../../../../components/StatusComponent";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import {
-  getAllSchedulesPaginate,
-  activateSchedule,
-  pauseSchedule,
-  deleteSchedule,
-} from "../../../../redux/slices/job_management/jobScheduleSlice";
+  useSchedulesList,
+  useActivateSchedule,
+  usePauseSchedule,
+  useDeleteSchedule,
+} from "../../../../hooks/jobManagement/useJobSchedules";
 import { nxApplyFixedColumns } from "../../../../utils/Nx/nxApplyFixedColumns";
 import useGrantAccessHooks from "../../../../components/useGrantAccessHooks";
 import IconThreeDots from "../../../../assets/Icon/Nx/IconThreeDots";
@@ -40,9 +40,16 @@ const formatDate = (val) => {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 const JobSchedulePage = () => {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { data, loading, actionLoading } = useSelector((state) => state.jobSchedule);
+
+  // TanStack Query data layer (replaces jobScheduleSlice thunks)
+  const [page, setPage] = useState(1);
+  const { data, isLoading: loading, refetch } = useSchedulesList({ page, pageSize: PAGE_SIZE });
+  const activateMutation = useActivateSchedule();
+  const pauseMutation = usePauseSchedule();
+  const deleteMutation = useDeleteSchedule();
+  const actionLoading =
+    activateMutation.isPending || pauseMutation.isPending || deleteMutation.isPending;
 
   const rawToken = useSelector((state) => state.auth?.token);
   const userId = useMemo(() => {
@@ -54,20 +61,15 @@ const JobSchedulePage = () => {
 
   const { loading: permissionsLoading } = useGrantAccessHooks();
 
-  const [page, setPage] = useState(1);
   const [accumulatedData, setAccumulatedData] = useState([]);
-  const [refreshToken, setRefreshToken] = useState(0);
   const [fixedColumns, setFixedColumns] = useState({ left: [], right: ["actions"] });
 
-  // Delete modal state
+  // Pause / Delete confirmation state (shared cascade choice: also stop in-flight runs)
+  const [pauseModalOpen, setPauseModalOpen] = useState(false);
+  const [scheduleToPause, setScheduleToPause] = useState(null);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [scheduleToDelete, setScheduleToDelete] = useState(null);
-
-  const fetchList = useCallback(() => {
-    dispatch(getAllSchedulesPaginate({ page, pageSize: PAGE_SIZE }));
-  }, [dispatch, page, refreshToken]);
-
-  useEffect(() => { fetchList(); }, [fetchList]);
+  const [cascadeCancel, setCascadeCancel] = useState(false);
 
   useEffect(() => {
     if (!data?.content) return;
@@ -89,30 +91,63 @@ const JobSchedulePage = () => {
 
   const hasMore = accumulatedData.length < (data?.totalElements || 0);
 
+  // After any mutation: reset to page 1 and refresh. Mutation onSuccess already
+  // invalidates the schedules cache; this resets accumulation/pagination state.
   const afterAction = useCallback(() => {
     setPage(1);
     setAccumulatedData([]);
-    setRefreshToken((n) => n + 1);
-  }, []);
+    refetch();
+  }, [refetch]);
 
-  const handleDeleteConfirm = async () => {
+  // ─── Activate (no cascade) ─────────────────────────────────────────────────
+
+  const handleActivate = useCallback((scheduleId) => {
+    activateMutation.mutate(scheduleId, { onSuccess: afterAction });
+  }, [activateMutation, afterAction]);
+
+  // ─── Pause (with cascade choice) ───────────────────────────────────────────
+
+  const openPause = (record) => {
+    setScheduleToPause(record);
+    setCascadeCancel(false);
+    setPauseModalOpen(true);
+  };
+
+  const handlePauseConfirm = () => {
+    if (!scheduleToPause) return;
+    setPauseModalOpen(false);
+    pauseMutation.mutate(
+      { scheduleId: scheduleToPause.scheduleId, cancelInFlight: cascadeCancel },
+      { onSuccess: afterAction, onSettled: () => setScheduleToPause(null) }
+    );
+  };
+
+  const handlePauseCancel = () => {
+    setPauseModalOpen(false);
+    setScheduleToPause(null);
+  };
+
+  // ─── Delete (with cascade choice) ──────────────────────────────────────────
+
+  const openDelete = (record) => {
+    setScheduleToDelete(record);
+    setCascadeCancel(false);
+    setDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = () => {
     if (!scheduleToDelete) return;
     setDeleteModalOpen(false);
-    const res = await dispatch(deleteSchedule(scheduleToDelete.scheduleId));
-    if (!res.error) afterAction();
-    setScheduleToDelete(null);
+    deleteMutation.mutate(
+      { scheduleId: scheduleToDelete.scheduleId, cancelInFlight: cascadeCancel },
+      { onSuccess: afterAction, onSettled: () => setScheduleToDelete(null) }
+    );
   };
 
   const handleDeleteCancel = () => {
     setDeleteModalOpen(false);
     setScheduleToDelete(null);
   };
-
-  const handleAction = useCallback((thunk, arg) => {
-    dispatch(thunk(arg)).then((res) => {
-      if (!res.error) afterAction();
-    });
-  }, [dispatch, afterAction]);
 
   // ─── Action Column ────────────────────────────────────────────────────────────
 
@@ -145,7 +180,7 @@ const JobSchedulePage = () => {
               <IconPower width="18" height="18" /> Activate
             </span>
           ),
-          onClick: () => handleAction(activateSchedule, record.scheduleId),
+          onClick: () => handleActivate(record.scheduleId),
         }] : []),
         ...(showPause ? [{
           key: "pause",
@@ -154,7 +189,7 @@ const JobSchedulePage = () => {
               <IconSuspend width="18" height="18" /> Pause
             </span>
           ),
-          onClick: () => handleAction(pauseSchedule, record.scheduleId),
+          onClick: () => openPause(record),
         }] : []),
         {
           key: "delete",
@@ -163,10 +198,7 @@ const JobSchedulePage = () => {
               <IconDeleteMenu width="18" height="18" /> Delete
             </span>
           ),
-          onClick: () => {
-            setScheduleToDelete(record);
-            setDeleteModalOpen(true);
-          },
+          onClick: () => openDelete(record),
         },
       ].sort((a, b) => a.key.localeCompare(b.key));
 
@@ -191,7 +223,7 @@ const JobSchedulePage = () => {
         </div>
       );
     },
-  }), [permissionsLoading, handleAction, navigate]);
+  }), [permissionsLoading, handleActivate, navigate]);
 
   // ─── Columns ─────────────────────────────────────────────────────────────────
 
@@ -320,6 +352,19 @@ const JobSchedulePage = () => {
     { path: "", breadcrumbName: "Schedule List" },
   ];
 
+  // Reusable cascade checkbox shown in both pause and delete confirmations.
+  const cascadeOption = (
+    <div style={{ marginTop: 16, padding: "10px 12px", background: "#fff7e6", border: "1px solid #ffe7ba", borderRadius: 6 }}>
+      <Checkbox checked={cascadeCancel} onChange={(e) => setCascadeCancel(e.target.checked)}>
+        Also stop in-flight runs
+      </Checkbox>
+      <div style={{ fontSize: 12, color: "#8c6d1f", marginTop: 4, marginLeft: 24 }}>
+        Cancels any queued or running executions this schedule already started.
+        Leave unchecked to let them finish.
+      </div>
+    </div>
+  );
+
   return (
     <>
       <BreadCrumb routes={routes} />
@@ -350,6 +395,46 @@ const JobSchedulePage = () => {
           showExport={false}
         />
       </NxCardContainer>
+
+      {/* Pause Confirmation Modal */}
+      <NxModal
+        isOpen={pauseModalOpen}
+        title="Pause Schedule"
+        loading={actionLoading}
+        handleCancel={handlePauseCancel}
+        width={480}
+        footer={[
+          <div className="flex flex-row justify-between items-center">
+            <ButtonComponent size={"small"} key="cancel" onClick={handlePauseCancel} disabled={actionLoading}>
+              Cancel
+            </ButtonComponent>
+            <ButtonComponent
+              size={"small"}
+              key="pause"
+              border={false}
+              className="!bg-[#d48806] !text-white !border-transparent"
+              onClick={handlePauseConfirm}
+              loading={actionLoading}
+            >
+              Pause
+            </ButtonComponent>
+          </div>
+        ]}
+      >
+        <div style={{ padding: "20px 24px" }}>
+          <p style={{ margin: 0, marginBottom: 8, color: "#333" }}>
+            Pause this schedule? It will stop firing new runs. The schedule itself
+            is kept and can be re-activated later.
+          </p>
+          <div style={{ display: "grid", gridTemplateColumns: "100px 1fr", gap: "8px 0", fontSize: 13 }}>
+            <span style={{ color: "#999", textTransform: "uppercase", fontSize: 11 }}>Name</span>
+            <span style={{ fontWeight: 500, color: "#222" }}>{scheduleToPause?.scheduleName ?? "—"}</span>
+            <span style={{ color: "#999", textTransform: "uppercase", fontSize: 11 }}>Job Code</span>
+            <span style={{ fontWeight: 500, color: "#222" }}>{scheduleToPause?.jobCode ?? "—"}</span>
+          </div>
+          {cascadeOption}
+        </div>
+      </NxModal>
 
       {/* Delete Confirmation Modal */}
       <NxModal
@@ -386,6 +471,7 @@ const JobSchedulePage = () => {
             <span style={{ color: "#999", textTransform: "uppercase", fontSize: 11 }}>Job Code</span>
             <span style={{ fontWeight: 500, color: "#222" }}>{scheduleToDelete?.jobCode ?? "—"}</span>
           </div>
+          {cascadeOption}
         </div>
       </NxModal>
     </>
