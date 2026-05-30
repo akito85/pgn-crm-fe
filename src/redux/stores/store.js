@@ -144,6 +144,7 @@ import paymentWarrantyPartnerReducer from "../slices/receipt_collection/paymentW
 import liborRateReducer from "../slices/receipt_collection/liborRate";
 import caCiMappingReducer from "../slices/receipt_collection/caCiMapping";
 import serviceRequestReducer from "../slices/account_management/detailAccount/ServiceRequestSlice";
+import workOrderReducer from "../slices/account_management/detailAccount/WorkOrderSlice";
 import paymentCycleReducer from "../slices/receipt_collection/paymentCycle";
 import paymentPeriodReducer from "../slices/receipt_collection/paymentPeriod";
 import billingItemCategoryReducer from "../slices/system_setup/master_data/billingItemCategory";
@@ -219,6 +220,7 @@ const reducer = combineReducers({
   paymentRelation: paymentRelationReducer,
   invoiceRelation: invoiceRelationReducer,
   serviceRequest: serviceRequestReducer,
+  workOrder: workOrderReducer,
   premise: premiseReducer,
   servicePoint: servicePointReducer,
   distributionMedia: distributionMediaReducer,

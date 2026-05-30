@@ -236,5 +236,14 @@ export const ACCOUNT_MANAGEMENT_ROUTES = {
   // GS UTILIZATION
   CREATE_GAS_UTILIZATION: "/account-management/account-standard/gas-utilization/create",
   UPDATE_GAS_UTILIZATION: "/account-management/account-standard/gas-utilization/update",
-  
+
+  // Work Order — Standalone
+  VIEW_WORK_ORDERS:       "/account-management/work-orders",
+  VIEW_DETAIL_WORK_ORDER: "/account-management/work-orders/view",
+  CREATE_WORK_ORDER:      "/account-management/work-orders/create",
+  UPDATE_WORK_ORDER:      "/account-management/work-orders/update",
+
+  // Work Order — Under SR
+  CREATE_SR_WORK_ORDER:   "/account-management/account-standard/service-requests/work-orders/create",
+  UPDATE_SR_WORK_ORDER:   "/account-management/account-standard/service-requests/work-orders/update",
 };

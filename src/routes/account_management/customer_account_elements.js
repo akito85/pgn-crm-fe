@@ -55,6 +55,9 @@ import CreateUpdatePaymentRelation from "../../app/pages/AccountManagement/Custo
 import CreateCustomerServiceRequest from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/ServiceRequest/Create/CreateCustomerServiceRequest";
 import CustomerServiceRequestDetails from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/ServiceRequest/Details/CustomerServiceRequestDetails";
 import PreRequisiteCreateForm from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/ServiceRequest/Create/StepContents/PreRequisiteForm/Create";
+import WorkOrderList from "../../app/pages/AccountManagement/WorkOrder/WorkOrderList";
+import WorkOrderDetail from "../../app/pages/AccountManagement/WorkOrder/WorkOrderDetail";
+import CreateWorkOrder from "../../app/pages/AccountManagement/shared/WorkOrder/Create/CreateWorkOrder";
 
 import InvoiceRelationDetail from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/FinancialInformation/InvoiceRelation/Details/InvoiceRelationDetail";
 import CreateUpdateInvoiceRelation from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/FinancialInformation/InvoiceRelation/CreateUpdate/CreateUpdateInvoiceRelation";
@@ -267,4 +270,14 @@ export const ACCOUNT_MANAGEMENT_ELEMENTS = {
   // EQUIPMENT
   CREATE_EQUIPMENT_PAGE: <EquipmentForm type={"create"}/>,
   UPDATE_EQUIPMENT_PAGE: <EquipmentForm type={"update"} />,
+
+  // Work Order — Standalone
+  VIEW_WORK_ORDERS_PAGE:       <WorkOrderList />,
+  VIEW_DETAIL_WORK_ORDER_PAGE: <WorkOrderDetail />,
+  CREATE_WORK_ORDER_PAGE:      <CreateWorkOrder />,
+  UPDATE_WORK_ORDER_PAGE:      <CreateWorkOrder />,
+
+  // Work Order — Under SR
+  CREATE_SR_WORK_ORDER_PAGE: <CreateWorkOrder />,
+  UPDATE_SR_WORK_ORDER_PAGE: <CreateWorkOrder />,
 };
