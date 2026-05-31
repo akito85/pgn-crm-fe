@@ -3,7 +3,7 @@ import { useState } from "react";
 import InvoiceRelationTable from "./InvoiceRelationTable";
 import { useDispatch, useSelector } from "react-redux";
 import InvoiceRelationApprovalModal from "./InvoiceRelationApprovalModal";
-import NxInactivateModal from "../../../../../../../components/Nx/NxInactivateModal";
+import NxActivateInactivateModal from "../../../../../../../components/Nx/NxActivateInactivateModal";
 import {
   getIrApprovalHierarchies,
   getIrApprovalHierarchy,
@@ -134,7 +134,7 @@ const InvoiceRelation = ({ accountId, customerId }) => {
         afterFinish={triggerRefresh}
       />
       {/* Inactivate Modal */}
-      <NxInactivateModal
+      <NxActivateInactivateModal
         isOpen={showInactiveModal}
         header={"INACTIVATE"}
         handleCloseModal={() => handleInactivateModal(false)}

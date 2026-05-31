@@ -8,6 +8,9 @@ import { dateFormatting, renderColumn} from "../../../../../../utils";
 import { getColumnSearchPropsUseFilteredValueFE } from "../../../../../../utils/getColumnSearchProps";
 import { sorterFunction } from "../../../../../../utils/sorterFunction";
 import NxTable from "../../../../../../components/Nx/NxTable";
+import NxModal from "../../../../../../components/Nx/NxModal";
+import { Button } from "antd";
+import NxDetailText from "../../../../../../components/Nx/NxDetailText";
 
 
 const ModalDetail = ({
@@ -85,38 +88,39 @@ const ModalDetail = ({
 
 
   return (
-    <ModalCustom
-      header={"Detail Contact"}
+    <NxModal
+      title={"Detail Contact"}
       isOpen={isOpen}
       handleCancel={() => {
         handleCloseModal()
       }}
-      type={"detail"}
       width={1000}
       footer={
-        <ButtonComponent
-          type={"default"}
-          onClick={() => {
-            handleCloseModal()
-          }}
-        >
-          Back
-        </ButtonComponent>
+        <div className="flex justify-end w-full">
+          <Button
+            type={"menu"}
+            onClick={() => {
+              handleCloseModal()
+            }}
+          >
+            Back
+          </Button>
+        </div>
       }
     >
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-y-4 p-4">
 
         <NxCardContainer header="CONTACT INFORMATION">
-          <div className="grid grid-cols-3 gap-x-6 gap-y-4">
-            <DetailText label="First Name">{dataDetail?.contact?.firstName}</DetailText>
-            <DetailText label="Middle Name">{dataDetail?.contact?.middleName}</DetailText>
-            <DetailText label="Last Name">{dataDetail?.contact?.lastName}</DetailText>
-            <DetailText label="Job">{dataDetail?.contact?.jobName}</DetailText>
-            <DetailText label="Position">{dataDetail?.contact?.positionName}</DetailText>
+          <div className="grid grid-cols-3 gap-4">
+            <NxDetailText label="First Name">{dataDetail?.contact?.firstName}</NxDetailText>
+            <NxDetailText label="Middle Name">{dataDetail?.contact?.middleName}</NxDetailText>
+            <NxDetailText label="Last Name">{dataDetail?.contact?.lastName}</NxDetailText>
+            <NxDetailText label="Job">{dataDetail?.contact?.jobName}</NxDetailText>
+            <NxDetailText label="Position">{dataDetail?.contact?.positionName}</NxDetailText>
           </div>
         </NxCardContainer>
 
-        <NxCardContainer header="CONTACT DETAIL INFORMATION" withoutPadding>
+        <NxCardContainer header="CONTACT DETAIL INFORMATION">
           <NxTable
             idTable="account-contact-detail-modal-table"
             useSelect
@@ -131,26 +135,28 @@ const ModalDetail = ({
         </NxCardContainer>
 
         <NxCardContainer header="CONTACT PURPOSE INFORMATION">
-          <div className="grid grid-cols-2 gap-x-6 gap-y-4 mb-4">
-            <DetailText label="Contact Address">{dataDetail?.contactAddress}</DetailText>
-            <DetailText label="Contact Address Additional Note">{dataDetail?.additionalNote}</DetailText>
-            <DetailText label="Primary">{dataDetail?.primaryFlagValue ? "Yes" : "No"}</DetailText>
+          <div className="flex flex-col gap-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <NxDetailText label="Contact Address">{dataDetail?.contactAddress}</NxDetailText>
+              <NxDetailText label="Contact Address Additional Note">{dataDetail?.additionalNote}</NxDetailText>
+              <NxDetailText label="Primary">{dataDetail?.primaryFlagValue ? "Yes" : "No"}</NxDetailText>
+            </div>
+            <NxDetailText label="Description">{dataDetail?.description}</NxDetailText>
           </div>
-          <DetailText label="Description">{dataDetail?.description}</DetailText>
         </NxCardContainer>
 
         <NxCardContainer header="HISTORY LOG INFORMATION">
-          <div className="grid grid-cols-5 gap-x-6 gap-y-4">
-            <DetailText label="Record ID">{dataDetail?.accountContactId}</DetailText>
-            <DetailText label="Created Date">{moment(dataDetail?.cretedDate).format(dateFormatting.dateTime)}</DetailText>
-            <DetailText label="Created By">{dataDetail?.createdBy}</DetailText>
-            <DetailText label="Updated Date">{dataDetail?.updatedDate !== null ? moment(dataDetail?.updatedDate).format(dateFormatting.dateTime) : ""}</DetailText>
-            <DetailText label="Updated By">{dataDetail?.updatedBy}</DetailText>
+          <div className="grid grid-cols-5 gap-4">
+            <NxDetailText label="Record ID">{dataDetail?.accountContactId}</NxDetailText>
+            <NxDetailText label="Created Date">{moment(dataDetail?.cretedDate).format(dateFormatting.dateTime)}</NxDetailText>
+            <NxDetailText label="Created By">{dataDetail?.createdBy}</NxDetailText>
+            <NxDetailText label="Updated Date">{dataDetail?.updatedDate !== null ? moment(dataDetail?.updatedDate).format(dateFormatting.dateTime) : ""}</NxDetailText>
+            <NxDetailText label="Updated By">{dataDetail?.updatedBy}</NxDetailText>
           </div>
         </NxCardContainer>
 
       </div>
-    </ModalCustom>
+    </NxModal>
   );
 };
 

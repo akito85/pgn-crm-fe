@@ -111,27 +111,27 @@ const TableRBI = ({
   pageSize,
   current,
   loading,
-  onChange = () => {},
-  onSizeChanger = () => {},
+  onChange = () => { },
+  onSizeChanger = () => { },
   totalData,
   onDelete,
   rowSelection,
-  onRowClicked = () => {},
+  onRowClicked = () => { },
   tableScrolled,
   expandable,
   className,
   useSelect = true,
   usePagination = true,
   useInfiniteScroll = false,
-  onLoadMore = () => {},
+  onLoadMore = () => { },
   hasMore = false,
   loadMoreThreshold = 20,
-  onSort = () => {},
-  handleDownload = () => {},
+  onSort = () => { },
+  handleDownload = () => { },
   columnDefinitions,
   fixedColumns = { left: [], right: [] },
-  setFixedColumns = () => {},
-  onAdvanceSearch = () => {},
+  setFixedColumns = () => { },
+  onAdvanceSearch = () => { },
   onRow,
   rowClassName,
   customHeaderLeft,
@@ -144,10 +144,11 @@ const TableRBI = ({
   refreshIcon,
   enableRowClick = false,
   selectedRowKey = null,
-  onRowClick = () => {},
-  onSearch = () => {},
+  onRowClick = () => { },
+  onSearch = () => { },
   tableSize = "default",
   summary,
+  rowKey,
 }) => {
   const [optionSelectedCol, setOptionSelectedCol] = useState([]);
   const [isAdvanceOpen, setIsAdvanceOpen] = useState(false);
@@ -202,7 +203,7 @@ const TableRBI = ({
       if (!target) return;
 
       const scrollTop = target.scrollTop;
-      
+
       // Prevent horizontal scroll from triggering fetch
       if (scrollTop === lastScrollTopRef.current) return;
       lastScrollTopRef.current = scrollTop;
@@ -474,29 +475,48 @@ const TableRBI = ({
       });
     }
 
-    // Separate into left, normal, right
+    // Separate into left, normal, right while preserving the exact order
+    // declared in fixedColumns.left and fixedColumns.right arrays.
     const leftFixed = [];
     const rightFixed = [];
     const normal = [];
 
-    visible.forEach((col) => {
-      const isLeftFixed =
-        (Array.isArray(fixedColumns.left) &&
-          fixedColumns.left.includes(col.key)) ||
-        col.fixed === "left";
+    const visibleMap = new Map(visible.map((c) => [c.key, c]));
+
+    // Preserve left order based on fixedColumns.left
+    if (Array.isArray(fixedColumns.left)) {
+      fixedColumns.left.forEach((key) => {
+        if (visibleMap.has(key)) {
+          leftFixed.push(visibleMap.get(key));
+          visibleMap.delete(key);
+        }
+      });
+    }
+
+    // Collect remaining visible columns into normal/right based on their fixed prop
+    for (const col of visibleMap.values()) {
       const isRightFixed =
         (Array.isArray(fixedColumns.right) &&
           fixedColumns.right.includes(col.key)) ||
         col.fixed === "right";
 
-      if (isLeftFixed) {
-        leftFixed.push(col);
-      } else if (isRightFixed) {
-        rightFixed.push(col);
-      } else {
-        normal.push(col);
+      if (isRightFixed) {
+        // skip here; right will be ordered explicitly below
+        continue;
       }
-    });
+      normal.push(col);
+    }
+
+    // Preserve right order based on fixedColumns.right
+    if (Array.isArray(fixedColumns.right)) {
+      fixedColumns.right.forEach((key) => {
+        // prefer columns that are remaining in visibleMap (not already in leftFixed)
+        const col = visible.find((c) => c.key === key);
+        if (col) {
+          rightFixed.push(col);
+        }
+      });
+    }
 
     const finalCols = [
       ...leftFixed.map((c) => processColumn(c, "left")),
@@ -583,8 +603,8 @@ const TableRBI = ({
 
   return (
     <div className={"flex flex-col w-full"}>
-    <style>
-      {`
+      <style>
+        {`
         #${idTable} .ant-table-content {
           position: relative;
           z-index: 1;
@@ -755,7 +775,7 @@ const TableRBI = ({
           z-index: 1;
         }
       `}
-    </style>
+      </style>
       {useSelect ? (
         <div className={"w-full flex mb-3 justify-between items-center"}>
           <div className="flex items-center gap-4">
@@ -839,6 +859,7 @@ const TableRBI = ({
         rowClassName={customRowClassName}
         size={tableSize}
         summary={summary}
+        rowKey={rowKey}
       />
 
       {useInfiniteScroll ? (

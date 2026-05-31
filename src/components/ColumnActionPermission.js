@@ -29,6 +29,7 @@ export const RenderContentActions = ({
             <div className="flex flex-col">
               {itemRender
                 ?.filter((item) => item?.action !== sliceColumn?.toLowerCase())
+                ?.sort((a, b) => (a?.action || "").localeCompare(b?.action || ""))
                 ?.map((item, index) => {
                   if (permissions?.includes(item?.action)) {
                     return (
