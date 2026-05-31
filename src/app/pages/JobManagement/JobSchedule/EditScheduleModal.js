@@ -1,42 +1,53 @@
 import React, { useEffect, useState } from "react";
-import { Checkbox, Input, InputNumber, Select } from "antd";
+import { Checkbox, Form } from "antd";
 import NxModal from "../../../../components/Nx/NxModal";
 import ButtonComponent from "../../../../components/ButtonComponent";
+import NxDate from "../../../../components/Nx/NxDatePicker";
+import ScheduleConfigFields, { FieldLabel, inputStyle } from "../JobExecution/ScheduleConfigFields";
+import { CRON_PRESETS } from "../JobExecution/scheduleConstants";
+import buildScheduleEditSubmit from "../JobExecution/buildScheduleEditSubmit";
 
-const toLocalInput = (v) => (v ? String(v).slice(0, 16) : ""); // "YYYY-MM-DDTHH:mm"
+// CRON schedules edit as Specific Days; INTERVAL schedules edit as Periodically.
+const triggerForScheduleType = (t) => (t === "INTERVAL" ? "PERIODICALLY" : "SPECIFIC_DAYS");
+
+// Pick the preset matching an existing cron, else "__custom__" so the raw cron
+// shows in the custom input. Undefined when there is no cron (INTERVAL schedule).
+const presetForCron = (cron) => {
+  if (!cron) return undefined;
+  return CRON_PRESETS.some((p) => p.value === cron) ? cron : "__custom__";
+};
 
 const EditScheduleModal = ({ open, schedule, loading, onClose, onSubmit }) => {
-  const [form, setForm] = useState({});
+  const [form] = Form.useForm();
+  const [triggerType, setTriggerType] = useState("SPECIFIC_DAYS");
+  const [cronPresetSeed, setCronPresetSeed] = useState(null);
   const [cascadeCancel, setCascadeCancel] = useState(false);
 
   useEffect(() => {
     if (!schedule) return;
-    setForm({
-      scheduleName: schedule.scheduleName ?? "",
-      scheduleType: schedule.scheduleType ?? "CRON",
-      cronExpression: schedule.cronExpression ?? "",
-      intervalSeconds: schedule.intervalSeconds ?? null,
-      timezone: schedule.timezone ?? "UTC",
-      startTime: toLocalInput(schedule.startTime),
-      endTime: toLocalInput(schedule.endTime),
-    });
+    const tt = triggerForScheduleType(schedule.scheduleType);
+    const seed = tt === "SPECIFIC_DAYS" ? presetForCron(schedule.cronExpression) : null;
+    setTriggerType(tt);
+    setCronPresetSeed(seed ?? null);
     setCascadeCancel(false);
-  }, [schedule]);
+    form.setFieldsValue({
+      timezone: schedule.timezone ?? "UTC",
+      cronExpression: schedule.cronExpression ?? "",
+      cronSchedulePreset: seed,
+      intervalSeconds: schedule.intervalSeconds ?? null,
+      startTime: schedule.startTime ?? null,
+      endTime: schedule.endTime ?? null,
+      scheduledAt: undefined,
+    });
+  }, [schedule, form]);
 
-  const set = (k, v) => setForm((p) => ({ ...p, [k]: v }));
-  const isCron = form.scheduleType === "CRON";
+  // Schedules carry an active window; only meaningful for the recurring types.
+  const showWindow = triggerType === "SPECIFIC_DAYS" || triggerType === "PERIODICALLY";
 
   const handleSubmit = () => {
-    const payload = {
-      scheduleName: form.scheduleName,
-      scheduleType: form.scheduleType,
-      cronExpression: isCron ? form.cronExpression : null,
-      intervalSeconds: isCron ? null : form.intervalSeconds,
-      timezone: form.timezone,
-      startTime: form.startTime ? `${form.startTime}:00` : null,
-      endTime: form.endTime ? `${form.endTime}:00` : null,
-    };
-    onSubmit({ scheduleId: schedule.scheduleId, payload, cancelInFlight: cascadeCancel });
+    form.validateFields().then((values) => {
+      onSubmit(buildScheduleEditSubmit({ triggerType, values, schedule, cancelInFlight: cascadeCancel }));
+    });
   };
 
   return (
@@ -45,20 +56,12 @@ const EditScheduleModal = ({ open, schedule, loading, onClose, onSubmit }) => {
       title="Edit Schedule"
       loading={loading}
       handleCancel={onClose}
-      width={520}
+      width={620}
       footer={[
         <div className="flex flex-row justify-between items-center" key="f">
-          <ButtonComponent size="small" key="cancel" onClick={onClose} disabled={loading}>
-            Cancel
-          </ButtonComponent>
-          <ButtonComponent
-            size="small"
-            key="save"
-            border={false}
-            className="!bg-[#0075bf] !text-white !border-transparent"
-            onClick={handleSubmit}
-            loading={loading}
-          >
+          <ButtonComponent size="small" key="cancel" onClick={onClose} disabled={loading}>Cancel</ButtonComponent>
+          <ButtonComponent size="small" key="save" border={false}
+            className="!bg-[#0075bf] !text-white !border-transparent" onClick={handleSubmit} loading={loading}>
             Save changes
           </ButtonComponent>
         </div>,
@@ -66,8 +69,7 @@ const EditScheduleModal = ({ open, schedule, loading, onClose, onSubmit }) => {
     >
       <div style={{ padding: "20px 24px", display: "flex", flexDirection: "column", gap: 12 }}>
         <div style={{ padding: "10px 12px", background: "#fff7e6", border: "1px solid #ffe7ba", borderRadius: 6, fontSize: 13, color: "#8c6d1f" }}>
-          Editing changes only future runs. Runs already started will continue to
-          completion unless you also cancel them below.
+          Editing changes only future runs. Runs already started will continue to completion unless you also cancel them below.
         </div>
 
         <div style={{ display: "grid", gridTemplateColumns: "120px 1fr", gap: "8px 0", fontSize: 13 }}>
@@ -75,55 +77,37 @@ const EditScheduleModal = ({ open, schedule, loading, onClose, onSubmit }) => {
           <span style={{ fontWeight: 500, color: "#222" }}>{schedule?.jobCode ?? "—"}</span>
           <span style={{ color: "#999", textTransform: "uppercase", fontSize: 11 }}>Job Name</span>
           <span style={{ fontWeight: 500, color: "#222" }}>{schedule?.jobName ?? "—"}</span>
+          <span style={{ color: "#999", textTransform: "uppercase", fontSize: 11 }}>Schedule</span>
+          <span style={{ fontWeight: 500, color: "#222" }}>{schedule?.scheduleName ?? "—"}</span>
         </div>
 
-        <label style={{ fontSize: 12, color: "#555" }}>Schedule name
-          <Input value={form.scheduleName} onChange={(e) => set("scheduleName", e.target.value)} />
-        </label>
-
-        <label style={{ fontSize: 12, color: "#555" }}>Type
-          <Select
-            value={form.scheduleType}
-            onChange={(v) => set("scheduleType", v)}
-            options={[{ value: "CRON", label: "CRON" }, { value: "INTERVAL", label: "INTERVAL" }]}
-            style={{ width: "100%" }}
+        <Form form={form} layout="vertical" requiredMark={false}>
+          <ScheduleConfigFields
+            form={form}
+            triggerType={triggerType}
+            setTriggerType={setTriggerType}
+            loading={loading}
+            initialCronPreset={cronPresetSeed}
           />
-        </label>
 
-        {isCron ? (
-          <label style={{ fontSize: 12, color: "#555" }}>Cron expression
-            <Input value={form.cronExpression} placeholder="0 0 * * *"
-                   onChange={(e) => set("cronExpression", e.target.value)} />
-          </label>
-        ) : (
-          <label style={{ fontSize: 12, color: "#555" }}>Interval (seconds)
-            <InputNumber min={1} value={form.intervalSeconds} style={{ width: "100%" }}
-                         onChange={(v) => set("intervalSeconds", v)} />
-          </label>
-        )}
-
-        <label style={{ fontSize: 12, color: "#555" }}>Timezone
-          <Input value={form.timezone} onChange={(e) => set("timezone", e.target.value)} />
-        </label>
-
-        <div style={{ display: "flex", gap: 12 }}>
-          <label style={{ fontSize: 12, color: "#555", flex: 1 }}>Start
-            <Input type="datetime-local" value={form.startTime}
-                   onChange={(e) => set("startTime", e.target.value)} />
-          </label>
-          <label style={{ fontSize: 12, color: "#555", flex: 1 }}>End
-            <Input type="datetime-local" value={form.endTime}
-                   onChange={(e) => set("endTime", e.target.value)} />
-          </label>
-        </div>
+          {showWindow && (
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 4 }}>
+              <Form.Item name="startTime" label={<FieldLabel>Start</FieldLabel>} style={{ marginBottom: 0 }}>
+                <NxDate showTime={true} placeholder="Optional start" disabled={loading} style={inputStyle} />
+              </Form.Item>
+              <Form.Item name="endTime" label={<FieldLabel>End</FieldLabel>} style={{ marginBottom: 0 }}>
+                <NxDate showTime={true} placeholder="Optional end" disabled={loading} style={inputStyle} />
+              </Form.Item>
+            </div>
+          )}
+        </Form>
 
         <div style={{ padding: "10px 12px", background: "#fff7e6", border: "1px solid #ffe7ba", borderRadius: 6 }}>
           <Checkbox checked={cascadeCancel} onChange={(e) => setCascadeCancel(e.target.checked)}>
             Also cancel in-flight runs
           </Checkbox>
           <div style={{ fontSize: 12, color: "#8c6d1f", marginTop: 4, marginLeft: 24 }}>
-            Cancels any queued or running executions this schedule already started.
-            Leave unchecked to let them finish.
+            Cancels any queued or running executions this schedule already started. Leave unchecked to let them finish.
           </div>
         </div>
       </div>

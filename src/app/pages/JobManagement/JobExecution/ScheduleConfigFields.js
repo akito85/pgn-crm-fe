@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Form, Input, InputNumber, Select } from "antd";
 import { CheckCircleOutlined } from "@ant-design/icons";
 import NxDate from "../../../../components/Nx/NxDatePicker";
@@ -59,9 +59,19 @@ const TriggerCard = ({ type, selected, onClick, disabled }) => {
  * The parent owns `form`, `triggerType` and `setTriggerType`; this component
  * renders the cards and the field block for the current trigger type and
  * resets dependent fields when the trigger type changes.
+ *
+ * `initialCronPreset` seeds the cron preset selection — used by the edit modal
+ * to pre-select the preset (or "__custom__") that matches an existing schedule.
+ * The run modal leaves it null (always starts fresh).
  */
-const ScheduleConfigFields = ({ form, triggerType, setTriggerType, loading = false }) => {
-  const [cronPreset, setCronPreset] = useState(null);
+const ScheduleConfigFields = ({ form, triggerType, setTriggerType, loading = false, initialCronPreset = null }) => {
+  const [cronPreset, setCronPreset] = useState(initialCronPreset);
+
+  // Re-seed when the parent supplies a new preset (e.g. opening edit on a
+  // different schedule). Manual dropdown changes don't change initialCronPreset.
+  useEffect(() => {
+    setCronPreset(initialCronPreset);
+  }, [initialCronPreset]);
 
   const handleTriggerChange = (val) => {
     setTriggerType(val);
