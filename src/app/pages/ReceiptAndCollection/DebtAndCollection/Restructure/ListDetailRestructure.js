@@ -18,7 +18,9 @@ import {
     getOpenItemDetail,
     resetOpenItemDetail,
     getPaymentPlanDetail,
-    resetPaymentPlanDetail
+    resetPaymentPlanDetail,
+    getRestructureBadDebtList,
+    getRestructureScheduleList,
 } from "../../../../../redux/slices/receipt_collection/restructure";
 import ModalOpenItemDetail from "./Modal/ModalOpenItemDetail";
 import ModalPaymentPlanDetail from "./Modal/ModalPaymentPlanDetail";
@@ -34,6 +36,7 @@ import SectionCard from "../../../../../components/SectionCard";
 import SubSectionCard from "../../../../../components/SubSectionCard";
 import LogHistoryInfo from "../../../../../components/LogHistoryInfo";
 import StatusComponent from "../../../../../components/StatusComponent";
+import RestructureStatusBadge from "./helpers/RestructureStatusBadge";
 import SVGIcon from "../../../../../assets/Icon/index";
 
 import { DEBT_AND_COLLECTION_ROUTES } from "../../../../../routes/DebtAndCollection/rc_routes";
@@ -51,16 +54,16 @@ const ListDetailRestructure = ({ selectedId: propId, onClose, onRefresh, approva
     const [approveOrReject, setApproveOrReject] = useState("");
     const [modalOpenItem, setModalOpenItem] = useState(false);
     const [modalPaymentPlan, setModalPaymentPlan] = useState(false);
-    const id = propId || location?.state?.id || "RES001"; 
+    const id = propId || location?.state?.id || "RES001";
     const isEmbedded = !!propId;
 
     const contactColumns = [
         { title: "NO", dataIndex: "key", width: 50, align: "center", render: (_, __, i) => i + 1 },
-        { 
-          title: "PRIMARY", 
-          dataIndex: "isPrimary", 
-          width: 120,
-          render: (val) => val ? <StatusComponent colour="primary">Primary</StatusComponent> : "-" 
+        {
+            title: "PRIMARY",
+            dataIndex: "isPrimary",
+            width: 120,
+            render: (val) => val ? <StatusComponent colour="primary">Primary</StatusComponent> : "-"
         },
         { title: "CONTACT NAME", dataIndex: "cpName", width: 250 },
         { title: "JOB", dataIndex: "job", width: 150 },
@@ -83,8 +86,8 @@ const ListDetailRestructure = ({ selectedId: propId, onClose, onRefresh, approva
                     dataSource={record.details || []}
                     useSelect={false}
                     usePagination={false}
-                    showAdvanceSearch={false}
-                    showSearchBar={false}
+                    showAdvanceSearch={true}
+                    showSearchBar={true}
                 />
             </div>
         ),
@@ -109,7 +112,11 @@ const ListDetailRestructure = ({ selectedId: propId, onClose, onRefresh, approva
         openItemDetail,
         loadingOpenItemDetail,
         paymentPlanDetail,
-        loadingPaymentPlanDetail
+        loadingPaymentPlanDetail,
+        badDebtListSearch,
+        loadingBadDebtList,
+        scheduleListSearch,
+        loadingScheduleList,
     } = useSelector((state) => state.restructure);
 
     const [segmentedPage, setSegmentedPage] = useState("Payment Plan");
@@ -117,6 +124,64 @@ const ListDetailRestructure = ({ selectedId: propId, onClose, onRefresh, approva
     const [selectedHierarchy, setSelectedHierarchy] = useState(null);
     const [appHierDataDetail, setAppHierDataDetail] = useState([]);
     const [localLoading, setLocalLoading] = useState(false);
+    const [badDebtSearchActive, setBadDebtSearchActive] = useState(false);
+    const [scheduleSearchActive, setScheduleSearchActive] = useState(false);
+
+    const handleBadDebtSearch = useCallback((e) => {
+        const value = e.target.value;
+        const searchObj = value ? { all: value } : {};
+        setBadDebtSearchActive(!!value);
+        dispatch(getRestructureBadDebtList({
+            id,
+            search: encodeURIComponent(JSON.stringify(searchObj)),
+        }));
+    }, [dispatch, id]);
+
+    const handleBadDebtAdvanceSearch = useCallback((searchData) => {
+        if (!searchData) {
+            setBadDebtSearchActive(false);
+            return;
+        }
+        const simpleSearch = {};
+        (searchData?.filters || []).forEach(({ column, value }) => {
+            if (column && value !== undefined && value !== null && value !== "") {
+                simpleSearch[column] = value;
+            }
+        });
+        setBadDebtSearchActive(Object.keys(simpleSearch).length > 0);
+        dispatch(getRestructureBadDebtList({
+            id,
+            search: encodeURIComponent(JSON.stringify(simpleSearch)),
+        }));
+    }, [dispatch, id]);
+
+    const handleScheduleSearch = useCallback((e) => {
+        const value = e.target.value;
+        const searchObj = value ? { all: value } : {};
+        setScheduleSearchActive(!!value);
+        dispatch(getRestructureScheduleList({
+            id,
+            search: encodeURIComponent(JSON.stringify(searchObj)),
+        }));
+    }, [dispatch, id]);
+
+    const handleScheduleAdvanceSearch = useCallback((searchData) => {
+        if (!searchData) {
+            setScheduleSearchActive(false);
+            return;
+        }
+        const simpleSearch = {};
+        (searchData?.filters || []).forEach(({ column, value }) => {
+            if (column && value !== undefined && value !== null && value !== "") {
+                simpleSearch[column] = value;
+            }
+        });
+        setScheduleSearchActive(Object.keys(simpleSearch).length > 0);
+        dispatch(getRestructureScheduleList({
+            id,
+            search: encodeURIComponent(JSON.stringify(simpleSearch)),
+        }));
+    }, [dispatch, id]);
 
     const [dataHeader, setDataHeader] = useState({});
     const [contacts, setContacts] = useState([]);
@@ -130,7 +195,7 @@ const ListDetailRestructure = ({ selectedId: propId, onClose, onRefresh, approva
     const approvalName = (dataListAppHierId || []).find(x => x.appHierId === data_detail?.restructure?.appHierId)?.approvalName || dataHeader?.approvalName || dataHeader?.appHierId || "";
 
     const isApprover = propIsApprover || location?.state?.isApprover || false;
-    const approvalType = propApprovalType || location?.state?.approvalType || data_detail?.tApprovalDto?.category;
+    const approvalType = propApprovalType || location?.state?.approvalType || data_detail?.tApprovalDto?.approvalType || data_detail?.tApprovalDto?.category;
     const isEarlyRepayment = (approvalType === "EARLY_REPAYMENT_RESTRUCTURE");
     const isRePlan = (approvalType === "REPLAN_RESTRUCTURE");
     const isCancel = (approvalType === "CANCEL_RESTRUCTURE");
@@ -179,8 +244,8 @@ const ListDetailRestructure = ({ selectedId: propId, onClose, onRefresh, approva
                 try {
                     if (isEarlyRepayment) {
                         const response = await receiptCollectionHttpService.getDetail(`/v1/dbs/api/early-repayment/by-restructure/${id}`);
-                        if (response?.data?.success && response?.data?.data && response?.data?.data.length > 0) {
-                            const erId = response.data.data[0].id;
+                        if (response?.success && response?.data && response?.data.length > 0) {
+                            const erId = response.data[0].id;
                             await dispatch(getDetailEarlyRepayment(erId));
                         }
                     } else {
@@ -234,16 +299,20 @@ const ListDetailRestructure = ({ selectedId: propId, onClose, onRefresh, approva
     useEffect(() => {
         if (data_detail) {
             if (data_detail.restructure) {
+                // early-repayment response wraps restructure as { info, contacts }
+                // regular restructure response sets it as a flat RestructureDetailDto
                 const res = data_detail.restructure;
-                setDataHeader(res);
-                setSelectedHierarchy(res.appHierId);
-                
-                // Map data to match the UI requirements
-                setOpenItems(data_detail.badDebtList || []);
-                setContacts(data_detail.restructure?.contactList || []);
-                
-                // Map calculationList to installmentsByCurrency format
-                const calc = data_detail.calculationList || [];
+                const resInfo = res?.info || res;
+                setDataHeader(resInfo);
+                setSelectedHierarchy(resInfo?.appHierId);
+
+                // open items: early repayment uses openItems/badDebts; restructure uses badDebtList
+                setOpenItems(data_detail.openItems || data_detail.badDebtList || []);
+                // contacts: early repayment nests under info.contactList; restructure at contactList
+                setContacts(resInfo?.contactList || data_detail.restructure?.contacts || []);
+
+                // installments: early repayment uses installments.calculated; restructure uses calculationList
+                const calc = data_detail.calculationList || data_detail.installments?.calculated || data_detail.installments?.selected || [];
                 const groupedCalc = calc.reduce((acc, curr) => {
                     const cur = curr.currency || "IDR";
                     if (!acc[cur]) acc[cur] = [];
@@ -260,7 +329,8 @@ const ListDetailRestructure = ({ selectedId: propId, onClose, onRefresh, approva
                 }, {});
                 setInstallmentsByCurrency(groupedCalc);
 
-                const dataAttachment = (data_detail?.attachmentDtoList || []).map(
+                // attachments: early repayment uses attachments; restructure uses attachmentDtoList
+                const dataAttachment = (data_detail?.attachmentDtoList || data_detail?.attachments || []).map(
                     (item) => ({
                         ...item,
                         createdDate: item.createdDate ? moment(item.createdDate).format("DD MMM YYYY") : "",
@@ -270,14 +340,15 @@ const ListDetailRestructure = ({ selectedId: propId, onClose, onRefresh, approva
                 setListDataAttachment(dataAttachment);
 
                 form.setFieldsValue({
-                    apphierId: res.appHierId
+                    apphierId: resInfo?.appHierId
                 });
             }
             if (data_detail.earlyRepayment) {
                 const er = data_detail.earlyRepayment;
-                setSelectedHierarchy(er.appHierId);
+                const erInfo = er?.info || er;
+                setSelectedHierarchy(erInfo?.appHierId);
 
-                const dataAttachment = (data_detail?.attachmentDtoList || []).map(
+                const dataAttachment = (data_detail?.attachmentDtoList || data_detail?.attachments || []).map(
                     (item) => ({
                         ...item,
                         createdDate: item.createdDate ? moment(item.createdDate).format("DD MMM YYYY") : "",
@@ -287,14 +358,15 @@ const ListDetailRestructure = ({ selectedId: propId, onClose, onRefresh, approva
                 setListDataAttachment(dataAttachment);
 
                 form.setFieldsValue({
-                    apphierId: er.appHierId
+                    apphierId: erInfo?.appHierId
                 });
             }
         }
     }, [data_detail, form]);
 
     const renderOpenItems = () => {
-        const grouped = openItems.reduce((acc, item) => {
+        const displayItems = badDebtSearchActive ? badDebtListSearch : openItems;
+        const grouped = displayItems.reduce((acc, item) => {
             const cur = item.currency || "IDR";
             if (!acc[cur]) acc[cur] = [];
             acc[cur].push(item);
@@ -319,7 +391,7 @@ const ListDetailRestructure = ({ selectedId: propId, onClose, onRefresh, approva
             const rows = grouped[currency] || [];
             const refreshedRows = groupedRefreshed ? (groupedRefreshed[currency] || []) : null;
             const isIdr = currency === "IDR";
-            
+
             const total = rows.reduce((sum, r) => {
                 const num = parseFloat(String(r.totalAmount || r.amount).replace(/,/g, "")) || 0;
                 return sum + num;
@@ -329,10 +401,10 @@ const ListDetailRestructure = ({ selectedId: propId, onClose, onRefresh, approva
                 { title: "NO", dataIndex: "key", width: 50, render: (_, __, i) => i + 1 },
                 { title: "INVOICE NO", dataIndex: "invoiceNo" },
                 { title: "INVOICE PERIOD", dataIndex: "invoicePeriod" },
-                { title: "BILLING ITEM", dataIndex: "allocation" },
-                { 
-                    title: "AMOUNT", 
-                    dataIndex: "amount", 
+                { title: "BILLING ITEM", dataIndex: "billingItem" },
+                {
+                    title: "AMOUNT",
+                    dataIndex: "amount",
                     align: "right",
                     render: (amount) => {
                         const num = parseFloat(String(amount).replace(/,/g, "")) || 0;
@@ -358,8 +430,11 @@ const ListDetailRestructure = ({ selectedId: propId, onClose, onRefresh, approva
                     dataSource={rows}
                     columns={columns}
                     usePagination={false}
-                    showAdvanceSearch={false}
-                    showSearchBar={false}
+                    showAdvanceSearch={true}
+                    showSearchBar={true}
+                    loading={loadingBadDebtList}
+                    onSearch={handleBadDebtSearch}
+                    onAdvanceSearch={handleBadDebtAdvanceSearch}
                     summary={() => (
                         <Table.Summary fixed>
                             <Table.Summary.Row className="font-bold text-[12px] bg-[#F5F5F5]">
@@ -389,8 +464,8 @@ const ListDetailRestructure = ({ selectedId: propId, onClose, onRefresh, approva
                         dataSource={refreshedRows}
                         columns={columns}
                         usePagination={false}
-                        showAdvanceSearch={false}
-                        showSearchBar={false}
+                        showAdvanceSearch={true}
+                        showSearchBar={true}
                         summary={() => (
                             <Table.Summary fixed>
                                 <Table.Summary.Row className="font-bold text-[12px] bg-[#F5F5F5]">
@@ -432,11 +507,19 @@ const ListDetailRestructure = ({ selectedId: propId, onClose, onRefresh, approva
     };
 
     const renderPaymentPlanDetail = () => {
-        const currencies = Object.keys(installmentsByCurrency);
+        const displayInstallments = scheduleSearchActive
+            ? scheduleListSearch.reduce((acc, item) => {
+                const cur = item.currency || "IDR";
+                if (!acc[cur]) acc[cur] = [];
+                acc[cur].push(item);
+                return acc;
+            }, {})
+            : installmentsByCurrency;
+        const currencies = Object.keys(displayInstallments);
         if (currencies.length === 0) return <DetailText label="">No data available</DetailText>;
 
         return currencies.map(currency => {
-            const rows = installmentsByCurrency[currency] || [];
+            const rows = displayInstallments[currency] || [];
             const isIdr = currency === "IDR";
             const currentSum = rows.reduce((sum, r) => sum + (parseFloat(r.amount) || 0), 0);
 
@@ -450,17 +533,17 @@ const ListDetailRestructure = ({ selectedId: propId, onClose, onRefresh, approva
                     render: (val) => (parseFloat(val) || 0).toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 })
                 },
                 { title: "DUE DATE", dataIndex: "dueDate", render: (val) => val ? moment(val).format("DD MMM YYYY") : "-" },
-                { 
-                    title: "BALANCE", 
-                    dataIndex: "balance", 
+                {
+                    title: "BALANCE",
+                    dataIndex: "balance",
                     align: "right",
                     render: (val) => (parseFloat(val) || 0).toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 })
                 },
                 { title: "DETAIL CODE", dataIndex: "detailCode" },
-                { 
-                    title: "STATUS", 
+                {
+                    title: "STATUS",
                     dataIndex: "status",
-                    render: (status) => <StatusComponent colour={status || "Draft"}>{status || "Draft"}</StatusComponent>
+                    render: (status) => <RestructureStatusBadge status={status || "Draft"} />
                 },
                 {
                     title: "ACTION",
@@ -485,8 +568,11 @@ const ListDetailRestructure = ({ selectedId: propId, onClose, onRefresh, approva
                             dataSource={rows}
                             columns={columns}
                             usePagination={false}
-                            showAdvanceSearch={false}
-                            showSearchBar={false}
+                            showAdvanceSearch={true}
+                            showSearchBar={true}
+                            loading={loadingScheduleList}
+                            onSearch={handleScheduleSearch}
+                            onAdvanceSearch={handleScheduleAdvanceSearch}
                             summary={() => (
                                 <Table.Summary fixed>
                                     <Table.Summary.Row className="font-bold text-[12px] bg-[#F5F5F5]">
@@ -524,11 +610,17 @@ const ListDetailRestructure = ({ selectedId: propId, onClose, onRefresh, approva
 
     const handleConfirm = (res, handleClear) => {
         const body = {
-            id: isEarlyRepayment ? (data_detail?.earlyRepayment?.id || id) : id,
+            id: isEarlyRepayment ? (data_detail?.earlyRepayment?.info?.id || data_detail?.id || id) : id,
             remark: res.remark,
             approvalId: data_detail?.tApprovalDto?.tAppId,
             action: approveOrReject.toUpperCase(),
-            category: isEarlyRepayment ? "EARLY_REPAYMENT_RESTRUCTURE" : "RESTRUCTURE",
+            category: isEarlyRepayment
+                ? "EARLY_REPAYMENT_RESTRUCTURE"
+                : isRePlan
+                    ? "REPLAN_RESTRUCTURE"
+                    : isCancel
+                        ? "CANCEL_RESTRUCTURE"
+                        : "RESTRUCTURE",
             ...(evaluationData || {})
         };
 
@@ -579,7 +671,7 @@ const ListDetailRestructure = ({ selectedId: propId, onClose, onRefresh, approva
     return (
         <Spin spinning={localLoading || loading}>
             {!isEmbedded && <BreadCrumb routes={routes} />}
-            
+
             {isEarlyRepayment ? (
                 <DetailEarlyRepayment
                     isEmbedded={isEmbedded}

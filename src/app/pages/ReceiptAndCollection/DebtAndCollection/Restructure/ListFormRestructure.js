@@ -75,6 +75,7 @@ const ListFormRestructure = (props) => {
     const [appHierDataDetail, setAppHierDataDetail] = useState([]);
     const [isModalSubmit, setIsModalSubmit] = useState(false);
     const [formValues, setFormValues] = useState({});
+    const [isUploading, setIsUploading] = useState(false);
 
     // Validation states for step 0
     const [isPlanDetailValid, setIsPlanDetailValid] = useState(true);
@@ -334,8 +335,9 @@ const ListFormRestructure = (props) => {
             invoiceNumber: item.invoiceNo,
             invoicePeriod: item.invoicePeriod,
             currency: item.currency,
-            allocation: item.allocation,
-            amount: item.amount,
+            amount: item.outstandingAmount || item.amount,
+            billingItemId: item.billingItemId || null,
+            billHeaderId: item.billHeaderId || null,
         })),
         calculationList: Object.values(installmentsByCurrency).flat().map((item) => ({
             periode: item.periode,
@@ -357,12 +359,19 @@ const ListFormRestructure = (props) => {
             ? await dispatch(updateRestructure({ id, body }))
             : await dispatch(saveRestructure({ body }));
         if (action.meta.requestStatus === "fulfilled") {
-            const restructureId = action.payload?.data?.restructureId || id;
+            const restructureId = action.payload?.restructureId || action.payload?.data?.restructureId || id;
             const newAttachments = listDataAttachment.filter(item => item.dataType !== "exist");
             if (newAttachments.length > 0 && restructureId) {
-                uploadAttachments(newAttachments, restructureId, "RESTRUCTURE",
-                    (body) => receiptCollectionHttpService.uploadImage(`/v1/dbs/api/attachment/upload/v1`, body)
-                ).catch(err => console.error("Async draft upload failed", err));
+                try {
+                    setIsUploading(true);
+                    await uploadAttachments(newAttachments, restructureId, "RESTRUCTURE",
+                        (body) => receiptCollectionHttpService.uploadImage(`/v1/dbs/api/attachment/upload/v1`, body)
+                    );
+                } catch (err) {
+                    console.error("Async draft upload failed", err);
+                } finally {
+                    setIsUploading(false);
+                }
             }
             message.success("Draft berhasil disimpan!");
             navigate(DEBT_AND_COLLECTION_ROUTES.VIEW_RESTRUCTURE);
@@ -397,12 +406,19 @@ const ListFormRestructure = (props) => {
             ? await dispatch(updateRestructure({ id, body }))
             : await dispatch(saveRestructure({ body }));
         if (action.meta.requestStatus === "fulfilled") {
-            const restructureId = action.payload?.data?.restructureId || id;
+            const restructureId = action.payload?.restructureId || action.payload?.data?.restructureId || id;
             const newAttachments = listDataAttachment.filter(item => item.dataType !== "exist");
             if (newAttachments.length > 0 && restructureId) {
-                uploadAttachments(newAttachments, restructureId, "RESTRUCTURE",
-                    (body) => receiptCollectionHttpService.uploadImage(`/v1/dbs/api/attachment/upload/v1`, body)
-                ).catch(err => console.error("Async submit upload failed", err));
+                try {
+                    setIsUploading(true);
+                    await uploadAttachments(newAttachments, restructureId, "RESTRUCTURE",
+                        (body) => receiptCollectionHttpService.uploadImage(`/v1/dbs/api/attachment/upload/v1`, body)
+                    );
+                } catch (err) {
+                    console.error("Async submit upload failed", err);
+                } finally {
+                    setIsUploading(false);
+                }
             }
             message.success("Payment Plan berhasil disubmit!");
             navigate(DEBT_AND_COLLECTION_ROUTES.VIEW_RESTRUCTURE);
@@ -431,7 +447,7 @@ const ListFormRestructure = (props) => {
     return (
         <>
             <BreadCrumb routes={routes} />
-            <Spin spinning={loading}>
+            <Spin spinning={loading || isUploading}>
                 <FormStepper steps={steps} current={current} onPrev={prev} onNext={next} />
                 
                 <Form 

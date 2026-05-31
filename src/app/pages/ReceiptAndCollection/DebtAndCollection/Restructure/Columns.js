@@ -1,5 +1,6 @@
 import { getColumnSearchPropsPaging } from "../../../../../utils/getColumnSearchProps";
 import StatusComponent from "../../../../../components/StatusComponent";
+import RestructureStatusBadge from "./helpers/RestructureStatusBadge";
 
 export const columns = (
     page = 1,
@@ -17,14 +18,14 @@ export const columns = (
             fixed: "left",
         },
         {
-            key: "paymentPlanCode",
+            key: "restructureNumber",
             title: "PAYMENT PLAN CODE",
-            dataIndex: "paymentPlanCode",
+            dataIndex: "restructureNumber",
             width: 180,
             align: "left",
-            sorter: (a, b) => a?.paymentPlanCode?.localeCompare(b?.paymentPlanCode),
+            sorter: (a, b) => a?.restructureNumber?.localeCompare(b?.restructureNumber),
             ...getColumnSearchPropsPaging(
-                "paymentPlanCode",
+                "restructureNumber",
                 searchInput,
                 searchedColumn,
                 searchText,
@@ -245,7 +246,7 @@ export const columns = (
             fixed: "right",
             render: (text) => (
                 <div className="flex justify-center w-full">
-                    <StatusComponent colour={text || 'none'}>{text || ""}</StatusComponent>
+                    <RestructureStatusBadge status={text} />
                 </div>
             )
         },

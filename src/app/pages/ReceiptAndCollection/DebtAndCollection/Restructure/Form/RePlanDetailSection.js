@@ -247,15 +247,9 @@ const RePlanDetailSection = ({ planInfo = {}, openItems = [], onValidationChange
       title: "BALANCE",
       dataIndex: "balance",
       align: "right",
-      render: (_, record, index) => {
+      render: () => {
         const isIdr = currency === "IDR";
-        const targetTotal = openItemTotals[currency] || 0;
-        // Calculate running sum up to this row from the CURRENT state of rows
-        const rows = installmentsByCurrency[currency] || [];
-        const sumPaidUpToThisRow = rows
-          .slice(0, index + 1)
-          .reduce((sum, r) => sum + (parseFloat(String(r.amount).replace(/,/g, "")) || 0), 0);
-        const balance = Math.max(0, targetTotal - sumPaidUpToThisRow);
+        const balance = 0;
 
         return (
           <span className="font-medium text-gray-500">
@@ -299,8 +293,8 @@ const RePlanDetailSection = ({ planInfo = {}, openItems = [], onValidationChange
               columns={buildColumns(currency)}
               dataSource={rows}
               usePagination={false}
-              showAdvanceSearch={false}
-              showSearchBar={false}
+              showAdvanceSearch={true}
+              showSearchBar={true}
               showColumnSettings={false}
               summary={() => (
                 <Table.Summary fixed>
@@ -315,7 +309,7 @@ const RePlanDetailSection = ({ planInfo = {}, openItems = [], onValidationChange
                     </Table.Summary.Cell>
                     <Table.Summary.Cell index={2} />
                     <Table.Summary.Cell index={3} className="text-right font-bold pr-4 text-gray-500">
-                      {targetTotal.toLocaleString(isIdr ? "id-ID" : "en-US", {
+                      {(0).toLocaleString(isIdr ? "id-ID" : "en-US", {
                         maximumFractionDigits: 2,
                       })}
                     </Table.Summary.Cell>

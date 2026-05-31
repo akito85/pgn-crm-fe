@@ -18,6 +18,7 @@ import SelectComponent from "../../../../../components/SelectComponent";
 import { getRestructureTypes } from "../../../../../redux/slices/receipt_collection/restructure";
 import { CUSTOMER_STATUS } from "../../../../../constants/restructure";
 import StatusComponent from "../../../../../components/StatusComponent";
+import RestructureStatusBadge from "./helpers/RestructureStatusBadge";
 
 const DetailPaymentPlan = ({
     isEmbedded,
@@ -185,7 +186,7 @@ const DetailPaymentPlan = ({
                 { 
                     title: "STATUS", 
                     dataIndex: "status",
-                    render: (status) => <StatusComponent colour={status || "Draft"}>{status || "Draft"}</StatusComponent>
+                    render: (status) => <RestructureStatusBadge status={status || "Draft"} />
                 }
             ];
 
@@ -199,8 +200,8 @@ const DetailPaymentPlan = ({
                             dataSource={rows}
                             columns={columns}
                             usePagination={false}
-                            showAdvanceSearch={false}
-                            showSearchBar={false}
+                            showAdvanceSearch={true}
+                            showSearchBar={true}
                             summary={() => (
                                 <Table.Summary fixed>
                                     <Table.Summary.Row className="font-bold text-[12px] bg-[#F5F5F5]">
@@ -302,8 +303,8 @@ const DetailPaymentPlan = ({
                             columns={contactColumns}
                             expandable={expandable}
                             usePagination={false}
-                            showAdvanceSearch={false}
-                            showSearchBar={false}
+                            showAdvanceSearch={true}
+                            showSearchBar={true}
                         />
                     </SectionCard>
 

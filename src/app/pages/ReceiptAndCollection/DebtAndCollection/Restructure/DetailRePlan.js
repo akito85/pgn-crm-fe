@@ -82,6 +82,12 @@ const DetailRePlan = ({
                     <SectionCard title="RE-PLAN INFORMATION">
                         <div className="grid grid-cols-5 gap-y-4 gap-x-4 w-full">
                             <InputComponent
+                                label="Payment Plan Reference"
+                                mandatory={true}
+                                disabled={true}
+                                value={dataHeader?.parentRestructureNumber || ""}
+                            />
+                            <InputComponent
                                 label="Payment Plan Code"
                                 mandatory={true}
                                 disabled={true}
@@ -119,6 +125,12 @@ const DetailRePlan = ({
                                 disabled={true}
                                 format="DD MMM YYYY"
                                 value={dataHeader?.createdDate ? moment(dataHeader.createdDate) : (dataHeader?.requestDate ? moment(dataHeader.requestDate) : null)}
+                            />
+                            <InputComponent
+                                label="Reason"
+                                mandatory={true}
+                                disabled={true}
+                                value={dataHeader?.replanReason || ""}
                             />
                             <div className="col-span-5 flex flex-col w-auto">
                                 <InputLabel text="Description" mandatory={true} />
@@ -214,8 +226,8 @@ const DetailRePlan = ({
                                     columns={contactColumns}
                                     expandable={expandable}
                                     usePagination={false}
-                                    showAdvanceSearch={false}
-                                    showSearchBar={false}
+                                    showAdvanceSearch={true}
+                                    showSearchBar={true}
                                 />
                             </SubSectionCard>
                         </div>

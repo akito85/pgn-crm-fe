@@ -51,8 +51,8 @@ const ContentModalConfirmEarlyRepayment = ({
                     dataSource={record.details || []}
                     useSelect={false}
                     usePagination={false}
-                    showAdvanceSearch={false}
-                    showSearchBar={false}
+                    showAdvanceSearch={true}
+                    showSearchBar={true}
                 />
             </div>
         ),
@@ -120,8 +120,8 @@ const ContentModalConfirmEarlyRepayment = ({
                             dataSource={rows}
                             columns={columns}
                             usePagination={false}
-                            showAdvanceSearch={false}
-                            showSearchBar={false}
+                            showAdvanceSearch={true}
+                            showSearchBar={true}
                             summary={() => (
                                 <Table.Summary fixed>
                                     <Table.Summary.Row className="font-bold text-[12px] bg-[#F5F5F5]">
@@ -214,8 +214,8 @@ const ContentModalConfirmEarlyRepayment = ({
                             dataSource={rows}
                             columns={columns}
                             usePagination={false}
-                            showAdvanceSearch={false}
-                            showSearchBar={false}
+                            showAdvanceSearch={true}
+                            showSearchBar={true}
                             summary={() => (
                                 <Table.Summary fixed>
                                     <Table.Summary.Row className="font-bold text-[12px] bg-[#F5F5F5]">
@@ -329,8 +329,8 @@ const ContentModalConfirmEarlyRepayment = ({
                             columns={attachmentColumns}
                             dataSource={listDataAttachment}
                             usePagination={false}
-                            showAdvanceSearch={false}
-                            showSearchBar={false}
+                            showAdvanceSearch={true}
+                            showSearchBar={true}
                         />
                     </SectionCard>
                 </div>

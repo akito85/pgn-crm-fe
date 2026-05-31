@@ -67,8 +67,8 @@ const ContentModalConfirmRestructure = ({
                     dataSource={record.details || []}
                     useSelect={false}
                     usePagination={false}
-                    showAdvanceSearch={false}
-                    showSearchBar={false}
+                    showAdvanceSearch={true}
+                    showSearchBar={true}
                 />
             </div>
         ),
@@ -136,8 +136,8 @@ const ContentModalConfirmRestructure = ({
                             dataSource={rows}
                             columns={columns}
                             usePagination={false}
-                            showAdvanceSearch={false}
-                            showSearchBar={false}
+                            showAdvanceSearch={true}
+                            showSearchBar={true}
                             summary={() => (
                                 <Table.Summary fixed>
                                     <Table.Summary.Row className="font-bold text-[12px] bg-[#F5F5F5]">
@@ -188,11 +188,8 @@ const ContentModalConfirmRestructure = ({
                     title: "BALANCE",
                     dataIndex: "balance",
                     align: "right",
-                    render: (_, __, index) => {
-                        const sumPaidUpToThisRow = rows
-                            .slice(0, index + 1)
-                            .reduce((sum, r) => sum + (parseFloat(String(r.amount).replace(/,/g, "")) || 0), 0);
-                        const balance = Math.max(0, targetTotal - sumPaidUpToThisRow);
+                    render: () => {
+                        const balance = 0;
                         return balance.toLocaleString(isIdr ? "id-ID" : "en-US", {
                             maximumFractionDigits: 2,
                         });
@@ -208,8 +205,8 @@ const ContentModalConfirmRestructure = ({
                             dataSource={rows}
                             columns={columns}
                             usePagination={false}
-                            showAdvanceSearch={false}
-                            showSearchBar={false}
+                            showAdvanceSearch={true}
+                            showSearchBar={true}
                             summary={() => (
                                 <Table.Summary fixed>
                                     <Table.Summary.Row className="font-bold text-[12px] bg-[#F5F5F5]">
@@ -221,7 +218,7 @@ const ContentModalConfirmRestructure = ({
                                         </Table.Summary.Cell>
                                         <Table.Summary.Cell index={2} />
                                         <Table.Summary.Cell index={3} className="text-right font-bold pr-4 text-gray-500">
-                                            {targetTotal.toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 })}
+                                            {(0).toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 })}
                                         </Table.Summary.Cell>
                                     </Table.Summary.Row>
                                 </Table.Summary>
@@ -277,8 +274,8 @@ const ContentModalConfirmRestructure = ({
                             columns={contactColumns}
                             expandable={expandable}
                             usePagination={false}
-                            showAdvanceSearch={false}
-                            showSearchBar={false}
+                            showAdvanceSearch={true}
+                            showSearchBar={true}
                         />
                     </SectionCard>
 
@@ -363,8 +360,8 @@ const ContentModalConfirmRestructure = ({
                                 columns={attachmentColumns}
                                 dataSource={listDataAttachment}
                                 usePagination={false}
-                                showAdvanceSearch={false}
-                                showSearchBar={false}
+                                showAdvanceSearch={true}
+                                showSearchBar={true}
                             />
                         </SectionCard>
                     </div>

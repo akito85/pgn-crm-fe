@@ -37,7 +37,7 @@ const DetailEarlyRepayment = ({
     configApp
 }) => {
     const renderEarlyPayoffDetail = () => {
-        const list = data_detail?.selectedInstallmentDetails || data_detail?.calculationList || [];
+        const list = data_detail?.installments?.selected || data_detail?.installments?.calculated || data_detail?.selectedInstallmentDetails || data_detail?.calculationList || [];
         const grouped = list.reduce((acc, item) => {
             const cur = item.currency || "IDR";
             if (!acc[cur]) acc[cur] = [];
@@ -213,27 +213,27 @@ const DetailEarlyRepayment = ({
                                 label="Source"
                                 mandatory={true}
                                 disabled={true}
-                                value={data_detail?.earlyRepayment?.source || dataHeader?.source || ""}
+                                value={data_detail?.earlyRepayment?.info?.source || dataHeader?.source || ""}
                             />
                             <DateComponent
                                 label="Request Date"
                                 mandatory={true}
                                 disabled={true}
                                 format="DD MMM YYYY"
-                                value={data_detail?.earlyRepayment?.createdDate ? moment(data_detail.earlyRepayment.createdDate) : (dataHeader?.requestDate ? moment(dataHeader.requestDate) : null)}
+                                value={data_detail?.earlyRepayment?.info?.createdDate ? moment(data_detail.earlyRepayment.info.createdDate) : (dataHeader?.requestDate ? moment(dataHeader.requestDate) : null)}
                             />
                             <DateComponent
                                 label="Early Payoff Date"
                                 mandatory={true}
                                 disabled={true}
                                 format="DD MMM YYYY"
-                                value={data_detail?.earlyRepayment?.repaymentDate ? moment(data_detail.earlyRepayment.repaymentDate) : (data_detail?.tApprovalDto?.requestedDate ? moment(data_detail.tApprovalDto.requestedDate) : null)}
+                                value={data_detail?.earlyRepayment?.info?.repaymentDate ? moment(data_detail.earlyRepayment.info.repaymentDate) : (data_detail?.tApprovalDto?.requestedDate ? moment(data_detail.tApprovalDto.requestedDate) : null)}
                             />
                             <InputComponent
                                 label="Reason"
                                 mandatory={true}
                                 disabled={true}
-                                value={data_detail?.earlyRepayment?.reason || "-"}
+                                value={data_detail?.earlyRepayment?.info?.reason || "-"}
                             />
                             <div className="flex flex-col">
                                 <InputLabel text="Term of Payment" mandatory={true} />
@@ -241,14 +241,14 @@ const DetailEarlyRepayment = ({
                                     <div style={{ width: "90px", flexShrink: 0 }}>
                                         <InputComponent
                                             disabled={true}
-                                            value={data_detail?.earlyRepayment?.termOfPaymentType || "-"}
+                                            value={data_detail?.earlyRepayment?.info?.termOfPaymentType || "-"}
                                         />
                                     </div>
                                     <div style={{ flex: 1 }}>
                                         <DateComponent
                                             disabled={true}
                                             format="DD MMM YYYY"
-                                            value={data_detail?.earlyRepayment?.termOfPaymentValue ? moment(data_detail.earlyRepayment.termOfPaymentValue) : null}
+                                            value={data_detail?.earlyRepayment?.info?.termOfPaymentValue ? moment(data_detail.earlyRepayment.info.termOfPaymentValue) : null}
                                             style={{ width: "100%" }}
                                         />
                                     </div>
@@ -276,7 +276,7 @@ const DetailEarlyRepayment = ({
                                         boxShadow: "0 1px 2px 0 rgb(0 0 0 / 0.05)",
                                         marginTop: "8px"
                                     }}
-                                    value={data_detail?.earlyRepayment?.reason || data_detail?.tApprovalDto?.remarks || ""}
+                                    value={data_detail?.earlyRepayment?.info?.remark || data_detail?.tApprovalDto?.remarks || ""}
                                     disabled={true}
                                 />
                             </div>
@@ -373,8 +373,8 @@ const DetailEarlyRepayment = ({
                                                     columns={contactColumns}
                                                     expandable={expandable}
                                                     usePagination={false}
-                                                    showAdvanceSearch={false}
-                                                    showSearchBar={false}
+                                                    showAdvanceSearch={true}
+                                                    showSearchBar={true}
                                                 />
                                             </SubSectionCard>
                                         )
@@ -386,12 +386,12 @@ const DetailEarlyRepayment = ({
                                             <SubSectionCard>
                                                 <TableRBI
                                                     idTable="table-contact-detail-er"
-                                                    dataSource={data_detail?.earlyRepayment?.contactList || []}
+                                                    dataSource={data_detail?.earlyRepayment?.contacts || []}
                                                     columns={contactColumns}
                                                     expandable={expandable}
                                                     usePagination={false}
-                                                    showAdvanceSearch={false}
-                                                    showSearchBar={false}
+                                                    showAdvanceSearch={true}
+                                                    showSearchBar={true}
                                                 />
                                             </SubSectionCard>
                                         )

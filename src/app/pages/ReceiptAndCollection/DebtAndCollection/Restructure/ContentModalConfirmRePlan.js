@@ -68,8 +68,8 @@ const ContentModalConfirmRePlan = ({
                     dataSource={record.details || []}
                     useSelect={false}
                     usePagination={false}
-                    showAdvanceSearch={false}
-                    showSearchBar={false}
+                    showAdvanceSearch={true}
+                    showSearchBar={true}
                 />
             </div>
         ),
@@ -119,8 +119,8 @@ const ContentModalConfirmRePlan = ({
                             columns={columns}
                             dataSource={items.map((it, idx) => ({ ...it, key: idx }))}
                             usePagination={false}
-                            showAdvanceSearch={false}
-                            showSearchBar={false}
+                            showAdvanceSearch={true}
+                            showSearchBar={true}
                             summary={() => (
                                 <Table.Summary fixed>
                                     <Table.Summary.Row className="font-bold text-[12px] bg-[#F5F5F5]">
@@ -169,11 +169,8 @@ const ContentModalConfirmRePlan = ({
                     dataIndex: "balance",
                     width: "30%",
                     align: "right",
-                    render: (_, __, index) => {
-                        const sumPaidUpToThisRow = items
-                            .slice(0, index + 1)
-                            .reduce((sum, r) => sum + (parseFloat(String(r.amount).replace(/,/g, "")) || 0), 0);
-                        const balance = Math.max(0, targetTotal - sumPaidUpToThisRow);
+                    render: () => {
+                        const balance = 0;
                         return balance.toLocaleString(currency === "IDR" ? "id-ID" : "en-US", {
                             maximumFractionDigits: 2,
                         });
@@ -191,8 +188,8 @@ const ContentModalConfirmRePlan = ({
                             columns={columns}
                             dataSource={items.map((it, idx) => ({ ...it, key: idx }))}
                             usePagination={false}
-                            showAdvanceSearch={false}
-                            showSearchBar={false}
+                            showAdvanceSearch={true}
+                            showSearchBar={true}
                             style={{ width: "100%" }}
                             summary={() => (
                                 <Table.Summary fixed>
@@ -205,7 +202,7 @@ const ContentModalConfirmRePlan = ({
                                         </Table.Summary.Cell>
                                         <Table.Summary.Cell index={2} />
                                         <Table.Summary.Cell index={3} className="text-right font-bold pr-4 text-gray-500">
-                                            {targetTotal.toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 })}
+                                            {(0).toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 })}
                                         </Table.Summary.Cell>
                                     </Table.Summary.Row>
                                 </Table.Summary>
@@ -262,8 +259,8 @@ const ContentModalConfirmRePlan = ({
                             dataSource={contacts.map((c, i) => ({ ...c, key: i + 1 }))}
                             expandable={expandable}
                             usePagination={false}
-                            showAdvanceSearch={false}
-                            showSearchBar={false}
+                            showAdvanceSearch={true}
+                            showSearchBar={true}
                         />
                     </SectionCard>
 
@@ -349,8 +346,8 @@ const ContentModalConfirmRePlan = ({
                                 columns={attachmentColumns}
                                 dataSource={listDataAttachment}
                                 usePagination={false}
-                                showAdvanceSearch={false}
-                                showSearchBar={false}
+                                showAdvanceSearch={true}
+                                showSearchBar={true}
                             />
                         </SectionCard>
                     </div>

@@ -166,8 +166,8 @@ const UploadRestructureLayout = ({
                 pageSize={pageSize}
                 onChange={(p, ps) => { setPage(p); setPageSize(ps); }}
                 tableScrolled={{ x: 1500, y: 400 }}
-                showSearchBar={false}
-                showAdvanceSearch={false}
+                showSearchBar={true}
+                showAdvanceSearch={true}
               />
             </div>
         );

@@ -57,8 +57,8 @@ const OpenItemInfoSection = ({ openItems = [] }) => {
               columns={columns}
               dataSource={rows}
               usePagination={false}
-              showAdvanceSearch={false}
-              showSearchBar={false}
+              showAdvanceSearch={true}
+              showSearchBar={true}
               summary={() => (
                 <Table.Summary fixed>
                   <Table.Summary.Row className="font-bold text-[12px] bg-[#F5F5F5]">

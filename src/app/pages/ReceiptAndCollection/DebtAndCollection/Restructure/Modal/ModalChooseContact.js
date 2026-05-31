@@ -71,8 +71,8 @@ const ModalChooseContact = ({ isOpen, handleCancel, onSelect, accountNumber, sel
           columns={subColumns}
           dataSource={record.contactDetails || []}
           usePagination={false}
-          showSearchBar={false}
-          showAdvanceSearch={false}
+          showSearchBar={true}
+          showAdvanceSearch={true}
           useSelect={false}
           headerBg={true}
         />

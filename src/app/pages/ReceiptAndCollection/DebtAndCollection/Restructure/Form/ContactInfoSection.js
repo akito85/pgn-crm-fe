@@ -102,8 +102,8 @@ const ContactInfoSection = forwardRef(({ onContactsChange, accountNumber, initia
           dataSource={record.details || []}
           useSelect={false}
           usePagination={false}
-          showAdvanceSearch={false}
-          showSearchBar={false}
+          showAdvanceSearch={true}
+          showSearchBar={true}
         />
       </div>
     ),
@@ -139,8 +139,8 @@ const ContactInfoSection = forwardRef(({ onContactsChange, accountNumber, initia
           dataSource={contacts}
           expandable={expandable}
           usePagination={false}
-          showAdvanceSearch={false}
-          showSearchBar={false}
+          showAdvanceSearch={true}
+          showSearchBar={true}
           useSelect={false}
           tableScrolled={{ x: "max-content" }}
         />

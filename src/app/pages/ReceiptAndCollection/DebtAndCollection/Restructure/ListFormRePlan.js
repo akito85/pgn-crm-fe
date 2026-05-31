@@ -62,6 +62,7 @@ const ListFormRePlan = (props) => {
     const [appHierDataDetail, setAppHierDataDetail] = useState([]);
     const [isModalSubmit, setIsModalSubmit] = useState(false);
     const [formValues, setFormValues] = useState({});
+    const [isUploading, setIsUploading] = useState(false);
 
     // Validation states for step 0
     const [isPlanDetailValid, setIsPlanDetailValid] = useState(true);
@@ -317,11 +318,13 @@ const ListFormRePlan = (props) => {
         sapCustId: values.sapCustId !== undefined ? values.sapCustId : null,
         accountStatus: values.accountStatus !== undefined ? values.accountStatus : null,
         saNumber: values.saNumber !== undefined ? values.saNumber : null,
+        parentRestructureNumber: values.restructureCode !== undefined ? values.restructureCode : null,
         type: values.type !== undefined ? values.type : null,
         tenor: values.tenor !== undefined ? values.tenor : null,
         startPeriod: values.startPeriod ? moment(values.startPeriod).format("YYYY-MM-DD") : null,
         source: values.source,
         description: values.description !== undefined ? values.description : null,
+        reason: values.reason !== undefined ? values.reason : null,
         contactIds: contacts.map((c) => c.id || c.contactId).filter(Boolean),
         appHierId: selectedHierarchy !== undefined && selectedHierarchy !== null ? selectedHierarchy : null,
         attachmentIds: listDataAttachment.map((a) => a.id).filter(Boolean),
@@ -351,12 +354,19 @@ const ListFormRePlan = (props) => {
         const body = buildRequestBody(values, true);
         const action = await dispatch(saveRestructure({ body }));
         if (action.meta.requestStatus === "fulfilled") {
-            const restructureId = action.payload?.data?.restructureId;
+            const restructureId = action.payload?.restructureId || action.payload?.data?.restructureId;
             const newAttachments = listDataAttachment.filter(item => item.dataType !== "exist");
             if (newAttachments.length > 0 && restructureId) {
-                uploadAttachments(newAttachments, restructureId, "RESTRUCTURE",
-                    (body) => receiptCollectionHttpService.uploadImage(`/v1/dbs/api/attachment/upload/v1`, body)
-                ).catch(err => console.error("Async draft upload failed", err));
+                try {
+                    setIsUploading(true);
+                    await uploadAttachments(newAttachments, restructureId, "RESTRUCTURE",
+                        (body) => receiptCollectionHttpService.uploadImage(`/v1/dbs/api/attachment/upload/v1`, body)
+                    );
+                } catch (err) {
+                    console.error("Async draft upload failed", err);
+                } finally {
+                    setIsUploading(false);
+                }
             }
             message.success("Draft berhasil disimpan!");
             navigate(DEBT_AND_COLLECTION_ROUTES.VIEW_RESTRUCTURE);
@@ -389,12 +399,19 @@ const ListFormRePlan = (props) => {
         const body = buildRequestBody(formValues, false);
         const action = await dispatch(saveRestructure({ body }));
         if (action.meta.requestStatus === "fulfilled") {
-            const restructureId = action.payload?.data?.restructureId;
+            const restructureId = action.payload?.restructureId || action.payload?.data?.restructureId;
             const newAttachments = listDataAttachment.filter(item => item.dataType !== "exist");
             if (newAttachments.length > 0 && restructureId) {
-                uploadAttachments(newAttachments, restructureId, "RESTRUCTURE",
-                    (body) => receiptCollectionHttpService.uploadImage(`/v1/dbs/api/attachment/upload/v1`, body)
-                ).catch(err => console.error("Async submit upload failed", err));
+                try {
+                    setIsUploading(true);
+                    await uploadAttachments(newAttachments, restructureId, "RESTRUCTURE",
+                        (body) => receiptCollectionHttpService.uploadImage(`/v1/dbs/api/attachment/upload/v1`, body)
+                    );
+                } catch (err) {
+                    console.error("Async submit upload failed", err);
+                } finally {
+                    setIsUploading(false);
+                }
             }
             message.success("Payment Plan berhasil disubmit!");
             navigate(DEBT_AND_COLLECTION_ROUTES.VIEW_RESTRUCTURE);
@@ -430,7 +447,7 @@ const ListFormRePlan = (props) => {
     return (
         <>
             <BreadCrumb routes={routes} />
-            <Spin spinning={loading}>
+            <Spin spinning={loading || isUploading}>
                 <FormStepper steps={steps} current={current} onPrev={prev} onNext={next} />
 
                 <Form

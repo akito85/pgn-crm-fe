@@ -68,6 +68,7 @@ const ListFormEarlyRepayment = (props) => {
     const [appHierDataDetail, setAppHierDataDetail] = useState([]);
     const [isModalSubmit, setIsModalSubmit] = useState(false);
     const [formValues, setFormValues] = useState({});
+    const [isUploading, setIsUploading] = useState(false);
 
     // Validation states for step 0
     const [isPlanDetailValid, setIsPlanDetailValid] = useState(true);
@@ -270,7 +271,12 @@ const ListFormEarlyRepayment = (props) => {
         earlyRepaymentDate: values.earlyRepaymentDate
             ? moment(values.earlyRepaymentDate).format("YYYY-MM-DD")
             : null,
-        earlyRepaymentReason: values.earlyRepaymentReason,
+        earlyRepaymentReason: values.reason,
+        remark: values.earlyRepaymentReason,
+        termOfPaymentType: values.termOfPaymentType,
+        termOfPaymentValue: values.termOfPaymentValue
+            ? moment(values.termOfPaymentValue).format("YYYY-MM-DD")
+            : null,
         installmentDetailIds: selectedInstallmentDetailIds,
         appHierId: selectedHierarchy,
         attachmentIds: listDataAttachment.map((a) => a.id).filter(Boolean),
@@ -284,12 +290,19 @@ const ListFormEarlyRepayment = (props) => {
             ? await dispatch(updateEarlyRepayment({ id, body }))
             : await dispatch(saveEarlyRepayment({ body }));
         if (action.meta.requestStatus === "fulfilled") {
-            const repaymentId = action.payload?.data?.repaymentId || id;
+            const repaymentId = action.payload?.repaymentId || action.payload?.data?.repaymentId || id;
             const newAttachments = listDataAttachment.filter(item => item.dataType !== "exist");
             if (newAttachments.length > 0 && repaymentId) {
-                await uploadAttachments(newAttachments, repaymentId, "EARLY_REPAYMENT_RESTRUCTURE",
-                    (body) => receiptCollectionHttpService.uploadImage(`/v1/dbs/api/attachment/upload/v1`, body)
-                );
+                try {
+                    setIsUploading(true);
+                    await uploadAttachments(newAttachments, repaymentId, "EARLY_REPAYMENT_RESTRUCTURE",
+                        (body) => receiptCollectionHttpService.uploadImage(`/v1/dbs/api/attachment/upload/v1`, body)
+                    );
+                } catch (err) {
+                    console.error("Async draft upload failed", err);
+                } finally {
+                    setIsUploading(false);
+                }
             }
             message.success("Draft berhasil disimpan!");
             navigate(DEBT_AND_COLLECTION_ROUTES.VIEW_RESTRUCTURE);
@@ -313,12 +326,19 @@ const ListFormEarlyRepayment = (props) => {
             ? await dispatch(updateEarlyRepayment({ id, body }))
             : await dispatch(saveEarlyRepayment({ body }));
         if (action.meta.requestStatus === "fulfilled") {
-            const repaymentId = action.payload?.data?.repaymentId || id;
+            const repaymentId = action.payload?.repaymentId || action.payload?.data?.repaymentId || id;
             const newAttachments = listDataAttachment.filter(item => item.dataType !== "exist");
             if (newAttachments.length > 0 && repaymentId) {
-                await uploadAttachments(newAttachments, repaymentId, "EARLY_REPAYMENT_RESTRUCTURE",
-                    (body) => receiptCollectionHttpService.uploadImage(`/v1/dbs/api/attachment/upload/v1`, body)
-                );
+                try {
+                    setIsUploading(true);
+                    await uploadAttachments(newAttachments, repaymentId, "EARLY_REPAYMENT_RESTRUCTURE",
+                        (body) => receiptCollectionHttpService.uploadImage(`/v1/dbs/api/attachment/upload/v1`, body)
+                    );
+                } catch (err) {
+                    console.error("Async submit upload failed", err);
+                } finally {
+                    setIsUploading(false);
+                }
             }
             message.success("Early Payoff berhasil disubmit!");
             navigate(DEBT_AND_COLLECTION_ROUTES.VIEW_RESTRUCTURE);
@@ -347,7 +367,7 @@ const ListFormEarlyRepayment = (props) => {
     return (
         <>
             <BreadCrumb routes={routes} />
-            <Spin spinning={loading}>
+            <Spin spinning={loading || isUploading}>
                 <FormStepper steps={steps} current={current} onPrev={prev} onNext={next} />
 
                 <Form

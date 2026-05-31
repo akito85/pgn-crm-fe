@@ -810,8 +810,8 @@ const TableRBI = ({
 
               {showSearchBar && (
                 <div style={{ width: "250px" }}>
-                  <SearchBar 
-                    placeholder="Search Content" 
+                  <SearchBar
+                    placeholder="Search Content"
                     onChange={onSearch}
                   />
                 </div>

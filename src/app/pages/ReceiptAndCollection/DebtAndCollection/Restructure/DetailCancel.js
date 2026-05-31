@@ -182,7 +182,7 @@ const DetailCancel = ({
             {segmentedPage === "Payment Plan" && (
                 <div className="flex flex-col gap-4 mt-4">
                     <CardContainerNoBorder 
-                        header="PAYMENT PLAN DETAIL (ORIGINAL)"
+                        header="PAYMENT PLAN DETAIL"
                         className="!border-[1.5px] !border-[#0075bf] !rounded-md !bg-white !shadow-none"
                         collapsible={true}
                     >
