@@ -93,6 +93,16 @@ export const jobGroupApiSlice = createApi({
       }),
       invalidatesTags: ["JobGroup"],
     }),
+
+    /** POST /v1/api/job-group/{id}/run */
+    runJobGroup: builder.mutation({
+      query: ({ id, body }) => ({
+        url: `/${id}/run`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["JobGroup"],
+    }),
   }),
 });
 
@@ -101,4 +111,5 @@ export const {
   useCreateJobGroupMutation,
   useUpdateJobGroupMutation,
   useDeleteJobGroupMutation,
+  useRunJobGroupMutation,
 } = jobGroupApiSlice;

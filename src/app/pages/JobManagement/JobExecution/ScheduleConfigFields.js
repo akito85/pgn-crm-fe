@@ -64,7 +64,7 @@ const TriggerCard = ({ type, selected, onClick, disabled }) => {
  * to pre-select the preset (or "__custom__") that matches an existing schedule.
  * The run modal leaves it null (always starts fresh).
  */
-const ScheduleConfigFields = ({ form, triggerType, setTriggerType, loading = false, initialCronPreset = null }) => {
+const ScheduleConfigFields = ({ form, triggerType, setTriggerType, loading = false, initialCronPreset = null, allowedTriggers = TRIGGER_TYPES }) => {
   const [cronPreset, setCronPreset] = useState(initialCronPreset);
 
   // Re-seed when the parent supplies a new preset (e.g. opening edit on a
@@ -86,7 +86,7 @@ const ScheduleConfigFields = ({ form, triggerType, setTriggerType, loading = fal
       </div>
       <Form.Item style={{ marginBottom: 18 }}>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-          {TRIGGER_TYPES.map((t) => (
+          {allowedTriggers.map((t) => (
             <TriggerCard key={t} type={t} selected={triggerType} disabled={loading} onClick={handleTriggerChange} />
           ))}
         </div>
