@@ -97,3 +97,31 @@ export function useDeleteSchedule() {
     onSuccess: () => qc.invalidateQueries({ queryKey: scheduleKeys.all }),
   });
 }
+
+export function useUpdateSchedule() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ scheduleId, payload, cancelInFlight = false }) =>
+      axios
+        .put(`${DEFINITION_BASE}/${scheduleId}?cancelInFlight=${cancelInFlight}`, payload, {
+          headers: headers(),
+        })
+        .then((r) => r?.data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: scheduleKeys.all });
+      qc.invalidateQueries({ queryKey: ["jobExecutions"] });
+      qc.invalidateQueries({ queryKey: ["jobStats"] });
+    },
+  });
+}
+
+export function useScheduleStats(scheduleId) {
+  return useQuery({
+    queryKey: ["jobStats", "schedule", scheduleId],
+    queryFn: async () => {
+      const res = await axios.get(`${MONITOR_BASE}/${scheduleId}/stats`, { headers: headers() });
+      return res?.data ?? {};
+    },
+    enabled: scheduleId !== null && scheduleId !== undefined,
+  });
+}
