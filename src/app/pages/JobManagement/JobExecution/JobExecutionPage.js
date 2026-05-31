@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { PlusCircleOutlined } from "@ant-design/icons";
-import { Dropdown, Skeleton, Spin } from "antd";
+import { Dropdown, Skeleton, Spin, message } from "antd";
 import { JOB_MGMT_ROUTES } from "../../../../routes/job_management/job_routes";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 import NxTable from "../../../../components/Nx/NxTable";
@@ -43,6 +43,15 @@ const formatDate = (val) => {
   const cs = String(Math.floor(d.getMilliseconds() / 10)).padStart(2, "0");
   return `${date} ${hh}:${mm}:${ss}.${cs}`;
 };
+
+// A stalled run is surfaced by the backend as FAILED with an EXECUTION_STALLED
+// error code in the structured errorMessage envelope (not a distinct status).
+const parseErrorCode = (errorMessage) => {
+  if (!errorMessage || typeof errorMessage !== "string" || !errorMessage.startsWith("{")) return null;
+  try { return JSON.parse(errorMessage)?.code ?? null; } catch { return null; }
+};
+const isStalled = (record) =>
+  record?.status === "FAILED" && parseErrorCode(record?.errorMessage) === "EXECUTION_STALLED";
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
@@ -123,10 +132,24 @@ const JobExecutionPage = () => {
     refetch();
   }, [refetch]);
 
-  // Run a mutation hook against an execution id, then reset the list on success.
-  const runAction = useCallback((mutation, executionId) => {
-    mutation.mutate(executionId, { onSuccess: afterAction });
+  // Run a mutation hook against an execution id, reset the list on success, and
+  // optionally show a confirmation toast.
+  const runAction = useCallback((mutation, executionId, successMsg) => {
+    mutation.mutate(executionId, {
+      onSuccess: () => {
+        afterAction();
+        if (successMsg) message.success(successMsg);
+      },
+    });
   }, [afterAction]);
+
+  // Run-level stop/kill toasts clarify that the schedule is untouched.
+  const stopMsg = (record) =>
+    `Stop requested for run #${record.executionId}.` +
+    (record.scheduleId ? " Schedule still active — next run will fire as scheduled." : "");
+  const killMsg = (record) =>
+    `Run #${record.executionId} killed.` +
+    (record.scheduleId ? " Schedule still active — next run will fire as scheduled." : "");
 
   // ─── Columns ────────────────────────────────────────────────────────────────
 
@@ -157,11 +180,11 @@ const JobExecutionPage = () => {
           key: "cancel",
           label: (
             <span style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, padding: "2px 0", opacity: ["PENDING","SCHEDULED","PROCESSING","ON_HOLD","SUSPENDED"].includes(status) ? 1 : 0.4 }}>
-              <IconCancel width="18" height="18" /> Cancel
+              <IconCancel width="18" height="18" /> Kill this run
             </span>
           ),
           disabled: !["PENDING","SCHEDULED","PROCESSING","ON_HOLD","SUSPENDED"].includes(status),
-          onClick: () => runAction(cancelMutation, record.executionId),
+          onClick: () => runAction(cancelMutation, record.executionId, killMsg(record)),
         },
         {
           key: "hold",
@@ -187,11 +210,11 @@ const JobExecutionPage = () => {
           key: "stop",
           label: (
             <span style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, padding: "2px 0", opacity: status === "PROCESSING" ? 1 : 0.4 }}>
-              <IconStop width="18" height="18" /> Stop
+              <IconStop width="18" height="18" /> Stop this run
             </span>
           ),
           disabled: status !== "PROCESSING",
-          onClick: () => runAction(stopMutation, record.executionId),
+          onClick: () => runAction(stopMutation, record.executionId, stopMsg(record)),
         },
         {
           key: "suspend",
@@ -264,9 +287,11 @@ const JobExecutionPage = () => {
       key: "status",
       align: "center",
       width: 160,
-      render: (val) => {
+      render: (val, record) => {
         if (!val) return "—";
-        const text = val.charAt(0).toUpperCase() + val.slice(1).toLowerCase();
+        // A FAILED run carrying the EXECUTION_STALLED code shows as "Stalled".
+        const stalled = isStalled(record);
+        const label = stalled ? "Stalled" : (val.charAt(0).toUpperCase() + val.slice(1).toLowerCase());
         const colourMap = {
           succeeded: "completed",
           failed: "failed",
@@ -277,11 +302,11 @@ const JobExecutionPage = () => {
           processing: "processing",
           on_hold: "hold",
           suspended: "suspended",
-          stalled: "failed",
         };
+        const colour = stalled ? "stalled" : (colourMap[val.toLowerCase()] || val.toLowerCase());
         return (
           <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "22px", overflow: "hidden" }}>
-            <StatusComponent colour={colourMap[val.toLowerCase()] || val.toLowerCase()} size="small">{text.replace("_", " ")}</StatusComponent>
+            <StatusComponent colour={colour} size="small">{label.replace("_", " ")}</StatusComponent>
           </div>
         );
       },
