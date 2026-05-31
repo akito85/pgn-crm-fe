@@ -25,6 +25,7 @@ import IconThreeDots from "../../../../assets/Icon/Nx/IconThreeDots";
 import ViewListIcon from "../../../../assets/Icon/Nx/IconViewList";
 import IconEditMenu from "../../../../assets/Icon/Nx/IconEditMenu";
 import IconDeleteMenu from "../../../../assets/Icon/Nx/IconDeleteMenu";
+import ModalRunGroup from "./ModalRunGroup";
 
 const PAGE_SIZE = 20;
 
@@ -68,6 +69,7 @@ const JobGroupPage = () => {
   const [expandedRowKeys, setExpandedRowKeys] = useState([]);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [groupToDelete, setGroupToDelete] = useState(null);
+  const [runModalGroup, setRunModalGroup] = useState(null);
 
   // Fetch JobGroup paginated list
   const handleFetch = useCallback(() => {
@@ -181,6 +183,15 @@ const JobGroupPage = () => {
         if (!record || !record.id) return <span>—</span>;
 
       const menuItems = [
+        canUpdate && {
+          key: "run",
+          label: (
+            <span style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, padding: "2px 0" }}>
+              ▶ Run
+            </span>
+          ),
+          onClick: () => setRunModalGroup(record),
+        },
         canUpdate && {
           key: "update",
           label: (
@@ -445,6 +456,12 @@ const JobGroupPage = () => {
           </div>
         </div>
       </NxModal>
+
+      <ModalRunGroup
+        open={!!runModalGroup}
+        group={runModalGroup}
+        onClose={() => setRunModalGroup(null)}
+      />
     </>
   );
 };
