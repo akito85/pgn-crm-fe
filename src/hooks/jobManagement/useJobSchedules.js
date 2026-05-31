@@ -21,6 +21,7 @@ const headers = () => tokenHeader();
 export const scheduleKeys = {
   all: ["jobSchedules"],
   list: (params) => ["jobSchedules", "list", params],
+  detail: (id) => ["jobSchedules", "detail", id],
 };
 
 // ─── List ───────────────────────────────────────────────────────────────────
@@ -40,6 +41,19 @@ export function useSchedulesList({ page = 1, pageSize = 20, status, isPaused, sc
     },
     // v5: keep the previous page's data visible while the next page loads
     placeholderData: (prev) => prev,
+  });
+}
+
+// ─── Detail ───────────────────────────────────────────────────────────────────
+
+export function useScheduleDetail(scheduleId) {
+  return useQuery({
+    queryKey: scheduleKeys.detail(scheduleId),
+    queryFn: async () => {
+      const res = await axios.get(`${MONITOR_BASE}/${scheduleId}`, { headers: headers() });
+      return res?.data ?? null;
+    },
+    enabled: scheduleId !== null && scheduleId !== undefined,
   });
 }
 

@@ -150,11 +150,9 @@ import billingItemCategoryReducer from "../slices/system_setup/master_data/billi
 import calendarReducer from "../slices/system_setup/master_data/calendar";
 import jobManagementReducer from "../slices/job_management/jobSlice";
 import jobGroupReducer from "../slices/job_management/jobGroupSlice";
-import jobExecutionReducer from "../slices/job_management/jobExecutionSlice";
 import oracleMetadataReducer from "../slices/job_management/oracleMetadataSlice";
 import taskQueueReducer from "../slices/job_management/taskQueueSlice";
 import handlerRegistryReducer from "../slices/job_management/handlerRegistrySlice";
-import jobScheduleReducer from "../slices/job_management/jobScheduleSlice";
 import { jobApiSlice } from "../slices/job_management/jobApiSlice";
 import { jobGroupApiSlice } from "../slices/job_management/jobGroupApiSlice";
 import auditTrailReducer from "../slices/user_management/audit_trail";
@@ -164,11 +162,9 @@ import activityTemplateReducer from "../slices/system_setup/activityTemplate";
 const reducer = combineReducers({
   jobManagement: jobManagementReducer,
   jobGroup: jobGroupReducer,
-  jobExecution: jobExecutionReducer,
   oracleMetadata: oracleMetadataReducer,
   taskQueue: taskQueueReducer,
   handlerRegistry: handlerRegistryReducer,
-  jobSchedule: jobScheduleReducer,
   auth: authReducer,
   message: messageReducer,
   entity: entityReducer,

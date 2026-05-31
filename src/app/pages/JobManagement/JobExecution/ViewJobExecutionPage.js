@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Spin, Tag, Tabs, Alert } from "antd";
 import { DownloadOutlined, WarningOutlined, InfoCircleOutlined, CloseCircleOutlined } from "@ant-design/icons";
@@ -11,9 +10,9 @@ import ButtonComponent from "../../../../components/ButtonComponent";
 import { JOB_MGMT_ROUTES } from "../../../../routes/job_management/job_routes";
 import { useGetJobByIdQuery } from "../../../../redux/slices/job_management/jobApiSlice";
 import {
-  getJobExecutionById,
-  getJobExecutionLogs,
-} from "../../../../redux/slices/job_management/jobExecutionSlice";
+  useExecutionDetail,
+  useExecutionLogs,
+} from "../../../../hooks/jobManagement/useJobExecutions";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -148,18 +147,16 @@ const ExecutionErrorDisplay = ({ errorMessage }) => {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 const ViewJobExecutionPage = () => {
-  const dispatch  = useDispatch();
   const navigate  = useNavigate();
   const location  = useLocation();
   const executionId = location.state?.id;
 
-  const { detail, detailLoading, logs, logsLoading } = useSelector((s) => s.jobExecution);
   const [activeTab, setActiveTab]     = useState("info");
-  const [logsFetched, setLogsFetched] = useState(false);
+  const [logsEnabled, setLogsEnabled] = useState(false);
 
-  useEffect(() => {
-    if (executionId) dispatch(getJobExecutionById(executionId));
-  }, [dispatch, executionId]);
+  const { data: detail, isLoading: detailLoading } = useExecutionDetail(executionId);
+  // Logs are fetched lazily — only once the user opens the Log tab.
+  const { data: logs, isFetching: logsLoading } = useExecutionLogs(executionId, logsEnabled);
 
   // Fetch job definition only once we have jobId from the execution detail
   const jobId = detail?.jobId;
@@ -167,10 +164,7 @@ const ViewJobExecutionPage = () => {
 
   const handleTabChange = (key) => {
     setActiveTab(key);
-    if (key === "log" && !logsFetched) {
-      dispatch(getJobExecutionLogs(executionId));
-      setLogsFetched(true);
-    }
+    if (key === "log") setLogsEnabled(true);
   };
 
   const breadcrumbRoutes = [
