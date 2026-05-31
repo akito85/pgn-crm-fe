@@ -16,6 +16,7 @@ import {
   useUpdateSchedule,
   useScheduleStats,
 } from "../../../../hooks/jobManagement/useJobSchedules";
+import { useStartExecution } from "../../../../hooks/jobManagement/useJobExecutions";
 import { nxApplyFixedColumns } from "../../../../utils/Nx/nxApplyFixedColumns";
 import useGrantAccessHooks from "../../../../components/useGrantAccessHooks";
 import IconThreeDots from "../../../../assets/Icon/Nx/IconThreeDots";
@@ -53,9 +54,10 @@ const ScheduledJobsPanel = () => {
   const pauseMutation = usePauseSchedule();
   const deleteMutation = useDeleteSchedule();
   const updateMutation = useUpdateSchedule();
+  const startMutation = useStartExecution();
   const actionLoading =
     activateMutation.isPending || pauseMutation.isPending || deleteMutation.isPending ||
-    updateMutation.isPending;
+    updateMutation.isPending || startMutation.isPending;
 
   const rawToken = useSelector((state) => state.auth?.token);
   const userId = useMemo(() => {
@@ -167,12 +169,29 @@ const ScheduledJobsPanel = () => {
 
   const openEdit = (record) => { setScheduleToEdit(record); setEditModalOpen(true); };
 
-  const handleEditSubmit = ({ scheduleId, payload, cancelInFlight }) => {
-    updateMutation.mutate(
-      { scheduleId, payload, cancelInFlight },
-      { onSuccess: () => { setEditModalOpen(false); afterAction(); },
-        onSettled: () => setScheduleToEdit(null) }
-    );
+  const handleEditSubmit = (descriptor) => {
+    const finish = () => { setEditModalOpen(false); afterAction(); };
+
+    if (descriptor.mode === "schedule") {
+      updateMutation.mutate(
+        { scheduleId: descriptor.scheduleId, payload: descriptor.payload, cancelInFlight: descriptor.cancelInFlight },
+        { onSuccess: finish, onSettled: () => setScheduleToEdit(null) }
+      );
+      return;
+    }
+
+    // mode === "execution": fire a one-time / immediate run of this schedule's job.
+    // When cascade is ticked, also pause the recurrence and kill in-flight runs.
+    startMutation.mutate(descriptor.triggerBody, {
+      onSuccess: () => {
+        if (descriptor.cancelInFlight) {
+          pauseMutation.mutate({ scheduleId: descriptor.scheduleId, cancelInFlight: true }, { onSuccess: finish });
+        } else {
+          finish();
+        }
+      },
+      onSettled: () => setScheduleToEdit(null),
+    });
   };
 
   // ─── Action Column ────────────────────────────────────────────────────────────
