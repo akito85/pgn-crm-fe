@@ -21,6 +21,8 @@ const NON_TERMINAL = new Set(["PENDING", "SCHEDULED", "PROCESSING", "ON_HOLD", "
 export const executionKeys = {
   all: ["jobExecutions"],
   list: (params) => ["jobExecutions", "list", params],
+  detail: (id) => ["jobExecutions", "detail", id],
+  logs: (id) => ["jobExecutions", "logs", id],
 };
 
 // ─── List (with live polling while runs are active) ───────────────────────────
@@ -40,6 +42,35 @@ export function useExecutionsList({ search = "", page = 1, pageSize = 30, sort =
       const anyRunning = rows.some((r) => r && NON_TERMINAL.has(r.status));
       return anyRunning ? pollMs : false;
     },
+  });
+}
+
+// ─── Detail & Logs ────────────────────────────────────────────────────────────
+
+export function useExecutionDetail(executionId) {
+  return useQuery({
+    queryKey: executionKeys.detail(executionId),
+    queryFn: async () => {
+      const res = await axios.get(`${EXEC_BASE}/${executionId}`, { headers: headers() });
+      return res?.data ?? null;
+    },
+    enabled: executionId !== null && executionId !== undefined,
+  });
+}
+
+export function useExecutionLogs(executionId, enabled = false) {
+  return useQuery({
+    queryKey: executionKeys.logs(executionId),
+    queryFn: async () => {
+      try {
+        const res = await axios.get(`${EXEC_BASE}/${executionId}/logs`, { headers: headers() });
+        return res?.data ?? [];
+      } catch {
+        // Logs are optional — return empty if the endpoint is unavailable.
+        return [];
+      }
+    },
+    enabled: enabled && executionId !== null && executionId !== undefined,
   });
 }
 
