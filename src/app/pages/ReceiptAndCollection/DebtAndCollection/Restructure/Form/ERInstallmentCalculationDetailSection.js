@@ -1,23 +1,33 @@
 import React from "react";
+import { Table } from "antd";
 import CardContainerNoBorder from "../../../../../../components/CardContainerNoBorder";
 import TableRBI from "../../../../../../components/TableRBI";
 import SubSectionCard from "../../../../../../components/SubSectionCard";
+import SectionCard from "../../../../../../components/SectionCard";
 import StatusComponent from "../../../../../../components/StatusComponent";
 
 const ERInstallmentCalculationDetailSection = ({ installmentsByCurrency = {} }) => {
   const currencies = Object.keys(installmentsByCurrency);
 
+  const getStatusColour = (status) => {
+    const s = (status || "Open").toLowerCase();
+    if (s === "partially paid") return "warning";
+    if (s === "broken") return "danger";
+    if (s === "release") return "info";
+    if (s === "paid" || s === "open") return "success";
+    return "success";
+  };
+
   return (
-    <CardContainerNoBorder header="INSTALLMENT CALCULATION DETAIL" collapsible={true}>
+    <CardContainerNoBorder header="PAYMENT PLAN DETAIL" collapsible={true}>
       <SubSectionCard>
         {currencies.length === 0 ? (
           <p className="text-gray-500">No calculation details available.</p>
         ) : (
           currencies.map((currency) => {
             const rows = installmentsByCurrency[currency] || [];
-            // Filter to only Open or partially paid? For mockup, just show rows
             const isIdr = currency === "IDR";
-            const currentSum = rows.reduce((sum, r) => sum + (parseFloat(r.amount) || 0), 0);
+            const totalAmount = rows.reduce((sum, r) => sum + (parseFloat(String(r.amount).replace(/,/g, "")) || 0), 0);
 
             const columns = [
               {
@@ -27,17 +37,34 @@ const ERInstallmentCalculationDetailSection = ({ installmentsByCurrency = {} }) 
                 align: "center",
                 render: (_, __, i) => i + 1,
               },
-              { title: "PERIODE", dataIndex: "periode" },
+              { title: "PERIOD", dataIndex: "periode" },
               {
                 title: "TOTAL AMOUNT",
                 dataIndex: "amount",
                 align: "right",
-                render: (_, record) => {
+                render: (val) => {
+                  const num = parseFloat(String(val).replace(/,/g, "")) || 0;
                   return (
                     <span className="font-medium">
-                      {parseFloat(record.amount).toLocaleString(isIdr ? "id-ID" : "en-US", {
-                        maximumFractionDigits: 2,
-                      })}
+                      {num.toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 })}
+                    </span>
+                  );
+                },
+              },
+              {
+                title: "DUE DATE",
+                dataIndex: "dueDate",
+                render: (val) => val || "-",
+              },
+              {
+                title: "BALANCE",
+                dataIndex: "balance",
+                align: "right",
+                render: (balance) => {
+                  const num = balance != null ? parseFloat(balance) : 0;
+                  return (
+                    <span className="font-medium text-gray-500">
+                      {num.toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 })}
                     </span>
                   );
                 },
@@ -46,37 +73,51 @@ const ERInstallmentCalculationDetailSection = ({ installmentsByCurrency = {} }) 
                 title: "STATUS",
                 dataIndex: "status",
                 align: "center",
-                render: () => {
+                render: (status) => {
+                  const finalStatus = status || "Open";
                   return (
                     <div className="flex justify-center">
-                      <StatusComponent colour="success">Open</StatusComponent>
+                      <StatusComponent colour={getStatusColour(finalStatus)}>{finalStatus}</StatusComponent>
                     </div>
                   );
-                }
-              }
+                },
+              },
             ];
+
+            // Last balance = balance of last row from backend
+            const lastBalance = rows.length > 0 && rows[rows.length - 1].balance != null
+              ? parseFloat(rows[rows.length - 1].balance)
+              : 0;
 
             return (
               <div key={currency} className="mb-4">
-                <div className="text-[14px] font-semibold text-[#0075BF] mb-2 uppercase">
-                  CURRENCY {currency}
-                </div>
-                <TableRBI
-                  idTable={`er-calc-detail-${currency}`}
-                  dataSource={rows}
-                  columns={columns}
-                  usePagination={false}
-                  showAdvanceSearch={true}
-                  showSearchBar={true}
-                />
-                <div className="flex bg-[#F5F5F5] border border-t-0 p-2 font-bold text-[12px]">
-                  <div className="flex-[3] text-center">Total</div>
-                  <div className="flex-1 text-right pr-[150px]">
-                    {currentSum.toLocaleString(isIdr ? "id-ID" : "en-US", {
-                      maximumFractionDigits: 2,
-                    })}
-                  </div>
-                </div>
+                <SectionCard title={`CURRENCY ${currency}`}>
+                  <TableRBI
+                    idTable={`er-calc-detail-${currency}`}
+                    dataSource={rows}
+                    columns={columns}
+                    usePagination={false}
+                    showAdvanceSearch={true}
+                    showSearchBar={true}
+                    summary={() => (
+                      <Table.Summary fixed>
+                        <Table.Summary.Row className="font-bold text-[12px] bg-[#F5F5F5]">
+                          <Table.Summary.Cell index={0} colSpan={2} className="text-center font-bold">
+                            Total
+                          </Table.Summary.Cell>
+                          <Table.Summary.Cell index={1} className="text-right font-bold pr-4">
+                            {totalAmount.toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 })}
+                          </Table.Summary.Cell>
+                          <Table.Summary.Cell index={2} />
+                          <Table.Summary.Cell index={3} className="text-right font-bold pr-4 text-gray-500">
+                            {lastBalance.toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 })}
+                          </Table.Summary.Cell>
+                          <Table.Summary.Cell index={4} />
+                        </Table.Summary.Row>
+                      </Table.Summary>
+                    )}
+                  />
+                </SectionCard>
               </div>
             );
           })
