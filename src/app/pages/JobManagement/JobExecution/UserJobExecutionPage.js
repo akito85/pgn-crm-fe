@@ -31,6 +31,15 @@ const formatDate = (val) => {
   return `${date} ${hh}:${mm}:${ss}`;
 };
 
+// A stalled run is surfaced by the backend as FAILED with an EXECUTION_STALLED
+// error code in the structured errorMessage envelope (not a distinct status).
+const parseErrorCode = (errorMessage) => {
+  if (!errorMessage || typeof errorMessage !== "string" || !errorMessage.startsWith("{")) return null;
+  try { return JSON.parse(errorMessage)?.code ?? null; } catch { return null; }
+};
+const isStalled = (record) =>
+  record?.status === "FAILED" && parseErrorCode(record?.errorMessage) === "EXECUTION_STALLED";
+
 const UserJobExecutionPage = () => {
   const navigate = useNavigate();
 
@@ -110,16 +119,17 @@ const UserJobExecutionPage = () => {
     { title: "PARAMETER", dataIndex: "inputPayload", key: "inputPayload", align: "left", width: 300, ellipsis: true, render: (v) => v || "—" },
     {
       title: "STATUS", dataIndex: "status", key: "status", align: "center", width: 160,
-      render: (val) => {
+      render: (val, record) => {
         if (!val) return "—";
-        const text = val.charAt(0).toUpperCase() + val.slice(1).toLowerCase();
+        const stalled = isStalled(record);
+        const text = stalled ? "Stalled" : (val.charAt(0).toUpperCase() + val.slice(1).toLowerCase());
         const map = { succeeded:"completed", failed:"failed", cancelled:"cancelled",
                       deleted:"inactive", pending:"pending", scheduled:"scheduled",
-                      processing:"processing", on_hold:"hold", suspended:"suspended",
-                      stalled:"failed" };
+                      processing:"processing", on_hold:"hold", suspended:"suspended" };
+        const colour = stalled ? "stalled" : (map[val.toLowerCase()] || val.toLowerCase());
         return (
           <div style={{ display:"flex", justifyContent:"center", alignItems:"center", height:"22px", overflow:"hidden" }}>
-            <StatusComponent colour={map[val.toLowerCase()] || val.toLowerCase()} size="small">
+            <StatusComponent colour={colour} size="small">
               {text.replace("_"," ")}
             </StatusComponent>
           </div>

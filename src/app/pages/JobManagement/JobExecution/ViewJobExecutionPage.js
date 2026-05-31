@@ -67,6 +67,7 @@ const ERROR_DISPLAY_MAP = {
   TIMEOUT:                     { message: (d) => `Execution timed out after ${d?.timeoutSeconds ?? "?"}s`, severity: "warning" },
   EXECUTION_CONTEXT_NOT_FOUND: { message: "Execution record not found.", severity: "error" },
   EXECUTION_CANCELLED:         { message: "Execution was cancelled.", severity: "info" },
+  EXECUTION_STALLED:           { message: "Run stalled (worker heartbeat lost) — recovered automatically and retried.", severity: "warning" },
   UNKNOWN_ERROR:               { message: "Unexpected error occurred.", severity: "error" },
 };
 
