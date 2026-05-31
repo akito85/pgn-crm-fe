@@ -27,15 +27,11 @@ const JobStatsBar = ({ stats = {}, loading = false }) => {
     );
   }
   return (
-    <div style={{ display: "flex", gap: 8, flexWrap: "wrap", padding: "8px 0" }}>
+    <div style={{ display: "flex", gap: 14, flexWrap: "wrap", padding: "8px 0", alignItems: "center" }}>
       {BUCKETS.map((b) => (
-        <div
-          key={b.key}
-          style={{ display: "flex", alignItems: "center", gap: 6, padding: "4px 10px",
-                   border: "1px solid #EDF0F3", borderRadius: 8, background: "#fff" }}
-        >
+        <div key={b.key} style={{ display: "flex", alignItems: "center", gap: 6 }}>
           <StatusComponent colour={b.colour} size="small">{b.label}</StatusComponent>
-          <span style={{ fontWeight: 600, fontSize: 13, color: "#1f2937" }}>
+          <span style={{ fontWeight: 700, fontSize: 13, color: "#1f2937" }}>
             {Number(stats?.[b.key] ?? 0)}
           </span>
         </div>
