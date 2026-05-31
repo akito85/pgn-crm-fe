@@ -45,6 +45,19 @@ export function useExecutionsList({ search = "", page = 1, pageSize = 30, sort =
   });
 }
 
+// ─── Global status statistics ────────────────────────────────────────────────
+
+export function useExecutionStats({ pollMs = 10000 } = {}) {
+  return useQuery({
+    queryKey: ["jobStats", "executions"],
+    queryFn: async () => {
+      const res = await axios.get(`${EXEC_BASE}/stats`, { headers: headers() });
+      return res?.data ?? {};
+    },
+    refetchInterval: pollMs,
+  });
+}
+
 // ─── Detail & Logs ────────────────────────────────────────────────────────────
 
 export function useExecutionDetail(executionId) {
