@@ -384,6 +384,7 @@ const ExecutionsPanel = () => {
           </div>
         )}
         <JobStatsSummary stats={stats} loading={statsLoading} />
+        <br/>
         <NxTable
           idTable="job-execution-list-table"
           userId={userId}
