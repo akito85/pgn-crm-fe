@@ -55,8 +55,14 @@ const JobStatsBar = ({ stats = {}, loading = false }) => {
       {/* Divider */}
       <div style={{ width: 1, alignSelf: "stretch", minHeight: 44, background: "#e6e8eb", flexShrink: 0 }} />
 
-      {/* Status chips */}
-      <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
+      {/* Status chips — two fixed rows, filled column-first, right of the total */}
+      <div style={{
+        display: "grid",
+        gridTemplateRows: "repeat(2, auto)",
+        gridAutoFlow: "column",
+        gap: 10,
+        alignContent: "center",
+      }}>
         {BUCKETS.map((b) => (
           <Chip key={b.key} dot={b.dot} label={b.label} value={stats?.[b.key]} />
         ))}
