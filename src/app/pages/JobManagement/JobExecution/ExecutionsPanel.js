@@ -276,6 +276,15 @@ const ExecutionsPanel = () => {
       width: 140,
     },
     {
+      title: "PARENT",
+      dataIndex: "parentExecutionId",
+      key: "parentExecutionId",
+      align: "center",
+      width: 90,
+      // Informational only: whether this run was spawned by a parent execution.
+      render: (val) => (val != null ? <span title={`Parent execution #${val}`}>Yes</span> : "No"),
+    },
+    {
       title: "PARAMETER",
       dataIndex: "inputPayload",
       key: "inputPayload",
@@ -364,7 +373,7 @@ const ExecutionsPanel = () => {
                 setSelectJobModalOpen(true);
               }}
             >
-              <span className="text-xs font-medium tracking-tight">Run Job</span>
+              <span className="text-xs font-medium tracking-tight">Run</span>
             </ButtonComponent>
           </div>
         }
@@ -426,6 +435,9 @@ const ExecutionsPanel = () => {
             },
           });
         }}
+        // A group run (UNRELATED fan-out / CHAINED workflow) spawns executions —
+        // refresh the list so they appear immediately.
+        onGroupSubmitted={afterAction}
       />
     </>
   );

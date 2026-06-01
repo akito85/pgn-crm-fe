@@ -94,6 +94,36 @@ export const jobGroupApiSlice = createApi({
       invalidatesTags: ["JobGroup"],
     }),
 
+    /**
+     * POST /v1/api/job-group (paged list for selectors).
+     * Shaped for useModalInfiniteData: { result, currentPage, totalPages }.
+     * Keeps groupType/chainId (dropped by toFrontend) so callers can constrain
+     * the run-trigger matrix per group type.
+     */
+    getJobGroupsPaged: builder.query({
+      query: ({ page = 0, size = 20, keyword } = {}) => ({
+        url: "",
+        method: "POST",
+        body: { page, size, keyword },
+      }),
+      transformResponse: (res) => ({
+        result: (res?.content ?? []).map((g) => ({
+          id:          g.id,
+          name:        g.name,
+          code:        g.code,
+          description: g.description,
+          isActive:    g.isActive,
+          jobCount:    g.jobCount,
+          groupType:   g.groupType,
+          chainId:     g.chainId,
+        })),
+        currentPage:   res?.page ?? 0,
+        totalPages:    res?.totalPages ?? 0,
+        totalElements: res?.totalElements ?? 0,
+      }),
+      providesTags: [{ type: "JobGroup", id: "LIST" }],
+    }),
+
     /** POST /v1/api/job-group/{id}/run */
     runJobGroup: builder.mutation({
       query: ({ id, body }) => ({
@@ -108,6 +138,7 @@ export const jobGroupApiSlice = createApi({
 
 export const {
   useGetJobGroupByIdQuery,
+  useGetJobGroupsPagedQuery,
   useCreateJobGroupMutation,
   useUpdateJobGroupMutation,
   useDeleteJobGroupMutation,
