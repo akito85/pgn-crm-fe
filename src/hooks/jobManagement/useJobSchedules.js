@@ -81,7 +81,12 @@ export function usePauseSchedule() {
           { headers: headers() }
         )
         .then((r) => r?.data),
-    onSuccess: () => qc.invalidateQueries({ queryKey: scheduleKeys.all }),
+    // cancelInFlight cascades into execution cancels, so refresh executions/stats too.
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: scheduleKeys.all });
+      qc.invalidateQueries({ queryKey: ["jobExecutions"] });
+      qc.invalidateQueries({ queryKey: ["jobStats"] });
+    },
   });
 }
 
@@ -94,7 +99,12 @@ export function useDeleteSchedule() {
           headers: headers(),
         })
         .then((r) => r?.data),
-    onSuccess: () => qc.invalidateQueries({ queryKey: scheduleKeys.all }),
+    // cancelInFlight cascades into execution cancels, so refresh executions/stats too.
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: scheduleKeys.all });
+      qc.invalidateQueries({ queryKey: ["jobExecutions"] });
+      qc.invalidateQueries({ queryKey: ["jobStats"] });
+    },
   });
 }
 
