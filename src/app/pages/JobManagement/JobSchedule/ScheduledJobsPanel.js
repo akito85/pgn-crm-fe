@@ -42,6 +42,38 @@ const formatDate = (val) => {
   return `${date} ${hh}:${mm}:${ss}`;
 };
 
+// Per-status execution counts surfaced as individual table columns, so a
+// schedule's run breakdown is visible without opening its detail page. Same
+// buckets/palette as the execution stats bar (JobStatsBar).
+const STAT_BUCKETS = [
+  { key: "SUCCEEDED",  label: "Succeeded",  dot: "#16a34a" },
+  { key: "FAILED",     label: "Failed",     dot: "#e5484d" },
+  { key: "CANCELLED",  label: "Cancelled",  dot: "#f2790d" },
+  { key: "STALLED",    label: "Stalled",    dot: "#f2a20d" },
+  { key: "PENDING",    label: "Pending",    dot: "#f2790d" },
+  { key: "SCHEDULED",  label: "Scheduled",  dot: "#9aa4b2" },
+  { key: "PROCESSING", label: "Processing", dot: "#f2790d" },
+  { key: "ON_HOLD",    label: "On-hold",    dot: "#b89b1e" },
+  { key: "SUSPENDED",  label: "Suspended",  dot: "#b89b1e" },
+  { key: "DELETED",    label: "Deleted",    dot: "#9aa4b2" },
+];
+
+const STAT_COLUMNS = STAT_BUCKETS.map((b) => ({
+  title: b.label.toUpperCase(),
+  key: `stat_${b.key}`,
+  align: "center",
+  width: 110,
+  render: (_, record) => {
+    const v = Number(record?.statusCounts?.[b.key] ?? 0);
+    return (
+      <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+        <span style={{ width: 8, height: 8, borderRadius: "50%", background: b.dot, flexShrink: 0 }} />
+        <span style={{ fontWeight: v > 0 ? 700 : 400, color: v > 0 ? "#1f2937" : "#9aa4b2" }}>{v}</span>
+      </span>
+    );
+  },
+}));
+
 // ─── Panel ─────────────────────────────────────────────────────────────────────
 
 const ScheduledJobsPanel = () => {
@@ -382,6 +414,7 @@ const ScheduledJobsPanel = () => {
       width: 175,
       render: (val) => formatDate(val),
     },
+    ...STAT_COLUMNS,
     actionColumn,
   ], [actionColumn]);
 
