@@ -28,7 +28,7 @@ import IconOnHold from "../../../../assets/Icon/Nx/IconOnHold";
 import IconSuspend from "../../../../assets/Icon/Nx/IconSuspend";
 import IconCancel from "../../../../assets/Icon/Nx/IconCancel";
 import ViewListIcon from "../../../../assets/Icon/Nx/IconViewList";
-import JobStatsBar from "../components/JobStatsBar";
+import JobStatsSummary from "../components/JobStatsSummary";
 
 const PAGE_SIZE = 30;
 
@@ -383,7 +383,7 @@ const ExecutionsPanel = () => {
             <Spin size="small" /> Processing...
           </div>
         )}
-        <JobStatsBar stats={stats} loading={statsLoading} />
+        <JobStatsSummary stats={stats} loading={statsLoading} />
         <NxTable
           idTable="job-execution-list-table"
           userId={userId}
