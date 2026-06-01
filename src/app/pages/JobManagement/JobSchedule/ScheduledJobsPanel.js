@@ -368,7 +368,7 @@ const ScheduledJobsPanel = () => {
       render: (val) => val || "—",
     },
     {
-      title: "STATUS",
+      title: "JOB STATUS",
       dataIndex: "status",
       key: "status",
       align: "center",
@@ -391,12 +391,21 @@ const ScheduledJobsPanel = () => {
       },
     },
     {
-      title: "PAUSED",
+      title: "SCHEDULED",
       dataIndex: "isPaused",
       key: "isPaused",
       align: "center",
-      width: 90,
-      render: (val) => (val ? "Yes" : "No"),
+      width: 120,
+      render: (val) => {
+        const paused = val === true;
+        return (
+          <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "22px", overflow: "hidden" }}>
+            <StatusComponent colour={paused ? "suspended" : "active"} size="small">
+              {paused ? "Paused" : "Running"}
+            </StatusComponent>
+          </div>
+        );
+      },
     },
     {
       title: "NEXT RUN",
