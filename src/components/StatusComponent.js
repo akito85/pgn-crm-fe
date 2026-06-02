@@ -113,6 +113,12 @@ const StatusComponent = ({
         tColor = "text-white";
         break;
 
+      // Transient failure being auto-recovered by the reaper (distinct from hard FAILED).
+      case "stalled":
+        bgColor = "bg-[#E8833A]";
+        tColor = "text-white";
+        break;
+
       // ===== WAITING/PENDING STATUSES =====
       case "partial payment":
       case "waiting to release":

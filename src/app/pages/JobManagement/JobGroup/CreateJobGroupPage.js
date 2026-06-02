@@ -103,6 +103,21 @@ const CreateJobGroupPage = () => {
   const [selectedJobs, setSelectedJobs] = useState([]);
   const hasPopulatedJobs = React.useRef(false);
 
+  // Runnable type. CHAINED makes the selected-jobs order significant (it becomes
+  // the linear chain order); UNRELATED runs them in parallel, order irrelevant.
+  const [groupType, setGroupType] = useState("UNRELATED");
+
+  // Reorder a selected job up (dir=-1) or down (dir=+1) — CHAINED ordering.
+  const moveJob = (index, dir) => {
+    const target = index + dir;
+    setSelectedJobs((prev) => {
+      if (target < 0 || target >= prev.length) return prev;
+      const next = [...prev];
+      [next[index], next[target]] = [next[target], next[index]];
+      return next;
+    });
+  };
+
   // State for job selection modal
   const [modalVisible, setModalVisible] = useState(false);
   const [ready, setReady] = useState(false);
@@ -198,7 +213,9 @@ const CreateJobGroupPage = () => {
       code:        currentGroup.code,
       description: currentGroup.description,
       accessGroupId: currentGroup.accessGroupId,
+      groupType:   currentGroup.groupType ?? "UNRELATED",
     });
+    setGroupType(currentGroup.groupType ?? "UNRELATED");
     // Fetch associated jobs for this group
     dispatch(getJobsByGroupId({ groupId: id, page: 0, pageSize: 200 }));
   }, [currentGroup, isEditMode, form, dispatch, id]);
@@ -238,6 +255,7 @@ const CreateJobGroupPage = () => {
       code:        values.code.toUpperCase(),
       description: values.description,
       accessGroupId: values.accessGroupId,
+      groupType:   values.groupType ?? "UNRELATED",
       jobIds,
     };
 
@@ -261,7 +279,27 @@ const CreateJobGroupPage = () => {
 
   const handleClear = () => {
     form.resetFields();
+    setGroupType("UNRELATED");
   };
+
+  // CHAINED groups expose an ORDER column with move up/down controls so the
+  // sequence (= chain order) is explicit. UNRELATED hides it.
+  const orderColumn = {
+    title: "ORDER", editable: false, width: 96, align: "center",
+    render: (_, __, index) => (
+      <div style={{ display: "flex", gap: 4, justifyContent: "center", alignItems: "center" }}>
+        <span style={{ fontWeight: 600, minWidth: 16 }}>{index + 1}</span>
+        <button type="button" onClick={() => moveJob(index, -1)} disabled={index === 0}
+          style={{ border: "1px solid #d9d9d9", background: "#fff", borderRadius: 4, cursor: index === 0 ? "not-allowed" : "pointer", lineHeight: 1, padding: "0 4px" }}>↑</button>
+        <button type="button" onClick={() => moveJob(index, 1)} disabled={index === selectedJobs.length - 1}
+          style={{ border: "1px solid #d9d9d9", background: "#fff", borderRadius: 4, cursor: index === selectedJobs.length - 1 ? "not-allowed" : "pointer", lineHeight: 1, padding: "0 4px" }}>↓</button>
+      </div>
+    ),
+  };
+
+  const selectedJobColumns = groupType === "CHAINED"
+    ? [orderColumn, ...SELECTED_JOBS_COLUMNS.filter((c) => c.title !== "NO")]
+    : SELECTED_JOBS_COLUMNS;
 
   return (
     <>
@@ -332,6 +370,22 @@ const CreateJobGroupPage = () => {
               </Form.Item>
 
               <Form.Item
+                label="Group Type"
+                name="groupType"
+                {...formItemProps}
+                initialValue="UNRELATED"
+              >
+                <Select
+                  style={fieldStyle}
+                  onChange={(v) => setGroupType(v)}
+                  options={[
+                    { value: "UNRELATED", label: "Unrelated (parallel)" },
+                    { value: "CHAINED",   label: "Chained (in order)" },
+                  ]}
+                />
+              </Form.Item>
+
+              <Form.Item
                 label="Description"
                 name="description"
                 className="md:col-span-3 w-full"
@@ -366,7 +420,7 @@ const CreateJobGroupPage = () => {
               idTable="selected-jobs-table"
               dataSource={selectedJobs}
               onDataChange={setSelectedJobs}
-              columns={SELECTED_JOBS_COLUMNS}
+              columns={selectedJobColumns}
               emptyText='No jobs selected. Add jobs to this group.'
               editMode="deleteOnly"
               autoEditOnAppend={false}
