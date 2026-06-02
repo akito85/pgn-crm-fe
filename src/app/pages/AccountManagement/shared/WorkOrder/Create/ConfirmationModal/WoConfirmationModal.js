@@ -1,6 +1,9 @@
+import { useEffect, useState } from "react";
 import { Button } from "antd";
 import NxModal from "../../../../../../../components/Nx/NxModal";
 import WoConfirmationModalTabs from "./WoConfirmationModalTabs";
+
+const CONFIRMATION_TABS = ["wo-info", "activity-data", "approval", "attachment"];
 
 const WoConfirmationModal = ({
   isOpen,
@@ -18,6 +21,13 @@ const WoConfirmationModal = ({
 
   const dataRequirements = formValues?.woFormDataRequirements || [];
 
+  const [currentTabIdx, setCurrentTabIdx] = useState(0);
+  const isLastTab = currentTabIdx === CONFIRMATION_TABS.length - 1;
+
+  useEffect(() => {
+    if (isOpen) setCurrentTabIdx(0);
+  }, [isOpen]);
+
   return (
     <NxModal
       isOpen={isOpen}
@@ -30,9 +40,22 @@ const WoConfirmationModal = ({
           <Button type="menu" onClick={handleCancel} disabled={loading}>
             Cancel
           </Button>
-          <Button type="submit" onClick={handleConfirm} loading={loading}>
-            {confirmLabel}
-          </Button>
+          <div className="flex items-center gap-2">
+            {currentTabIdx > 0 && (
+              <Button type="menu" onClick={() => setCurrentTabIdx((p) => p - 1)} disabled={loading}>
+                Previous
+              </Button>
+            )}
+            {isLastTab ? (
+              <Button type="submit" onClick={handleConfirm} loading={loading}>
+                {confirmLabel}
+              </Button>
+            ) : (
+              <Button type="submit" onClick={() => setCurrentTabIdx((p) => p + 1)} disabled={loading}>
+                Next
+              </Button>
+            )}
+          </div>
         </div>
       }
     >
@@ -43,6 +66,7 @@ const WoConfirmationModal = ({
           dataRequirements={dataRequirements}
           approvalData={approvalData}
           attachments={attachments}
+          activeTabKey={CONFIRMATION_TABS[currentTabIdx]}
         />
       </div>
     </NxModal>
