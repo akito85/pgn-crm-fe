@@ -278,6 +278,7 @@ export const ACCOUNT_MANAGEMENT_ELEMENTS = {
   UPDATE_WORK_ORDER_PAGE:      <CreateWorkOrder />,
 
   // Work Order — Under SR
+  VIEW_DETAIL_SR_WORK_ORDER_PAGE: <WorkOrderDetail />,
   CREATE_SR_WORK_ORDER_PAGE: <CreateWorkOrder />,
   UPDATE_SR_WORK_ORDER_PAGE: <CreateWorkOrder />,
 };
