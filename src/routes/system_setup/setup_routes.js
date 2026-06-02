@@ -109,4 +109,10 @@ export const SYSTEM_SETUP_ROUTES = {
   DETAIL_PRE_REQUISITE_TEMPLATE: "/system-setup/pre-requisite-template/view",
   CREATE_PRE_REQUISITE_TEMPLATE: "/system-setup/pre-requisite-template/create",
   UPDATE_PRE_REQUISITE_TEMPLATE: "/system-setup/pre-requisite-template/update",
+
+  // Activity Template
+  VIEW_ACTIVITY_TEMPLATE: "/system-setup/activity-template",
+  DETAIL_ACTIVITY_TEMPLATE: "/system-setup/activity-template/view",
+  CREATE_ACTIVITY_TEMPLATE: "/system-setup/activity-template/create",
+  UPDATE_ACTIVITY_TEMPLATE: "/system-setup/activity-template/update",
 };

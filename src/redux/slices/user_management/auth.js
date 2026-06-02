@@ -741,7 +741,7 @@ export const verifyChangeEmailPhone = createAsyncThunk(
   }
 );
 export const verifyChangePassword = createAsyncThunk(
-  "VERIFY_CHANGE_EMAIL_PHONE",
+  "VERIFY_CHANGE_PASSWORD",
   async (params, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/auth/verify-password?verify=${params}`;

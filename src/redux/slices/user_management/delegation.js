@@ -191,6 +191,26 @@ const delegationSlice = createSlice({
     [getDelegateTo.rejected]: (state) => {
       state.loading = false;
     },
+    //APPROVE REJECT DELEGATION
+    [approveRejectDelegation.pending]: (state) => {
+      state.loading = true;
+    },
+    [approveRejectDelegation.fulfilled]: (state) => {
+      state.loading = false;
+    },
+    [approveRejectDelegation.rejected]: (state) => {
+      state.loading = false;
+    },
+    //CREATE DELEGATION
+    [createDelegation.pending]: (state) => {
+      state.loading = true;
+    },
+    [createDelegation.fulfilled]: (state) => {
+      state.loading = false;
+    },
+    [createDelegation.rejected]: (state) => {
+      state.loading = false;
+    },
   },
 });
 
