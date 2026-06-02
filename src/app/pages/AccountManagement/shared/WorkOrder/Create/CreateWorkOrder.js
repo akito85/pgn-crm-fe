@@ -380,6 +380,7 @@ const CreateWorkOrder = () => {
             idAccount: woContext.idAccount,
             idCustomer: woContext.idCustomer,
             type: woContext.accountType,
+            activeTab: "work-order",
           },
         });
       } else {
@@ -512,7 +513,21 @@ const CreateWorkOrder = () => {
       <ModalConfirm
         isOpen={modalBack}
         handleCancel={() => setModalBack(false)}
-        handleOk={() => navigate(-1)}
+        handleOk={() => {
+          if (isSrContext) {
+            navigate(ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_SERVICE_REQUEST, {
+              state: {
+                id: woContext.srId,
+                idAccount: woContext.idAccount,
+                idCustomer: woContext.idCustomer,
+                type: woContext.accountType,
+                activeTab: "work-order",
+              },
+            });
+          } else {
+            navigate(-1);
+          }
+        }}
         width={400}
       >
         <div className="flex justify-center mt-5 gap-[20px]">

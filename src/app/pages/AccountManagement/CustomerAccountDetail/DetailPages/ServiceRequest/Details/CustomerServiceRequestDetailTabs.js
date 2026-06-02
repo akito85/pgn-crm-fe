@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import NxCardContainer from "../../../../../../../components/Nx/NxCardContainer";
 import NxTabs from "../../../../../../../components/Nx/NxTabs";
 import CustomerServiceRequestDetailAttch from "./CustomerServiceRequestDetailAttch";
@@ -14,6 +14,7 @@ const CustomerServiceRequestDetailTabs = ({
   accountType,
   data_accountDetail,
   data_detail,
+  initialTab,
 }) => {
   const commonProps = {
     id,
@@ -52,7 +53,11 @@ const CustomerServiceRequestDetailTabs = ({
     },
   ];
 
-  const [activeKey, setActiveKey] = useState(items[0]?.key || "");
+  const [activeKey, setActiveKey] = useState(initialTab || items[0]?.key || "");
+
+ useEffect(() =>{
+  console.log(data_detail)
+ },[]);
 
   return (
     <NxCardContainer

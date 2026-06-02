@@ -45,7 +45,7 @@ const CustomerServiceRequestDetails = ({ type = "standard" }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { id, idAccount, idCustomer, type: accountType } = location?.state || {};
+  const { id, idAccount, idCustomer, type: accountType, activeTab } = location?.state || {};
 
   const { data_accountDetail, loading: loadingAccountDetail } = useSelector(
     (state) => state.accountManagement
@@ -141,6 +141,7 @@ const CustomerServiceRequestDetails = ({ type = "standard" }) => {
             accountType={accountType}
             data_accountDetail={data_accountDetail}
             data_detail={detail_serviceRequest}
+            initialTab={activeTab}
           />
 
           {/* Action Log */}
