@@ -165,7 +165,7 @@ export const downloadGasDeposit = createAsyncThunk(
   "DOWNLOAD_GAS_DEPOSIT",
   async ({ body, id }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/gas-deposit/export-excel/${id}`;
+      const url = `/v1/dbs/api/gas-deposit/download/${id}`;
       const response = await accountManagementService.downloadDataAdvanced(
         url,
         body
