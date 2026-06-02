@@ -12,6 +12,7 @@ import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 import BaseContainer from "../../../../components/BaseContainer";
 import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
 import NxDetailText from "../../../../components/Nx/NxDetailText";
+import StatusComponent from "../../../../components/StatusComponent";
 
 const HeaderDetail = ({
   data_header = [],
@@ -30,6 +31,13 @@ const HeaderDetail = ({
   const { data_accountDetail } = useSelector(
     (state) => state.accountManagement
   );
+  const custStatus = data_accountDetail?.accountSummary?.customerStatus ? data_accountDetail?.accountSummary?.customerStatus
+                    .charAt(0)
+                    .toUpperCase() +
+                  data_accountDetail?.accountSummary?.customerStatus
+                    .slice(1)
+                    .toLowerCase()
+                  : ""
 
   useEffect(() => {
     if (idAccount && idCustomer && type) {
@@ -100,10 +108,9 @@ const HeaderDetail = ({
                     {data_accountDetail?.accountSummary?.searchKey}
                   </NxDetailText>
                   <NxDetailText label="Status">
-                    {data_accountDetail?.accountSummary?.customerStatus
-                      ? data_accountDetail.accountSummary.customerStatus.charAt(0).toUpperCase() +
-                        data_accountDetail.accountSummary.customerStatus.slice(1).toLowerCase()
-                      : ""}
+                    <StatusComponent colour={custStatus.toLowerCase()} margin={false} size="small"> 
+                      {custStatus}
+                    </StatusComponent>
                   </NxDetailText>
                   <NxDetailText label="Description">
                     {data_accountDetail?.accountSummary?.description}
@@ -213,14 +220,9 @@ const HeaderDetail = ({
                 {data_accountDetail?.accountSummary?.searchKey}
               </NxDetailText>
               <NxDetailText label="Status">
-                {data_accountDetail?.accountSummary?.customerStatus
-                  ? data_accountDetail?.accountSummary?.customerStatus
-                    .charAt(0)
-                    .toUpperCase() +
-                  data_accountDetail?.accountSummary?.customerStatus
-                    .slice(1)
-                    .toLowerCase()
-                  : ""}
+                <StatusComponent colour={custStatus.toLowerCase()} margin={false} size="small"> 
+                  {custStatus}
+                </StatusComponent>
               </NxDetailText>
               <NxDetailText label="Description">
                 {data_accountDetail?.accountSummary?.description}
