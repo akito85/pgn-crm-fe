@@ -4,7 +4,7 @@ import NxDate from "../../../../components/Nx/NxDatePicker";
 import NxStatusComponent from "../../../../components/Nx/NxStatusComponent";
 
 /**
- * Returns the column definitions for the Gas Deposit table.
+ * Returns the column definitions for the Summary Balance table.
  *
  * @param {Object}          params                        - Column configuration options.
  * @param {Object}          params.search                 - Current active search/filter values keyed by column dataIndex.
@@ -17,7 +17,7 @@ import NxStatusComponent from "../../../../components/Nx/NxStatusComponent";
  * @param {boolean}         [params.isFrontEnd=false]     - When true, uses client-side search/filter props.
  * @returns {Array<Object>} Array of Ant Design column definition objects.
  */
-const getGasDepositColumns = ({
+const getHistoryColumns = ({
   search,
   searchInput,
   searchedColumn,
@@ -133,214 +133,6 @@ const getGasDepositColumns = ({
       },
     ]
   },
-  {
-    key: "billingPeriod",
-    title: "BILLING PERIOD",
-    dataIndex: "billingPeriod",
-    width: 150,
-    sorter: true,
-    align: "center",
-    ...(isFrontEnd ? getColumnSearchPropsUseFilteredValueFE : getColumnSearchPropsUseFilteredValue)(
-      search,
-      "billingPeriod",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-    ),
-  },
-  {
-    key: "timeUnit",
-    title: "TIME UNIT",
-    dataIndex: "timeUnit",
-    width: 150,
-    sorter: true,
-    align: "center",
-    ...(isFrontEnd ? getColumnSearchPropsUseFilteredValueFE : getColumnSearchPropsUseFilteredValue)(
-      search,
-      "timeUnit",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-    ),
-  },
-  {
-    key: "currency",
-    title: "CURRENCY",
-    dataIndex: "currency",
-    width: 150,
-    sorter: true,
-    align: "center",
-    ...(isFrontEnd ? getColumnSearchPropsUseFilteredValueFE : getColumnSearchPropsUseFilteredValue)(
-      search,
-      "currency",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-    ),
-  },
-  {
-    key: "uom",
-    title: "UOM",
-    dataIndex: "uom",
-    width: 150,
-    sorter: true,
-    align: "center",
-    ...(isFrontEnd ? getColumnSearchPropsUseFilteredValueFE : getColumnSearchPropsUseFilteredValue)(
-      search,
-      "uom",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-    ),
-  },
-  {
-    key: "quantity",
-    title: "QUANTITY",
-    dataIndex: "quantity",
-    width: 150,
-    sorter: true,
-    align: "center",
-    ...(isFrontEnd ? getColumnSearchPropsUseFilteredValueFE : getColumnSearchPropsUseFilteredValue)(
-      search,
-      "quantity",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-    ),
-  },
-  {
-    key: "amount",
-    title: "AMOUNT",
-    dataIndex: "amount",
-    width: 150,
-    sorter: true,
-    align: "center",
-    ...(isFrontEnd ? getColumnSearchPropsUseFilteredValueFE : getColumnSearchPropsUseFilteredValue)(
-      search,
-      "amount",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-    ),
-  },
-  {
-    key: "cashBalance",
-    title: "CASH BALANCE",
-    dataIndex: "cashBalance",
-    width: 150,
-    sorter: true,
-    align: "center",
-    ...(isFrontEnd ? getColumnSearchPropsUseFilteredValueFE : getColumnSearchPropsUseFilteredValue)(
-      search,
-      "cashBalance",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-    ),
-  },
-  {
-    key: "type",
-    title: "TYPE",
-    dataIndex: "type",
-    width: 150,
-    sorter: true,
-    align: "center",
-    ...(isFrontEnd ? getColumnSearchPropsUseFilteredValueFE : getColumnSearchPropsUseFilteredValue)(
-      search,
-      "type",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-    ),
-  },
-  {
-    key: "accountType",
-    title: "ACCOUNT TYPE",
-    dataIndex: "accountType",
-    width: 160,
-    sorter: true,
-    align: "center",
-    ...(isFrontEnd ? getColumnSearchPropsUseFilteredValueFE : getColumnSearchPropsUseFilteredValue)(
-      search,
-      "accountType",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-    ),
-  },
-  {
-    key: "classificationType",
-    title: "CLASSIFICATION TYPE",
-    dataIndex: "classificationType",
-    width: 160,
-    sorter: true,
-    align: "center",
-    ...(isFrontEnd ? getColumnSearchPropsUseFilteredValueFE : getColumnSearchPropsUseFilteredValue)(
-      search,
-      "classificationType",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-    ),
-  },
-  {
-    key: "source",
-    title: "SOURCE",
-    dataIndex: "source",
-    width: 160,
-    sorter: true,
-    align: "center",
-    ...(isFrontEnd ? getColumnSearchPropsUseFilteredValueFE : getColumnSearchPropsUseFilteredValue)(
-      search,
-      "source",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-    ),
-  },
-  {
-    key: "sapCustId",
-    title: "SAP CUST ID",
-    dataIndex: "sapCustId",
-    width: 160,
-    sorter: true,
-    align: "center",
-    ...(isFrontEnd ? getColumnSearchPropsUseFilteredValueFE : getColumnSearchPropsUseFilteredValue)(
-      search,
-      "sapCustId",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-    ),
-  },
-  {
-    key: "description",
-    title: "DESCRIPTION",
-    dataIndex: "description",
-    width: 160,
-    sorter: true,
-    align: "center",
-    ...(isFrontEnd ? getColumnSearchPropsUseFilteredValueFE : getColumnSearchPropsUseFilteredValue)(
-      search,
-      "description",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-    ),
-  },
   includeStatus && {
     key: "status",
     title: "STATUS",
@@ -389,4 +181,4 @@ const getGasDepositColumns = ({
   },
 ].filter(Boolean);
 
-export { getGasDepositColumns };
+export { getHistoryColumns };
