@@ -130,7 +130,7 @@ export const updatePositionHierarchy = createAsyncThunk(
   async (body, thunkAPI) => {
     try {
       let url = "/v1/dbs/api/positionhierarchy/update";
-      const response = await userHttpService.createData(url, body);
+      const response = await userHttpService.updateData(url, body);
       const bodyMessage = {
         title: "Successfull",
         description: `Your data has been Updated`,

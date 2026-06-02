@@ -318,6 +318,13 @@ const LayoutMenu = ({ children }) => {
       dispatch(clearBodyMessage());
       setModalConfirmation(false);
       setLoadingLogout(false);
+      // Token cleared by the thunk; navigate regardless of API failure so the
+      // user is never left stuck on a protected page with no valid session.
+      if (tokenJSON?.userLevel !== "Super User") {
+        navigate("/login");
+      } else {
+        navigate("/login-su");
+      }
     }
   };
   const initialAvatar = (fullName) => {

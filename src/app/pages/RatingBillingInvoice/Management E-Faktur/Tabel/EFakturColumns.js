@@ -71,7 +71,7 @@ export const getEFakturColumns = ({
       key: "type",
       title: "FAKTUR TYPE",
       dataIndex: "type",
-      width: 180,
+      width: 120,
       sorter: true,
       filteredValue: [search?.type] || null,
       ...getColumnSearchPropsUseFilteredValue(
@@ -83,16 +83,18 @@ export const getEFakturColumns = ({
         handleSearch,
         true,
       ),
-      render: (text) =>
-        renderColumn(
-          "type",
-          hasValue(search["type"]),
-          searchText,
-          text || " ",
-          false,
-          "input",
-          search,
-        ),
+      render: (text) => {
+        const displayType = text || "-";
+        const typeLabel = String(displayType).replace(/_/g, " ");
+
+        return (
+          <div className="flex justify-center">
+            <StatusComponent colour={String(displayType).toLowerCase()}>
+              {typeLabel}
+            </StatusComponent>
+          </div>
+        );
+      },
     },
     // 3. BILLING CODE
     {
@@ -644,204 +646,8 @@ export const getEFakturColumns = ({
           search,
         ),
     },
-    // 22. TAX BASIS IDR (new)
-    {
-      key: "taxBasisIdr",
-      title: "TAX BASIS IDR",
-      dataIndex: "taxBasisIdr",
-      width: 180,
-      isNumber: true,
-      sorter: true,
-      filteredValue: [search?.taxBasisIdr] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "taxBasisIdr",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true,
-      ),
-      render: (value) => {
-        const formattedValue = (
-          <span>Rp {currencyFormatting(value, "idr")}</span>
-        );
-        return renderColumn(
-          "taxBasisIdr",
-          hasValue(search["taxBasisIdr"]),
-          searchText,
-          formattedValue,
-          false,
-          "input",
-          search,
-        );
-      },
-    },
-    // 23. TAX BASIS USD (new)
-    {
-      key: "taxBasisUsd",
-      title: "TAX BASIS USD",
-      dataIndex: "taxBasisUsd",
-      width: 180,
-      isNumber: true,
-      sorter: true,
-      filteredValue: [search?.taxBasisUsd] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "taxBasisUsd",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true,
-      ),
-      render: (value) => {
-        const formattedValue = (
-          <span>$ {currencyFormatting(value, "usd")}</span>
-        );
-        return renderColumn(
-          "taxBasisUsd",
-          hasValue(search["taxBasisUsd"]),
-          searchText,
-          formattedValue,
-          false,
-          "input",
-          search,
-        );
-      },
-    },
-    // 24. TAX BASIS EQV IDR (new)
-    {
-      key: "taxBasisEqvIdr",
-      title: "TAX BASIS EQV IDR",
-      dataIndex: "taxBasisEqvIdr",
-      width: 200,
-      isNumber: true,
-      sorter: true,
-      filteredValue: [search?.taxBasisEqvIdr] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "taxBasisEqvIdr",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true,
-      ),
-      render: (value) => {
-        const formattedValue = (
-          <span>Rp {currencyFormatting(value, "idr")}</span>
-        );
-        return renderColumn(
-          "taxBasisEqvIdr",
-          hasValue(search["taxBasisEqvIdr"]),
-          searchText,
-          formattedValue,
-          false,
-          "input",
-          search,
-        );
-      },
-    },
-    // 25. VAT IDR (new)
-    {
-      key: "vatIdr",
-      title: "VAT IDR",
-      dataIndex: "vatIdr",
-      width: 180,
-      isNumber: true,
-      sorter: true,
-      filteredValue: [search?.vatIdr] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "vatIdr",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true,
-      ),
-      render: (value) => {
-        const formattedValue = (
-          <span>Rp {currencyFormatting(value, "idr")}</span>
-        );
-        return renderColumn(
-          "vatIdr",
-          hasValue(search["vatIdr"]),
-          searchText,
-          formattedValue,
-          false,
-          "input",
-          search,
-        );
-      },
-    },
-    // 26. VAT USD (new)
-    {
-      key: "vatUsd",
-      title: "VAT USD",
-      dataIndex: "vatUsd",
-      width: 180,
-      isNumber: true,
-      sorter: true,
-      filteredValue: [search?.vatUsd] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "vatUsd",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true,
-      ),
-      render: (value) => {
-        const formattedValue = (
-          <span>$ {currencyFormatting(value, "usd")}</span>
-        );
-        return renderColumn(
-          "vatUsd",
-          hasValue(search["vatUsd"]),
-          searchText,
-          formattedValue,
-          false,
-          "input",
-          search,
-        );
-      },
-    },
-    // 27. VAT EQV IDR (new)
-    {
-      key: "vatEqvIdr",
-      title: "VAT EQV IDR",
-      dataIndex: "vatEqvIdr",
-      width: 180,
-      isNumber: true,
-      sorter: true,
-      filteredValue: [search?.vatEqvIdr] || null,
-      ...getColumnSearchPropsUseFilteredValue(
-        search,
-        "vatEqvIdr",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true,
-      ),
-      render: (value) => {
-        const formattedValue = (
-          <span>Rp {currencyFormatting(value, "idr")}</span>
-        );
-        return renderColumn(
-          "vatEqvIdr",
-          hasValue(search["vatEqvIdr"]),
-          searchText,
-          formattedValue,
-          false,
-          "input",
-          search,
-        );
-      },
-    },
+
+
     // 28. BILLING PERIOD
     {
       key: "billPeriode",
@@ -891,7 +697,11 @@ export const getEFakturColumns = ({
         "date",
       ),
       render: (text) => {
-        const formattedDate = text ? moment(text).format("DD-MM-YYYY") : " ";
+        // Pastikan parsing dan penampilan tanggal invoice menggunakan format YYYY-MM-DD
+        // Terima berbagai format input, lalu keluarkan dalam bentuk 'yyyy-mm-dd'
+        const formattedDate = text && moment(text).isValid()
+          ? moment(text).format("YYYY-MM-DD")
+          : " ";
         return renderDateColumn(
           "invoiceDate",
           hasValue(search["invoiceDate"]),
@@ -972,7 +782,7 @@ export const getEFakturColumns = ({
       key: "statusApproval",
       title: "STATUS APPROVAL",
       dataIndex: "statusApproval",
-      width: 300,
+      width: 160,
       isClassification: true,
       sorter: true,
       filteredValue: [search?.statusApproval] || null,
@@ -998,6 +808,37 @@ export const getEFakturColumns = ({
         );
       },
     },
+    // STATUS PJAP
+    {
+      key: "statusPjap",
+      title: "STATUS PJAP",
+      dataIndex: "statusPjap",
+      width: 120,
+      isClassification: true,
+      sorter: true,
+      filteredValue: [search?.statusPjap] || null,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "statusPjap",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+      ),
+      render: (status) => {
+        const displayStatus = status || "-";
+        const statusLabel = String(displayStatus).replace(/_/g, " ");
+
+        return (
+          <div className="flex justify-center">
+            <StatusComponent colour={String(displayStatus).toLowerCase()}>
+              {statusLabel}
+            </StatusComponent>
+          </div>
+        );
+      },
+    },
   ];
 };
 
@@ -1009,6 +850,7 @@ export const getActionColumn = ({
 }) => {
   return [
     {
+      key: "action",
       action: "Update",
       type: "table",
       width: 40,
@@ -1060,6 +902,7 @@ export const getActionColumn = ({
       },
     },
     {
+      key: "action_view",
       action: "View",
       type: "table",
       width: 40,

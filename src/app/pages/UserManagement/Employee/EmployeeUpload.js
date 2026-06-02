@@ -60,8 +60,9 @@ const EmployeeUpload = () => {
         })
       );
       setDataEmployeeList(
-        dataConverter?.uploadEmployeeDTO?.map((item) => {
+        dataConverter?.uploadEmployeeDTO?.map((item, index) => {
           return {
+            key: index + 1,
             empNumber: item?.empNumber,
             firstName: item?.firstName,
             lastName: item?.lastName,
@@ -69,10 +70,11 @@ const EmployeeUpload = () => {
             phone: item?.phone,
             empType: item?.empTypeId,
             empTypeId: item?.empTypeId,
-            startDate: moment(item?.startDate).clone(),
-            endDate: moment(item?.endDate).clone(),
+            startDate: item?.startDate ? moment(item.startDate).format("DD MMM YYYY") : null,
+            endDate: item?.endDate ? moment(item.endDate).format("DD MMM YYYY") : null,
             description: item?.description,
             status: item?.status,
+            message: item?.message ?? [],
           };
         })
       );
@@ -80,12 +82,11 @@ const EmployeeUpload = () => {
         dataConverter?.uploadAssignmentDTO?.map((item) => {
           return {
             empNumber: item?.empNumber,
-            endDate: moment(item?.endDate).clone(),
+            endDate: item?.endDate ? moment(item.endDate).clone() : null,
             isMain: item?.isMain,
             jobId: item?.jobId,
             positionId: item?.positionId,
-            startDate: moment(item?.startDate).clone(),
-            status: item?.status,
+            startDate: item?.startDate ? moment(item.startDate).clone() : null,
           };
         })
       );
@@ -175,17 +176,17 @@ const EmployeeUpload = () => {
           ...item,
           empType: item?.empType?.toString(),
           empTypeId: typeof item?.empType === 'string' ? item?.empTypeId?.toString() : item?.empType?.toString(),
-          startDate: moment(item?.startDate).format(dateFormatting?.dateCapital),
-          endDate: moment(item?.endDate).format(dateFormatting?.dateCapital),
+          startDate: item?.startDate ? moment(item.startDate, "DD MMM YYYY").format(dateFormatting?.dateCapital) : null,
+          endDate: item?.endDate ? moment(item.endDate, "DD MMM YYYY").format(dateFormatting?.dateCapital) : null,
         }
       });
-      const assignmentEmployeeListItem = dataAssignmentEmployeeList?.map((item) => {
+      const assignmentEmployeeListItem = dataAssignmentEmployeeList?.map(({ status: _status, ...item }) => {
         return {
           ...item,
           jobId: item?.jobId?.toString(),
           positionId: item?.positionId.toString(),
-          startDate: moment(item?.startDate).format(dateFormatting?.dateCapital),
-          endDate: moment(item?.endDate).format(dateFormatting?.dateCapital),
+          startDate: item?.startDate ? moment(item.startDate).format(dateFormatting?.dateCapital) : null,
+          endDate: item?.endDate ? moment(item.endDate).format(dateFormatting?.dateCapital) : null,
         }
       });
       const body = {
@@ -379,6 +380,8 @@ const EmployeeUpload = () => {
             </p>
           </div>
         </ModalConfirm>
+
+
       </Spin>
     </>
   );
