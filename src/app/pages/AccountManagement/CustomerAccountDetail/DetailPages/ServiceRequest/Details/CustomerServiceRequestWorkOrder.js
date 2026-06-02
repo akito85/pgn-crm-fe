@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { Button } from "antd";
+import { Button, Tooltip } from "antd";
 import NxTable from "../../../../../../../components/Nx/NxTable";
 import NxDate from "../../../../../../../components/Nx/NxDatePicker";
 import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
@@ -23,13 +23,26 @@ const COLUMNS = [
   { title: "COMPLETION PLAN DATE", dataIndex: "planEndDate",     width: 180, sorter: true, filter: true, render: (v) => v ? NxDate.formatDate(v, "DD MMM YYYY") : "-" },
   { title: "COMPLETION REMARK",    dataIndex: "description",     width: 220, sorter: true, filter: true, render: (v) => v || "-" },
   {
-    title: "STATUS", dataIndex: "status", width: 120, sorter: true, filter: true,
+    title: "STATUS", dataIndex: "status", width: 120, sorter: false, filter: false,
     render: (v) => v ? (
-      <StatusComponent colour={(v || "").toLowerCase()} margin={false}>
-        {(v || "").replace(/_/g, " ")}
-      </StatusComponent>
+      <div className="flex justify-center">
+        <StatusComponent colour={(v || "").toLowerCase()} margin={false} size="small">
+          {(v || "").replace(/_/g, " ")}
+        </StatusComponent>
+      </div>
     ) : "-",
   },
+  {
+    title: "APPROVAL STATUS", dataIndex: "approvalStatus", width: 120, sorter: false, filter: false,
+    render: (v) => v ? (
+      <div className="flex justify-center">
+        <StatusComponent colour={(v || "").toLowerCase()} margin={false} size="small">
+          {(v || "").replace(/_/g, " ")}
+        </StatusComponent>
+      </div>
+    ) : "-",
+  },
+  
 ];
 
 const CustomerServiceRequestWorkOrder = ({
@@ -102,41 +115,43 @@ const CustomerServiceRequestWorkOrder = ({
       width: 120,
       fixed: "right",
       render: (_, record) => (
-        <div className="flex justify-center gap-2">
-          <Button
-            size="small"
-            type="menu"
-            onClick={() =>
-              navigate(ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_WORK_ORDER, {
-                state: { woId: record.id, idAccount, idCustomer, accountType },
-              })
-            }
-          >
-            View
-          </Button>
-          <Button
-            size="small"
-            type="secondary"
-            onClick={() =>
-              navigate(ACCOUNT_MANAGEMENT_ROUTES.UPDATE_SR_WORK_ORDER, {
-                state: {
-                  woContext: {
-                    type: "sr",
-                    srId: id,
-                    srNumber: data_detail?.requestNumber || "",
-                    srCategory: data_detail?.requestCategory || "",
-                    idAccount,
-                    idCustomer,
-                    accountType,
-                    isUpdate: true,
-                    woId: record.id,
+        <div className="flex justify-center gap-1">
+          <Tooltip title="View">
+            <Button
+              type="table-action"
+              onClick={() =>
+                navigate(ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_SR_WORK_ORDER, {
+                  state: { woId: record.id, idAccount, idCustomer, accountType },
+                })
+              }
+            >
+              <SVGIcon name="IconDetail" width={20} />
+            </Button>
+          </Tooltip>
+          <Tooltip title="Edit">
+            <Button
+              type="table-action"
+              onClick={() =>
+                navigate(ACCOUNT_MANAGEMENT_ROUTES.UPDATE_SR_WORK_ORDER, {
+                  state: {
+                    woContext: {
+                      type: "sr",
+                      srId: id,
+                      srNumber: data_detail?.requestNumber || "",
+                      srCategory: data_detail?.requestCategory || "",
+                      idAccount,
+                      idCustomer,
+                      accountType,
+                      isUpdate: true,
+                      woId: record.id,
+                    },
                   },
-                },
-              })
-            }
-          >
-            Edit
-          </Button>
+                })
+              }
+            >
+              <SVGIcon name="IconEdit" width={20} />
+            </Button>
+          </Tooltip>
         </div>
       ),
     },
@@ -187,6 +202,7 @@ const CustomerServiceRequestWorkOrder = ({
       <WorkOrderApprovalModal
         isOpen={showApprovalModal}
         accountId={idAccount}
+        srId={id}
         handleCancel={() => setShowApprovalModal(false)}
         afterFinish={() => fetchList(1, false)}
       />

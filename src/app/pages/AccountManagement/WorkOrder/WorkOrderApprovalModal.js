@@ -1,30 +1,38 @@
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Form, Button } from "antd";
-import InputComponent from "../../../components/InputComponent";
-import DetailText from "../../../components/DetailText";
-import NxTable from "../../../components/Nx/NxTable";
-import NxBaseContainer from "../../../components/Nx/NxBaseContainer";
-import NxModal from "../../../components/Nx/NxModal";
-import { NxFormStepper } from "../../../components/Nx/NxFormStepNavigation";
-import SVGIcon from "../../../assets/Icon/index";
-import { showModalError } from "../../../redux/slices/general_slice";
+import InputComponent from "../../../../components/InputComponent";
+import DetailText from "../../../../components/DetailText";
+import NxTable from "../../../../components/Nx/NxTable";
+import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
+import NxModal from "../../../../components/Nx/NxModal";
+import { NxFormStepper } from "../../../../components/Nx/NxFormStepNavigation";
+import SVGIcon from "../../../../assets/Icon/index";
+import { showModalError } from "../../../../redux/slices/general_slice";
 import {
   getWoApprovals,
   approveOrRejectWo,
-} from "../../../redux/slices/account_management/detailAccount/WorkOrderSlice";
+} from "../../../../redux/slices/account_management/detailAccount/WorkOrderSlice";
+import StatusComponent from "../../../../components/StatusComponent";
 
 const WO_APPROVAL_COLUMNS = [
   { title: "NO", width: 60, align: "center", render: (_, __, i) => i + 1 },
   { title: "WO NUMBER",  dataIndex: "woNumber",       width: 180, sorter: true, filter: true, render: (v) => v || "-" },
   { title: "TYPE",       dataIndex: "woTypeName",     width: 140, sorter: true, filter: true, render: (v) => v || "-" },
   { title: "CATEGORY",   dataIndex: "woCategoryName", width: 140, sorter: true, filter: true, render: (v) => v || "-" },
-  { title: "STATUS",     dataIndex: "status",         width: 120, sorter: true, filter: true, render: (v) => v || "-" },
+  { title: "STATUS",     dataIndex: "status",  width: 120, render: (v) => v ? (
+      <div className="flex justify-center">
+        <StatusComponent colour={(v || "").toLowerCase()} margin={false} size="small">
+          {(v || "").replace(/_/g, " ")}
+        </StatusComponent>
+      </div>
+    ) : "-", },
 ];
 
 const WorkOrderApprovalModal = ({
   isOpen,
   accountId,
+  srId,
   handleCancel = () => {},
   afterFinish = () => {},
 }) => {
@@ -51,15 +59,15 @@ const WorkOrderApprovalModal = ({
 
   useEffect(() => {
     if (isOpen && accountId) {
-      dispatch(getWoApprovals({ accountId, body: { page: 1, size: loadMoreSize, sort, searchs: search, filters: [], filterRules: [] }, isLoadMore: false }));
+      dispatch(getWoApprovals({ accountId, body: { page: 1, size: loadMoreSize, sort, searchs: search, filters: [], filterRules: [], srId: srId || null }, isLoadMore: false }));
       setPage(1);
     }
-  }, [dispatch, isOpen, accountId, search, sort]);
+  }, [dispatch, isOpen, accountId, srId, search, sort]);
 
   const handleLoadMore = () => {
     const nextPage = page + 1;
     if (nextPage <= (pagination_listWoApprovals.totalPage || 0)) {
-      dispatch(getWoApprovals({ accountId, body: { page: nextPage, size: loadMoreSize, sort, searchs: search, filters: [], filterRules: [] }, isLoadMore: true }));
+      dispatch(getWoApprovals({ accountId, body: { page: nextPage, size: loadMoreSize, sort, searchs: search, filters: [], filterRules: [], srId: srId || null }, isLoadMore: true }));
       setPage(nextPage);
     }
   };
