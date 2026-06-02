@@ -75,6 +75,12 @@ import moment from "moment";
 import NxBreadCrumb from "../../../../../../../components/Nx/NxBreadCrumb";
 import NxCardContainer from "../../../../../../../components/Nx/NxCardContainer";
 
+const findName = (list, id) => {
+  const items = Array.isArray(list) ? list : list?.data || [];
+  const item = items.find((i) => (i.glbTypeValId || i.id) === id);
+  return item?.name || item?.glbTypeValName || null;
+};
+
 const CreateUpdateCustomerServiceRequest = ({ formType = "create" }) => {
   const location = useLocation();
 
@@ -304,7 +310,16 @@ const CreateUpdateCustomerServiceRequest = ({ formType = "create" }) => {
 
   // Populate form when update detail is loaded
   useEffect(() => {
-    if (!isUpdate || !list_srApprovalHierarchy.length) return;
+    if (
+      !isUpdate ||
+      !list_srApprovalHierarchy.length ||
+      !list_srTypes.length ||
+      !list_srCategories.length ||
+      !list_srSubcategories.length ||
+      !list_srPriorities.length ||
+      !list_srChannels.length ||
+      !list_srSources.length
+    ) return;
 
     const status = serviceRequestDetail?.status || "";
     const statusApproval = serviceRequestDetail?.statusApproval || "";
@@ -320,17 +335,27 @@ const CreateUpdateCustomerServiceRequest = ({ formType = "create" }) => {
 
     if (!detail) return;
 
+    const typeId   = detail.requestType     || detail.type;
+    const catId    = detail.requestCategory || detail.category;
+    const subCatId = detail.requestSubCategory || detail.subCategory;
+
     formCreate.setFieldsValue({
-      type: detail.requestType || detail.type,
-      category: detail.requestCategory || detail.category,
-      subCategory: detail.requestSubCategory || detail.subCategory,
-      priority: detail.priority,
-      description: detail.description,
-      requestDate: detail.requestedDate ? moment(detail.requestedDate) : null,
+      type:                    typeId,
+      category:                catId,
+      subCategory:             subCatId,
+      priority:                detail.priority,
+      description:             detail.description,
+      requestDate:             detail.requestedDate ? moment(detail.requestedDate) : null,
       serviceRequestReference: detail.reference,
-      appHierId: detail.apphierId,
-      channel: detail.channel,
-      requestSource: detail.source
+      appHierId:               detail.apphierId,
+      channel:                 detail.channel,
+      requestSource:           detail.source,
+      typeName:                findName(list_srTypes,        typeId),
+      categoryName:            findName(list_srCategories,   catId),
+      subCategoryName:         findName(list_srSubcategories, subCatId),
+      priorityName:            findName(list_srPriorities,   detail.priority),
+      channelName:             findName(list_srChannels,     detail.channel),
+      requestSourceName:       findName(list_srSources,      detail.source),
     });
 
     const appHierOption = list_srApprovalHierarchy.find(
@@ -339,7 +364,18 @@ const CreateUpdateCustomerServiceRequest = ({ formType = "create" }) => {
     if (appHierOption) {
       handleSelectHierarchy(detail.apphierId, appHierOption.approvalName);
     }
-  }, [isUpdate, serviceRequestDetail, serviceRequestDetailDraft, list_srApprovalHierarchy]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [ // eslint-disable-line react-hooks/exhaustive-deps
+    isUpdate,
+    serviceRequestDetail,
+    serviceRequestDetailDraft,
+    list_srApprovalHierarchy,
+    list_srTypes,
+    list_srCategories,
+    list_srSubcategories,
+    list_srPriorities,
+    list_srChannels,
+    list_srSources,
+  ]);
 
   // Populate attachments from loaded detail in UPDATE mode (Gap 3)
   useEffect(() => {
@@ -814,24 +850,54 @@ const CreateUpdateCustomerServiceRequest = ({ formType = "create" }) => {
     }
 
     if (isUpdate) {
-      const detail = serviceRequestDetail || serviceRequestDetailDraft;
-      if (detail?.apphierId && list_srApprovalHierarchy.length) {
-        formCreate.setFieldsValue({ appHierId: detail.apphierId });
-        const appHierOption = list_srApprovalHierarchy.find(
-          (option) => option.appHierId === detail.apphierId
-        );
-        if (appHierOption) {
-          handleSelectHierarchy(detail.apphierId, appHierOption.approvalName);
+      const status = serviceRequestDetail?.status || "";
+      const statusApproval = serviceRequestDetail?.statusApproval || "";
+      const isActiveClear = status.toUpperCase() === "ACTIVE";
+      const isDraftApprovalClear = statusApproval.toUpperCase() === "DRAFT";
+      const isRejectApprovalClear = statusApproval.toUpperCase() === "REJECT";
+
+      const detail =
+        isActiveClear && (isDraftApprovalClear || isRejectApprovalClear)
+          ? serviceRequestDetailDraft
+          : serviceRequestDetail;
+
+      if (detail) {
+        if (detail.apphierId && list_srApprovalHierarchy.length) {
+          formCreate.setFieldsValue({ appHierId: detail.apphierId });
+          const appHierOption = list_srApprovalHierarchy.find(
+            (option) => option.appHierId === detail.apphierId
+          );
+          if (appHierOption) {
+            handleSelectHierarchy(detail.apphierId, appHierOption.approvalName);
+          }
         }
+
+        // Restore name fields from loaded lists
+        formCreate.setFieldsValue({
+          typeName:          findName(list_srTypes,         detail.requestType        || detail.type),
+          categoryName:      findName(list_srCategories,    detail.requestCategory    || detail.category),
+          subCategoryName:   findName(list_srSubcategories, detail.requestSubCategory || detail.subCategory),
+          priorityName:      findName(list_srPriorities,    detail.priority),
+          channelName:       findName(list_srChannels,      detail.channel),
+          requestSourceName: findName(list_srSources,       detail.source),
+        });
       }
 
-      if (serviceRequestDetail?.attachments?.length) {
+      if (detail?.attachments?.length) {
         setAttachmentDataSource(
-          serviceRequestDetail.attachments.map((att) => ({ ...att, key: att.id }))
+          detail.attachments.map((att) => ({ ...att, key: att.id }))
         );
       }
     } else {
       setAttachmentDataSource([]);
+      formCreate.setFieldsValue({
+        typeName: null,
+        categoryName: null,
+        subCategoryName: null,
+        channelName: null,
+        priorityName: null,
+        requestSourceName: null,
+      });
     }
   };
 
