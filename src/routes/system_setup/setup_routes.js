@@ -98,4 +98,10 @@ export const SYSTEM_SETUP_ROUTES = {
   DETAIL_CALENDAR: "/system-setup/calendar/view",
   CREATE_CALENDAR: "/system-setup/calendar/create",
   UPDATE_CALENDAR: "/system-setup/calendar/update",
+
+  // Data Requirement Template
+  VIEW_DATA_REQUIREMENT_TEMPLATE: "/system-setup/data-requirement-template",
+  DETAIL_DATA_REQUIREMENT_TEMPLATE: "/system-setup/data-requirement-template/view/:id",
+  CREATE_DATA_REQUIREMENT_TEMPLATE: "/system-setup/data-requirement-template/create",
+  UPDATE_DATA_REQUIREMENT_TEMPLATE: "/system-setup/data-requirement-template/update/:id",
 };

@@ -43,6 +43,9 @@ import BillingItemCategoryDetail from "../../app/pages/SystemSetup/MasterData/Bi
 import CalendarView from "../../app/pages/SystemSetup/MasterData/Calendar/CalendarView";
 import CalendarForm from "../../app/pages/SystemSetup/MasterData/Calendar/CalendarForm";
 import CalendarDetail from "../../app/pages/SystemSetup/MasterData/Calendar/CalendarDetail";
+import DataRequirementTemplateView from "../../app/pages/SystemSetup/DataRequirementTemplate/DataRequirementTemplateView";
+import DataRequirementTemplateDetail from "../../app/pages/SystemSetup/DataRequirementTemplate/DataRequirementTemplateDetail";
+import DataRequirementTemplateForm from "../../app/pages/SystemSetup/DataRequirementTemplate/DataRequirementTemplateForm";
 
 export const SYSTEM_SETUP_ELEMENTS = {
   // menu
@@ -143,4 +146,10 @@ export const SYSTEM_SETUP_ELEMENTS = {
   DETAIL_CALENDAR_PAGE: <CalendarDetail />,
   CREATE_CALENDAR_PAGE: <CalendarForm type="create" />,
   UPDATE_CALENDAR_PAGE: <CalendarForm type="update" />,
+
+  // Data Requirement Template
+  VIEW_DATA_REQUIREMENT_TEMPLATE_PAGE: <DataRequirementTemplateView />,
+  DETAIL_DATA_REQUIREMENT_TEMPLATE_PAGE: <DataRequirementTemplateDetail />,
+  CREATE_DATA_REQUIREMENT_TEMPLATE_PAGE: <DataRequirementTemplateForm type="create" />,
+  UPDATE_DATA_REQUIREMENT_TEMPLATE_PAGE: <DataRequirementTemplateForm type="update" />,
 };
