@@ -1,5 +1,5 @@
 import { Fragment, useState, useEffect, useRef, useCallback } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 
 import { Button, Popconfirm, Tooltip } from "antd";
@@ -8,6 +8,7 @@ import { PlusOutlined } from "@ant-design/icons";
 import {
   getSrPrerequisites,
   deleteSrPrerequisite,
+  getSrPrerequisiteTemplate,
 } from "../../../../../../../../../redux/slices/account_management/detailAccount/ServiceRequestSlice";
 import ButtonComponent from "../../../../../../../../../components/ButtonComponent";
 import NxTable from "../../../../../../../../../components/Nx/NxTable";
@@ -42,6 +43,36 @@ export default function PreRequisiteForm({
   const [prereqLoading, setPrereqLoading] = useState(false);
   const loadingRef = useRef(false);
   const newPrerequisiteProcessed = useRef(false);
+  const [page, setPage] = useState(0);
+  const [loadMoreSize] = useState(20);
+  const [sort, setSort] = useState("");
+  const [search, setSearch] = useState({});
+  const [filters, setFilters] = useState([]);
+  const [filterRules, setFilterRules] = useState([]);
+
+  const {
+    loading_prerequisiteTemplate,
+    list_prerequisiteTemplate,
+    pagination_prerequisiteTemplate,
+  } = useSelector((state) => state.serviceRequest);
+
+  useEffect(() => {
+    const body = {
+      accountId,
+      srTypeId: form?.getFieldValue("srTypeId"),
+      srCategoryId: form?.getFieldValue("srCategoryId"),
+      srSubCategoryId: form?.getFieldValue("srSubCategoryId"),
+      page: 0,
+      size: loadMoreSize,
+      sort,
+      filters,
+      filterRules,
+      search: search,
+    };
+    setPage(0);
+    const promise = dispatch(getSrPrerequisiteTemplate({ body, isLoadMore: false }));
+    return () => { promise.abort(); };
+  }, [sort, search, filters, filterRules]);
 
   // Local data (CREATE flow: belum ada srId, simpan di form field)
   const [localPrereqs, setLocalPrereqs] = useState(() =>

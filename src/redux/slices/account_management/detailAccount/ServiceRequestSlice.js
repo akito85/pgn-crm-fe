@@ -63,6 +63,10 @@ const initialState = {
   isFailed: false,
   isSuccess: false,
   message: "",
+  // Pre Requisite Template
+  loading_prerequisiteTemplate: false,
+  list_prerequisiteTemplate: [],
+  pagination_prerequisiteTemplate: { totalPage: 0, totalElement: 0, currentPage: 0, pageSize: 10 },
 };
 
 // =====================================================
@@ -932,6 +936,20 @@ export const updateSrStatus = createAsyncThunk(
   }
 );
 
+// Get Pre Requisite Template
+export const getSrPrerequisiteTemplate = createAsyncThunk(
+  "GET_SR_PREREQUISITE_TEMPLATE",
+  async ({ body, isLoadMore }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/pre-requisite-template/list-for-sr`;
+      const response = await accountManagementService.updateDataWithMethodPost(url, body);
+      return { ...response.data, isLoadMore };
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
 // =====================================================
 // SLICE DEFINITION
 // =====================================================
@@ -1420,6 +1438,37 @@ const serviceRequestSlice = createSlice({
     [approveOrRejectAllServiceRequest.rejected]: (state) => {
       state.loading_approveSr = false;
       state.loading_rejectSr = false;
+    },
+
+    // Pre Requisite Template
+    [getSrPrerequisiteTemplate.pending]: (state, action) => {
+      if (!action.meta.arg?.isLoadMore) state.loading_prerequisiteTemplate = true;
+    },
+    [getSrPrerequisiteTemplate.fulfilled]: (state, action) => {
+      state.loading_prerequisiteTemplate = false;
+      const { result, page, isLoadMore } = action.payload;
+      if (isLoadMore) {
+        const currentIds = new Set(state.list_prerequisiteTemplate.map((i) => i.id));
+        state.list_prerequisiteTemplate = [
+          ...state.list_prerequisiteTemplate,
+          ...result.filter((i) => !currentIds.has(i.id)),
+        ];
+      } else {
+        state.list_prerequisiteTemplate = result;
+      }
+      state.pagination_prerequisiteTemplate = {
+        totalPage: page?.totalPages || 0,
+        totalElement: page?.totalElements || 0,
+        currentPage: page?.number || 0,
+        pageSize: page?.size || 10,
+      };
+    },
+    [getSrPrerequisiteTemplate.rejected]: (state, action) => {
+      state.loading_prerequisiteTemplate = false;
+      if (!action.meta.arg?.isLoadMore) {
+        state.list_prerequisiteTemplate = [];
+        state.pagination_prerequisiteTemplate = { totalPage: 0, totalElement: 0, currentPage: 0, pageSize: 10 };
+      }
     },
   },
 });
