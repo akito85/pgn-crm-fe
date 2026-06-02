@@ -304,7 +304,7 @@ const CreateUpdateCustomerServiceRequest = ({ formType = "create" }) => {
 
   // Populate form when update detail is loaded
   useEffect(() => {
-    if (!isUpdate) return;
+    if (!isUpdate || !list_srApprovalHierarchy.length) return;
 
     const status = serviceRequestDetail?.status || "";
     const statusApproval = serviceRequestDetail?.statusApproval || "";
@@ -333,10 +333,13 @@ const CreateUpdateCustomerServiceRequest = ({ formType = "create" }) => {
       requestSource: detail.source
     });
 
-    if (detail.apphierId) {
-      dispatch(getSrApprovalHierarchy(detail.apphierId));
+    const appHierOption = list_srApprovalHierarchy.find(
+      (option) => option.appHierId === detail.apphierId
+    );
+    if (appHierOption) {
+      handleSelectHierarchy(detail.apphierId, appHierOption.approvalName);
     }
-  }, [isUpdate, serviceRequestDetail, serviceRequestDetailDraft]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isUpdate, serviceRequestDetail, serviceRequestDetailDraft, list_srApprovalHierarchy]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Populate attachments from loaded detail in UPDATE mode (Gap 3)
   useEffect(() => {
@@ -350,7 +353,7 @@ const CreateUpdateCustomerServiceRequest = ({ formType = "create" }) => {
   }, [isUpdate, serviceRequestDetail, serviceRequestDetailDraft]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSelectHierarchy = (value, label) => {
-    formCreate.setFieldsValue({ appHierId: value, appHierName: label });
+    formCreate.setFieldValue("appHierName", label);
     if (value) dispatch(getSrApprovalHierarchy(value));
   };
 
@@ -810,12 +813,24 @@ const CreateUpdateCustomerServiceRequest = ({ formType = "create" }) => {
       });
     }
 
-    // Gap 4: restore attachments to original state on reset
-    if (isUpdate && serviceRequestDetail?.attachments?.length) {
-      setAttachmentDataSource(
-        serviceRequestDetail.attachments.map((att) => ({ ...att, key: att.id }))
-      );
-    } else if (!isUpdate) {
+    if (isUpdate) {
+      const detail = serviceRequestDetail || serviceRequestDetailDraft;
+      if (detail?.apphierId && list_srApprovalHierarchy.length) {
+        formCreate.setFieldsValue({ appHierId: detail.apphierId });
+        const appHierOption = list_srApprovalHierarchy.find(
+          (option) => option.appHierId === detail.apphierId
+        );
+        if (appHierOption) {
+          handleSelectHierarchy(detail.apphierId, appHierOption.approvalName);
+        }
+      }
+
+      if (serviceRequestDetail?.attachments?.length) {
+        setAttachmentDataSource(
+          serviceRequestDetail.attachments.map((att) => ({ ...att, key: att.id }))
+        );
+      }
+    } else {
       setAttachmentDataSource([]);
     }
   };
