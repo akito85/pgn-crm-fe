@@ -1,8 +1,8 @@
-import { Fragment, useState, useEffect, useRef, useCallback } from "react";
+import { Fragment, useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 
-import { Button, Popconfirm, Tooltip } from "antd";
+import { Button, Checkbox, Popconfirm, Tooltip } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 
 import {
@@ -213,34 +213,62 @@ export default function PreRequisiteForm({
     [dispatch, accountId, srId, isCreateFlow, form, loadFirst],
   );
 
+  // Track which template rows the user has checked
+  const [selectedTemplateKeys, setSelectedTemplateKeys] = useState(new Set());
+
+  // Inject `selected` flag into the template data so the table reflects check state
+  const templateDisplayData = useMemo(() => {
+    const items = list_prerequisiteTemplate || [];
+    return items.map((item) => {
+      const key = item.key ?? item.id ?? `tmpl-${item.prerequisiteId}`;
+      return { ...item, key, selected: selectedTemplateKeys.has(key) };
+    });
+  }, [list_prerequisiteTemplate, selectedTemplateKeys]);
+
+  const allSelected = templateDisplayData.length > 0 && templateDisplayData.every((item) => item.selected);
+  const someSelected = templateDisplayData.some((item) => item.selected) && !allSelected;
+
+  const handleSelectAll = useCallback(
+    (checked) => {
+      const nextKeys = checked ? new Set(templateDisplayData.map((item) => item.key)) : new Set();
+      setSelectedTemplateKeys(nextKeys);
+      const selected = checked ? templateDisplayData : [];
+      form?.setFieldsValue({ srFormSelectedPreRequisites: selected });
+    },
+    [templateDisplayData, form],
+  );
+
+  const handleSelectOne = useCallback(
+    (record, checked) => {
+      setSelectedTemplateKeys((prev) => {
+        const next = new Set(prev);
+        if (checked) next.add(record.key);
+        else next.delete(record.key);
+        const selected = templateDisplayData.filter((item) => next.has(item.key));
+        form?.setFieldsValue({ srFormSelectedPreRequisites: selected });
+        return next;
+      });
+    },
+    [templateDisplayData, form],
+  );
+
   const columnMain = [
-    // TODO: tambahkan mekanisme checkbox saat di next maka yang di centang akan disimpan dalam state untuk di bawa ke step berikutnya
     {
-      title: "Select", // TODO: rubah jadi icon checkbox
+      title: (
+        <Checkbox
+          checked={allSelected}
+          indeterminate={someSelected}
+          onChange={(e) => handleSelectAll(e.target.checked)}
+        />
+      ),
       dataIndex: "select",
       key: "select",
       width: 50,
       align: "center",
       render: (_, record) => (
-        <input
-          type="checkbox"
+        <Checkbox
           checked={record.selected || false}
-          onChange={(e) => {
-            const checked = e.target.checked;
-            if (isCreateFlow) {
-              setLocalPrereqs((prev) =>
-                prev.map((item) =>
-                  item.key === record.key ? { ...item, selected: checked } : item,
-                ),
-              );
-            } else {
-              setPrereqData((prev) =>
-                prev.map((item) =>
-                  item.key === record.key ? { ...item, selected: checked } : item,
-                ),
-              );
-            }
-          }}
+          onChange={(e) => handleSelectOne(record, e.target.checked)}
         />
       ),
     },
@@ -375,7 +403,7 @@ export default function PreRequisiteForm({
           {/* Prerequisite Table */}
           <NxTable
             idTable="prerequisite-table"
-            dataSource={list_prerequisiteTemplate}
+            dataSource={templateDisplayData}
             usePagination={false}
             useInfiniteScroll={!isCreateFlow}
             onLoadMore={handleLoadMore}
