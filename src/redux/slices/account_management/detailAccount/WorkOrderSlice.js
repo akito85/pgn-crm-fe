@@ -43,6 +43,10 @@ const initialState = {
   pagination_closedWo: { totalPage: 0, totalElement: 0 },
   loading_closedWo: false,
 
+  // Attachments (detail view)
+  list_woAttachments: [],
+  loading_listWoAttachments: false,
+
   // Progress history
   list_woProgress: [],
   loading_woProgress: false,
@@ -320,7 +324,7 @@ export const getWoActivities = createAsyncThunk(
         `/v1/dbs/api/workorders/${woId}/activities/list`,
         body
       );
-      return { ...response.data, isLoadMore };
+      return { ...response, isLoadMore };
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
@@ -337,7 +341,7 @@ export const getWoDataRequirements = createAsyncThunk(
         `/v1/dbs/api/workorders/${woId}/data-requirements/list`,
         body
       );
-      return { ...response.data, isLoadMore };
+      return { ...response, isLoadMore };
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
@@ -380,6 +384,20 @@ export const getWoProgress = createAsyncThunk(
     try {
       const response = await accountManagementService.getAll(
         `/v1/dbs/api/workorders/${woId}/progress`
+      );
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+export const getWoAttachments = createAsyncThunk(
+  "GET_WO_ATTACHMENTS",
+  async ({ accountId, woId }, thunkAPI) => {
+    try {
+      const response = await accountManagementService.getAll(
+        `/v1/dbs/api/accounts/${accountId}/workorders/${woId}/attachments`
       );
       return response.data;
     } catch (error) {
@@ -630,6 +648,14 @@ const workOrderSlice = createSlice({
       };
     },
     [getWoDataRequirementValues.rejected]: (state) => {},
+
+    // getWoAttachments
+    [getWoAttachments.pending]: (state) => { state.loading_listWoAttachments = true; },
+    [getWoAttachments.fulfilled]: (state, action) => {
+      state.loading_listWoAttachments = false;
+      state.list_woAttachments = Array.isArray(action.payload) ? action.payload : (action.payload?.data || []);
+    },
+    [getWoAttachments.rejected]: (state) => { state.loading_listWoAttachments = false; },
 
     // getWoProgress
     [getWoProgress.pending]: (state) => { state.loading_woProgress = true; },
