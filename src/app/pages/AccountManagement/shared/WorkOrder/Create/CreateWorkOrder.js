@@ -236,6 +236,19 @@ const CreateWorkOrder = () => {
     const invalidRows = activityData.filter(
       (row) => !row.picPositionId || !row.picUserId
     );
+
+    // validation empty activity list
+    if(activityData.length < 1)
+    {
+      dispatch(
+        showModalError({
+          title: "Activity Validation Failed",
+          description: `Activity List Cannot Empty`,
+        })
+      );
+      return false;
+    }
+
     if (invalidRows.length > 0) {
       const names = invalidRows
         .map((row, i) => `Row ${i + 1}: ${row.woActName || "(unnamed)"}`)
@@ -277,6 +290,7 @@ const CreateWorkOrder = () => {
   const buildPayload = (action = "SUBMIT") => {
     const values = form.getFieldsValue(true);
     return {
+      ...(isUpdate && { id: parseInt(woContext.woId) }),
       woRefId: values.workOrderReferenceId || null,
       woReference: values.workOrderReference || null,
       source: isSrContext ? "SERVICE_REQUEST" : (values.source || null),
@@ -330,7 +344,11 @@ const CreateWorkOrder = () => {
   const handleConfirmSubmit = async () => {
     setModalConfirm(false);
     setLoadingForm(true);
-    const newAttachments = attachmentDataSource.filter((a) => a.dataType === "new");
+    const newWoAttachments = attachmentDataSource.filter((a) => a.dataType === "new");
+    const newActivityAttachments = activityData.flatMap((row) =>
+      (row.attachments || []).filter((a) => a.dataType === "new")
+    );
+    const allNewAttachments = [...newWoAttachments, ...newActivityAttachments];
     const action = confirmationType === "draft" ? "DRAFT" : "SUBMIT";
     try {
       if (isUpdate && woContext.woId) {
@@ -339,7 +357,7 @@ const CreateWorkOrder = () => {
             accountId,
             woId: woContext.woId,
             body: dataSend,
-            attachments: newAttachments,
+            attachments: allNewAttachments,
             action,
             successBodyExtra: { return: false },
           })
@@ -349,7 +367,7 @@ const CreateWorkOrder = () => {
           createWorkOrder({
             accountId,
             body: dataSend,
-            attachments: newAttachments,
+            attachments: allNewAttachments,
             action,
             successBodyExtra: { return: false },
           })
