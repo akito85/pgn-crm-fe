@@ -59,15 +59,15 @@ export default function PreRequisiteForm({
   useEffect(() => {
     const body = {
       accountId,
-      srTypeId: form?.getFieldValue("srTypeId"),
-      srCategoryId: form?.getFieldValue("srCategoryId"),
-      srSubCategoryId: form?.getFieldValue("srSubCategoryId"),
+      srTypeId: form?.getFieldValue("type"),
+      srCategoryId: form?.getFieldValue("category"),
+      srSubCategoryId: form?.getFieldValue("subCategory"),
       page: 0,
       size: loadMoreSize,
       sort,
       filters,
       filterRules,
-      search: search,
+      searchs: search,
     };
     setPage(0);
     const promise = dispatch(getSrPrerequisiteTemplate({ body, isLoadMore: false }));
@@ -214,16 +214,47 @@ export default function PreRequisiteForm({
   );
 
   const columnMain = [
+    // TODO: tambahkan mekanisme checkbox saat di next maka yang di centang akan disimpan dalam state untuk di bawa ke step berikutnya
+    {
+      title: "Select", // TODO: rubah jadi icon checkbox
+      dataIndex: "select",
+      key: "select",
+      width: 50,
+      align: "center",
+      render: (_, record) => (
+        <input
+          type="checkbox"
+          checked={record.selected || false}
+          onChange={(e) => {
+            const checked = e.target.checked;
+            if (isCreateFlow) {
+              setLocalPrereqs((prev) =>
+                prev.map((item) =>
+                  item.key === record.key ? { ...item, selected: checked } : item,
+                ),
+              );
+            } else {
+              setPrereqData((prev) =>
+                prev.map((item) =>
+                  item.key === record.key ? { ...item, selected: checked } : item,
+                ),
+              );
+            }
+          }}
+        />
+      ),
+    },
     {
       title: "NO",
       dataIndex: "no",
       key: "no",
+      align: "center",
       render: (_, __, index) => index + 1,
     },
     {
       title: "TYPE",
-      dataIndex: "type",
-      key: "type",
+      dataIndex: "typeName",
+      key: "typeName",
     },
     {
       title: "PREREQUISITE NAME",
@@ -238,26 +269,26 @@ export default function PreRequisiteForm({
       dataIndex: "description",
       key: "description",
     },
-    {
-      title: "STATUS",
-      dataIndex: "status",
-      key: "status",
-    },
-    {
-      title: "DUE DATE",
-      dataIndex: "dueDateLabel",
-      key: "dueDate",
-    },
-    {
-      title: "COMPLETED DATE",
-      dataIndex: "completedDateLabel",
-      key: "completedDate",
-    },
-    {
-      title: "ASSIGNED TO",
-      dataIndex: "assignedToLabel",
-      key: "assignedTo",
-    },
+    // {
+    //   title: "STATUS",
+    //   dataIndex: "status",
+    //   key: "status",
+    // },
+    // {
+    //   title: "DUE DATE",
+    //   dataIndex: "dueDateLabel",
+    //   key: "dueDate",
+    // },
+    // {
+    //   title: "COMPLETED DATE",
+    //   dataIndex: "completedDateLabel",
+    //   key: "completedDate",
+    // },
+    // {
+    //   title: "ASSIGNED TO",
+    //   dataIndex: "assignedToLabel",
+    //   key: "assignedTo",
+    // },
     {
       title: "ACTIONS",
       key: "actions",
@@ -344,6 +375,7 @@ export default function PreRequisiteForm({
           {/* Prerequisite Table */}
           <NxTable
             idTable="prerequisite-table"
+            dataSource={list_prerequisiteTemplate}
             usePagination={false}
             useInfiniteScroll={!isCreateFlow}
             onLoadMore={handleLoadMore}
