@@ -618,22 +618,13 @@ const CreateCustomerServiceRequest = (props) => {
         requirementValue: dr.value || null,
         requirementDesc: null
       })),
-      prerequisites: (values.srFormPreRequisites || []).map((pr) => ({
-        prerequisiteId: pr.prerequisiteId,
-        prerequisiteName: pr.prerequisiteName,
-        prerequisiteComments: pr.prerequisiteComments || null,
-        ...(pr.prerequisiteStatus && {
-          prerequisiteStatus: pr.prerequisiteStatus
-        }),
-        ...(pr.prerequisiteValue && {
-          prerequisiteValue: pr.prerequisiteValue
-        }),
-        ...(pr.prerequisiteDueDate && {
-          prerequisiteDueDate: pr.prerequisiteDueDate
-        }),
-        ...(pr.prerequisiteAssignedTo && {
-          prerequisiteAssignedTo: pr.prerequisiteAssignedTo
-        })
+      prerequisites: [
+        ...(values.srFormPreRequisites || []),
+        ...(values.srFormSelectedPreRequisites || []),
+      ].map((pr) => ({
+        prerequisiteType: typeof pr.type === 'number' ? pr.type : (pr.prerequisiteId ?? null),
+        prerequisiteName: pr.name || pr.prerequisiteName || null,
+        prerequisiteDesc: pr.description || pr.prerequisiteComments || null,
       }))
     };
   };
