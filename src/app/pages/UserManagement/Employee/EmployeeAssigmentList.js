@@ -77,7 +77,7 @@ const EmployeeAssigmentList = ({
       sorter: true,
       inputType: 'date',
       // ...getColumnSearchProps('startDate', 'date'),
-      render: (endDate) => moment(endDate).format("YYYY-MM-DD")
+      render: (startDate) => startDate ? moment(startDate).format("YYYY-MM-DD") : '-'
     },
     {
       title: "END DATE",
@@ -87,7 +87,7 @@ const EmployeeAssigmentList = ({
       sorter: true,
       inputType: 'date',
       // ...getColumnSearchProps('endDate', 'date'),
-      render: (endDate) => moment(endDate).format("YYYY-MM-DD")
+      render: (endDate) => endDate ? moment(endDate).format("YYYY-MM-DD") : '-'
     },
     {
       title: "isMain",

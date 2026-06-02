@@ -1,5 +1,4 @@
-import React, { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Spin } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
@@ -9,10 +8,10 @@ import ButtonComponent from "../../../../components/ButtonComponent";
 import StatusComponent from "../../../../components/StatusComponent";
 import { JOB_MGMT_ROUTES } from "../../../../routes/job_management/job_routes";
 import {
-  getScheduleById,
-  activateSchedule,
-  pauseSchedule,
-} from "../../../../redux/slices/job_management/jobScheduleSlice";
+  useScheduleDetail,
+  useActivateSchedule,
+  usePauseSchedule,
+} from "../../../../hooks/jobManagement/useJobSchedules";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -69,16 +68,14 @@ const ScheduleStatus = ({ status }) => {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 const ViewJobSchedulePage = () => {
-  const dispatch   = useDispatch();
   const navigate   = useNavigate();
   const location   = useLocation();
   const scheduleId = location.state?.id;
 
-  const { detail: schedule, detailLoading, actionLoading } = useSelector((s) => s.jobSchedule);
-
-  useEffect(() => {
-    if (scheduleId) dispatch(getScheduleById(scheduleId));
-  }, [dispatch, scheduleId]);
+  const { data: schedule, isLoading: detailLoading, refetch } = useScheduleDetail(scheduleId);
+  const activateMutation = useActivateSchedule();
+  const pauseMutation = usePauseSchedule();
+  const actionLoading = activateMutation.isPending || pauseMutation.isPending;
 
   const breadcrumbRoutes = [
     { path: JOB_MGMT_ROUTES.VIEW_JOB_SCHEDULER_MANAGEMENT, breadcrumbName: "Job Scheduler Management" },
@@ -122,15 +119,13 @@ const ViewJobSchedulePage = () => {
   const showPause    = schedule.status === "ACTIVE" && schedule.isPaused === false;
 
   const handleActivate = () => {
-    dispatch(activateSchedule(scheduleId)).then((res) => {
-      if (!res.error) dispatch(getScheduleById(scheduleId));
-    });
+    activateMutation.mutate(scheduleId, { onSuccess: () => refetch() });
   };
 
   const handlePause = () => {
-    dispatch(pauseSchedule(scheduleId)).then((res) => {
-      if (!res.error) dispatch(getScheduleById(scheduleId));
-    });
+    // View page keeps the simple pause (no cascade); the list page offers the
+    // cancelInFlight choice. Default cancelInFlight=false here.
+    pauseMutation.mutate({ scheduleId, cancelInFlight: false }, { onSuccess: () => refetch() });
   };
 
   // ─── Render ──────────────────────────────────────────────────────────────

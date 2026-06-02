@@ -1893,7 +1893,7 @@ const StandardForm = () => {
         setModalConfirm(false);
       })
       .catch((error) => {
-        if (Math.floor((error.response.data_create.code || 0) / 100) === 5) {
+        if (Math.floor((error?.response?.data?.code || 0) / 100) === 5) {
           const message =
             (error.response &&
               error.response.data &&

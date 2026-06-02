@@ -274,10 +274,17 @@ const useColumnLayout = ({
 
   // ── displayedColumns memo ─────────────────────────────────────────────────
   const displayedColumns = useMemo(() => {
-    const cols = (resolvedColumns || []).filter(Boolean).map((c) => ({
-      ...c,
-      key: c.key || c.dataIndex || c.title,
-    }));
+    const cols = (resolvedColumns || [])
+      .filter(Boolean)
+      .filter((c) => {
+        const k = c.key || c.dataIndex || c.title;
+        const isActionCol = k === ACTION_COL_KEY || k === `${ACTION_COL_KEY}s`;
+        return !isActionCol || !!c.render;
+      })
+      .map((c) => ({
+        ...c,
+        key: c.key || c.dataIndex || c.title,
+      }));
 
     const allStaticFixed = new Set([...staticFixedKeys.left, ...staticFixedKeys.right]);
 

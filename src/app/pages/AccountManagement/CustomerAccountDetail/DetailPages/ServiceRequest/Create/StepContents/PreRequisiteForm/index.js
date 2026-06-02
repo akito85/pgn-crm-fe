@@ -1,13 +1,16 @@
 import { Fragment, useState, useEffect, useRef, useCallback } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 
 import { Button, Popconfirm, Tooltip } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 
 import {
-  getSrPrerequisites,
+  getServiceRequestPreRequisites,
   deleteSrPrerequisite,
+  saveCreateSrFormData,
+  saveCreateSrAttachments,
+  removeCreateSrPrerequisite,
 } from "../../../../../../../../../redux/slices/account_management/detailAccount/ServiceRequestSlice";
 import ButtonComponent from "../../../../../../../../../components/ButtonComponent";
 import NxTable from "../../../../../../../../../components/Nx/NxTable";
@@ -23,30 +26,26 @@ export default function PreRequisiteForm({
   customer,
   dropdowns,
   currentStep,
+  attachments = [],
 }) {
   const dispatch = useDispatch();
+  const { create_sr } = useSelector((state) => state.serviceRequest);
   const [isOpen, setIsOpen] = useState(false);
   const [selectedPrerequisite, setSelectedPrerequisite] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
 
-  const srId = location?.state?.id;
+  const serviceRequestId = location?.state?.id;
   const accountId = account?.accountInformation?.accountId;
-  const isCreateFlow = !srId; // TRUE = SR baru, belum punya ID
+  const isCreateFlow = !serviceRequestId; // TRUE = SR baru, belum punya ID
 
   const PAGE_SIZE = 10;
-  // Remote data (UPDATE flow: srId ada)
+  // Remote data (UPDATE flow: serviceRequestId ada)
   const [prereqData, setPrereqData] = useState([]);
   const [prereqPage, setPrereqPage] = useState(1);
   const [prereqHasMore, setPrereqHasMore] = useState(false);
   const [prereqLoading, setPrereqLoading] = useState(false);
   const loadingRef = useRef(false);
-  const newPrerequisiteProcessed = useRef(false);
-
-  // Local data (CREATE flow: belum ada srId, simpan di form field)
-  const [localPrereqs, setLocalPrereqs] = useState(() =>
-    form?.getFieldValue("srFormPreRequisites") || []
-  );
 
   const getPrerequisiteLabel = useCallback(
     (prerequisiteId) => {
@@ -80,9 +79,9 @@ export default function PreRequisiteForm({
 
   const fetchPage = useCallback(
     async (page) => {
-      if (!accountId || !srId) return;
+      if (!accountId || !serviceRequestId) return;
       const result = await dispatch(
-        getSrPrerequisites({ accountId, srId, page, size: PAGE_SIZE }),
+        getServiceRequestPreRequisites({ accountId, serviceRequestId }),
       ).unwrap();
 
       const payload = result?.data ?? result;
@@ -92,11 +91,11 @@ export default function PreRequisiteForm({
 
       return { items: mapItems(content, page), hasMore };
     },
-    [dispatch, accountId, srId, mapItems],
+    [dispatch, accountId, serviceRequestId, mapItems],
   );
 
   const loadFirst = useCallback(() => {
-    if (!accountId || !srId) return;
+    if (!accountId || !serviceRequestId) return;
     setPrereqData([]);
     setPrereqPage(1);
     setPrereqHasMore(false);
@@ -109,44 +108,11 @@ export default function PreRequisiteForm({
       })
       .catch(() => {})
       .finally(() => setPrereqLoading(false));
-  }, [fetchPage, accountId, srId]);
+  }, [fetchPage, accountId, serviceRequestId]);
 
   useEffect(() => {
     loadFirst();
   }, [loadFirst]);
-
-  // Tangkap prerequisite baru dari Create page (CREATE flow)
-  // Ref guard untuk React StrictMode double-mount; window.history.replaceState
-  // untuk mencegah duplikat saat komponen unmount+remount (user pindah step lalu kembali)
-  useEffect(() => {
-    const newPrerequisite = location?.state?.newPrerequisite;
-    if (newPrerequisite && isCreateFlow && !newPrerequisiteProcessed.current) {
-      newPrerequisiteProcessed.current = true;
-
-      // Hapus newPrerequisite dari history state agar tidak diproses ulang saat remount
-      window.history.replaceState(
-        { ...window.history.state, usr: { ...location.state, newPrerequisite: undefined } },
-        "",
-      );
-
-      const mapped = {
-        ...newPrerequisite,
-        key: `local-${Date.now()}`,
-        type: getPrerequisiteLabel(newPrerequisite.prerequisiteId),
-        name: newPrerequisite.prerequisiteName || getPrerequisiteLabel(newPrerequisite.prerequisiteId),
-        description: newPrerequisite.prerequisiteComments || "-",
-        status: "-",
-        dueDateLabel: "-",
-        completedDateLabel: "-",
-        assignedToLabel: "-",
-      };
-      setLocalPrereqs((prev) => {
-        const updated = [...prev, mapped];
-        form?.setFieldsValue({ srFormPreRequisites: updated });
-        return updated;
-      });
-    }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleLoadMore = useCallback(() => {
     if (loadingRef.current || !prereqHasMore) return Promise.resolve();
@@ -167,19 +133,15 @@ export default function PreRequisiteForm({
   const handleDelete = useCallback(
     async (record) => {
       if (isCreateFlow) {
-        setLocalPrereqs((prev) => {
-          const updated = prev.filter((item) => item.key !== record.key);
-          form?.setFieldsValue({ srFormPreRequisites: updated });
-          return updated;
-        });
+        dispatch(removeCreateSrPrerequisite(record.key));
         return;
       }
       await dispatch(
-        deleteSrPrerequisite({ accountId, srId, id: record.id }),
+        deleteSrPrerequisite({ accountId, serviceRequestId, id: record.id }),
       );
       loadFirst();
     },
-    [dispatch, accountId, srId, isCreateFlow, form, loadFirst],
+    [dispatch, accountId, serviceRequestId, isCreateFlow, loadFirst],
   );
 
   const columnMain = [
@@ -271,10 +233,8 @@ export default function PreRequisiteForm({
         : currentFormData?.requestDate,
     };
 
-    // Simpan ke sessionStorage agar tidak hilang saat halaman remount
-    try {
-      sessionStorage.setItem("srWizardFormData", JSON.stringify(serializedData));
-    } catch (_) {}
+    dispatch(saveCreateSrFormData(serializedData));
+    dispatch(saveCreateSrAttachments(attachments));
 
     const basePath = location?.pathname?.includes("account-standard")
       ? "/account-management/account-standard"
@@ -285,8 +245,9 @@ export default function PreRequisiteForm({
         account,
         customer,
         serviceRequestData: serializedData,
-        srId,
+        srId: serviceRequestId,
         accountId,
+        type: location?.state?.type,
         fromWizard: true,
         returnPath: location?.pathname,
         returnToStep: currentStep ?? 2,
@@ -318,7 +279,7 @@ export default function PreRequisiteForm({
             onLoadMore={handleLoadMore}
             hasMore={isCreateFlow ? false : prereqHasMore}
             useSelect={true}
-            dataMain={isCreateFlow ? localPrereqs : prereqData}
+            dataMain={isCreateFlow ? (create_sr?.prerequisites ?? []) : prereqData}
             columnMain={columnMain}
             fontSize={"medium"}
             loading={isCreateFlow ? false : prereqLoading}

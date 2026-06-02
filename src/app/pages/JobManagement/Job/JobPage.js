@@ -165,28 +165,25 @@ const JobPage = () => {
     }
   }, [createJobMutation]);
 
-  // Action column — always present in baseColumns so the fixed-right column
-  // never appears/disappears (no layout shift). Skeleton and permission checks
-  // live inside render so only cell content changes during loading.
-  const actionColumn = useMemo(() => ({
-    title: "ACTIONS",
-    key: "actions",
-    width: 120,
-    align: "center",
-    fixed: "right",
-    render: (_, record) => {
-      if (permissionsLoading) {
-        return (
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <div style={{ width: "100%", transform: "scaleY(0.55)", transformOrigin: "center" }}>
-              <Skeleton.Button active size="small" shape="round" block />
+  const actionColumn = useMemo(() => {
+    const hasAnyAction = canCreate || canUpdate || canDelete || canView;
+    if (!permissionsLoading && !hasAnyAction) return null;
+    return {
+      title: "ACTIONS",
+      key: "actions",
+      width: 120,
+      align: "center",
+      fixed: "right",
+      render: (_, record) => {
+        if (permissionsLoading) {
+          return (
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <div style={{ width: "100%", transform: "scaleY(0.55)", transformOrigin: "center" }}>
+                <Skeleton.Button active size="small" shape="round" block />
+              </div>
             </div>
-          </div>
-        );
-      }
-
-      const hasAnyAction = canCreate || canUpdate || canDelete || canView;
-      if (!hasAnyAction) return null;
+          );
+        }
 
       const menuItems = [
         canCreate && {
@@ -247,10 +244,11 @@ const JobPage = () => {
         </div>
       );
     },
-  }), [permissionsLoading, toView, toUpdate, canCreate, canUpdate, canDelete, canView, copyingId, handleCopy]);
+  };
+  }, [permissionsLoading, toView, toUpdate, canCreate, canUpdate, canDelete, canView, copyingId, handleCopy]);
 
   const baseColumns = useMemo(
-    () => [...getJobManagementColumns(accessGroupsMap), actionColumn],
+    () => [...getJobManagementColumns(accessGroupsMap), ...(actionColumn ? [actionColumn] : [])],
     [actionColumn, accessGroupsMap]
   );
 

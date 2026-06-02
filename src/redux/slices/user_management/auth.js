@@ -505,6 +505,30 @@ export const checkGrantedAccess = createAsyncThunk(
       thunkAPI.dispatch(grantedAccess(payload));
       return data;
     } catch (error) {
+      // Action paths (e.g. /module/feature/create) are not registered as menu
+      // paths in the backend. When the current path fails, retry with the parent
+      // path so the menu-level grant is used for access control instead.
+      const parentPath = pathname
+        ? pathname.split("/").slice(0, -1).join("/") || "/"
+        : null;
+      if (parentPath && parentPath !== "/" && parentPath !== pathname) {
+        const parentCached = readGrantedAccessCache(parentPath);
+        if (parentCached) {
+          writeGrantedAccessCache(pathname, parentCached);
+          thunkAPI.dispatch(grantedAccess(parentCached));
+          return;
+        }
+        try {
+          const parentData = await authService.checkGrantedAccess(parentPath);
+          const parentPayload = parentData?.data;
+          writeGrantedAccessCache(parentPath, parentPayload);
+          writeGrantedAccessCache(pathname, parentPayload);
+          thunkAPI.dispatch(grantedAccess(parentPayload));
+          return parentData;
+        } catch {
+          // parent path also failed — fall through to original error handling
+        }
+      }
       thunkAPI.dispatch(
         validateError({ error: error, action: "CHECK_GRANTED_ACCESS" })
       );
@@ -717,7 +741,7 @@ export const verifyChangeEmailPhone = createAsyncThunk(
   }
 );
 export const verifyChangePassword = createAsyncThunk(
-  "VERIFY_CHANGE_EMAIL_PHONE",
+  "VERIFY_CHANGE_PASSWORD",
   async (params, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/auth/verify-password?verify=${params}`;
