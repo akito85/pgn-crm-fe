@@ -58,7 +58,7 @@ const PaymentPlanMonitoringByYear = () => {
                     if (record.isFirstGrandTotal) {
                         return {
                             children: <strong style={{ color: "#111827", textTransform: "uppercase", display: "block", textAlign: "center" }}>GRAND TOTAL</strong>,
-                            props: { colSpan: 2, rowSpan: 2 }
+                            props: { colSpan: 2, rowSpan: record.grandTotalCount || 1 }
                         };
                     }
                     return { children: null, props: { colSpan: 0, rowSpan: 0 } };
@@ -135,25 +135,30 @@ const PaymentPlanMonitoringByYear = () => {
         totalPayment: item.paymentTotalAmount,
         unpaid: item.openItemTotalAccount,
         sisaTunggakan: item.openItemTotalAmount,
-        details: (item.children || []).map((child, cIdx) => {
-            const isGrandTotal = child.area === "GRAND TOTAL";
-            const firstGrandTotalIdx = (item.children || []).findIndex(c => c.area === "GRAND TOTAL");
-            const isFirstGrandTotal = isGrandTotal && cIdx === firstGrandTotalIdx;
-            return {
-                key: child.key || `${idx}-${cIdx}`,
-                no: cIdx + 1,
-                area: child.area,
-                currency: child.currency || "IDR",
-                submissions: child.accountTotal,
-                totalAmount: child.planAmount,
-                payment: child.paymentTotalAccount,
-                totalPayment: child.paymentTotalAmount,
-                unpaid: child.openItemTotalAccount,
-                sisaTunggakan: child.openItemTotalAmount,
-                isGrandTotal: isGrandTotal,
-                isFirstGrandTotal: isFirstGrandTotal,
-            };
-        })
+        details: (() => {
+            const children = item.children || [];
+            const grandTotalCount = children.filter(c => c.area === "GRAND TOTAL").length;
+            const firstGrandTotalIdx = children.findIndex(c => c.area === "GRAND TOTAL");
+            return children.map((child, cIdx) => {
+                const isGrandTotal = child.area === "GRAND TOTAL";
+                const isFirstGrandTotal = isGrandTotal && cIdx === firstGrandTotalIdx;
+                return {
+                    key: child.key || `${idx}-${cIdx}`,
+                    no: cIdx + 1,
+                    area: child.area,
+                    currency: child.currency || "IDR",
+                    submissions: child.accountTotal,
+                    totalAmount: child.planAmount,
+                    payment: child.paymentTotalAccount,
+                    totalPayment: child.paymentTotalAmount,
+                    unpaid: child.openItemTotalAccount,
+                    sisaTunggakan: child.openItemTotalAmount,
+                    isGrandTotal: isGrandTotal,
+                    isFirstGrandTotal: isFirstGrandTotal,
+                    grandTotalCount: isFirstGrandTotal ? grandTotalCount : 0,
+                };
+            });
+        })()
     }));
 
     const columnDefinitions = yearColumns.map((col) => ({ key: col.key, title: col.title }));

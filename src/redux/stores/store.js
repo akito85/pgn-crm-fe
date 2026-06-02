@@ -102,6 +102,7 @@ import templateRemindingReducer from "../slices/debt_and_collection/templateRemi
 import activityTypeReducer from "../slices/debt_and_collection/activityType";
 import activityActionReducer from "../slices/debt_and_collection/activityAction";
 import activitiesReducer from "../slices/debt_and_collection/activities";
+import collectionActivitiesReducer from "../slices/debt_and_collection/collectionActivities";
 import transactionReportReducer from "../slices/debt_and_collection/transactionReport";
 import managementDeliveryInvoiceReducer from "../slices/rating_billing_invoice/managementDeliveryInvoice";
 import masterEfakturCodeReducer from "../slices/rating_billing_invoice/MasterData/efakturCode";
@@ -146,8 +147,10 @@ import caCiMappingReducer from "../slices/receipt_collection/caCiMapping";
 import serviceRequestReducer from "../slices/account_management/detailAccount/ServiceRequestSlice";
 import paymentCycleReducer from "../slices/receipt_collection/paymentCycle";
 import paymentPeriodReducer from "../slices/receipt_collection/paymentPeriod";
+import exceptionReducer from "../slices/receipt_collection/exceptionSlice";
 import billingItemCategoryReducer from "../slices/system_setup/master_data/billingItemCategory";
 import calendarReducer from "../slices/system_setup/master_data/calendar";
+import collectionTemplateReducer from "../slices/system_setup/master_data/collectionTemplate";
 import jobManagementReducer from "../slices/job_management/jobSlice";
 import jobGroupReducer from "../slices/job_management/jobGroupSlice";
 import oracleMetadataReducer from "../slices/job_management/oracleMetadataSlice";
@@ -315,7 +318,9 @@ const reducer = combineReducers({
   paymentPeriod: paymentPeriodReducer,
   billingItemCategory: billingItemCategoryReducer,
   calendar: calendarReducer,
+  collectionTemplate: collectionTemplateReducer,
   caCiMapping: caCiMappingReducer,
+  exception: exceptionReducer,
 
   // Attachment
   attachment: attachmentReducer,
@@ -342,6 +347,7 @@ const reducer = combineReducers({
   activityType: activityTypeReducer,
   activityAction: activityActionReducer,
   activities: activitiesReducer,
+  collectionActivities: collectionActivitiesReducer,
   transactionReport: transactionReportReducer,
   writeOff: writeOffReducer,
 

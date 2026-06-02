@@ -1432,8 +1432,17 @@ const efakturSlice = createSlice({
     },
     [getListEFaktur.fulfilled]: (state, action) => {
       state.loading = false;
-      state.list_efaktur = action.payload.result || [];
+      const isLoadMore = action?.meta?.arg?.isLoadMore;
+      const incoming = action.payload.result || [];
       state.pagination = action.payload.page || initialState.pagination;
+
+      if (isLoadMore) {
+        // append
+        state.list_efaktur = [...(state.list_efaktur || []), ...incoming];
+      } else {
+        // replace
+        state.list_efaktur = incoming;
+      }
     },
     [getListEFaktur.rejected]: (state) => {
       state.loading = false;
