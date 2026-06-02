@@ -18,7 +18,9 @@ const WoActivityStep = ({ form, woContext, dropdowns, activityData, setActivityD
   const { list_woActivities } = useSelector((state) => state.workOrder);
 
   useEffect(() => {
+    if (isUpdateMode) return;           // update mode: ActivityTable handles its own init
     if (!list_woActivities.length) return;
+    if (activityData.length > 0) return; // already populated: don't reset on remount
 
     const isTemplateBatch = list_woActivities.every((item) => item.isTemplate !== false);
     if (!isTemplateBatch) return;
