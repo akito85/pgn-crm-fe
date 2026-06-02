@@ -399,6 +399,17 @@ const CreateUpdateCustomerServiceRequest = ({ formType = "create" }) => {
     }
   }, [isUpdate, serviceRequestDetail, serviceRequestDetailDraft]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Populate attachments from loaded detail in UPDATE mode (Gap 3)
+  useEffect(() => {
+    if (!isUpdate) return;
+    const detail = serviceRequestDetail || serviceRequestDetailDraft;
+    if (detail?.attachments?.length) {
+      setAttachmentDataSource(
+        detail.attachments.map((att) => ({ ...att, key: att.id }))
+      );
+    }
+  }, [isUpdate, serviceRequestDetail, serviceRequestDetailDraft]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const handleSelectHierarchy = (value, label) => {
     formCreate.setFieldValue("appHierName", label);
     if (value) dispatch(getSrApprovalHierarchy(value));
