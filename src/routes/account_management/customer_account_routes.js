@@ -246,4 +246,5 @@ export const ACCOUNT_MANAGEMENT_ROUTES = {
   // Work Order — Under SR
   CREATE_SR_WORK_ORDER:   "/account-management/account-standard/service-requests/work-orders/create",
   UPDATE_SR_WORK_ORDER:   "/account-management/account-standard/service-requests/work-orders/update",
+  VIEW_DETAIL_SR_WORK_ORDER : "/account-management/account-standard/service-requests/work-orders/view",
 };
