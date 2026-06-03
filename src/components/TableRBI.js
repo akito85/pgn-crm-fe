@@ -147,6 +147,7 @@ const TableRBI = ({
   onRowClick = () => { },
   onSearch = () => { },
   tableSize = "default",
+  summary,
   rowKey,
 }) => {
   const [optionSelectedCol, setOptionSelectedCol] = useState([]);
@@ -868,6 +869,7 @@ const TableRBI = ({
         onRow={customOnRow}
         rowClassName={customRowClassName}
         size={tableSize}
+        summary={summary}
         rowKey={rowKey}
       />
 

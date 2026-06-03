@@ -1,5 +1,6 @@
 import moment from "moment";
 import { Tabs, Input } from "antd";
+import { InfoCircleFilled } from "@ant-design/icons";
 import CardContainerNoBorder from "../../../../../components/CardContainerNoBorder";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 import DetailText from "../../../../../components/DetailText";
@@ -42,7 +43,25 @@ const DetailRePlan = ({
             label: "Re-Plan",
             children: (
                 <div className="p-5 min-h-[400px] flex flex-col gap-4">
-                    <SectionCard title="ACCOUNT INFORMATION">
+                    {data_detail?.tApprovalDto?.isApprover && (
+                        <div
+                            className="flex items-start gap-3 p-4 border mb-4"
+                            style={{
+                                backgroundColor: "#FFF3E6",
+                                borderColor: "#FFE0B2",
+                                borderRadius: "8px",
+                                color: "#B36214"
+                            }}
+                        >
+                            <InfoCircleFilled style={{ fontSize: "18px", marginTop: "2px", color: "#D97706" }} />
+                            <div className="flex flex-col gap-1 text-[14px]">
+                                <span style={{ color: "#B36214", fontWeight: "600" }}>
+                                    This Approval for Re-Plan
+                                </span>
+                            </div>
+                        </div>
+                    )}
+                    <SectionCard title="ACCOUNT INFORMATION" defaultActiveKey={[]}>
                         <div className="grid grid-cols-5 gap-y-4 gap-x-4 w-full">
                             <DetailText label="Account Number">{dataHeader?.accountNumber || ""}</DetailText>
                             <DetailText label="Account Name">{dataHeader?.accountName || ""}</DetailText>
@@ -62,6 +81,12 @@ const DetailRePlan = ({
 
                     <SectionCard title="RE-PLAN INFORMATION">
                         <div className="grid grid-cols-5 gap-y-4 gap-x-4 w-full">
+                            <InputComponent
+                                label="Payment Plan Reference"
+                                mandatory={true}
+                                disabled={true}
+                                value={dataHeader?.parentRestructureNumber || ""}
+                            />
                             <InputComponent
                                 label="Payment Plan Code"
                                 mandatory={true}
@@ -100,6 +125,12 @@ const DetailRePlan = ({
                                 disabled={true}
                                 format="DD MMM YYYY"
                                 value={dataHeader?.createdDate ? moment(dataHeader.createdDate) : (dataHeader?.requestDate ? moment(dataHeader.requestDate) : null)}
+                            />
+                            <InputComponent
+                                label="Reason"
+                                mandatory={true}
+                                disabled={true}
+                                value={dataHeader?.replanReason || ""}
                             />
                             <div className="col-span-5 flex flex-col w-auto">
                                 <InputLabel text="Description" mandatory={true} />
@@ -195,8 +226,8 @@ const DetailRePlan = ({
                                     columns={contactColumns}
                                     expandable={expandable}
                                     usePagination={false}
-                                    showAdvanceSearch={false}
-                                    showSearchBar={false}
+                                    showAdvanceSearch={true}
+                                    showSearchBar={true}
                                 />
                             </SubSectionCard>
                         </div>
