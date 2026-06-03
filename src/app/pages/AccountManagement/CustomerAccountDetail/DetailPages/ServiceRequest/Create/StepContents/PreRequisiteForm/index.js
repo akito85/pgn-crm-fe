@@ -30,7 +30,7 @@ export default function PreRequisiteForm({
   attachments = [],
 }) {
   const dispatch = useDispatch();
-  const { create_sr } = useSelector((state) => state.serviceRequest);
+  const { create_sr, edited_api_prerequisites = {} } = useSelector((state) => state.serviceRequest);
   const [isOpen, setIsOpen] = useState(false);
   const [selectedPrerequisite, setSelectedPrerequisite] = useState(null);
   const navigate = useNavigate();
@@ -311,6 +311,13 @@ export default function PreRequisiteForm({
               <SVGIcon name="IconDetail" width={20} />
             </Button>
           </Tooltip>
+          {(!isCreateFlow || record._isCreated || record._isTemplate) && (
+            <Tooltip title="Edit">
+              <Button type="table-action" onClick={() => handleEditClick(record)}>
+                <SVGIcon name="IconEdit" width={20} />
+              </Button>
+            </Tooltip>
+          )}
           {(!isCreateFlow || record._isCreated) && (
             <Popconfirm
               title="Are you sure you want to delete this prerequisite?"
@@ -330,7 +337,7 @@ export default function PreRequisiteForm({
     },
   ];
 
-  const handleCreateClick = () => {
+  const buildNavState = (extra = {}) => {
     const currentFormData = form?.getFieldsValue(true);
     const serializedData = {
       ...currentFormData,
@@ -338,15 +345,13 @@ export default function PreRequisiteForm({
         ? currentFormData.requestDate.toISOString()
         : currentFormData?.requestDate,
     };
-
     dispatch(saveCreateSrFormData(serializedData));
     dispatch(saveCreateSrAttachments(attachments));
-
     const basePath = location?.pathname?.includes("account-standard")
       ? "/account-management/account-standard"
       : "/account-management/account-onetime";
-
-    navigate(`${basePath}/service-requests/pre-requisites/create`, {
+    return {
+      path: `${basePath}/service-requests/pre-requisites/create`,
       state: {
         account,
         customer,
@@ -357,9 +362,23 @@ export default function PreRequisiteForm({
         fromWizard: true,
         returnPath: location?.pathname,
         returnToStep: currentStep ?? 2,
+        ...extra,
       },
-    });
+    };
   };
+
+  const handleCreateClick = () => {
+    const { path, state } = buildNavState();
+    navigate(path, { state });
+  };
+
+  const handleEditClick = useCallback((record) => {
+    const extra = record._isTemplate
+      ? { editData: record, editKey: null }  // template: save as new created item
+      : { editData: record, editKey: record.key ?? record.id };
+    const { path, state } = buildNavState(extra);
+    navigate(path, { state });
+  }, [form, dispatch, attachments, location, account, customer, serviceRequestId, accountId, currentStep, navigate]);
 
   return (
     <Fragment>
@@ -385,7 +404,10 @@ export default function PreRequisiteForm({
             onLoadMore={handleLoadMore}
             hasMore={isCreateFlow ? false : prereqHasMore}
             useSelect={true}
-            dataSource={isCreateFlow ? combinedCreateFlowData : prereqData}
+            dataSource={isCreateFlow
+              ? combinedCreateFlowData
+              : prereqData.map((item) => ({ ...item, ...(edited_api_prerequisites[item.key] ?? {}) }))
+            }
             columnMain={columnMain}
             fontSize={"medium"}
             loading={isCreateFlow ? false : prereqLoading}

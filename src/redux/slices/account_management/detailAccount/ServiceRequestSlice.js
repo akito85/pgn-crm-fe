@@ -67,6 +67,8 @@ const initialState = {
     prerequisites: [],
     attachments: [],
   },
+  // Local overrides for API prerequisites (update flow edits, not sent to BE)
+  edited_api_prerequisites: {},
   // UI State
   loading: false,
   loading_detailSr: false,
@@ -960,6 +962,18 @@ const serviceRequestSlice = createSlice({
         (pr) => pr.key !== action.payload
       );
     },
+    updateCreateSrPrerequisite: (state, action) => {
+      state.create_sr.prerequisites = state.create_sr.prerequisites.map(
+        (pr) => pr.key === action.payload.key ? { ...pr, ...action.payload } : pr
+      );
+    },
+    saveEditedApiPrerequisite: (state, action) => {
+      const id = action.payload.key ?? action.payload.id;
+      state.edited_api_prerequisites[id] = action.payload;
+    },
+    clearEditedApiPrerequisites: (state) => {
+      state.edited_api_prerequisites = {};
+    },
     saveCreateSrAttachments: (state, action) => {
       state.create_sr.attachments = action.payload;
     },
@@ -1543,6 +1557,9 @@ export const {
   saveCreateSrFormData,
   addCreateSrPrerequisite,
   removeCreateSrPrerequisite,
+  updateCreateSrPrerequisite,
+  saveEditedApiPrerequisite,
+  clearEditedApiPrerequisites,
   saveCreateSrAttachments,
   resetCreateSr,
 } = serviceRequestSlice.actions;
