@@ -293,25 +293,25 @@ const DetailWarranty = ({ data_detail }) => {
     <div className="flex flex-col gap-4 pb-5 px-5 pt-5">
       <SectionCard title="ACCOUNT INFORMATION">
         <div className="w-full grid grid-cols-5 gap-y-4 gap-x-4">
-            <DetailText label="Account Number">{data_detail?.accountNumber || "-"}</DetailText>
-            <DetailText label="Account Name">{data_detail?.accountName || "-"}</DetailText>
-            <DetailText label="Customer Number">{data_detail?.customerNumber || "-"}</DetailText>
-            <DetailText label="Customer Name">{data_detail?.customerName || "-"}</DetailText>
-            <DetailText label="Cost Center">{data_detail?.costCenterName || data_detail?.costCenter || "-"}</DetailText>
-            <DetailText label="Customer Segment">{data_detail?.customerSegment || data_detail?.accountSegment || "-"}</DetailText>
-            <DetailText label="Customer Group">{data_detail?.customerGroup || "-"}</DetailText>
-            <DetailText label="Account Type">{data_detail?.accountType || "-"}</DetailText>
-            <DetailText label="Clasification Type">{data_detail?.classificationType || "-"}</DetailText>
+            <DetailText label="Account Number">{data_detail?.accountNumber || ""}</DetailText>
+            <DetailText label="Account Name">{data_detail?.accountName || ""}</DetailText>
+            <DetailText label="Customer Number">{data_detail?.customerNumber || ""}</DetailText>
+            <DetailText label="Customer Name">{data_detail?.customerName || ""}</DetailText>
+            <DetailText label="Cost Center">{data_detail?.costCenterName || data_detail?.costCenter || ""}</DetailText>
+            <DetailText label="Customer Segment">{data_detail?.customerSegment || data_detail?.accountSegment || ""}</DetailText>
+            <DetailText label="Customer Group">{data_detail?.customerGroup || ""}</DetailText>
+            <DetailText label="Account Type">{data_detail?.accountType || ""}</DetailText>
+            <DetailText label="Clasification Type">{data_detail?.classificationType || ""}</DetailText>
         </div>
       </SectionCard>
 
       <SectionCard title="SERVICE AGREEMENT DETAIL">
         <div className="w-full grid grid-cols-5 gap-y-4 gap-x-4">
-            <DetailText label="Service Agreement Number">{data_detail?.serviceAgreementNumber || data_detail?.saNumber || "-"}</DetailText>
-            <DetailText label="Service Agreement Reference">{ selectedSA?.saReference || "-"}</DetailText>
-            <DetailText label="Service Type">{ selectedSA?.serviceType?.value || "-"}</DetailText>
-            <DetailText label="Type">{ selectedSA?.saType || "-"}</DetailText>
-            <DetailText label="PBG Type">{ selectedSA?.pjbgType || "-"}</DetailText>
+            <DetailText label="Service Agreement Number">{data_detail?.serviceAgreementNumber || data_detail?.saNumber || ""}</DetailText>
+            <DetailText label="Service Agreement Reference">{ selectedSA?.saReference || ""}</DetailText>
+            <DetailText label="Service Type">{ selectedSA?.serviceType?.value || ""}</DetailText>
+            <DetailText label="Type">{ selectedSA?.saType || ""}</DetailText>
+            <DetailText label="PBG Type">{ selectedSA?.pjbgType || ""}</DetailText>
             <DetailText label="Service Agreement Date">{ selectedSA?.saDate ? moment(selectedSA.saDate).format("DD/MM/YYYY") : "-"}</DetailText>
             <DetailText label="Start Date">{ selectedSA?.startDate ? moment(selectedSA.startDate).format("DD/MM/YYYY") : "-"}</DetailText>
             <DetailText label="End Date">{selectedSA?.endDate ? moment(selectedSA.endDate).format("DD/MM/YYYY") : "-"}</DetailText>
@@ -323,31 +323,31 @@ const DetailWarranty = ({ data_detail }) => {
                 {selectedSA?.status ? <StatusComponent colour={selectedSA?.status}>{selectedSA?.status}</StatusComponent> : "-"}
             </DetailText>
             <div className="col-span-5">
-                <DetailText label="Description">{ selectedSA?.description || "-"}</DetailText>
+                <DetailText label="Description">{ selectedSA?.description || ""}</DetailText>
             </div>
         </div>
       </SectionCard>
 
       <SectionCard title="PAYMENT GUARANTEE INFORMATION">
         <div className="w-full grid grid-cols-5 gap-y-4 gap-x-4">
-            <DetailText label="Type">{data_detail?.warrantyType || "-"}</DetailText>
-            <DetailText label="Document Number">{data_detail?.documentNumber || "-"}</DetailText>
+            <DetailText label="Type">{data_detail?.warrantyType || ""}</DetailText>
+            <DetailText label="Document Number">{data_detail?.documentNumber || ""}</DetailText>
             <DetailText label="Document Date">{data_detail?.documentDate ? moment(data_detail?.documentDate).format("DD/MM/YYYY") : "-"}</DetailText>
-            <DetailText label="Issuer">{data_detail?.issuerBankName || data_detail?.issuerBank || data_detail?.partnerName || "-"}</DetailText>
-            <DetailText label="Issuer Branch">{data_detail?.issuerBranchName || selectedBranchName || data_detail?.issuerBranch || "-"}</DetailText>
-            <DetailText label="Currency">{data_detail?.currency || "-"}</DetailText>
+            <DetailText label="Issuer">{data_detail?.issuerBankName || data_detail?.issuerBank || data_detail?.partnerName || ""}</DetailText>
+            <DetailText label="Issuer Branch">{data_detail?.issuerBranchName || selectedBranchName || data_detail?.issuerBranch || ""}</DetailText>
+            <DetailText label="Currency">{data_detail?.currency || ""}</DetailText>
             {data_detail?.warrantyType === "CASH" && (
               <>
-                <DetailText label="Rate Type">{data_detail?.rateType || "-"}</DetailText>
+                <DetailText label="Rate Type">{data_detail?.rateType || ""}</DetailText>
                 <DetailText label="Rate Date">{data_detail?.rateDate ? moment(data_detail?.rateDate).format("DD/MM/YYYY") : "-"}</DetailText>
-                <DetailText label="Rate">{data_detail?.rateAmount?.toLocaleString() || data_detail?.rate?.toLocaleString() || "-"}</DetailText>
+                <DetailText label="Rate">{data_detail?.rateAmount?.toLocaleString() || data_detail?.rate?.toLocaleString() || ""}</DetailText>
               </>
             )}
             <DetailText label="EFF Start Date">{data_detail?.effectiveStartDate ? moment(data_detail?.effectiveStartDate).format("DD/MM/YYYY") : "-"}</DetailText>
             <DetailText label="EFF End Date">{data_detail?.effectiveEndDate ? moment(data_detail?.effectiveEndDate).format("DD/MM/YYYY") : "-"}</DetailText>
             <DetailText label="Term Of Claim Period">{data_detail?.claimPeriodTermValue ? `${data_detail?.claimPeriodTermValue} ${data_detail?.claimPeriodTermType || ''}` : "-"}</DetailText>
             <div className="col-span-3">
-              <DetailText label="Description">{data_detail?.description || "-"}</DetailText>
+              <DetailText label="Description">{data_detail?.description || ""}</DetailText>
             </div>
         </div>
       </SectionCard>
@@ -430,7 +430,7 @@ const DetailWarranty = ({ data_detail }) => {
         header={approvalAction === "APPROVE" ? "Approve" : "Reject"}
         approveOrReject={approvalAction === "APPROVE" ? "approve" : "reject"}
         menu="Payment Guarantee Mutation"
-        named={selectedMutationRecord?.noDocumentMutation || "-"}
+        named={selectedMutationRecord?.noDocumentMutation || ""}
       />
     </div>
   );

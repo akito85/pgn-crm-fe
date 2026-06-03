@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import moment from "moment";
 import { Form, Input, Select, DatePicker, message, Spin } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import ModalCustom from "../../../../../../components/Modal/ModalCustom";
@@ -122,6 +123,11 @@ const ModalCancelRestructure = ({
     };
 
     const handleSave = async () => {
+        if (listDataAttachment.length === 0) {
+            message.warning("Attachment wajib diisi minimal 1 file");
+            return;
+        }
+
         const values = form.getFieldsValue(true);
         setIsSubmitting(true);
         
@@ -135,13 +141,17 @@ const ModalCancelRestructure = ({
         };
 
         // Note: For now using existing cancelRestructure, but in real case might need a body-based one
-        dispatch(cancelRestructure({ id: record?.id, body })).then((action) => {
+        dispatch(cancelRestructure({ id: record?.id, body })).then(async (action) => {
             if (action.meta.requestStatus === "fulfilled") {
                 const newAttachments = listDataAttachment.filter(item => item.dataType !== "exist");
                 if (newAttachments.length > 0) {
-                    uploadAttachments(newAttachments, record?.id, "CANCEL_RESTRUCTURE",
-                        (body) => receiptCollectionHttpService.uploadImage(`/v1/dbs/api/attachment/upload/v1`, body)
-                    ).catch(err => console.error("Attachment upload failed", err));
+                    try {
+                        await uploadAttachments(newAttachments, record?.id, "CANCEL_RESTRUCTURE",
+                            (body) => receiptCollectionHttpService.uploadImage(`/v1/dbs/api/attachment/upload/v1`, body)
+                        );
+                    } catch (err) {
+                        console.error("Attachment upload failed", err);
+                    }
                 }
                 message.success("Request Cancel Payment Plan berhasil disubmit!");
                 onSuccess();
@@ -213,7 +223,11 @@ const ModalCancelRestructure = ({
                                     label="Cancel Date" 
                                     rules={[{ required: true, message: "Cancel Date is required" }]}
                                 >
-                                    <DatePicker className="w-full" placeholder="Select Date" />
+                                    <DatePicker
+                                        className="w-full"
+                                        placeholder="Select Date"
+                                        disabledDate={(current) => current && current.isBefore(moment().startOf('day'))}
+                                    />
                                 </Form.Item>
                                 <Form.Item 
                                     name="remark" 
@@ -255,6 +269,7 @@ const ModalCancelRestructure = ({
                                     service={receiptCollectionHttpService}
                                     configApplication={configApp.PAYMENT_SERVICE}
                                     typeRBI={"data"}
+                                    mandatory={true}
                                 />
                             </SubSectionCard>
                         </SectionCard>

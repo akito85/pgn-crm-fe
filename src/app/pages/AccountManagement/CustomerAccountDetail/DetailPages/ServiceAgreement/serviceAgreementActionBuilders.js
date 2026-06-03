@@ -24,9 +24,12 @@ export const SERVICE_AGREEMENT_PERMISSION_MAPPING = {
 export const buildServiceAgreementToolbarActions = ({
   variant,
   scope,
+  isExistMain,
   onDownload,
   onOpenApproval,
 }) => {
+  const createTooltipTitle =
+    "An active SA Main already exists. Please deactivate the current SA Main before creating a new one.";
   const toolbarActions = [
     {
       action: "Download",
@@ -62,7 +65,20 @@ export const buildServiceAgreementToolbarActions = ({
     ...toolbarActions,
     {
       action: "Create",
-      render: (
+      render: isExistMain ? (
+        <Tooltip placement="bottom" title={createTooltipTitle}>
+          <span>
+            <ButtonComponent
+              icon={<SVGIcon name="IconButtonCreate" width={20} />}
+              type="submit"
+              border={false}
+              disabled
+            >
+              Create
+            </ButtonComponent>
+          </span>
+        </Tooltip>
+      ) : (
         <NavLink
           to={variant.routes.createMain}
           state={variant.stateBuilders.createMain({ scope })}

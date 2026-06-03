@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Checkbox, Form, Input, Card, Spin, Carousel } from "antd";
+import { Alert, Checkbox, Form, Input, Card, Spin, Carousel } from "antd";
 import {
 	ExclamationCircleFilled,
 	EyeInvisibleOutlined,
@@ -25,7 +25,7 @@ const LogIn = (props) => {
 	const { type } = props;
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
-	const { loading, data_entities, isLoggedIn } = useSelector((state) => state.auth);
+	const { loading, data_entities, entitiesLoadFailed, isLoggedIn } = useSelector((state) => state.auth);
 	const { data } = useSelector(state => state?.login_background);
 	const { bodyError, modalError } = useSelector(
 		(state) => state.general
@@ -58,9 +58,9 @@ const LogIn = (props) => {
 	}, [dispatch, type, isCaptchaEnabled])
 
 
-	const options = data_entities?.data?.map((item) => {
-		return { value: item?.id, label: item?.name }
-	})
+	const options = Array.isArray(data_entities?.data)
+		? data_entities.data.map((item) => ({ value: item?.id, label: item?.name }))
+		: []
 	const handleLogin = (formValue) => {
 		let data;
 		const captchaValid = !isCaptchaEnabled || validateCaptcha(formValue.captcha);
@@ -192,16 +192,29 @@ const LogIn = (props) => {
 										/>
 									</Form.Item>
 									{
-										type !== "superuser" &&
-										<Form.Item
-											name="entityId"
-											label={<span>Entity</span>}
-											rules={formMessageRequired('entity')}>
-											<SelectComponent
-												options={options}
-												placeholder={'Choose your entity'}
-											/>
-										</Form.Item>
+										type !== "superuser" && (
+											<>
+												{entitiesLoadFailed && (
+													<Alert
+														type="warning"
+														showIcon
+														className="mb-4"
+														message="Service temporarily unavailable"
+														description="We couldn't load the entity list right now. The system may be starting up or undergoing maintenance. Please refresh the page and try again, or contact your administrator if the problem persists."
+													/>
+												)}
+												<Form.Item
+													name="entityId"
+													label={<span>Entity</span>}
+													rules={formMessageRequired('entity')}>
+													<SelectComponent
+														options={options}
+														placeholder={entitiesLoadFailed ? 'Entity list unavailable' : 'Choose your entity'}
+														disabled={entitiesLoadFailed}
+													/>
+												</Form.Item>
+											</>
+										)
 									}
 									{isCaptchaEnabled && (
 										<Form.Item

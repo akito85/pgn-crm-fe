@@ -1,5 +1,6 @@
 import { getColumnSearchPropsPaging } from "../../../../../utils/getColumnSearchProps";
 import StatusComponent from "../../../../../components/StatusComponent";
+import RestructureStatusBadge from "./helpers/RestructureStatusBadge";
 
 export const columns = (
     page = 1,
@@ -15,6 +16,21 @@ export const columns = (
             width: 60,
             render: (text, object, index) => (page - 1) * pageSize + index + 1,
             fixed: "left",
+        },
+        {
+            key: "restructureNumber",
+            title: "PAYMENT PLAN CODE",
+            dataIndex: "restructureNumber",
+            width: 180,
+            align: "left",
+            sorter: (a, b) => a?.restructureNumber?.localeCompare(b?.restructureNumber),
+            ...getColumnSearchPropsPaging(
+                "restructureNumber",
+                searchInput,
+                searchedColumn,
+                searchText,
+                handleSearch
+            ),
         },
         {
             key: "customerNumber",
@@ -230,33 +246,33 @@ export const columns = (
             fixed: "right",
             render: (text) => (
                 <div className="flex justify-center w-full">
-                    <StatusComponent colour={text || 'none'}>{text || '-'}</StatusComponent>
+                    <RestructureStatusBadge status={text} />
                 </div>
             )
         },
         {
             key: "statusCustomer",
-            title: "STATUS CUSTOMER",
+            title: "ACCOUNT STATUS",
             dataIndex: "statusCustomer",
             width: 150,
             align: "center",
             fixed: "right",
             render: (text) => (
                 <div className="flex justify-center w-full">
-                    <StatusComponent colour={text || 'none'}>{text || '-'}</StatusComponent>
+                    <StatusComponent colour={text || 'none'}>{text || ""}</StatusComponent>
                 </div>
             )
         },
         {
             key: "statusApproval",
-            title: "STATUS APPROVAL",
+            title: "APPROVAL STATUS",
             dataIndex: "statusApproval",
             width: 180,
             align: "center",
             fixed: "right",
             render: (text) => (
                 <div className="flex justify-center w-full">
-                    <StatusComponent colour={text || 'none'}>{text || '-'}</StatusComponent>
+                    <StatusComponent colour={text || 'none'}>{text || ""}</StatusComponent>
                 </div>
             )
         },

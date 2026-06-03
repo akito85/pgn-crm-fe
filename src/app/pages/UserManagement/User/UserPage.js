@@ -22,8 +22,9 @@ import PendingTaskLayout from "./PendingTaskLayout";
 import SVGIcon from "../../../../assets/Icon/index";
 import ViewListIcon from "../../../../assets/Icon/Nx/IconViewList";
 import IconEditNx from "../../../../assets/Icon/Nx/IconEdit";
-import IconGenerateLink from "../../../../assets/Icon/Nx/IconGenerateLink";
-import IconPower from "../../../../assets/Icon/Nx/IconPower";
+import IconActive from "../../../../assets/icons/nx/IconActive";
+import IconGeneratePassword from "../../../../assets/icons/nx/IconGeneratePassword";
+import IconInactive from "../../../../assets/icons/nx/IconInactive";
 import InputComponent from "../../../../components/InputComponent";
 import { formMessageRequired, hasValue } from "../../../../utils";
 import { useTryAgainHooks } from "../../../../utils/useTryAgainHooks";
@@ -289,94 +290,80 @@ const UserPage = () => {
       action: "View",
       type: "table",
       render: (record) => (
-        <Tooltip title="Detail">
-          <Link
-            to={USER_ROUTES.DETAIL_USER}
-            state={{ id: record?.userCode }}
-            className="flex flex-col justify-center items-center"
-          >
-            <ViewListIcon />
-          </Link>
-        </Tooltip>
+        <Link
+          to={USER_ROUTES.DETAIL_USER}
+          state={{ id: record?.userCode }}
+          className="flex items-center justify-center"
+          style={{ color: "#1976D2" }}
+        >
+          <ViewListIcon />
+        </Link>
       ),
     },
     {
       action: "Update",
       type: "table",
-      render: (record) => (
-        <Tooltip title="Update">
-          <Link
-            to={record?.status === "ACTIVE" ? USER_ROUTES.UPDATE_USER : undefined}
-            state={record?.status === "ACTIVE" ? { id: record?.userCode } : undefined}
-          >
-            <ButtonComponent
-              icon={
-                <IconEditNx
-                  color={record?.status === "ACTIVE" ? "#1976D2" : "#C0BEC6"}
-                />
-              }
-              border={false}
-              disabled={record?.status !== "ACTIVE"}
-            />
-          </Link>
-        </Tooltip>
-      ),
+      render: (record) => {
+        const disabled = record?.status !== "ACTIVE";
+        return (
+          <Tooltip title="Update">
+            <div className={`inline-flex items-center ${disabled ? "cursor-not-allowed text-gray-300" : ""}`}>
+              <Link
+                to={!disabled ? USER_ROUTES.UPDATE_USER : undefined}
+                state={!disabled ? { id: record?.userCode } : undefined}
+                className={`inline-flex items-center transition-colors duration-200 ${disabled ? "text-gray-300 pointer-events-none" : "text-[#1976D2] hover:text-[#1976D2]"}`}
+              >
+                <IconEditNx width={20} />
+              </Link>
+            </div>
+          </Tooltip>
+        );
+      },
     },
     {
       action: "Generate",
       type: "table",
-      render: (record) => (
-        <Tooltip title="Generate Link Password">
-          <Link
-            to={
-              record?.status === "ACTIVE" && record.authType !== "LDAP"
-                ? USER_ROUTES.GENERATE_PASSWORD
-                : undefined
-            }
-            state={
-              record?.status === "ACTIVE" && record.authType !== "LDAP"
-                ? { id: record?.userId }
-                : undefined
-            }
-          >
-            <ButtonComponent
-              icon={
-                <IconGenerateLink
-                  color={
-                    record?.status === "ACTIVE" && record.authType !== "LDAP"
-                      ? "#1976D2"
-                      : "#C0BEC6"
-                  }
-                />
-              }
-              border={false}
-              disabled={!(record?.status === "ACTIVE" && record.authType !== "LDAP")}
-            />
-          </Link>
-        </Tooltip>
-      ),
+      render: (record) => {
+        const disabled = !(record?.status === "ACTIVE" && record.authType !== "LDAP");
+        return (
+          <Tooltip title="Generate Password">
+            <div className={`inline-flex items-center ${disabled ? "cursor-not-allowed text-gray-300" : ""}`}>
+              <Link
+                to={!disabled ? USER_ROUTES.GENERATE_PASSWORD : undefined}
+                state={!disabled ? { id: record?.userId } : undefined}
+                className={`inline-flex items-center transition-colors duration-200 ${disabled ? "text-gray-300 pointer-events-none" : "text-[#1976D2] hover:text-[#1976D2]"}`}
+              >
+                <IconGeneratePassword width={20} />
+              </Link>
+            </div>
+          </Tooltip>
+        );
+      },
     },
     {
       action: "Activate",
       type: "table",
-      render: (record) => (
-        <Tooltip title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}>
-          <ButtonComponent
-            icon={
-              <IconPower
-                color={record?.status === "ACTIVE" ? "#1976D2" : "#C0BEC6"}
-              />
+      render: (record) => {
+        const isActive = record?.status === "ACTIVE";
+        const handleToggle = () => {
+          setOpenModal(true);
+          setSelectedUserId(record?.userId);
+          setActivate(record?.status);
+          setRecord(record);
+        };
+        return (
+          <Tooltip title={isActive ? "Inactivate" : "Activate"}>
+            {isActive
+              ? <span className="inline-flex items-center text-[#D32F2F] hover:text-[#D32F2F] transition-colors duration-200 cursor-pointer" onClick={handleToggle}>
+                  <IconInactive width={20} />
+                </span>
+              : <span className="inline-flex items-center text-green-600 hover:text-green-600 transition-colors duration-200 cursor-pointer" onClick={handleToggle}>
+                  <IconActive width={20} />
+                </span>
             }
-            border={false}
-            onClick={() => {
-              setOpenModal(true);
-              setSelectedUserId(record?.userId);
-              setActivate(record?.status);
-              setRecord(record);
-            }}
-          />
-        </Tooltip>
-      ),
+          </Tooltip>
+        );
+      },
     },
   ], [handleDownload]);
 

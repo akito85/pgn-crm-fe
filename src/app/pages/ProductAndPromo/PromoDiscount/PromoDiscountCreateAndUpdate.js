@@ -54,6 +54,7 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
     dataListAppHierId,
     dataListAppHierDetail,
     loading,
+    loading_createUpdatePromo,
     data_promo_type,
     data_promotion_type,
     data_promoDiscountDetail,
@@ -573,8 +574,6 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
   );
 
   const handleConfirm = () => {
-    setModalConfirm(false);
-
     let dataCriteriaObject = listDataCriteria.map((item, index) => ({
         ...handleMappingCriteriaGeneral({
           item: item,
@@ -639,6 +638,7 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
       .unwrap()
       .then(async (dataForm) => {
         const idData = dataForm?.id;
+        setModalConfirm(false);
         setLoadingForm(true);
         const filterDataAttach = listDataAttachment.filter(
           (item) => item.dataType !== "exist"
@@ -727,7 +727,7 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
 
   return (
     <>
-      <Spin spinning={loading || loadingForm}>
+      <Spin spinning={loading || loadingForm || loading_createUpdatePromo}>
         <div className="flex flex-col gap-y-4">
           <NxBreadCrumb routes={routes} />
           <NxFormStepper steps={steps} current={current} onPrev={prev} onNext={next} />
@@ -848,20 +848,20 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
           width={1200}
           footer={[
             <div className="flex justify-between" key="footer">
-              <Button type="menu" onClick={() => { setActiveTab(0); setModalConfirm(false); }}>
+              <Button type="menu" disabled={loading_createUpdatePromo} onClick={() => { setActiveTab(0); setModalConfirm(false); }}>
                 Cancel
               </Button>
               <div className="flex">
-                <Button type="menu" disabled={activeTab < 1} onClick={() => setActiveTab(prev => prev - 1)}>
+                <Button type="menu" disabled={activeTab < 1 || loading_createUpdatePromo} onClick={() => setActiveTab(prev => prev - 1)}>
                   Previous
                 </Button>
                 {activeTab < 2 && (
-                  <Button type="submit" onClick={() => setActiveTab(prev => prev + 1)}>
+                  <Button type="submit" disabled={loading_createUpdatePromo} onClick={() => setActiveTab(prev => prev + 1)}>
                     Next
                   </Button>
                 )}
                 {activeTab === 2 && (
-                  <Button type="submit" onClick={handleConfirm} disabled={loading || loadingForm}>
+                  <Button type="submit" onClick={handleConfirm} loading={loading_createUpdatePromo} disabled={loading_createUpdatePromo}>
                     Confirm
                   </Button>
                 )}

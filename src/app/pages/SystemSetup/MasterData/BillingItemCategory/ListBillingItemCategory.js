@@ -1,4 +1,4 @@
-import { Tooltip, Spin, Checkbox } from "antd";
+import { Tooltip, Spin } from "antd";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, NavLink } from "react-router-dom";
@@ -8,6 +8,10 @@ import ButtonComponent from "../../../../../components/ButtonComponent";
 import Toolbar from "../../../../../components/Toolbar";
 import TableRBI from "../../../../../components/TableRBI";
 import SVGIcon from "../../../../../assets/Icon/index";
+import IconViewList from "../../../../../assets/Icon/Nx/IconViewList";
+import IconEditNx from "../../../../../assets/Icon/Nx/IconEdit";
+import IconActive from "../../../../../assets/icons/nx/IconActive";
+import IconInactive from "../../../../../assets/icons/nx/IconInactive";
 import {
   getListBillingItemCategory,
   requestInactiveBillingItemCategory,
@@ -16,7 +20,7 @@ import {
   getAvailableApproval,
   getSelectedApproval,
 } from "../../../../../redux/slices/system_setup/master_data/billingItemCategory";
-import { renderColumn, renderDateColumn } from "../../../../../utils";
+import { hasValue, renderColumn, renderDateColumn } from "../../../../../utils";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
 import { useColumnActionPermission } from "../../../../../components/ColumnActionPermission";
 import ModalInactivateWithHierarchy from "../../../../../components/Modal/ModalInactivateWithHierarchy";
@@ -317,7 +321,7 @@ const ListBillingItemCategory = () => {
       render: (
         <ButtonComponent
           type={"submit"}
-          icon={<DownloadOutlined style={{ fontSize: "20px" }} />}
+          icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
           onClick={() => handleDownload()}
         >
           Download List
@@ -344,14 +348,15 @@ const ListBillingItemCategory = () => {
       type: "table",
       render: (record) => {
         return (
-          <Link
-            to={SYSTEM_SETUP_ROUTES.DETAIL_BILLING_ITEM_CATEGORY}
-            state={{ id: record.id }}
-          >
-            <Tooltip title="Detail">
-              <SVGIcon name="IconDetail" width={20} />
-            </Tooltip>
-          </Link>
+          <Tooltip title="Detail">
+            <Link
+              to={SYSTEM_SETUP_ROUTES.DETAIL_BILLING_ITEM_CATEGORY}
+              state={{ id: record.id }}
+              className="inline-flex items-center text-[#1976D2] hover:text-[#1976D2] transition-colors duration-200"
+            >
+              <IconViewList width={20} />
+            </Link>
+          </Tooltip>
         );
       },
     },
@@ -402,19 +407,18 @@ const ListBillingItemCategory = () => {
                   status: record.status,
                   statusApproval: record.statusApproval,
                 }}
+                className="inline-flex items-center text-[#1976D2] hover:text-[#1976D2] transition-colors duration-200"
               >
-                <SVGIcon name="IconEdit" width={24} color="#ACC424" />
+                <IconEditNx width={20} />
               </Link>
             </Tooltip>
           ) : (
             <Tooltip title="Update">
-              <Link>
-                <div className="cursor-not-allowed">
-                  <span className="pointer-events-none">
-                    <SVGIcon name="IconEdit" width={24} color="#8D91A0" />
-                  </span>
-                </div>
-              </Link>
+              <div className="inline-flex items-center cursor-not-allowed text-gray-300">
+                <span className="pointer-events-none">
+                  <IconEditNx width={20} />
+                </span>
+              </div>
             </Tooltip>
           );
 
@@ -433,12 +437,7 @@ const ListBillingItemCategory = () => {
             canInactivate ? (
               <ButtonComponent
                 icon={
-                  <Checkbox
-                    className="inactive-check"
-                    onClick={() => handleInactive(record)}
-                    disabled={false}
-                    checked={false}
-                  />
+                  <SVGIcon name="IconInactive" width={20} />
                 }
                 type={"action"}
                 border={false}
@@ -448,26 +447,19 @@ const ListBillingItemCategory = () => {
               </ButtonComponent>
             ) : (
               <div className="flex items-center px-2 py-1">
-                <Checkbox
-                  className="inactive-check"
-                  disabled={true}
-                  checked={false}
-                />
-                <span className="text-gray-400 ml-4">Inactivate</span>
+                <span className="text-gray-400 pointer-events-none">Inactivate</span>
               </div>
             )
           ) : (
             <Tooltip title="Inactivate">
-              <div className="pt-1">
-                <Checkbox
-                  className="inactive-check"
-                  onClick={
-                    canInactivate ? () => handleInactive(record) : undefined
-                  }
-                  disabled={!canInactivate}
-                  checked={false}
-                />
-              </div>
+              {canInactivate
+                ? <span className="inline-flex items-center text-[#D32F2F] hover:text-[#D32F2F] transition-colors duration-200 cursor-pointer" onClick={() => handleInactive(record)}>
+                    <IconInactive width={20} />
+                  </span>
+                : <span className="inline-flex items-center text-gray-300 cursor-not-allowed">
+                    <IconInactive width={20} />
+                  </span>
+              }
             </Tooltip>
           );
 
@@ -513,7 +505,7 @@ const ListBillingItemCategory = () => {
       {
         title: "NO",
         key: "no",
-        width: 60,
+        width: 90,
         dataIndex: "key",
         align: "center",
         isClassification: true,
@@ -523,6 +515,7 @@ const ListBillingItemCategory = () => {
         title: "CATEGORY CODE",
         dataIndex: "code",
         key: "code",
+        width: 60,
         align: "left",
         sorter: true,
         filteredValue: search?.code ? [search.code] : null,
@@ -539,7 +532,7 @@ const ListBillingItemCategory = () => {
         render: (text) =>
           renderColumn(
             "code",
-            searchedColumn,
+            hasValue(search["code"]),
             searchText,
             text,
             true,
@@ -551,6 +544,7 @@ const ListBillingItemCategory = () => {
         title: "CATEGORY NAME",
         dataIndex: "name",
         key: "name",
+        width: 50,
         align: "left",
         sorter: true,
         filteredValue: search?.name ? [search.name] : null,
@@ -567,7 +561,7 @@ const ListBillingItemCategory = () => {
         render: (text) =>
           renderColumn(
             "name",
-            searchedColumn,
+            hasValue(search["name"]),
             searchText,
             text,
             true,
@@ -579,6 +573,7 @@ const ListBillingItemCategory = () => {
         title: "START DATE",
         dataIndex: "startDate",
         key: "startDate",
+        width: 100,
         sorter: true,
         align: "center",
         filteredValue: search?.startDate ? [search.startDate] : null,
@@ -595,7 +590,7 @@ const ListBillingItemCategory = () => {
         render: (v) =>
           renderDateColumn(
             "startDate",
-            searchedColumn,
+            hasValue(search["startDate"]),
             searchText,
             v,
             "date",
@@ -606,6 +601,7 @@ const ListBillingItemCategory = () => {
         title: "END DATE",
         dataIndex: "endDate",
         key: "endDate",
+        width: 100,
         sorter: true,
         align: "center",
         filteredValue: search?.endDate ? [search.endDate] : null,
@@ -622,7 +618,7 @@ const ListBillingItemCategory = () => {
         render: (v) =>
           renderDateColumn(
             "endDate",
-            searchedColumn,
+            hasValue(search["endDate"]),
             searchText,
             v,
             "date",
@@ -630,14 +626,13 @@ const ListBillingItemCategory = () => {
           ),
       },
       {
-        title: "DESCRIPTION",
         key: "description",
+        title: "DESCRIPTION",
         dataIndex: "description",
         sorter: true,
-        ellipsis: {
-          showTitle: false,
-        },
-        filteredValue: search?.description ? [search.description] : null,
+        width: 80,
+        filteredValue: [search?.description] || null,
+        ellipsis: { showTitle: false },
         ...getColumnSearchPropsUseFilteredValue(
           search,
           "description",
@@ -645,13 +640,12 @@ const ListBillingItemCategory = () => {
           searchedColumn,
           searchText,
           handleSearch,
-          false,
-          "input",
+          true,
         ),
         render: (text) =>
           renderColumn(
             "description",
-            searchedColumn,
+            hasValue(search["description"]),
             searchText,
             text,
             true,
@@ -663,7 +657,7 @@ const ListBillingItemCategory = () => {
         title: "STATUS",
         dataIndex: "status",
         key: "status",
-        width: 100,
+        width: 85,
         sorter: true,
         filteredValue: search?.status ? [search.status] : null,
         ...getColumnSearchPropsUseFilteredValue(
@@ -679,7 +673,7 @@ const ListBillingItemCategory = () => {
         render: (text) =>
           renderColumn(
             "status",
-            searchedColumn,
+            hasValue(search["status"]),
             searchText,
             text ? text.toUpperCase() : text,
             false,
@@ -690,7 +684,7 @@ const ListBillingItemCategory = () => {
         title: "APPROVAL STATUS",
         dataIndex: "statusApproval",
         key: "statusApproval",
-        width: 150,
+        width: 90,
         sorter: true,
         filteredValue: search?.statusApproval ? [search.statusApproval] : null,
         ...getColumnSearchPropsUseFilteredValue(
@@ -706,7 +700,7 @@ const ListBillingItemCategory = () => {
         render: (text) =>
           renderColumn(
             "statusApproval",
-            searchedColumn,
+            hasValue(search["statusApproval"]),
             searchText,
             text ? text.toUpperCase() : text,
             false,
@@ -723,7 +717,7 @@ const ListBillingItemCategory = () => {
     itemGrantAccess,
   ).map((col) => ({
     ...col,
-    width: 30,
+    width: 75,
     align: "center",
   }));
 
@@ -841,7 +835,7 @@ const ListBillingItemCategory = () => {
           onLoadMore={handleLoadMore}
           hasMore={hasMore}
           loadMoreThreshold={20}
-          tableScrolled={{ y: 525, x: "max-content" }}
+          tableScrolled={{ y: 525, x: 500 }}
           onRefresh={handleRefresh}
           showRefresh={true}
           onAdvanceSearch={handleAdvanceSearch}

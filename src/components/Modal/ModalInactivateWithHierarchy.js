@@ -47,8 +47,10 @@ const ModalInactivateWithHierarchy = ({
   };
 
   useEffect(() => {
-    dispatch(getAPIOption());
-  }, [dispatch, getAPIOption]);
+    if (openModalInactivate) {
+      dispatch(getAPIOption());
+    }
+  }, [dispatch, getAPIOption, openModalInactivate]);
 
   useEffect(() => {
     if (dataListAppHierId && dataListAppHierId.length > 0) {

@@ -1081,6 +1081,7 @@ const NxTableNested = ({
   onRowClick         = () => {},
   // ── Error / empty state ───────────────────────────────────────────────────
   fetchFailed        = false,
+  emptyText,
   onInitialLoad,
   onClearPreferences,
   // ── Deprecated (accepted for compat, no-op) ───────────────────────────────
@@ -2122,9 +2123,13 @@ const NxTableNested = ({
               )}
             </div>
           ) : filteredDataSource.length === 0 ? (
-            <div style={{ padding: "40px 20px", textAlign: "center", color: "#999", fontFamily: FONT_FAMILY, fontSize: 12 }}>
-              No data
-            </div>
+            emptyText ? (
+              <div>{emptyText}</div>
+            ) : (
+              <div style={{ padding: "40px 20px", textAlign: "center", color: "#999", fontFamily: FONT_FAMILY, fontSize: 12 }}>
+                No data
+              </div>
+            )
           ) : (
             filteredDataSource.map((row, i) => (
               <ParentRow

@@ -98,8 +98,8 @@ const EREarlyRepaymentDetailSection = ({ installmentsByCurrency = {}, onInstallm
                   dataSource={rows}
                   columns={columns}
                   usePagination={false}
-                  showAdvanceSearch={false}
-                  showSearchBar={false}
+                  showAdvanceSearch={true}
+                  showSearchBar={true}
                 />
                 <div className="flex bg-[#F5F5F5] border border-t-0 p-2 font-bold text-[12px]">
                   <div className="flex-[3] text-center">Total</div>

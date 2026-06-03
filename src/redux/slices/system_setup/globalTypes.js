@@ -258,6 +258,24 @@ export const downloadExcelGlobalType = createAsyncThunk(
   }
 );
 
+export const deleteGlobalType = createAsyncThunk(
+  "DELETE_GLOBAL_TYPE",
+  async (id, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/globaltype/${id}`;
+      const response = await userHttpService.deleteData(url);
+      const successBody = { title: "Successful", description: "Global type deleted successfully." };
+      thunkAPI.dispatch(showModalSuccess(successBody));
+      return response.data;
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({ error: errorBody(errorCode(error), "deleted", errorMessage(error)), action: "DELETE_GLOBAL_TYPE", back: false })
+      );
+      return thunkAPI.rejectWithValue(error?.response?.data);
+    }
+  }
+);
+
 const globalTypesSlice = createSlice({
   name: "globalTypes",
   initialState,

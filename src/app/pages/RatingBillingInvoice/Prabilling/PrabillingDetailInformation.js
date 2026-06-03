@@ -45,7 +45,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
             <DetailText label={"Schedule Type"}>
               {prabillData?.shceduleType || ""}
             </DetailText>
-            <DetailText label={"Total Customer"}>
+            <DetailText label={"Total Account"}>
               {prabillData?.totalCustomer || 0}
             </DetailText>
             <DetailText label={"Status"}>
@@ -72,6 +72,9 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
                   </DetailText>
                   <DetailText label={"Specific Customer Account"}>
                     {detail.accounts}
+                  </DetailText>
+                  <DetailText label={"Prabill Component"}>
+                    {detail.prabillComponent}
                   </DetailText>
                   <DetailText label={"Completion Date"}>
                     {prabillData?.updateDtm

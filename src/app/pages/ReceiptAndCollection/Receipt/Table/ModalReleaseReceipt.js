@@ -415,7 +415,7 @@ const ModalReleaseReceipt = ({
                                         />
                                         <div className="mt-4">
                                             <p className="font-bold">Remark</p>
-                                            <div className="text-gray-700">{releaseReason || "-"}</div>
+                                            <div className="text-gray-700">{releaseReason || ""}</div>
                                         </div>
                                     </>
                                 )}

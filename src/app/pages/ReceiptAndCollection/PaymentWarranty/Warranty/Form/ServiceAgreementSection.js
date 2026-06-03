@@ -14,17 +14,17 @@ const ServiceAgreementSection = ({ form, dataServiceAgreement, disabled, loading
       const selectedSA = dataServiceAgreement.result.find(sa => sa.saNumber === val);
       if (selectedSA) {
         form.setFieldsValue({
-          saReference: selectedSA.saReference || "-",
-          saType: selectedSA.serviceType?.value || selectedSA.serviceType || "-",
-          type: selectedSA.saType?.value || selectedSA.saType || "-",
-          pbgType: selectedSA.pjbgType?.value || selectedSA.pjbgType || "-",
+          saReference: selectedSA.saReference || "",
+          saType: selectedSA.serviceType?.value || selectedSA.serviceType || "",
+          type: selectedSA.saType?.value || selectedSA.saType || "",
+          pbgType: selectedSA.pjbgType?.value || selectedSA.pjbgType || "",
           saDate: selectedSA.saDate ? moment(selectedSA.saDate).format("DD/MM/YYYY") : "-",
           saStartDate: selectedSA.startDate ? moment(selectedSA.startDate).format("DD/MM/YYYY") : "-",
           saEndDate: selectedSA.endDate ? moment(selectedSA.endDate).format("DD/MM/YYYY") : "-",
           commitmentDate: selectedSA.commitmentDate ? moment(selectedSA.commitmentDate).format("DD/MM/YYYY") : "-",
-          saStatusApproval: selectedSA.approvalStatus || "-",
-          saStatus: selectedSA.status || "-",
-          saDescription: selectedSA.description || "-",
+          saStatusApproval: selectedSA.approvalStatus || "",
+          saStatus: selectedSA.status || "",
+          saDescription: selectedSA.description || "",
         });
       } else if (!val) {
         form.setFieldsValue({

@@ -1,5 +1,6 @@
 import moment from "moment";
 import { Tabs } from "antd";
+import { InfoCircleFilled } from "@ant-design/icons";
 import CardContainerNoBorder from "../../../../../components/CardContainerNoBorder";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 import DetailText from "../../../../../components/DetailText";
@@ -35,21 +36,39 @@ const DetailCancel = ({
             label: "Cancel Plan",
             children: (
                 <div className="p-5 min-h-[400px] flex flex-col gap-4">
-                    <SectionCard title="ACCOUNT INFORMATION">
+                    {data_detail?.tApprovalDto?.isApprover && (
+                        <div
+                            className="flex items-start gap-3 p-4 border mb-4"
+                            style={{
+                                backgroundColor: "#FFF3E6",
+                                borderColor: "#FFE0B2",
+                                borderRadius: "8px",
+                                color: "#B36214"
+                            }}
+                        >
+                            <InfoCircleFilled style={{ fontSize: "18px", marginTop: "2px", color: "#D97706" }} />
+                            <div className="flex flex-col gap-1 text-[14px]">
+                                <span style={{ color: "#B36214", fontWeight: "600" }}>
+                                    This Approval for Cancel
+                                </span>
+                            </div>
+                        </div>
+                    )}
+                    <SectionCard title="ACCOUNT INFORMATION" defaultActiveKey={[]}>
                         <div className="grid grid-cols-5 gap-y-4 gap-x-4 w-full">
-                            <DetailText label="Account Number">{dataHeader?.accountNumber || "-"}</DetailText>
-                            <DetailText label="Account Name">{dataHeader?.accountName || "-"}</DetailText>
-                            <DetailText label="Customer Number">{dataHeader?.customerNumber || "-"}</DetailText>
-                            <DetailText label="Customer Name">{dataHeader?.customerName || "-"}</DetailText>
-                            <DetailText label="Account Group Type">{dataHeader?.accountGroupType || "-"}</DetailText>
-                            <DetailText label="SOR">{dataHeader?.sor || "-"}</DetailText>
-                            <DetailText label="Cost Center">{dataHeader?.costCenter || "-"}</DetailText>
-                            <DetailText label="Account Segment">{dataHeader?.accountSegment || "-"}</DetailText>
-                            <DetailText label="Meter Reading Code">{dataHeader?.meterReadingCode || "-"}</DetailText>
-                            <DetailText label="Account Type">{dataHeader?.accountType || "-"}</DetailText>
-                            <DetailText label="Classification Type">{dataHeader?.classificationType || "-"}</DetailText>
-                            <DetailText label="SAP Cust ID">{dataHeader?.sapCustId || "-"}</DetailText>
-                            <DetailText label="Account Status">{dataHeader?.accountStatus || "-"}</DetailText>
+                            <DetailText label="Account Number">{dataHeader?.accountNumber || ""}</DetailText>
+                            <DetailText label="Account Name">{dataHeader?.accountName || ""}</DetailText>
+                            <DetailText label="Customer Number">{dataHeader?.customerNumber || ""}</DetailText>
+                            <DetailText label="Customer Name">{dataHeader?.customerName || ""}</DetailText>
+                            <DetailText label="Account Group Type">{dataHeader?.accountGroupType || ""}</DetailText>
+                            <DetailText label="SOR">{dataHeader?.sor || ""}</DetailText>
+                            <DetailText label="Cost Center">{dataHeader?.costCenter || ""}</DetailText>
+                            <DetailText label="Account Segment">{dataHeader?.accountSegment || ""}</DetailText>
+                            <DetailText label="Meter Reading Code">{dataHeader?.meterReadingCode || ""}</DetailText>
+                            <DetailText label="Account Type">{dataHeader?.accountType || ""}</DetailText>
+                            <DetailText label="Classification Type">{dataHeader?.classificationType || ""}</DetailText>
+                            <DetailText label="SAP Cust ID">{dataHeader?.sapCustId || ""}</DetailText>
+                            <DetailText label="Account Status">{dataHeader?.accountStatus || ""}</DetailText>
                         </div>
                     </SectionCard>
 
@@ -59,13 +78,13 @@ const DetailCancel = ({
                                 label="Payment Plan Code"
                                 mandatory={true}
                                 disabled={true}
-                                value={dataHeader?.restructureNumber || "-"}
+                                value={dataHeader?.restructureNumber || ""}
                             />
                             <InputComponent
                                 label="Cancel Reason"
                                 mandatory={true}
                                 disabled={true}
-                                value={dataHeader?.cancelReason || "-"}
+                                value={dataHeader?.cancelReason || ""}
                             />
                             <DateComponent
                                 label="Cancel Date"
@@ -86,7 +105,7 @@ const DetailCancel = ({
                                 <div 
                                     className="p-2 border rounded-md bg-[#F5F5F5] mt-2 min-h-[60px]"
                                 >
-                                    {dataHeader?.remark || "-"}
+                                    {dataHeader?.remark || ""}
                                 </div>
                             </div>
                         </div>
@@ -163,7 +182,7 @@ const DetailCancel = ({
             {segmentedPage === "Payment Plan" && (
                 <div className="flex flex-col gap-4 mt-4">
                     <CardContainerNoBorder 
-                        header="PAYMENT PLAN DETAIL (ORIGINAL)"
+                        header="PAYMENT PLAN DETAIL"
                         className="!border-[1.5px] !border-[#0075bf] !rounded-md !bg-white !shadow-none"
                         collapsible={true}
                     >
@@ -178,11 +197,11 @@ const DetailCancel = ({
                 <div className="mt-5">
                     <LogHistoryInfo
                         data={{
-                            recordId: dataHeader?.id || "-",
+                            recordId: dataHeader?.id || "",
                             createdDate: dataHeader?.createdDate ? moment(dataHeader?.createdDate).format("DD MMM YYYY HH:mm:ss") : "-",
-                            createdBy: dataHeader?.createdBy || "-",
+                            createdBy: dataHeader?.createdBy || "",
                             updatedDate: dataHeader?.updatedDate ? moment(dataHeader?.updatedDate).format("DD MMM YYYY HH:mm:ss") : "-",
-                            updatedBy: dataHeader?.updatedBy || "-"
+                            updatedBy: dataHeader?.updatedBy || ""
                         }} 
                     />
                 </div>

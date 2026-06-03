@@ -4,6 +4,7 @@ import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer"
 import NxTable from "../../../../../../../components/Nx/NxTable";
 import NxDate from "../../../../../../../components/Nx/NxDatePicker";
 import StatusComponent from "../../../../../../../components/StatusComponent";
+import NxStatusComponent from "../../../../../../../components/Nx/NxStatusComponent";
 
 // "IN_PROGRESS" → "In Progress"
 const formatStatus = (val) => {
@@ -44,19 +45,19 @@ const CustomerServiceRequestDetailInfo = ({ data_detail }) => {
             <NxDetailText label="Closed Date">{NxDate.formatDate(sr.closedDate, "DD MMM YYYY")}</NxDetailText>
 
             <NxDetailText label="Status">
-              <StatusComponent colour={(sr.status || "").toLowerCase()} margin={false}>
+              <NxStatusComponent colour={(sr.status || "").toLowerCase()} margin={false}>
                 {formatStatus(sr.status)}
-              </StatusComponent>
+              </NxStatusComponent>
             </NxDetailText>
             <NxDetailText label="Status Pre-Requisite">
-              <StatusComponent colour={(sr.statusPrerequisite || "").toLowerCase()} margin={false}>
+              <NxStatusComponent colour={(sr.statusPrerequisite || "").toLowerCase()} margin={false}>
                 {formatStatus(sr.statusPrerequisite)}
-              </StatusComponent>
+              </NxStatusComponent>
             </NxDetailText>
             <NxDetailText label="Status Approval">
-              <StatusComponent colour={(sr.statusApproval || "").toLowerCase()} margin={false}>
+              <NxStatusComponent colour={(sr.statusApproval || "").toLowerCase()} margin={false}>
                 {formatStatus(sr.statusApproval)}
-              </StatusComponent>
+              </NxStatusComponent>
             </NxDetailText>
           </div>
           <div className="w-full">
