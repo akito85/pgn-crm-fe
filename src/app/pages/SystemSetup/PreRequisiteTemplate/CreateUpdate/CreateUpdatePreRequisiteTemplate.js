@@ -1,4 +1,4 @@
-import { Button, Empty, Form, Select, Tooltip } from "antd"
+import { Button, Empty, Form, Select, Spin, Tooltip } from "antd"
 import { useState, useEffect, useMemo, useCallback } from "react"
 import dayjs from "dayjs"
 import NxBaseContainer from "../../../../../components/Nx/NxBaseContainer"
@@ -806,7 +806,9 @@ const CreateUpdatePreRequisiteTemplate = ({ type = "create" }) => {
                                 rules={[{ required: true, message: "Account Type is required" }]}
                                 className="no-margin-form"
                             >
-                                <SelectComponent>
+                                <SelectComponent
+                                    notFoundContent={loading_account_group_type ? <Spin size="small" /> : undefined}
+                                >
                                     {(list_account_group_type || []).map((data, index) => (
                                         <Select.Option key={index} value={data.id}>{data.name}</Select.Option>
                                     ))}
