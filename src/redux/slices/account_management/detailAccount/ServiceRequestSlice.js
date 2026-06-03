@@ -285,7 +285,7 @@ export const updateServiceRequest = createAsyncThunk(
   "UPDATE_SERVICE_REQUEST",
   async ({ accountId, id, body, attachments = [], action = "SUBMIT", successBodyExtra = {} }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/${id}`;
+      const url = `/v1/dbs/api/account/${accountId}/service-request/${id}`;
       const response = await accountManagementService.updateData(url, body);
 
       const uploadUrl = `/v1/dbs/api/service-request/upload-attachment`;
