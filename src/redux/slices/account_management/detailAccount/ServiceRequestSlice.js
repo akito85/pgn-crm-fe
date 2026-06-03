@@ -939,9 +939,9 @@ export const updateSrStatus = createAsyncThunk(
 // Get Pre Requisite Template
 export const getSrPrerequisiteTemplate = createAsyncThunk(
   "GET_SR_PREREQUISITE_TEMPLATE",
-  async ({ body, isLoadMore }, thunkAPI) => {
+  async ({ accountId, body, isLoadMore }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/pre-requisite-template/list-for-sr`;
+      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/prerequisite-templates`;
       const response = await accountManagementService.updateDataWithMethodPost(url, body);
       return { ...response.data, isLoadMore };
     } catch (error) {

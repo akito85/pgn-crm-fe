@@ -58,7 +58,6 @@ export default function PreRequisiteForm({
 
   useEffect(() => {
     const body = {
-      accountId,
       srTypeId: form?.getFieldValue("type"),
       srCategoryId: form?.getFieldValue("category"),
       srSubCategoryId: form?.getFieldValue("subCategory"),
@@ -70,7 +69,7 @@ export default function PreRequisiteForm({
       searchs: search,
     };
     setPage(0);
-    const promise = dispatch(getSrPrerequisiteTemplate({ body, isLoadMore: false }));
+    const promise = dispatch(getSrPrerequisiteTemplate({ accountId, body, isLoadMore: false }));
     return () => { promise.abort(); };
   }, [sort, search, filters, filterRules]);
 
