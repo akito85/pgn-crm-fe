@@ -283,16 +283,16 @@ const CreateUpdatePreRequisiteTemplate = ({ type = "create" }) => {
             render: (_, __, index) => index + 1,
         },
         {
-            key: "accountType",
-            title: "ACCOUNT TYPE",
-            dataIndex: "accountType",
-            render: (value) => getNameByValue(list_account_group_type, value),
-        },
-        {
             key: "accountSegment",
             title: "ACCOUNT SEGMENT",
             dataIndex: "accountSegment",
             render: (value) => getNameByValue(list_account_segment, value),
+        },
+        {
+            key: "accountType",
+            title: "ACCOUNT TYPE",
+            dataIndex: "accountType",
+            render: (value) => getNameByValue(list_account_group_type, value),
         },
         {
             key: "startDate",
@@ -782,19 +782,6 @@ const CreateUpdatePreRequisiteTemplate = ({ type = "create" }) => {
                     >
                         <div className="grid grid-cols-2 gap-4">
                             <Form.Item
-                                name="accountType"
-                                label="Account Type"
-                                required
-                                rules={[{ required: true, message: "Account Type is required" }]}
-                                className="no-margin-form"
-                            >
-                                <SelectComponent>
-                                    {(list_account_group_type || []).map((data, index) => (
-                                        <Select.Option key={index} value={data.id}>{data.name}</Select.Option>
-                                    ))}
-                                </SelectComponent>
-                            </Form.Item>
-                            <Form.Item
                                 name="accountSegment"
                                 label="Account Segment"
                                 required
@@ -803,6 +790,19 @@ const CreateUpdatePreRequisiteTemplate = ({ type = "create" }) => {
                             >
                                 <SelectComponent>
                                     {(list_account_segment || []).map((data, index) => (
+                                        <Select.Option key={index} value={data.id}>{data.name}</Select.Option>
+                                    ))}
+                                </SelectComponent>
+                            </Form.Item>
+                            <Form.Item
+                                name="accountType"
+                                label="Account Type"
+                                required
+                                rules={[{ required: true, message: "Account Type is required" }]}
+                                className="no-margin-form"
+                            >
+                                <SelectComponent>
+                                    {(list_account_group_type || []).map((data, index) => (
                                         <Select.Option key={index} value={data.id}>{data.name}</Select.Option>
                                     ))}
                                 </SelectComponent>
