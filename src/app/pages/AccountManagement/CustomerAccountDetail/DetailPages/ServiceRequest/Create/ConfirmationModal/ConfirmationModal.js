@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import { Button } from "antd";
 import NxModal from "../../../../../../../../components/Nx/NxModal";
 import ConfirmationModalTabs from "./ConfirmationModalTabs";
@@ -13,10 +14,15 @@ const ConfirmationModal = ({
   dropdowns,
   approvalTableData = [],
   attachmentsData = [],
+  prerequisites = [],
   type = "submit",
   loading = false,
+  service,
+  configApplication,
 }) => {
   const [activeTab, setActiveTab] = useState(0);
+
+  const { loading_createUpdateSr } = useSelector((state) => state.serviceRequest);
 
   useEffect(() => {
     if (!isOpen) setActiveTab(0);
@@ -32,23 +38,23 @@ const ConfirmationModal = ({
 
   const footer = (
     <div className="flex justify-between" key="footer">
-      <Button type="menu" disabled={loading} onClick={handleCancel}>
+      <Button type="menu" disabled={loading_createUpdateSr} onClick={handleCancel}>
         Cancel
       </Button>
       <div className="flex gap-2">
         <Button
           type="menu"
-          disabled={loading || activeTab < 1}
+          disabled={loading_createUpdateSr || activeTab < 1}
           onClick={() => handleChangeTab("prev")}
         >
           Previous
         </Button>
         {activeTab < TAB_COUNT - 1 ? (
-          <Button type="submit" disabled={loading} onClick={() => handleChangeTab("next")}>
+          <Button type="submit" disabled={loading_createUpdateSr} onClick={() => handleChangeTab("next")}>
             Next
           </Button>
         ) : (
-          <Button type="submit" loading={loading} onClick={handleConfirm}>
+          <Button type="submit" loading={loading_createUpdateSr} onClick={handleConfirm}>
             {type === "draft" ? "Save as Draft" : "Confirm"}
           </Button>
         )}
@@ -72,9 +78,12 @@ const ConfirmationModal = ({
         dropdowns={dropdowns}
         approvalTableData={approvalTableData}
         attachmentsData={attachmentsData}
+        prerequisites={prerequisites}
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         disabled={loading}
+        service={service}
+        configApplication={configApplication}
       />
     </NxModal>
   );

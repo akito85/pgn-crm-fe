@@ -1,10 +1,10 @@
 import { Fragment } from "react";
 import NxDetailText from "../../../../../../../components/Nx/NxDetailText";
 import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
-import NxTable from "../../../../../../../components/Nx/NxTable";
 import NxDate from "../../../../../../../components/Nx/NxDatePicker";
 import StatusComponent from "../../../../../../../components/StatusComponent";
 import NxStatusComponent from "../../../../../../../components/Nx/NxStatusComponent";
+import DataRequirementTable from "./DataRequirementTable";
 
 // "IN_PROGRESS" → "In Progress"
 const formatStatus = (val) => {
@@ -12,15 +12,8 @@ const formatStatus = (val) => {
   return val.replace(/_/g, " ").toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
 };
 
-const DR_COLUMNS = [
-  { title: "NO",    width: 60, align: "center", render: (_, __, i) => i + 1 },
-  { title: "TYPE",  dataIndex: "drType",  width: 200, sorter: true, filter: true },
-  { title: "VALUE", dataIndex: "drValue", sorter: true, filter: true },
-];
-
-const CustomerServiceRequestDetailInfo = ({ data_detail }) => {
-  const sr  = data_detail || {};
-  const drs = Array.isArray(sr.dataRequirements) ? sr.dataRequirements : [];
+const CustomerServiceRequestDetailInfo = ({ id, idAccount, data_detail }) => {
+  const sr = data_detail || {};
 
   return (
     <Fragment>
@@ -67,18 +60,7 @@ const CustomerServiceRequestDetailInfo = ({ data_detail }) => {
       </NxBaseContainer>
 
       {/* DATA REQUIREMENT */}
-      <NxBaseContainer header="DATA REQUIREMENT" border className="overflow-hidden">
-        <NxTable
-          dataSource={drs.map((item, i) => ({ ...item, key: item.id || i }))}
-          columns={DR_COLUMNS}
-          usePagination={false}
-          showAdvanceSearch={false}
-          showSearchBar={false}
-          fontSize="small"
-          tablePadding="small"
-          tableScrolled={{ x: "max-content" }}
-        />
-      </NxBaseContainer>
+      <DataRequirementTable accountId={idAccount} serviceRequestId={id} />
     </Fragment>
   );
 };
