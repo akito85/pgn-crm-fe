@@ -14,6 +14,7 @@ const FormConfirmation = ({ data }) => {
     list_billing_cycle,
     list_billing_period,
     list_scheduler_type,
+    list_component_prabilling,
   } = useSelector((state) => state.rbi_prabilling);
 
   const getPeriodName = (val) => {
@@ -121,6 +122,13 @@ const FormConfirmation = ({ data }) => {
       return scheduleType.name;
     }
     return "";
+  };
+
+  const getComponentName = (val) => {
+    const found = (list_component_prabilling || []).find(
+      (item) => item?.componenetCode === val
+    );
+    return found?.componentName ?? val ?? "";
   };
 
   const renderSpecificCustomer = () => {
@@ -250,6 +258,21 @@ const FormConfirmation = ({ data }) => {
           <DetailText label="Specific Customer Account">
             {renderSpecificCustomer()}
           </DetailText>
+
+          <div className="col-span-2">
+            <DetailText label="Specific Component Prabilling">
+              {(data?.specificComponentPrabilling || []).length > 0
+                ? (data?.specificComponentPrabilling || []).map(
+                    (code, index, array) => (
+                      <span key={index}>
+                        {getComponentName(code)}
+                        {index < array.length - 1 && ", "}
+                      </span>
+                    )
+                  )
+                : ""}
+            </DetailText>
+          </div>
         </div>
       </CardContainer>
 

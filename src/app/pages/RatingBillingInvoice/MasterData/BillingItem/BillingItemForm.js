@@ -51,6 +51,10 @@ import {
   getAccountTypeList,
   resetApprovalState,
   getAttachmentDetail,
+  getBillType,
+  getBillingItemCategoryList,
+  getBillingItemTypeList,
+  getBillingItemCriteriaList,
 } from "../../../../../redux/slices/rating_billing_invoice/billingItem";
 import {
   showModalError,
@@ -202,9 +206,9 @@ const BillingItemForm = (props) => {
     });
   }, []);
 
-  // Initial data fetch — only eager-load data that is needed immediately
-  // (BillingItemCategory for mapping, SpecialGL/GLAccount for criteria table, bank, classification)
-  // Category/Type/BillType/Criteria dropdowns are lazy-loaded in BillingItemSectionForm
+  // Initial data fetch — eager-load all data needed at render time.
+  // For update mode, also pre-load the dropdown lists (category/type/billType/criteria)
+  // so that form values set by handleSetDataUpdate resolve to labels instead of raw IDs.
   useEffect(() => {
     dispatch(getBillingItemCategory());
     dispatch(getBillingItemCategoryDdl());
@@ -214,7 +218,13 @@ const BillingItemForm = (props) => {
     dispatch(getBankList());
     dispatch(getClassificationTypeList());
     dispatch(getAccountTypeList());
-  }, [dispatch]);
+    if (type === "update") {
+      dispatch(getBillingItemCategoryList());
+      dispatch(getBillingItemTypeList());
+      dispatch(getBillingItemCriteriaList());
+      dispatch(getBillType());
+    }
+  }, [dispatch, type]);
 
   const handleSearchGLAccount = useCallback(
     debounce((searchValue) => {
