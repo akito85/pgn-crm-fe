@@ -424,13 +424,23 @@ const CreateUpdatePreRequisiteTemplate = ({ type = "create" }) => {
     }, [form]);
 
     const handleSelectCriteria = (value) => {
-        const updated = [...new Set([...criteriaValues, value])];
+        let updated = [...new Set([...criteriaValues, value])];
+        const selected = list_criteria.find((item) => item.id === value);
+        if (selected?.value === "ACCOUNT_GROUP_TYPE") {
+            const segmentItem = list_criteria.find((item) => item.value === "ACCOUNT_SEGMENT");
+            if (segmentItem) updated = [...new Set([...updated, segmentItem.id])];
+        }
         setCriteriaValues(updated);
         form.setFieldsValue({ criteria: updated });
     };
 
     const handleDeselectCriteria = (value) => {
-        const updated = criteriaValues.filter((item) => item !== value);
+        let updated = criteriaValues.filter((item) => item !== value);
+        const deselected = list_criteria.find((item) => item.id === value);
+        if (deselected?.value === "ACCOUNT_SEGMENT") {
+            const groupTypeItem = list_criteria.find((item) => item.value === "ACCOUNT_GROUP_TYPE");
+            if (groupTypeItem) updated = updated.filter((item) => item !== groupTypeItem.id);
+        }
         setCriteriaValues(updated);
         setCriteriaDataRows([]);
         form.setFieldsValue({ criteria: updated });
