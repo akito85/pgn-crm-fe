@@ -673,7 +673,6 @@ const CreateUpdateCustomerServiceRequest = ({ formType = "create" }) => {
 
   const buildPayload = (action = "SUBMIT", validationType = null) => {
     const values = formCreate.getFieldsValue(true);
-    const isDraft = action === "DRAFT";
 
     return {
       requestType: values.type ? parseInt(values.type) : null,
@@ -689,11 +688,7 @@ const CreateUpdateCustomerServiceRequest = ({ formType = "create" }) => {
       channel: values.channel ? parseInt(values.channel) : null,
       source: values.requestSource ? parseInt(values.requestSource) : null,
       action,
-      isDraft,
       validationType,
-      stepNumber: validationType
-        ? stepValidationTypes.indexOf(validationType) + 1
-        : steps.length,
       dataRequirements: (values.srFormDataRequirements || []).map((dr) => ({
         requirementType: dr.typeId ? parseInt(dr.typeId) : null,
         requirementValue: dr.value || null,
