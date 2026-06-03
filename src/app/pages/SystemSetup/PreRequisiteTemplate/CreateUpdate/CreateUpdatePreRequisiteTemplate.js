@@ -74,9 +74,10 @@ const CreateUpdatePreRequisiteTemplate = ({ type = "create" }) => {
     }, [dispatch, type, recordId]);
 
     const handleGetAccountGroupType = useCallback((accountSegmentId) => {
+        modalForm.setFieldsValue({ accountType: undefined });
         if (!accountSegmentId) return;
         dispatch(getAccountGroupType({ id: accountSegmentId }));
-    }, [dispatch]);
+    }, [dispatch, modalForm]);
 
     useEffect(() => {
         if (type !== "update" || !detail_prt?.id) return;
