@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { PlusCircleOutlined } from "@ant-design/icons";
 import { Button, Form, Select, Tooltip } from "antd";
@@ -16,7 +16,9 @@ import { getSrDataRequirementValues } from "../../../../../../../../../redux/sli
 export default function InfoDataRequirement({
   dropdowns,
   form,
-  accountId
+  accountId,
+  initialDataRequirements = [],
+  resetSignal = 0,
 }) {
   const dispatch = useDispatch();
   const { detail_srDataRequirementValues, loading_srDataRequirementValues } = useSelector(
@@ -30,18 +32,23 @@ export default function InfoDataRequirement({
   const [selectedTypeValue, setSelectedTypeValue] = useState(null);
   const [modalForm] = Form.useForm();
 
-  // Sync local table state with form data on mount (for persistence across step navigation)
+  const initDoneRef = useRef(false);
+
+  // Sync local table state from prop once initial data arrives (update mode).
+  // Prop-based approach avoids relying on Form.useWatch for an unregistered field.
   useEffect(() => {
-    const formData = form.getFieldValue('srFormDataRequirements');
-    if (formData && formData.length > 0) {
-      // Ensure all records have proper no values
-      const dataWithNumbers = formData.map((item, index) => ({
-        ...item,
-        no: index + 1
-      }));
-      setDataRequirement(dataWithNumbers);
-    }
-  }, [form]);
+    if (initDoneRef.current || !initialDataRequirements.length) return;
+    initDoneRef.current = true;
+    setDataRequirement(initialDataRequirements);
+    form.setFieldsValue({ srFormDataRequirements: initialDataRequirements });
+  }, [initialDataRequirements]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Re-sync when the user clicks Reset/Clear in the parent form.
+  useEffect(() => {
+    if (resetSignal === 0) return;
+    setDataRequirement(initialDataRequirements);
+    form.setFieldsValue({ srFormDataRequirements: initialDataRequirements });
+  }, [resetSignal]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Create safe accessor functions that handle both array and { data: [] } formats
   const getDropdownItems = (dropdownKey) => {

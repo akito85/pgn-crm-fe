@@ -63,6 +63,7 @@ import {
   getSrPriorities,
   getSrSources,
   getSrDataRequirementTypes,
+  getSrDataRequirements,
   getSrPrerequisiteTypes,
   getSrAttachmentCategories,
   createServiceRequest,
@@ -115,6 +116,7 @@ const CreateUpdateCustomerServiceRequest = ({ formType = "create" }) => {
     detail_srApprovalHierarchy,
     list_srPrerequisiteTypes,
     list_srDataRequirementTypes,
+    list_srDataRequirements,
     list_srAttachmentCategories,
     detail_serviceRequest: serviceRequestDetail,
     detailDraft_serviceRequest: serviceRequestDetailDraft,
@@ -196,6 +198,7 @@ const CreateUpdateCustomerServiceRequest = ({ formType = "create" }) => {
   const [modalBack, setModalBack] = useState(false);
 
   const [modalError, setModalError] = useState(false);
+  const [drResetSignal, setDrResetSignal] = useState(0);
   const [bodyError, setBodyError] = useState({});
 
   const [customerType, setCustomerType] = useState(0);
@@ -307,6 +310,38 @@ const CreateUpdateCustomerServiceRequest = ({ formType = "create" }) => {
       dispatch(getServiceRequestDraft({ accountId: idAccount, id }));
     }
   }, [dispatch, isUpdate, id, idAccount]);
+
+  // Fetch existing data requirements from API (same source as detail page)
+  useEffect(() => {
+    if (!isUpdate || !id || !idAccount) return;
+    dispatch(getSrDataRequirements({
+      accountId: idAccount,
+      serviceRequestId: id,
+      body: { page: 0, size: 999, sort: "", searchs: {}, filters: [], filterRules: [] },
+      isLoadMore: false,
+    }));
+  }, [dispatch, isUpdate, id, idAccount]);
+
+  // Map API data requirements into the shape expected by InfoDataRequirement.
+  // Does not require list_srDataRequirementTypes to be loaded first — type string
+  // is always available from the API response and typeId resolves when types are ready.
+  const initialDataRequirements = useMemo(() => {
+    if (!isUpdate || !list_srDataRequirements.length) return [];
+    return list_srDataRequirements.map((dr, index) => {
+      const typeEntry = list_srDataRequirementTypes.find(
+        (t) => (t.name || t.glbTypeValName) === dr.type
+      );
+      return {
+        key: dr.id || `dr-${index}`,
+        no: index + 1,
+        type: dr.type,
+        typeId: typeEntry ? String(typeEntry.glbTypeValId || typeEntry.id || '') : null,
+        typeValue: typeEntry?.glbValue || null,
+        value: dr.value,
+        valueId: null,
+      };
+    });
+  }, [isUpdate, list_srDataRequirements, list_srDataRequirementTypes]);
 
   // Populate form when update detail is loaded
   useEffect(() => {
@@ -547,6 +582,8 @@ const CreateUpdateCustomerServiceRequest = ({ formType = "create" }) => {
           account={data_accountDetail}
           customer={data_customerDetail}
           dropdowns={dropdowns}
+          initialDataRequirements={initialDataRequirements}
+          resetSignal={drResetSignal}
         />
       ),
       disabled: false
@@ -813,7 +850,7 @@ const CreateUpdateCustomerServiceRequest = ({ formType = "create" }) => {
         updateServiceRequest({
           accountId: idAccount,
           id,
-          body: { ...dataSend, serviceRequestId: id },
+          body: { ...dataSend },
           attachments: newAttachments,
           action: confirmationType.toUpperCase(),
           successBodyExtra: { return: false }
@@ -905,6 +942,9 @@ const CreateUpdateCustomerServiceRequest = ({ formType = "create" }) => {
           detail.attachments.map((att) => ({ ...att, key: att.id }))
         );
       }
+
+      // Signal InfoDataRequirement to re-sync from initialDataRequirements
+      setDrResetSignal(s => s + 1);
     } else {
       setAttachmentDataSource([]);
       formCreate.setFieldsValue({
