@@ -177,9 +177,9 @@ const PreRequisiteCreateFrom = () => {
           addCreateSrPrerequisite({
             key: `local-${Date.now()}`,
             ...prerequisiteData,
-            type: getPrerequisiteTypeLabel(prerequisiteData.prerequisiteId),
-            name: prerequisiteData.prerequisiteName || getPrerequisiteTypeLabel(prerequisiteData.prerequisiteId),
-            description: prerequisiteData.prerequisiteComments || "-",
+            typeName: getPrerequisiteTypeLabel(prerequisiteData.prerequisiteType),
+            name: prerequisiteData.prerequisiteName || getPrerequisiteTypeLabel(prerequisiteData.prerequisiteType),
+            description: prerequisiteData.prerequisiteDesc || "-",
             status: "-",
             dueDateLabel: "-",
             completedDateLabel: "-",
