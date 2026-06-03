@@ -73,6 +73,9 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
                   <DetailText label={"Specific Customer Account"}>
                     {detail.accounts}
                   </DetailText>
+                  <DetailText label={"Prabill Component"}>
+                    {detail.prabillComponent}
+                  </DetailText>
                   <DetailText label={"Completion Date"}>
                     {prabillData?.updateDtm
                       ? moment(prabillData.updateDtm).format("DD MMM YYYY HH:mm:ss")
