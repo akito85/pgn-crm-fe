@@ -66,20 +66,20 @@ const TAB_CONFIGS = [
     scrollX: 1000,
     action: "getCustomerTaxData",
   },
-  {
-    key: "3",
-    label: "Billing Bucket",
-    dataKey: "billingBucketData",
-    scrollX: 900,
-    action: "getCustomerBillingBucketData",
-  },
-  {
-    key: "4",
-    label: "Billing Item",
-    dataKey: "billingItemData",
-    scrollX: 1500,
-    action: "getCustomerBillingItemData",
-  },
+  // {
+  //   key: "3",
+  //   label: "Billing Bucket",
+  //   dataKey: "billingBucketData",
+  //   scrollX: 900,
+  //   action: "getCustomerBillingBucketData",
+  // },
+  // {
+  //   key: "4",
+  //   label: "Billing Item",
+  //   dataKey: "billingItemData",
+  //   scrollX: 1500,
+  //   action: "getCustomerBillingItemData",
+  // },
 ];
 
 const AccountDetailPage = () => {
