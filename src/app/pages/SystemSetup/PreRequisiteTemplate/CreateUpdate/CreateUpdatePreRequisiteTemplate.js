@@ -65,13 +65,18 @@ const CreateUpdatePreRequisiteTemplate = ({ type = "create" }) => {
         dispatch(getSrCategory());
         dispatch(getSrSubCategory());
         dispatch(getCriteria());
-        dispatch(getAccountGroupType());
         dispatch(getAccountSegment());
+        // dispatch(getAccountGroupType());
         dispatch(getPreRequisiteType());
         if (type === "update" && recordId) {
             dispatch(getDetailPreRequisiteTemplate(recordId));
         }
     }, [dispatch, type, recordId]);
+
+    const handleGetAccountGroupType = useCallback((accountSegmentId) => {
+        if (!accountSegmentId) return;
+        dispatch(getAccountGroupType({ id: accountSegmentId }));
+    }, [dispatch]);
 
     useEffect(() => {
         if (type !== "update" || !detail_prt?.id) return;
@@ -788,7 +793,7 @@ const CreateUpdatePreRequisiteTemplate = ({ type = "create" }) => {
                                 rules={[{ required: true, message: "Account Segment is required" }]}
                                 className="no-margin-form"
                             >
-                                <SelectComponent>
+                                <SelectComponent onChange={handleGetAccountGroupType} allowClear>
                                     {(list_account_segment || []).map((data, index) => (
                                         <Select.Option key={index} value={data.id}>{data.name}</Select.Option>
                                     ))}
