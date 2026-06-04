@@ -488,15 +488,15 @@ const ListDetailReceipt = ({ type: propType }) => {
 
       <LogHistoryInfo
         data={{
-          recordId: data_detail?.id || "-",
+          recordId: data_detail?.id || "",
           createdDate: data_detail?.createdDate
             ? moment(data_detail?.createdDate).format("DD MMM YYYY HH:mm:ss")
             : "-",
-          createdBy: data_detail?.createdBy || "-",
+          createdBy: data_detail?.createdBy || "",
           updatedDate: data_detail?.updatedDate
             ? moment(data_detail?.updatedDate).format("DD MMM YYYY HH:mm:ss")
             : "-",
-          updatedBy: data_detail?.updatedBy || "-",
+          updatedBy: data_detail?.updatedBy || "",
         }}
       />
 

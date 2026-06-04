@@ -13,6 +13,13 @@ import {
   approveOrRejectRelationship,
   approveOrRejectInactiveRelationship,
 } from "../../../../../../../redux/slices/account_management/detailAccount/relationshipSlice";
+import {
+  getStandaloneRelationship,
+  getStandaloneRelationshipDraft,
+  approveOrRejectStandaloneRelationship,
+  approveOrRejectInactiveStandaloneRelationship,
+} from "../../../../../../../redux/slices/relationship/standaloneRelationshipSlice";
+import { RELATIONSHIP_ROUTES } from "../../../../../../../routes/relationship/relationship_routes";
 import { showModalError } from "../../../../../../../redux/slices/general_slice";
 import NxCardContainer from "../../../../../../../components/Nx/NxCardContainer";
 import NxBreadCrumb from "../../../../../../../components/Nx/NxBreadCrumb";
@@ -31,9 +38,10 @@ import SVGIcon from "../../../../../../../assets/Icon/index";
  * @param {object}                    props
  * @param {"standard"|"oneTime"}      [props.accountType="standard"] - Account type context.
  */
-const RelationshipDetail = ({ accountType = "standard" }) => {
+const RelationshipDetail = ({ accountType = "standard", isStandalone = false }) => {
   // --- Hooks ---
   const dispatch = useDispatch();
+  const sliceKey = isStandalone ? "standaloneRelationship" : "relationship";
 
   const {
     detail_relationship,
@@ -41,7 +49,7 @@ const RelationshipDetail = ({ accountType = "standard" }) => {
     loading_detailRelationship,
     loading_detailDraftRelationship,
     loading_approveRejectRelationship,
-  } = useSelector((state) => state.relationship);
+  } = useSelector((state) => state[sliceKey]);
 
   const { loading: loadingCustomer, loadingAccount } = useSelector(
     (state) => state.customerAccount
@@ -84,7 +92,10 @@ const RelationshipDetail = ({ accountType = "standard" }) => {
   const draftExist = status && status !== "DRAFT" && statusApproval && statusApproval !== "APPROVED";
   const isApproval = ["ACCOUNT_RELATIONSHIP", "INACTIVE_ACCOUNT_RELATIONSHIP"].includes(approvalType);
 
-  const routes = [
+  const routes = isStandalone ? [
+    { path: RELATIONSHIP_ROUTES.VIEW_RELATIONSHIP, breadcrumbName: "Relationship" },
+    { path: "", breadcrumbName: "Detail Relationship" },
+  ] : [
     {
       path: "",
       breadcrumbName: "Account",
@@ -153,27 +164,19 @@ const RelationshipDetail = ({ accountType = "standard" }) => {
     ];
 
     if (approvalType === "ACCOUNT_RELATIONSHIP") {
-      dispatch(
-        approveOrRejectRelationship({
-          accountId,
-          body,
-          action: action.toUpperCase(),
-        })
-      )
-        .unwrap()
-        .then(() => navigate(-1))
-        .catch(() => {});
+      if (isStandalone) {
+        dispatch(approveOrRejectStandaloneRelationship({ body, onSuccess: () => navigate(-1) }));
+      } else {
+        dispatch(approveOrRejectRelationship({ accountId, body, action: action.toUpperCase() }))
+          .unwrap().then(() => navigate(-1)).catch(() => {});
+      }
     } else if (approvalType === "INACTIVE_ACCOUNT_RELATIONSHIP") {
-      dispatch(
-        approveOrRejectInactiveRelationship({
-          accountId,
-          body,
-          action: action.toUpperCase(),
-        })
-      )
-        .unwrap()
-        .then(() => navigate(-1))
-        .catch(() => {});
+      if (isStandalone) {
+        dispatch(approveOrRejectInactiveStandaloneRelationship({ body, onSuccess: () => navigate(-1) }));
+      } else {
+        dispatch(approveOrRejectInactiveRelationship({ accountId, body, action: action.toUpperCase() }))
+          .unwrap().then(() => navigate(-1)).catch(() => {});
+      }
     } else {
       dispatch(showModalError({
         title: "Failed",
@@ -184,21 +187,33 @@ const RelationshipDetail = ({ accountType = "standard" }) => {
 
   // --- Effects ---
   useEffect(() => {
-    if (isStandard)
+    if (isStandalone) {
+      dispatch(getGrantedAccessAccount('/relationship'));
+    } else if (isStandard) {
       dispatch(getGrantedAccessAccount('/account-management/account-standard/relationship'));
-    else if (isOneTime)
+    } else if (isOneTime) {
       dispatch(getGrantedAccessAccount('/account-management/account-onetime/relationship'));
+    }
   }, []);
 
   useEffect(() => {
-    if (accountId && idRelationship) {
-      dispatch(getRelationship({ accountId, idRelationship }));
+    if (idRelationship) {
+      if (isStandalone) {
+        dispatch(getStandaloneRelationship({ id: idRelationship, subjectAccountId: accountId }));
+      } else if (accountId) {
+        dispatch(getRelationship({ accountId, idRelationship }));
+      }
     }
   }, [accountId, idRelationship]);
 
   useEffect(() => {
-    if (accountId && idRelationship && draftExist)
-      dispatch(getRelationshipDraft({ accountId, idRelationship }));
+    if (idRelationship && draftExist) {
+      if (isStandalone) {
+        dispatch(getStandaloneRelationshipDraft({ id: idRelationship, subjectAccountId: accountId }));
+      } else if (accountId) {
+        dispatch(getRelationshipDraft({ accountId, idRelationship }));
+      }
+    }
   }, [accountId, idRelationship, draftExist]);
 
   return (
@@ -206,14 +221,16 @@ const RelationshipDetail = ({ accountType = "standard" }) => {
       <Spin spinning={isLoading} className={"w-full top-20"}>
         <div className="flex flex-col gap-y-4">
           <NxBreadCrumb routes={routes} />
-          <HeaderDetail
-            data_header={["CUSTOMER INFORMATION", "ACCOUNT INFORMATION"]}
-            dispatch={dispatch}
-            idAccount={accountId}
-            idCustomer={customerId}
-            type={accountType}
-            collapsible
-          />
+          {!isStandalone && (
+            <HeaderDetail
+              data_header={["CUSTOMER INFORMATION", "ACCOUNT INFORMATION"]}
+              dispatch={dispatch}
+              idAccount={accountId}
+              idCustomer={customerId}
+              type={accountType}
+              collapsible
+            />
+          )}
 
           {draftExist && (
             <NxBaseContainer border padding={false}>

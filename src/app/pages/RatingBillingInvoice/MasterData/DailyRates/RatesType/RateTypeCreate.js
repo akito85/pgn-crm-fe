@@ -56,7 +56,7 @@ const RateTypeCreate = ({ type }) => {
     },
     {
       path: RBI_ROUTES.DAILY_RATE_VIEW,
-      breadcrumbName: "Daily Rate",
+      breadcrumbName: "Rate Type List",
     },
     {
       path: "",

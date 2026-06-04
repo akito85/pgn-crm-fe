@@ -328,8 +328,8 @@ const AdjustmentBillingForm = ({ type }) => {
       setIdInvoice(dataDetail.referenceInvoiceNumber);
       setBillingPeriodId(
         dataDetail?.correctionBillingPeriodId ??
-          dataDetail?.correctionBillPeriodId ??
-          dataDetail?.billingPeriod,
+        dataDetail?.correctionBillPeriodId ??
+        dataDetail?.billingPeriod,
       );
       setDataInvoice(dataDetail?.invoiceInformation || null);
 
@@ -457,8 +457,8 @@ const AdjustmentBillingForm = ({ type }) => {
       const resolvedCurrentBillingPeriodId = resolveBillingPeriodId(
         currentBillingPeriod,
         dataCurrentBillingPeriod?.id ??
-          dataCurrentBillingPeriod?.[0]?.id ??
-          dataDetail?.billingPeriod,
+        dataCurrentBillingPeriod?.[0]?.id ??
+        dataDetail?.billingPeriod,
       );
       // For correction billing period: if form value is empty/unchanged, use detail ID directly
       // Otherwise, resolve the selected value to ID via resolveBillingPeriodId
@@ -466,9 +466,9 @@ const AdjustmentBillingForm = ({ type }) => {
         !correctionBillingPeriod && type === "update"
           ? dataDetail?.correctionBillingPeriodId
           : resolveBillingPeriodId(
-              correctionBillingPeriod,
-              billingPeriodId ?? dataDetail?.correctionBillingPeriodId,
-            );
+            correctionBillingPeriod,
+            billingPeriodId ?? dataDetail?.correctionBillingPeriodId,
+          );
 
       const calculationTypeValue =
         dataListCalculationType?.find((item) => {
@@ -549,8 +549,42 @@ const AdjustmentBillingForm = ({ type }) => {
         transactionDate: formValue?.transactionDate
           ? moment(formValue?.transactionDate).format("YYYY-MM-DDTHH:mm:ss")
           : null,
+        // On update mode, only use recalculated rate when rateType/rateDate has changed.
+        // Otherwise, keep original detail rateReal as requested by backend contract.
         rateType: formValue?.rateType || dataInvoice?.rateType,
-        rate: formValue?.rateReal ?? dataInvoice?.rateReal,
+        rate: (() => {
+          const currentRateType = formValue?.rateType || dataInvoice?.rateType;
+          const currentRateDate = formValue?.rateDate
+            ? moment(formValue?.rateDate).format("YYYY-MM-DD")
+            : null;
+
+          const originalRateType = dataDetail?.rateType || null;
+          const originalRateDate = dataDetail?.rateDate
+            ? moment(dataDetail?.rateDate).format("YYYY-MM-DD")
+            : null;
+
+          const isRateCriteriaChanged =
+            type !== "update" ||
+            String(currentRateType || "") !== String(originalRateType || "") ||
+            String(currentRateDate || "") !== String(originalRateDate || "");
+
+          if (!isRateCriteriaChanged) {
+            return (
+              dataDetail?.rateReal ??
+              formValue?.rate ??
+              dataInvoice?.rate ??
+              dataInvoice?.convertedValue ??
+              null
+            );
+          }
+
+          return (
+            formValue?.rate ??
+            dataInvoice?.convertedValue ??
+            dataInvoice?.rate ??
+            null
+          );
+        })(),
         rateDate: formValue?.rateDate
           ? moment(formValue?.rateDate).format("YYYY-MM-DDTHH:mm:ss")
           : dataInvoice?.rateDate,
@@ -1043,9 +1077,8 @@ const AdjustmentBillingForm = ({ type }) => {
               <SVGIcon name="IconFailed" width={48} />
               <p className="text-[18px] font-bold">{"Failed"}</p>
             </div>
-            <p className="pl-[70px]">{`Your data was not ${
-              flag === 1 ? "created" : "submitted"
-            }. ${bodyError.message}.`}</p>
+            <p className="pl-[70px]">{`Your data was not ${flag === 1 ? "created" : "submitted"
+              }. ${bodyError.message}.`}</p>
             <p className="pl-[70px]">Please try again.</p>
           </div>
         </ModalError>

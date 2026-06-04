@@ -194,6 +194,10 @@ const BillingItemDetailInformation = ({
             ? moment(detail?.endDate).format(dateFormatting.date)
             : null,
           description: detail?.description,
+          createdDate: detail?.createdDate,
+          createdBy: detail?.createdBy,
+          updatedDate: detail?.updatedDate,
+          updatedBy: detail?.updatedBy,
       }));
       setDataDetailTable(mappedDetail);
       setIsDetailMapShown(true);
@@ -466,19 +470,23 @@ const BillingItemDetailInformation = ({
         }
       >
         <CardComponent header="HISTORY LOG INFORMATION" cols={5}>
-          <DetailText label="Record ID">{dataHistory.recordId}</DetailText>
+          <DetailText label="Record ID">{dataHistory?.recordId ?? "-"}</DetailText>
           <DetailText label="Created Date">
             {dataHistory?.createdDate
-              ? moment(dataHistory.createdDate).format(dateFormatting.dateTime)
-              : ""}
+              ? (moment(dataHistory.createdDate, [moment.ISO_8601, "DD MMM YYYY HH:mm:ss"], true).isValid()
+                  ? moment(dataHistory.createdDate, [moment.ISO_8601, "DD MMM YYYY HH:mm:ss"]).format(dateFormatting.dateTime)
+                  : dataHistory.createdDate)
+              : "-"}
           </DetailText>
-          <DetailText label="Created By">{dataHistory?.createdBy}</DetailText>
+          <DetailText label="Created By">{dataHistory?.createdBy || "-"}</DetailText>
           <DetailText label="Updated Date">
             {dataHistory?.updatedDate
-              ? moment(dataHistory.updatedDate).format(dateFormatting.dateTime)
-              : ""}
+              ? (moment(dataHistory.updatedDate, [moment.ISO_8601, "DD MMM YYYY HH:mm:ss"], true).isValid()
+                  ? moment(dataHistory.updatedDate, [moment.ISO_8601, "DD MMM YYYY HH:mm:ss"]).format(dateFormatting.dateTime)
+                  : dataHistory.updatedDate)
+              : "-"}
           </DetailText>
-          <DetailText label="Updated By">{dataHistory?.updatedBy}</DetailText>
+          <DetailText label="Updated By">{dataHistory?.updatedBy || "-"}</DetailText>
         </CardComponent>
       </ModalCustom>
     </Fragment>

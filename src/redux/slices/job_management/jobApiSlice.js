@@ -77,12 +77,19 @@ const toFrontend = (job) => {
         const nc = typeof job.notificationConfig === 'string'
           ? JSON.parse(job.notificationConfig)
           : job.notificationConfig;
+        // nc.inApp is the nested { standard, toast, popup, inline } object per
+        // the Notifications module's DISPLAY_TYPES vocabulary. Old rows with a
+        // legacy boolean inApp deserialise as nc.inApp === true/false — fall
+        // back to standard=true so we don't silently drop the user's intent.
+        const inApp = typeof nc.inApp === 'object' && nc.inApp !== null
+          ? nc.inApp
+          : { standard: nc.inApp === true, toast: false, popup: false, inline: false };
         return {
-          showInDrawer:    nc.inApp      ?? false,
-          showAlert:       false,
-          sendViaEmail:    nc.email      ?? false,
-          sendViaSMS:      nc.sms        ?? false,
-          sendViaWhatsApp: nc.whatsapp   ?? false,
+          showInDrawer:    inApp.standard ?? false,
+          showAlert:       inApp.popup    ?? false,
+          sendViaEmail:    nc.email       ?? false,
+          sendViaSMS:      nc.sms         ?? false,
+          sendViaWhatsApp: nc.whatsapp    ?? false,
         };
       } catch (e) {
         return null;
@@ -131,10 +138,15 @@ const toBackendCreate = (v) => {
     accessGroupId:  v.accessGroupId  ?? null,
     notificationConfig: v.notificationSettings
       ? {
-          inApp:     v.notificationSettings.showInDrawer    ?? false,
-          email:     v.notificationSettings.sendViaEmail    ?? false,
-          sms:       v.notificationSettings.sendViaSMS      ?? false,
-          whatsapp:  v.notificationSettings.sendViaWhatsApp ?? false,
+          inApp: {
+            standard: v.notificationSettings.showInDrawer ?? false,
+            toast:    false,
+            popup:    v.notificationSettings.showAlert    ?? false,
+            inline:   false,
+          },
+          email:    v.notificationSettings.sendViaEmail    ?? false,
+          sms:      v.notificationSettings.sendViaSMS      ?? false,
+          whatsapp: v.notificationSettings.sendViaWhatsApp ?? false,
         }
       : null,
   };
@@ -178,10 +190,15 @@ const toBackendUpdate = (v) => {
     accessGroupId:  v.accessGroupId  ?? null,
     notificationConfig: v.notificationSettings
       ? {
-          inApp:     v.notificationSettings.showInDrawer    ?? false,
-          email:     v.notificationSettings.sendViaEmail    ?? false,
-          sms:       v.notificationSettings.sendViaSMS      ?? false,
-          whatsapp:  v.notificationSettings.sendViaWhatsApp ?? false,
+          inApp: {
+            standard: v.notificationSettings.showInDrawer ?? false,
+            toast:    false,
+            popup:    v.notificationSettings.showAlert    ?? false,
+            inline:   false,
+          },
+          email:    v.notificationSettings.sendViaEmail    ?? false,
+          sms:      v.notificationSettings.sendViaSMS      ?? false,
+          whatsapp: v.notificationSettings.sendViaWhatsApp ?? false,
         }
       : null,
   };
@@ -226,8 +243,8 @@ export const jobApiSlice = createApi({
           };
         } catch (error) {
           api.dispatch(showModalError({
-            title: "Failed to load jobs",
-            description: error?.response?.data?.message ?? error?.message ?? "Unknown error",
+            title: "Failed to load job list",
+            description: error?.response?.data?.message ?? error?.message ?? "Something went wrong while retrieving the job list. Please try again or contact support if the problem continues.",
           }));
           return { error: { status: error?.response?.status, data: error?.response?.data } };
         }
@@ -300,6 +317,10 @@ export const jobApiSlice = createApi({
           const res = await axios.get(`${JOB_BASE}/access-groups`, { headers: getHeaders() });
           return { data: res.data };
         } catch (error) {
+          api.dispatch(showModalError({
+            title: "Could not load job groups",
+            description: "Job group names are temporarily unavailable. Group IDs may appear in the table instead. Please refresh the page or contact support if the issue persists.",
+          }));
           return { error: { status: error?.response?.status, data: error?.response?.data } };
         }
       },

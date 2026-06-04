@@ -1,12 +1,11 @@
 import moment from "moment";
-import { Form, Tooltip } from "antd";
-import { EyeOutlined } from "@ant-design/icons";
+import { Form } from "antd";
 import NxTabs from "../../../../../../../../components/Nx/NxTabs";
 import NxBaseContainer from "../../../../../../../../components/Nx/NxBaseContainer";
 import NxDetailText from "../../../../../../../../components/Nx/NxDetailText";
 import NxTable from "../../../../../../../../components/Nx/NxTable";
 import NxApprovalInput from "../../../../../../../../components/Nx/NxApprovalInput";
-import { previewFileAttachment } from "../../../../../../../../utils/previewFileAttachment";
+import NxAttachmentInput from "../../../../../../../../components/Nx/NxAttachmentInput";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -113,9 +112,7 @@ const ContactTab = ({ form }) => {
 // ---------------------------------------------------------------------------
 // Tab: Pre-Requisite
 // ---------------------------------------------------------------------------
-const PreRequisiteTab = ({ form }) => {
-  const prereqs = form?.getFieldValue("srFormPreRequisites") || [];
-
+const PreRequisiteTab = ({ prerequisites }) => {
   const columns = [
     { title: "NO", key: "no", render: (_, __, idx) => idx + 1, width: 60, align: "center" },
     { title: "TYPE", dataIndex: "type", key: "type" },
@@ -129,7 +126,7 @@ const PreRequisiteTab = ({ form }) => {
         idTable="confirm-prereq-table"
         usePagination={false}
         useSelect={false}
-        dataMain={prereqs}
+        dataMain={prerequisites}
         columnMain={columns}
         tableScrolled={{ x: "max-content", y: 400 }}
       />
@@ -140,46 +137,19 @@ const PreRequisiteTab = ({ form }) => {
 // ---------------------------------------------------------------------------
 // Tab: Attachment
 // ---------------------------------------------------------------------------
-const AttachmentTab = ({ attachmentsData }) => {
-  const columns = [
-    { title: "NO", key: "no", render: (_, __, idx) => idx + 1, width: 60, align: "center" },
-    { title: "CATEGORY", dataIndex: "fileCategoryName", key: "fileCategoryName" },
-    { title: "FILE NAME", dataIndex: "fileName", key: "fileName" },
-    {
-      title: "FILE SIZE",
-      dataIndex: "fileSize",
-      key: "fileSize",
-      render: (v) => v || "-",
-    },
-    {
-      title: "ACTION",
-      key: "action",
-      align: "center",
-      width: 80,
-      render: (_, record) => (
-        <Tooltip title="Preview">
-          <EyeOutlined
-            style={{ fontSize: "20px", color: "#0075bf", cursor: "pointer" }}
-            onClick={() => previewFileAttachment(record.base64 || record.urlFile1)}
-          />
-        </Tooltip>
-      ),
-    },
-  ];
+const noop = () => () => {};
 
-  return (
-    <NxBaseContainer border header="ATTACHMENT INFORMATION">
-      <NxTable
-        idTable="confirm-attachment-table"
-        usePagination={false}
-        useSelect={false}
-        dataMain={attachmentsData}
-        columnMain={columns}
-        tableScrolled={{ x: "max-content", y: 400 }}
-      />
-    </NxBaseContainer>
-  );
-};
+const AttachmentTab = ({ attachmentsData, service, configApplication }) => (
+  <NxBaseContainer border header="ATTACHMENT INFORMATION">
+    <NxAttachmentInput
+      data={attachmentsData}
+      type="confirmation"
+      service={service}
+      configApplication={configApplication}
+      getAPIGuard={noop}
+    />
+  </NxBaseContainer>
+);
 
 // ---------------------------------------------------------------------------
 // Main Tabs Component
@@ -189,9 +159,12 @@ const ConfirmationModalTabs = ({
   dropdowns,
   approvalTableData,
   attachmentsData,
+  prerequisites = [],
   activeTab,
   setActiveTab,
   disabled,
+  service,
+  configApplication,
 }) => {
   const tabOptions = [
     {
@@ -207,7 +180,7 @@ const ConfirmationModalTabs = ({
     {
       key: 2,
       label: "Pre-Requisite",
-      children: <PreRequisiteTab form={form} />,
+      children: <PreRequisiteTab prerequisites={prerequisites} />,
     },
     {
       key: 3,
@@ -225,7 +198,13 @@ const ConfirmationModalTabs = ({
     {
       key: 4,
       label: "Attachment",
-      children: <AttachmentTab attachmentsData={attachmentsData} />,
+      children: (
+        <AttachmentTab
+          attachmentsData={attachmentsData}
+          service={service}
+          configApplication={configApplication}
+        />
+      ),
     },
   ].map((tab) => ({ ...tab, disabled }));
 

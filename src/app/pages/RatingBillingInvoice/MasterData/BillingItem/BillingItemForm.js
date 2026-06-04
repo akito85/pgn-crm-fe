@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { debounce } from "lodash";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Form, Spin } from "antd";
@@ -214,6 +215,19 @@ const BillingItemForm = (props) => {
     dispatch(getClassificationTypeList());
     dispatch(getAccountTypeList());
   }, [dispatch]);
+
+  const handleSearchGLAccount = useCallback(
+    debounce((searchValue) => {
+      dispatch(getGLAccountList({ search: searchValue }));
+    }, 350),
+    [dispatch],
+  );
+
+  useEffect(() => {
+    return () => {
+      handleSearchGLAccount.cancel();
+    };
+  }, [handleSearchGLAccount]);
 
   const isReceiptMethodType = useCallback(
     (typeValue) => {
@@ -455,6 +469,7 @@ const BillingItemForm = (props) => {
   const handleSetDataUpdate = useCallback(
     (dataDetail, dataCompare = null) => {
       setStartDate(moment(dataDetail?.startDate));
+      setEndDate(dataDetail?.endDate ? moment(dataDetail?.endDate) : null);
       setSelectedHierarchy(dataDetail?.approvalHierarchy);
       const typeId = resolveTypeId(dataDetail?.transMappingType);
 
@@ -1454,6 +1469,7 @@ const BillingItemForm = (props) => {
               disabledCriteriaColumns={[]}
               isBank={checkedBank}
               data_glAccountBankList={data_glAccountBankList}
+              onSearchGLAccount={handleSearchGLAccount}
               onTabChange={() => {
                 setDetailMapping(false);
                 setCategory("");
@@ -1551,6 +1567,8 @@ const BillingItemForm = (props) => {
               allData={allDataDetailTable}
               dataAttachment={listDataAttachment}
               dataConfirm={dataSend}
+              dataCriteriaTable={dataCriteriaTable}
+              dataMappingItemTable={dataMappingItemTable}
               dataApproval={selectedHierarchy}
               dataApprovalTable={appHierDataDetail}
               listApproval={appHierOptions}

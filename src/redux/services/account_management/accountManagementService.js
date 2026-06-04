@@ -100,6 +100,17 @@ const updateData = async (url, data) => {
   }
 };
 
+const patchData = async (url, data) => {
+  try {
+    const response = await axios.patch(configApp.ACCOUNT_SERVICE + url, data, {
+      headers: tokenHeader(),
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+}
+
 const updateDataWithMethodPost = async (url, data, options = {}) => {
   const { headers = {} } = options;
 
@@ -212,6 +223,7 @@ const accountManagementService = {
   downloadData,
   createData,
   updateData,
+  patchData,
   deleteData,
   getDetailByIdBody,
   activationWithRemark,

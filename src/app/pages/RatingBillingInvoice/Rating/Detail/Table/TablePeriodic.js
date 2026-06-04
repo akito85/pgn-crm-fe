@@ -67,7 +67,7 @@ export const columnsPeriodic = (
         "totalEstUsage",
         hasValue(search["totalEstUsage"]),
         searchText,
-        text ? text.toLocaleString('en-US', { minimumFractionDigits: 3 }) : "-",
+        text ? text.toLocaleString('en-US', { minimumFractionDigits: 3 }) : "",
         false,
         "input",
         search
@@ -95,7 +95,7 @@ export const columnsPeriodic = (
         "totalEstAmount",
         hasValue(search["totalEstAmount"]),
         searchText,
-        text ? text.toLocaleString('en-US', { minimumFractionDigits: 3 }) : "-",
+        text ? text.toLocaleString('en-US', { minimumFractionDigits: 3 }) : "",
         false,
         "input",
         search
@@ -123,7 +123,7 @@ export const columnsPeriodic = (
         "accMinContract",
         hasValue(search["accMinContract"]),
         searchText,
-        text ? text.toLocaleString('en-US', { minimumFractionDigits: 3 }) : "-",
+        text ? text.toLocaleString('en-US', { minimumFractionDigits: 3 }) : "",
         false,
         "input",
         search
@@ -151,7 +151,7 @@ export const columnsPeriodic = (
         "accMaxContract",
         hasValue(search["accMaxContract"]),
         searchText,
-        text ? text.toLocaleString('en-US', { minimumFractionDigits: 3 }) : "-",
+        text ? text.toLocaleString('en-US', { minimumFractionDigits: 3 }) : "",
         false,
         "input",
         search
@@ -179,7 +179,7 @@ export const columnsPeriodic = (
         "adjustmentUsage",
         hasValue(search["adjustmentUsage"]),
         searchText,
-        text ? text.toLocaleString('en-US', { minimumFractionDigits: 3 }) : "-",
+        text ? text.toLocaleString('en-US', { minimumFractionDigits: 3 }) : "",
         false,
         "input",
         search

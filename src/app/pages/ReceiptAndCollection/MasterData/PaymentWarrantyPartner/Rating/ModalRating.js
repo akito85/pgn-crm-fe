@@ -280,19 +280,19 @@ const ModalRating = ({
               <div style={{ display: valuePage !== "Rating" ? "none" : undefined }}>
                 <p className="text-primary uppercase font-bold mb-4">RATING INFORMATION</p>
                 <div className="grid grid-cols-5 gap-4">
-                  <DetailText label="Rating">{DOMPurify.sanitize(form.getFieldValue("rating")) || "-"}</DetailText>
-                  <DetailText label="Criteria">{DOMPurify.sanitize(form.getFieldValue("criteria")) || "-"}</DetailText>
+                  <DetailText label="Rating">{DOMPurify.sanitize(form.getFieldValue("rating")) || ""}</DetailText>
+                  <DetailText label="Criteria">{DOMPurify.sanitize(form.getFieldValue("criteria")) || ""}</DetailText>
                   <DetailText label="Rating date">{form.getFieldValue("ratingDate") ? renderDateConverter(form.getFieldValue("ratingDate")) : "-"}</DetailText>
                   <DetailText label="Start date">{form.getFieldValue("startDate") ? renderDateConverter(form.getFieldValue("startDate")) : "-"}</DetailText>
                   <DetailText label="End date">{form.getFieldValue("endDate") ? renderDateConverter(form.getFieldValue("endDate")) : "-"}</DetailText>
-                  <DetailText label="Rating Issuer">{DOMPurify.sanitize(form.getFieldValue("ratingIssuer")) || "-"}</DetailText>
+                  <DetailText label="Rating Issuer">{DOMPurify.sanitize(form.getFieldValue("ratingIssuer")) || ""}</DetailText>
                   <DetailText label="RBC min 120%">{form.getFieldValue("rbc") ? `${form.getFieldValue("rbc").toLocaleString('id-ID')} %` : "-"}</DetailText>
                   <DetailText label="Equity At Least Rp200M">{form.getFieldValue("equity") ? `Rp ${form.getFieldValue("equity").toLocaleString('id-ID')}` : "-"}</DetailText>
                   <DetailText label="10X Collateral Value Asset">{form.getFieldValue("collateralValueAsset") ? form.getFieldValue("collateralValueAsset").toLocaleString('id-ID') : "-"}</DetailText>
                   <div></div>
                   <div className="col-span-1"></div>
                   <div className="col-span-5">
-                    <DetailText label="Description">{DOMPurify.sanitize(form.getFieldValue("description")) || "-"}</DetailText>
+                    <DetailText label="Description">{DOMPurify.sanitize(form.getFieldValue("description")) || ""}</DetailText>
                   </div>
                 </div>
               </div>

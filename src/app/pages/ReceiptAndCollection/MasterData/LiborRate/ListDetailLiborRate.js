@@ -2,8 +2,11 @@ import { Spin, Tabs } from "antd";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
+import moment from "moment";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import DetailLiborRate from "./DetailLiborRate";
+import CardContainerNoBorder from "../../../../../components/CardContainerNoBorder";
+import LogHistoryInfo from "../../../../../components/LogHistoryInfo";
 import {
   getDetailRateIndex,
   approveOrRejectRateIndex,
@@ -27,7 +30,7 @@ const ListDetailLiborRate = () => {
   const [modalApprove, setModalApprove] = useState(false);
   const [approveOrReject, setApproveOrReject] = useState("");
   const [loadingConfirm, setLoadingConfirm] = useState(false);
-  const [segmentedPage, setSegmentedPage] = useState("Libor Rate");
+  const [segmentedPage, setSegmentedPage] = useState("Detail");
 
   useEffect(() => {
     if (id) {
@@ -84,31 +87,53 @@ const ListDetailLiborRate = () => {
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <div className="mt-5">
-          <Tabs
-            activeKey={segmentedPage}
-            onChange={setSegmentedPage}
-            items={[
-              {
-                label: "Libor Rate",
-                key: "Libor Rate",
-                children: <DetailLiborRate data={data_detail} />,
-              },
-              {
-                label: "Attachment",
-                key: "Attachment",
-                children: (
-                  <BaseContainer header={"ATTACHMENT INFORMATION"}>
-                    <AttachmentComponent
-                      type={"detail"}
-                      data={data_detail?.attachmentDtoList || []}
-                      typeSelector="liborRate"
-                      service={receiptCollectionHttpService}
-                      configApplication={configApp.PAYMENT_SERVICE}
-                    />
-                  </BaseContainer>
-                ),
-              },
-            ]}
+          <CardContainerNoBorder
+            header="LIBOR RATE DETAIL"
+            className="mt-5 !border-[1.5px] !border-[#0075bf] !rounded-md !bg-white !shadow-none"
+            noPadding
+            collapsible={true}
+            defaultExpanded={true}
+          >
+            <div className="full-width-tabs">
+              <Tabs
+                activeKey={segmentedPage}
+                onChange={setSegmentedPage}
+                items={[
+                  {
+                    label: "Detail",
+                    key: "Detail",
+                    children: <DetailLiborRate data={data_detail} />,
+                  },
+                  {
+                    label: "Attachment",
+                    key: "Attachment",
+                    children: (
+                      <BaseContainer header={"ATTACHMENT INFORMATION"}>
+                        <div className="p-5">
+                          <AttachmentComponent
+                            type={"detail"}
+                            data={data_detail?.attachmentDtoList || []}
+                            typeSelector="liborRate"
+                            service={receiptCollectionHttpService}
+                            configApplication={configApp.PAYMENT_SERVICE}
+                          />
+                        </div>
+                      </BaseContainer>
+                    ),
+                  },
+                ]}
+              />
+            </div>
+          </CardContainerNoBorder>
+
+          <LogHistoryInfo
+            data={{
+              recordId: data_detail?.rateIndex?.id || "",
+              createdDate: data_detail?.rateIndex?.createdDate ? moment(data_detail?.rateIndex?.createdDate).format("DD MMM YYYY HH:mm:ss") : "-",
+              createdBy: data_detail?.rateIndex?.createdBy || "",
+              updatedDate: data_detail?.rateIndex?.updatedDate ? moment(data_detail?.rateIndex?.updatedDate).format("DD MMM YYYY HH:mm:ss") : "-",
+              updatedBy: data_detail?.rateIndex?.updatedBy || ""
+            }}
           />
         </div>
       </Spin>

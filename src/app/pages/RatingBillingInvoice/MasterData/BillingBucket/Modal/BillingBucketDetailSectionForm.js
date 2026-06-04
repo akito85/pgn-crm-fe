@@ -109,6 +109,18 @@ const EditableCell = ({
             type="number"
             controls={false}
             style={{ width: "100%" }}
+            min={1}
+            max={999}
+            precision={0}
+            onKeyDown={(e) => {
+              const allowedKeys = ["Backspace", "Delete", "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Tab"];
+              if (allowedKeys.includes(e.key)) return;
+              const currentVal = String(e.currentTarget.value).replace(/\D/g, "");
+              const hasSelection = e.currentTarget.selectionStart !== e.currentTarget.selectionEnd;
+              if (!hasSelection && currentVal.length >= 3) {
+                e.preventDefault();
+              }
+            }}
           />
         );
       case "startDate":

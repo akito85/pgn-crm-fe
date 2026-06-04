@@ -52,7 +52,7 @@ import ProductDistributionForm from "../../app/pages/AccountManagement/CustomerA
 import PaymentRelationDetail from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/FinancialInformation/PaymentRelation/Details/PaymentRelationDetail"; 
 import CreateUpdatePaymentRelation from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/FinancialInformation/PaymentRelation/CreateUpdate/CreateUpdatePaymentRelation"
 
-import CreateCustomerServiceRequest from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/ServiceRequest/Create/CreateCustomerServiceRequest";
+import CreateUpdateCustomerServiceRequest from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/ServiceRequest/Create/CreateUpdateCustomerServiceRequest";
 import CustomerServiceRequestDetails from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/ServiceRequest/Details/CustomerServiceRequestDetails";
 import PreRequisiteCreateForm from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/ServiceRequest/Create/StepContents/PreRequisiteForm/Create";
 
@@ -62,7 +62,7 @@ import MultiDestinationDetail from "../../app/pages/AccountManagement/CustomerAc
 import CreateUpdateMultiDestination from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/MultiDestination/CreateUpdate/CreateUpdateMultiDestination";
 import CreateUpdateRelationship from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/Relationship/CreateUpdate/CreateUpdateRelationship";
 import GasDeposit from "../../app/pages/AccountManagement/GasDeposit/GasDeposit";
-import GasDepositDetail from "../../app/pages/AccountManagement/GasDeposit/Detail/GasDepositDetail";
+// import GasDepositDetail from "../../app/pages/AccountManagement/GasDeposit/Detail/GasDepositDetail";
 
 export const ACCOUNT_MANAGEMENT_ELEMENTS = {
   // Customer/Account List
@@ -110,8 +110,8 @@ export const ACCOUNT_MANAGEMENT_ELEMENTS = {
 
   // Service Request Detail
   VIEW_DETAIL_SERVICE_REQUEST_PAGE: <CustomerServiceRequestDetails />,
-  CREATE_SERVICE_REQUEST_PAGE: <CreateCustomerServiceRequest />,
-  // UPDATE_SERVICE_REQUEST_PAGE: <UpdateCustomerServiceRequest />,
+  CREATE_SERVICE_REQUEST_PAGE: <CreateUpdateCustomerServiceRequest formType={"create"} />,
+  UPDATE_SERVICE_REQUEST_PAGE: <CreateUpdateCustomerServiceRequest formType={"update"} />,
   CREATE_SERVICE_REQUEST_PREREQUISITE_PAGE: <PreRequisiteCreateForm />,
 
   // Payment Relation Detail
@@ -142,10 +142,10 @@ export const ACCOUNT_MANAGEMENT_ELEMENTS = {
   UPLOAD_GAS_SOURCE: <UploadGasSource />,
   
   // Gas Deposit Account Standard
-  VIEW_DETAIL_GAS_DEPOSIT_PAGE: <GasDepositDetail accountType="standard" />,
+  // VIEW_DETAIL_GAS_DEPOSIT_PAGE: <GasDepositDetail accountType="standard" />,
 
   // Gas Deposit Account One Time
-  VIEW_DETAIL_GAS_DEPOSIT_ONETIME_PAGE: <GasDepositDetail accountType="oneTime" />,
+  // VIEW_DETAIL_GAS_DEPOSIT_ONETIME_PAGE: <GasDepositDetail accountType="oneTime" />,
 
   // Multi Destination Account Standard
   VIEW_DETAIL_MULTI_DESTINATION_PAGE: <MultiDestinationDetail accountType="standard" />,

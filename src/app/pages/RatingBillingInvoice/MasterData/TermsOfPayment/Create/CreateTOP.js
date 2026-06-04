@@ -35,6 +35,7 @@ const CreateTOP = ({
   handleStartDate = () => {},
   handleEndDate = () => {},
   disbaledDate,
+  isDraft = false,
 }) => {
   // Dependency Data Criteria
   const handleSelectCriteria = (value) => {
@@ -113,7 +114,7 @@ const CreateTOP = ({
           <Form.Item
             label={"Name"}
             name={"name"}
-            rules={formMessageRequired("Name")}
+            rules={isDraft ? [] : formMessageRequired("Name")}
           >
             <InputComponent
               disabled={status === "Active" ? true : false}
@@ -125,7 +126,7 @@ const CreateTOP = ({
           <Form.Item
             label={"Start Date"}
             name={"startDate"}
-            rules={formMessageRequired("Start Date")}
+            rules={isDraft ? [] : formMessageRequired("Start Date")}
             required
           >
             <DateComponent
@@ -137,16 +138,20 @@ const CreateTOP = ({
           <Form.Item
             label={"End Date"}
             name={"endDate"}
-            rules={[
-              {
-                validator: (_, value) =>
-                  (value && moment(startDate) <= moment(value)) || !value
-                    ? Promise.resolve()
-                    : Promise.reject(
-                        new Error("End date must before Start date"),
-                      ),
-              },
-            ]}
+            rules={
+              isDraft
+                ? []
+                : [
+                    {
+                      validator: (_, value) =>
+                        (value && moment(startDate) <= moment(value)) || !value
+                          ? Promise.resolve()
+                          : Promise.reject(
+                              new Error("End date must before Start date"),
+                            ),
+                    },
+                  ]
+            }
           >
             <DateComponent
               disabled={disbaledDate}
@@ -158,7 +163,7 @@ const CreateTOP = ({
           <Form.Item
             label={"Type"}
             name={"type"}
-            rules={formMessageRequired("Type")}
+            rules={isDraft ? [] : formMessageRequired("Type")}
           >
             <SelectComponent placeholder={"Choose Type"}>
               {dataType?.map((data) => (
@@ -172,7 +177,7 @@ const CreateTOP = ({
           <Form.Item
             label={"Terms"}
             name={"terms"}
-            rules={formMessageRequired("terms")}
+            rules={isDraft ? [] : formMessageRequired("terms")}
           >
             <InputComponent
               onInput={(e) =>

@@ -46,6 +46,14 @@ import CalendarDetail from "../../app/pages/SystemSetup/MasterData/Calendar/Cale
 import DataRequirementTemplateView from "../../app/pages/SystemSetup/DataRequirementTemplate/DataRequirementTemplateView";
 import DataRequirementTemplateDetail from "../../app/pages/SystemSetup/DataRequirementTemplate/DataRequirementTemplateDetail";
 import DataRequirementTemplateForm from "../../app/pages/SystemSetup/DataRequirementTemplate/DataRequirementTemplateForm";
+import ListCollectionTemplate from "../../app/pages/SystemSetup/MasterData/CollectionTemplate/ListCollectionTemplate";
+import CollectionTemplateForm from "../../app/pages/SystemSetup/MasterData/CollectionTemplate/CollectionTemplateForm";
+import PreRequisiteTemplate from "../../app/pages/SystemSetup/PreRequisiteTemplate/PreRequisiteTemplate";
+import PreRequisiteTemplateDetail from "../../app/pages/SystemSetup/PreRequisiteTemplate/Details/PreRequisiteTemplateDetail";
+import CreateUpdatePreRequisiteTemplate from "../../app/pages/SystemSetup/PreRequisiteTemplate/CreateUpdate/CreateUpdatePreRequisiteTemplate";
+import ActivityTemplate from "../../app/pages/SystemSetup/ActivityTemplate/ActivityTemplate";
+import ActivityTemplateDetail from "../../app/pages/SystemSetup/ActivityTemplate/Details/ActivityTemplateDetail";
+import CreateUpdateActivityTemplate from "../../app/pages/SystemSetup/ActivityTemplate/CreateUpdate/CreateUpdateActivityTemplate";
 
 export const SYSTEM_SETUP_ELEMENTS = {
   // menu
@@ -147,9 +155,19 @@ export const SYSTEM_SETUP_ELEMENTS = {
   CREATE_CALENDAR_PAGE: <CalendarForm type="create" />,
   UPDATE_CALENDAR_PAGE: <CalendarForm type="update" />,
 
-  // Data Requirement Template
-  VIEW_DATA_REQUIREMENT_TEMPLATE_PAGE: <DataRequirementTemplateView />,
-  DETAIL_DATA_REQUIREMENT_TEMPLATE_PAGE: <DataRequirementTemplateDetail />,
-  CREATE_DATA_REQUIREMENT_TEMPLATE_PAGE: <DataRequirementTemplateForm type="create" />,
-  UPDATE_DATA_REQUIREMENT_TEMPLATE_PAGE: <DataRequirementTemplateForm type="update" />,
+  // Collection Template
+  VIEW_COLLECTION_TEMPLATE_PAGE: <ListCollectionTemplate />,
+  CREATE_COLLECTION_TEMPLATE_PAGE: <CollectionTemplateForm type="create" />,
+  UPDATE_COLLECTION_TEMPLATE_PAGE: <CollectionTemplateForm type="update" />,
+  // Pre Requisite Template
+  VIEW_PRE_REQUISITE_TEMPLATE_PAGE: <PreRequisiteTemplate />,
+  DETAIL_PRE_REQUISITE_TEMPLATE_PAGE: <PreRequisiteTemplateDetail />,
+  CREATE_PRE_REQUISITE_TEMPLATE_PAGE: <CreateUpdatePreRequisiteTemplate type="create" />,
+  UPDATE_PRE_REQUISITE_TEMPLATE_PAGE: <CreateUpdatePreRequisiteTemplate type="update" />,
+
+  // Activity Template
+  VIEW_ACTIVITY_TEMPLATE_PAGE: <ActivityTemplate />,
+  DETAIL_ACTIVITY_TEMPLATE_PAGE: <ActivityTemplateDetail />,
+  CREATE_ACTIVITY_TEMPLATE_PAGE: <CreateUpdateActivityTemplate type="create" />,
+  UPDATE_ACTIVITY_TEMPLATE_PAGE: <CreateUpdateActivityTemplate type="update" />,
 };

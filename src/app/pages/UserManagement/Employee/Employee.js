@@ -267,87 +267,77 @@ const Employee = () => {
       action: "View",
       type: "table",
       render: (record) => (
-        <Tooltip title="Detail">
-          <Link
-            to={USER_ROUTES.DETAIL_EMPLOYEE}
-            state={{ id: record?.employeeCode }}
-            className="flex flex-col justify-center items-center"
-          >
-            <ViewListIcon />
-          </Link>
-        </Tooltip>
+        <Link
+          to={USER_ROUTES.DETAIL_EMPLOYEE}
+          state={{ id: record?.employeeCode }}
+          className="flex items-center justify-center"
+          style={{ color: "#1976D2" }}
+        >
+          <ViewListIcon />
+        </Link>
       ),
     },
     {
       action: "Update",
       type: "table",
-      render: (record) => (
-        <Tooltip title="Update">
-          <Link
-            to={record?.status === "ACTIVE" ? USER_ROUTES.UPDATE_EMPLOYEE : undefined}
-            state={
-              record?.status === "ACTIVE" ? { id: record?.employeeCode } : undefined
-            }
-          >
-            <ButtonComponent
-              icon={
-                <IconEditNx
-                  color={record?.status === "ACTIVE" ? "#1976D2" : "#C0BEC6"}
-                />
-              }
-              border={false}
-              disabled={record?.status !== "ACTIVE"}
-            />
-          </Link>
-        </Tooltip>
-      ),
+      render: (record) => {
+        const disabled = record?.status !== "ACTIVE";
+        return (
+          <Tooltip title="Update">
+            <div className={`inline-flex items-center ${disabled ? "cursor-not-allowed text-gray-300" : ""}`}>
+              <Link
+                to={!disabled ? USER_ROUTES.UPDATE_EMPLOYEE : undefined}
+                state={!disabled ? { id: record?.employeeCode } : undefined}
+                className={`inline-flex items-center transition-colors duration-200 ${disabled ? "text-gray-300 pointer-events-none" : "text-[#1976D2] hover:text-[#1976D2]"}`}
+              >
+                <IconEditNx width={20} />
+              </Link>
+            </div>
+          </Tooltip>
+        );
+      },
     },
     {
       action: "forward",
       type: "table",
-      render: (record) => (
-        <Tooltip title="Forward Task">
-          <Link
-            to={record?.status === "ACTIVE" ? USER_ROUTES.FORWARD_TASK : undefined}
-            state={
-              record?.status === "ACTIVE" ? { id: record?.employeeCode } : undefined
-            }
-          >
-            <ButtonComponent
-              icon={
-                <IconForwardTask
-                  color={record?.status === "ACTIVE" ? "#1976D2" : "#C0BEC6"}
-                />
-              }
-              border={false}
-              disabled={record?.status !== "ACTIVE"}
-            />
-          </Link>
-        </Tooltip>
-      ),
+      render: (record) => {
+        const disabled = record?.status !== "ACTIVE";
+        return (
+          <Tooltip title="Forward Task">
+            <div className={`inline-flex items-center ${disabled ? "cursor-not-allowed text-gray-300" : ""}`}>
+              <Link
+                to={!disabled ? USER_ROUTES.FORWARD_TASK : undefined}
+                state={!disabled ? { id: record?.employeeCode } : undefined}
+                className={`inline-flex items-center transition-colors duration-200 ${disabled ? "text-gray-300 pointer-events-none" : "text-[#1976D2] hover:text-[#1976D2]"}`}
+              >
+                <IconForwardTask width={20} />
+              </Link>
+            </div>
+          </Tooltip>
+        );
+      },
     },
     {
       action: "terminate",
       type: "table",
-      render: (record) => (
-        <Tooltip title="Terminate">
-          <ButtonComponent
-            icon={
-              <IconTerminate
-                color={record?.status === "ACTIVE" ? "#BE3036" : "#C0BEC6"}
-              />
-            }
-            border={false}
-            disabled={record?.status !== "ACTIVE"}
-            onClick={() => {
-              if (record?.status === "ACTIVE") {
-                setEmpId(record?.employeeId);
-                setModalTerm(true);
-              }
-            }}
-          />
-        </Tooltip>
-      ),
+      render: (record) => {
+        const active = record?.status === "ACTIVE";
+        return (
+          <Tooltip title="Terminate">
+            <span
+              className={`inline-flex items-center transition-colors duration-200 ${active ? "text-[#BE3036] hover:text-[#BE3036] cursor-pointer" : "text-gray-300 cursor-not-allowed"}`}
+              onClick={() => {
+                if (active) {
+                  setEmpId(record?.employeeId);
+                  setModalTerm(true);
+                }
+              }}
+            >
+              <IconTerminate width={20} />
+            </span>
+          </Tooltip>
+        );
+      },
     },
   ], []);
 
