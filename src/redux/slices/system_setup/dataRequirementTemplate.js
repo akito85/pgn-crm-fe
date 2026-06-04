@@ -67,7 +67,7 @@ export const getDataRequirementTemplateByFilter = createAsyncThunk(
   async ({ sourceType, type, category, subCategory }, thunkAPI) => {
     try {
       let url = `/v1/dbs/api/data-requirement/template/detail?sourceType=${sourceType}&type=${type}&category=${category}`;
-      if (sourceType === "SERVICE_REQUEST") {
+      if (subCategory) {
         url += `&subCategory=${subCategory}`;
       }
       const response = await accountManagementService.getAll(url);
