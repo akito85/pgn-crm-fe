@@ -21,6 +21,10 @@ export default function InfoDataRequirement({ form, dropdowns }) {
   const [dataRequirement, setDataRequirement] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalForm] = Form.useForm();
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editRecord, setEditRecord] = useState(null);
+  const [editModalForm] = Form.useForm();
+  const selectedEditType = Form.useWatch("editType", editModalForm);
 
   const type = Form.useWatch("type", form);
   const category = Form.useWatch("category", form);
@@ -90,6 +94,18 @@ export default function InfoDataRequirement({ form, dropdowns }) {
     setIsModalOpen(false);
   };
 
+  const handleEditOpen = (record) => {
+    setEditRecord(record);
+    editModalForm.setFieldsValue({ editType: record.typeId });
+    setIsEditModalOpen(true);
+  };
+
+  const handleEditCancel = () => {
+    setEditRecord(null);
+    editModalForm.resetFields();
+    setIsEditModalOpen(false);
+  };
+
   const handleModalAdd = () => {
     modalForm.validateFields().then((values) => {
       const typeItem = getDropdownItems("serviceRequestDataRequirements").find(
@@ -124,21 +140,38 @@ export default function InfoDataRequirement({ form, dropdowns }) {
       key: "type",
     },
     {
+      title: "Value",
+      dataIndex: "value",
+      key: "value",
+    },
+    {
       title: "ACTION",
       align: "center",
       width: 15,
       fixed: "right",
       render: (_, record) => (
-        <Tooltip title="Delete">
-          <div className="pt-1 cursor-pointer flex justify-center">
-            <SVGIcon
-              name="IconDelete"
-              color={"#BE3036"}
-              width={20}
-              onClick={() => handleDelete(record)}
-            />
-          </div>
-        </Tooltip>
+        <div className="flex gap-4 px-4">
+          <Tooltip title="Edit">
+            <div className="pt-1 cursor-pointer flex justify-center">
+              <SVGIcon
+                name="IconEdit"
+                color={"#1890FF"}
+                width={20}
+                onClick={() => handleEditOpen(record)}
+              />
+            </div>
+          </Tooltip>
+          <Tooltip title="Delete">
+            <div className="pt-1 cursor-pointer flex justify-center">
+              <SVGIcon
+                name="IconDelete"
+                color={"#BE3036"}
+                width={20}
+                onClick={() => handleDelete(record)}
+              />
+            </div>
+          </Tooltip>
+        </div>
       ),
     },
   ];
@@ -206,6 +239,50 @@ export default function InfoDataRequirement({ form, dropdowns }) {
                 />
               </Form.Item>
             </Form>
+          </NxBaseContainer>
+        </div>
+      </NxModal>
+
+      <NxModal
+        isOpen={isEditModalOpen}
+        handleCancel={handleEditCancel}
+        title={"CHOOSE DATA REQUIREMENT"}
+        width={1500}
+        footer={
+          <div className="flex justify-end">
+            <Button type="menu" onClick={handleEditCancel}>Back</Button>
+          </div>
+        }
+      >
+        <div className="p-4 flex flex-col gap-4">
+          <NxBaseContainer border>
+            <Form form={editModalForm} layout="vertical">
+              <Form.Item name="editType" label="Type" className="no-margin-form">
+                <Select
+                  placeholder="Select Type"
+                  options={getDropdownItems("serviceRequestDataRequirements").map((item) => ({
+                    value: item.glbTypeValId?.toString() || item.id?.toString(),
+                    label: item.name || item.glbTypeValName,
+                  }))}
+                />
+              </Form.Item>
+            </Form>
+          </NxBaseContainer>
+
+          <NxBaseContainer border>
+            <NxTable
+              idTable={"ChooseDataRequirement"}
+              usePagination={false}
+              useSelect={false}
+              showAdvanceSearch={false}
+              tableScrolled={{ y: 300, x: "max-content" }}
+              dataSource={[]}
+              columns={[
+                { title: "No", dataIndex: "no", key: "no", align: "center", width: 60 },
+                { title: "Name", dataIndex: "name", key: "name" },
+                { title: "Description", dataIndex: "description", key: "description" },
+              ]}
+            />
           </NxBaseContainer>
         </div>
       </NxModal>

@@ -155,6 +155,12 @@ export const SYSTEM_SETUP_ELEMENTS = {
   CREATE_CALENDAR_PAGE: <CalendarForm type="create" />,
   UPDATE_CALENDAR_PAGE: <CalendarForm type="update" />,
 
+  // Data Requirement Template
+  VIEW_DATA_REQUIREMENT_TEMPLATE_PAGE: <DataRequirementTemplateView />,
+  DETAIL_DATA_REQUIREMENT_TEMPLATE_PAGE: <DataRequirementTemplateDetail />,
+  CREATE_DATA_REQUIREMENT_TEMPLATE_PAGE: <DataRequirementTemplateForm type="create" />,
+  UPDATE_DATA_REQUIREMENT_TEMPLATE_PAGE: <DataRequirementTemplateForm type="update" />,
+
   // Collection Template
   VIEW_COLLECTION_TEMPLATE_PAGE: <ListCollectionTemplate />,
   CREATE_COLLECTION_TEMPLATE_PAGE: <CollectionTemplateForm type="create" />,
