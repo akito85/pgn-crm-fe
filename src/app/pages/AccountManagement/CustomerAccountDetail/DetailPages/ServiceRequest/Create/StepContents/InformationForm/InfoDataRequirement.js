@@ -106,6 +106,26 @@ export default function InfoDataRequirement({ form, dropdowns }) {
     setIsEditModalOpen(false);
   };
 
+  const handleSelectDataRequirement = (row) => {
+    const typeId = selectedEditType || editRecord?.typeId;
+    const typeItem = getDropdownItems("serviceRequestDataRequirements").find(
+      (item) => (item.glbTypeValId?.toString() || item.id?.toString()) === typeId
+    );
+    const updatedData = dataRequirement.map((item) =>
+      item.key === editRecord?.key
+        ? {
+            ...item,
+            typeId,
+            type: typeItem?.name || typeItem?.glbTypeValName || item.type,
+            value: row.value ?? row.name ?? "",
+          }
+        : item
+    );
+    setDataRequirement(updatedData);
+    form.setFieldsValue({ srFormDataRequirements: updatedData });
+    handleEditCancel();
+  };
+
   const handleModalAdd = () => {
     modalForm.validateFields().then((values) => {
       const typeItem = getDropdownItems("serviceRequestDataRequirements").find(
@@ -279,8 +299,25 @@ export default function InfoDataRequirement({ form, dropdowns }) {
               dataSource={[]}
               columns={[
                 { title: "No", dataIndex: "no", key: "no", align: "center", width: 60 },
-                { title: "Name", dataIndex: "name", key: "name" },
-                { title: "Description", dataIndex: "description", key: "description" },
+                { title: "Value", dataIndex: "value", key: "value" },
+                {
+                  title: "Action",
+                  key: "action",
+                  align: "center",
+                  width: 80,
+                  render: (_, row) => (
+                    <Tooltip title="Select">
+                      <div className="pt-1 cursor-pointer flex justify-center">
+                        <SVGIcon
+                          name="IconAddTable"
+                          color={"#1890FF"}
+                          width={20}
+                          onClick={() => handleSelectDataRequirement(row)}
+                        />
+                      </div>
+                    </Tooltip>
+                  ),
+                },
               ]}
             />
           </NxBaseContainer>
