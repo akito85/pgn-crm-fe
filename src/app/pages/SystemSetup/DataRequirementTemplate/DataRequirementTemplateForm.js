@@ -16,6 +16,7 @@ import {
   createDataRequirementTemplate,
   updateDataRequirementTemplate,
   getDataRequirementTemplateDetail,
+  getDataRequirementTypes,
   resetDataRequirementTemplate,
 } from "../../../../redux/slices/system_setup/dataRequirementTemplate";
 import {
@@ -42,7 +43,7 @@ const DataRequirementTemplateForm = ({ type }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { data_detail, loading } = useSelector(
+  const { data_detail, loading, data_requirement_types, loading_requirement_types } = useSelector(
     (state) => state.dataRequirementTemplate
   );
 
@@ -66,6 +67,7 @@ const DataRequirementTemplateForm = ({ type }) => {
     dispatch(getSrCategories());
     dispatch(getSrSubcategories());
     dispatch(getSrWorkOrderTypes());
+    dispatch(getDataRequirementTypes());
   }, [dispatch]);
 
   useEffect(() => {
@@ -374,7 +376,14 @@ const DataRequirementTemplateForm = ({ type }) => {
                 className="no-margin-form"
                 rules={[{ required: true, message: requiredMessage("Type") }]}
               >
-                <InputComponent placeholder="Enter type" />
+                <Select
+                  placeholder="Select type"
+                  loading={loading_requirement_types}
+                  options={(data_requirement_types || []).map((item) => {
+                    const label = item.name || item.glbTypeValName || item;
+                    return { value: label, label };
+                  })}
+                />
               </Form.Item>
             </Form>
           </NxBaseContainer>

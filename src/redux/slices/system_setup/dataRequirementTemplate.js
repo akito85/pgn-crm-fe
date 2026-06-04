@@ -8,10 +8,12 @@ const initialState = {
   data_pagination: null,
   data_detail: null,
   data_filter: null,
+  data_requirement_types: [],
   data_sr_filter_list: [],
   data_sr_filter_pagination: null,
   loading_sr_filter: false,
   loading_filter: false,
+  loading_requirement_types: false,
   loading: false,
   message: "",
   success: false,
@@ -92,6 +94,26 @@ export const getDataRequirementTemplatePaginateBySrFilter = createAsyncThunk(
       const response = await accountManagementService.getPagination(url);
       return { ...response, isLoadMore };
     } catch (response) {
+      return thunkAPI.rejectWithValue(response?.response?.data);
+    }
+  }
+);
+
+export const getDataRequirementTypes = createAsyncThunk(
+  "GET_DATA_REQUIREMENT_TYPES",
+  async (_, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/data-requirement/template/data-requirement-type";
+      const response = await accountManagementService.getAll(url);
+      return response;
+    } catch (response) {
+      thunkAPI.dispatch(
+        validateError({
+          error: response,
+          action: "GET_DATA_REQUIREMENT_TYPES",
+          back: false,
+        })
+      );
       return thunkAPI.rejectWithValue(response?.response?.data);
     }
   }
@@ -341,6 +363,17 @@ const dataRequirementTemplateSlice = createSlice({
         state.loading_sr_filter = false;
         state.data_sr_filter_list = [];
         state.data_sr_filter_pagination = null;
+      })
+      .addCase(getDataRequirementTypes.pending, (state) => {
+        state.loading_requirement_types = true;
+      })
+      .addCase(getDataRequirementTypes.fulfilled, (state, action) => {
+        state.loading_requirement_types = false;
+        state.data_requirement_types = action.payload?.data || [];
+      })
+      .addCase(getDataRequirementTypes.rejected, (state) => {
+        state.loading_requirement_types = false;
+        state.data_requirement_types = [];
       })
       .addCase(createDataRequirementTemplate.pending, (state) => {
         state.loading = true;
