@@ -117,14 +117,16 @@ const DataRequirementTemplateForm = ({ type }) => {
 
   const handleSaveDetail = () => {
     detailForm.validateFields().then((values) => {
+      const typeItem = (data_requirement_types || []).find((item) => item.value === values.type);
+      const enriched = { ...values, typeName: typeItem?.name || values.type };
       if (editingRecord) {
         setDetails((prev) =>
           prev.map((d) =>
-            d.key === editingRecord.key ? { ...d, ...values } : d
+            d.key === editingRecord.key ? { ...d, ...enriched } : d
           )
         );
       } else {
-        setDetails((prev) => [...prev, { ...values, key: Date.now() }]);
+        setDetails((prev) => [...prev, { ...enriched, key: Date.now() }]);
       }
       handleCloseModal();
     });
@@ -170,7 +172,15 @@ const DataRequirementTemplateForm = ({ type }) => {
       align: "center",
       render: (_, __, index) => index + 1,
     },
-    { title: "Type", dataIndex: "type", key: "type" },
+    {
+      title: "Type",
+      key: "type",
+      render: (_, record) => {
+        if (record.typeName) return record.typeName;
+        const found = (data_requirement_types || []).find((item) => item.value === record.type);
+        return found?.name || record.type || "-";
+      },
+    },
     {
       title: "ACTION",
       key: "action",
@@ -379,10 +389,10 @@ const DataRequirementTemplateForm = ({ type }) => {
                 <Select
                   placeholder="Select type"
                   loading={loading_requirement_types}
-                  options={(data_requirement_types || []).map((item) => {
-                    const label = item.name || item.glbTypeValName || item;
-                    return { value: label, label };
-                  })}
+                  options={(data_requirement_types || []).map((item) => ({
+                    value: item.value,
+                    label: item.name,
+                  }))}
                 />
               </Form.Item>
             </Form>

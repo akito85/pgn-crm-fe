@@ -96,7 +96,7 @@ export default function InfoDataRequirement({ form, dropdowns }) {
 
   const handleEditOpen = (record) => {
     setEditRecord(record);
-    editModalForm.setFieldsValue({ editType: record.typeId });
+    editModalForm.setFieldsValue({ editType: record.type });
     setIsEditModalOpen(true);
   };
 
@@ -108,15 +108,12 @@ export default function InfoDataRequirement({ form, dropdowns }) {
 
   const handleSelectDataRequirement = (row) => {
     const typeId = selectedEditType || editRecord?.typeId;
-    const typeItem = getDropdownItems("serviceRequestDataRequirements").find(
-      (item) => (item.glbTypeValId?.toString() || item.id?.toString()) === typeId
-    );
     const updatedData = dataRequirement.map((item) =>
       item.key === editRecord?.key
         ? {
             ...item,
             typeId,
-            type: typeItem?.name || typeItem?.glbTypeValName || item.type,
+            type: typeId,
             value: row.value ?? row.name ?? "",
           }
         : item
@@ -128,14 +125,10 @@ export default function InfoDataRequirement({ form, dropdowns }) {
 
   const handleModalAdd = () => {
     modalForm.validateFields().then((values) => {
-      const typeItem = getDropdownItems("serviceRequestDataRequirements").find(
-        (item) =>
-          (item.glbTypeValId?.toString() || item.id?.toString()) === values.type
-      );
       const newRecord = {
         key: Date.now(),
         no: (dataRequirement.length > 0 ? Math.max(...dataRequirement.map((i) => i.no)) : 0) + 1,
-        type: typeItem?.name || typeItem?.glbTypeValName || values.type,
+        type: values.type,
         typeId: values.type,
       };
       const updatedData = [...dataRequirement, newRecord];
@@ -253,8 +246,8 @@ export default function InfoDataRequirement({ form, dropdowns }) {
                   placeholder="Select Data Requirement Type"
                   loading={getDropdownItems("serviceRequestDataRequirements").length === 0}
                   options={getDropdownItems("serviceRequestDataRequirements").map((item) => ({
-                    value: item.glbTypeValId?.toString() || item.id?.toString(),
-                    label: item.name || item.glbTypeValName,
+                    value: item.name,
+                    label: item.name,
                   }))}
                 />
               </Form.Item>
@@ -281,8 +274,8 @@ export default function InfoDataRequirement({ form, dropdowns }) {
                 <Select
                   placeholder="Select Type"
                   options={getDropdownItems("serviceRequestDataRequirements").map((item) => ({
-                    value: item.glbTypeValId?.toString() || item.id?.toString(),
-                    label: item.name || item.glbTypeValName,
+                    value: item.name,
+                    label: item.name,
                   }))}
                 />
               </Form.Item>
