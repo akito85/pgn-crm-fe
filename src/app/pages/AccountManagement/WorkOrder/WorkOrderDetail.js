@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate, useLocation } from "react-router-dom";
 import { Button, Spin } from "antd";
 import { LeftOutlined } from "@ant-design/icons";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
@@ -15,6 +14,8 @@ import HeaderDetail from "../CustomerAccountDetail/HeaderDetail";
 import StatusComponent from "../../../../components/StatusComponent";
 import WoStatusUpdateModal from "./WoStatusUpdateModal";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../routes/account_management/customer_account_routes";
+import useWoContext from "../shared/WorkOrder/hooks/useWoContext";
+import useWoNavigation from "../shared/WorkOrder/hooks/useWoNavigation";
 import {
   getWorkOrder,
   getWoActivities,
@@ -63,10 +64,8 @@ const PAGE_SIZE = 50;
 
 const WorkOrderDetail = () => {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  const { woId, idAccount, idCustomer, accountType } = location.state || {};
+  const woContext = useWoContext();
+  const { goBack, goToUpdate } = useWoNavigation(woContext);
 
   const {
     detail_workOrder,
@@ -95,34 +94,34 @@ const WorkOrderDetail = () => {
   const closeStatusModal = () => setStatusModal({ open: false, toStatus: null });
 
   useEffect(() => {
-    if (woId) {
+    if (woContext.woId) {
       dispatch(clearWoActivities());
       dispatch(clearWoDataRequirements());
-      dispatch(getWorkOrder({ woId, accountId: idAccount }));
-      dispatch(getWoActivities({ woId, body: { page: 1, size: PAGE_SIZE, filters: [], filterRules: [] }, isLoadMore: false }));
-      dispatch(getWoDataRequirements({ woId, body: { page: 1, size: 100, filters: [], filterRules: [] }, isLoadMore: false }));
-      dispatch(getWoAttachments({ accountId: idAccount, woId }));
-      dispatch(getWoProgress(woId));
+      dispatch(getWorkOrder({ woId: woContext.woId, accountId: woContext.accountId }));
+      dispatch(getWoActivities({ woId: woContext.woId, body: { page: 1, size: PAGE_SIZE, filters: [], filterRules: [] }, isLoadMore: false }));
+      dispatch(getWoDataRequirements({ woId: woContext.woId, body: { page: 1, size: 100, filters: [], filterRules: [] }, isLoadMore: false }));
+      dispatch(getWoAttachments({ accountId: woContext.accountId, woId: woContext.woId }));
+      dispatch(getWoProgress(woContext.woId));
       setActivityPage(1);
     }
-  }, [dispatch, woId, idAccount]);
+  }, [dispatch, woContext.woId, woContext.accountId]);
 
   useEffect(() => {
-    if (idAccount && accountType) {
-      if (accountType === "standard") {
-        dispatch(getAccountStandardDetail({ idCustomer, idAccount }));
+    if (woContext.accountId && woContext.accountType) {
+      if (woContext.accountType === "standard") {
+        dispatch(getAccountStandardDetail({ idCustomer: woContext.idCustomer, idAccount: woContext.accountId }));
       } else {
-        dispatch(getAccountOneTimeDetail({ idCustomer, idAccount }));
+        dispatch(getAccountOneTimeDetail({ idCustomer: woContext.idCustomer, idAccount: woContext.accountId }));
       }
     }
-  }, [dispatch, idAccount, idCustomer, accountType]);
+  }, [dispatch, woContext.accountId, woContext.idCustomer, woContext.accountType]);
 
   const hasMoreActivities = list_woActivities.length < (pagination_woActivities.totalElement || 0);
 
   const handleLoadMoreActivities = () => {
     const nextPage = activityPage + 1;
     if (nextPage <= (pagination_woActivities.totalPage || 0)) {
-      dispatch(getWoActivities({ woId, body: { page: nextPage, size: PAGE_SIZE, filters: [], filterRules: [] }, isLoadMore: true }));
+      dispatch(getWoActivities({ woId: woContext.woId, body: { page: nextPage, size: PAGE_SIZE, filters: [], filterRules: [] }, isLoadMore: true }));
       setActivityPage(nextPage);
     }
   };
@@ -133,12 +132,12 @@ const WorkOrderDetail = () => {
   const approvalStatus = (wo?.approvalStatus || "").toUpperCase();
 
   const handleStatusSubmit = ({ toStatus, remark, cancelApphierId }) => {
-    dispatch(updateWoStatus({ accountId: idAccount, woId, toStatus, remark, cancelApphierId }))
+    dispatch(updateWoStatus({ accountId: woContext.accountId, woId: woContext.woId, toStatus, remark, cancelApphierId }))
       .unwrap()
       .then(() => {
         closeStatusModal();
-        dispatch(getWorkOrder({ woId, accountId: idAccount }));
-        dispatch(getWoProgress(woId));
+        dispatch(getWorkOrder({ woId: woContext.woId, accountId: woContext.accountId }));
+        dispatch(getWoProgress(woContext.woId));
       })
       .catch(() => {});
   };
@@ -167,11 +166,7 @@ const WorkOrderDetail = () => {
     const btnEdit = (
       <Button
         type="submit"
-        onClick={() =>
-          navigate(ACCOUNT_MANAGEMENT_ROUTES.UPDATE_WORK_ORDER, {
-            state: { woContext: { type: "standalone", idAccount, idCustomer, accountType, isUpdate: true, woId } },
-          })
-        }
+        onClick={() => goToUpdate(woContext.woId)}
       >
         Edit
       </Button>
@@ -304,13 +299,13 @@ const WorkOrderDetail = () => {
         <NxBreadCrumb routes={routes} />
 
         <div className="my-5 flex flex-col gap-4">
-          {idAccount && (
+          {woContext.accountId && (
             <HeaderDetail
               data_header={["CUSTOMER INFORMATION", "ACCOUNT INFORMATION"]}
               dispatch={dispatch}
-              idAccount={idAccount}
-              idCustomer={idCustomer}
-              type={accountType}
+              idAccount={woContext.accountId}
+              idCustomer={woContext.idCustomer}
+              type={woContext.accountType}
               collapsible={true}
             />
           )}
@@ -341,7 +336,7 @@ const WorkOrderDetail = () => {
 
         <NxBaseContainer border className="mb-5">
           <div className="flex justify-between items-center">
-            <Button icon={<LeftOutlined />} onClick={() => navigate(-1)}>
+            <Button icon={<LeftOutlined />} onClick={goBack}>
               Back
             </Button>
             <div className="flex gap-2">
