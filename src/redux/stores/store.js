@@ -160,6 +160,7 @@ import { jobApiSlice } from "../slices/job_management/jobApiSlice";
 import { jobGroupApiSlice } from "../slices/job_management/jobGroupApiSlice";
 import dataRequirementTemplateReducer from "../slices/system_setup/dataRequirementTemplate";
 import srDataRequirementContactReducer from "../slices/account_management/detailAccount/srDataRequirementContactSlice";
+import srDataRequirementAddressReducer from "../slices/account_management/detailAccount/srDataRequirementAddressSlice";
 import auditTrailReducer from "../slices/user_management/audit_trail";
 import preRequisiteTemplateReducer from "../slices/system_setup/preRequisiteTemplate";
 import activityTemplateReducer from "../slices/system_setup/activityTemplate";
@@ -196,6 +197,7 @@ const reducer = combineReducers({
   general: generalReducer,
   dataRequirementTemplate: dataRequirementTemplateReducer,
   srDataRequirementContact: srDataRequirementContactReducer,
+  srDataRequirementAddress: srDataRequirementAddressReducer,
   position_hierarchy: positionHierarchyReducer,
   // menu: menuReducer
   // generate_password : generatePasswordReducer,

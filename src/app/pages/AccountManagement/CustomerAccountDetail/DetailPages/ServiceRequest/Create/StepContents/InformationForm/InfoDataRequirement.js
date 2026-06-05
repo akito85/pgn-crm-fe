@@ -14,11 +14,13 @@ import {
   resetDataRequirementTemplate,
 } from "../../../../../../../../../redux/slices/system_setup/dataRequirementTemplate";
 import { getSrDataRequirementContacts } from "../../../../../../../../../redux/slices/account_management/detailAccount/srDataRequirementContactSlice";
+import { getSrDataRequirementAddress } from "../../../../../../../../../redux/slices/account_management/detailAccount/srDataRequirementAddressSlice";
 
 export default function InfoDataRequirement({ form, dropdowns, idAccount }) {
   const dispatch = useDispatch();
   const { data_filter, loading_filter } = useSelector((state) => state.dataRequirementTemplate);
   const { data: data_contacts, loading: loading_contacts } = useSelector((state) => state.srDataRequirementContact);
+  const { data: data_address, loading: loading_address } = useSelector((state) => state.srDataRequirementAddress);
 
   const [dataRequirement, setDataRequirement] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -70,23 +72,33 @@ export default function InfoDataRequirement({ form, dropdowns, idAccount }) {
     }
   }, [data_filter]);
 
-  // Fetch contact list when user selects "Contact" type in edit modal
+  // Fetch data when user selects "Contact" or "Address" type in edit modal
   useEffect(() => {
-    if (selectedEditType?.toLowerCase() === "contact" && idAccount) {
-      dispatch(getSrDataRequirementContacts(idAccount));
-    }
+    if (!idAccount) return;
+    const type = selectedEditType?.toLowerCase();
+    if (type === "contact") dispatch(getSrDataRequirementContacts(idAccount));
+    if (type === "address") dispatch(getSrDataRequirementAddress(idAccount));
   }, [selectedEditType, idAccount]);
 
   // Build selectable rows for the choose table
   const chooseTableData = useMemo(() => {
-    if (selectedEditType?.toLowerCase() !== "contact") return [];
-    const result = Array.isArray(data_contacts) ? data_contacts : [];
-    return result.map((item, index) => ({
+    const type = selectedEditType?.toLowerCase();
+    let source = [];
+    if (type === "contact") source = Array.isArray(data_contacts) ? data_contacts : [];
+    else if (type === "address") source = Array.isArray(data_address) ? data_address : [];
+    return source.map((item, index) => ({
       key: index,
       no: index + 1,
       value: item.value,
     }));
-  }, [data_contacts, selectedEditType]);
+  }, [data_contacts, data_address, selectedEditType]);
+
+  const isChooseTableLoading = useMemo(() => {
+    const type = selectedEditType?.toLowerCase();
+    if (type === "contact") return loading_contacts;
+    if (type === "address") return loading_address;
+    return false;
+  }, [selectedEditType, loading_contacts, loading_address]);
 
   const getDropdownItems = (dropdownKey) => {
     const dropdown = dropdowns?.[dropdownKey];
@@ -310,7 +322,7 @@ export default function InfoDataRequirement({ form, dropdowns, idAccount }) {
               showAdvanceSearch={false}
               tableScrolled={{ y: 300, x: "max-content" }}
               dataSource={chooseTableData}
-              loading={selectedEditType?.toLowerCase() === "contact" && loading_contacts}
+              loading={isChooseTableLoading}
               columns={[
                 { title: "No", dataIndex: "no", key: "no", align: "center", width: 60 },
                 { title: "Value", dataIndex: "value", key: "value" },
