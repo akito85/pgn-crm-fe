@@ -8,11 +8,6 @@ const initialState = {
   pagination_listWo: { totalPage: 0, totalElement: 0, currentPage: 0, pageSize: 10 },
   loading_listWo: false,
 
-  // SR-scoped WO list
-  list_woSrWorkOrders: [],
-  pagination_woSrWorkOrders: { totalPage: 0, totalElement: 0, currentPage: 0, pageSize: 10 },
-  loading_listWoSrWorkOrders: false,
-
   // Approval
   list_woApprovals: [],
   pagination_listWoApprovals: { totalPage: 0, totalElement: 0 },
@@ -86,25 +81,10 @@ export const getWorkOrders = createAsyncThunk(
   "GET_WORK_ORDERS",
   async ({ accountId, body, isLoadMore }, thunkAPI) => {
     try {
-      const response = await accountManagementService.updateDataWithMethodPost(
-        `/v1/dbs/api/accounts/${accountId}/workorders/list`,
-        body
-      );
-      return { ...response.data, isLoadMore };
-    } catch (error) {
-      return thunkAPI.rejectWithValue(error?.response);
-    }
-  }
-);
-
-export const getWoSrList = createAsyncThunk(
-  "GET_WO_SR_LIST",
-  async ({ accountId, srId, body, isLoadMore }, thunkAPI) => {
-    try {
-      const response = await accountManagementService.updateDataWithMethodPost(
-        `/v1/dbs/api/accounts/${accountId}/servicerequests/${srId}/workorders/list`,
-        body
-      );
+      const url = accountId
+        ? `/v1/dbs/api/accounts/${accountId}/workorders/list`
+        : `/v1/dbs/api/workorders/list`;
+      const response = await accountManagementService.updateDataWithMethodPost(url, body);
       return { ...response.data, isLoadMore };
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
@@ -488,23 +468,6 @@ const workOrderSlice = createSlice({
         state.pagination_listWo = { totalPage: 0, totalElement: 0, currentPage: 0, pageSize: 10 };
       }
     },
-
-    // getWoSrList
-    [getWoSrList.pending]: (state, action) => {
-      if (!action.meta.arg?.isLoadMore) state.loading_listWoSrWorkOrders = true;
-    },
-    [getWoSrList.fulfilled]: (state, action) => {
-      state.loading_listWoSrWorkOrders = false;
-      const { items, totalPage, totalElement, currentPage, pageSize } = extractListData(action.payload);
-      if (action.payload?.isLoadMore) {
-        const ids = new Set(state.list_woSrWorkOrders.map((i) => i.id));
-        state.list_woSrWorkOrders = [...state.list_woSrWorkOrders, ...items.filter((i) => !ids.has(i.id))];
-      } else {
-        state.list_woSrWorkOrders = items;
-      }
-      state.pagination_woSrWorkOrders = { totalPage, totalElement, currentPage, pageSize };
-    },
-    [getWoSrList.rejected]: (state) => { state.loading_listWoSrWorkOrders = false; },
 
     // getWorkOrder
     [getWorkOrder.pending]: (state) => { state.loading_detailWo = true; },
