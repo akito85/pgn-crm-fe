@@ -1,5 +1,6 @@
 import { Tabs, Button, Tooltip } from "antd";
 import NxTable from "../../../../../../../components/Nx/NxTable";
+import NxTableNested from "../../../../../../../components/Nx/NxTableNested";
 import NxDetailText from "../../../../../../../components/Nx/NxDetailText";
 import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
 import NxDate from "../../../../../../../components/Nx/NxDatePicker";
@@ -23,9 +24,25 @@ const attachmentColumns = [
   },
 ];
 
+const APPROVAL_PARENT_COLS = [
+  { key: "no",            title: "NO",        width: 60,  align: "center", render: (_, __, i) => i + 1 },
+  { key: "approvalLevel", title: "HIERARCHY",  dataIndex: "approvalLevel", fill: true },
+  { key: "position",      title: "POSITION",   dataIndex: "position",      fill: true },
+];
+const APPROVAL_CHILD_COLS = [
+  { key: "no",           title: "NO",       width: 60, align: "center", render: (_, __, i) => i + 1 },
+  { key: "employeeName", title: "EMPLOYEE", dataIndex: "employeeName", fill: true },
+];
+
 const WoConfirmationModalTabs = ({ formValues, activityData, dataRequirements, approvalData, attachments, activeTabKey }) => {
   const displayVal = (v) => v || "-";
   const displayDate = (v) => v ? NxDate.formatDate(v.format ? v.format("YYYY-MM-DD") : v, "DD MMM YYYY") : "-";
+
+  const nestedApprovalData = (approvalData || []).map((h, i) => ({
+    ...h,
+    id: h.id ?? i,
+    children: h.employeeDetail || [],
+  }));
 
   const activityAttachments = (activityData || []).flatMap((act) =>
     (act.attachments || []).map((att) => ({ ...att, activityName: act.woActName }))
@@ -99,15 +116,12 @@ const WoConfirmationModalTabs = ({ formValues, activityData, dataRequirements, a
       label: "Approval",
       children: (
         <NxBaseContainer border header="Approval Hierarchy">
-          <NxTable
+          <NxTableNested
             idTable="confirm-approval-table"
-            dataSource={(approvalData || []).map((item, i) => ({ ...item, key: item.id || i }))}
-            columns={[
-              { title: "NO",    width: 60, align: "center", render: (_, __, i) => i + 1 },
-              { title: "LEVEL", dataIndex: "approvalLevel", width: 100, render: (v) => v || "-" },
-              { title: "NAME",  dataIndex: "approverName",  render: (v) => v || "-" },
-              { title: "ROLE",  dataIndex: "approverRole",  width: 200, render: (v) => v || "-" },
-            ]}
+            dataSource={nestedApprovalData}
+            parentColumns={APPROVAL_PARENT_COLS}
+            childColumns={APPROVAL_CHILD_COLS}
+            useSelect={false}
             usePagination={false}
             useInfiniteScroll={false}
             showAdvanceSearch={false}

@@ -148,6 +148,7 @@ const NxAttachmentInput = ({
   configApplication = configApp.MASTER_MANAGEMENT,
   getAPIGuard = getGlobalPropertiesAttachment,
   mandatory = false,
+  autoHeight = true,
 }) => {
   // --- Hooks ---
   const dispatch = useDispatch();
@@ -303,6 +304,7 @@ const NxAttachmentInput = ({
             columns={columns}
             usePagination={false}
             showAdvanceSearch={true}
+            autoHeight={autoHeight}
           />
         </div>
       </Spin>

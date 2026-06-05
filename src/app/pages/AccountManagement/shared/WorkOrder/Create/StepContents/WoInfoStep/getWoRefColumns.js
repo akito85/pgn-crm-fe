@@ -8,7 +8,7 @@ export const getWoRefColumns = () => [
   {
     title: "STATUS", dataIndex: "status", width: 120, sorter: true, filter: true,
     render: (v) => v ? (
-      <StatusComponent colour={(v || "").toLowerCase()} margin={false}>
+      <StatusComponent colour={(v || "").toLowerCase()} margin={false} size="small">
         {(v || "").replace(/_/g, " ")}
       </StatusComponent>
     ) : "-",

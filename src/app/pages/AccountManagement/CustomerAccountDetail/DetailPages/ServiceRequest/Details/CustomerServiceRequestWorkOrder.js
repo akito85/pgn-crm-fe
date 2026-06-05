@@ -4,11 +4,13 @@ import { Button, Tooltip } from "antd";
 import NxTable from "../../../../../../../components/Nx/NxTable";
 import NxDate from "../../../../../../../components/Nx/NxDatePicker";
 import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
+import NxHistoryModal from "../../../../../../../components/Nx/NxHistoryModal";
 import StatusComponent from "../../../../../../../components/StatusComponent";
 import SVGIcon from "../../../../../../../assets/Icon/index";
 import WorkOrderApprovalModal from "../../../../WorkOrder/WorkOrderApprovalModal";
 import {
   getWorkOrders,
+  getWoApprovalHistory,
 } from "../../../../../../../redux/slices/account_management/detailAccount/WorkOrderSlice";
 import useWoNavigation from "../../../../shared/WorkOrder/hooks/useWoNavigation";
 
@@ -54,10 +56,11 @@ const CustomerServiceRequestWorkOrder = ({
 }) => {
   const dispatch = useDispatch();
   const [showApprovalModal, setShowApprovalModal] = useState(false);
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [page, setPage] = useState(1);
   const [loadMoreSize] = useState(50);
 
-  const { list_workOrders, loading_listWo, pagination_listWo } = useSelector(
+  const { list_workOrders, loading_listWo, pagination_listWo, detail_woApprovalHistory } = useSelector(
     (state) => state.workOrder
   );
 
@@ -67,7 +70,7 @@ const CustomerServiceRequestWorkOrder = ({
     entryPoint: "sr-under-account",
     source: "SERVICE_REQUEST",
     sourceId: id,
-    sourceReference: [data_detail?.requestNumber, data_detail?.subCategory]
+    sourceReference: [data_detail?.requestNumber, data_detail?.requestSubCategoryName]
       .filter(Boolean)
       .join(" - "),
     idCustomer,
@@ -114,24 +117,29 @@ const CustomerServiceRequestWorkOrder = ({
     {
       title: "ACTION",
       align: "center",
-      width: 120,
+      width: 160,
       fixed: "right",
       render: (_, record) => (
         <div className="flex justify-center gap-1">
           <Tooltip title="View">
-            <Button
-              type="table-action"
-              onClick={() => goToView(record.id)}
-            >
+            <Button type="table-action" onClick={() => goToView(record.id)}>
               <SVGIcon name="IconDetail" width={20} />
             </Button>
           </Tooltip>
           <Tooltip title="Edit">
+            <Button type="table-action" onClick={() => goToUpdate(record.id)}>
+              <SVGIcon name="IconEdit" width={20} />
+            </Button>
+          </Tooltip>
+          <Tooltip title="Approval History">
             <Button
               type="table-action"
-              onClick={() => goToUpdate(record.id)}
+              onClick={() => {
+                dispatch(getWoApprovalHistory(record.id));
+                setShowHistoryModal(true);
+              }}
             >
-              <SVGIcon name="IconEdit" width={20} />
+              <SVGIcon name="IconLogHistory" width={20} />
             </Button>
           </Tooltip>
         </div>
@@ -187,6 +195,14 @@ const CustomerServiceRequestWorkOrder = ({
         srId={id}
         handleCancel={() => setShowApprovalModal(false)}
         afterFinish={() => fetchList(1, false)}
+      />
+
+      <NxHistoryModal
+        isOpen={showHistoryModal}
+        handleClose={() => setShowHistoryModal(false)}
+        header="Approval History"
+        dataApprover={detail_woApprovalHistory?.dataApprover}
+        dataHistory={detail_woApprovalHistory?.dataHistory}
       />
     </>
   );

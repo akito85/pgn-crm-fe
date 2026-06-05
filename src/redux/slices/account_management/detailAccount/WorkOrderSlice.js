@@ -15,6 +15,10 @@ const initialState = {
   loading_approveWo: false,
   loading_rejectWo: false,
 
+  // Approval History
+  detail_woApprovalHistory: null,
+  loading_woApprovalHistory: false,
+
   // Detail / CRUD
   detail_workOrder: null,
   loading_detailWo: false,
@@ -244,6 +248,7 @@ export const approveOrRejectWo = createAsyncThunk(
       );
       thunkAPI.dispatch(
         showModalSuccess({
+          return: false,
           title: "Successful",
           description: `Work Order has been ${action === "APPROVE" ? "approved" : "rejected"}.`,
         })
@@ -414,6 +419,20 @@ export const getWoPicUsers = createAsyncThunk(
         `/v1/dbs/api/workorders/pic-users?positionId=${positionId}`
       );
       return { positionId, data: response.data };
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+export const getWoApprovalHistory = createAsyncThunk(
+  "GET_WO_APPROVAL_HISTORY",
+  async (id, thunkAPI) => {
+    try {
+      const response = await accountManagementService.getDetail(
+        `/v1/dbs/api/workorders/approval-history/${id}`
+      );
+      return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
@@ -639,6 +658,20 @@ const workOrderSlice = createSlice({
       };
     },
     [getWoPicUsers.rejected]: (state) => {},
+
+    // getWoApprovalHistory
+    [getWoApprovalHistory.pending]: (state) => {
+      state.detail_woApprovalHistory = null;
+      state.loading_woApprovalHistory = true;
+    },
+    [getWoApprovalHistory.fulfilled]: (state, action) => {
+      state.detail_woApprovalHistory = action.payload;
+      state.loading_woApprovalHistory = false;
+    },
+    [getWoApprovalHistory.rejected]: (state) => {
+      state.detail_woApprovalHistory = null;
+      state.loading_woApprovalHistory = false;
+    },
 
     // getWoApprovalHierarchy (detail)
     [getWoApprovalHierarchy.pending]: (state) => {},

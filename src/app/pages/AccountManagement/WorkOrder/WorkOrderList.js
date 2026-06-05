@@ -5,10 +5,14 @@ import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
 import NxTable from "../../../../components/Nx/NxTable";
 import NxDate from "../../../../components/Nx/NxDatePicker";
+import NxHistoryModal from "../../../../components/Nx/NxHistoryModal";
 import StatusComponent from "../../../../components/StatusComponent";
 import SVGIcon from "../../../../assets/Icon/index";
 import WorkOrderApprovalModal from "./WorkOrderApprovalModal";
-import { getWorkOrders } from "../../../../redux/slices/account_management/detailAccount/WorkOrderSlice";
+import {
+  getWorkOrders,
+  getWoApprovalHistory,
+} from "../../../../redux/slices/account_management/detailAccount/WorkOrderSlice";
 import useWoContext from "../shared/WorkOrder/hooks/useWoContext";
 import useWoNavigation from "../shared/WorkOrder/hooks/useWoNavigation";
 
@@ -35,11 +39,12 @@ const WorkOrderList = () => {
   const woContext = useWoContext();
   const { goToCreate, goToView, goToUpdate } = useWoNavigation(woContext);
 
-  const { list_workOrders, pagination_listWo, loading_listWo } = useSelector(
+  const { list_workOrders, pagination_listWo, loading_listWo, detail_woApprovalHistory } = useSelector(
     (state) => state.workOrder
   );
 
   const [showApprovalModal, setShowApprovalModal] = useState(false);
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [page, setPage] = useState(1);
   const [loadMoreSize] = useState(20);
   const [sort, setSort] = useState("");
@@ -79,24 +84,29 @@ const WorkOrderList = () => {
     {
       title: "ACTION",
       align: "center",
-      width: 120,
+      width: 160,
       fixed: "right",
       render: (_, record) => (
         <div className="flex justify-center gap-1">
           <Tooltip title="View">
-            <Button
-              type="table-action"
-              onClick={() => goToView(record.id)}
-            >
+            <Button type="table-action" onClick={() => goToView(record.id)}>
               <SVGIcon name="IconDetail" width={20} />
             </Button>
           </Tooltip>
           <Tooltip title="Edit">
+            <Button type="table-action" onClick={() => goToUpdate(record.id)}>
+              <SVGIcon name="IconEdit" width={20} />
+            </Button>
+          </Tooltip>
+          <Tooltip title="Approval History">
             <Button
               type="table-action"
-              onClick={() => goToUpdate(record.id)}
+              onClick={() => {
+                dispatch(getWoApprovalHistory(record.id));
+                setShowHistoryModal(true);
+              }}
             >
-              <SVGIcon name="IconEdit" width={20} />
+              <SVGIcon name="IconLogHistory" width={20} />
             </Button>
           </Tooltip>
         </div>
@@ -154,6 +164,14 @@ const WorkOrderList = () => {
         accountId={woContext.accountId}
         handleCancel={() => setShowApprovalModal(false)}
         afterFinish={() => fetchList(1, false)}
+      />
+
+      <NxHistoryModal
+        isOpen={showHistoryModal}
+        handleClose={() => setShowHistoryModal(false)}
+        header="Approval History"
+        dataApprover={detail_woApprovalHistory?.dataApprover}
+        dataHistory={detail_woApprovalHistory?.dataHistory}
       />
     </>
   );

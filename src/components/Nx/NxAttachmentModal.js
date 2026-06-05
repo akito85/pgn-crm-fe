@@ -77,18 +77,20 @@ const NxAttachmentModal = ({
     });
   };
 
+  const requireCategory = categoryOptions.length > 0;
+
   const property = {
     name: "file",
     multiple: true,
     fileList: fileList,
     showUploadList: false,
     accept: dataGuard.fileExt,
-    disabled: !category,
+    disabled: requireCategory && !category,
     beforeUpload: useCallback(
       async (file) => {
         const base64 = await getBase64(file);
         const file_extension = getFileExtension(file?.name);
-        if (dataGuard.fileExt.includes(file_extension)) {
+        if (!dataGuard.fileExt || dataGuard.fileExt.includes(file_extension)) {
           setFileList((prevState) => {
             const res = {
               file: file,
@@ -107,7 +109,7 @@ const NxAttachmentModal = ({
         }
         return false;
       },
-      [category]
+      [category, dataGuard]
     ),
   };
 
@@ -118,8 +120,8 @@ const NxAttachmentModal = ({
           return {
             ...file,
             key: nxGenerateRandomId(),
-            fileCategoryName: category.label,
-            fileCategoryId: category.value,
+            fileCategoryName: category?.label || null,
+            fileCategoryId: category?.value || null,
           };
         });
         newData = newData.filter((item) => item.size <= dataGuard.size);
@@ -130,8 +132,8 @@ const NxAttachmentModal = ({
         const data = {
           ...dataLink,
           key: nxGenerateRandomId(),
-          fileCategoryName: category.label,
-          fileCategoryId: category.value,
+          fileCategoryName: category?.label || null,
+          fileCategoryId: category?.value || null,
         };
         return [...prevState, data];
       });
@@ -213,21 +215,23 @@ const NxAttachmentModal = ({
                 Attach files to this section
               </span>
             </div>
-            <Form.Item name={"category"} className={"w-1/4 no-margin-form"}>
-              <SelectComponent
-                allowClear={false}
-                mandatory
-                label={"Category"}
-                onChange={handleCategory}
-                labelInValue
-              >
-                {categoryOptions.map((data, index) => (
-                  <Select.Option key={index} value={data.id}>
-                    {data.text}
-                  </Select.Option>
-                ))}
-              </SelectComponent>
-            </Form.Item>
+            {requireCategory && (
+              <Form.Item name={"category"} className={"w-1/4 no-margin-form"}>
+                <SelectComponent
+                  allowClear={false}
+                  mandatory
+                  label={"Category"}
+                  onChange={handleCategory}
+                  labelInValue
+                >
+                  {categoryOptions.map((data, index) => (
+                    <Select.Option key={index} value={data.id}>
+                      {data.text}
+                    </Select.Option>
+                  ))}
+                </SelectComponent>
+              </Form.Item>
+            )}
           </div>
           <Form.Item name={"file"}>
             <div className="w-full">
@@ -259,14 +263,14 @@ const NxAttachmentModal = ({
                           width={"24%"}
                           onChange={updateLink}
                           onClick={(e) => e.stopPropagation()}
-                          disabled={!category}
+                          disabled={requireCategory && !category}
                         />
                         <Button
                           onClick={handleUploadLink}
                           icon={<UploadOutlined />}
                           type={"submit"}
                           border={false}
-                          disabled={!category}
+                          disabled={requireCategory && !category}
                         />
                       </div>
                     </div>

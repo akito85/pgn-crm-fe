@@ -48,7 +48,7 @@ const CreateWorkOrder = () => {
   const dispatch = useDispatch();
 
   const woContext = useWoContext();
-  const { goBack, goToView } = useWoNavigation(woContext);
+  const { goBack } = useWoNavigation(woContext);
   const isUpdate = woContext.isUpdate === true;
   const isSrContext = woContext.source === "SERVICE_REQUEST";
   const isStandalone = woContext.accountId === null;
@@ -59,6 +59,7 @@ const CreateWorkOrder = () => {
   const [modalConfirm, setModalConfirm] = useState(false);
   const [confirmationType, setConfirmationType] = useState("submit");
   const [dataSend, setDataSend] = useState({});
+  const [confirmFormValues, setConfirmFormValues] = useState({});
   const [modalBack, setModalBack] = useState(false);
 
   const [activityData, setActivityData] = useState([]);
@@ -337,6 +338,20 @@ const CreateWorkOrder = () => {
       const payload = buildPayload(action);
       setDataSend(payload);
       setConfirmationType(submitType);
+      const values = form.getFieldsValue(true);
+      const findLabel = (list, id) => {
+        const found = (list || []).find(
+          (item) => (item.id?.toString() || item.glbTypeValId?.toString()) === id?.toString()
+        );
+        return found ? (found.name || found.glbTypeValName) : id;
+      };
+      setConfirmFormValues({
+        ...values,
+        category: findLabel(list_woCategories, values.category),
+        type:     findLabel(list_woTypes,       values.type),
+        priority: findLabel(list_woPriorities,  values.priority),
+        group:    findLabel(list_woGroups,      values.group),
+      });
       setModalConfirm(true);
     } catch (_) {}
   };
@@ -362,7 +377,7 @@ const CreateWorkOrder = () => {
             successBodyExtra: { return: false },
           })
         ).unwrap();
-        woContext.entryPoint === "bad-debt" ? goBack() : goToView(woContext.woId);
+        goBack();
       } else {
         const result = await dispatch(
           createWorkOrder({
@@ -373,7 +388,7 @@ const CreateWorkOrder = () => {
             successBodyExtra: { return: false },
           })
         ).unwrap();
-        woContext.entryPoint === "bad-debt" ? goBack() : goToView(result.id);
+        goBack();
       }
     } catch (_) {
     } finally {
@@ -488,7 +503,7 @@ const CreateWorkOrder = () => {
       <WoConfirmationModal
         isOpen={modalConfirm}
         type={confirmationType}
-        formValues={form.getFieldsValue(true)}
+        formValues={confirmFormValues}
         activityData={activityData}
         approvalData={detail_woApprovalHierarchy}
         attachments={attachmentDataSource}
