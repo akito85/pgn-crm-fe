@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Button, Form, Select, Tooltip } from "antd";
 
@@ -13,10 +13,12 @@ import {
   getDataRequirementTemplateByFilter,
   resetDataRequirementTemplate,
 } from "../../../../../../../../../redux/slices/system_setup/dataRequirementTemplate";
+import { getSrDataRequirementContacts } from "../../../../../../../../../redux/slices/account_management/detailAccount/srDataRequirementContactSlice";
 
-export default function InfoDataRequirement({ form, dropdowns }) {
+export default function InfoDataRequirement({ form, dropdowns, idAccount }) {
   const dispatch = useDispatch();
   const { data_filter, loading_filter } = useSelector((state) => state.dataRequirementTemplate);
+  const { data: data_contacts, loading: loading_contacts } = useSelector((state) => state.srDataRequirementContact);
 
   const [dataRequirement, setDataRequirement] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -67,6 +69,24 @@ export default function InfoDataRequirement({ form, dropdowns }) {
       form.setFieldsValue({ srFormDataRequirements: populated });
     }
   }, [data_filter]);
+
+  // Fetch contact list when user selects "Contact" type in edit modal
+  useEffect(() => {
+    if (selectedEditType?.toLowerCase() === "contact" && idAccount) {
+      dispatch(getSrDataRequirementContacts(idAccount));
+    }
+  }, [selectedEditType, idAccount]);
+
+  // Build selectable rows for the choose table
+  const chooseTableData = useMemo(() => {
+    if (selectedEditType?.toLowerCase() !== "contact") return [];
+    const result = Array.isArray(data_contacts) ? data_contacts : [];
+    return result.map((item, index) => ({
+      key: index,
+      no: index + 1,
+      value: item.value,
+    }));
+  }, [data_contacts, selectedEditType]);
 
   const getDropdownItems = (dropdownKey) => {
     const dropdown = dropdowns?.[dropdownKey];
@@ -289,7 +309,8 @@ export default function InfoDataRequirement({ form, dropdowns }) {
               useSelect={false}
               showAdvanceSearch={false}
               tableScrolled={{ y: 300, x: "max-content" }}
-              dataSource={[]}
+              dataSource={chooseTableData}
+              loading={selectedEditType?.toLowerCase() === "contact" && loading_contacts}
               columns={[
                 { title: "No", dataIndex: "no", key: "no", align: "center", width: 60 },
                 { title: "Value", dataIndex: "value", key: "value" },

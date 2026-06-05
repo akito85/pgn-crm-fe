@@ -547,6 +547,7 @@ const CreateUpdateCustomerServiceRequest = ({ formType = "create" }) => {
           account={data_accountDetail}
           customer={data_customerDetail}
           dropdowns={dropdowns}
+          idAccount={idAccount}
         />
       ),
       disabled: false
