@@ -1,45 +1,65 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button, Spin } from "antd";
 import { LeftOutlined } from "@ant-design/icons";
-import NxCardContainer from "../../../components/Nx/NxCardContainer";
-import NxBaseContainer from "../../../components/Nx/NxBaseContainer";
-import NxDetailText from "../../../components/Nx/NxDetailText";
-import NxTable from "../../../components/Nx/NxTable";
-import NxDate from "../../../components/Nx/NxDatePicker";
-import NxBreadCrumb from "../../../components/Nx/NxBreadCrumb";
+import NxCardContainer from "../../../../components/Nx/NxCardContainer";
+import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
+import NxDetailText from "../../../../components/Nx/NxDetailText";
+import NxTable from "../../../../components/Nx/NxTable";
+import NxDate from "../../../../components/Nx/NxDatePicker";
+import NxBreadCrumb from "../../../../components/Nx/NxBreadCrumb";
+import NxTabs from "../../../../components/Nx/NxTabs";
+import NxAttachmentInput from "../../../../components/Nx/NxAttachmentInput";
 import HeaderDetail from "../CustomerAccountDetail/HeaderDetail";
-import StatusComponent from "../../../components/StatusComponent";
+import StatusComponent from "../../../../components/StatusComponent";
 import WoStatusUpdateModal from "./WoStatusUpdateModal";
-import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../routes/account_management/customer_account_routes";
+import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../routes/account_management/customer_account_routes";
 import {
   getWorkOrder,
   getWoActivities,
+  getWoDataRequirements,
+  getWoAttachments,
   getWoProgress,
   updateWoStatus,
-} from "../../../redux/slices/account_management/detailAccount/WorkOrderSlice";
-import { getAccountStandardDetail, getAccountOneTimeDetail } from "../../../redux/slices/account_management/accountManagement";
+  clearWoActivities,
+  clearWoDataRequirements,
+} from "../../../../redux/slices/account_management/detailAccount/WorkOrderSlice";
+import { getAccountStandardDetail, getAccountOneTimeDetail } from "../../../../redux/slices/account_management/accountManagement";
 
 const ACTIVITY_COLUMNS = [
   { title: "NO",            width: 60,  align: "center", render: (_, __, i) => i + 1 },
-  { title: "ACTIVITY NAME", dataIndex: "woActName",      width: 180, render: (v) => v || "-" },
-  { title: "PIC POSITION",  dataIndex: "picPositionName",width: 160, render: (v) => v || "-" },
-  { title: "PIC USER",      dataIndex: "picUserName",    width: 160, render: (v) => v || "-" },
-  { title: "PLAN DATE",     dataIndex: "planDate",       width: 130, render: (v) => v ? NxDate.formatDate(v, "DD MMM YYYY") : "-" },
-  { title: "STATUS",        dataIndex: "activityStatus", width: 120, render: (v) => v || "-" },
-  { title: "DESCRIPTION",   dataIndex: "woActDesc",      width: 200, render: (v) => v || "-" },
+  { title: "ACTIVITY NAME", dataIndex: "woActName",       width: 180, render: (v) => v || "-" },
+  { title: "PIC POSITION",  dataIndex: "picPositionName", width: 160, render: (v) => v || "-" },
+  { title: "PIC USER",      dataIndex: "picUserName",     width: 160, render: (v) => v || "-" },
+  { title: "PLAN DATE",     dataIndex: "planDate",        width: 130, render: (v) => v ? NxDate.formatDate(v, "DD MMM YYYY") : "-" },
+  { title: "STATUS",        dataIndex: "activityStatus",  width: 120, render: (v) => v ? (
+      <div className="flex justify-center">
+        <StatusComponent colour={(v || "").toLowerCase()} margin={false} size="small">
+          {(v || "").replace(/_/g, " ")}
+        </StatusComponent>
+      </div>
+    ) : "-", },
+  { title: "DESCRIPTION",   dataIndex: "woActDesc",       width: 200, render: (v) => v || "-" },
+];
+
+const DATA_REQ_COLUMNS = [
+  { title: "NO",    width: 60,  align: "center", render: (_, __, i) => i + 1 },
+  { title: "TYPE",  dataIndex: "type",  width: 180, render: (v) => v || "-" },
+  { title: "VALUE", dataIndex: "value", render: (v) => v || "-" },
 ];
 
 const PROGRESS_COLUMNS = [
   { title: "NO",           width: 60,  align: "center", render: (_, __, i) => i + 1 },
-  { title: "FROM STATUS",  dataIndex: "fromStatus",   width: 140, render: (v) => v || "(initial)" },
-  { title: "TO STATUS",    dataIndex: "toStatus",     width: 140, render: (v) => v || "-" },
-  { title: "REMARK",       dataIndex: "remark",       render: (v) => v || "-" },
-  { title: "CHANGED BY",   dataIndex: "changedBy",    width: 160, render: (v) => v || "-" },
-  { title: "CHANGED DATE", dataIndex: "changedDate",  width: 180, render: (v) => v ? NxDate.formatDate(v, "DD MMM YYYY HH:mm") : "-" },
+  { title: "FROM STATUS",  dataIndex: "fromStatus",      width: 140, render: (v) => v || "(initial)" },
+  { title: "TO STATUS",    dataIndex: "toStatus",        width: 140, render: (v) => v || "-" },
+  { title: "REMARK",       dataIndex: "remark",          render: (v) => v || "-" },
+  { title: "CHANGED BY",   dataIndex: "changedBy",       width: 160, render: (v) => v || "-" },
+  { title: "CHANGED DATE", dataIndex: "changedDate",     width: 180, render: (v) => v ? NxDate.formatDate(v, "DD MMM YYYY HH:mm") : "-" },
   { title: "DURATION (s)", dataIndex: "durationSeconds", width: 130, render: (v) => v ?? "-" },
 ];
+
+const PAGE_SIZE = 50;
 
 const WorkOrderDetail = () => {
   const dispatch = useDispatch();
@@ -53,6 +73,11 @@ const WorkOrderDetail = () => {
     loading_detailWo,
     list_woActivities,
     loading_listWoActivities,
+    pagination_woActivities,
+    list_woDataRequirements,
+    loading_listWoDataRequirements,
+    list_woAttachments,
+    loading_listWoAttachments,
     list_woProgress,
     loading_woProgress,
     loading_statusUpdateWo,
@@ -62,6 +87,8 @@ const WorkOrderDetail = () => {
 
   const isLoading = loading_detailWo || loadingAccount;
 
+  const [activeTab, setActiveTab] = useState("info");
+  const [activityPage, setActivityPage] = useState(1);
   const [statusModal, setStatusModal] = useState({ open: false, toStatus: null });
 
   const openStatusModal = (toStatus) => setStatusModal({ open: true, toStatus });
@@ -69,11 +96,16 @@ const WorkOrderDetail = () => {
 
   useEffect(() => {
     if (woId) {
+      dispatch(clearWoActivities());
+      dispatch(clearWoDataRequirements());
       dispatch(getWorkOrder({ woId, accountId: idAccount }));
-      dispatch(getWoActivities({ woId, body: { page: 1, size: 50, filters: [], filterRules: [] }, isLoadMore: false }));
+      dispatch(getWoActivities({ woId, body: { page: 1, size: PAGE_SIZE, filters: [], filterRules: [] }, isLoadMore: false }));
+      dispatch(getWoDataRequirements({ woId, body: { page: 1, size: 100, filters: [], filterRules: [] }, isLoadMore: false }));
+      dispatch(getWoAttachments({ accountId: idAccount, woId }));
       dispatch(getWoProgress(woId));
+      setActivityPage(1);
     }
-  }, [dispatch, woId]);
+  }, [dispatch, woId, idAccount]);
 
   useEffect(() => {
     if (idAccount && accountType) {
@@ -84,6 +116,16 @@ const WorkOrderDetail = () => {
       }
     }
   }, [dispatch, idAccount, idCustomer, accountType]);
+
+  const hasMoreActivities = list_woActivities.length < (pagination_woActivities.totalElement || 0);
+
+  const handleLoadMoreActivities = () => {
+    const nextPage = activityPage + 1;
+    if (nextPage <= (pagination_woActivities.totalPage || 0)) {
+      dispatch(getWoActivities({ woId, body: { page: nextPage, size: PAGE_SIZE, filters: [], filterRules: [] }, isLoadMore: true }));
+      setActivityPage(nextPage);
+    }
+  };
 
   const wo = detail_workOrder;
   const status = (wo?.status || "").toUpperCase();
@@ -105,50 +147,29 @@ const WorkOrderDetail = () => {
     if (!wo) return null;
 
     const btnInProgress = (
-      <Button type="secondary" onClick={() => openStatusModal("IN_PROGRESS")}>
-        Mark as In Progress
-      </Button>
+      <Button type="secondary" onClick={() => openStatusModal("IN_PROGRESS")}>Mark as In Progress</Button>
     );
     const btnOnHold = (
-      <Button type="secondary" onClick={() => openStatusModal("ON_HOLD")}>
-        Mark as On Hold
-      </Button>
+      <Button type="secondary" onClick={() => openStatusModal("ON_HOLD")}>Mark as On Hold</Button>
     );
     const btnOpen = (
-      <Button type="secondary" onClick={() => openStatusModal("OPEN")}>
-        Mark as Open
-      </Button>
+      <Button type="secondary" onClick={() => openStatusModal("OPEN")}>Mark as Open</Button>
     );
     const btnResolved = (
-      <Button type="secondary" onClick={() => openStatusModal("RESOLVED")}>
-        Mark as Resolved
-      </Button>
+      <Button type="secondary" onClick={() => openStatusModal("RESOLVED")}>Mark as Resolved</Button>
     );
     const btnClosed = (
-      <Button type="submit" onClick={() => openStatusModal("CLOSED")}>
-        Mark as Closed
-      </Button>
+      <Button type="submit" onClick={() => openStatusModal("CLOSED")}>Mark as Closed</Button>
     );
     const btnCancel = (
-      <Button type="reject" onClick={() => openStatusModal("CANCELLED")}>
-        Cancel WO
-      </Button>
+      <Button type="reject" onClick={() => openStatusModal("CANCELLED")}>Cancel WO</Button>
     );
     const btnEdit = (
       <Button
         type="submit"
         onClick={() =>
           navigate(ACCOUNT_MANAGEMENT_ROUTES.UPDATE_WORK_ORDER, {
-            state: {
-              woContext: {
-                type: "standalone",
-                idAccount,
-                idCustomer,
-                accountType,
-                isUpdate: true,
-                woId,
-              },
-            },
+            state: { woContext: { type: "standalone", idAccount, idCustomer, accountType, isUpdate: true, woId } },
           })
         }
       >
@@ -157,26 +178,119 @@ const WorkOrderDetail = () => {
     );
 
     switch (status) {
-      case "DRAFT":
-        return <>{btnEdit}</>;
-      case "SUBMITTED":
-        return null;
-      case "OPEN":
-        return <>{btnInProgress}{btnOnHold}{btnCancel}</>;
-      case "IN_PROGRESS":
-        return <>{btnOnHold}{btnResolved}{btnCancel}</>;
+      case "DRAFT":      return <>{btnEdit}</>;
+      case "SUBMITTED":  return null;
+      case "OPEN":       return <>{btnInProgress}{btnOnHold}{btnCancel}</>;
+      case "IN_PROGRESS":return <>{btnOnHold}{btnResolved}{btnCancel}</>;
       case "ON_HOLD":
-        if (prevStatus === "IN_PROGRESS") return <>{btnInProgress}{btnCancel}</>;
-        return <>{btnOpen}{btnCancel}</>;
-      case "RESOLVED":
-        return <>{btnInProgress}{btnClosed}{btnCancel}</>;
-      case "CLOSED":
-      case "CANCELLED":
-        return null;
-      default:
-        return null;
+        return prevStatus === "IN_PROGRESS" ? <>{btnInProgress}{btnCancel}</> : <>{btnOpen}{btnCancel}</>;
+      case "RESOLVED":   return <>{btnInProgress}{btnClosed}{btnCancel}</>;
+      default:           return null;
     }
   };
+
+  const tabItems = useMemo(() => [
+    {
+      key: "info",
+      label: "Work Order Information",
+      children: (
+        <NxBaseContainer border>
+          <div className="grid grid-cols-3 gap-4">
+            <NxDetailText label="WO Number">{wo?.woNumber || "-"}</NxDetailText>
+            <NxDetailText label="Source">{wo?.source || "-"}</NxDetailText>
+            <NxDetailText label="Source Reference">{wo?.sourceNumber || "-"}</NxDetailText>
+            <NxDetailText label="Category">{wo?.woCategoryName || "-"}</NxDetailText>
+            <NxDetailText label="Type">{wo?.woTypeName || "-"}</NxDetailText>
+            <NxDetailText label="Priority">{wo?.woPriorityName || "-"}</NxDetailText>
+            <NxDetailText label="Group">{wo?.woGroupName || "-"}</NxDetailText>
+            <NxDetailText label="Request Date">{wo?.requestDate ? NxDate.formatDate(wo.requestDate, "DD MMM YYYY") : "-"}</NxDetailText>
+            <NxDetailText label="Plan Completion Date">{wo?.planCompletionDate ? NxDate.formatDate(wo.planCompletionDate, "DD MMM YYYY") : "-"}</NxDetailText>
+            <NxDetailText label="Due Date">{wo?.dueDate ? NxDate.formatDate(wo.dueDate, "DD MMM YYYY") : "-"}</NxDetailText>
+            <NxDetailText label="Status">
+              {status ? (
+                <StatusComponent colour={status.toLowerCase()} margin={false} size="small">
+                  {status.replace(/_/g, " ")}
+                </StatusComponent>
+              ) : "-"}
+            </NxDetailText>
+            <NxDetailText label="Approval Status">
+              {approvalStatus ? (
+                <StatusComponent colour={approvalStatus.toLowerCase()} margin={false} size="small">
+                  {approvalStatus.replace(/_/g, " ")}
+                </StatusComponent>
+              ) : "-"}
+            </NxDetailText>
+            <NxDetailText label="Age (hours)">{wo?.ageHours != null ? `${wo.ageHours} hrs` : "-"}</NxDetailText>
+          </div>
+          <NxDetailText label="Description" className="mt-2">{wo?.description || "-"}</NxDetailText>
+        </NxBaseContainer>
+      ),
+    },
+    {
+      key: "activity",
+      label: "Activity & Data",
+      children: (
+        <>
+          <NxBaseContainer border>
+            <span className="text-sm font-semibold text-gray-600 mb-2 block">Activity List</span>
+            <NxTable
+              idTable="wo-detail-activity-table"
+              dataSource={list_woActivities.map((item, i) => ({ ...item, key: item.id ?? i }))}
+              columns={ACTIVITY_COLUMNS}
+              usePagination={false}
+              useInfiniteScroll={true}
+              onLoadMore={handleLoadMoreActivities}
+              hasMore={hasMoreActivities}
+              loading={loading_listWoActivities}
+              showAdvanceSearch={false}
+              tableScrolled={{ x: "max-content" }}
+            />
+          </NxBaseContainer>
+          <NxBaseContainer border>
+            <span className="text-sm font-semibold text-gray-600 mb-2 block">Data Requirement</span>
+            <NxTable
+              idTable="wo-detail-datareq-table"
+              dataSource={list_woDataRequirements.map((item, i) => ({ ...item, key: item.id ?? i }))}
+              columns={DATA_REQ_COLUMNS}
+              usePagination={false}
+              useInfiniteScroll={false}
+              loading={loading_listWoDataRequirements}
+              showAdvanceSearch={false}
+              tableScrolled={{ x: "max-content" }}
+            />
+          </NxBaseContainer>
+        </>
+      ),
+    },
+    {
+      key: "attachment",
+      label: "Attachment",
+      children: (
+        <NxBaseContainer border>
+          <Spin spinning={loading_listWoAttachments}>
+            <NxAttachmentInput
+              data={list_woAttachments}
+              type="detail"
+              mandatory={false}
+              autoHeight={true}
+            />
+          </Spin>
+        </NxBaseContainer>
+      ),
+    },
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  ], [
+    wo,
+    status,
+    approvalStatus,
+    list_woActivities,
+    loading_listWoActivities,
+    hasMoreActivities,
+    list_woDataRequirements,
+    loading_listWoDataRequirements,
+    list_woAttachments,
+    loading_listWoAttachments,
+  ]);
 
   const routes = [
     { path: "", breadcrumbName: "Account Management" },
@@ -201,52 +315,12 @@ const WorkOrderDetail = () => {
             />
           )}
 
-          <NxCardContainer header="WORK ORDER INFORMATION">
-            <NxBaseContainer border>
-              <div className="grid grid-cols-3 gap-4">
-                <NxDetailText label="WO Number">{wo?.woNumber || "-"}</NxDetailText>
-                <NxDetailText label="Source">{wo?.source || "-"}</NxDetailText>
-                <NxDetailText label="Source Reference">{wo?.sourceNumber || "-"}</NxDetailText>
-                <NxDetailText label="Category">{wo?.woCategoryName || "-"}</NxDetailText>
-                <NxDetailText label="Type">{wo?.woTypeName || "-"}</NxDetailText>
-                <NxDetailText label="Priority">{wo?.woPriorityName || "-"}</NxDetailText>
-                <NxDetailText label="Group">{wo?.woGroupName || "-"}</NxDetailText>
-                <NxDetailText label="Request Date">{wo?.requestDate ? NxDate.formatDate(wo.requestDate, "DD MMM YYYY") : "-"}</NxDetailText>
-                <NxDetailText label="Plan Completion Date">{wo?.planCompletionDate ? NxDate.formatDate(wo.planCompletionDate, "DD MMM YYYY") : "-"}</NxDetailText>
-                <NxDetailText label="Due Date">{wo?.dueDate ? NxDate.formatDate(wo.dueDate, "DD MMM YYYY") : "-"}</NxDetailText>
-                <NxDetailText label="Status">
-                  {status ? (
-                    <StatusComponent colour={status.toLowerCase()} margin={false}>
-                      {status.replace(/_/g, " ")}
-                    </StatusComponent>
-                  ) : "-"}
-                </NxDetailText>
-                <NxDetailText label="Approval Status">
-                  {approvalStatus ? (
-                    <StatusComponent colour={approvalStatus.toLowerCase()} margin={false}>
-                      {approvalStatus.replace(/_/g, " ")}
-                    </StatusComponent>
-                  ) : "-"}
-                </NxDetailText>
-                <NxDetailText label="Age (hours)">{wo?.ageHours != null ? `${wo.ageHours} hrs` : "-"}</NxDetailText>
-              </div>
-              <NxDetailText label="Description" className="mt-2">{wo?.description || "-"}</NxDetailText>
-            </NxBaseContainer>
-          </NxCardContainer>
-
-          <NxCardContainer header="ACTIVITY LIST">
-            <NxBaseContainer border>
-              <NxTable
-                idTable="wo-detail-activity-table"
-                dataSource={list_woActivities.map((item, i) => ({ ...item, key: item.id ?? i }))}
-                columns={ACTIVITY_COLUMNS}
-                usePagination={false}
-                useInfiniteScroll={false}
-                loading={loading_listWoActivities}
-                showAdvanceSearch={false}
-                tableScrolled={{ x: "max-content" }}
-              />
-            </NxBaseContainer>
+          <NxCardContainer header="WORK ORDER">
+            <NxTabs
+              items={tabItems}
+              activeKey={activeTab}
+              onChange={setActiveTab}
+            />
           </NxCardContainer>
 
           <NxCardContainer header="PROGRESS HISTORY">
@@ -265,7 +339,6 @@ const WorkOrderDetail = () => {
           </NxCardContainer>
         </div>
 
-        {/* Footer */}
         <NxBaseContainer border className="mb-5">
           <div className="flex justify-between items-center">
             <Button icon={<LeftOutlined />} onClick={() => navigate(-1)}>
@@ -281,7 +354,7 @@ const WorkOrderDetail = () => {
       <WoStatusUpdateModal
         isOpen={statusModal.open}
         toStatus={statusModal.toStatus}
-        accountId={idAccount}
+        woData={detail_workOrder}
         approvalHierarchies={list_woApprovalHierarchy}
         loading={loading_statusUpdateWo}
         onCancel={closeStatusModal}
