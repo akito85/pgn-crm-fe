@@ -1,15 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Form, Select, DatePicker, Input, Button } from "antd";
 import NxModal from "../../../../../../../../components/Nx/NxModal";
 import NxBaseContainer from "../../../../../../../../components/Nx/NxBaseContainer";
 import NxAttachmentInput from "../../../../../../../../components/Nx/NxAttachmentInput";
-import { NxFormStepper } from "../../../../../../../../components/Nx/NxFormStepNavigation";
+import NxTabs from "../../../../../../../../components/Nx/NxTabs";
 import { requiredMessage } from "../../../../../../../../utils";
 import { getWoPicUsers } from "../../../../../../../../redux/slices/account_management/detailAccount/WorkOrderSlice";
 import moment from "moment";
-
-const { TextArea } = Input;
+import InputComponent from "../../../../../../../../components/InputComponent";
 
 /**
  * @param {{
@@ -25,7 +24,7 @@ const ActivityModal = ({ isOpen, editingRow, dropdowns, onSave, onCancel }) => {
   const { list_woPicUsers } = useSelector((state) => state.workOrder);
 
   const [form] = Form.useForm();
-  const [current, setCurrent] = useState(0);
+  const [activeTab, setActiveTab] = useState("activity");
   const [attachmentData, setAttachmentData] = useState([]);
   const [deletedAttachments, setDeletedAttachments] = useState([]);
   const [selectedPositionId, setSelectedPositionId] = useState(null);
@@ -51,42 +50,48 @@ const ActivityModal = ({ isOpen, editingRow, dropdowns, onSave, onCancel }) => {
     }
     if (!isOpen) {
       form.resetFields();
-      setCurrent(0);
+      setActiveTab("activity");
       setAttachmentData([]);
       setDeletedAttachments([]);
       setSelectedPositionId(null);
     }
   }, [isOpen, editingRow, form, dispatch]);
 
-  const handlePositionChange = (value) => {
-    setSelectedPositionId(value);
-    form.setFieldsValue({ picUserId: undefined });
-    if (value) dispatch(getWoPicUsers(value));
-  };
+  const handleFormValuesChange = useCallback((changedValues) => {
+    if ("picPositionId" in changedValues) {
+      const value = changedValues.picPositionId;
+      setSelectedPositionId(value);
+      form.setFieldsValue({ picUserId: undefined });
+      if (value) dispatch(getWoPicUsers(value));
+    }
+  }, [dispatch, form]);
 
+  // M_POSITION: positionId + name  |  R_GLOBAL_TYPE_VALUE: glbTypeValId + glbTypeValName  |  generic: id + name
   const makeOptions = (list) =>
     (Array.isArray(list) ? list : []).map((item) => ({
-      value: item.id?.toString() || item.glbTypeValId?.toString(),
+      value: (item.id ?? item.positionId ?? item.glbTypeValId)?.toString(),
       label: item.name || item.glbTypeValName,
     }));
 
-  const picUserOptions = selectedPositionId
-    ? makeOptions(list_woPicUsers[selectedPositionId] || [])
-    : [];
+  // VW_EMPLOYEE_ASSIGNMENT: employeeId + employeeName
+  const makePicUserOptions = (list) =>
+    (Array.isArray(list) ? list : []).map((item) => ({
+      value: (item.employeeId ?? item.id)?.toString(),
+      label: item.employeeName || item.name,
+    }));
 
-  const steps = [
-    { key: "activity",   title: "Activity" },
-    { key: "attachment", title: "Attachment" },
-  ];
+  const picUserOptions = useMemo(
+    () => selectedPositionId ? makePicUserOptions(list_woPicUsers[selectedPositionId] || []) : [],
+    [selectedPositionId, list_woPicUsers] // eslint-disable-line react-hooks/exhaustive-deps
+  );
 
-  const handleNext = async () => {
+  const handleSave = async () => {
     try {
       await form.validateFields(["woActName", "picPositionId", "picUserId"]);
-      setCurrent(1);
-    } catch (_) {}
-  };
-
-  const handleSave = () => {
+    } catch (_) {
+      setActiveTab("activity");
+      return;
+    }
     const values = form.getFieldsValue(true);
     onSave({
       woActName: values.woActName || "",
@@ -106,20 +111,115 @@ const ActivityModal = ({ isOpen, editingRow, dropdowns, onSave, onCancel }) => {
     });
   };
 
+  const positionOptions = useMemo(
+    () => makeOptions(dropdowns?.list_woPicPositions || []),
+    [dropdowns?.list_woPicPositions] 
+  );
+
+  const statusOptions = useMemo(
+    () => makeOptions(dropdowns?.list_woActivityStatuses || []),
+    [dropdowns?.list_woActivityStatuses] 
+  );
+
+  const tabItems = useMemo(() => [
+    {
+      key: "activity",
+      label: "Activity",
+      children: (
+        <NxBaseContainer border>
+          <Form form={form} layout="vertical" onValuesChange={handleFormValuesChange}>
+            <div className="grid grid-cols-3 gap-x-6">
+              <Form.Item
+                name="woActName"
+                label="Activity Name"
+                rules={[{ required: true, message: requiredMessage("Activity Name") }]}
+                className="no-margin-form"
+              >
+                <Input
+                  placeholder="Enter activity name"
+                  disabled={editingRow?.isTemplate === true}
+                />
+              </Form.Item>
+
+              <Form.Item
+                name="picPositionId"
+                label="PIC Position"
+                rules={[{ required: true, message: requiredMessage("PIC Position") }]}
+                className="no-margin-form"
+              >
+                <Select
+                  placeholder="Select Position"
+                  options={positionOptions}
+                />
+              </Form.Item>
+
+              <Form.Item
+                name="picUserId"
+                label="PIC User"
+                rules={[{ required: true, message: requiredMessage("PIC User") }]}
+                className="no-margin-form"
+              >
+                <Select
+                  placeholder="Select User"
+                  options={picUserOptions}
+                  disabled={!selectedPositionId}
+                />
+              </Form.Item>
+
+              <Form.Item name="planDate" label="Plan Date" className="no-margin-form">
+                <DatePicker style={{ width: "100%" }} />
+              </Form.Item>
+
+              <Form.Item name="activityStatus" label="Status" className="no-margin-form">
+                <Select
+                  placeholder="Select Status"
+                  options={statusOptions}
+                />
+              </Form.Item>
+
+              <Form.Item name="durationDays" label="Duration (Days)" className="no-margin-form">
+                <Input type="number" min={0} placeholder="0" />
+              </Form.Item>
+            </div>
+
+            <Form.Item name="description" label="Description" className="w-full">
+              <InputComponent type="textarea" />
+            </Form.Item>
+          </Form>
+        </NxBaseContainer>
+      ),
+    },
+    {
+      key: "attachment",
+      label: "Attachment",
+      children: (
+        <NxBaseContainer border>
+          <NxAttachmentInput
+            data={attachmentData}
+            updateData={setAttachmentData}
+            setDeleted={setDeletedAttachments}
+            mandatory={false}
+            autoHeight={false}
+          />
+        </NxBaseContainer>
+      ),
+    },
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  ], [
+    form,
+    handleFormValuesChange,
+    positionOptions,
+    statusOptions,
+    picUserOptions,
+    selectedPositionId,
+    editingRow?.isTemplate,
+    attachmentData,
+  ]);
+
   const footer = (
     <div className="flex justify-between">
       <Button type="menu" onClick={onCancel}>Cancel</Button>
-      <div className="flex gap-2">
-        {current === 1 && (
-          <Button type="menu" onClick={() => setCurrent(0)}>Previous</Button>
-        )}
-        {current === 0 && (
-          <Button type="submit" onClick={handleNext}>Next</Button>
-        )}
-        {current === 1 && (
-          <Button type="submit" onClick={handleSave}>Save</Button>
-        )}
-      </div>
+      <Button type="submit" onClick={handleSave}>Save</Button>
     </div>
   );
 
@@ -131,88 +231,11 @@ const ActivityModal = ({ isOpen, editingRow, dropdowns, onSave, onCancel }) => {
       width={900}
       footer={footer}
     >
-      <NxFormStepper steps={steps} current={current} onPrev={() => setCurrent(0)} onNext={handleNext} inModal />
-
-      <div className="p-4">
-        {/* Step 0 — Activity */}
-        <div className={current !== 0 ? "hidden" : ""}>
-          <NxBaseContainer border>
-            <Form form={form} layout="vertical">
-              <div className="grid grid-cols-2 gap-x-4">
-                {/* Activity Name — FREE TEXT */}
-                <Form.Item
-                  name="woActName"
-                  label="Activity Name"
-                  rules={[{ required: true, message: requiredMessage("Activity Name") }]}
-                  className="no-margin-form"
-                >
-                  <Input
-                    placeholder="Enter activity name"
-                    disabled={editingRow?.isTemplate === true}
-                  />
-                </Form.Item>
-
-                <Form.Item
-                  name="picPositionId"
-                  label="PIC Position"
-                  rules={[{ required: true, message: requiredMessage("PIC Position") }]}
-                  className="no-margin-form"
-                >
-                  <Select
-                    placeholder="Select Position"
-                    options={makeOptions(dropdowns?.list_woPicPositions || [])}
-                    onChange={handlePositionChange}
-                  />
-                </Form.Item>
-
-                <Form.Item
-                  name="picUserId"
-                  label="PIC User"
-                  rules={[{ required: true, message: requiredMessage("PIC User") }]}
-                  className="no-margin-form"
-                >
-                  <Select
-                    placeholder="Select User"
-                    options={picUserOptions}
-                    disabled={!selectedPositionId}
-                  />
-                </Form.Item>
-
-                <Form.Item name="planDate" label="Plan Date" className="no-margin-form">
-                  <DatePicker style={{ width: "100%" }} />
-                </Form.Item>
-
-                <Form.Item name="activityStatus" label="Status" className="no-margin-form">
-                  <Select
-                    placeholder="Select Status"
-                    options={makeOptions(dropdowns?.list_woActivityStatuses || [])}
-                  />
-                </Form.Item>
-
-                <Form.Item name="durationDays" label="Duration (Days)" className="no-margin-form">
-                  <Input type="number" min={0} placeholder="0" />
-                </Form.Item>
-              </div>
-
-              <Form.Item name="description" label="Description" className="no-margin-form mt-4">
-                <TextArea rows={2} maxLength={255} showCount />
-              </Form.Item>
-            </Form>
-          </NxBaseContainer>
-        </div>
-
-        {/* Step 1 — Attachment */}
-        <div className={current !== 1 ? "hidden" : ""}>
-          <NxBaseContainer border>
-            <NxAttachmentInput
-              data={attachmentData}
-              updateData={setAttachmentData}
-              setDeleted={setDeletedAttachments}
-              mandatory={false}
-            />
-          </NxBaseContainer>
-        </div>
-      </div>
+      <NxTabs
+        items={tabItems}
+        activeKey={activeTab}
+        onChange={setActiveTab}
+      />
     </NxModal>
   );
 };
