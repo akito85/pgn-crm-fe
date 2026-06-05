@@ -1,16 +1,16 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Button } from "antd";
-import NxCardContainer from "../../../components/Nx/NxCardContainer";
-import NxBaseContainer from "../../../components/Nx/NxBaseContainer";
-import NxTable from "../../../components/Nx/NxTable";
-import NxDate from "../../../components/Nx/NxDatePicker";
-import StatusComponent from "../../../components/StatusComponent";
-import SVGIcon from "../../../assets/Icon/index";
+import { Button, Tooltip } from "antd";
+import NxCardContainer from "../../../../components/Nx/NxCardContainer";
+import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
+import NxTable from "../../../../components/Nx/NxTable";
+import NxDate from "../../../../components/Nx/NxDatePicker";
+import StatusComponent from "../../../../components/StatusComponent";
+import SVGIcon from "../../../../assets/Icon/index";
 import WorkOrderApprovalModal from "./WorkOrderApprovalModal";
-import { getWorkOrders } from "../../../redux/slices/account_management/detailAccount/WorkOrderSlice";
-import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../routes/account_management/customer_account_routes";
+import { getWorkOrders } from "../../../../redux/slices/account_management/detailAccount/WorkOrderSlice";
+import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../routes/account_management/customer_account_routes";
 
 const COLUMNS = [
   { title: "NO",           width: 60,  align: "center", render: (_, __, i) => i + 1 },
@@ -85,38 +85,40 @@ const WorkOrderList = () => {
       width: 120,
       fixed: "right",
       render: (_, record) => (
-        <div className="flex justify-center gap-2">
-          <Button
-            size="small"
-            type="menu"
-            onClick={() =>
-              navigate(ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_WORK_ORDER, {
-                state: { woId: record.id, idAccount: idAccount || record.accountId, idCustomer, accountType },
-              })
-            }
-          >
-            View
-          </Button>
-          <Button
-            size="small"
-            type="secondary"
-            onClick={() =>
-              navigate(ACCOUNT_MANAGEMENT_ROUTES.UPDATE_WORK_ORDER, {
-                state: {
-                  woContext: {
-                    type: "standalone",
-                    idAccount: idAccount || record.accountId,
-                    idCustomer,
-                    accountType,
-                    isUpdate: true,
-                    woId: record.id,
+        <div className="flex justify-center gap-1">
+          <Tooltip title="View">
+            <Button
+              type="table-action"
+              onClick={() =>
+                navigate(ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_SR_WORK_ORDER, {
+                  state: { woId: record.id, idAccount: idAccount || record.accountId, idCustomer, accountType },
+                })
+              }
+            >
+              <SVGIcon name="IconDetail" width={20} />
+            </Button>
+          </Tooltip>
+          <Tooltip title="Edit">
+            <Button
+              type="table-action"
+              onClick={() =>
+                navigate(ACCOUNT_MANAGEMENT_ROUTES.UPDATE_WORK_ORDER, {
+                  state: {
+                    woContext: {
+                      type: "standalone",
+                      idAccount: idAccount || record.accountId,
+                      idCustomer,
+                      accountType,
+                      isUpdate: true,
+                      woId: record.id,
+                    },
                   },
-                },
-              })
-            }
-          >
-            Edit
-          </Button>
+                })
+              }
+            >
+              <SVGIcon name="IconEdit" width={20} />
+            </Button>
+          </Tooltip>
         </div>
       ),
     },
