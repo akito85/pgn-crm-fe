@@ -15,6 +15,7 @@ import { notification } from "./notification";
 import { job_management } from "./job_management";
 import AuditTrailPage from "../app/pages/AuditTrail/AuditTrailPage";
 import { relationship } from "./relationship";
+import { work_order } from "./work_order";
 export const index = [
   {
     path: "/",
@@ -52,4 +53,5 @@ export const index = [
   ...debt_and_collection,
   ...notification,
   ...relationship,
+  ...work_order,
 ];
