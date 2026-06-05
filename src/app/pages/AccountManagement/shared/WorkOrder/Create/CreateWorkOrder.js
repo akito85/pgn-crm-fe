@@ -362,7 +362,7 @@ const CreateWorkOrder = () => {
             successBodyExtra: { return: false },
           })
         ).unwrap();
-        goToView(woContext.woId);
+        woContext.entryPoint === "bad-debt" ? goBack() : goToView(woContext.woId);
       } else {
         const result = await dispatch(
           createWorkOrder({
@@ -373,7 +373,7 @@ const CreateWorkOrder = () => {
             successBodyExtra: { return: false },
           })
         ).unwrap();
-        goToView(result.id);
+        woContext.entryPoint === "bad-debt" ? goBack() : goToView(result.id);
       }
     } catch (_) {
     } finally {
