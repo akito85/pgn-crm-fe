@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
 import { Button, Tooltip } from "antd";
 import NxTable from "../../../../../../../components/Nx/NxTable";
 import NxDate from "../../../../../../../components/Nx/NxDatePicker";
@@ -9,9 +8,9 @@ import StatusComponent from "../../../../../../../components/StatusComponent";
 import SVGIcon from "../../../../../../../assets/Icon/index";
 import WorkOrderApprovalModal from "../../../../WorkOrder/WorkOrderApprovalModal";
 import {
-  getWoSrList,
+  getWorkOrders,
 } from "../../../../../../../redux/slices/account_management/detailAccount/WorkOrderSlice";
-import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
+import useWoNavigation from "../../../../shared/WorkOrder/hooks/useWoNavigation";
 
 const COLUMNS = [
   { title: "NO", width: 60, align: "center", render: (_, __, i) => i + 1 },
@@ -42,7 +41,7 @@ const COLUMNS = [
       </div>
     ) : "-",
   },
-  
+
 ];
 
 const CustomerServiceRequestWorkOrder = ({
@@ -54,21 +53,40 @@ const CustomerServiceRequestWorkOrder = ({
   onSort = () => {},
 }) => {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
   const [showApprovalModal, setShowApprovalModal] = useState(false);
   const [page, setPage] = useState(1);
   const [loadMoreSize] = useState(50);
 
-  const { list_woSrWorkOrders, loading_listWoSrWorkOrders, pagination_woSrWorkOrders } = useSelector(
+  const { list_workOrders, loading_listWo, pagination_listWo } = useSelector(
     (state) => state.workOrder
   );
 
+  const woNavContext = {
+    accountId: idAccount,
+    srId: id,
+    entryPoint: "sr-under-account",
+    source: "SERVICE_REQUEST",
+    sourceId: id,
+    sourceNumber: data_detail?.requestNumber || data_detail?.woNumber || "",
+    idCustomer,
+    accountType,
+  };
+  const { goToCreate, goToView, goToUpdate } = useWoNavigation(woNavContext);
+
   const fetchList = (pg = 1, isLoadMore = false) => {
     if (id && idAccount) {
-      dispatch(getWoSrList({
+      dispatch(getWorkOrders({
         accountId: idAccount,
-        srId: id,
-        body: { page: pg, size: loadMoreSize, filters: [], filterRules: [] },
+        body: {
+          page: pg,
+          size: loadMoreSize,
+          filters: [],
+          filterRules: [],
+          searchs: {
+            source: "SERVICE_REQUEST",
+            sourceId: String(id),
+          },
+        },
         isLoadMore,
       }));
     }
@@ -81,31 +99,13 @@ const CustomerServiceRequestWorkOrder = ({
 
   const handleLoadMore = () => {
     const nextPage = page + 1;
-    if (nextPage <= (pagination_woSrWorkOrders.totalPage || 0)) {
+    if (nextPage <= (pagination_listWo.totalPage || 0)) {
       fetchList(nextPage, true);
       setPage(nextPage);
     }
   };
 
-  const hasMore = list_woSrWorkOrders.length < (pagination_woSrWorkOrders.totalElement || 0);
-
-  const handleCreate = () => {
-    navigate(ACCOUNT_MANAGEMENT_ROUTES.CREATE_SR_WORK_ORDER, {
-      state: {
-        woContext: {
-          type: "sr",
-          srId: id,
-          srNumber: data_detail?.requestNumber || data_detail?.woNumber || "",
-          srCategory: data_detail?.requestCategory || data_detail?.category || "",
-          idAccount,
-          idCustomer,
-          accountType,
-          isUpdate: false,
-          woId: null,
-        },
-      },
-    });
-  };
+  const hasMore = list_workOrders.length < (pagination_listWo.totalElement || 0);
 
   const columnsWithAction = [
     ...COLUMNS,
@@ -119,11 +119,7 @@ const CustomerServiceRequestWorkOrder = ({
           <Tooltip title="View">
             <Button
               type="table-action"
-              onClick={() =>
-                navigate(ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_SR_WORK_ORDER, {
-                  state: { woId: record.id, idAccount, idCustomer, accountType },
-                })
-              }
+              onClick={() => goToView(record.id)}
             >
               <SVGIcon name="IconDetail" width={20} />
             </Button>
@@ -131,23 +127,7 @@ const CustomerServiceRequestWorkOrder = ({
           <Tooltip title="Edit">
             <Button
               type="table-action"
-              onClick={() =>
-                navigate(ACCOUNT_MANAGEMENT_ROUTES.UPDATE_SR_WORK_ORDER, {
-                  state: {
-                    woContext: {
-                      type: "sr",
-                      srId: id,
-                      srNumber: data_detail?.requestNumber || "",
-                      srCategory: data_detail?.requestCategory || "",
-                      idAccount,
-                      idCustomer,
-                      accountType,
-                      isUpdate: true,
-                      woId: record.id,
-                    },
-                  },
-                })
-              }
+              onClick={() => goToUpdate(record.id)}
             >
               <SVGIcon name="IconEdit" width={20} />
             </Button>
@@ -174,7 +154,7 @@ const CustomerServiceRequestWorkOrder = ({
           </Button>
           <Button
             type="submit"
-            onClick={handleCreate}
+            onClick={() => goToCreate()}
             icon={<SVGIcon name="IconButtonCreate" width={14} />}
           >
             Create
@@ -183,7 +163,7 @@ const CustomerServiceRequestWorkOrder = ({
 
         <NxTable
           idTable="sr-workorder-table"
-          dataSource={list_woSrWorkOrders.map((item, i) => ({ ...item, key: item.id ?? i }))}
+          dataSource={list_workOrders.map((item, i) => ({ ...item, key: item.id ?? i }))}
           columns={columnsWithAction}
           usePagination={false}
           useInfiniteScroll={true}
@@ -194,7 +174,7 @@ const CustomerServiceRequestWorkOrder = ({
           fontSize="small"
           tablePadding="small"
           tableScrolled={{ x: "max-content" }}
-          loading={loading_listWoSrWorkOrders}
+          loading={loading_listWo}
           onSort={onSort}
         />
       </NxBaseContainer>
