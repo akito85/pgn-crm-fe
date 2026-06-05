@@ -15,12 +15,16 @@ import {
 } from "../../../../../../../../../redux/slices/system_setup/dataRequirementTemplate";
 import { getSrDataRequirementContacts } from "../../../../../../../../../redux/slices/account_management/detailAccount/srDataRequirementContactSlice";
 import { getSrDataRequirementAddress } from "../../../../../../../../../redux/slices/account_management/detailAccount/srDataRequirementAddressSlice";
+import { getSrDataRequirementSa } from "../../../../../../../../../redux/slices/account_management/detailAccount/srDataRequirementSaSlice";
+import { getSrDataRequirementAdditionalInfo } from "../../../../../../../../../redux/slices/account_management/detailAccount/srDataRequirementAdditionalInfoSlice";
 
 export default function InfoDataRequirement({ form, dropdowns, idAccount }) {
   const dispatch = useDispatch();
   const { data_filter, loading_filter } = useSelector((state) => state.dataRequirementTemplate);
   const { data: data_contacts, loading: loading_contacts } = useSelector((state) => state.srDataRequirementContact);
   const { data: data_address, loading: loading_address } = useSelector((state) => state.srDataRequirementAddress);
+  const { data: data_sa, loading: loading_sa } = useSelector((state) => state.srDataRequirementSa);
+  const { data: data_additionalInfo, loading: loading_additionalInfo } = useSelector((state) => state.srDataRequirementAdditionalInfo);
 
   const [dataRequirement, setDataRequirement] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -72,12 +76,14 @@ export default function InfoDataRequirement({ form, dropdowns, idAccount }) {
     }
   }, [data_filter]);
 
-  // Fetch data when user selects "Contact" or "Address" type in edit modal
+  // Fetch data when user selects "Contact", "Address", or "Service Agreement" type in edit modal
   useEffect(() => {
     if (!idAccount) return;
     const type = selectedEditType?.toLowerCase();
     if (type === "contact") dispatch(getSrDataRequirementContacts(idAccount));
     if (type === "address") dispatch(getSrDataRequirementAddress(idAccount));
+    if (type === "service agreement") dispatch(getSrDataRequirementSa(idAccount));
+    if (type === "additoinal information") dispatch(getSrDataRequirementAdditionalInfo(idAccount));
   }, [selectedEditType, idAccount]);
 
   // Build selectable rows for the choose table
@@ -86,19 +92,23 @@ export default function InfoDataRequirement({ form, dropdowns, idAccount }) {
     let source = [];
     if (type === "contact") source = Array.isArray(data_contacts) ? data_contacts : [];
     else if (type === "address") source = Array.isArray(data_address) ? data_address : [];
+    else if (type === "service agreement") source = Array.isArray(data_sa) ? data_sa : [];
+    else if (type === "additoinal information") source = Array.isArray(data_additionalInfo) ? data_additionalInfo : [];
     return source.map((item, index) => ({
       key: index,
       no: index + 1,
       value: item.value,
     }));
-  }, [data_contacts, data_address, selectedEditType]);
+  }, [data_contacts, data_address, data_sa, data_additionalInfo, selectedEditType]);
 
   const isChooseTableLoading = useMemo(() => {
     const type = selectedEditType?.toLowerCase();
     if (type === "contact") return loading_contacts;
     if (type === "address") return loading_address;
+    if (type === "service agreement") return loading_sa;
+    if (type === "additoinal information") return loading_additionalInfo;
     return false;
-  }, [selectedEditType, loading_contacts, loading_address]);
+  }, [selectedEditType, loading_contacts, loading_address, loading_sa, loading_additionalInfo]);
 
   const getDropdownItems = (dropdownKey) => {
     const dropdown = dropdowns?.[dropdownKey];
