@@ -1,6 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate, useLocation } from "react-router-dom";
 import { Button, Form, Spin } from "antd";
 import { WarningOutlined } from "@ant-design/icons";
 
@@ -11,6 +10,8 @@ import HeaderDetail from "../../../CustomerAccountDetail/HeaderDetail";
 import SVGIcon from "../../../../../../assets/Icon/index";
 import { ModalConfirm } from "../../../../../../components/Modal/ModalPopUp";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../routes/account_management/customer_account_routes";
+import useWoContext from "../hooks/useWoContext";
+import useWoNavigation from "../hooks/useWoNavigation";
 
 import WoInfoStep from "./StepContents/WoInfoStep";
 import WoActivityStep from "./StepContents/WoActivityStep";
@@ -44,14 +45,13 @@ import NxDate from "../../../../../../components/Nx/NxDatePicker";
 import moment from "moment";
 
 const CreateWorkOrder = () => {
-  const location = useLocation();
-  const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const woContext = location.state?.woContext || {};
+  const woContext = useWoContext();
+  const { goBack, goToView } = useWoNavigation(woContext);
   const isUpdate = woContext.isUpdate === true;
-  const isSrContext = woContext.type === "sr";
-  const isStandalone = woContext.type === "standalone";
+  const isSrContext = woContext.source === "SERVICE_REQUEST";
+  const isStandalone = woContext.accountId === null;
 
   const [form] = Form.useForm();
   const [current, setCurrent] = useState(0);
@@ -65,10 +65,10 @@ const CreateWorkOrder = () => {
   const [attachmentDataSource, setAttachmentDataSource] = useState([]);
   const [deletedAttachments, setDeletedAttachments] = useState([]);
 
-  const [selectedAccountId, setSelectedAccountId] = useState(woContext.idAccount || null);
+  const [selectedAccountId, setSelectedAccountId] = useState(woContext.accountId || null);
   const [selectedAccountType, setSelectedAccountType] = useState(woContext.accountType || null);
 
-  const accountId = isSrContext ? woContext.idAccount : (selectedAccountId || woContext.idAccount);
+  const accountId = isSrContext ? woContext.accountId : (selectedAccountId || woContext.accountId);
 
   const {
     detail_workOrder,
@@ -121,7 +121,7 @@ const CreateWorkOrder = () => {
 
   // ─── Load account detail ──────────────────────────────────────────────────
   useEffect(() => {
-    const idAccount = woContext.idAccount || selectedAccountId;
+    const idAccount = woContext.accountId || selectedAccountId;
     const idCustomer = woContext.idCustomer;
     const accType = woContext.accountType || selectedAccountType;
     if (idAccount && accType) {
@@ -131,7 +131,7 @@ const CreateWorkOrder = () => {
         dispatch(getAccountOneTimeDetail({ idCustomer, idAccount }));
       }
     }
-  }, [dispatch, woContext.idAccount, woContext.idCustomer, woContext.accountType, selectedAccountId, selectedAccountType]);
+  }, [dispatch, woContext.accountId, woContext.idCustomer, woContext.accountType, selectedAccountId, selectedAccountType]);
 
   // ─── Load WO detail in update mode ───────────────────────────────────────
   useEffect(() => {
@@ -362,8 +362,9 @@ const CreateWorkOrder = () => {
             successBodyExtra: { return: false },
           })
         ).unwrap();
+        goToView(woContext.woId);
       } else {
-        await dispatch(
+        const result = await dispatch(
           createWorkOrder({
             accountId,
             body: dataSend,
@@ -372,21 +373,7 @@ const CreateWorkOrder = () => {
             successBodyExtra: { return: false },
           })
         ).unwrap();
-      }
-      if (isSrContext) {
-        navigate(ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_SERVICE_REQUEST, {
-          state: {
-            id: woContext.srId,
-            idAccount: woContext.idAccount,
-            idCustomer: woContext.idCustomer,
-            type: woContext.accountType,
-            activeTab: "work-order",
-          },
-        });
-      } else {
-        navigate(ACCOUNT_MANAGEMENT_ROUTES.VIEW_WORK_ORDERS, {
-          state: { idAccount: accountId, idCustomer: woContext.idCustomer, accountType: selectedAccountType },
-        });
+        goToView(result.id);
       }
     } catch (_) {
     } finally {
@@ -439,7 +426,7 @@ const CreateWorkOrder = () => {
             <HeaderDetail
               data_header={["CUSTOMER INFORMATION", "ACCOUNT INFORMATION"]}
               dispatch={dispatch}
-              idAccount={isSrContext ? woContext.idAccount : selectedAccountId}
+              idAccount={isSrContext ? woContext.accountId : selectedAccountId}
               idCustomer={isSrContext ? woContext.idCustomer : null}
               type={isSrContext ? woContext.accountType : selectedAccountType}
               collapsible={true}
@@ -513,21 +500,7 @@ const CreateWorkOrder = () => {
       <ModalConfirm
         isOpen={modalBack}
         handleCancel={() => setModalBack(false)}
-        handleOk={() => {
-          if (isSrContext) {
-            navigate(ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_SERVICE_REQUEST, {
-              state: {
-                id: woContext.srId,
-                idAccount: woContext.idAccount,
-                idCustomer: woContext.idCustomer,
-                type: woContext.accountType,
-                activeTab: "work-order",
-              },
-            });
-          } else {
-            navigate(-1);
-          }
-        }}
+        handleOk={() => goBack()}
         width={400}
       >
         <div className="flex justify-center mt-5 gap-[20px]">

@@ -35,19 +35,20 @@ const WoInfoStep = ({ form, woContext, dropdowns, onAccountSelect, onCategoryCha
 
   const [showWoRefModal, setShowWoRefModal] = useState(false);
   const [showSrRefModal, setShowSrRefModal] = useState(false);
+  const isSourceLocked = woContext.source !== "MANUAL";
   const [selectedSource, setSelectedSource] = useState(
-    woContext.type === "sr" ? "SERVICE_REQUEST" : undefined
+    isSourceLocked ? woContext.source : undefined
   );
   const [woRefPage, setWoRefPage] = useState(1);
   const [woRefSort, setWoRefSort] = useState("");
 
   useEffect(() => {
-    if (woContext.type === "sr") {
+    if (isSourceLocked) {
       form.setFieldsValue({
-        source: "SERVICE_REQUEST",
-        sourceReference: `${woContext.srNumber}${woContext.srCategory ? ` - ${woContext.srCategory}` : ""}`,
+        source: woContext.source,
+        sourceReference: `${woContext.srNumber || ""}${woContext.srCategory ? ` - ${woContext.srCategory}` : ""}`,
       });
-      setSelectedSource("SERVICE_REQUEST");
+      setSelectedSource(woContext.source);
     }
   }, [woContext, form]);
 
@@ -88,8 +89,7 @@ const WoInfoStep = ({ form, woContext, dropdowns, onAccountSelect, onCategoryCha
     }
   };
 
-  const isSrContext = woContext.type === "sr";
-  const isStandalone = woContext.type === "standalone";
+  const isStandalone = woContext.accountId === null;
 
   const makeOptions = (list) =>
     (Array.isArray(list) ? list : []).map((item) => ({
@@ -142,7 +142,7 @@ const WoInfoStep = ({ form, woContext, dropdowns, onAccountSelect, onCategoryCha
               <Select
                 placeholder="Select Source"
                 options={SOURCES}
-                disabled={isSrContext}
+                disabled={isSourceLocked}
                 onChange={handleSourceChange}
               />
             </Form.Item>
@@ -150,14 +150,14 @@ const WoInfoStep = ({ form, woContext, dropdowns, onAccountSelect, onCategoryCha
             {/* Source Reference */}
             <Form.Item name="sourceReference" label="Source Reference">
               <Input
-                disabled={isSrContext || selectedSource === "MANUAL" || !selectedSource}
+                disabled={isSourceLocked || selectedSource === "MANUAL" || !selectedSource}
                 placeholder={
                   selectedSource === "MANUAL" || !selectedSource
                     ? "N/A (Manual source)"
                     : "Select Source Reference"
                 }
                 addonAfter={
-                  !isSrContext && selectedSource === "SERVICE_REQUEST" ? (
+                  !isSourceLocked && selectedSource === "SERVICE_REQUEST" ? (
                     <Button size="small" type="text" onClick={() => setShowSrRefModal(true)}>
                       Select
                     </Button>
