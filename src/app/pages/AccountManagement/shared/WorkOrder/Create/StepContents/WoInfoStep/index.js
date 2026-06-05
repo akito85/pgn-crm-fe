@@ -46,7 +46,7 @@ const WoInfoStep = ({ form, woContext, dropdowns, onAccountSelect, onCategoryCha
     if (isSourceLocked) {
       form.setFieldsValue({
         source: woContext.source,
-        sourceReference: `${woContext.srNumber || ""}${woContext.srCategory ? ` - ${woContext.srCategory}` : ""}`,
+        sourceReference: woContext.sourceReference || "",
       });
       setSelectedSource(woContext.source);
     }
@@ -128,9 +128,11 @@ const WoInfoStep = ({ form, woContext, dropdowns, onAccountSelect, onCategoryCha
           <div className="grid grid-cols-3 gap-x-4">
             {/* WO Reference */}
             <Form.Item name="workOrderReferenceId" hidden><Input /></Form.Item>
-            <Form.Item name="workOrderReference" label="Work Order Reference">
+            <Form.Item label="Work Order Reference">
               <div className="flex gap-x-1">
-                <Input disabled placeholder="Select Work Order Reference" />
+                <Form.Item name="workOrderReference" noStyle>
+                  <Input disabled placeholder="Select Work Order Reference" />
+                </Form.Item>
                 <Button type="submit" className="min-w-[120px]" onClick={handleOpenWoRefModal}>
                   Select
                 </Button>

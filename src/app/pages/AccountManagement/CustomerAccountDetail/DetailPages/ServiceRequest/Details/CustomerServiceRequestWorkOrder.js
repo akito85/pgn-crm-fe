@@ -67,7 +67,9 @@ const CustomerServiceRequestWorkOrder = ({
     entryPoint: "sr-under-account",
     source: "SERVICE_REQUEST",
     sourceId: id,
-    sourceNumber: data_detail?.requestNumber || data_detail?.woNumber || "",
+    sourceReference: [data_detail?.requestNumber, data_detail?.subCategory]
+      .filter(Boolean)
+      .join(" - "),
     idCustomer,
     accountType,
   };
