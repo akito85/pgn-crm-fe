@@ -148,7 +148,7 @@ const DataRequirementTemplateView = () => {
     ["View", "Update", "Delete"],
     itemActions,
     "View",
-    "table"
+    "page"
   ).map((col) => ({ ...col, width: 100, align: "center" }));
 
   const baseColumns = useMemo(

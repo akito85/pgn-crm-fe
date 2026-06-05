@@ -89,7 +89,12 @@ const DataRequirementTemplateForm = ({ type }) => {
       });
       setSourceType(data_detail.sourceType || "Service Request");
       setDetails(
-        (data_detail.details || []).map((d, i) => ({ ...d, key: d.id ?? i }))
+        (data_detail.details || []).map((d, i) => ({
+          ...d,
+          key: d.id ?? i,
+          typeId: d.typeId ?? d.id,
+          typeName: d.typeName ?? d.type,
+        }))
       );
     }
   }, [data_detail, form, isUpdate]);
@@ -118,7 +123,7 @@ const DataRequirementTemplateForm = ({ type }) => {
   const handleSaveDetail = () => {
     detailForm.validateFields().then((values) => {
       const typeItem = (data_requirement_types || []).find((item) => item.value === values.type);
-      const enriched = { ...values, typeName: typeItem?.name || values.type };
+      const enriched = { ...values, typeId: typeItem?.id, typeName: typeItem?.name || values.type };
       if (editingRecord) {
         setDetails((prev) =>
           prev.map((d) =>
@@ -144,7 +149,7 @@ const DataRequirementTemplateForm = ({ type }) => {
       category: values.category,
       subCategory: values.sourceType === "Service Request" ? values.subCategory : null,
       description: values.description,
-      details: details.map((d) => ({ type: d.type })),
+      details: details.map((d) => ({ type: d.typeName ?? d.type, typeId: d.typeId })),
     };
 
     if (isUpdate) {
