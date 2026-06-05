@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate, useLocation } from "react-router-dom";
 import { Button, Tooltip } from "antd";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
@@ -10,7 +9,8 @@ import StatusComponent from "../../../../components/StatusComponent";
 import SVGIcon from "../../../../assets/Icon/index";
 import WorkOrderApprovalModal from "./WorkOrderApprovalModal";
 import { getWorkOrders } from "../../../../redux/slices/account_management/detailAccount/WorkOrderSlice";
-import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../routes/account_management/customer_account_routes";
+import useWoContext from "../shared/WorkOrder/hooks/useWoContext";
+import useWoNavigation from "../shared/WorkOrder/hooks/useWoNavigation";
 
 const COLUMNS = [
   { title: "NO",           width: 60,  align: "center", render: (_, __, i) => i + 1 },
@@ -32,10 +32,8 @@ const COLUMNS = [
 
 const WorkOrderList = () => {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  const { idAccount, idCustomer, accountType } = location.state || {};
+  const woContext = useWoContext();
+  const { goToCreate, goToView, goToUpdate } = useWoNavigation(woContext);
 
   const { list_workOrders, pagination_listWo, loading_listWo } = useSelector(
     (state) => state.workOrder
@@ -48,10 +46,9 @@ const WorkOrderList = () => {
   const [search, setSearch] = useState({});
 
   const fetchList = (pg = 1, isLoadMore = false) => {
-    if (!idAccount) return;
     dispatch(
       getWorkOrders({
-        accountId: idAccount,
+        accountId: woContext.accountId,
         body: { page: pg, size: loadMoreSize, sort, searchs: search, filters: [], filterRules: [] },
         isLoadMore,
       })
@@ -61,7 +58,7 @@ const WorkOrderList = () => {
   useEffect(() => {
     fetchList(1, false);
     setPage(1);
-  }, [dispatch, idAccount, sort, search]);
+  }, [dispatch, woContext.accountId, sort, search]);
 
   const handleLoadMore = () => {
     const nextPage = page + 1;
@@ -89,11 +86,7 @@ const WorkOrderList = () => {
           <Tooltip title="View">
             <Button
               type="table-action"
-              onClick={() =>
-                navigate(ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_SR_WORK_ORDER, {
-                  state: { woId: record.id, idAccount: idAccount || record.accountId, idCustomer, accountType },
-                })
-              }
+              onClick={() => goToView(record.id)}
             >
               <SVGIcon name="IconDetail" width={20} />
             </Button>
@@ -101,20 +94,7 @@ const WorkOrderList = () => {
           <Tooltip title="Edit">
             <Button
               type="table-action"
-              onClick={() =>
-                navigate(ACCOUNT_MANAGEMENT_ROUTES.UPDATE_WORK_ORDER, {
-                  state: {
-                    woContext: {
-                      type: "standalone",
-                      idAccount: idAccount || record.accountId,
-                      idCustomer,
-                      accountType,
-                      isUpdate: true,
-                      woId: record.id,
-                    },
-                  },
-                })
-              }
+              onClick={() => goToUpdate(record.id)}
             >
               <SVGIcon name="IconEdit" width={20} />
             </Button>
@@ -142,20 +122,7 @@ const WorkOrderList = () => {
             </Button>
             <Button
               type="submit"
-              onClick={() =>
-                navigate(ACCOUNT_MANAGEMENT_ROUTES.CREATE_WORK_ORDER, {
-                  state: {
-                    woContext: {
-                      type: "standalone",
-                      idAccount,
-                      idCustomer,
-                      accountType,
-                      isUpdate: false,
-                      woId: null,
-                    },
-                  },
-                })
-              }
+              onClick={() => goToCreate()}
               icon={<SVGIcon name="IconButtonCreate" width={14} />}
             >
               Create
@@ -184,7 +151,7 @@ const WorkOrderList = () => {
 
       <WorkOrderApprovalModal
         isOpen={showApprovalModal}
-        accountId={idAccount}
+        accountId={woContext.accountId}
         handleCancel={() => setShowApprovalModal(false)}
         afterFinish={() => fetchList(1, false)}
       />
