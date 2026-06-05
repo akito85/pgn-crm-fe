@@ -18,6 +18,7 @@ const WoAttachmentStep = ({ data, updateData, setDeleted }) => {
           updateData={updateData}
           setDeleted={setDeleted}
           mandatory={false}
+          autoHeight={true}
         />
       </NxBaseContainer>
     </NxCardContainer>
