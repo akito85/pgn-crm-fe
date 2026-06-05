@@ -1,3 +1,6 @@
+import WorkOrderList from "../../app/pages/AccountManagement/WorkOrder/WorkOrderList";
+import WorkOrderDetail from "../../app/pages/AccountManagement/WorkOrder/WorkOrderDetail";
+import CreateWorkOrder from "../../app/pages/AccountManagement/shared/WorkOrder/Create/CreateWorkOrder";
 import CustomerAccountList from "../../app/pages/AccountManagement/CustomerAccount/CustomerAccountList";
 import CustomerAccountDetail from "../../app/pages/AccountManagement/CustomerAccountDetail/CustomerAccountDetail";
 import ServiceAgreementDetail from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/ServiceAgreement/DetailServiceAgreement";
@@ -267,5 +270,14 @@ export const ACCOUNT_MANAGEMENT_ELEMENTS = {
   // EQUIPMENT
   CREATE_EQUIPMENT_PAGE: <EquipmentForm type={"create"}/>,
   UPDATE_EQUIPMENT_PAGE: <EquipmentForm type={"update"} />,
+
+  // Work Order
+  VIEW_WORK_ORDERS_PAGE:          <WorkOrderList />,
+  VIEW_DETAIL_WORK_ORDER_PAGE:    <WorkOrderDetail />,
+  CREATE_WORK_ORDER_PAGE:         <CreateWorkOrder />,
+  UPDATE_WORK_ORDER_PAGE:         <CreateWorkOrder />,
+  VIEW_DETAIL_SR_WORK_ORDER_PAGE: <WorkOrderDetail />,
+  CREATE_SR_WORK_ORDER_PAGE:      <CreateWorkOrder />,
+  UPDATE_SR_WORK_ORDER_PAGE:      <CreateWorkOrder />,
 
 };

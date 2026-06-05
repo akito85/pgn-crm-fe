@@ -13,7 +13,7 @@ import NxAttachmentInput from "../../../../components/Nx/NxAttachmentInput";
 import HeaderDetail from "../CustomerAccountDetail/HeaderDetail";
 import StatusComponent from "../../../../components/StatusComponent";
 import WoStatusUpdateModal from "./WoStatusUpdateModal";
-import { WORK_ORDER_ROUTES } from "../../../../routes/work_order/work_order_routes";
+import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../routes/account_management/customer_account_routes";
 import useWoContext from "../shared/WorkOrder/hooks/useWoContext";
 import useWoNavigation from "../shared/WorkOrder/hooks/useWoNavigation";
 import {
@@ -289,7 +289,7 @@ const WorkOrderDetail = () => {
 
   const routes = [
     { path: "", breadcrumbName: "Account Management" },
-    { path: WORK_ORDER_ROUTES.WO_LIST, breadcrumbName: "Work Orders" },
+    { path: ACCOUNT_MANAGEMENT_ROUTES.VIEW_WORK_ORDERS, breadcrumbName: "Work Orders" },
     { path: "", breadcrumbName: "Detail" },
   ];
 

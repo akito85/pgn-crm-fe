@@ -1,71 +1,61 @@
 import { useNavigate } from "react-router-dom";
 
+// Static WO paths (RBAC-configured, no dynamic segments)
+const WO_PATHS = {
+  LIST:      "/account-management/work-orders",
+  VIEW:      "/account-management/work-orders/view",
+  CREATE:    "/account-management/work-orders/create",
+  UPDATE:    "/account-management/work-orders/update",
+  SR_VIEW:   "/account-management/account-standard/service-requests/work-orders/view",
+  SR_CREATE: "/account-management/account-standard/service-requests/work-orders/create",
+  SR_UPDATE: "/account-management/account-standard/service-requests/work-orders/update",
+};
+
 /**
- * Builds context-aware navigation URLs based on entryPoint.
- * Each entry point has its own URL prefix for WO operations.
+ * Context-aware navigation helpers for Work Order components.
+ * Navigates to static paths (RBAC-safe) with woContext in navigation state.
  */
 const useWoNavigation = (woContext) => {
   const navigate = useNavigate();
 
-  const getBaseUrl = () => {
-    const { entryPoint, accountId, srId } = woContext;
-    switch (entryPoint) {
-      case "account-detail":
-        return `/account-management/accounts/${accountId}/work-orders`;
-      case "sr-under-account":
-        return `/account-management/accounts/${accountId}/service-requests/${srId}/work-orders`;
-      case "sr-standalone":
-        return `/service-requests/${srId}/work-orders`;
-      case "standalone":
-      case "bad-debt":
-      default:
-        return "/work-orders";
-    }
-  };
+  const isSr = woContext.entryPoint === "sr-under-account" ||
+               woContext.entryPoint === "sr-standalone";
 
   const goBack = () => {
     switch (woContext.entryPoint) {
-      case "account-detail":
-        return navigate(
-          `/account-management/accounts/${woContext.accountId}/work-orders`
-        );
-      case "sr-under-account":
-        return navigate(
-          `/account-management/accounts/${woContext.accountId}/service-requests/${woContext.srId}`
-        );
-      case "sr-standalone":
-        return navigate(`/service-requests/${woContext.srId}`);
       case "bad-debt":
         return navigate(-1);
+      case "sr-under-account":
+      case "sr-standalone":
+        return navigate(-1);
       default:
-        return navigate("/work-orders");
+        return navigate(WO_PATHS.LIST, { state: { woContext } });
     }
   };
 
   const goToCreate = (overrides = {}) => {
-    const base = getBaseUrl();
-    navigate(`${base}/create`, {
+    const path = isSr ? WO_PATHS.SR_CREATE : WO_PATHS.CREATE;
+    navigate(path, {
       state: { woContext: { ...woContext, ...overrides } },
     });
   };
 
   const goToView = (woId) => {
-    const base = getBaseUrl();
-    navigate(`${base}/view/${woId}`, {
-      state: { woContext },
+    const path = isSr ? WO_PATHS.SR_VIEW : WO_PATHS.VIEW;
+    navigate(path, {
+      state: { woContext: { ...woContext, woId } },
     });
   };
 
   const goToUpdate = (woId) => {
-    const base = getBaseUrl();
-    navigate(`${base}/update/${woId}`, {
-      state: { woContext },
+    const path = isSr ? WO_PATHS.SR_UPDATE : WO_PATHS.UPDATE;
+    navigate(path, {
+      state: { woContext: { ...woContext, woId } },
     });
   };
 
   const goToList = () => {
-    const base = getBaseUrl();
-    navigate(base, { state: { woContext } });
+    navigate(WO_PATHS.LIST, { state: { woContext } });
   };
 
   return { goBack, goToCreate, goToView, goToUpdate, goToList };

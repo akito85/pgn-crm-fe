@@ -1,53 +1,52 @@
 // useWoContext.js
-import { useParams, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 
 /**
- * Derives WO context from URL params + optional navigation state overrides.
+ * Derives WO context from navigation state + pathname.
  *
- * URL pattern → entryPoint + source:
- *   /account-management/accounts/:accountId/service-requests/:srId/work-orders/* → sr-under-account, SERVICE_REQUEST
- *   /account-management/accounts/:accountId/work-orders/*                        → account-detail, MANUAL
- *   /service-requests/:srId/work-orders/*                                        → sr-standalone, SERVICE_REQUEST
- *   /work-orders/*                                                               → standalone, MANUAL
+ * All IDs (accountId, srId, woId) come from location.state.woContext — NOT URL params.
+ * entryPoint is derived from state override first, then pathname pattern, then accountId presence.
  *
- * Navigation state overrides (e.g. from Bad Debt):
- *   navigate("/work-orders/create", { state: { woContext: { source: "BAD_DEBT", sourceId: 123, ... } } })
+ * Pathname patterns for entryPoint fallback:
+ *   /account-management/account-standard/service-requests/* → sr-under-account
+ *   (other paths) + accountId in state                     → account-detail
+ *   (other paths) no accountId in state                    → standalone
+ *
+ * Bad Debt override:
+ *   navigate("/account-management/work-orders/create", {
+ *     state: { woContext: { source: "BAD_DEBT", entryPoint: "bad-debt", sourceId: 123, ... } }
+ *   })
  */
 const useWoContext = () => {
-  const { accountId, srId, woId } = useParams();
   const location = useLocation();
-  const stateOverrides = location.state?.woContext || {};
-
+  const stateCtx = location.state?.woContext || {};
   const pathname = location.pathname;
-  let entryPoint, source;
 
-  if (
-    pathname.startsWith("/account-management") &&
-    pathname.includes("/service-requests/")
-  ) {
-    entryPoint = "sr-under-account";
-    source = "SERVICE_REQUEST";
-  } else if (pathname.startsWith("/account-management")) {
-    entryPoint = "account-detail";
-    source = "MANUAL";
-  } else if (pathname.startsWith("/service-requests/")) {
-    entryPoint = "sr-standalone";
-    source = "SERVICE_REQUEST";
-  } else {
-    entryPoint = "standalone";
-    source = "MANUAL";
+  const accountId = stateCtx.accountId || null;
+  const srId = stateCtx.srId || null;
+  const woId = stateCtx.woId || null;
+
+  let entryPoint = stateCtx.entryPoint;
+  if (!entryPoint) {
+    if (pathname.includes("/service-requests/")) {
+      entryPoint = "sr-under-account";
+    } else if (accountId) {
+      entryPoint = "account-detail";
+    } else {
+      entryPoint = "standalone";
+    }
   }
 
   return {
-    accountId: accountId ? Number(accountId) : null,
-    srId: srId ? Number(srId) : null,
-    woId: woId ? Number(woId) : null,
+    ...stateCtx,
+    accountId,
+    srId,
+    woId,
     entryPoint,
-    source,
-    sourceId: null,
-    sourceNumber: null,
+    source: stateCtx.source || "MANUAL",
+    sourceId: stateCtx.sourceId || null,
+    sourceNumber: stateCtx.sourceNumber || null,
     isUpdate: pathname.includes("/update"),
-    ...stateOverrides,
   };
 };
 

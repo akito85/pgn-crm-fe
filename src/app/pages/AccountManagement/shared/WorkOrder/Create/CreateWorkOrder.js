@@ -10,7 +10,6 @@ import HeaderDetail from "../../../CustomerAccountDetail/HeaderDetail";
 import SVGIcon from "../../../../../../assets/Icon/index";
 import { ModalConfirm } from "../../../../../../components/Modal/ModalPopUp";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../routes/account_management/customer_account_routes";
-import { WORK_ORDER_ROUTES } from "../../../../../../routes/work_order/work_order_routes";
 import useWoContext from "../hooks/useWoContext";
 import useWoNavigation from "../hooks/useWoNavigation";
 
@@ -404,7 +403,7 @@ const CreateWorkOrder = () => {
       ]
     : [
         { path: "", breadcrumbName: "Account Management" },
-        { path: WORK_ORDER_ROUTES.WO_LIST, breadcrumbName: "Work Orders" },
+        { path: ACCOUNT_MANAGEMENT_ROUTES.VIEW_WORK_ORDERS, breadcrumbName: "Work Orders" },
         { path: "", breadcrumbName: isUpdate ? "Update" : "Create" },
       ];
 
