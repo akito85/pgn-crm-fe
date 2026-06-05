@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Button, Form, Input, Select, DatePicker } from "antd";
+import { Button, Form, Input, Select, DatePicker, Tooltip } from "antd";
 import NxCardContainer from "../../../../../../../../components/Nx/NxCardContainer";
 import NxBaseContainer from "../../../../../../../../components/Nx/NxBaseContainer";
 import NxModal from "../../../../../../../../components/Nx/NxModal";
@@ -12,8 +12,8 @@ import {
   getClosedWorkOrders,
   getWoActivitiesByCategory,
 } from "../../../../../../../../redux/slices/account_management/detailAccount/WorkOrderSlice";
+import InputComponent from "../../../../../../../../components/InputComponent";
 
-const { TextArea } = Input;
 
 const SOURCES = [
   { value: "SERVICE_REQUEST", label: "Service Request" },
@@ -129,15 +129,12 @@ const WoInfoStep = ({ form, woContext, dropdowns, onAccountSelect, onCategoryCha
             {/* WO Reference */}
             <Form.Item name="workOrderReferenceId" hidden><Input /></Form.Item>
             <Form.Item name="workOrderReference" label="Work Order Reference">
-              <Input
-                disabled
-                placeholder="Select Work Order Reference"
-                addonAfter={
-                  <Button size="small" type="text" onClick={handleOpenWoRefModal}>
-                    Select
-                  </Button>
-                }
-              />
+              <div className="flex gap-x-1">
+                <Input disabled placeholder="Select Work Order Reference" />
+                <Button type="submit" className="min-w-[120px]" onClick={handleOpenWoRefModal}>
+                  Select
+                </Button>
+              </div>
             </Form.Item>
 
             {/* Source */}
@@ -215,7 +212,7 @@ const WoInfoStep = ({ form, woContext, dropdowns, onAccountSelect, onCategoryCha
               label="Request Date"
               rules={[{ required: true, message: requiredMessage("Request Date") }]}
             >
-              <DatePicker style={{ width: "100%" }} />
+              <DatePicker style={{ width: "100%" }} format="DD MMM YYYY" />
             </Form.Item>
 
             {/* Completion Plan Date */}
@@ -224,7 +221,7 @@ const WoInfoStep = ({ form, woContext, dropdowns, onAccountSelect, onCategoryCha
               label="Completion Plan Date"
               rules={[{ required: true, message: requiredMessage("Completion Plan Date") }]}
             >
-              <DatePicker style={{ width: "100%" }} />
+              <DatePicker style={{ width: "100%" }} format="DD MMM YYYY" />
             </Form.Item>
 
             {/* Due Date */}
@@ -233,13 +230,13 @@ const WoInfoStep = ({ form, woContext, dropdowns, onAccountSelect, onCategoryCha
               label="Due Date"
               rules={[{ required: true, message: requiredMessage("Due Date") }]}
             >
-              <DatePicker style={{ width: "100%" }} />
+              <DatePicker style={{ width: "100%" }} format="DD MMM YYYY" />
             </Form.Item>
           </div>
 
           {/* Description — full width */}
           <Form.Item name="description" label="Description">
-            <TextArea rows={3} maxLength={255} showCount />
+            <InputComponent type="textarea" />
           </Form.Item>
         </NxBaseContainer>
       </NxCardContainer>
@@ -252,7 +249,9 @@ const WoInfoStep = ({ form, woContext, dropdowns, onAccountSelect, onCategoryCha
         width={900}
         footer={
           <div className="flex justify-end">
-            <Button onClick={() => setShowWoRefModal(false)}>Close</Button>
+            <Button type="menu" key="close" onClick={() => setShowWoRefModal(false)}>
+              Back
+            </Button>
           </div>
         }
       >
@@ -269,9 +268,18 @@ const WoInfoStep = ({ form, woContext, dropdowns, onAccountSelect, onCategoryCha
                   width: 100,
                   fixed: "right",
                   render: (_, record) => (
-                    <Button size="small" type="submit" onClick={() => handleSelectWoRef(record)}>
-                      Select
-                    </Button>
+                    <div className="flex w-full justify-center gap-4">
+                      <Tooltip title="Select">
+                        <div className="pt-1 cursor-pointer">
+                          <SVGIcon
+                            name="IconActionCreate"
+                            color={"#0075bf"}
+                            width={20}
+                            onClick={() => handleSelectWoRef(record)}
+                          />
+                        </div>
+                      </Tooltip>
+                    </div>
                   ),
                 },
               ]}
