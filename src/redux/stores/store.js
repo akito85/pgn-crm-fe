@@ -130,6 +130,7 @@ import transferToCustomerReducer from "../slices/receipt_collection/transferToCu
 import restructureReducer from "../slices/receipt_collection/restructure";
 import restructureMonitoringReducer from "../slices/receipt_collection/restructureMonitoring";
 import notificationsReducer from "../slices/notifications";
+import notificationAdminReducer from "../slices/notificationAdmin";
 import multiDestinationReducer from "../slices/account_management/detailAccount/MultiDestinationSlice";
 import gasDepositReducer from "../slices/account_management/detailAccount/GasDepositSlice";
 import deductionReducer from "../slices/receipt_collection/deduction";
@@ -347,6 +348,7 @@ const reducer = combineReducers({
 
   // notifications
   notifications: notificationsReducer,
+  notificationAdmin: notificationAdminReducer,
 
   // audit trail
   audit_trail: auditTrailReducer,
