@@ -19,6 +19,7 @@ export const notificationAdminKeys = {
   all: ["notificationAdmin"],
   templates: (filter) => ["notificationAdmin", "templates", filter],
   catalog: (module) => ["notificationAdmin", "catalog", module],
+  resolvers: ["notificationAdmin", "resolvers"],
 };
 
 // ─── Templates ────────────────────────────────────────────────────────────────
@@ -64,5 +65,18 @@ export function useSaveCatalogField() {
   return useMutation({
     mutationFn: (field) => notificationApi.saveCatalogField(field),
     onSuccess: () => qc.invalidateQueries({ queryKey: notificationAdminKeys.all }),
+  });
+}
+
+// ─── Resolvers (guided register form) ───────────────────────────────────────
+
+export function useResolvers() {
+  return useQuery({
+    queryKey: notificationAdminKeys.resolvers,
+    queryFn: async () => {
+      const data = await notificationApi.listResolvers();
+      return Array.isArray(data) ? data : [];
+    },
+    staleTime: 5 * 60 * 1000, // whitelist changes rarely; cache for 5 min
   });
 }

@@ -522,6 +522,21 @@ const notificationApi = {
   },
 
   /**
+   * List resolver types and their whitelisted refs, for the guided register form.
+   * GET /v1/api/notification/catalog/resolvers
+   */
+  listResolvers: async () => {
+    try {
+      const config = { headers: notificationTokenHeader(), withCredentials: true };
+      const response = await axios.get(`${NOTIFICATION_API_URL}/catalog/resolvers`, config);
+      return response?.data;
+    } catch (error) {
+      console.error('[NotificationApi] Error listing resolvers:', error);
+      throw error;
+    }
+  },
+
+  /**
    * List templates filtered by module/submodule/category/channel/language.
    * GET /v1/api/notification/templates
    */
