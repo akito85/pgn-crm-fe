@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
-import { Select, InputNumber, Button, Spin, message, Tag } from "antd";
+import { InputNumber, Button, Spin, message, Tag } from "antd";
 import { SettingOutlined, ArrowLeftOutlined } from "@ant-design/icons";
 
 import BreadCrumb from "../../../../components/BreadCrumb";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
 import NxSwitch from "../../../../components/Nx/NxSwitch";
+import NxSelect from "../../../../components/Nx/NxSelect";
 import notificationApi from "../../../../services/notificationApi";
 import {
   fetchGlobalSettings,
@@ -130,7 +131,7 @@ const GlobalNotificationSettings = () => {
               <div className="font-medium text-gray-800">Default Display Type</div>
               <div className="text-sm text-gray-500">Default presentation for notifications</div>
             </div>
-            <Select
+            <NxSelect
               value={local.defaultDisplayType}
               onChange={(v) => change("defaultDisplayType", v)}
               disabled={saving}
