@@ -93,7 +93,7 @@ const GlobalNotificationSettings = () => {
         ]}
       />
       <NxCardContainer header="GLOBAL NOTIFICATION SETTINGS">
-      <NxBaseContainer header="System Defaults" bodyClassName="pt-3">
+      <NxBaseContainer border header="System Defaults" bodyClassName="pt-3">
         <div className="w-full space-y-6">
           <div className="flex items-center text-gray-500 text-sm">
             <SettingOutlined className="mr-2" />

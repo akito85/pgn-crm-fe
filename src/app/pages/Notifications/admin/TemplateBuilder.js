@@ -310,7 +310,7 @@ const TemplateBuilder = ({ mode = "create" }) => {
       )}
 
       {/* Template metadata */}
-      <NxBaseContainer header="Details" className="mb-4" bodyClassName="pt-3">
+      <NxBaseContainer border header="Details" className="mb-4" bodyClassName="pt-3">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
           <div>
             <div className="text-xs text-gray-500 mb-1">Template Code *</div>
@@ -370,7 +370,7 @@ const TemplateBuilder = ({ mode = "create" }) => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {/* Field picker */}
-        <NxBaseContainer header="Available Fields" bodyClassName="pt-3">
+        <NxBaseContainer border header="Available Fields" bodyClassName="pt-3">
           {!form.eventCode ? (
             <Empty description="Pick a category to discover its fields" />
           ) : categoryFieldsLoading ? (
@@ -434,7 +434,7 @@ const TemplateBuilder = ({ mode = "create" }) => {
         </NxBaseContainer>
 
         {/* Selected fields / layout */}
-        <NxBaseContainer header={`Selected Fields (${selected.length})`} bodyClassName="pt-3">
+        <NxBaseContainer border header={`Selected Fields (${selected.length})`} bodyClassName="pt-3">
           {selected.length === 0 ? (
             <Empty description="Add fields from the left to build the layout" />
           ) : (
@@ -475,7 +475,7 @@ const TemplateBuilder = ({ mode = "create" }) => {
       </div>
 
       {/* Body editor */}
-      <NxBaseContainer header="Body" className="mt-4" bodyClassName="pt-3">
+      <NxBaseContainer border header="Body" className="mt-4" bodyClassName="pt-3">
         <div className="w-full">
           <div className="text-xs text-gray-500 mb-1">Subject</div>
           <Input
@@ -499,7 +499,7 @@ const TemplateBuilder = ({ mode = "create" }) => {
 
       {/* Preview */}
       {preview && (
-        <NxBaseContainer header="Preview" className="mt-4" bodyClassName="pt-3">
+        <NxBaseContainer border header="Preview" className="mt-4" bodyClassName="pt-3">
           <pre className="w-full text-xs bg-gray-50 p-3 rounded overflow-auto">
             {JSON.stringify(preview, null, 2)}
           </pre>
