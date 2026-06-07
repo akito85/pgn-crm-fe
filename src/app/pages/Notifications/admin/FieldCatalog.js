@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useSelector } from "react-redux";
-import { Modal, Form, Input, Switch, message, Tooltip, Button } from "antd";
+import { Modal, Form, message, Tooltip, Button } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { Pencil, Trash2, CircleCheck, Ban } from "lucide-react";
 
@@ -8,6 +8,7 @@ import BreadCrumb from "../../../../components/BreadCrumb";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 import NxTable from "../../../../components/Nx/NxTable";
 import NxSelect from "../../../../components/Nx/NxSelect";
+import NxInput from "../../../../components/Nx/NxInput";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import StatusComponent from "../../../../components/StatusComponent";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
@@ -15,14 +16,16 @@ import {
   MODULES,
   MODULE_SUBMODULES,
   DATA_TYPES,
-  RESOLVER_TYPES,
   toOptions,
   FIELD_HELP,
-  RESOLVER_REF_PLACEHOLDER,
+  FIELD_SOURCES,
+  LOOKUP_RESOLVER_TYPES,
+  sourceLabel,
 } from "./catalogConstants";
 import {
   useCatalogFields,
   useSaveCatalogField,
+  useResolvers,
 } from "../../../../hooks/notifications/useNotificationAdmin";
 
 const columnsCatalog = [
@@ -32,8 +35,7 @@ const columnsCatalog = [
   { title: "MODULE", dataIndex: "module", key: "module", align: "left", width: 110, sorter: true, ellipsis: true, render: (v) => v || "-" },
   { title: "SUBMODULE", dataIndex: "submodule", key: "submodule", align: "left", width: 150, sorter: true, ellipsis: true, render: (v) => v || "-" },
   { title: "DATA TYPE", dataIndex: "dataType", key: "dataType", align: "center", width: 110, sorter: true, render: (v) => v || "-" },
-  { title: "RESOLVER TYPE", dataIndex: "resolverType", key: "resolverType", align: "left", width: 140, sorter: true, render: (v) => v || "-" },
-  { title: "RESOLVER REF", dataIndex: "resolverRef", key: "resolverRef", align: "left", width: 200, ellipsis: true, render: (v) => v || "-" },
+  { title: "SOURCE", dataIndex: "resolverType", key: "source", align: "left", width: 170, sorter: true, render: (v) => sourceLabel(v) },
   {
     title: "KIND",
     dataIndex: "kind",
@@ -81,16 +83,47 @@ const FieldCatalog = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [form] = Form.useForm();
 
+  const { data: resolverDescriptors = [] } = useResolvers();
+
   // Watch fields that drive dependent UI.
   const selectedModule = Form.useWatch("module", form);
-  const selectedResolver = Form.useWatch("resolverType", form);
+  const selectedSourceKey = Form.useWatch("source", form);
+  const selectedSource = useMemo(
+    () => FIELD_SOURCES.find((s) => s.key === selectedSourceKey),
+    [selectedSourceKey]
+  );
 
   const submoduleOptions = useMemo(
     () => toOptions(MODULE_SUBMODULES[selectedModule] || []),
     [selectedModule]
   );
-  const refPlaceholder =
-    RESOLVER_REF_PLACEHOLDER[selectedResolver] || "whitelisted resolver reference";
+
+  // Whitelisted lookup refs across NAMED_QUERY + JPA_PROJECTION, labelled with the
+  // friendly relation name from any existing catalogue row that already uses the
+  // ref (falls back to the raw ref).
+  const lookupOptions = useMemo(() => {
+    const relByRef = {};
+    (groups || []).forEach((g) =>
+      (g.fields || []).forEach((f) => {
+        if (LOOKUP_RESOLVER_TYPES.includes(f.resolverType) && f.resolverRef) {
+          relByRef[f.resolverRef] = f.sourceRelation || f.displayLabel || f.resolverRef;
+        }
+      })
+    );
+    const opts = [];
+    resolverDescriptors
+      .filter((d) => LOOKUP_RESOLVER_TYPES.includes(d.type) && d.whitelisted)
+      .forEach((d) =>
+        (d.refs || []).forEach((ref) =>
+          opts.push({
+            value: `${d.type}::${ref}`, // carries type + ref
+            label: relByRef[ref] ? `${relByRef[ref]} (${ref})` : ref,
+            sourceRelation: relByRef[ref] || null,
+          })
+        )
+      );
+    return opts;
+  }, [resolverDescriptors, groups]);
 
   const rows = useMemo(() => {
     const out = [];
@@ -121,21 +154,47 @@ const FieldCatalog = () => {
     const submodule = Array.isArray(values.submodule)
       ? values.submodule.slice(-1)[0]
       : values.submodule;
-    saveFieldMutation.mutate(
-      { ...values, submodule, isJoined: !!values.isJoined },
-      {
-        onSuccess: () => {
-          message.success("Field registered");
-          setModalOpen(false);
-        },
-        onError: (e) =>
-          message.error(
-            e?.response?.data?.message ||
-              e?.message ||
-              (typeof e === "string" ? e : "Failed to register field")
-          ),
-      }
-    );
+
+    const src = FIELD_SOURCES.find((s) => s.key === values.source);
+    let resolverType = src?.resolverType;
+    let resolverRef = values.sourceRef;
+    let sourceRelation = null;
+    let isJoined = false;
+
+    if (src?.refKind === "lookup") {
+      // sourceRef holds "TYPE::ref"; split back into the real enum + ref.
+      const [lookType, ...rest] = String(values.sourceRef || "").split("::");
+      resolverType = lookType || "NAMED_QUERY";
+      resolverRef = rest.join("::");
+      const opt = lookupOptions.find((o) => o.value === values.sourceRef);
+      sourceRelation = opt?.sourceRelation || null;
+      isJoined = true;
+    }
+
+    const payload = {
+      fieldKey: values.fieldKey,
+      displayLabel: values.displayLabel,
+      dataType: values.dataType,
+      module: values.module,
+      submodule,
+      resolverType,
+      resolverRef,
+      sourceRelation,
+      isJoined,
+    };
+
+    saveFieldMutation.mutate(payload, {
+      onSuccess: () => {
+        message.success("Field registered");
+        setModalOpen(false);
+      },
+      onError: (e) =>
+        message.error(
+          e?.response?.data?.message ||
+            e?.message ||
+            (typeof e === "string" ? e : "Failed to register field")
+        ),
+    });
   };
 
   // Catalogue row actions. The backend is insert-only today (no update / delete /
@@ -222,7 +281,7 @@ const FieldCatalog = () => {
           <Form
             form={form}
             layout="vertical"
-            initialValues={{ isJoined: false, dataType: "STRING", resolverType: "PAYLOAD" }}
+            initialValues={{ dataType: "STRING" }}
           >
             <SectionTitle>Identity</SectionTitle>
             <Form.Item
@@ -231,7 +290,7 @@ const FieldCatalog = () => {
               tooltip={FIELD_HELP.fieldKey}
               rules={[{ required: true, message: "Field key is required" }]}
             >
-              <Input placeholder="e.g. object_account_number" />
+              <NxInput placeholder="e.g. object_account_number" />
             </Form.Item>
             <Form.Item
               name="displayLabel"
@@ -239,7 +298,7 @@ const FieldCatalog = () => {
               tooltip={FIELD_HELP.displayLabel}
               rules={[{ required: true, message: "Label is required" }]}
             >
-              <Input placeholder="e.g. Account Number" />
+              <NxInput placeholder="e.g. Account Number" />
             </Form.Item>
             <Form.Item name="dataType" label="Data Type" tooltip={FIELD_HELP.dataType}>
               <NxSelect options={toOptions(DATA_TYPES)} />
@@ -274,33 +333,44 @@ const FieldCatalog = () => {
               </Form.Item>
             </div>
 
-            <SectionTitle>Resolver / Source</SectionTitle>
-            <div className="grid grid-cols-2 gap-3">
+            <SectionTitle>Source</SectionTitle>
+            <Form.Item
+              name="source"
+              label="Source"
+              tooltip={FIELD_HELP.source}
+              rules={[{ required: true, message: "Source is required" }]}
+            >
+              <NxSelect
+                options={FIELD_SOURCES.map((s) => ({ value: s.key, label: s.label }))}
+                placeholder="Where does this value come from?"
+                onChange={() => form.setFieldsValue({ sourceRef: undefined })}
+              />
+            </Form.Item>
+
+            {selectedSource && selectedSource.refKind === "lookup" ? (
               <Form.Item
-                name="resolverType"
-                label="Resolver Type"
-                tooltip={FIELD_HELP.resolverType}
-                rules={[{ required: true }]}
+                name="sourceRef"
+                label={selectedSource.refLabel}
+                tooltip={FIELD_HELP.sourceRef}
+                rules={[{ required: true, message: "Pick a lookup" }]}
               >
-                <NxSelect showSearch options={toOptions(RESOLVER_TYPES)} />
+                <NxSelect
+                  showSearch
+                  optionFilterProp="label"
+                  options={lookupOptions}
+                  placeholder="Pick a prepared lookup"
+                />
               </Form.Item>
-              <Form.Item name="resolverRef" label="Resolver Ref" tooltip={FIELD_HELP.resolverRef}>
-                <Input placeholder={refPlaceholder} />
-              </Form.Item>
-            </div>
-            <div className="grid grid-cols-2 gap-3 items-end">
+            ) : selectedSource ? (
               <Form.Item
-                name="isJoined"
-                label="Joined (cross-module)"
-                tooltip={FIELD_HELP.isJoined}
-                valuePropName="checked"
+                name="sourceRef"
+                label={selectedSource.refLabel}
+                tooltip={FIELD_HELP.sourceRef}
+                rules={[{ required: true, message: `${selectedSource.refLabel} is required` }]}
               >
-                <Switch />
+                <NxInput placeholder={selectedSource.refHint} />
               </Form.Item>
-              <Form.Item name="sourceRelation" label="Source Relation" tooltip={FIELD_HELP.sourceRelation}>
-                <Input placeholder="e.g. M_ACCOUNT" />
-              </Form.Item>
-            </div>
+            ) : null}
           </Form>
         </Modal>
       </NxCardContainer>
