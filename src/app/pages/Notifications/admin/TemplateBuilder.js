@@ -3,7 +3,6 @@ import { useNavigate, useLocation } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
 import {
   Input,
-  Select,
   Button,
   Switch,
   Tag,
@@ -29,6 +28,8 @@ import {
 import BreadCrumb from "../../../../components/BreadCrumb";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
+import NxSelect from "../../../../components/Nx/NxSelect";
+import { CHANNELS, toOptions } from "./catalogConstants";
 import {
   fetchEvents,
   fetchCategoryFields,
@@ -50,12 +51,8 @@ import {
   selectSaving,
 } from "../../../../redux/slices/notificationAdmin";
 
-const { Option } = Select;
 const { Panel } = Collapse;
 const { TextArea } = Input;
-
-// Transports are fixed; the field/category catalogue stays API-driven.
-const CHANNELS = ["TASKLIST", "EMAIL", "WHATSAPP", "SMS", "INAPP"];
 
 // mode: "create" | "update". On update the template id is passed via route
 // state (location.state.id) — never in the URL — mirroring UserForm.
@@ -333,35 +330,27 @@ const TemplateBuilder = ({ mode = "create" }) => {
           </div>
           <div>
             <div className="text-xs text-gray-500 mb-1">Category (event) *</div>
-            <Select
+            <NxSelect
               showSearch
               loading={eventsLoading}
               placeholder="Pick an approval category"
               value={form.eventCode}
-              style={{ width: "100%" }}
-              optionFilterProp="children"
+              optionFilterProp="label"
               onChange={onPickEvent}
-            >
-              {events.map((ev) => (
-                <Option key={ev.eventCode} value={ev.eventCode}>
-                  {ev.category || ev.eventCode}
-                  {ev.module ? ` (${ev.module})` : ""}
-                </Option>
-              ))}
-            </Select>
+              options={events.map((ev) => ({
+                value: ev.eventCode,
+                label: `${ev.category || ev.eventCode}${ev.module ? ` (${ev.module})` : ""}`,
+              }))}
+            />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <div className="text-xs text-gray-500 mb-1">Channel *</div>
-              <Select
+              <NxSelect
                 value={form.channelType}
-                style={{ width: "100%" }}
                 onChange={(v) => setField("channelType", v)}
-              >
-                {CHANNELS.map((c) => (
-                  <Option key={c} value={c}>{c}</Option>
-                ))}
-              </Select>
+                options={toOptions(CHANNELS)}
+              />
             </div>
             <div>
               <div className="text-xs text-gray-500 mb-1">Language</div>
