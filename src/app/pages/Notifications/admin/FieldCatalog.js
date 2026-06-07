@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useMemo, useState } from "react";
+import { useSelector } from "react-redux";
 import { Modal, Form, Input, Switch, message, Tooltip, Button } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
+import { Pencil, Trash2, CircleCheck, Ban } from "lucide-react";
 
 import BreadCrumb from "../../../../components/BreadCrumb";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
@@ -9,6 +10,7 @@ import NxTable from "../../../../components/Nx/NxTable";
 import NxSelect from "../../../../components/Nx/NxSelect";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import StatusComponent from "../../../../components/StatusComponent";
+import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
 import {
   MODULES,
   MODULE_SUBMODULES,
@@ -19,12 +21,9 @@ import {
   RESOLVER_REF_PLACEHOLDER,
 } from "./catalogConstants";
 import {
-  fetchCatalogFields,
-  saveCatalogField,
-  selectCatalogFields,
-  selectCatalogLoading,
-  selectCatalogSaving,
-} from "../../../../redux/slices/notificationAdmin";
+  useCatalogFields,
+  useSaveCatalogField,
+} from "../../../../hooks/notifications/useNotificationAdmin";
 
 const columnsCatalog = [
   { title: "NO", align: "center", width: 60, key: "no", fixed: "left", render: (t, o, i) => i + 1 },
@@ -65,10 +64,9 @@ const SectionTitle = ({ children }) => (
 );
 
 const FieldCatalog = () => {
-  const dispatch = useDispatch();
-  const groups = useSelector(selectCatalogFields);
-  const loading = useSelector(selectCatalogLoading);
-  const saving = useSelector(selectCatalogSaving);
+  const { data: groups = [], isLoading: loading, refetch } = useCatalogFields();
+  const saveFieldMutation = useSaveCatalogField();
+  const saving = saveFieldMutation.isPending;
   const rawToken = useSelector((state) => state.auth?.token);
 
   const userId = useMemo(() => {
@@ -94,10 +92,6 @@ const FieldCatalog = () => {
   const refPlaceholder =
     RESOLVER_REF_PLACEHOLDER[selectedResolver] || "whitelisted resolver reference";
 
-  useEffect(() => {
-    dispatch(fetchCatalogFields());
-  }, [dispatch]);
-
   const rows = useMemo(() => {
     const out = [];
     (groups || []).forEach((g) => {
@@ -117,22 +111,45 @@ const FieldCatalog = () => {
   const onModuleChange = () => form.setFieldsValue({ submodule: undefined });
 
   const handleSubmit = async () => {
+    let values;
     try {
-      const values = await form.validateFields();
-      // submodule uses tags mode (array); persist the single chosen string.
-      const submodule = Array.isArray(values.submodule)
-        ? values.submodule.slice(-1)[0]
-        : values.submodule;
-      await dispatch(
-        saveCatalogField({ ...values, submodule, isJoined: !!values.isJoined })
-      ).unwrap();
-      message.success("Field registered");
-      setModalOpen(false);
+      values = await form.validateFields();
     } catch (e) {
-      if (e?.errorFields) return; // antd validation — keep modal open
-      message.error(e?.message || (typeof e === "string" ? e : "Failed to register field"));
+      return; // antd validation — keep modal open
     }
+    // submodule uses tags mode (array); persist the single chosen string.
+    const submodule = Array.isArray(values.submodule)
+      ? values.submodule.slice(-1)[0]
+      : values.submodule;
+    saveFieldMutation.mutate(
+      { ...values, submodule, isJoined: !!values.isJoined },
+      {
+        onSuccess: () => {
+          message.success("Field registered");
+          setModalOpen(false);
+        },
+        onError: (e) =>
+          message.error(
+            e?.response?.data?.message ||
+              e?.message ||
+              (typeof e === "string" ? e : "Failed to register field")
+          ),
+      }
+    );
   };
+
+  // Catalogue row actions. The backend is insert-only today (no update / delete /
+  // activate / inactivate endpoint for catalogue fields), so these are rendered
+  // disabled until those endpoints land.
+  const disabledAction = (label, Icon) => ({
+    render: () => (
+      <Tooltip title={`${label} (pending backend support)`}>
+        <span className="inline-flex items-center text-gray-300 cursor-not-allowed pointer-events-none">
+          <Icon size={18} />
+        </span>
+      </Tooltip>
+    ),
+  });
 
   const itemActions = useMemo(
     () => [
@@ -144,9 +161,24 @@ const FieldCatalog = () => {
           </ButtonComponent>
         ),
       },
+      { action: "Update", type: "table", ...disabledAction("Update", Pencil) },
+      { action: "Activate", type: "table", ...disabledAction("Activate", CircleCheck) },
+      { action: "Inactivate", type: "table", ...disabledAction("Inactivate", Ban) },
+      { action: "Delete", type: "table", ...disabledAction("Delete", Trash2) },
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
+  );
+
+  const actionColumns = useColumnActionPermission(
+    ["Update", "Activate", "Inactivate", "Delete"],
+    itemActions,
+    "Update"
+  );
+
+  const allColumns = useMemo(
+    () => [...columnsCatalog, ...actionColumns],
+    [actionColumns]
   );
 
   return (
@@ -158,7 +190,7 @@ const FieldCatalog = () => {
             idTable="notification-field-catalog-table"
             userId={userId}
             dataSource={rows}
-            columns={columnsCatalog}
+            columns={allColumns}
             rowKey={(r) => r.fieldId ?? r.fieldKey}
             loading={loading}
             totalData={rows?.length || 0}
@@ -168,7 +200,7 @@ const FieldCatalog = () => {
             showSearchBar={true}
             showAdvanceSearch={false}
             showRefresh={true}
-            onRefresh={() => dispatch(fetchCatalogFields())}
+            onRefresh={() => refetch()}
             tableScrolled={{ x: 1300, y: 600 }}
           />
         </div>

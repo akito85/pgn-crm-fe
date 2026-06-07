@@ -1,23 +1,17 @@
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { Link, NavLink } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { Tooltip, message } from "antd";
-import { PlusOutlined, EyeOutlined, CheckCircleOutlined, StopOutlined } from "@ant-design/icons";
+import { PlusOutlined } from "@ant-design/icons";
+import { Pencil, Eye, CircleCheck, Ban, Trash2 } from "lucide-react";
 
 import BreadCrumb from "../../../../components/BreadCrumb";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 import NxTable from "../../../../components/Nx/NxTable";
 import StatusComponent from "../../../../components/StatusComponent";
 import ButtonComponent from "../../../../components/ButtonComponent";
-import IconEditNx from "../../../../assets/Icon/Nx/IconEdit";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
-
-import {
-  fetchTemplates,
-  setTemplateActive,
-  selectTemplates,
-  selectTemplatesLoading,
-} from "../../../../redux/slices/notificationAdmin";
+import { useTemplates, useSetTemplateActive } from "../../../../hooks/notifications/useNotificationAdmin";
 
 // Columns follow the standard NxTable look (UPPERCASE titles, fixed NO + STATUS).
 const columnsTemplates = [
@@ -125,10 +119,6 @@ const columnsTemplates = [
 ];
 
 const TemplatesList = () => {
-  const dispatch = useDispatch();
-
-  const templates = useSelector(selectTemplates);
-  const loading = useSelector(selectTemplatesLoading);
   const rawToken = useSelector((state) => state.auth?.token);
 
   const userId = useMemo(() => {
@@ -140,22 +130,21 @@ const TemplatesList = () => {
     }
   }, [rawToken]);
 
-  const reload = () => dispatch(fetchTemplates({}));
+  const { data: templates = [], isLoading: loading, refetch } = useTemplates({});
+  const setActiveMutation = useSetTemplateActive();
 
-  useEffect(() => {
-    reload();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch]);
+  const reload = () => refetch();
 
-  const handleToggleActive = async (record) => {
-    try {
-      await dispatch(
-        setTemplateActive({ id: record.templateId, active: !record.isActive })
-      ).unwrap();
-      message.success(`Template ${record.isActive ? "deactivated" : "activated"}`);
-    } catch (e) {
-      message.error(typeof e === "string" ? e : "Failed to change template state");
-    }
+  const handleToggleActive = (record) => {
+    setActiveMutation.mutate(
+      { id: record.templateId, active: !record.isActive },
+      {
+        onSuccess: () =>
+          message.success(`Template ${record.isActive ? "deactivated" : "activated"}`),
+        onError: (e) =>
+          message.error(typeof e === "string" ? e : "Failed to change template state"),
+      }
+    );
   };
 
   // Action names map to M_ACTION verbs wired to the menu (Update/Preview/Activate/Inactivate).
@@ -182,7 +171,7 @@ const TemplatesList = () => {
               className="inline-flex items-center"
               style={{ color: "#1976D2" }}
             >
-              <IconEditNx width={20} />
+              <Pencil size={18} />
             </Link>
           </Tooltip>
         ),
@@ -198,7 +187,7 @@ const TemplatesList = () => {
               className="inline-flex items-center"
               style={{ color: "#1976D2" }}
             >
-              <EyeOutlined style={{ fontSize: 18 }} />
+              <Eye size={18} />
             </Link>
           </Tooltip>
         ),
@@ -214,7 +203,7 @@ const TemplatesList = () => {
                 style={{ color: "#16a34a" }}
                 onClick={() => handleToggleActive(record)}
               >
-                <CheckCircleOutlined style={{ fontSize: 18 }} />
+                <CircleCheck size={18} />
               </span>
             </Tooltip>
           ),
@@ -230,10 +219,22 @@ const TemplatesList = () => {
                 style={{ color: "#BE3036" }}
                 onClick={() => handleToggleActive(record)}
               >
-                <StopOutlined style={{ fontSize: 18 }} />
+                <Ban size={18} />
               </span>
             </Tooltip>
           ) : null,
+      },
+      {
+        // DELETE has no backend endpoint yet — rendered disabled until one lands.
+        action: "Delete",
+        type: "table",
+        render: () => (
+          <Tooltip title="Delete (pending backend support)">
+            <span className="inline-flex items-center text-gray-300 cursor-not-allowed pointer-events-none">
+              <Trash2 size={18} />
+            </span>
+          </Tooltip>
+        ),
       },
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -241,7 +242,7 @@ const TemplatesList = () => {
   );
 
   const actionColumns = useColumnActionPermission(
-    ["Update", "Preview", "Activate", "Inactivate"],
+    ["Update", "Preview", "Activate", "Inactivate", "Delete"],
     itemActions,
     "Update"
   );
