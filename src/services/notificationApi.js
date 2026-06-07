@@ -449,6 +449,180 @@ const notificationApi = {
       throw error;
     }
   },
+
+  // ===========================================================================
+  // Template-driven channels: Super User admin console (Phase 6)
+  // API-driven builder — no fields/categories/channels are hardcoded in the FE.
+  // ===========================================================================
+
+  /**
+   * List active events/categories for the builder's category picker.
+   * GET /v1/api/notification/events
+   */
+  listEvents: async () => {
+    try {
+      const config = { headers: notificationTokenHeader(), withCredentials: true };
+      const response = await axios.get(`${NOTIFICATION_API_URL}/events`, config);
+      return response?.data;
+    } catch (error) {
+      console.error('[NotificationApi] Error listing events:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Fields available to a category, grouped by module/submodule and labelled
+   * direct vs joined.
+   * GET /v1/api/notification/catalog/categories/{eventCode}/fields
+   */
+  getCategoryFields: async (eventCode) => {
+    try {
+      const config = { headers: notificationTokenHeader(), withCredentials: true };
+      const response = await axios.get(
+        `${NOTIFICATION_API_URL}/catalog/categories/${encodeURIComponent(eventCode)}/fields`, config);
+      return response?.data;
+    } catch (error) {
+      console.error('[NotificationApi] Error fetching category fields:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * List catalogue fields grouped by module/submodule (optionally filtered).
+   * GET /v1/api/notification/catalog/fields?module=
+   */
+  listCatalogFields: async (module = null) => {
+    try {
+      const config = {
+        params: module ? { module } : {},
+        headers: notificationTokenHeader(),
+        withCredentials: true,
+      };
+      const response = await axios.get(`${NOTIFICATION_API_URL}/catalog/fields`, config);
+      return response?.data;
+    } catch (error) {
+      console.error('[NotificationApi] Error listing catalogue fields:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Register a catalogue field bound to a whitelisted resolver.
+   * POST /v1/api/notification/catalog/fields
+   */
+  saveCatalogField: async (field) => {
+    try {
+      const config = { headers: notificationTokenHeader(), withCredentials: true };
+      const response = await axios.post(`${NOTIFICATION_API_URL}/catalog/fields`, field, config);
+      return response?.data;
+    } catch (error) {
+      console.error('[NotificationApi] Error saving catalogue field:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * List templates filtered by module/submodule/category/channel/language.
+   * GET /v1/api/notification/templates
+   */
+  listTemplates: async (filter = {}) => {
+    try {
+      const config = {
+        params: filter,
+        headers: notificationTokenHeader(),
+        withCredentials: true,
+      };
+      const response = await axios.get(`${NOTIFICATION_API_URL}/templates`, config);
+      return response?.data;
+    } catch (error) {
+      console.error('[NotificationApi] Error listing templates:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Load a template with its content variables and layout, for editing.
+   * GET /v1/api/notification/templates/{id}
+   */
+  getTemplate: async (id) => {
+    try {
+      const config = { headers: notificationTokenHeader(), withCredentials: true };
+      const response = await axios.get(`${NOTIFICATION_API_URL}/templates/${id}`, config);
+      return response?.data;
+    } catch (error) {
+      console.error('[NotificationApi] Error loading template:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Save a template with its content variables and per-channel layout.
+   * POST /v1/api/notification/templates
+   */
+  saveTemplate: async (request) => {
+    try {
+      const config = { headers: notificationTokenHeader(), withCredentials: true };
+      const response = await axios.post(`${NOTIFICATION_API_URL}/templates`, request, config);
+      return response?.data;
+    } catch (error) {
+      console.error('[NotificationApi] Error saving template:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Validate a template request without saving (returns the offending token/ref).
+   * POST /v1/api/notification/templates/validate
+   */
+  validateTemplate: async (request) => {
+    try {
+      const config = {
+        headers: notificationTokenHeader(),
+        withCredentials: true,
+        validateStatus: (status) => status === 200 || status === 400,
+      };
+      const response = await axios.post(`${NOTIFICATION_API_URL}/templates/validate`, request, config);
+      return response?.data;
+    } catch (error) {
+      console.error('[NotificationApi] Error validating template:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Structural preview of a saved template.
+   * GET /v1/api/notification/templates/{id}/preview?entityId=
+   */
+  previewTemplate: async (id, entityId = null) => {
+    try {
+      const config = {
+        params: entityId != null ? { entityId } : {},
+        headers: notificationTokenHeader(),
+        withCredentials: true,
+      };
+      const response = await axios.get(`${NOTIFICATION_API_URL}/templates/${id}/preview`, config);
+      return response?.data;
+    } catch (error) {
+      console.error('[NotificationApi] Error previewing template:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Activate / deactivate a template (migration go-live / rollback).
+   * POST /v1/api/notification/templates/{id}/activate | /deactivate
+   */
+  setTemplateActive: async (id, active) => {
+    try {
+      const config = { headers: notificationTokenHeader(), withCredentials: true };
+      const path = active ? 'activate' : 'deactivate';
+      const response = await axios.post(`${NOTIFICATION_API_URL}/templates/${id}/${path}`, {}, config);
+      return response?.data;
+    } catch (error) {
+      console.error('[NotificationApi] Error setting template active state:', error);
+      throw error;
+    }
+  },
 };
 
 export default notificationApi;
