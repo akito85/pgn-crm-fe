@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  Input,
   Button,
   Switch,
   Tag,
@@ -29,7 +28,8 @@ import BreadCrumb from "../../../../components/BreadCrumb";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
 import NxSelect from "../../../../components/Nx/NxSelect";
-import { CHANNELS, toOptions } from "./catalogConstants";
+import NxInput, { NxTextArea } from "../../../../components/Nx/NxInput";
+import { CHANNELS, toOptions, sourceLabel } from "./catalogConstants";
 import {
   fetchEvents,
   fetchCategoryFields,
@@ -52,7 +52,6 @@ import {
 } from "../../../../redux/slices/notificationAdmin";
 
 const { Panel } = Collapse;
-const { TextArea } = Input;
 
 // mode: "create" | "update". On update the template id is passed via route
 // state (location.state.id) — never in the URL — mirroring UserForm.
@@ -314,7 +313,7 @@ const TemplateBuilder = ({ mode = "create" }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
           <div>
             <div className="text-xs text-gray-500 mb-1">Template Code *</div>
-            <Input
+            <NxInput
               placeholder="e.g. SA_APPROVAL_TASKLIST_ID"
               value={form.templateCode}
               onChange={(e) => setField("templateCode", e.target.value)}
@@ -322,7 +321,7 @@ const TemplateBuilder = ({ mode = "create" }) => {
           </div>
           <div>
             <div className="text-xs text-gray-500 mb-1">Template Name *</div>
-            <Input
+            <NxInput
               placeholder="Human-readable name"
               value={form.templateName}
               onChange={(e) => setField("templateName", e.target.value)}
@@ -354,7 +353,7 @@ const TemplateBuilder = ({ mode = "create" }) => {
             </div>
             <div>
               <div className="text-xs text-gray-500 mb-1">Language</div>
-              <Input
+              <NxInput
                 placeholder="id / en"
                 value={form.templateLanguage}
                 onChange={(e) => setField("templateLanguage", e.target.value)}
@@ -403,11 +402,11 @@ const TemplateBuilder = ({ mode = "create" }) => {
                           <div className="text-sm text-gray-800 truncate">
                             {field.displayLabel || field.fieldKey}{" "}
                             {field.kind === "joined" ? (
-                              <Tooltip title={field.sourceRelation || "cross-module join"}>
-                                <Tag color="purple">joined</Tag>
+                              <Tooltip title={field.sourceRelation || "cross-module lookup"}>
+                                <Tag color="purple">{sourceLabel(field.resolverType)}</Tag>
                               </Tooltip>
                             ) : (
-                              <Tag color="cyan">direct</Tag>
+                              <Tag color="cyan">{sourceLabel(field.resolverType)}</Tag>
                             )}
                           </div>
                           <div className="text-xs text-gray-400 truncate">
@@ -453,7 +452,7 @@ const TemplateBuilder = ({ mode = "create" }) => {
                     </Space>
                   </div>
                   <div className="flex items-center gap-2 mt-1">
-                    <Input
+                    <NxInput
                       size="small"
                       addonBefore="Label"
                       value={s.displayLabel}
@@ -478,7 +477,7 @@ const TemplateBuilder = ({ mode = "create" }) => {
       <NxBaseContainer border header="Body" className="mt-4" bodyClassName="pt-3">
         <div className="w-full">
           <div className="text-xs text-gray-500 mb-1">Subject</div>
-          <Input
+          <NxInput
             className="mb-3"
             placeholder="Subject (supports ${token})"
             value={form.subjectTemplate}
@@ -487,7 +486,7 @@ const TemplateBuilder = ({ mode = "create" }) => {
           <div className="text-xs text-gray-500 mb-1">
             Body (FreeMarker — insert tokens from the selected fields)
           </div>
-          <TextArea
+          <NxTextArea
             ref={bodyRef}
             rows={10}
             placeholder={"Compose the message. Use ${fieldKey} tokens."}
