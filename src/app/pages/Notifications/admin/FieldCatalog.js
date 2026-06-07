@@ -1,13 +1,23 @@
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Modal, Form, Input, Select, Switch, message, Tooltip } from "antd";
+import { Modal, Form, Input, Switch, message, Tooltip, Button } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 
 import BreadCrumb from "../../../../components/BreadCrumb";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 import NxTable from "../../../../components/Nx/NxTable";
+import NxSelect from "../../../../components/Nx/NxSelect";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import StatusComponent from "../../../../components/StatusComponent";
+import {
+  MODULES,
+  MODULE_SUBMODULES,
+  DATA_TYPES,
+  RESOLVER_TYPES,
+  toOptions,
+  FIELD_HELP,
+  RESOLVER_REF_PLACEHOLDER,
+} from "./catalogConstants";
 import {
   fetchCatalogFields,
   saveCatalogField,
@@ -16,87 +26,15 @@ import {
   selectCatalogSaving,
 } from "../../../../redux/slices/notificationAdmin";
 
-const { Option } = Select;
-
-// Resolver types are bound server-side to a whitelist; guided picker.
-const RESOLVER_TYPES = ["PAYLOAD", "JOIN", "STATIC", "EXPRESSION"];
-const DATA_TYPES = ["STRING", "NUMBER", "DATE", "BOOLEAN", "CURRENCY"];
-
 const columnsCatalog = [
-  {
-    title: "NO",
-    align: "center",
-    width: 60,
-    key: "no",
-    fixed: "left",
-    render: (text, object, index) => index + 1,
-  },
-  {
-    title: "FIELD KEY",
-    dataIndex: "fieldKey",
-    key: "fieldKey",
-    align: "left",
-    width: 200,
-    sorter: true,
-    ellipsis: true,
-  },
-  {
-    title: "LABEL",
-    dataIndex: "displayLabel",
-    key: "displayLabel",
-    align: "left",
-    width: 180,
-    sorter: true,
-    ellipsis: true,
-    render: (v) => v || "-",
-  },
-  {
-    title: "MODULE",
-    dataIndex: "module",
-    key: "module",
-    align: "left",
-    width: 110,
-    sorter: true,
-    ellipsis: true,
-    render: (v) => v || "-",
-  },
-  {
-    title: "SUBMODULE",
-    dataIndex: "submodule",
-    key: "submodule",
-    align: "left",
-    width: 120,
-    sorter: true,
-    ellipsis: true,
-    render: (v) => v || "-",
-  },
-  {
-    title: "DATA TYPE",
-    dataIndex: "dataType",
-    key: "dataType",
-    align: "center",
-    width: 110,
-    sorter: true,
-    render: (v) => v || "-",
-  },
-  {
-    title: "RESOLVER TYPE",
-    dataIndex: "resolverType",
-    key: "resolverType",
-    align: "left",
-    width: 140,
-    sorter: true,
-    render: (v) => v || "-",
-  },
-  {
-    title: "RESOLVER REF",
-    dataIndex: "resolverRef",
-    key: "resolverRef",
-    align: "left",
-    width: 200,
-    ellipsis: true,
-    render: (v) => v || "-",
-  },
+  { title: "NO", align: "center", width: 60, key: "no", fixed: "left", render: (t, o, i) => i + 1 },
+  { title: "FIELD KEY", dataIndex: "fieldKey", key: "fieldKey", align: "left", width: 200, sorter: true, ellipsis: true },
+  { title: "LABEL", dataIndex: "displayLabel", key: "displayLabel", align: "left", width: 180, sorter: true, ellipsis: true, render: (v) => v || "-" },
+  { title: "MODULE", dataIndex: "module", key: "module", align: "left", width: 110, sorter: true, ellipsis: true, render: (v) => v || "-" },
+  { title: "SUBMODULE", dataIndex: "submodule", key: "submodule", align: "left", width: 150, sorter: true, ellipsis: true, render: (v) => v || "-" },
+  { title: "DATA TYPE", dataIndex: "dataType", key: "dataType", align: "center", width: 110, sorter: true, render: (v) => v || "-" },
+  { title: "RESOLVER TYPE", dataIndex: "resolverType", key: "resolverType", align: "left", width: 140, sorter: true, render: (v) => v || "-" },
+  { title: "RESOLVER REF", dataIndex: "resolverRef", key: "resolverRef", align: "left", width: 200, ellipsis: true, render: (v) => v || "-" },
   {
     title: "KIND",
     dataIndex: "kind",
@@ -119,6 +57,13 @@ const columnsCatalog = [
   },
 ];
 
+// Small section heading inside the register modal.
+const SectionTitle = ({ children }) => (
+  <div className="text-xs font-semibold uppercase tracking-wide text-gray-500 mt-1 mb-2">
+    {children}
+  </div>
+);
+
 const FieldCatalog = () => {
   const dispatch = useDispatch();
   const groups = useSelector(selectCatalogFields);
@@ -138,11 +83,21 @@ const FieldCatalog = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [form] = Form.useForm();
 
+  // Watch fields that drive dependent UI.
+  const selectedModule = Form.useWatch("module", form);
+  const selectedResolver = Form.useWatch("resolverType", form);
+
+  const submoduleOptions = useMemo(
+    () => toOptions(MODULE_SUBMODULES[selectedModule] || []),
+    [selectedModule]
+  );
+  const refPlaceholder =
+    RESOLVER_REF_PLACEHOLDER[selectedResolver] || "whitelisted resolver reference";
+
   useEffect(() => {
     dispatch(fetchCatalogFields());
   }, [dispatch]);
 
-  // Flatten grouped FieldGroupDto[] into rows.
   const rows = useMemo(() => {
     const out = [];
     (groups || []).forEach((g) => {
@@ -158,10 +113,19 @@ const FieldCatalog = () => {
     setModalOpen(true);
   };
 
+  // Clear submodule when the module changes so a stale value can't be saved.
+  const onModuleChange = () => form.setFieldsValue({ submodule: undefined });
+
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
-      await dispatch(saveCatalogField({ ...values, isJoined: !!values.isJoined })).unwrap();
+      // submodule uses tags mode (array); persist the single chosen string.
+      const submodule = Array.isArray(values.submodule)
+        ? values.submodule.slice(-1)[0]
+        : values.submodule;
+      await dispatch(
+        saveCatalogField({ ...values, submodule, isJoined: !!values.isJoined })
+      ).unwrap();
       message.success("Field registered");
       setModalOpen(false);
     } catch (e) {
@@ -187,90 +151,126 @@ const FieldCatalog = () => {
 
   return (
     <>
-      <BreadCrumb
-        routes={[
-          { breadcrumbName: "Notifications" },
-          { breadcrumbName: "Field Catalogue" },
-        ]}
-      />
+      <BreadCrumb routes={[{ breadcrumbName: "Notifications" }, { breadcrumbName: "Field Catalogue" }]} />
       <NxCardContainer header="NOTIFICATION FIELD CATALOGUE" actions={itemActions}>
-      <div className="w-full">
-        <NxTable
-          idTable="notification-field-catalog-table"
-          userId={userId}
-          dataSource={rows}
-          columns={columnsCatalog}
-          rowKey={(r) => r.fieldId ?? r.fieldKey}
-          loading={loading}
-          totalData={rows?.length || 0}
-          usePagination={false}
-          useInfiniteScroll={false}
-          showExport={true}
-          showSearchBar={true}
-          showAdvanceSearch={false}
-          showRefresh={true}
-          onRefresh={() => dispatch(fetchCatalogFields())}
-          tableScrolled={{ x: 1300, y: 600 }}
-        />
-      </div>
+        <div className="w-full">
+          <NxTable
+            idTable="notification-field-catalog-table"
+            userId={userId}
+            dataSource={rows}
+            columns={columnsCatalog}
+            rowKey={(r) => r.fieldId ?? r.fieldKey}
+            loading={loading}
+            totalData={rows?.length || 0}
+            usePagination={false}
+            useInfiniteScroll={false}
+            showExport={true}
+            showSearchBar={true}
+            showAdvanceSearch={false}
+            showRefresh={true}
+            onRefresh={() => dispatch(fetchCatalogFields())}
+            tableScrolled={{ x: 1300, y: 600 }}
+          />
+        </div>
 
-      <Modal
-        title="Register Catalogue Field"
-        open={modalOpen}
-        onCancel={() => setModalOpen(false)}
-        onOk={handleSubmit}
-        confirmLoading={saving}
-        okText="Register"
-        destroyOnClose
-      >
-        <Form
-          form={form}
-          layout="vertical"
-          initialValues={{ isJoined: false, dataType: "STRING", resolverType: "PAYLOAD" }}
+        <Modal
+          title="Register Catalogue Field"
+          open={modalOpen}
+          onCancel={() => setModalOpen(false)}
+          destroyOnClose
+          footer={
+            <div className="flex items-center justify-between">
+              <Button onClick={() => setModalOpen(false)}>Cancel</Button>
+              <Button type="primary" loading={saving} onClick={handleSubmit}>
+                Register
+              </Button>
+            </div>
+          }
         >
-          <Form.Item name="fieldKey" label="Field Key" rules={[{ required: true, message: "Field key is required" }]}>
-            <Input placeholder="e.g. object_account_number" />
-          </Form.Item>
-          <Form.Item name="displayLabel" label="Display Label" rules={[{ required: true, message: "Label is required" }]}>
-            <Input placeholder="e.g. Account Number" />
-          </Form.Item>
-          <div className="grid grid-cols-2 gap-3">
-            <Form.Item name="module" label="Module" rules={[{ required: true, message: "Module is required" }]}>
-              <Input placeholder="e.g. ACC" />
+          <Form
+            form={form}
+            layout="vertical"
+            initialValues={{ isJoined: false, dataType: "STRING", resolverType: "PAYLOAD" }}
+          >
+            <SectionTitle>Identity</SectionTitle>
+            <Form.Item
+              name="fieldKey"
+              label="Field Key"
+              tooltip={FIELD_HELP.fieldKey}
+              rules={[{ required: true, message: "Field key is required" }]}
+            >
+              <Input placeholder="e.g. object_account_number" />
             </Form.Item>
-            <Form.Item name="submodule" label="Submodule">
-              <Input placeholder="optional" />
+            <Form.Item
+              name="displayLabel"
+              label="Display Label"
+              tooltip={FIELD_HELP.displayLabel}
+              rules={[{ required: true, message: "Label is required" }]}
+            >
+              <Input placeholder="e.g. Account Number" />
             </Form.Item>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <Form.Item name="dataType" label="Data Type">
-              <Select>
-                {DATA_TYPES.map((d) => (
-                  <Option key={d} value={d}>{d}</Option>
-                ))}
-              </Select>
+            <Form.Item name="dataType" label="Data Type" tooltip={FIELD_HELP.dataType}>
+              <NxSelect options={toOptions(DATA_TYPES)} />
             </Form.Item>
-            <Form.Item name="resolverType" label="Resolver Type" rules={[{ required: true }]}>
-              <Select showSearch>
-                {RESOLVER_TYPES.map((d) => (
-                  <Option key={d} value={d}>{d}</Option>
-                ))}
-              </Select>
-            </Form.Item>
-          </div>
-          <Form.Item name="resolverRef" label="Resolver Ref" tooltip="Whitelisted resolver reference (payload key, join name, or expression)">
-            <Input placeholder="e.g. payload.objectAccountNumber" />
-          </Form.Item>
-          <div className="grid grid-cols-2 gap-3 items-end">
-            <Form.Item name="isJoined" label="Joined (cross-module)" valuePropName="checked">
-              <Switch />
-            </Form.Item>
-            <Form.Item name="sourceRelation" label="Source Relation" tooltip="Relation label when joined">
-              <Input placeholder="e.g. M_ACCOUNT" />
-            </Form.Item>
-          </div>
-        </Form>
-      </Modal>
+
+            <SectionTitle>Classification</SectionTitle>
+            <div className="grid grid-cols-2 gap-3">
+              <Form.Item
+                name="module"
+                label="Module"
+                tooltip={FIELD_HELP.module}
+                rules={[{ required: true, message: "Module is required" }]}
+              >
+                <NxSelect
+                  options={MODULES}
+                  placeholder="Select module"
+                  onChange={onModuleChange}
+                />
+              </Form.Item>
+              <Form.Item name="submodule" label="Submodule" tooltip={FIELD_HELP.submodule}>
+                <NxSelect
+                  mode="tags"
+                  maxTagCount={1}
+                  options={submoduleOptions}
+                  placeholder={selectedModule ? "Select or type a category" : "Pick a module first"}
+                  disabled={!selectedModule}
+                  // antd v4 has no maxCount; keep only the latest pick (still an array)
+                  onChange={(vals) =>
+                    form.setFieldsValue({ submodule: (vals || []).slice(-1) })
+                  }
+                />
+              </Form.Item>
+            </div>
+
+            <SectionTitle>Resolver / Source</SectionTitle>
+            <div className="grid grid-cols-2 gap-3">
+              <Form.Item
+                name="resolverType"
+                label="Resolver Type"
+                tooltip={FIELD_HELP.resolverType}
+                rules={[{ required: true }]}
+              >
+                <NxSelect showSearch options={toOptions(RESOLVER_TYPES)} />
+              </Form.Item>
+              <Form.Item name="resolverRef" label="Resolver Ref" tooltip={FIELD_HELP.resolverRef}>
+                <Input placeholder={refPlaceholder} />
+              </Form.Item>
+            </div>
+            <div className="grid grid-cols-2 gap-3 items-end">
+              <Form.Item
+                name="isJoined"
+                label="Joined (cross-module)"
+                tooltip={FIELD_HELP.isJoined}
+                valuePropName="checked"
+              >
+                <Switch />
+              </Form.Item>
+              <Form.Item name="sourceRelation" label="Source Relation" tooltip={FIELD_HELP.sourceRelation}>
+                <Input placeholder="e.g. M_ACCOUNT" />
+              </Form.Item>
+            </div>
+          </Form>
+        </Modal>
       </NxCardContainer>
     </>
   );
