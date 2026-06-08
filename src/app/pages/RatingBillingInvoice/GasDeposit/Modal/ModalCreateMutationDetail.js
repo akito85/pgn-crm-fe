@@ -93,12 +93,13 @@ const ModalCreateMutationDetail = ({
       dispatch(getMutationCategoryOptions());
       dispatch(getPeriodOptions());
       dispatch(getAllApprovalList());
-      form.setFieldsValue({
-        source: "MANUAL",
-        type: "Adjustment",
-        billingPeriod: initialValues?.billingPeriod || defaultBillingPeriod,
-        uom: initialValues?.uom || defaultUom,
-      });
+        form.setFieldsValue({
+          source: "MANUAL",
+          type: "Adjustment",
+          billingPeriod: initialValues?.billingPeriod || defaultBillingPeriod,
+          uom: initialValues?.uom || defaultUom,
+          documentNumber: initialValues?.documentNumber || undefined,
+        });
     }
   }, [dispatch, isOpen, form, defaultBillingPeriod, defaultUom, initialValues?.billingPeriod, initialValues?.uom]);
 
@@ -155,6 +156,7 @@ const ModalCreateMutationDetail = ({
     if (currentStep === 0) {
       try {
         await form.validateFields([
+          "documentNumber",
           "billingPeriod",
           "mutationDate",
           "mutationType",
@@ -299,6 +301,7 @@ const ModalCreateMutationDetail = ({
     let values;
     try {
       values = await form.validateFields([
+        "documentNumber",
         "source",
         "billingPeriod",
         "mutationDate",
@@ -337,6 +340,7 @@ const ModalCreateMutationDetail = ({
       gasDepositId: selectedData.gasDepositId,
       apphierId: values.apphierId,
       billPeriode: values.billingPeriod,
+      documentNumber: values.documentNumber,
       mutationDate: values.mutationDate,
       transType: values.mutationType,
       source: values.source,
@@ -433,6 +437,15 @@ const ModalCreateMutationDetail = ({
         >
           <BaseContainer border header="MUTATION INFORMATION" className="mb-3">
             <div className="grid grid-cols-5 gap-3">
+              <Form.Item
+                label="Document Number"
+                name="documentNumber"
+                rules={[{ required: true, message: "Please input Document Number!" }]}
+                style={{ marginBottom: 0 }}
+              >
+                <InputComponent placeholder="Input Document Number" />
+              </Form.Item>
+
               <Form.Item
                 label="Source"
                 name="source"
