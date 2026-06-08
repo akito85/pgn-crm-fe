@@ -4,8 +4,8 @@ import PropTypes from "prop-types";
 import moment from "moment";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import NxBreadCrumb from "../../../../components/Nx/NxBreadCrumb";
-import { NxFormFooter, NxFormStepper } from "../../../../components/Nx/NxFormStepNavigation";
+import BreadCrumb from "../../../../components/BreadCrumb";
+import { FormFooter, FormStepper } from "../../../../components/FormStepNavigation";
 import CardContainer from "../../../../components/CardContainer";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import TableRBI from "../../../../components/TableRBI";
@@ -822,9 +822,9 @@ const GasDepositExpiredCreatePage = () => {
 
   return (
     <>
-      <NxBreadCrumb routes={routes} />
+      <BreadCrumb routes={routes} />
 
-      <NxFormStepper
+      <FormStepper
         steps={steps}
         current={currentStep}
         onPrev={() => setCurrentStep((prev) => Math.max(0, prev - 1))}
@@ -956,7 +956,7 @@ const GasDepositExpiredCreatePage = () => {
           </CardContainer>
         )}
 
-        <NxFormFooter
+        <FormFooter
           current={currentStep}
           totalSteps={steps.length}
           onPrev={() => setCurrentStep((prev) => Math.max(0, prev - 1))}

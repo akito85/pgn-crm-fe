@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { message } from "antd";
 import { useDispatch, useSelector } from "react-redux";
-import NxBreadCrumb from "../../../../components/Nx/NxBreadCrumb";
+import BreadCrumb from "../../../../components/BreadCrumb";
 import CardContainer from "../../../../components/CardContainer";
 import TableRBI from "../../../../components/TableRBI";
 import ButtonComponent from "../../../../components/ButtonComponent";
@@ -139,7 +139,7 @@ const PayGasDepositeExpiredApprovalPage = () => {
 
   return (
     <>
-      <NxBreadCrumb routes={routes} />
+      <BreadCrumb routes={routes} />
 
       <CardContainer
         header={(

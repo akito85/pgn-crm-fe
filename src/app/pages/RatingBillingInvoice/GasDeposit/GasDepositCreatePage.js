@@ -3,8 +3,8 @@ import { Form, DatePicker, Spin } from "antd";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import moment from "moment";
-import NxBreadCrumb from "../../../../components/Nx/NxBreadCrumb";
-import { NxFormStepper, NxFormFooter } from "../../../../components/Nx/NxFormStepNavigation";
+import BreadCrumb from "../../../../components/BreadCrumb";
+import { FormStepper, FormFooter } from "../../../../components/FormStepNavigation";
 import CardContainer from "../../../../components/CardContainer";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import TableRBI from "../../../../components/TableRBI";
@@ -693,9 +693,9 @@ const GasDepositCreatePage = () => {
           -webkit-text-fill-color: rgba(0, 0, 0, 0.25) !important;
         }
       `}</style>
-      <NxBreadCrumb routes={routes} />
+      <BreadCrumb routes={routes} />
 
-      <NxFormStepper
+      <FormStepper
         steps={steps}
         current={currentStep}
         onPrev={() => setCurrentStep((prev) => Math.max(0, prev - 1))}
@@ -906,7 +906,7 @@ const GasDepositCreatePage = () => {
           </CardContainer>
         </div>
 
-        <NxFormFooter
+        <FormFooter
           current={currentStep}
           totalSteps={steps.length}
           onPrev={() => setCurrentStep((prev) => Math.max(0, prev - 1))}

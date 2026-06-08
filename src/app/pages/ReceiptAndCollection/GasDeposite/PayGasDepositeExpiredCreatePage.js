@@ -2,8 +2,8 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Form, message } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import NxBreadCrumb from "../../../../components/Nx/NxBreadCrumb";
-import { NxFormFooter, NxFormStepper } from "../../../../components/Nx/NxFormStepNavigation";
+import BreadCrumb from "../../../../components/BreadCrumb";
+import { FormFooter, FormStepper } from "../../../../components/FormStepNavigation";
 import CardContainer from "../../../../components/CardContainer";
 import TableRBI from "../../../../components/TableRBI";
 import ButtonComponent from "../../../../components/ButtonComponent";
@@ -532,9 +532,9 @@ const PayGasDepositeExpiredCreatePage = () => {
 
   return (
     <>
-      <NxBreadCrumb routes={routes} />
+      <BreadCrumb routes={routes} />
 
-      <NxFormStepper
+      <FormStepper
         steps={steps}
         current={currentStep}
         onPrev={handlePrev}
@@ -649,7 +649,7 @@ const PayGasDepositeExpiredCreatePage = () => {
           </CardContainer>
         )}
 
-        <NxFormFooter
+        <FormFooter
           current={currentStep}
           totalSteps={steps.length}
           onPrev={handlePrev}

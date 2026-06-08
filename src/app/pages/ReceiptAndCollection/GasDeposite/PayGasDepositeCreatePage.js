@@ -3,8 +3,8 @@ import { Form, Spin, message } from "antd";
 import moment from "moment";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
-import NxBreadCrumb from "../../../../components/Nx/NxBreadCrumb";
-import { NxFormStepper, NxFormFooter } from "../../../../components/Nx/NxFormStepNavigation";
+import BreadCrumb from "../../../../components/BreadCrumb";
+import { FormStepper, FormFooter } from "../../../../components/FormStepNavigation";
 import CardContainer from "../../../../components/CardContainer";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import TableRBI from "../../../../components/TableRBI";
@@ -885,9 +885,9 @@ const extractRequestErrorMessage = (error, fallbackMessage) => (
 
   return (
     <>
-      <NxBreadCrumb routes={routes} />
+      <BreadCrumb routes={routes} />
 
-      <NxFormStepper
+      <FormStepper
         steps={steps}
         current={currentStep}
         onPrev={() => setCurrentStep((prev) => Math.max(0, prev - 1))}
@@ -1095,7 +1095,7 @@ const extractRequestErrorMessage = (error, fallbackMessage) => (
           </CardContainer>
         </div>
 
-        <NxFormFooter
+        <FormFooter
           current={currentStep}
           totalSteps={steps.length}
           onPrev={() => setCurrentStep((prev) => Math.max(0, prev - 1))}
