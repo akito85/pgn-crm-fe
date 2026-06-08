@@ -15,10 +15,14 @@ import {
 } from "../../../../../../../../../redux/slices/system_setup/dataRequirementTemplate";
 import { getSrDataRequirementValues } from "../../../../../../../../../redux/slices/account_management/detailAccount/ServiceRequestSlice";
 
-export default function InfoDataRequirement({ form, dropdowns, idAccount }) {
+export default function InfoDataRequirement({ form, dropdowns, idAccount, isUpdate = false }) {
   const dispatch = useDispatch();
   const { data_filter, loading_filter } = useSelector((state) => state.dataRequirementTemplate);
-  const { detail_srDataRequirementValues, loading_srDataRequirementValues } = useSelector((state) => state.serviceRequest);
+  const {
+  detail_srDataRequirementValues,
+  loading_srDataRequirementValues,
+  list_srDataRequirements,
+} = useSelector((state) => state.serviceRequest);
 
   const [dataRequirement, setDataRequirement] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -48,6 +52,24 @@ export default function InfoDataRequirement({ form, dropdowns, idAccount }) {
     }
   }, [form]);
 
+  // In UPDATE mode: populate form from the existing SR's data requirements
+  useEffect(() => {
+    if (!isUpdate) return;
+    if (!list_srDataRequirements.length) return;
+    const existing = form.getFieldValue("srFormDataRequirements");
+    if (existing?.length > 0) return;
+
+    const populated = list_srDataRequirements.map((item, index) => ({
+      key: item.id ?? index,
+      no: index + 1,
+      type: item.type,
+      typeId: item.requirementType ?? item.id,
+      value: item.value ?? "",
+    }));
+    setDataRequirement(populated);
+    form.setFieldsValue({ srFormDataRequirements: populated });
+  }, [isUpdate, list_srDataRequirements]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Auto-fetch template when type, category, subCategory are all set
   useEffect(() => {
     if (type && category && subCategory) {
@@ -64,25 +86,25 @@ export default function InfoDataRequirement({ form, dropdowns, idAccount }) {
     }
   }, [type, category, subCategory]);
 
-  // Auto-populate table when template data arrives
+  // Auto-populate table when template data arrives — skip in update mode
   useEffect(() => {
-    if (data_filter?.details) {
-      const populated = data_filter.details.map((item, index) => ({
-        key: item.id ?? index,
-        no: index + 1,
-        type: item.type,
-        typeId: item.id,
-      }));
-      setDataRequirement(populated);
-      form.setFieldsValue({ srFormDataRequirements: populated });
-    }
-  }, [data_filter]);
+    if (!data_filter?.details) return;
+    if (isUpdate) return;
+    const populated = data_filter.details.map((item, index) => ({
+      key: item.id ?? index,
+      no: index + 1,
+      type: item.type,
+      typeId: item.id,
+    }));
+    setDataRequirement(populated);
+    form.setFieldsValue({ srFormDataRequirements: populated });
+  }, [data_filter]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Fetch data requirement values when user selects a type in edit modal
   useEffect(() => {
-    if (!idAccount || !selectedEditType) return;
+    if (!idAccount || selectedEditType == null) return;
     const items = getDropdownItems("serviceRequestDataRequirements");
-    const matched = items.find((i) => i.name === selectedEditType);
+    const matched = items.find((i) => (i.glbTypeValId ?? i.id) === selectedEditType);
     if (matched?.glbValue) {
       dispatch(getSrDataRequirementValues({ typeValue: matched.glbValue, accountId: idAccount }));
     }
@@ -90,9 +112,9 @@ export default function InfoDataRequirement({ form, dropdowns, idAccount }) {
 
   // Build selectable rows for the choose table
   const chooseTableData = useMemo(() => {
-    if (!selectedEditType) return [];
+    if (selectedEditType == null) return [];
     const items = getDropdownItems("serviceRequestDataRequirements");
-    const matched = items.find((i) => i.name === selectedEditType);
+    const matched = items.find((i) => (i.glbTypeValId ?? i.id) === selectedEditType);
     const source = matched?.glbValue
       ? (detail_srDataRequirementValues[matched.glbValue] ?? [])
       : [];
@@ -124,7 +146,7 @@ export default function InfoDataRequirement({ form, dropdowns, idAccount }) {
 
   const handleEditOpen = (record) => {
     setEditRecord(record);
-    editModalForm.setFieldsValue({ editType: record.type });
+    editModalForm.setFieldsValue({ editType: record.typeId });
     setIsEditModalOpen(true);
   };
 
@@ -135,13 +157,16 @@ export default function InfoDataRequirement({ form, dropdowns, idAccount }) {
   };
 
   const handleSelectDataRequirement = (row) => {
-    const typeId = selectedEditType || editRecord?.typeId;
+    const typeId = selectedEditType ?? editRecord?.typeId;
+    const items = getDropdownItems("serviceRequestDataRequirements");
+    const matched = items.find((i) => (i.glbTypeValId ?? i.id) === typeId);
+    const typeName = matched?.name || matched?.glbTypeValName || editRecord?.type || String(typeId);
     const updatedData = dataRequirement.map((item) =>
       item.key === editRecord?.key
         ? {
             ...item,
             typeId,
-            type: typeId,
+            type: typeName,
             value: row.value ?? row.name ?? "",
           }
         : item
@@ -153,10 +178,13 @@ export default function InfoDataRequirement({ form, dropdowns, idAccount }) {
 
   const handleModalAdd = () => {
     modalForm.validateFields().then((values) => {
+      const items = getDropdownItems("serviceRequestDataRequirements");
+      const matched = items.find((i) => (i.glbTypeValId ?? i.id) === values.type);
+      const typeName = matched?.name || matched?.glbTypeValName || String(values.type);
       const newRecord = {
         key: Date.now(),
         no: (dataRequirement.length > 0 ? Math.max(...dataRequirement.map((i) => i.no)) : 0) + 1,
-        type: values.type,
+        type: typeName,
         typeId: values.type,
       };
       const updatedData = [...dataRequirement, newRecord];
@@ -274,8 +302,8 @@ export default function InfoDataRequirement({ form, dropdowns, idAccount }) {
                   placeholder="Select Data Requirement Type"
                   loading={getDropdownItems("serviceRequestDataRequirements").length === 0}
                   options={getDropdownItems("serviceRequestDataRequirements").map((item) => ({
-                    value: item.name,
-                    label: item.name,
+                    value: item.glbTypeValId ?? item.id,
+                    label: item.name || item.glbTypeValName,
                   }))}
                 />
               </Form.Item>
@@ -302,8 +330,8 @@ export default function InfoDataRequirement({ form, dropdowns, idAccount }) {
                 <Select
                   placeholder="Select Type"
                   options={getDropdownItems("serviceRequestDataRequirements").map((item) => ({
-                    value: item.name,
-                    label: item.name,
+                    value: item.glbTypeValId ?? item.id,
+                    label: item.name || item.glbTypeValName,
                   }))}
                 />
               </Form.Item>

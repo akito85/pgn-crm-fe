@@ -62,6 +62,7 @@ export default function PreRequisiteForm({
   } = useSelector((state) => state.serviceRequest);
 
   useEffect(() => {
+    if (!isCreateFlow) return;
     const body = {
       srTypeId: form?.getFieldValue("type"),
       srCategoryId: form?.getFieldValue("category"),
@@ -76,7 +77,7 @@ export default function PreRequisiteForm({
     setPage(0);
     const promise = dispatch(getSrPrerequisiteTemplate({ accountId, body, isLoadMore: false }));
     return () => { promise.abort(); };
-  }, [sort, search, filters, filterRules]);
+  }, [sort, search, filters, filterRules, isCreateFlow]);
 
   // Local data (CREATE flow: belum ada srId, simpan di form field)
   const [localPrereqs, setLocalPrereqs] = useState(() =>

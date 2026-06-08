@@ -45,7 +45,7 @@ const SrInfoTab = ({ form, dropdowns }) => {
       <NxBaseContainer border header="SERVICE REQUEST INFORMATION">
         <div className="p-4 flex flex-col gap-4">
           <div className="w-full grid grid-cols-3 gap-4">
-            <NxDetailText label="Service Request Reference">{values.srr || "-"}</NxDetailText>
+            <NxDetailText label="Service Request Reference">{values.serviceRequestReference || "-"}</NxDetailText>
             <NxDetailText label="Type">{getLabel(dropdowns, "serviceRequestTypes", values.type)}</NxDetailText>
             <NxDetailText label="Category">{getLabel(dropdowns, "serviceRequestCategories", values.category)}</NxDetailText>
           </div>

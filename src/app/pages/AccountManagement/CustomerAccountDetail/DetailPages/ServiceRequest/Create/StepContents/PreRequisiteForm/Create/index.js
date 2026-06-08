@@ -326,7 +326,7 @@ const PreRequisiteCreateFrom = () => {
           >
             <div className="w-full grid grid-cols-4 gap-4">
               <NxDetailText label="SR Reference">
-                {srData?.srr || srData?.reference || "-"}
+                {srData?.serviceRequestReference || srData?.reference || "-"}
               </NxDetailText>
               <NxDetailText label="Type">
                 {getDropdownLabel("serviceRequestTypes", srData?.type)}

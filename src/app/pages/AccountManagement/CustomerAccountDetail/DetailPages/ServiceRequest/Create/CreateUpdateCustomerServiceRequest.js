@@ -65,6 +65,7 @@ import {
   getSrDataRequirementTypes,
   getSrPrerequisiteTypes,
   getSrAttachmentCategories,
+  getSrDataRequirements,
   createServiceRequest,
   updateServiceRequest,
   resetCreateSr,
@@ -116,6 +117,7 @@ const CreateUpdateCustomerServiceRequest = ({ formType = "create" }) => {
     list_srPrerequisiteTypes,
     list_srDataRequirementTypes,
     list_srAttachmentCategories,
+    list_srDataRequirements,
     detail_serviceRequest: serviceRequestDetail,
     detailDraft_serviceRequest: serviceRequestDetailDraft,
     loading_createUpdateSr,
@@ -125,6 +127,10 @@ const CreateUpdateCustomerServiceRequest = ({ formType = "create" }) => {
     loading_detailSrApprovalHierarchy,
     create_sr,
   } = useSelector((state) => state.serviceRequest);
+
+  const isDraft =
+    (serviceRequestDetail?.statusApproval || "").toUpperCase() === "DRAFT" ||
+    (serviceRequestDetail?.statusApproval || "").toUpperCase() === "REJECT";
 
   // Map state keys to the dropdowns structure expected by child components
   const dropdowns = {
@@ -300,11 +306,16 @@ const CreateUpdateCustomerServiceRequest = ({ formType = "create" }) => {
     dispatch(getSrApprovalHierarchies());
   }, [dispatch]);
 
-  // Load detail + detail-draft when in update mode
+  // Load detail + detail-draft + data requirements when in update mode
   useEffect(() => {
     if (isUpdate && id && idAccount) {
       dispatch(getServiceRequest({ accountId: idAccount, id }));
       dispatch(getServiceRequestDraft({ accountId: idAccount, id }));
+      dispatch(getSrDataRequirements({
+        accountId: idAccount,
+        serviceRequestId: id,
+        body: { page: 0, size: 100, sort: "", searchs: {}, filters: [], filterRules: [] },
+      }));
     }
   }, [dispatch, isUpdate, id, idAccount]);
 
@@ -377,29 +388,7 @@ const CreateUpdateCustomerServiceRequest = ({ formType = "create" }) => {
     list_srSources,
   ]);
 
-  // Populate attachments from loaded detail in UPDATE mode (Gap 3)
-  useEffect(() => {
-    if (!isUpdate) return;
-    const detail = serviceRequestDetail || serviceRequestDetailDraft;
-    if (detail?.attachments?.length) {
-      setAttachmentDataSource(
-        detail.attachments.map((att) => ({ ...att, key: att.id }))
-      );
-    }
-  }, [isUpdate, serviceRequestDetail, serviceRequestDetailDraft]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Populate attachments from loaded detail in UPDATE mode (Gap 3)
-  useEffect(() => {
-    if (!isUpdate) return;
-    const detail = serviceRequestDetail || serviceRequestDetailDraft;
-    if (detail?.attachments?.length) {
-      setAttachmentDataSource(
-        detail.attachments.map((att) => ({ ...att, key: att.id }))
-      );
-    }
-  }, [isUpdate, serviceRequestDetail, serviceRequestDetailDraft]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Populate attachments from loaded detail in UPDATE mode (Gap 3)
+  // Populate attachments from loaded detail in UPDATE mode
   useEffect(() => {
     if (!isUpdate) return;
     const detail = serviceRequestDetail || serviceRequestDetailDraft;
@@ -548,6 +537,8 @@ const CreateUpdateCustomerServiceRequest = ({ formType = "create" }) => {
           customer={data_customerDetail}
           dropdowns={dropdowns}
           idAccount={idAccount}
+          isUpdate={isUpdate}
+          isDraft={isDraft}
         />
       ),
       disabled: false
@@ -901,6 +892,20 @@ const CreateUpdateCustomerServiceRequest = ({ formType = "create" }) => {
         setAttachmentDataSource(
           detail.attachments.map((att) => ({ ...att, key: att.id }))
         );
+      }
+
+      // Restore data requirements
+      if (list_srDataRequirements?.length) {
+        const restoredDr = list_srDataRequirements.map((item, index) => ({
+          key: item.id ?? index,
+          no: index + 1,
+          type: item.type,
+          typeId: item.requirementType ?? item.id,
+          value: item.value ?? "",
+        }));
+        formCreate.setFieldsValue({ srFormDataRequirements: restoredDr });
+      } else {
+        formCreate.setFieldsValue({ srFormDataRequirements: [] });
       }
     } else {
       setAttachmentDataSource([]);
