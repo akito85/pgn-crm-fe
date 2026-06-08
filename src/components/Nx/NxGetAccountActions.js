@@ -8,6 +8,7 @@ const nxGetAccountActions = ({
   handleView = () => {},
   handleApproval = () => {},
   handleDownload = () => {},
+  handleActivate = () => {},
   handleInactivate = () => {},
   handleApprovalHistory = () => {},
   handleRecalculate = () => {},
@@ -54,7 +55,7 @@ const nxGetAccountActions = ({
     )
   },
   {
-    action: "Recalculate",
+    action: "Bulk-Recalculate",
     render: (
       <Button
         type={"submit"}
@@ -66,7 +67,7 @@ const nxGetAccountActions = ({
     )
   },
   {
-    action: "Expire",
+    action: "Bulk-Expire",
     render: (
       <Button
         type={"submit"}
@@ -135,6 +136,49 @@ const nxGetAccountActions = ({
             >
               <SVGIcon name="IconEdit" width={20} />
             </Button>
+          </Tooltip>
+        );
+
+      return <Fragment key={`table-action-${index}`}>{content}</Fragment>;
+    }
+  },
+  {
+    action: "Activate",
+    type: "table",
+    render: (record, actionLength, index) => {
+      const isInactive = record.status === "INACTIVE";
+      const isActive = record.status === "ACTIVE";
+
+      const content =
+        actionLength > 3 ? (
+          <Button
+            icon={
+              <Checkbox
+                checked={isActive}
+                style={{ transform: "scale(0.9)" }}
+                className="action-checkbox"
+              />
+            }
+            onClick={() =>
+              handleActivate(record)
+            }
+            type={"action"}
+          >
+            Inactivate
+          </Button>
+        ) : (
+          <Tooltip
+            title={isInactive ? "Activate" : ""}
+            key={`table-action-${index}`}
+          >
+            <Checkbox
+              className="action-checkbox"
+              checked={isActive}
+              onClick={() =>
+                handleActivate(record)
+              }
+              style={{ transform: "scale(0.9)" }}
+            />
           </Tooltip>
         );
 
@@ -240,6 +284,8 @@ const nxGetAccountActions = ({
     action: "Recalculate",
     type: "table",
     render: (record, actionLength, index) => {
+      const disabled = ["NEED_TO_RECALCULATE", "NEED_TO_EXPIRE"].includes(record.status);
+
       const content =
         actionLength > 3 ? (
           <Button
@@ -252,6 +298,7 @@ const nxGetAccountActions = ({
             border={false}
             onClick={() => handleRecalculate(record)}
             type={"action"}
+            disabled={disabled}
           >
             <span className={"text-black ml-3"}>Recalculate</span>
           </Button>
@@ -260,6 +307,7 @@ const nxGetAccountActions = ({
             <Button
               onClick={() => handleRecalculate(record)}
               type="table-action"
+              disabled={disabled}
             >
               <SVGIcon name="IconRating" width={20} />
             </Button>
@@ -273,6 +321,8 @@ const nxGetAccountActions = ({
     action: "Expire",
     type: "table",
     render: (record, actionLength, index) => {
+      const disabled = ["NEED_TO_RECALCULATE", "NEED_TO_EXPIRE"].includes(record.status);
+
       const content =
         actionLength > 3 ? (
           <Button
@@ -285,6 +335,7 @@ const nxGetAccountActions = ({
             border={false}
             onClick={() => handleExpire(record)}
             type={"action"}
+            disabled={disabled}
           >
             <span className={"text-black ml-3"}>Recalculate</span>
           </Button>
@@ -293,6 +344,7 @@ const nxGetAccountActions = ({
             <Button
               onClick={() => handleExpire(record)}
               type="table-action"
+              disabled={disabled}
             >
               <SVGIcon name="IconExpire" width={20} />
             </Button>

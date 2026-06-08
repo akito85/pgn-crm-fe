@@ -48,6 +48,7 @@ import itemReducer from "../slices/receipt_collection/paymentItem";
 import billingReducer from "../slices/rating_billing_invoice/billing";
 import adjustmentBillingReducer from "../slices/rating_billing_invoice/adjustmentBilling";
 import adjustmentInvoiceReducer from "../slices/rating_billing_invoice/adjustmentInvoice";
+import rbiAccountingReducer from "../slices/rating_billing_invoice/accounting";
 import accountReducer from "../slices/account_management/Account/accountSlice";
 import cycleReducer from "../slices/receipt_collection/transactionCalender";
 import financialInformationReducer from "../slices/account_management/detailAccount/FinancialInformationSlice";
@@ -101,6 +102,7 @@ import templateRemindingReducer from "../slices/debt_and_collection/templateRemi
 import activityTypeReducer from "../slices/debt_and_collection/activityType";
 import activityActionReducer from "../slices/debt_and_collection/activityAction";
 import activitiesReducer from "../slices/debt_and_collection/activities";
+import collectionActivitiesReducer from "../slices/debt_and_collection/collectionActivities";
 import transactionReportReducer from "../slices/debt_and_collection/transactionReport";
 import managementDeliveryInvoiceReducer from "../slices/rating_billing_invoice/managementDeliveryInvoice";
 import masterEfakturCodeReducer from "../slices/rating_billing_invoice/MasterData/efakturCode";
@@ -118,13 +120,16 @@ import digitalSignatureReducer from "../slices/rating_billing_invoice/MasterData
 import settingReducer from "../slices/receipt_collection/setting";
 import glAccountReducer from "../slices/rating_billing_invoice/MasterData/glAccount";
 import contentManagementReducer from "../slices/rating_billing_invoice/MasterData/contentManagement";
+import installmentReducer from "../slices/rating_billing_invoice/installment";
 import accountPromoReducer from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/Promo/store/slices/promoSlice";
 import accountingReducer from "../slices/receipt_collection/accounting";
 import relationshipReducer from "../slices/account_management/detailAccount/relationshipSlice";
+import standaloneRelationshipReducer from "../slices/relationship/standaloneRelationshipSlice";
 import warrantyReducer from "../slices/receipt_collection/warranty";
 import transferToReceiptReducer from "../slices/receipt_collection/transferToReceipt";
 import transferToCustomerReducer from "../slices/receipt_collection/transferToCustomer";
 import restructureReducer from "../slices/receipt_collection/restructure";
+import restructureMonitoringReducer from "../slices/receipt_collection/restructureMonitoring";
 import notificationsReducer from "../slices/notifications";
 import multiDestinationReducer from "../slices/account_management/detailAccount/MultiDestinationSlice";
 import gasDepositReducer from "../slices/account_management/detailAccount/GasDepositSlice";
@@ -142,24 +147,29 @@ import caCiMappingReducer from "../slices/receipt_collection/caCiMapping";
 import serviceRequestReducer from "../slices/account_management/detailAccount/ServiceRequestSlice";
 import paymentCycleReducer from "../slices/receipt_collection/paymentCycle";
 import paymentPeriodReducer from "../slices/receipt_collection/paymentPeriod";
+import exceptionReducer from "../slices/receipt_collection/exceptionSlice";
 import gasDepositPaymentReducer from "../slices/receipt_collection/gasDepositPayment";
 import billingItemCategoryReducer from "../slices/system_setup/master_data/billingItemCategory";
 import calendarReducer from "../slices/system_setup/master_data/calendar";
+import collectionTemplateReducer from "../slices/system_setup/master_data/collectionTemplate";
 import jobManagementReducer from "../slices/job_management/jobSlice";
 import jobGroupReducer from "../slices/job_management/jobGroupSlice";
-import jobExecutionReducer from "../slices/job_management/jobExecutionSlice";
 import oracleMetadataReducer from "../slices/job_management/oracleMetadataSlice";
 import taskQueueReducer from "../slices/job_management/taskQueueSlice";
+import handlerRegistryReducer from "../slices/job_management/handlerRegistrySlice";
 import { jobApiSlice } from "../slices/job_management/jobApiSlice";
 import { jobGroupApiSlice } from "../slices/job_management/jobGroupApiSlice";
+import auditTrailReducer from "../slices/user_management/audit_trail";
+import preRequisiteTemplateReducer from "../slices/system_setup/preRequisiteTemplate";
+import activityTemplateReducer from "../slices/system_setup/activityTemplate";
 import gasDepositRbiReducer from "../slices/rating_billing_invoice/gasDeposit";
 
 const reducer = combineReducers({
   jobManagement: jobManagementReducer,
   jobGroup: jobGroupReducer,
-  jobExecution: jobExecutionReducer,
   oracleMetadata: oracleMetadataReducer,
   taskQueue: taskQueueReducer,
+  handlerRegistry: handlerRegistryReducer,
   auth: authReducer,
   message: messageReducer,
   entity: entityReducer,
@@ -223,6 +233,7 @@ const reducer = combineReducers({
   accountEquipment: equpmentReducer,
   accountPromo: accountPromoReducer,
   relationship: relationshipReducer,
+  standaloneRelationship: standaloneRelationshipReducer,
   multiDestination: multiDestinationReducer,
   gasDeposit: gasDepositReducer,
 
@@ -251,6 +262,7 @@ const reducer = combineReducers({
   billing: billingReducer,
   adjustmentBilling: adjustmentBillingReducer,
   adjustmentInvoice: adjustmentInvoiceReducer,
+  rbiAccounting: rbiAccountingReducer,
   rating: ratingReducer,
   pointOfSales: postOfSalesReducer,
   invoice: invoiceReducer,
@@ -272,6 +284,7 @@ const reducer = combineReducers({
   digitalSignature: digitalSignatureReducer,
   glAccount: glAccountReducer,
   contentManagement: contentManagementReducer,
+  installment: installmentReducer,
   gasDepositRbi: gasDepositRbiReducer,
 
   //receipt and collection
@@ -297,6 +310,7 @@ const reducer = combineReducers({
   transferToReceipt: transferToReceiptReducer,
   transferToCustomer: transferToCustomerReducer,
   restructure: restructureReducer,
+  restructureMonitoring: restructureMonitoringReducer,
   deduction: deductionReducer,
   gapuraManagement: gapuraManagementReducer,
   historyWarranty: historyWarrantyReducer,
@@ -308,7 +322,9 @@ const reducer = combineReducers({
   gasDepositPayment: gasDepositPaymentReducer,
   billingItemCategory: billingItemCategoryReducer,
   calendar: calendarReducer,
+  collectionTemplate: collectionTemplateReducer,
   caCiMapping: caCiMappingReducer,
+  exception: exceptionReducer,
 
   // Attachment
   attachment: attachmentReducer,
@@ -335,11 +351,18 @@ const reducer = combineReducers({
   activityType: activityTypeReducer,
   activityAction: activityActionReducer,
   activities: activitiesReducer,
+  collectionActivities: collectionActivitiesReducer,
   transactionReport: transactionReportReducer,
   writeOff: writeOffReducer,
 
   // notifications
   notifications: notificationsReducer,
+
+  // audit trail
+  audit_trail: auditTrailReducer,
+  // system setup
+  preRequisiteTemplate: preRequisiteTemplateReducer,
+  activityTemplate: activityTemplateReducer,
 });
 
 // add throttle middlewares

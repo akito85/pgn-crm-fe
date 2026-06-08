@@ -182,7 +182,7 @@ const ListDetailTransferToReceipt = () => {
         },
         {
             path: "",
-            breadcrumbName: "Payment Warranty",
+            breadcrumbName: "Payment  Guarantee",
         },
         {
             path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_TRANSFER_TO_RECEIPT,
@@ -283,11 +283,11 @@ const ListDetailTransferToReceipt = () => {
 
             <LogHistoryInfo
                 data={{
-                    recordId: data_detail?.transferToReceipt?.id || "-",
+                    recordId: data_detail?.transferToReceipt?.id || "",
                     createdDate: data_detail?.transferToReceipt?.createdDate ? moment(data_detail?.transferToReceipt?.createdDate).format("DD MMM YYYY HH:mm:ss") : "-",
-                    createdBy: data_detail?.transferToReceipt?.createdBy || "-",
+                    createdBy: data_detail?.transferToReceipt?.createdBy || "",
                     updatedDate: data_detail?.transferToReceipt?.updatedDate ? moment(data_detail?.transferToReceipt?.updatedDate).format("DD MMM YYYY HH:mm:ss") : "-",
-                    updatedBy: data_detail?.transferToReceipt?.updatedBy || "-"
+                    updatedBy: data_detail?.transferToReceipt?.updatedBy || ""
                 }}
             />
 

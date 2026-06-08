@@ -2,14 +2,14 @@ import React, { useState } from "react";
 import DynamicTableInlineBilling from "../../Table/DynamicTableInlineBilling";
 
 const CriteriaDetailTab = ({
-  criteriaType = null,   
+  criteriaType = null,
   dataTable = [],
   onDataChange = () => {},
   data_specialGLList = [],
   data_glAccountList = [],
   data_classificationTypeList = [],
   data_accountTypeList = [],
-  data_criteriaOptions = [], 
+  data_criteriaOptions = [],
   type = "create",
   isEditabled = false,
   setIsEditabled = () => {},
@@ -21,9 +21,11 @@ const CriteriaDetailTab = ({
   disabledColumns = [],
   isBank = false,
   data_glAccountBankList = [],
+  onSearchGLAccount = () => {},
 }) => {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [glAccountSearchValue, setGlAccountSearchValue] = useState("");
 
   const handleChangePage = (pageChange, pageSizeChange) => {
     setPage(pageSize !== pageSizeChange ? 1 : pageChange);
@@ -40,7 +42,8 @@ const CriteriaDetailTab = ({
     if (isNumericId) {
       return (
         data_criteriaOptions?.find(
-          (item) => item.id === criteriaType || item.id === Number(criteriaType),
+          (item) =>
+            item.id === criteriaType || item.id === Number(criteriaType),
         )?.code || null
       );
     }
@@ -76,15 +79,16 @@ const CriteriaDetailTab = ({
 
   const criteriaColConfig = getCriteriaColumnConfig();
 
-  const glAccountOptions = (isBank && data_glAccountBankList?.length > 0)
-    ? data_glAccountBankList.map((item) => ({
-        value: item.glNumber,
-        label: `${item.glNumber} - ${item.glDescription}`,
-      }))
-    : data_glAccountList.map((item) => ({
-        value: item.glAccountId ?? item.id,
-        label: `${item.glAccount ?? item.account} - ${item.glAccountDesc ?? item.name}`,
-      }));
+  const glAccountOptions =
+    isBank && data_glAccountBankList?.length > 0
+      ? data_glAccountBankList.map((item) => ({
+          value: item.glNumber,
+          label: `${item.glNumber} - ${item.glDescription}`,
+        }))
+      : data_glAccountList.map((item) => ({
+          value: item.glAccountId ?? item.id,
+          label: `${item.glAccount ?? item.account} - ${item.glAccountDesc ?? item.name}`,
+        }));
 
   const specialGlOptions = data_specialGLList.map((item) => ({
     value: item.id,
@@ -113,7 +117,8 @@ const CriteriaDetailTab = ({
             options: criteriaColConfig.options,
             required: true,
             width: 200,
-            render: (value) => renderSelectValue(value, criteriaColConfig.options),
+            render: (value) =>
+              renderSelectValue(value, criteriaColConfig.options),
           },
         ]
       : []),
@@ -124,6 +129,13 @@ const CriteriaDetailTab = ({
       required: true,
       width: 250,
       options: glAccountOptions,
+      onSearch: isBank
+        ? undefined
+        : (val) => {
+            setGlAccountSearchValue(val);
+            onSearchGLAccount(val);
+          },
+      searchValue: glAccountSearchValue,
       render: (value) => renderSelectValue(value, glAccountOptions),
       onClick: (selectedLabel, form) => {
         if (!form) return;
@@ -140,7 +152,9 @@ const CriteriaDetailTab = ({
             return label === selectedLabel;
           });
           form.setFieldsValue({
-            descriptionAccount: found ? (found.glAccountDesc ?? found.name ?? "") : "",
+            descriptionAccount: found
+              ? (found.glAccountDesc ?? found.name ?? "")
+              : "",
           });
         }
       },
@@ -178,14 +192,7 @@ const CriteriaDetailTab = ({
   ];
 
   const totalColWidth =
-    60 +
-    (criteriaColConfig ? 200 : 0) +
-    250 +
-    220 +
-    180 +
-    180 +
-    180 +
-    120; // kolom ACTIONS
+    60 + (criteriaColConfig ? 200 : 0) + 250 + 220 + 180 + 180 + 180 + 120; // kolom ACTIONS
 
   return (
     <DynamicTableInlineBilling
@@ -213,6 +220,7 @@ const CriteriaDetailTab = ({
       defaultNewRowValues={defaultNewRowValues}
       disabledColumns={disabledColumns}
       allowDeleteExisting={true}
+      glAccountSearchValue={glAccountSearchValue}
     />
   );
 };

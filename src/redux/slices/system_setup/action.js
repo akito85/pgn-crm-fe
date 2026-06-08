@@ -200,6 +200,24 @@ export const downloadAction = createAsyncThunk(
   }
 );
 
+export const deleteAction = createAsyncThunk(
+  "DELETE_ACTION",
+  async (id, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/action/${id}`;
+      const response = await userHttpService.deleteData(url);
+      const successBody = { title: "Successful", description: "Action deleted successfully." };
+      thunkAPI.dispatch(showModalSuccess(successBody));
+      return response.data;
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({ error: errorBody(errorCode(error), "deleted", errorMessage(error)), action: "DELETE_ACTION", back: false })
+      );
+      return thunkAPI.rejectWithValue(error?.response?.data);
+    }
+  }
+);
+
 const actionSlice = createSlice({
   name: "action",
   initialState,

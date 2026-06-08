@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice, createEntityAdapter } from "@reduxjs/toolkit";
 import receiptCollectionHttpService from "../../services/receiptCollectionHttpService";
+import ratingBillingHttpService from "../../services/ratingBillingHttpService";
 import {
   showModalError,
   setBodyError,
@@ -9,7 +10,6 @@ import {
 
 const warrantyAdapter = createEntityAdapter({
   selectId: (warranty) => warranty.id,
-  sortComparer: (a, b) => b.createdAt - a.createdAt
 });
 
 
@@ -72,6 +72,8 @@ const initialState = warrantyAdapter.getInitialState({
   isSuccess: false,
   message: "",
   dataServiceAgreement: null,
+  warrantyRate: null,
+  loadingWarrantyRate: false,
 });
 
 
@@ -119,11 +121,9 @@ export const getAllWarrantyListPaginate = createAsyncThunk(
     try {
       const searchParams = search === undefined ? "" : search;
       // Default sort
-      const sortValue = sort === undefined || sort === "" ? "updatedDate~desc" : sort;
-      const [orderBy, order] = sortValue.split("~");
+      const sortValue = sort === undefined || sort === "" ? "id~desc" : sort;
 
-
-      const url = `/v1/dbs/api/payment-warranty/get-list?page=${page}&size=${pageSize}&order=${order || 'desc'}&orderBy=${orderBy || 'updatedDate'}&searchs=${searchParams}`;
+      const url = `/v1/dbs/api/payment-warranty/get-list?page=${page}&size=${pageSize}&sort=${sortValue}&searchs=${searchParams}`;
 
       const response = await receiptCollectionHttpService.getPagination(url);
       return response.data;
@@ -195,7 +195,7 @@ export const getAllCustomerInfoPaginate = createAsyncThunk(
   async ({ page, pageSize, search, sort }, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
-      const sortParams = sort === undefined || sort === "" ? "createdDate~desc" : sort;
+      const sortParams = sort === undefined || sort === "" ? "id~desc" : sort;
       const url = `/v1/dbs/api/payment-warranty/customer/get-list?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
       const response = await receiptCollectionHttpService.getAll(url);
       return response.data;
@@ -224,10 +224,9 @@ export const getDetailWarrantyMutation = createAsyncThunk(
   async ({ id, page, pageSize, search, sort }, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
-      const sortValue = sort === undefined || sort === "" ? "updatedDate~desc" : sort;
-      const [orderBy, order] = sortValue.split("~");
+      const sortValue = sort === undefined || sort === "" ? "id~desc" : sort;
 
-      const url = `/v1/dbs/api/payment-warranty/mutation/get-list/${id}?page=${page}&size=${pageSize}&order=${order || 'desc'}&orderBy=${orderBy || 'updatedDate'}&searchs=${searchParams}`;
+      const url = `/v1/dbs/api/payment-warranty/mutation/get-list/${id}?page=${page}&size=${pageSize}&sort=${sortValue}&searchs=${searchParams}`;
 
       const response = await receiptCollectionHttpService.getPagination(url);
       return response.data;
@@ -251,10 +250,9 @@ export const getAllWarrantyInfoPaginate = createAsyncThunk(
   async ({ page, pageSize, search, sort, transTypeName }, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
-      const sortValue = sort === undefined || sort === "" ? "updatedDate~desc" : sort;
-      const [orderBy, order] = sortValue.split("~");
+      const sortValue = sort === undefined || sort === "" ? "id~desc" : sort;
 
-      let url = `/v1/dbs/api/payment-warranty/get-list?page=${page}&size=${pageSize}&order=${order || 'desc'}&orderBy=${orderBy || 'updatedDate'}&searchs=${searchParams}`;
+      let url = `/v1/dbs/api/payment-warranty/get-list?page=${page}&size=${pageSize}&sort=${sortValue}&searchs=${searchParams}`;
 
       if (transTypeName) {
         url += `&transTypeName=${transTypeName}`;
@@ -560,9 +558,9 @@ export const getWarrantyTypeOptions = createAsyncThunk(
 
 export const getMutationCategoryOptions = createAsyncThunk(
   "GET_MUTATION_CATEGORY_OPTIONS",
-  async (_, thunkAPI) => {
+  async (search, thunkAPI) => {
     try {
-      const url = "/v1/dbs/api/payment-warranty/mutation-category";
+      const url = `/v1/dbs/api/payment-warranty/mutation-category${search ? `?search=${search}` : ""}`;
       const response = await receiptCollectionHttpService.getAll(url);
       return response.data;
     } catch (error) {
@@ -759,7 +757,7 @@ export const downloadWarrantyList = createAsyncThunk(
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams =
-        sort === undefined || sort === "" ? "createdDate~desc" : sort;
+        sort === undefined || sort === "" ? "id~desc" : sort;
       const url = `/v1/dbs/api/payment-warranty/download?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
       const response = await receiptCollectionHttpService.downloadData(url);
       return response.data;
@@ -782,7 +780,7 @@ export const downloadWarrantyListDetail = createAsyncThunk(
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams =
-        sort === undefined || sort === "" ? "createdDate~desc" : sort;
+        sort === undefined || sort === "" ? "id~desc" : sort;
       const url = `/v1/dbs/api/payment-warranty/download-detail-list?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
       const response = await receiptCollectionHttpService.downloadData(url);
       return response.data;
@@ -996,6 +994,19 @@ export const getDownloadTemplate = createAsyncThunk(
   }
 );
 
+export const getWarrantyRate = createAsyncThunk(
+  "GET_WARRANTY_RATE",
+  async ({ fromCurrency, rateType, rateDate }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/daily-rate/warranty-rate?fromCurrency=${fromCurrency}&rateType=${encodeURIComponent(rateType)}&rateDate=${rateDate}`;
+      const response = await ratingBillingHttpService.getAll(url);
+      return response?.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
 const warrantySlice = createSlice({
   name: "warranty",
   initialState,
@@ -1185,14 +1196,14 @@ const warrantySlice = createSlice({
 
     // Get Mutation Category Options
     [getMutationCategoryOptions.pending]: (state) => {
-      state.loadingMutation = true;
+      state.loadingMutationCategory = true;
     },
     [getMutationCategoryOptions.fulfilled]: (state, action) => {
-      state.loadingMutation = false;
+      state.loadingMutationCategory = false;
       state.dataMutationCategoryOptions = action.payload;
     },
     [getMutationCategoryOptions.rejected]: (state) => {
-      state.loadingMutation = false;
+      state.loadingMutationCategory = false;
     },
 
     // Download Warranty
@@ -1442,6 +1453,17 @@ const warrantySlice = createSlice({
     },
     [getServiceAgreementByAccountId.rejected]: (state) => {
       state.loadingServiceAgreement = false;
+    },
+    [getWarrantyRate.pending]: (state) => {
+      state.loadingWarrantyRate = true;
+    },
+    [getWarrantyRate.fulfilled]: (state, action) => {
+      state.loadingWarrantyRate = false;
+      state.warrantyRate = action.payload ?? null;
+    },
+    [getWarrantyRate.rejected]: (state) => {
+      state.loadingWarrantyRate = false;
+      state.warrantyRate = null;
     },
   },
 });

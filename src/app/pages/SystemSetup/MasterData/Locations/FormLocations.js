@@ -325,7 +325,7 @@ const FormLocations = ({ type }) => {
         let arrayCols = [
             {
                 title: "NO",
-                width: 50,
+                width: 90,
                 align: "center",
                 dataIndex: 'no',
                 render: (text, object, index) => (page - 1) * pageSize + index + 1,

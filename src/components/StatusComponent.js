@@ -5,11 +5,9 @@ import {
   CloseCircleFilled,
   Loading3QuartersOutlined,
   ExclamationCircleFilled,
-  MinusCircleFilled,
   SyncOutlined,
   FileTextOutlined,
   StopOutlined,
-  HourglassOutlined,
 } from "@ant-design/icons";
 import React, { useMemo } from "react";
 
@@ -42,13 +40,18 @@ const StatusComponent = ({
       case "sent":
       case "approved":
       case "success_upload":
-      case "standard": 
+      case "standard":
         bgColor = "status-active";
         tColor = "text-white";
         break;
 
       case "open":
         bgColor = "status-active";
+        tColor = "text-white";
+        break;
+
+      case "submitted":
+        bgColor = "bg-[#1B76D2]";
         tColor = "text-white";
         break;
 
@@ -72,14 +75,14 @@ const StatusComponent = ({
         tColor = "text-white";
         break;
 
-      case "waiting_approval":
-      case "waiting_for_approval":
-        bgColor = "bg-[#f57c00]";
+      // ===== OK / NOT OK STATUSES =====
+      case "ok":
+        bgColor = "status-active";
         tColor = "text-white";
         break;
 
-      case "none":
-        bgColor = "bg-gray-400";
+      case "not ok":
+        bgColor = "bg-[#f57c00]";
         tColor = "text-white";
         break;
 
@@ -96,16 +99,28 @@ const StatusComponent = ({
       case "failed billing":
       case "fail":
       case "not_paid":
+      case "broken":
+        bgColor = "status-inactive";
+        tColor = "text-white";
+        break;
+
       case "cancelled":
       case "CANCELLED":
-        bgColor = "status-inactive";
+      case "canceled":
+        bgColor = "bg-[#f57c00]";
+        tColor = "text-white";
+        break;
+
+      // Transient failure being auto-recovered by the reaper (distinct from hard FAILED).
+      case "stalled":
+        bgColor = "bg-[#E8833A]";
         tColor = "text-white";
         break;
 
       // ===== WAITING/PENDING STATUSES =====
       case "partial payment":
       case "waiting to release":
-      case "need review": // ✅ Billing status
+      case "need review":
         bgColor = "status-waiting";
         tColor = "text-yellow-700";
         break;
@@ -116,7 +131,6 @@ const StatusComponent = ({
       case "awaiting_approval":
       case "awaiting approval":
       case "processing":
-      case "submitted":
       case "waiting":
       case "waiting approval":
       case "waiting_approval":
@@ -140,6 +154,11 @@ const StatusComponent = ({
 
       case "main":
         bgColor = "status-active";
+        tColor = "text-white";
+        break;
+
+      case "break":
+        bgColor = "bg-[#0075BF]";
         tColor = "text-white";
         break;
 
@@ -228,7 +247,12 @@ const StatusComponent = ({
         break;
 
       case "terminated":
-        bgColor = "bg-white";
+        bgColor = "bg-[#00CFE8]";
+        tColor = "text-white";
+        break;
+
+      case "early payoff":
+        bgColor = "bg-[#0075BF]";
         tColor = "text-white";
         break;
 
@@ -279,6 +303,7 @@ const StatusComponent = ({
     return { bgcolor: bgColor, textColor: tColor };
   }, [colour]);
 
+  // eslint-disable-next-line no-unused-vars
   const renderIconStatus = () => {
     if (!colour || typeof colour !== "string") return null;
 
@@ -349,7 +374,9 @@ const StatusComponent = ({
   if (!children) return null;
 
   const sizeClasses =
-    size === "small" ? `px-2 py-0 text-xs ${margin ? "my-0.5" : ""}` : `px-3 py-0 ${margin ? "my-1" : ""}`;
+    size === "small"
+      ? `px-2 py-0 text-xs ${margin ? "my-0.5" : ""}`
+      : `px-3 py-0 ${margin ? "my-1" : ""}`;
 
   return (
     <div

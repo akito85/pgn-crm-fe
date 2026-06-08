@@ -94,6 +94,7 @@ export const getTosColumns = ({
                                 <SVGIcon
                                     name="IconEdit"
                                     width={24}
+                                    color="#1976D2"
                                     onClick={() => {
                                         setdataUpdate(record);
                                         openModalFormTos(record);

@@ -40,6 +40,10 @@ const EditableCell = ({
   required,
   disableDate,
   onCellClicked,
+  onDropdownVisibleChange,
+  onSearch,
+  searchValue,
+  selectLoading,
   onInput,
   maxLength,
   form,
@@ -65,41 +69,37 @@ const EditableCell = ({
   };
 
   const handleDisableDate = (current) => {
+    if (!current) return false;
+    const currentStart = current.clone().startOf("day");
+
     if (dataIndex === "endDate") {
-      if (
-        hasValue(startDateLock) &&
-        hasValue(endDateLock) &&
-        hasValue(form.getFieldValue("startDate")) === false
-      ) {
-        return (
-          current < moment(startDateLock) ||
-          current > moment(endDateLock).add(1, "days")
-        );
-      } else if (
-        hasValue(form.getFieldValue("startDate")) &&
-        hasValue(endDateLock)
-      ) {
-        return (
-          current &&
-          (moment(form.getFieldValue("startDate")) > current ||
-            current > moment(endDateLock).add(1, "days"))
-        );
-      } else if (hasValue(form.getFieldValue("startDate"))) {
-        return moment(form.getFieldValue().startDate) > current;
-      } else {
-        return null;
-      }
+      const selectedStartDate = form.getFieldValue("startDate");
+      const limitStart = hasValue(selectedStartDate)
+        ? moment(selectedStartDate).startOf("day")
+        : hasValue(startDateLock)
+          ? moment(startDateLock).startOf("day")
+          : null;
+
+      const limitEnd = hasValue(endDateLock)
+        ? moment(endDateLock).startOf("day")
+        : null;
+
+      if (limitStart && currentStart.isBefore(limitStart)) return true;
+      if (limitEnd && currentStart.isAfter(limitEnd)) return true;
+      return false;
     } else if (dataIndex === "startDate") {
-      if (hasValue(endDateLock)) {
-        return (
-          moment(startDateLock) >= current ||
-          current > moment(endDateLock).add(1, "days")
-        );
-      } else {
-        return moment(startDateLock) > current;
-      }
+      const limitStart = hasValue(startDateLock)
+        ? moment(startDateLock).startOf("day")
+        : null;
+      const limitEnd = hasValue(endDateLock)
+        ? moment(endDateLock).startOf("day")
+        : null;
+
+      if (limitStart && currentStart.isBefore(limitStart)) return true;
+      if (limitEnd && currentStart.isAfter(limitEnd)) return true;
+      return false;
     } else {
-      return moment().add(-1, "days") >= current;
+      return currentStart.isBefore(moment().startOf("day"));
     }
   };
 
@@ -112,7 +112,7 @@ const EditableCell = ({
     }
   };
 
-  const getInputNode = (inputType, options) => {
+  const getInputNode = (inputType, options, searchValue) => {
     switch (inputType) {
       case "text":
         return <InputComponent />;
@@ -155,14 +155,24 @@ const EditableCell = ({
         return (
           <Select
             disabled={handleDisabledColumn(dataIndex, record)}
+            loading={selectLoading}
             onChange={(val) => onCellClicked && onCellClicked(val, form)}
+            onDropdownVisibleChange={(open) =>
+              onDropdownVisibleChange && onDropdownVisibleChange(open, form)
+            }
+            onSearch={(input) => onSearch && onSearch(input)}
+            searchValue={searchValue}
             showSearch
             optionFilterProp="children"
             allowClear
-            filterOption={(input, option) =>
-              (option?.children ?? "")
-                .toLowerCase()
-                .includes(input.toLowerCase())
+            autoClearSearchValue={false}
+            filterOption={
+              onSearch
+                ? false
+                : (input, option) =>
+                  (option?.children ?? "")
+                    .toLowerCase()
+                    .includes(input.toLowerCase())
             }
           >
             {options?.map((option) => (
@@ -205,12 +215,22 @@ const EditableCell = ({
       case "description":
         return <Input.TextArea rows={1} maxLength={255} />;
       case "description_readonly":
-        return <Input.TextArea rows={1} disabled style={{ backgroundColor: "#f5f5f5", color: "#595959", cursor: "not-allowed" }} />;
+        return (
+          <Input.TextArea
+            rows={1}
+            disabled
+            style={{
+              backgroundColor: "#f5f5f5",
+              color: "#595959",
+              cursor: "not-allowed",
+            }}
+          />
+        );
       default:
         return <InputComponent />;
     }
   };
-  const inputNode = getInputNode(inputType, options);
+  const inputNode = getInputNode(inputType, options, searchValue);
 
   if (
     dataIndex === "operation" ||
@@ -267,8 +287,8 @@ const DynamicTableInlineBilling = ({
   action,
   useSelect = false,
   usePagination = false,
-  onChangePage = () => {},
-  onSizeChanger = () => {},
+  onChangePage = () => { },
+  onSizeChanger = () => { },
   pageSize,
   current,
   totalData,
@@ -284,17 +304,18 @@ const DynamicTableInlineBilling = ({
   handleValidate,
   messageValidate,
   actionFix,
-  setInserted = () => {},
+  setInserted = () => { },
   isDynamicEditable = false,
-  unFilterUpdatedlist = () => {},
+  unFilterUpdatedlist = () => { },
   startDateLock = null,
   endDateLock = null,
-  setModalRequired = () => {},
-  handleValidateUpdate = () => {},
+  setModalRequired = () => { },
+  handleValidateUpdate = () => { },
   onCancelEdit = null,
   defaultNewRowValues = {},
   disabledColumns = [],
   allowDeleteExisting = false,
+  glAccountSearchValue = "",
 }) => {
   const [form] = Form.useForm();
   const [editingKey, setEditingKey] = useState("");
@@ -406,12 +427,14 @@ const DynamicTableInlineBilling = ({
 
   const save = async (key) => {
     const requiredHiddenCols = cols.filter(
-      (col) => col.required === true && optionSelectedCol.includes(col.title)
+      (col) => col.required === true && optionSelectedCol.includes(col.title),
     );
 
     if (requiredHiddenCols.length > 0) {
       setOptionSelectedCol((prev) =>
-        prev.filter((title) => !requiredHiddenCols.some((col) => col.title === title))
+        prev.filter(
+          (title) => !requiredHiddenCols.some((col) => col.title === title),
+        ),
       );
       setTimeout(() => {
         executeSave(key);
@@ -464,34 +487,33 @@ const DynamicTableInlineBilling = ({
     ) : (
       <Tooltip title="Delete">
         <div
-          className={`flex justify-center${
-            editingKey !== "" ||
+          className={`flex justify-center${editingKey !== "" ||
             isDynamicEditable ||
             (!allowDeleteExisting && record?.dataType === "exist")
-              ? " cursor-not-allowed"
-              : ""
-          }`}
+            ? " cursor-not-allowed"
+            : ""
+            }`}
         >
           <SVGIcon
             name="IconDelete"
             color={
               editingKey !== "" ||
-              isDynamicEditable ||
-              (!allowDeleteExisting && record?.dataType === "exist")
+                isDynamicEditable ||
+                (!allowDeleteExisting && record?.dataType === "exist")
                 ? "#8D91A0"
                 : "#D90000"
             }
             className={
               editingKey !== "" ||
-              isDynamicEditable ||
-              (!allowDeleteExisting && record?.dataType === "exist")
+                isDynamicEditable ||
+                (!allowDeleteExisting && record?.dataType === "exist")
                 ? "disabled"
                 : undefined
             }
             width={24}
             onClick={
               (editingKey === "" || !isDynamicEditable) &&
-              (allowDeleteExisting || record?.dataType !== "exist")
+                (allowDeleteExisting || record?.dataType !== "exist")
                 ? () => deleteRow(record.key)
                 : undefined
             }
@@ -613,11 +635,10 @@ const DynamicTableInlineBilling = ({
                 {actionButton?.includes("update") && (
                   <Tooltip title="Update">
                     <div
-                      className={`flex justify-center${
-                        editingKey !== "" || isDynamicEditable
-                          ? " cursor-not-allowed"
-                          : ""
-                      }`}
+                      className={`flex justify-center${editingKey !== "" || isDynamicEditable
+                        ? " cursor-not-allowed"
+                        : ""
+                        }`}
                     >
                       <SVGIcon
                         name="IconEdit"
@@ -663,11 +684,10 @@ const DynamicTableInlineBilling = ({
                 {actionButton?.includes("create") && (
                   <Tooltip title="Create Detail">
                     <div
-                      className={`flex justify-center${
-                        editingKey !== "" || isDynamicEditable
-                          ? " cursor-not-allowed"
-                          : ""
-                      }`}
+                      className={`flex justify-center${editingKey !== "" || isDynamicEditable
+                        ? " cursor-not-allowed"
+                        : ""
+                        }`}
                     >
                       <SVGIcon
                         name="IconActionCreate"
@@ -777,6 +797,10 @@ const DynamicTableInlineBilling = ({
                   editing: isEditing(record),
                   options: col.options,
                   onCellClicked: col.onClick,
+                  onDropdownVisibleChange: col.onDropdownVisibleChange,
+                  onSearch: col.onSearch,
+                  searchValue: col.searchValue,
+                  selectLoading: col.loading,
                   showPassword: visiblePassword,
                   handlePassword: handleVisiblePassword,
                   regex: regex,

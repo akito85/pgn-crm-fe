@@ -1,5 +1,5 @@
-import { MoreOutlined } from "@ant-design/icons";
-import { Checkbox, Popover, Space, Spin, Tooltip } from "antd";
+import { DownOutlined, MoreOutlined, UpOutlined } from "@ant-design/icons";
+import { Checkbox, Popover, Space, Spin, Tag, Tooltip } from "antd";
 import moment from "moment";
 import React, { useEffect, useRef, useState } from "react";
 import Highlighter from "react-highlight-words";
@@ -22,12 +22,19 @@ import {
   getListApprovalById,
   getAllApprovalList,
   inactiveBankAccount,
+  getAccountCriteriaView,
+  getListCriteria,
+  getParentAccountOptions,
 } from "../../../../../redux/slices/receipt_collection/bankSlice";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
-import CardComponent from "../../../../../components/Card/CardComponent";
+import FunctionalTableCategoryInformation from "./Table/FunctionalTableCategoryInformation";
+import FunctionalTableVAAccount from "./Table/FunctionalTableVAAccount";
+import FunctionalTableVATransaction from "./Table/FunctionalTableVATransaction";
+import FunctionalTableOPAccount from "./Table/FunctionalTableOPAccount";
+import FunctionalTableOPTransaction from "./Table/FunctionalTableOPTransaction";
+import FunctionalTableOPCustom from "./Table/FunctionalTableOPCustom";
+import CriteriaViewTable from "./Table/CriteriaViewTable";
 import RadioTabs from "../../../../../components/RadioTabs";
-import FunctionalTableCriteriaPayment from "./Table/FunctionalTableCriteriaPayment";
-import TableVA from "./TableVA";
 import { intToNPWP } from "../../../../../utils/npwp";
 import {
   getColumnSearchProps,
@@ -50,32 +57,35 @@ const DetailBank = ({
   setSelectedLocationType,
   selectedLocationType,
   navigateToCreatePage = () => {},
-  
-  // --- PROPS BARU UNTUK GL ACCOUNT ---
-  data_glAccount = [] 
-  // -----------------------------------
 }) => {
   const {
     data_modal,
     dataAccountInfoPaging,
     loading,
     dataApprovalHistoryBankAccount,
-    dataGLType // Tarik dataGLType dari redux untuk mapping nama GL
+    data_va_category,
+    data_nomenklatur1,
+    data_nomenklatur2,
+    data_display,
+    data_billing_item,
+    dataCriteriaView,
+    data_select_criteria,
+    data_parent_options,
   } = useSelector((state) => state.bank);
   
   const dispatch = useDispatch();
-  const [page, setPage] = useState([1]);
-  const [pageSize, setPageSize] = useState([10]);
-  const [pageContact, setPageContact] = useState([1]);
-  const [pageSizeContact, setPageSizeContact] = useState([10]);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [pageContact] = useState(1);
+  const [pageSizeContact] = useState(10);
   const searchInput = useRef(null);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
-  const [sort, setSort] = useState("");
+  const [, setSort] = useState("");
   const [search, setSearch] = useState("");
   const [openModal, setOpenModal] = useState(false);
-  const [criteriaValues, setCriteriaValues] = useState([]);
-  const [listDataCriteria, setListDataCriteria] = useState([]);
+  const [, setCriteriaValues] = useState([]);
+  const [, setListDataCriteria] = useState([]);
   const [pageBank, setPageBank] = useState(1);
   const [pageSizeBank, setPageSizeBank] = useState(10);
   const [idVA, setIdVA] = useState();
@@ -88,14 +98,19 @@ const DetailBank = ({
 
   const [approveOrReject, setApproveOrReject] = useState("");
   const [modalConfirm, setModalConfirm] = useState(false);
-  const [remark, setRemark] = useState("");
+  const [, setRemark] = useState("");
 
   const [openModalHistory, setOpenModalHistory] = useState(false);
   const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
   const [openModalInactivate, setOpenModalInactivate] = useState(false);
   const [bankAccountName, setBankAccountName] = useState();
-  const [idBankAccount, setIdBankAccount] = useState();
-  const [statusBank, setStatusBank] = useState();
+  const [, setStatusBank] = useState();
+
+  const [listDataCategoryInfoModal, setListDataCategoryInfoModal] = useState([]);
+  const [modalAccountInfoCollapsed, setModalAccountInfoCollapsed] = useState(false);
+  const [modalCategoryCollapsed, setModalCategoryCollapsed] = useState(false);
+  const [categoryInfoTab, setCategoryInfoTab] = useState("Nomenklatur");
+  const [modalCriteriaCollapsed, setModalCriteriaCollapsed] = useState(false);
 
   useEffect(() => {
     if (id && data_modal?.accountBankDto?.id) {
@@ -137,8 +152,44 @@ const DetailBank = ({
       });
       setListDataCriteria(dataCriteriaList);
       setCriteriaValues(mappingCriteria);
+
+      const vaCatOpts = (data_va_category || []).map((c) => ({ value: c.id ?? c.Id, label: c.name ?? c.text ?? "" }));
+
+      const billingOpts = (data_billing_item || []).map((b) => ({ value: b.id ?? b.Id, label: b.name ?? b.text ?? "" }));
+
+      const dataCategoryList = (
+        data_modal?.accountBankDto?.categoryDataDtoList || []
+      ).map((item, index) => {
+        const catLabel = vaCatOpts.find((o) => String(o.value) === String(item.categoryId))?.label ?? null;
+
+        return {
+          id: item.id,
+          key: index + 1,
+          category: item.categoryId ? { value: item.categoryId, label: catLabel } : null,
+          totalDigit: item.totalDigit ? String(item.totalDigit) : "",
+          staticCode: item.staticCode || "",
+          nomenklatur1: item.nomenklatur1 ? { value: item.nomenklatur1, label: item.nomenklatur1 } : null,
+          nomenklatur2: item.nomenklatur2 ? { value: item.nomenklatur2, label: item.nomenklatur2 } : null,
+          display: item.display ? { value: item.display, label: item.display } : null,
+          details: (item.billingItemIds || []).map((bid, bidIndex) => {
+            const billingLabel = billingOpts.find((o) => String(o.value) === String(bid))?.label ?? String(bid);
+            return { key: bidIndex + 1, billingItem: { value: bid, label: billingLabel } };
+          }),
+        };
+      });
+      setListDataCategoryInfoModal(dataCategoryList);
+
+      // Set initial category info tab based on account category
+      const accountCat = data_modal?.accountBankDto?.category;
+      if (accountCat === "Online Payment") {
+        setCategoryInfoTab("OP Account");
+      } else if (accountCat) {
+        setCategoryInfoTab("VA Account");
+      } else {
+        setCategoryInfoTab("Nomenklatur");
+      }
     }
-  }, [id, data_modal]);
+  }, [id, data_modal, data_va_category, data_nomenklatur1, data_nomenklatur2, data_display, data_billing_item]);
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -151,11 +202,6 @@ const DetailBank = ({
     setSearch(
       selectedKeys.length === 0 ? "" : `${dataIndex}~${selectedKeys[0]}`
     );
-  };
-
-  const handleChange = (page, pageSize) => {
-    setPage(page);
-    setPageSize(pageSize);
   };
 
   const handleChangeSizeBank = (pageChange, pageSizeChange) => {
@@ -177,8 +223,8 @@ const DetailBank = ({
     setPageSize(pageSize);
   };
 
-  const [fieldSort, setFieldSort] = useState("");
-  const [orderSort, setOrderSort] = useState("");
+  const [, setFieldSort] = useState("");
+  const [, setOrderSort] = useState("");
 
   const paginationTable = (typeData = "data") => {
     let result = [...dataSource];
@@ -267,7 +313,14 @@ const DetailBank = ({
   const handleDetailAccount = (record) => {
     setOpenModal(true);
     setIdVA(record);
+    setModalAccountInfoCollapsed(false);
+    setModalCategoryCollapsed(false);
+    setModalCriteriaCollapsed(false);
+    // initial tab is set after data loads via useEffect watching data_modal
     dispatch(getDetailAccountInformation(record));
+    dispatch(getAccountCriteriaView(record));
+    // getListCriteria & getParentAccountOptions dipanggil di useEffect mount,
+    // tidak perlu dipanggil ulang setiap buka modal
   };
 
   const columnContact = (
@@ -283,6 +336,14 @@ const DetailBank = ({
       width: 60,
       align: "center",
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
+    },
+    {
+      title: "PRIMARY",
+      dataIndex: "isPrimary",
+      width: 120,
+      align: "center",
+      render: (val) =>
+        val === "Y" ? <Tag color="blue">Primary</Tag> : <span className="text-gray-400">-</span>,
     },
     {
       title: "CONTACT NAME",
@@ -323,37 +384,6 @@ const DetailBank = ({
       ),
     },
   ];
-
-  // --- KOLOM UNTUK TABEL GL ACCOUNT ---
-  const columnsGLAccount = [
-    {
-      title: "NO",
-      width: 60,
-      align: "center",
-      render: (text, object, index) => index + 1,
-    },
-    {
-      title: "GL TYPE",
-      dataIndex: "glType",
-      align: "center",
-      render: (text) => {
-        // Translate ID GL Type jadi Nama
-        const typeName = dataGLType?.find((item) => String(item.id) === String(text))?.name;
-        return typeName || text; 
-      }
-    },
-    {
-      title: "ACCOUNT NUMBER",
-      dataIndex: "accountNumber",
-      align: "center",
-    },
-    {
-      title: "ACCOUNT DESCRIPTION",
-      dataIndex: "accountDes",
-      align: "left",
-    }
-  ];
-  // ------------------------------------
 
   const expandedRowRender = (record) => {
     const dataExpanded = record?.contactDetails;
@@ -412,6 +442,14 @@ const DetailBank = ({
       })
     );
   }, [id, pageBank, pageSizeBank, sortBank, searchBank, dispatch]);
+
+  // Fetch data yang hanya perlu diambil sekali saat komponen mount atau id berubah
+  useEffect(() => {
+    if (id) {
+      dispatch(getListCriteria());
+      dispatch(getParentAccountOptions(id));
+    }
+  }, [dispatch, id]);
 
   const handleSearchBank = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -487,10 +525,11 @@ const DetailBank = ({
         (pageBank - 1) * pageSizeBank + index + 1,
     },
     {
-      title: "BANK ACCOUNT NUMBER",
+      title: "ACCOUNT NUMBER",
       dataIndex: "accountNumber",
       sorter: true,
       align: "left",
+      width: 160,
       ...getColumnSearchPropsPaging(
         "accountNumber",
         searchInput,
@@ -514,10 +553,11 @@ const DetailBank = ({
         ),
     },
     {
-      title: "BANK ACCOUNT NAME",
+      title: "ACCOUNT NAME",
       dataIndex: "accountName",
       sorter: true,
       align: "left",
+      width: 160,
       ...getColumnSearchPropsPaging(
         "accountName",
         searchInput,
@@ -545,6 +585,7 @@ const DetailBank = ({
       dataIndex: "currency",
       sorter: true,
       align: "center",
+      width: 110,
       ...getColumnSearchPropsPaging(
         "currency",
         searchInput,
@@ -572,6 +613,7 @@ const DetailBank = ({
       dataIndex: "entityName",
       sorter: true,
       align: "center",
+      width: 100,
       ...getColumnSearchPropsPaging(
         "entityName",
         searchInput,
@@ -599,6 +641,7 @@ const DetailBank = ({
       dataIndex: "type",
       sorter: true,
       align: "center",
+      width: 120,
       ...getColumnSearchPropsPaging(
         "type",
         searchInput,
@@ -622,12 +665,13 @@ const DetailBank = ({
         ),
     },
     {
-      title: "TOTAL DIGIT",
-      dataIndex: "totalDigit",
+      title: "CATEGORY",
+      dataIndex: "category",
       sorter: true,
-      align: "right",
+      align: "left",
+      width: 140,
       ...getColumnSearchPropsPaging(
-        "totalDigit",
+        "category",
         searchInput,
         searchedColumn,
         searchText,
@@ -635,7 +679,7 @@ const DetailBank = ({
         true
       ),
       render: (text) =>
-        searchedColumn === "totalDigit" ? (
+        searchedColumn === "category" ? (
           <Highlighter
             highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
             searchWords={[searchText]}
@@ -653,6 +697,7 @@ const DetailBank = ({
       dataIndex: "startDate",
       sorter: true,
       align: "center",
+      width: 130,
       ...getColumnSearchProps(
         "startDate",
         searchInput,
@@ -683,6 +728,7 @@ const DetailBank = ({
       dataIndex: "endDate",
       sorter: true,
       align: "center",
+      width: 130,
       ...getColumnSearchProps(
         "endDate",
         searchInput,
@@ -709,12 +755,13 @@ const DetailBank = ({
         ),
     },
     {
-      title: "FIRST STATIC CODE",
-      dataIndex: "staticCode",
+      title: "PARENT",
+      dataIndex: "parent",
       sorter: true,
-      align: "right",
+      align: "left",
+      width: 260,
       ...getColumnSearchPropsPaging(
-        "staticCode",
+        "parent",
         searchInput,
         searchedColumn,
         searchText,
@@ -722,7 +769,35 @@ const DetailBank = ({
         true
       ),
       render: (text) =>
-        searchedColumn === "staticCode" ? (
+        searchedColumn === "parent" ? (
+          <Highlighter
+            highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
+            searchWords={[searchText]}
+            autoEscape
+            textToHighlight={text ? text.toString() : ""}
+          />
+        ) : text ? (
+          <Tooltip placement="topLeft" title={text}>{text}</Tooltip>
+        ) : (
+          ""
+        ),
+    },
+    {
+      title: "CRITERIA",
+      dataIndex: "criteria",
+      sorter: true,
+      align: "left",
+      width: 160,
+      ...getColumnSearchPropsPaging(
+        "criteria",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearchBank,
+        true
+      ),
+      render: (text) =>
+        searchedColumn === "criteria" ? (
           <Highlighter
             highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
             searchWords={[searchText]}
@@ -740,6 +815,7 @@ const DetailBank = ({
       dataIndex: "description",
       sorter: true,
       align: "left",
+      width: 180,
       ...getColumnSearchPropsPaging(
         "description",
         searchInput,
@@ -764,50 +840,12 @@ const DetailBank = ({
         ),
     },
     {
-      title: "STATUS",
-      dataIndex: "status",
-      key: "status",
-      sorter: true,
-      fixed:'right',
-      ...getColumnSearchPropsPaging(
-        "status",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearchBank,
-        true
-      ),
-      render: (text) =>
-        text ? (
-          <div className="flex justify-center">
-            <StatusComponent colour={text}>{text}</StatusComponent>
-          </div>
-        ) : (
-          ""
-        ),
-    },
-    {
       title: "STATUS APPROVAL",
       dataIndex: "statusApproval",
-      key: "statusApproval",
       sorter: true,
-      fixed: 'right',
-      ...getColumnSearchPropsPaging(
-        "statusApproval",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearchBank,
-        true
-      ),
-      render: (text) =>
-        text ? (
-          <div className="flex justify-center">
-            <StatusComponent colour={text}>{text}</StatusComponent>
-          </div>
-        ) : (
-          ""
-        ),
+      align: "center",
+      width: 150,
+      render: (text) => text ? <StatusComponent colour={text}>{text}</StatusComponent> : "",
     },
     {
       title: "ACTION",
@@ -830,10 +868,10 @@ const DetailBank = ({
                     >
                       <ButtonComponent
                         className="gap-5 w-full"
-                        icon={<SVGIcon name="IconEdit" width={24} color={"#0075BF"} />}
+                        icon={<SVGIcon name="IconEdit" width={14} color={"#0075BF"} />}
                         border={false}
                       >
-                        <span className={"text-black gap-2 text-xl text-center w-full"}>
+                        <span className={"text-black gap-2 text-xs text-center w-full"}>
                           Update
                         </span>
                       </ButtonComponent>
@@ -841,11 +879,11 @@ const DetailBank = ({
                   ) : (
                     <ButtonComponent
                       className="gap-5 w-full"
-                      icon={<SVGIcon name="IconEdit" width={24} color={"#d3d3d3"} />}
+                      icon={<SVGIcon name="IconEdit" width={14} color={"#d3d3d3"} />}
                       border={false}
                       disabled={true}
                     >
-                      <span className={"text-black gap-2 text-xl text-center w-full"}>
+                      <span className={"text-black gap-2 text-xs text-center w-full"}>
                         Update
                       </span>
                     </ButtonComponent>
@@ -862,32 +900,40 @@ const DetailBank = ({
                           setStatusBank(r?.status);
                         }}
                       >
-                        <Checkbox checked={r?.status === "Active" ? true : false} className="gap-7" />
-                        <span className={"text-black gap-2 text-xl text-center"}>
-                          {r?.status === "ACTIVE" ? "Inactivate" : "Activate"}
-                        </span>
+                        <div className="flex items-center gap-5">
+                          <span style={{ display: "inline-flex", width: "14px", height: "14px", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                            <Checkbox checked={r?.status === "Active" ? true : false} style={{ transform: "scale(0.75)", transformOrigin: "center" }} />
+                          </span>
+                          <span className={"text-black text-xs text-center"}>
+                            {r?.status === "ACTIVE" ? "Inactivate" : "Activate"}
+                          </span>
+                        </div>
                       </ButtonComponent>
                     ) : (
                       <ButtonComponent border={false} disabled={true}>
-                        <Checkbox
-                          checked={
-                            r?.status === "Active" ? true : false || r?.status === "Draft" ? true : null
-                          }
-                          className="gap-7"
-                        />
-                        <span className={"text-black gap-2 text-xl text-center"}>
-                          {r?.status === "Active" ? "Inactivate" : "Activate"}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <span style={{ display: "inline-flex", width: "14px", height: "14px", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                            <Checkbox
+                              checked={
+                                r?.status === "Active" ? true : false || r?.status === "Draft" ? true : null
+                              }
+                              style={{ transform: "scale(0.75)", transformOrigin: "center" }}
+                            />
+                          </span>
+                          <span className={"text-black text-xs text-center"}>
+                            {r?.status === "Active" ? "Inactivate" : "Activate"}
+                          </span>
+                        </div>
                       </ButtonComponent>
                     )
                   }
                   <ButtonComponent
                     className="gap-5"
-                    icon={<SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />}
+                    icon={<SVGIcon name="IconLogHistory" color={"#0075bf"} width={14} />}
                     border={false}
                     onClick={() => handleApprovalHistory(r)}
                   >
-                    <span className={"text-black text-xl text-center"}>
+                    <span className={"text-black text-xs text-center"}>
                       Approval History
                     </span>
                   </ButtonComponent>
@@ -916,56 +962,6 @@ const DetailBank = ({
       },
     },
   ];
-
-  const renderSection = (segmentedPage) => {
-    switch (segmentedPage) {
-      case "VA":
-        return (
-          <TableVA
-            data_detail={data_detail}
-            id={idVA}
-            dataSource={dataSource}
-          />
-        );
-      case "Criteria":
-        return (
-          <FunctionalTableCriteriaPayment
-            type={"detail"}
-            data={listDataCriteria}
-            dataCriteria={criteriaValues}
-            updateData={setListDataCriteria}
-          />
-        );
-      default:
-        return <></>;
-    }
-  };
-
-  const [tabData, setTabData] = useState([
-    { value: "VA" },
-    { value: "Criteria" },
-  ]);
-
-  const [segmentedPage, setSegmentedPage] = useState(tabData[0].value);
-
-  const handleSegmentedPage = (e) => {
-    setSegmentedPage(e.target.value);
-  };
-
-  const criteriaSelect =
-    data_modal?.accountBankDto?.criteriaDtoList?.map((item) => {
-      return {
-        id: item?.criteria,
-        accountInformationId: item?.accountInformationId,
-        criteriaName: item?.criteriaName,
-      };
-    }) || [];
-
-  const mappingCriteria = criteriaSelect.map((a) => a.criteriaName || ""); 
-  const criteria = mappingCriteria.reduce(
-    (current, next) => current + (next ? `, ${next}` : ""),
-    ""
-  );
 
   const showButtonApproval = data_modal?.tApprovalDto?.isApprover;
 
@@ -1041,6 +1037,14 @@ const DetailBank = ({
     setOpenModal(true);
   };
 
+  // Hitung categoryTabs di luar JSX agar tidak perlu IIFE anti-pattern di render
+  const accountCategory = data_modal?.accountBankDto?.category;
+  const categoryTabs = !accountCategory
+    ? [{ value: "Nomenklatur" }]
+    : accountCategory === "Online Payment"
+      ? [{ value: "OP Account" }, { value: "OP Transaction" }, { value: "OP Custom" }, { value: "Nomenklatur" }]
+      : [{ value: "VA Account" }, { value: "VA Transaction" }, { value: "Nomenklatur" }];
+
   return (
     <div className="w-full gap-5">
       <Spin spinning={loading}>
@@ -1098,20 +1102,7 @@ const DetailBank = ({
           </div>
         </BaseContainer>
 
-        {/* --- TAMBAHAN SECTION GL ACCOUNT DI SINI --- */}
-        <BaseContainer header={"GL ACCOUNT INFORMATION"}>
-          <TablePagination
-            useSelect={false}
-            usePagination={false}
-            dataSource={data_glAccount} 
-            columns={columnsGLAccount}
-            tableScrolled={{ x: "max-content" }}
-          />
-        </BaseContainer>
-        {/* ------------------------------------------- */}
-
-        {data_detail?.statusApproval === "Approved" ? (
-          <BaseContainer header={"BANK ACCOUNT INFORMATION"}>
+        <BaseContainer header={"BANK ACCOUNT INFORMATION"}>
             <div className="w-full flex justify-end gap-5">
               <NavLink
                 to={RECEIPT_AND_COLLECTION_ROUTES.CREATE_ACCOUNT_INFORMATION}
@@ -1125,7 +1116,7 @@ const DetailBank = ({
                 </ButtonComponent>
               </NavLink>
             </div>
-            <div className="my-5 gap-5">
+            <div className="my-5 gap-5 rc-bank-small">
               <TablePagination
                 dataSource={dataAccountInfoPaging?.result}
                 pageSize={pageSizeBank}
@@ -1145,13 +1136,12 @@ const DetailBank = ({
                 totalData={dataAccountInfoPaging?.page?.totalElements}
                 onSort={onSortBank}
                 tableScrolled={{
-                  x: 3000,
+                  x: "max-content",
                   y: 525,
                 }}
               />
             </div>
           </BaseContainer>
-        ) : null}
 
         <BaseContainer header={"CONTACT LIST"}>
           <TablePagination
@@ -1181,11 +1171,7 @@ const DetailBank = ({
           handleCancel={() => {
             setOpenModal(false);
           }}
-          header={
-            segmentedPage === "Criteria"
-              ? "ACCOUNT DETAIL"
-              : "BANK ACCOUNT DETAIL"
-          }
+          header={"BANK ACCOUNT DETAIL"}
           width={1000}
           type={"detail"}
           footer={
@@ -1226,92 +1212,138 @@ const DetailBank = ({
             )
           }
         >
-          <CardComponent header={"BANK ACCOUNT INFORMATION"}>
-            <div className="w-full grid grid-cols-3">
-              <DetailText label={"Bank Account Number"}>
-                {data_modal?.accountBankDto?.accountNumber}
-              </DetailText>
-              <DetailText label={"Bank Account Name"}>
-                {data_modal?.accountBankDto?.accountName}
-              </DetailText>
-              <DetailText label={"Branch Name"}>
-                {data_modal?.accountBankDto?.branchName}
-              </DetailText>
-              <DetailText label={"Currency"}>
-                {data_modal?.accountBankDto?.currency?.name}
-              </DetailText>
-              <DetailText label={"Entity"}>
-                {data_modal?.accountBankDto?.entity?.name}
-              </DetailText>
-              <DetailText label={"Type"}>
-                {data_modal?.accountBankDto?.type?.name}
-              </DetailText>
-              <DetailText label={"Criteria"}>
-                {criteria ? criteria.slice(1) : ""}
-              </DetailText>
-              <DetailText label={"Start Date"}>
-                {moment(data_modal?.accountBankDto?.startDate).format(
-                  dateFormatting.dateCapital
-                )}
-              </DetailText>
-              <DetailText label={"End Date"}>
-                {data_modal.accountBankDto?.endDate
-                  ? moment(data_modal?.accountBankDto?.endDate).format(
-                      dateFormatting.dateCapital
-                    )
-                  : ""}
-              </DetailText>
-              <div className="col-span-3">
-                <DetailText label={"Description"}>
-                  {data_modal?.accountBankDto?.description}
-                </DetailText>
+          {/* Account Information — collapsible */}
+          <div className="bg-detail p-4 mb-3 rounded-md">
+            <div
+              className="flex justify-between items-center cursor-pointer"
+              onClick={() => setModalAccountInfoCollapsed(!modalAccountInfoCollapsed)}
+            >
+              <div className="text-primary text-xs font-semibold uppercase">ACCOUNT INFORMATION</div>
+              <div className="text-primary">
+                {modalAccountInfoCollapsed ? <DownOutlined /> : <UpOutlined />}
               </div>
-              <DetailText label={"isVA"}>
-                {data_modal?.accountBankDto?.isVa === true ? "True" : "False"}
-              </DetailText>
-              <DetailText label={"Total Digit"}>
-                {data_modal?.accountBankDto?.totalDigit}
-              </DetailText>
-              <DetailText label={"First Static Code"}>
-                {data_modal?.accountBankDto?.staticCode}
-              </DetailText>
-              <DetailText label={"Status"}>
-                {data_modal?.accountBankDto?.status}
-              </DetailText>
-              <DetailText label={"Status Approval"}>
-                {data_modal?.accountBankDto?.statusApproval}
-              </DetailText>
             </div>
-          </CardComponent>
-          <CardComponent header={"HISTORY LOG INFORMATION"}>
-            <div className="w-full grid grid-cols-5">
-              <DetailText label={"Record ID"}>
-                {data_modal?.accountBankDto?.id}
-              </DetailText>
-              <DetailText label={"Created Date"}>
-                {moment(data_modal?.accountBankDto?.createdDate).format(
-                  "DD MMM YYYY HH:mm:ss"
-                )}
-              </DetailText>
-              <DetailText label={"Created By"}>
-                {data_modal?.accountBankDto?.createdBy}
-              </DetailText>
-              <DetailText label={"Updated Date"}>
-                {data_modal?.accountBankDto?.updatedDate === null
-                  ? ""
-                  : moment(data_modal?.accountBankDto?.updatedDate).format(
-                      "DD MMM YYYY HH:mm:ss"
-                    )}
-              </DetailText>
-              <DetailText label={"Updated By"}>
-                {data_modal?.accountBankDto?.updatedBy}
-              </DetailText>
-            </div>
-          </CardComponent>
+            {!modalAccountInfoCollapsed && (
+              <Spin spinning={loading}>
+                <div className="mt-3">
+                  {/* Row 1: Account Number, Account Name, Currency, Entity, Type */}
+                  <div className="w-full grid grid-cols-5 gap-y-2.5 gap-x-2 py-1">
+                    <DetailText label={"Account Number"}>
+                      {data_modal?.accountBankDto?.accountNumber}
+                    </DetailText>
+                    <DetailText label={"Account Name"}>
+                      {data_modal?.accountBankDto?.accountName}
+                    </DetailText>
+                    <DetailText label={"Currency"}>
+                      {data_modal?.accountBankDto?.currency?.name}
+                    </DetailText>
+                    <DetailText label={"Entity"}>
+                      {data_modal?.accountBankDto?.entity?.name}
+                    </DetailText>
+                    <DetailText label={"Type"}>
+                      {data_modal?.accountBankDto?.type?.name}
+                    </DetailText>
+                  </div>
+                  {/* Row 2: Category, Start Date, End Date, Parent, Criteria */}
+                  <div className="w-full grid grid-cols-5 gap-y-2.5 gap-x-2 py-1">
+                    <DetailText label={"Category"}>
+                      {data_modal?.accountBankDto?.category}
+                    </DetailText>
+                    <DetailText label={"Start Date"}>
+                      {data_modal?.accountBankDto?.startDate
+                        ? moment(data_modal?.accountBankDto?.startDate).format(dateFormatting.dateCapital)
+                        : ""}
+                    </DetailText>
+                    <DetailText label={"End Date"}>
+                      {data_modal?.accountBankDto?.endDate
+                        ? moment(data_modal?.accountBankDto?.endDate).format(dateFormatting.dateCapital)
+                        : ""}
+                    </DetailText>
+                    <DetailText label={"Parent"}>
+                      {(data_parent_options || []).find(
+                        (p) => String(p.id) === String(data_modal?.accountBankDto?.parentId)
+                      )?.label || ""}
+                    </DetailText>
+                    <DetailText label={"Criteria"}>
+                      {(data_select_criteria || [])
+                        .filter((c) =>
+                          (data_modal?.accountBankDto?.criteriaDtoList || [])
+                            .map((item) => String(item?.criteria))
+                            .includes(String(c?.id))
+                        )
+                        .map((c) => c.text)
+                        .join(", ")}
+                    </DetailText>
+                  </div>
+                </div>
+              </Spin>
+            )}
+          </div>
 
           <div className="w-full gap-5">
-            <RadioTabs data={tabData} onChange={handleSegmentedPage} />
-            <div className="my-5">{renderSection(segmentedPage)}</div>
+            {/* Category Information */}
+            <div className="drop-shadow-md bg-white rounded-lg w-full mt-[30px] p-[20px]">
+              <div
+                className="flex justify-between items-center cursor-pointer"
+                onClick={() => setModalCategoryCollapsed(!modalCategoryCollapsed)}
+              >
+                <div className="text-primary text-xs font-bold uppercase">CATEGORY INFORMATION</div>
+                <div className="text-primary">
+                  {modalCategoryCollapsed ? <DownOutlined /> : <UpOutlined />}
+                </div>
+              </div>
+              {!modalCategoryCollapsed && (
+                <div className="mt-4 rc-bank-small">
+                  <RadioTabs
+                    data={categoryTabs}
+                    onChange={(e) => setCategoryInfoTab(e.target.value)}
+                    currentPosition={categoryInfoTab}
+                  />
+                  <div className="mt-3">
+                    {categoryInfoTab === "VA Account" && (
+                      <FunctionalTableVAAccount id={idVA} />
+                    )}
+                    {categoryInfoTab === "VA Transaction" && (
+                      <FunctionalTableVATransaction id={idVA} />
+                    )}
+                    {categoryInfoTab === "OP Account" && (
+                      <FunctionalTableOPAccount id={idVA} />
+                    )}
+                    {categoryInfoTab === "OP Transaction" && (
+                      <FunctionalTableOPTransaction id={idVA} />
+                    )}
+                    {categoryInfoTab === "OP Custom" && (
+                      <FunctionalTableOPCustom id={idVA} />
+                    )}
+                    {categoryInfoTab === "Nomenklatur" && (
+                      <FunctionalTableCategoryInformation
+                        type="detail"
+                        data={listDataCategoryInfoModal}
+                        updateData={() => {}}
+                      />
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Criteria Information */}
+            <div className="drop-shadow-md bg-white rounded-lg w-full mt-[30px] p-[20px]">
+              <div
+                className="flex justify-between items-center cursor-pointer"
+                onClick={() => setModalCriteriaCollapsed(!modalCriteriaCollapsed)}
+              >
+                <div className="text-primary text-xs font-bold uppercase">CRITERIA INFORMATION</div>
+                <div className="text-primary">
+                  {modalCriteriaCollapsed ? <DownOutlined /> : <UpOutlined />}
+                </div>
+              </div>
+              {!modalCriteriaCollapsed && (
+                <div className="mt-4 rc-bank-small">
+                  <CriteriaViewTable data={dataCriteriaView} loading={loading} />
+                </div>
+              )}
+            </div>
           </div>
         </ModalCustom>
 

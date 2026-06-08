@@ -4,14 +4,34 @@ import { Form, Row, Col, Select } from "antd";
 import InputComponent from "../../../../../../components/InputComponent";
 import SelectComponent from "../../../../../../components/SelectComponent";
 import DateComponent from "../../../../../../components/DateComponent";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { MUTATION_TYPES, MUTATION_SOURCES, WARRANTY_TYPES } from "../../../../../../constants/warranty";
 import SubSectionCard from "../../../../../../components/SubSectionCard";
+import { getMutationCategoryOptions } from "../../../../../../redux/slices/receipt_collection/warranty";
 
 const { Option } = Select;
 
 const MutationForm = ({ disabled, currencyDDL, warrantyType, headerCurrency }) => {
-  const { dataMutationCategoryOptions, loadingMutation } = useSelector((state) => state.warranty);
+  const dispatch = useDispatch();
+  const form = Form.useFormInstance();
+  const mutationType = Form.useWatch("type", form);
+  const mutationAmount = Form.useWatch("amount", form);
+  const mutationRate = Form.useWatch("rate", form);
+  const { dataMutationCategoryOptions, loadingMutationCategory } = useSelector((state) => state.warranty);
+
+  React.useEffect(() => {
+    if (mutationType) {
+      dispatch(getMutationCategoryOptions(mutationType));
+    }
+  }, [mutationType, dispatch]);
+
+  React.useEffect(() => {
+    const amount = typeof mutationAmount === 'object' ? mutationAmount?.floatValue : mutationAmount;
+    const rate = typeof mutationRate === 'object' ? mutationRate?.floatValue : mutationRate;
+    if (amount != null && rate != null) {
+      form.setFieldsValue({ eqvAmount: parseFloat((amount * rate).toFixed(2)) });
+    }
+  }, [mutationAmount, mutationRate, form]);
 
   return (
     <SubSectionCard>
@@ -49,6 +69,7 @@ const MutationForm = ({ disabled, currencyDDL, warrantyType, headerCurrency }) =
               placeholder="Select type" 
               disabled={disabled} 
               options={MUTATION_TYPES} 
+              onChange={() => form.setFieldsValue({ category: undefined })}
             />
           </Form.Item>
         </Col>
@@ -60,12 +81,20 @@ const MutationForm = ({ disabled, currencyDDL, warrantyType, headerCurrency }) =
           >
             <SelectComponent 
               placeholder="Select Category" 
-              disabled={disabled} 
-              loading={loadingMutation}
-              options={dataMutationCategoryOptions?.map(item => ({
-                name: item.name,
-                value: item.name 
-              })) || []} 
+              disabled={disabled || !mutationType} 
+              loading={loadingMutationCategory}
+              options={dataMutationCategoryOptions
+                ?.filter(item => {
+                  if (!mutationType) return true;
+                  const searchText = mutationType.toUpperCase();
+                  const nameMatch = item.name?.toUpperCase().includes(searchText);
+                  const descMatch = item.desc?.toUpperCase().includes(searchText);
+                  return nameMatch || descMatch;
+                })
+                .map(item => ({
+                  name: item.name,
+                  value: item.name 
+                })) || []} 
             />
           </Form.Item>
         </Col>
@@ -151,12 +180,12 @@ const MutationForm = ({ disabled, currencyDDL, warrantyType, headerCurrency }) =
           >
             <InputComponent 
               placeholder="Input.." 
-              disabled={disabled || warrantyType !== WARRANTY_TYPES.CASH} 
+              disabled={true} 
               type="numeric"
               thousandSeparator=","
               decimalSeparator="."
-              decimalScale={2}
-              fixedDecimalScale={true}
+              decimalScale={8}
+              fixedDecimalScale={false}
             />
           </Form.Item>
         </Col>
@@ -169,7 +198,7 @@ const MutationForm = ({ disabled, currencyDDL, warrantyType, headerCurrency }) =
           >
             <InputComponent 
               placeholder="Input.." 
-              disabled={disabled} 
+              disabled={true} 
               type="numeric"
               thousandSeparator=","
               decimalSeparator="."

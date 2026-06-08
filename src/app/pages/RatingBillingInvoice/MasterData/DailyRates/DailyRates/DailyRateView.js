@@ -23,6 +23,7 @@ import {
   getDowloadDailyRate,
   getListApprovalById,
   inactiveDailyRates,
+  requestActivateDailyRates,
 } from "../../../../../../redux/slices/rating_billing_invoice/MasterData/dailyrate";
 import {
   hasValue,
@@ -41,276 +42,276 @@ export const columnDailyRate = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => {},
+  handleSearch = () => { },
 ) => [
-  {
-    title: "NO",
-    dataIndex: "no",
-    key: "no",
-    width: 60,
-    align: "center",
-    render: (text, object, index) => (page - 1) * pageSize + index + 1,
-  },
-  {
-    title: "TYPE",
-    dataIndex: "rateType",
-    key: "rateType",
-    sorter: true,
-    align: "left",
-    width: 120,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "rateType",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-    ),
-    render: (text) =>
-      renderColumn(
+    {
+      title: "NO",
+      dataIndex: "no",
+      key: "no",
+      width: 60,
+      align: "center",
+      render: (text, object, index) => (page - 1) * pageSize + index + 1,
+    },
+    {
+      title: "TYPE",
+      dataIndex: "rateType",
+      key: "rateType",
+      sorter: true,
+      align: "left",
+      width: 120,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
         "rateType",
-        hasValue(search["rateType"]),
+        searchInput,
+        searchedColumn,
         searchText,
-        text,
-        false,
-        "input",
-        search,
+        handleSearch,
       ),
-  },
-  {
-    title: "FROM CURRENCY",
-    dataIndex: "fromCurrencyName",
-    key: "fromCurrencyName",
-    sorter: true,
-    align: "center",
-    width: 160,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "fromCurrencyName",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-    ),
-    render: (text) =>
-      renderColumn(
+      render: (text) =>
+        renderColumn(
+          "rateType",
+          hasValue(search["rateType"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
+    },
+    {
+      title: "FROM CURRENCY",
+      dataIndex: "fromCurrencyName",
+      key: "fromCurrencyName",
+      sorter: true,
+      align: "center",
+      width: 160,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
         "fromCurrencyName",
-        hasValue(search["fromCurrencyName"]),
+        searchInput,
+        searchedColumn,
         searchText,
-        text,
-        false,
-        "input",
-        search,
+        handleSearch,
       ),
-  },
-  {
-    title: "TO CURRENCY",
-    dataIndex: "toCurrencyName",
-    key: "toCurrencyName",
-    sorter: true,
-    align: "center",
-    width: 150,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "toCurrencyName",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-    ),
-    render: (text) =>
-      renderColumn(
+      render: (text) =>
+        renderColumn(
+          "fromCurrencyName",
+          hasValue(search["fromCurrencyName"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
+    },
+    {
+      title: "TO CURRENCY",
+      dataIndex: "toCurrencyName",
+      key: "toCurrencyName",
+      sorter: true,
+      align: "center",
+      width: 150,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
         "toCurrencyName",
-        hasValue(search["toCurrencyName"]),
+        searchInput,
+        searchedColumn,
         searchText,
-        text,
-        false,
-        "input",
-        search,
+        handleSearch,
       ),
-  },
-  {
-    title: "RATE DATE",
-    dataIndex: "rateDate",
-    key: "rateDate",
-    sorter: true,
-    align: "center",
-    width: 140,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "rateDate",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true,
-      "date",
-    ),
-    render: (text) =>
-      renderDateColumn(
+      render: (text) =>
+        renderColumn(
+          "toCurrencyName",
+          hasValue(search["toCurrencyName"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
+    },
+    {
+      title: "RATE DATE",
+      dataIndex: "rateDate",
+      key: "rateDate",
+      sorter: true,
+      align: "center",
+      width: 140,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
         "rateDate",
-        hasValue(search["rateDate"]),
+        searchInput,
+        searchedColumn,
         searchText,
-        text,
+        handleSearch,
+        true,
         "date",
-        search,
       ),
-  },
-  {
-    title: "CONVERTED RATE",
-    dataIndex: "convertedRate",
-    key: "convertedRate",
-    sorter: true,
-    align: "right",
-    width: 170,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "convertedRate",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-    ),
-    ellipsis: {
-      showTitle: false,
+      render: (text) =>
+        renderDateColumn(
+          "rateDate",
+          hasValue(search["rateDate"]),
+          searchText,
+          text,
+          "date",
+          search,
+        ),
     },
-    render: (text, record) => {
-      const tempValue = text ? (text + "").split(".") : [];
-      const thousandSeparator = ",";
-      const decimalSeparator = ".";
-      const descimal = tempValue[1]
-        ? `${decimalSeparator}${tempValue[1]}`
-        : `${decimalSeparator}00`;
-      const value =
-        tempValue.length > 0
-          ? tempValue[0].replace(/\B(?=(\d{3})+(?!\d))/g, thousandSeparator) +
-            descimal
-          : "";
-
-      return renderColumn(
+    {
+      title: "CONVERTED RATE",
+      dataIndex: "convertedRate",
+      key: "convertedRate",
+      sorter: true,
+      align: "right",
+      width: 170,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
         "convertedRate",
-        hasValue(search["convertedRate"]),
+        searchInput,
+        searchedColumn,
         searchText,
-        value,
-        true,
-        "input",
-        search,
-      );
-    },
-  },
-  {
-    title: "DESCRIPTION",
-    dataIndex: "description",
-    key: "description",
-    sorter: true,
-    width: 250,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "description",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-    ),
-    ellipsis: {
-      showTitle: false,
-    },
-    render: (text) =>
-      renderColumn(
-        "description",
-        hasValue(search["description"]),
-        searchText,
-        text,
-        true,
-        "input",
-        search,
+        handleSearch,
       ),
-  },
-  {
-    title: "STATUS",
-    dataIndex: "status",
-    key: "status",
-    width: 130,
-    sorter: true,
-    align: "left",
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "status",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-    ),
-    render: (a) => {
-      let text;
-      switch (a) {
-        case "ACTIVE":
-          text = "Active";
-          break;
-        case "INACTIVE":
-          text = "Inactive";
-          break;
-        case "DRAFT":
-          text = "Draft";
-          break;
-        default:
-          text = a ? a.charAt(0).toUpperCase() + a.slice(1).toLowerCase() : a;
-          break;
-      }
-      return renderColumn(
-        "status",
-        hasValue(search["status"]),
-        searchText,
-        text,
-        false,
-        "status",
-        search,
-      );
+      ellipsis: {
+        showTitle: false,
+      },
+      render: (text, record) => {
+        const tempValue = text ? (text + "").split(".") : [];
+        const thousandSeparator = ",";
+        const decimalSeparator = ".";
+        const descimal = tempValue[1]
+          ? `${decimalSeparator}${tempValue[1]}`
+          : `${decimalSeparator}00`;
+        const value =
+          tempValue.length > 0
+            ? tempValue[0].replace(/\B(?=(\d{3})+(?!\d))/g, thousandSeparator) +
+            descimal
+            : "";
+
+        return renderColumn(
+          "convertedRate",
+          hasValue(search["convertedRate"]),
+          searchText,
+          value,
+          true,
+          "input",
+          search,
+        );
+      },
     },
-  },
-  {
-    title: "STATUS APPROVAL",
-    dataIndex: "statusApproval",
-    key: "statusApproval",
-    width: 180,
-    sorter: true,
-    align: "right",
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "statusApproval",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-    ),
-    render: (a) => {
-      let text;
-      switch (a) {
-        case "WAITING APPROVAL":
-          text = "Waiting Approval";
-          break;
-        case "DRAFT":
-          text = "Draft";
-          break;
-        case "APPROVAL":
-          text = "Approval";
-          break;
-        default:
-          text = a ? a.charAt(0).toUpperCase() + a.slice(1).toLowerCase() : a;
-          break;
-      }
-      return renderColumn(
-        "status",
-        hasValue(search["status"]),
-        searchText,
-        text,
-        false,
-        "status",
+    {
+      title: "DESCRIPTION",
+      dataIndex: "description",
+      key: "description",
+      sorter: true,
+      width: 250,
+      ...getColumnSearchPropsUseFilteredValue(
         search,
-      );
+        "description",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+      ),
+      ellipsis: {
+        showTitle: false,
+      },
+      render: (text) =>
+        renderColumn(
+          "description",
+          hasValue(search["description"]),
+          searchText,
+          text,
+          true,
+          "input",
+          search,
+        ),
     },
-  },
-];
+    {
+      title: "STATUS",
+      dataIndex: "status",
+      key: "status",
+      width: 130,
+      sorter: true,
+      align: "left",
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "status",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+      ),
+      render: (a) => {
+        let text;
+        switch (a) {
+          case "ACTIVE":
+            text = "Active";
+            break;
+          case "INACTIVE":
+            text = "Inactive";
+            break;
+          case "DRAFT":
+            text = "Draft";
+            break;
+          default:
+            text = a ? a.charAt(0).toUpperCase() + a.slice(1).toLowerCase() : a;
+            break;
+        }
+        return renderColumn(
+          "status",
+          hasValue(search["status"]),
+          searchText,
+          text,
+          false,
+          "status",
+          search,
+        );
+      },
+    },
+    {
+      title: "STATUS APPROVAL",
+      dataIndex: "statusApproval",
+      key: "statusApproval",
+      width: 180,
+      sorter: true,
+      align: "right",
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "statusApproval",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+      ),
+      render: (a) => {
+        let text;
+        switch (a) {
+          case "WAITING APPROVAL":
+            text = "Waiting Approval";
+            break;
+          case "DRAFT":
+            text = "Draft";
+            break;
+          case "APPROVAL":
+            text = "Approval";
+            break;
+          default:
+            text = a ? a.charAt(0).toUpperCase() + a.slice(1).toLowerCase() : a;
+            break;
+        }
+        return renderColumn(
+          "status",
+          hasValue(search["status"]),
+          searchText,
+          text,
+          false,
+          "status",
+          search,
+        );
+      },
+    },
+  ];
 
 const DailyRateView = ({ dispatch }) => {
   const {
@@ -342,9 +343,9 @@ const DailyRateView = ({ dispatch }) => {
     return saved
       ? JSON.parse(saved)
       : {
-          left: ["no"],
-          right: ["action", "status", "statusApproval"],
-        };
+        left: ["no"],
+        right: ["action", "status", "statusApproval"],
+      };
   });
 
   // ✅ Save to localStorage when fixedColumns change
@@ -398,11 +399,15 @@ const DailyRateView = ({ dispatch }) => {
           create: dataApprovalHistory?.dataApprover?.DAILY_RATES || [],
           inactive:
             dataApprovalHistory?.dataApprover?.INACTIVE_DAILY_RATES || [],
+          activate:
+            dataApprovalHistory?.dataApprover?.ACTIVATED_DAILY_RATES || [],
         },
         dataHistory: {
           create: dataApprovalHistory?.dataHistory?.DAILY_RATES || [],
           inactive:
             dataApprovalHistory?.dataHistory?.INACTIVE_DAILY_RATES || [],
+          activate:
+            dataApprovalHistory?.dataHistory?.ACTIVATED_DAILY_RATES || [],
         },
       };
       setDataApprovalHistoryFix(temp);
@@ -430,6 +435,7 @@ const DailyRateView = ({ dispatch }) => {
   //handle inactive
   const handleInactive = (r) => {
     setRatesId(r?.ratesId);
+    setDataInactivate(r || {});
     setOpenModalInactivate(true);
   };
   const handleCancelModalInactivate = () => {
@@ -473,12 +479,20 @@ const DailyRateView = ({ dispatch }) => {
   }, [dispatch, search, sort]);
 
   const handleSubmitModalInactivate = (res, handleClear) => {
+    const selectedStatus = (dataInactivate?.status || "").toUpperCase();
+    const isActivateRequest = selectedStatus === "INACTIVE";
+
     const body = {
       ratesId: ratesId,
       appHierId: res.approvalHierarchy,
       remark: res.remark,
     };
-    dispatch(inactiveDailyRates({ body }))
+
+    const activationAction = isActivateRequest
+      ? requestActivateDailyRates({ body })
+      : inactiveDailyRates({ body });
+
+    dispatch(activationAction)
       .unwrap()
       .then(() => {
         handleClear();
@@ -573,6 +587,7 @@ const DailyRateView = ({ dispatch }) => {
       render: (record, data) => {
         const isEditable =
           record.status === "DRAFT" ||
+          record.statusApproval === "REJECTED" ||
           (record.status === "ACTIVE" &&
             !moment(record?.rateDate).isBefore(moment(), "day") &&
             !moment(record?.rateDate).isSame(moment(), "day"));
@@ -592,9 +607,8 @@ const DailyRateView = ({ dispatch }) => {
               disabled={!isEditable}
             >
               <span
-                className={`ml-0 ${
-                  isEditable ? "text-black " : "text-[#8D91A0]"
-                }`}
+                className={`ml-0 ${isEditable ? "text-black " : "text-[#8D91A0]"
+                  }`}
               >
                 Update
               </span>
@@ -632,7 +646,10 @@ const DailyRateView = ({ dispatch }) => {
       action: "Activate",
       type: "table",
       render: (record, data) => {
-        const isActivateOrInactivate =
+        const normalizedStatus = (record.status || "").toUpperCase();
+        const isActivateRequest = normalizedStatus === "INACTIVE";
+
+        const isInactivateRequest =
           (record.statusApproval === "APPROVED" &&
             record.status === "ACTIVE") ||
           (record.statusApproval === "DRAFT" && record.status === "ACTIVE") ||
@@ -642,6 +659,9 @@ const DailyRateView = ({ dispatch }) => {
             record.status === "ACTIVE") ||
           moment(record?.rateDate).isBefore(moment(), "day");
 
+        const isActivateOrInactivate = isActivateRequest || isInactivateRequest;
+        const actionText = isActivateRequest ? "Activate" : "Inactivate";
+
         const Content =
           data > 3 ? (
             <ButtonComponent
@@ -649,7 +669,7 @@ const DailyRateView = ({ dispatch }) => {
                 <Checkbox
                   className="inactive-check"
                   onClick={() => handleInactive(record)}
-                  disabled={record.status === "ACTIVE" ? false : true}
+                  disabled={!isActivateOrInactivate}
                   checked={record.status === "ACTIVE" ? false : true}
                 />
               }
@@ -658,19 +678,15 @@ const DailyRateView = ({ dispatch }) => {
               disabled={!isActivateOrInactivate}
               onClick={() => handleInactive(record)}
             >
-              <span className="text-black ml-1">
-                {record.status !== "ACTIVE" ? "Activate" : "Inactivate"}
-              </span>
+              <span className="text-black ml-1">{actionText}</span>
             </ButtonComponent>
           ) : (
-            <Tooltip
-              title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}
-            >
+            <Tooltip title={actionText}>
               <div className="pt-1">
                 <Checkbox
                   className="inactive-check"
                   onClick={() => handleInactive(record)}
-                  disabled={record.status === "ACTIVE" ? false : true}
+                  disabled={!isActivateOrInactivate}
                   checked={record.status === "ACTIVE" ? false : true}
                 />
               </div>
@@ -800,6 +816,9 @@ const DailyRateView = ({ dispatch }) => {
     });
   }, [baseColumns, fixedColumns]);
 
+  const selectedStatus = (dataInactivate?.status || "").toUpperCase();
+  const isActivateFlow = selectedStatus === "INACTIVE";
+
   return (
     <div>
       <Spin spinning={loading}>
@@ -842,7 +861,8 @@ const DailyRateView = ({ dispatch }) => {
           getAPIOption={getAllApprovalList}
           getAPIDetail={getListApprovalById}
           selector={"daily_rate"}
-          alertMessage={`Are you sure you want to inactivate `}
+          alertMessage={`Are you sure you want to ${isActivateFlow ? "activate" : "inactivate"
+            } `}
           openModalInactivate={openModalInactivate}
           handleCloseModalInactivate={handleCancelModalInactivate}
           onFinish={handleSubmitModalInactivate}

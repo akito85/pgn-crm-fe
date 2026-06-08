@@ -149,7 +149,7 @@ const LayoutMenu = ({ children }) => {
   // const config =
   //   localStorage.getItem("config") || window.sessionStorage.getItem("config");
   // const configParsed = parseInt(
-  //   JSON.parse(config)?.find((item) => item?.name === "SESSION_TIME")?.vale
+  //   JSON.parse(config)?.find((item) => item?.name === "SESSION_TIME")?.value
   // );
   // const [showTimeoutModal, setShowTimeoutModal] = useState(false);
   const [isTimedout, setIsTimedout] = useState(false);
@@ -205,9 +205,9 @@ const LayoutMenu = ({ children }) => {
 
   // use effect check grant access
   useEffect(() => {
-    dispatch(checkGrantedAccess(location?.pathname));
+    dispatch(checkGrantedAccess(grantPath || location?.pathname));
     dispatch(getProfile());
-  }, [dispatch, location, data_switch]);
+  }, [dispatch, location, grantPath, data_switch]);
 
   // useEffect(() => {
   //   dispatch(getGlobalFormatConfig());
@@ -318,6 +318,13 @@ const LayoutMenu = ({ children }) => {
       dispatch(clearBodyMessage());
       setModalConfirmation(false);
       setLoadingLogout(false);
+      // Token cleared by the thunk; navigate regardless of API failure so the
+      // user is never left stuck on a protected page with no valid session.
+      if (tokenJSON?.userLevel !== "Super User") {
+        navigate("/login");
+      } else {
+        navigate("/login-su");
+      }
     }
   };
   const initialAvatar = (fullName) => {
@@ -630,8 +637,8 @@ const LayoutMenu = ({ children }) => {
                 </div>
               </ModalError>
             ) : null}
-            {location.pathname === '/' ? (
-              // Always render dashboard regardless of permission check state
+            {location.pathname === '/' ||
+            tokenJSON?.userLevel === "Super User" ? (
               <div className="mt-[15px]">{children}</div>
             ) :
             (data_grant_access?.response?.data?.data?.isGranted === false &&

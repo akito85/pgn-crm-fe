@@ -26,8 +26,12 @@ const SelectComponent = ({
   showSearch = true,
   className,
   style: customStyle,
+  maxTagCount: maxTagCountProp,
   ...restProps
 }) => {
+  const computedMaxTagCount = maxTagCountProp !== undefined
+    ? maxTagCountProp
+    : (mode === "multiple" ? "responsive" : undefined);
   const wrapper = "flex flex-col";
   const style = {
     width: width || "auto",
@@ -68,7 +72,7 @@ const SelectComponent = ({
         allowClear={allowClear}
         defaultValue={defaultValue}
         options={options}
-        maxTagCount={mode === "multiple" ? "responsive" : undefined}
+        maxTagCount={computedMaxTagCount}
         onSelect={onSelect}
         onDeselect={onDeselect}
         onClear={onClear}

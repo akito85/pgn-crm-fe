@@ -19,6 +19,7 @@ const ModalMutationNoStepper = ({
   mutationDataInfo = [],
   warrantyType = null,
   headerCurrency = null,
+  rateAmount = null,
   fetchMutation = () => {},
 }) => {
   const dispatch = useDispatch();
@@ -27,8 +28,6 @@ const ModalMutationNoStepper = ({
 
   useEffect(() => {
     if (isOpen) {
-      dispatch(getMutationCategoryOptions());
-      
       if (modalType === "update" && selectedRecord) {
         if (selectedRecord.id) {
           // Fetch specific mutation data from API if it already exists (has ID)
@@ -52,6 +51,7 @@ const ModalMutationNoStepper = ({
                       : (selectedRecord?.date ? moment(selectedRecord.date) : null),
                   eqvAmount: resData.eqvAmount ?? resData.equivalentAmount ?? selectedRecord?.eqvAmount,
                   convertedCurrency: resData.convertedCurrency || resData.currency || selectedRecord?.convertedCurrency,
+                  rate: rateAmount ?? resData.rate,
                 });
               }
             })
@@ -69,13 +69,17 @@ const ModalMutationNoStepper = ({
                 ? moment(selectedRecord.transactionDate) 
                 : null,
             eqvAmount: selectedRecord.eqvAmount ?? selectedRecord.equivalentAmount,
+            rate: rateAmount ?? selectedRecord.rate,
           });
         }
       } else {
         form.resetFields();
+        if (rateAmount != null) {
+          form.setFieldsValue({ rate: rateAmount });
+        }
       }
     }
-  }, [isOpen, modalType, selectedRecord, dispatch, form]);
+  }, [isOpen, modalType, selectedRecord, rateAmount, dispatch, form]);
 
   const handleClose = () => {
     form.resetFields();

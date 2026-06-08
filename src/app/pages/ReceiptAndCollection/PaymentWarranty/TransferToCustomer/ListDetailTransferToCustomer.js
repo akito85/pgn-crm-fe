@@ -146,7 +146,7 @@ const ListDetailTransferToCustomer = () => {
         setPageSize(pageSize);
     };
 
-    const approvalName = appHierOptions.find(x => x.value === selectedHierarchy)?.name || data_detail?.transferToCustomer?.approvalName || "-";
+    const approvalName = appHierOptions.find(x => x.value === selectedHierarchy)?.name || data_detail?.transferToCustomer?.approvalName || "";
 
     const items = [
         {
@@ -189,7 +189,7 @@ const ListDetailTransferToCustomer = () => {
         },
         {
             path: "",
-            breadcrumbName: "Payment Warranty",
+            breadcrumbName: "Payment  Guarantee",
         },
         {
             path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_TRANSFER_TO_CUSTOMER,
@@ -283,11 +283,11 @@ const ListDetailTransferToCustomer = () => {
 
             <LogHistoryInfo
                 data={{
-                    recordId: data_detail?.transferToCustomer?.id || "-",
+                    recordId: data_detail?.transferToCustomer?.id || "",
                     createdDate: data_detail?.transferToCustomer?.createdDate ? moment(data_detail?.transferToCustomer?.createdDate).format("DD MMM YYYY HH:mm:ss") : "-",
-                    createdBy: data_detail?.transferToCustomer?.createdBy || "-",
+                    createdBy: data_detail?.transferToCustomer?.createdBy || "",
                     updatedDate: data_detail?.transferToCustomer?.updatedDate ? moment(data_detail?.transferToCustomer?.updatedDate).format("DD MMM YYYY HH:mm:ss") : "-",
-                    updatedBy: data_detail?.transferToCustomer?.updatedBy || "-"
+                    updatedBy: data_detail?.transferToCustomer?.updatedBy || ""
                 }}
             />
 

@@ -17,6 +17,7 @@ import {
   getApprovalHierarchy,
   getDetailApproval,
   inactiveBillingCycle,
+  requestActivateBillingCycle,
 } from "../../../../../../redux/slices/rating_billing_invoice/MasterData/billingCycle";
 import { Checkbox, Spin, Tooltip } from "antd";
 import TableRBI from "../../../../../../components/TableRBI";
@@ -32,6 +33,7 @@ import CardContainer from "../../../../../../components/CardContainer";
 const BillingCycleView = ({ type }) => {
   const searchInput = useRef(null);
   const dispatch = useDispatch();
+  const initialPageSize = 100;
   const loadMoreSize = 20;
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
@@ -54,15 +56,18 @@ const BillingCycleView = ({ type }) => {
     billing_cycle_list.length < (billing_cycle_pagination?.totalElements || 0);
 
   const [fixedColumns, setFixedColumns] = useState(() => {
-    try {
-      const saved = localStorage.getItem("billingCycleFixedColumns");
-      return saved ? JSON.parse(saved) : { left: ["no"], right: ["action"] };
-    } catch (e) {
-      return { left: ["no"], right: ["action"] };
-    }
+    const saved = localStorage.getItem("billingCycleFixedColumns");
+    return saved
+      ? JSON.parse(saved)
+      : {
+        left: ["no"],
+        right: ["action"],
+      };
   });
 
-  // Save fixedColumns to localStorage when changed
+  const normalizeStatus = (value) =>
+    (value || "").toString().trim().toUpperCase();
+
   useEffect(() => {
     try {
       localStorage.setItem("billingCycleFixedColumns", JSON.stringify(fixedColumns));
@@ -138,7 +143,7 @@ const BillingCycleView = ({ type }) => {
       getBillingCycleList({
         search: encodeURIComponent(JSON.stringify(search)),
         page: 1,
-        pageSize: loadMoreSize,
+        pageSize: initialPageSize,
         sort,
         isLoadMore: false,
       }),
@@ -152,11 +157,15 @@ const BillingCycleView = ({ type }) => {
           create: dataApprovalHistory?.dataApprover?.BILLING_CYCLE || [],
           inactive:
             dataApprovalHistory?.dataApprover?.INACTIVE_BILLING_CYCLE || [],
+          activate:
+            dataApprovalHistory?.dataApprover?.ACTIVATED_BILLING_CYCLE || [],
         },
         dataHistory: {
           create: dataApprovalHistory?.dataHistory?.BILLING_CYCLE || [],
           inactive:
             dataApprovalHistory?.dataHistory?.INACTIVE_BILLING_CYCLE || [],
+          activate:
+            dataApprovalHistory?.dataHistory?.ACTIVATED_BILLING_CYCLE || [],
         },
       };
       setDataApprovalHistoryFix(temp);
@@ -195,12 +204,21 @@ const BillingCycleView = ({ type }) => {
   };
 
   const handleOk = (res, handleClear) => {
+    const selectedStatus = normalizeStatus(chooseId?.status);
+    const selectedStatusApproval = normalizeStatus(chooseId?.statusApproval);
+    const isActivateRequest =
+      selectedStatus === "INACTIVE" &&
+      selectedStatusApproval !== "WAITING APPROVAL";
     const dataValue = {
       billingCycleId: chooseId.billingCycleId,
       appHierId: res.approvalHierarchy,
       remark: res.remark,
     };
-    dispatch(inactiveBillingCycle(dataValue))
+    dispatch(
+      (isActivateRequest ? requestActivateBillingCycle : inactiveBillingCycle)(
+        dataValue
+      )
+    )
       .unwrap()
       .then(() => {
         handleClear();
@@ -209,7 +227,7 @@ const BillingCycleView = ({ type }) => {
           getBillingCycleList({
             search: encodeURIComponent(JSON.stringify(search)),
             page: 1,
-            pageSize: loadMoreSize,
+            pageSize: initialPageSize,
             sort,
             isLoadMore: false,
           }),
@@ -223,7 +241,12 @@ const BillingCycleView = ({ type }) => {
               error.response.data.message) ||
             error.message ||
             error.toString();
-          setBodyError({ body: { ...res }, handleClear, message });
+          setBodyError({
+            body: { ...res },
+            handleClear,
+            message,
+            actionType: isActivateRequest ? "activate" : "inactivate",
+          });
           setModalError(true);
         }
       });
@@ -258,7 +281,7 @@ const BillingCycleView = ({ type }) => {
       getBillingCycleList({
         search: encodeURIComponent(JSON.stringify(search)),
         page: 1,
-        pageSize: loadMoreSize,
+        pageSize: initialPageSize,
         sort,
         isLoadMore: false,
       }),
@@ -310,9 +333,7 @@ const BillingCycleView = ({ type }) => {
             }}
           >
             <Tooltip title="Detail">
-              <div className="pt-1">
-                <SVGIcon name="IconDetail" width={24} />
-              </div>
+              <SVGIcon name="IconDetail" width={20} />
             </Tooltip>
           </Link>
         );
@@ -333,7 +354,7 @@ const BillingCycleView = ({ type }) => {
                 <SVGIcon
                   name="IconEdit"
                   color={isEditable ? "#0075bf" : "#8D91A0"}
-                  width={24}
+                  width={20}
                 />
               }
               type={"action"}
@@ -341,11 +362,9 @@ const BillingCycleView = ({ type }) => {
               disabled={!isEditable}
             >
               <span
-                className={`ml-0 ${
-                  isEditable ? "text-black " : "text-[#8D91A0]"
-                }`}
+                className={`ml-2 ${isEditable ? "text-black " : "text-[#8D91A0]"
+                  }`}
               >
-                {" "}
                 Update
               </span>
             </ButtonComponent>
@@ -354,7 +373,7 @@ const BillingCycleView = ({ type }) => {
               <div className="pt-1">
                 <SVGIcon
                   name="IconEdit"
-                  width={24}
+                  width={20}
                   color={!isEditable ? "#8D91A0" : "#ACC424"}
                   className={!isEditable ? "cursor-not-allowed" : undefined}
                 />
@@ -382,14 +401,16 @@ const BillingCycleView = ({ type }) => {
       action: "Activate",
       type: "table",
       render: (record, data) => {
-        const isActivateOrInactivate =
-          (record.statusApproval === "APPROVED" &&
-            record.status === "ACTIVE") ||
-          (record.statusApproval === "DRAFT" && record.status === "ACTIVE") ||
-          (record.statusApproval === "REJECTED" &&
-            record.status === "ACTIVE") ||
-          (record.statusApproval === "WAITING APPROVAL" &&
-            record.status === "ACTIVE");
+        const rowStatus = normalizeStatus(record.status);
+        const rowStatusApproval = normalizeStatus(record.statusApproval);
+        const canInactivate =
+          rowStatus === "ACTIVE" &&
+          ["APPROVED", "DRAFT", "REJECTED", "WAITING APPROVAL"].includes(
+            rowStatusApproval,
+          );
+        const canActivate =
+          rowStatus === "INACTIVE" && rowStatusApproval !== "WAITING APPROVAL";
+        const isActivateOrInactivate = canInactivate || canActivate;
 
         const Content =
           data > 3 ? (
@@ -398,8 +419,8 @@ const BillingCycleView = ({ type }) => {
                 <Checkbox
                   className="inactive-check"
                   onClick={() => handleInactive(record)}
-                  disabled={record.status === "ACTIVE" ? false : true}
-                  checked={record.status === "ACTIVE" ? false : true}
+                  disabled={!isActivateOrInactivate}
+                  checked={rowStatus !== "ACTIVE"}
                 />
               }
               type={"action"}
@@ -407,20 +428,20 @@ const BillingCycleView = ({ type }) => {
               disabled={!isActivateOrInactivate}
               onClick={() => handleInactive(record)}
             >
-              <span className="text-black ml-1">
+              <span className="text-black ml-2">
                 {record.status !== "ACTIVE" ? "Activate" : "Inactivate"}
               </span>
             </ButtonComponent>
           ) : (
             <Tooltip
-              title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}
+              title={rowStatus === "ACTIVE" ? "Inactivate" : "Activate"}
             >
               <div className="pt-1">
                 <Checkbox
                   className="inactive-check"
                   onClick={() => handleInactive(record)}
-                  disabled={record.status === "ACTIVE" ? false : true}
-                  checked={record.status === "ACTIVE" ? false : true}
+                  disabled={!isActivateOrInactivate}
+                  checked={rowStatus !== "ACTIVE"}
                 />
               </div>
             </Tooltip>
@@ -437,13 +458,13 @@ const BillingCycleView = ({ type }) => {
           data > 3 ? (
             <ButtonComponent
               icon={
-                <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
+                <SVGIcon name="IconLogHistory" color={"#0075bf"} width={20} />
               }
               type={"action"}
               border={false}
               onClick={() => handleApprovalHistory(record.billingCycleId)}
             >
-              <span className={"text-black ml-0"}>Approval History</span>
+              <span className={"text-black ml-2"}>Approval History</span>
             </ButtonComponent>
           ) : (
             <Tooltip title="Approval History">
@@ -451,7 +472,7 @@ const BillingCycleView = ({ type }) => {
                 <SVGIcon
                   name="IconLogHistory"
                   color={"#0075bf"}
-                  width={24}
+                  width={20}
                   onClick={() => handleApprovalHistory(record.billingCycleId)}
                 />
               </div>
@@ -596,9 +617,10 @@ const BillingCycleView = ({ type }) => {
           dispatch={dispatch}
           getAPIOption={getApprovalHierarchy}
           getAPIDetail={getDetailApproval}
-          alertMessage={`Are you sure you want to inactivate this Billing Cycle with Begin Cycle ${
-            chooseId?.beginCycle || ""
-          }?`}
+          alertMessage={`Are you sure you want to ${normalizeStatus(chooseId?.status) === "INACTIVE"
+            ? "activate"
+            : "inactivate"
+            } this Billing Cycle with Begin Cycle ${chooseId?.beginCycle || ""}?`}
           openModalInactivate={modalInactive}
           handleCloseModalInactivate={handleCancel}
           onFinish={handleOk}
@@ -615,7 +637,8 @@ const BillingCycleView = ({ type }) => {
               <SVGIcon name="IconFailed" width={48} />
               <p className="text-[18px] font-bold">{"Failed"}</p>
             </div>
-            <p className="pl-[70px]">{`Your data was not inactivate. ${bodyError.message}.`}</p>
+            <p className="pl-[70px]">{`Your data was not ${bodyError.actionType || "inactivate"
+              }. ${bodyError.message}.`}</p>
             <p className="pl-[70px]">Please try again.</p>
           </div>
         </ModalError>

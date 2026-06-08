@@ -12,6 +12,7 @@ import { configApp } from "../../../../../constants/configApp";
 import ratingBillingHttpService from "../../../../../redux/services/ratingBillingHttpService";
 import {
   approveCreateUpdateTOP,
+  approveActivatedTOP,
   approveInactive,
   getDetailDraftTOP,
   getDetailTOP,
@@ -284,10 +285,23 @@ const ListDetailTOP = () => {
       setModalApprove(false);
       dispatch(approveCreateUpdateTOP({ body: data }));
       handleClear();
+    } else if (
+      data_detail?.approvalInformation?.approvalType ===
+      "ACTIVATE_TERMS_OF_PAYMENT"
+    ) {
+      const data = {
+        id: id,
+        description: res.remark,
+        approvalId: data_detail?.approvalInformation?.tAppId,
+        action: approveOrReject.toUpperCase(),
+      };
+      setModalApprove(false);
+      dispatch(approveActivatedTOP({ body: data }));
+      handleClear();
     } else {
       const data = {
         id: id,
-        description: remark,
+        description: res.remark,
         approvalId: data_detail?.approvalInformation?.tAppId,
         action: approveOrReject.toUpperCase(),
       };

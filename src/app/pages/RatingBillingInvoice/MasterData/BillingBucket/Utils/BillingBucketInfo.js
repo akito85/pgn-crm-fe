@@ -51,7 +51,7 @@ const BillingBucketInfo = ({
     };
 
   return (
-    <div className="w-full grid grid-cols-3 gap-3">
+    <div className="w-full grid grid-cols-5 gap-3">
       {preview === "detail" ? (
         <>
           <DetailText label={"Billing Bucket Code"}>
@@ -60,6 +60,12 @@ const BillingBucketInfo = ({
           <DetailText label={"Name"}>{data?.information?.name}</DetailText>
           <DetailText label={"Priority Period"}>
             {data?.information?.priorityPeriod?.name}
+          </DetailText>
+           <DetailText label={"Category"}>
+            {data?.information?.category}
+          </DetailText>
+           <DetailText label={"Currency"}>
+            {data?.information?.currency}
           </DetailText>
           <DetailText label={"Start Date"}>
             {data?.information?.startDate
@@ -78,7 +84,7 @@ const BillingBucketInfo = ({
               {criteriaName?.slice(2) || data?.criteria}
             </DetailText>
           </div>
-          <div className="col-span-3">
+          <div className="col-span-5">
             <DetailText label={"Description"}>
               {data?.information?.description}
             </DetailText>

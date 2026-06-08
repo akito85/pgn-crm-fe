@@ -127,7 +127,7 @@ export const columnMutation = (
             <div 
                 ref={(el) => {
                     if (el) {
-                        el.textContent = text || "-";
+                        el.textContent = text || "";
                     }
                 }}
             />

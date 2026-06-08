@@ -19,11 +19,45 @@ export const columnsTablePOSDetailInfo = (
   data = [],
   type
 ) => {
+  const isLockedItem = (record) => {
+    const itemCode = record?.item;
+    const itemName = record?.itemName;
+
+    return ["PPN", "PPH", "Meterai"].includes(itemCode) ||
+      ["PPN", "PPH", "Meterai"].includes(itemName);
+  };
+
   const column = [
     {
-      title: "NO",
+      title: "No",
       width: 60,
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
+    },
+    {
+      title: "SOURCE",
+      dataIndex: "source",
+      filteredValue: search?.["source"] ? [search?.["source"]] : null,
+      sorter: (a, b) => sorter("source", a, b),
+      ...getColumnSearchPropsUseFilteredValueFE(
+        search,
+        "source",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+        "input",
+      ),
+      render: (text) =>
+        renderColumn(
+          "source",
+          hasValue(search?.["source"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
     },
     {
       title: "TYPE",
@@ -43,7 +77,7 @@ export const columnsTablePOSDetailInfo = (
       render: (text) =>
         renderColumn(
           "type",
-          hasValue(search["type"]),
+          hasValue(search?.["type"]),
           searchText,
           text,
           false,
@@ -52,7 +86,7 @@ export const columnsTablePOSDetailInfo = (
         ),
     },
     {
-      title: "ITEM",
+      title: "ITEM CODE",
       dataIndex: "item",
       filteredValue: search?.["item"] ? [search?.["item"]] : null,
       sorter: (a, b) => sorter("item", a, b),
@@ -69,7 +103,7 @@ export const columnsTablePOSDetailInfo = (
       render: (text) =>
         renderColumn(
           "item",
-          hasValue(search["item"]),
+          hasValue(search?.["item"]),
           searchText,
           text,
           false,
@@ -78,13 +112,13 @@ export const columnsTablePOSDetailInfo = (
         ),
     },
     {
-      title: "CURRENCY",
-      dataIndex: "currency",
-      filteredValue: search?.["currency"] ? [search?.["currency"]] : null,
-      sorter: (a, b) => sorter("currency", a, b),
+      title: "ITEM",
+      dataIndex: "itemName",
+      filteredValue: search?.["itemName"] ? [search?.["itemName"]] : null,
+      sorter: (a, b) => sorter("itemName", a, b),
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
-        "currency",
+        "itemName",
         searchInput,
         searchedColumn,
         searchText,
@@ -94,8 +128,8 @@ export const columnsTablePOSDetailInfo = (
       ),
       render: (text) =>
         renderColumn(
-          "currency",
-          hasValue(search["currency"]),
+          "itemName",
+          hasValue(search?.["itemName"]),
           searchText,
           text,
           false,
@@ -121,7 +155,85 @@ export const columnsTablePOSDetailInfo = (
       render: (text) =>
         renderColumn(
           "quantity",
-          hasValue(search["quantity"]),
+          hasValue(search?.["quantity"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
+    },
+    {
+      title: "UOM",
+      dataIndex: "uom",
+      filteredValue: search?.["uom"] ? [search?.["uom"]] : null,
+      sorter: (a, b) => sorter("uom", a, b),
+      ...getColumnSearchPropsUseFilteredValueFE(
+        search,
+        "uom",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+        "input",
+      ),
+      render: (text) =>
+        renderColumn(
+          "uom",
+          hasValue(search?.["uom"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
+    },
+    {
+      title: "CURENCY",
+      dataIndex: "currency",
+      filteredValue: search?.["currency"] ? [search?.["currency"]] : null,
+      sorter: (a, b) => sorter("currency", a, b),
+      ...getColumnSearchPropsUseFilteredValueFE(
+        search,
+        "currency",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+        "input",
+      ),
+      render: (text) =>
+        renderColumn(
+          "currency",
+          hasValue(search?.["currency"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
+    },
+    {
+      title: "PRICE CODE",
+      dataIndex: "priceCode",
+      filteredValue: search?.["priceCode"] ? [search?.["priceCode"]] : null,
+      sorter: (a, b) => sorter("priceCode", a, b),
+      ...getColumnSearchPropsUseFilteredValueFE(
+        search,
+        "priceCode",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+        "input",
+      ),
+      render: (text) =>
+        renderColumn(
+          "priceCode",
+          hasValue(search?.["priceCode"]),
           searchText,
           text,
           false,
@@ -147,7 +259,7 @@ export const columnsTablePOSDetailInfo = (
       render: (text) =>
         renderColumn(
           "price",
-          hasValue(search["price"]),
+          hasValue(search?.["price"]),
           searchText,
           separatorCurrency(text),
           false,
@@ -173,7 +285,7 @@ export const columnsTablePOSDetailInfo = (
       render: (text) =>
         renderColumn(
           "amount",
-          hasValue(search["amount"]),
+          hasValue(search?.["amount"]),
           searchText,
           separatorCurrency(text),
           false,
@@ -182,46 +294,117 @@ export const columnsTablePOSDetailInfo = (
         ),
     },
     {
-      title: "REFERENCE",
-      dataIndex: "referenceName",
-      align: searchedColumn !== "" ? "left" : "center",
-      ellipsis: {
-        showTitle: false,
-      },
-      render: (v, r, i) => {
-        const check =
-          data.findIndex(
-            (item) => parseInt(item.itemId) === parseInt(r.reference)
-          ) !== -1
-            ? data.findIndex(
-                (item) => parseInt(item.itemId) === parseInt(r.reference)
-              ) +
-                1 >=
-                (page - 1) * pageSize + 1 &&
-              data.findIndex(
-                (item) => parseInt(item.itemId) === parseInt(r.reference)
-              ) +
-                1 <=
-                page * pageSize
-            : false;
-        const text =
-          data.findIndex(
-            (item) => parseInt(item.itemId) === parseInt(r.reference)
-          ) + 1;
-        if (text) {
-          return text;
-        }
-        return "";
-      },
-    },
-    {
-      title: "UOM",
-      dataIndex: "uom",
-      filteredValue: search?.["uom"] ? [search?.["uom"]] : null,
-      sorter: (a, b) => sorter("uom", a, b),
+      title: "DISCOUNT AMOUNT",
+      dataIndex: "discount",
+      filteredValue: search?.["discount"] ? [search?.["discount"]] : null,
+      sorter: (a, b) => sorter("discount", a, b),
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
-        "uom",
+        "discount",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+        "currency",
+      ),
+      render: (text) =>
+        renderColumn(
+          "discount",
+          hasValue(search?.["discount"]),
+          searchText,
+          separatorCurrency(text),
+          false,
+          "input",
+          search
+        ),
+    },
+    {
+      title: "TOTAL AMOUNT",
+      dataIndex: "totalAmount",
+      filteredValue: search?.["totalAmount"] ? [search?.["totalAmount"]] : null,
+      sorter: (a, b) => sorter("totalAmount", a, b),
+      ...getColumnSearchPropsUseFilteredValueFE(
+        search,
+        "totalAmount",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+        "currency",
+      ),
+      render: (text) =>
+        renderColumn(
+          "totalAmount",
+          hasValue(search?.["totalAmount"]),
+          searchText,
+          separatorCurrency(text),
+          false,
+          "input",
+          search
+        ),
+    },
+    {
+      title: "VAT BASIS",
+      dataIndex: "vatBasis",
+      filteredValue: search?.["vatBasis"] ? [search?.["vatBasis"]] : null,
+      sorter: (a, b) => sorter("vatBasis", a, b),
+      ...getColumnSearchPropsUseFilteredValueFE(
+        search,
+        "vatBasis",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+        "currency",
+      ),
+      render: (text) =>
+        renderColumn(
+          "vatBasis",
+          hasValue(search?.["vatBasis"]),
+          searchText,
+          separatorCurrency(text),
+          false,
+          "input",
+          search
+        ),
+    },
+    {
+      title: "VAT BASIS EQV",
+      dataIndex: "vatBasisEqv",
+      filteredValue: search?.["vatBasisEqv"] ? [search?.["vatBasisEqv"]] : null,
+      sorter: (a, b) => sorter("vatBasisEqv", a, b),
+      ...getColumnSearchPropsUseFilteredValueFE(
+        search,
+        "vatBasisEqv",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+        "currency",
+      ),
+      render: (text) =>
+        renderColumn(
+          "vatBasisEqv",
+          hasValue(search?.["vatBasisEqv"]),
+          searchText,
+          separatorCurrency(text),
+          false,
+          "input",
+          search
+        ),
+    },
+    {
+      title: "VAT RATE",
+      dataIndex: "vatRate",
+      filteredValue: search?.["vatRate"] ? [search?.["vatRate"]] : null,
+      sorter: (a, b) => sorter("vatRate", a, b),
+      ...getColumnSearchPropsUseFilteredValueFE(
+        search,
+        "vatRate",
         searchInput,
         searchedColumn,
         searchText,
@@ -231,8 +414,8 @@ export const columnsTablePOSDetailInfo = (
       ),
       render: (text) =>
         renderColumn(
-          "uom",
-          hasValue(search["uom"]),
+          "vatRate",
+          hasValue(search?.["vatRate"]),
           searchText,
           text,
           false,
@@ -240,7 +423,214 @@ export const columnsTablePOSDetailInfo = (
           search
         ),
     },
-    // ✅ UPDATED: Ganti AMOUNT EQV IDR → TOTAL AMOUNT EQV
+    {
+      title: "VAT CODE",
+      dataIndex: "vatCode",
+      filteredValue: search?.["vatCode"] ? [search?.["vatCode"]] : null,
+      sorter: (a, b) => sorter("vatCode", a, b),
+      ...getColumnSearchPropsUseFilteredValueFE(
+        search,
+        "vatCode",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+        "input",
+      ),
+      render: (text) =>
+        renderColumn(
+          "vatCode",
+          hasValue(search?.["vatCode"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
+    },
+    {
+      title: "VAT",
+      dataIndex: "vat",
+      filteredValue: search?.["vat"] ? [search?.["vat"]] : null,
+      sorter: (a, b) => sorter("vat", a, b),
+      ...getColumnSearchPropsUseFilteredValueFE(
+        search,
+        "vat",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+        "currency",
+      ),
+      render: (text) =>
+        renderColumn(
+          "vat",
+          hasValue(search?.["vat"]),
+          searchText,
+          separatorCurrency(text),
+          false,
+          "input",
+          search
+        ),
+    },
+    {
+      title: "VAT EQV",
+      dataIndex: "vatEqv",
+      filteredValue: search?.["vatEqv"] ? [search?.["vatEqv"]] : null,
+      sorter: (a, b) => sorter("vatEqv", a, b),
+      ...getColumnSearchPropsUseFilteredValueFE(
+        search,
+        "vatEqv",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+        "currency",
+      ),
+      render: (text) =>
+        renderColumn(
+          "vatEqv",
+          hasValue(search?.["vatEqv"]),
+          searchText,
+          separatorCurrency(text),
+          false,
+          "input",
+          search
+        ),
+    },
+    {
+      title: "WITHHOLDING TAX",
+      dataIndex: "witholdingTax",
+      filteredValue: search?.["witholdingTax"] ? [search?.["witholdingTax"]] : null,
+      sorter: (a, b) => sorter("witholdingTax", a, b),
+      ...getColumnSearchPropsUseFilteredValueFE(
+        search,
+        "witholdingTax",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+        "currency",
+      ),
+      render: (text) =>
+        renderColumn(
+          "witholdingTax",
+          hasValue(search?.["witholdingTax"]),
+          searchText,
+          separatorCurrency(text),
+          false,
+          "input",
+          search
+        ),
+    },
+    {
+      title: "VAT EXCH EXCH RATE TYPE",
+      dataIndex: "vatExchangeRateType",
+      filteredValue: search?.["vatExchangeRateType"] ? [search?.["vatExchangeRateType"]] : null,
+      sorter: (a, b) => sorter("vatExchangeRateType", a, b),
+      ...getColumnSearchPropsUseFilteredValueFE(
+        search,
+        "vatExchangeRateType",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+        "input",
+      ),
+      render: (text) =>
+        renderColumn(
+          "vatExchangeRateType",
+          hasValue(search?.["vatExchangeRateType"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
+    },
+    {
+      title: "VAT EXCH RATE DATE",
+      dataIndex: "vatExchangeRateDate",
+      filteredValue: search?.["vatExchangeRateDate"] ? [search?.["vatExchangeRateDate"]] : null,
+      sorter: (a, b) => sorter("vatExchangeRateDate", a, b),
+      ...getColumnSearchPropsUseFilteredValueFE(
+        search,
+        "vatExchangeRateDate",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+        "input",
+      ),
+      render: (text) =>
+        renderColumn(
+          "vatExchangeRateDate",
+          hasValue(search?.["vatExchangeRateDate"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
+    },
+    {
+      title: "VAT EXCH RATE",
+      dataIndex: "vatExchangeRate",
+      filteredValue: search?.["vatExchangeRate"] ? [search?.["vatExchangeRate"]] : null,
+      sorter: (a, b) => sorter("vatExchangeRate", a, b),
+      ...getColumnSearchPropsUseFilteredValueFE(
+        search,
+        "vatExchangeRate",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+        "currency",
+      ),
+      render: (text) =>
+        renderColumn(
+          "vatExchangeRate",
+          hasValue(search?.["vatExchangeRate"]),
+          searchText,
+          separatorCurrency(text),
+          false,
+          "input",
+          search
+        ),
+    },
+    {
+      title: "CONVERTED CURENCY",
+      dataIndex: "convertedCurrency",
+      filteredValue: search?.["convertedCurrency"] ? [search?.["convertedCurrency"]] : null,
+      sorter: (a, b) => sorter("convertedCurrency", a, b),
+      ...getColumnSearchPropsUseFilteredValueFE(
+        search,
+        "convertedCurrency",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+        "input",
+      ),
+      render: (text) =>
+        renderColumn(
+          "convertedCurrency",
+          hasValue(search?.["convertedCurrency"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
+    },
     {
       title: "TOTAL AMOUNT EQV",
       dataIndex: "totalAmountEqv",
@@ -259,7 +649,7 @@ export const columnsTablePOSDetailInfo = (
       render: (text) =>
         renderColumn(
           "totalAmountEqv",
-          hasValue(search["totalAmountEqv"]),
+          hasValue(search?.["totalAmountEqv"]),
           searchText,
           separatorCurrency(text),
           false,
@@ -267,15 +657,14 @@ export const columnsTablePOSDetailInfo = (
           search
         ),
     },
-    // ✅ UPDATED: Ganti AMOUNT EQV USD → CONVERTED CURRENCY
     {
-      title: "CONVERTED CURRENCY",
-      dataIndex: "convertedCurrency",
-      filteredValue: search?.["convertedCurrency"] ? [search?.["convertedCurrency"]] : null,
-      sorter: (a, b) => sorter("convertedCurrency", a, b),
+      title: "RATE TYPE",
+      dataIndex: "rateType",
+      filteredValue: search?.["rateType"] ? [search?.["rateType"]] : null,
+      sorter: (a, b) => sorter("rateType", a, b),
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
-        "convertedCurrency",
+        "rateType",
         searchInput,
         searchedColumn,
         searchText,
@@ -285,8 +674,8 @@ export const columnsTablePOSDetailInfo = (
       ),
       render: (text) =>
         renderColumn(
-          "convertedCurrency",
-          hasValue(search["convertedCurrency"]),
+          "rateType",
+          hasValue(search?.["rateType"]),
           searchText,
           text,
           false,
@@ -294,17 +683,40 @@ export const columnsTablePOSDetailInfo = (
           search
         ),
     },
-    // ✅ REMOVED: AMOUNT IDR (TAX PURPOSE) / eqvIdr - tidak ada di response baru
-    // ✅ REMOVED: TOTAL EQUIVALENT IDR / totalEqvIdr - tidak ada di response baru
-    // ✅ REMOVED: TOTAL EQUIVALENT USD / totalEqvUsd - tidak ada di response baru
     {
-      title: "DISCOUNT",
-      dataIndex: "discount",
-      filteredValue: search?.["discount"] ? [search?.["discount"]] : null,
-      sorter: (a, b) => sorter("discount", a, b),
+      title: "RATE DATE",
+      dataIndex: "rateDate",
+      filteredValue: search?.["rateDate"] ? [search?.["rateDate"]] : null,
+      sorter: (a, b) => sorter("rateDate", a, b),
       ...getColumnSearchPropsUseFilteredValueFE(
         search,
-        "discount",
+        "rateDate",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+        "input",
+      ),
+      render: (text) =>
+        renderColumn(
+          "rateDate",
+          hasValue(search?.["rateDate"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
+    },
+    {
+      title: "RATE",
+      dataIndex: "rate",
+      filteredValue: search?.["rate"] ? [search?.["rate"]] : null,
+      sorter: (a, b) => sorter("rate", a, b),
+      ...getColumnSearchPropsUseFilteredValueFE(
+        search,
+        "rate",
         searchInput,
         searchedColumn,
         searchText,
@@ -314,67 +726,11 @@ export const columnsTablePOSDetailInfo = (
       ),
       render: (text) =>
         renderColumn(
-          "discount",
-          hasValue(search["discount"]),
+          "rate",
+          hasValue(search?.["rate"]),
           searchText,
           separatorCurrency(text),
           false,
-          "input",
-          search
-        ),
-    },
-    {
-      title: "TOTAL",
-      dataIndex: "total",
-      filteredValue: search?.["total"] ? [search?.["total"]] : null,
-      sorter: (a, b) => sorter("total", a, b),
-      ...getColumnSearchPropsUseFilteredValueFE(
-        search,
-        "total",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true,
-        "currency",
-      ),
-      render: (text) =>
-        renderColumn(
-          "total",
-          hasValue(search["total"]),
-          searchText,
-          separatorCurrency(text),
-          false,
-          "input",
-          search
-        ),
-    },
-    {
-      title: "REMARK",
-      dataIndex: "remark",
-      width: 240,
-      filteredValue: search?.["remark"] ? [search?.["remark"]] : null,
-      sorter: (a, b) => sorter("remark", a, b),
-      ellipsis: {
-        showTitle: false,
-      },
-      ...getColumnSearchPropsUseFilteredValueFE(
-        search,
-        "remark",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true,
-        "input"
-      ),
-      render: (text) =>
-        renderColumn(
-          "remark",
-          hasValue(search["remark"]),
-          searchText,
-          text,
-          true,
           "input",
           search
         ),
@@ -390,28 +746,18 @@ export const columnsTablePOSDetailInfo = (
             <Tooltip title="Update">
               <div
                 className={`pt-1 ${
-                  r.item === "PPN" || r.item === "PPH"
+                  isLockedItem(r)
                     ? " cursor-not-allowed"
                     : ""
                 }`}
               >
                 <SVGIcon
                   name="IconEdit"
-                  color={
-                    r.item !== "PPN" && r.item !== "PPH" && r.item !== "Meterai"
-                      ? "#ACC424"
-                      : "#8D91A0"
-                  }
+                  color={!isLockedItem(r) ? "#ACC424" : "#8D91A0"}
                   width={24}
-                  className={
-                    r.item === "PPN" || r.item === "PPH" || r.item === "Meterai"
-                      ? "disabled"
-                      : undefined
-                  }
+                  className={isLockedItem(r) ? "disabled" : undefined}
                   onClick={() =>
-                    r.item !== "PPN" && r.item !== "PPH" && r.item !== "Meterai"
-                      ? handleUpdate(r, i)
-                      : undefined
+                    !isLockedItem(r) ? handleUpdate(r, i) : undefined
                   }
                 />
               </div>
@@ -420,29 +766,17 @@ export const columnsTablePOSDetailInfo = (
             <Tooltip title="Delete">
               <div
                 className={`pt-1 ${
-                  r.item === "PPN" || r.item === "PPH"
+                  isLockedItem(r)
                     ? " cursor-not-allowed"
                     : ""
                 }`}
               >
                 <SVGIcon
                   name="IconDelete"
-                  color={
-                    r.item !== "PPN" && r.item !== "PPH" && r.item !== "Meterai"
-                      ? "#D90000"
-                      : "#8D91A0"
-                  }
+                  color={!isLockedItem(r) ? "#D90000" : "#8D91A0"}
                   width={24}
-                  className={
-                    r.item === "PPN" || r.item === "PPH" || r.item === "Meterai"
-                      ? "disabled"
-                      : undefined
-                  }
-                  onClick={() =>
-                    r.item !== "PPN" && r.item !== "PPH" && r.item !== "Meterai"
-                      ? handleDelete(r)
-                      : undefined
-                  }
+                  className={isLockedItem(r) ? "disabled" : undefined}
+                  onClick={() => (!isLockedItem(r) ? handleDelete(r) : undefined)}
                 />
               </div>
             </Tooltip>

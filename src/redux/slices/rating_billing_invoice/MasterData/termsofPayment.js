@@ -243,9 +243,8 @@ export const createTOP = createAsyncThunk(
       const data = await ratingBillingHttpService.createData(url, body);
       const successBody = {
         title: `Successful`,
-        description: `Your data has been ${
-          body.isSubmit === false ? "created" : "submitted"
-        }.`,
+        description: `Your data has been ${body.isSubmit === false ? "created" : "submitted"
+          }.`,
       };
       thunkAPI.dispatch(showModalSuccess(successBody));
       return data.data;
@@ -264,9 +263,8 @@ export const createTOP = createAsyncThunk(
       } else {
         const errorBody = {
           title: "Failed",
-          description: `Your data was not ${
-            body.isSubmit === false ? "created" : "submitted"
-          }. ${message}.`,
+          description: `Your data was not ${body.isSubmit === false ? "created" : "submitted"
+            }. ${message}.`,
         };
         thunkAPI.dispatch(showModalError(errorBody));
       }
@@ -284,9 +282,8 @@ export const updateTOP = createAsyncThunk(
       const data = await ratingBillingHttpService.updateData(url, body);
       const successBody = {
         title: `Successful`,
-        description: `Your data has been ${
-          body.isSubmit === false ? "updated" : "submitted"
-        }.`,
+        description: `Your data has been ${body.isSubmit === false ? "updated" : "submitted"
+          }.`,
       };
       thunkAPI.dispatch(showModalSuccess(successBody));
       return data.data;
@@ -305,9 +302,8 @@ export const updateTOP = createAsyncThunk(
       } else {
         const errorBody = {
           title: "Failed",
-          description: `Your data was not ${
-            body.isSubmit === false ? "updated" : "submitted"
-          }. ${message}.`,
+          description: `Your data was not ${body.isSubmit === false ? "updated" : "submitted"
+            }. ${message}.`,
         };
         thunkAPI.dispatch(showModalError(errorBody));
       }
@@ -376,6 +372,43 @@ export const inactiveTOP = createAsyncThunk(
   },
 );
 
+export const requestActivateTOP = createAsyncThunk(
+  "REQUEST_ACTIVATE_TOP",
+  async ({ body }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/rbi/top/request-activate`;
+      const response = await ratingBillingHttpService.activationWithRemark(
+        url,
+        body,
+      );
+
+      const successMessage = {
+        title: "Successfull",
+        description: "Your data has been submitted.",
+        return: false,
+      };
+      thunkAPI.dispatch(showModalSuccess(successMessage));
+      return response.data;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error);
+    }
+  },
+);
+
 export const approveInactive = createAsyncThunk(
   "APPROVE_OR_REJECT_INACTIVE_TOPS",
   async ({ body }, thunkAPI) => {
@@ -423,6 +456,48 @@ export const approveCreateUpdateTOP = createAsyncThunk(
   async ({ body }, thunkAPI) => {
     try {
       const url = "/v1/dbs/api/rbi/top/approval-top";
+      const response = await ratingBillingHttpService.activationWithRemark(
+        url,
+        body,
+      );
+      const message = response?.message;
+      const successMessage = {
+        title: "Successfull",
+        description: `${message}`,
+        return: true,
+      };
+      thunkAPI.dispatch(showModalSuccess(successMessage));
+      return response.data;
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          data: error.response.data.data,
+          description: `Your data was not created. ${message}.`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response.data);
+    }
+  },
+);
+
+export const approveActivatedTOP = createAsyncThunk(
+  "APPROVE_OR_REJECT_ACTIVATED_TOPS",
+  async ({ body }, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/rbi/top/approval-activate";
       const response = await ratingBillingHttpService.activationWithRemark(
         url,
         body,
@@ -828,6 +903,19 @@ const termsofPaymentSlice = createSlice({
       state.loading = false;
     },
 
+    // request activate app
+    [requestActivateTOP.pending]: (state) => {
+      state.loading = true;
+    },
+    [requestActivateTOP.fulfilled]: (state) => {
+      state.isSuccess = true;
+      state.loading = false;
+    },
+    [requestActivateTOP.rejected]: (state) => {
+      state.isFailed = true;
+      state.loading = false;
+    },
+
     // Approve Or Reject Inactive
     [approveInactive.pending]: (state) => {
       state.loading = true;
@@ -851,6 +939,20 @@ const termsofPaymentSlice = createSlice({
       state.loading = false;
     },
     [approveCreateUpdateTOP.rejected]: (state, action) => {
+      state.isFailed = true;
+      state.loading = false;
+      state.message = action.payload;
+    },
+
+    // Approve Or Reject Activated
+    [approveActivatedTOP.pending]: (state) => {
+      state.loading = true;
+    },
+    [approveActivatedTOP.fulfilled]: (state) => {
+      state.isSuccess = true;
+      state.loading = false;
+    },
+    [approveActivatedTOP.rejected]: (state, action) => {
       state.isFailed = true;
       state.loading = false;
       state.message = action.payload;

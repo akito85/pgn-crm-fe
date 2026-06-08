@@ -12,6 +12,7 @@ import { Link, NavLink } from "react-router-dom";
 import ModalInactivateWithHierarchy from "../../../../../../components/Modal/ModalInactivateWithHierarchy";
 import {
   activationGeneralTemplate,
+  activateRequestGneralTemplate,
   getAllGeneralTemplatePaginate,
   getApprovalHistoryGeneralTemplate,
   getApprovalList,
@@ -37,6 +38,14 @@ const GeneralTemplateView = () => {
   const searchInput = useRef(null);
   const dispatch = useDispatch();
 
+  const normalizeStatus = (value) =>
+    (value || "")
+      .toString()
+      .replace(/_/g, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+      .toUpperCase();
+
   // Use State
   const [page, setPage] = useState(1);
   const initialPageSize = 100;
@@ -53,29 +62,33 @@ const GeneralTemplateView = () => {
 
   const [fixedColumns, setFixedColumns] = useState(() => {
     try {
-      const saved = localStorage.getItem("generalTemplateFixedColumns");
-      return saved ? JSON.parse(saved) : { left: ["no"], right: ["statusApproval", "action"] };
+      const saved = localStorage.getItem("generalTemplateFixedColumns_v2");
+      return saved ? JSON.parse(saved) : { left: ["NO"], right: ["status", "statusApproval", "action"] };
     } catch (e) {
-      return { left: ["no"], right: ["statusApproval", "action"] };
+      return { left: ["NO"], right: ["status", "statusApproval", "action"] };
     }
   });
 
   const [dataApprovalHistory, setDataApprovalHistory] = useState({});
   const [dataInactivate, setDataInactivate] = useState({});
+  const [dataActivate, setDataActivate] = useState({});
 
   //modal
   const [openModalHistory, setOpenModalHistory] = useState(false);
   const [modalInactivate, setModalInactivate] = useState(false);
+  const [modalActivate, setModalActivate] = useState(false);
 
   //try again
   const [bodyError, setBodyError] = useState({});
   const [modalError, setModalError] = useState(false);
+  const [bodyActivateError, setBodyActivateError] = useState({});
+  const [modalActivateError, setModalActivateError] = useState(false);
 
   //useEffect
   // Save fixedColumns to localStorage when changed
   useEffect(() => {
     try {
-      localStorage.setItem("generalTemplateFixedColumns", JSON.stringify(fixedColumns));
+      localStorage.setItem("generalTemplateFixedColumns_v2", JSON.stringify(fixedColumns));
     } catch (e) {
       // ignore storage errors
     }
@@ -126,11 +139,17 @@ const GeneralTemplateView = () => {
           inactive:
             data_approval_history?.dataApprover?.INACTIVE_GENERAL_TEMPLATE ||
             [],
+          activate:
+            data_approval_history?.dataApprover?.ACTIVATED_GENERAL_TEMPLATE ||
+            [],
         },
         dataHistory: {
           create: data_approval_history?.dataHistory?.GENERAL_TEMPLATE || [],
           inactive:
             data_approval_history?.dataHistory?.INACTIVE_GENERAL_TEMPLATE || [],
+          activate:
+            data_approval_history?.dataHistory?.ACTIVATED_GENERAL_TEMPLATE ||
+            [],
         },
       };
       setDataApprovalHistory(temp);
@@ -255,6 +274,16 @@ const GeneralTemplateView = () => {
     setModalInactivate(false);
   };
 
+  const handleOpenModalActivate = (value) => {
+    setDataActivate(value);
+    setModalActivate(true);
+  };
+
+  const handleCloseModalActivate = () => {
+    setDataActivate({});
+    setModalActivate(false);
+  };
+
   const onFinishInactive = (e) => {
     const body = {
       templateId: dataInactivate?.templateId,
@@ -288,6 +317,54 @@ const GeneralTemplateView = () => {
           setModalError(true);
         }
       });
+  };
+
+  const onFinishActivate = (e) => {
+    const body = {
+      templateId: dataActivate?.templateId,
+      description: e.remark,
+      apphierId: e.tappId ? e.tappId : e.approvalHierarchy,
+    };
+
+    dispatch(activateRequestGneralTemplate(body))
+      .unwrap()
+      .then(async () => {
+        shouldResetRef.current = true;
+        dispatch(
+          getAllGeneralTemplatePaginate({
+            page: 1,
+            pageSize: initialPageSize,
+            sort,
+            search: encodeURIComponent(JSON.stringify(search)),
+          })
+        );
+        setModalActivate(false);
+      })
+      .catch((error) => {
+        if (Math.floor((error.response.data.code || 0) / 100) === 5) {
+          const message =
+            (error?.response &&
+              error?.response?.data &&
+              error?.response?.data?.message) ||
+            error?.message ||
+            error?.toString();
+          setBodyActivateError({ message, value: e });
+          setModalActivateError(true);
+        }
+      });
+  };
+
+  const handleRetryActivate = () => {
+    if (bodyActivateError?.value) {
+      onFinishActivate(bodyActivateError.value);
+    }
+    setModalActivateError(false);
+    setBodyActivateError({});
+  };
+
+  const handleCloseModalActivateError = () => {
+    setModalActivateError(false);
+    setBodyActivateError({});
   };
 
   // routes
@@ -380,9 +457,8 @@ const GeneralTemplateView = () => {
               type={"action"}
             >
               <span
-                className={`ml-0 ${
-                  isEditable ? "text-black" : "text-[#8D91A0]"
-                }`}
+                className={`ml-0 ${isEditable ? "text-black" : "text-[#8D91A0]"
+                  }`}
               >
                 {" "}
                 Update
@@ -421,14 +497,21 @@ const GeneralTemplateView = () => {
       action: "Activate",
       type: "table",
       render: (record, data) => {
-        const isActivateOrInactivate =
-          (record.statusApproval === "APPROVED" &&
-            record.status === "ACTIVE") ||
-          (record.statusApproval === "DRAFT" && record.status === "ACTIVE") ||
-          (record.statusApproval === "REJECTED" &&
-            record.status === "ACTIVE") ||
-          (record.statusApproval === "WAITING APPROVAL" &&
-            record.status === "ACTIVE");
+        const rowStatus = normalizeStatus(record.status);
+        const rowStatusApproval = normalizeStatus(record.statusApproval);
+        const canInactivate =
+          rowStatus === "ACTIVE" &&
+          ["APPROVED", "DRAFT", "REJECTED", "WAITING APPROVAL"].includes(
+            rowStatusApproval,
+          );
+        const canActivate =
+          rowStatus === "INACTIVE" && rowStatusApproval !== "WAITING APPROVAL";
+        const isActivateOrInactivate = canInactivate || canActivate;
+        const label = rowStatus !== "ACTIVE" ? "Activate" : "Inactivate";
+        const handleClick = () =>
+          rowStatus === "ACTIVE"
+            ? handleOpenModalInactivate(record)
+            : handleOpenModalActivate(record);
 
         const Content =
           data > 3 ? (
@@ -436,30 +519,28 @@ const GeneralTemplateView = () => {
               icon={
                 <Checkbox
                   className="inactive-check"
-                  onClick={() => handleOpenModalInactivate(record)}
-                  disabled={record.status === "ACTIVE" ? false : true}
-                  checked={record.status === "ACTIVE" ? false : true}
+                  onClick={isActivateOrInactivate ? handleClick : undefined}
+                  disabled={!isActivateOrInactivate}
+                  checked={rowStatus !== "ACTIVE"}
                 />
               }
               border={false}
               disabled={!isActivateOrInactivate}
-              onClick={() => handleOpenModalInactivate(record)}
+              onClick={isActivateOrInactivate ? handleClick : undefined}
               type={"action"}
             >
-              <span className="text-black ml-1">
-                {record.status !== "ACTIVE" ? "Activate" : "Inactivate"}
+              <span className={isActivateOrInactivate ? "text-black ml-1" : "text-[#8D91A0] ml-1"}>
+                {label}
               </span>
             </ButtonComponent>
           ) : (
-            <Tooltip
-              title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}
-            >
+            <Tooltip title={label}>
               <div className="pt-1">
                 <Checkbox
                   className="inactive-check"
-                  onClick={() => handleOpenModalInactivate(record)}
-                  disabled={record.status === "ACTIVE" ? false : true}
-                  checked={record.status === "ACTIVE" ? false : true}
+                  onClick={isActivateOrInactivate ? handleClick : undefined}
+                  disabled={!isActivateOrInactivate}
+                  checked={rowStatus !== "ACTIVE"}
                 />
               </div>
             </Tooltip>
@@ -644,14 +725,46 @@ const GeneralTemplateView = () => {
             dispatch={dispatch}
             getAPIOption={getApprovalList}
             getAPIDetail={getApprovalListDetail}
-            alertMessage={`Are you sure you want to inactivate General Template with name ${
-              dataInactivate?.templateName || ""
-            }?`}
+            alertMessage={`Are you sure you want to inactivate General Template with name ${dataInactivate?.templateName || ""
+              }?`}
             openModalInactivate={modalInactivate}
             handleCloseModalInactivate={handleCloseModalInactivate}
             onFinish={onFinishInactive}
             selector="general_template"
           />
+        ) : null}
+
+        {modalActivate ? (
+          <ModalInactivateWithHierarchy
+            dispatch={dispatch}
+            getAPIOption={getApprovalList}
+            getAPIDetail={getApprovalListDetail}
+            header={"Request Activate Information"}
+            alertMessage={`Are you sure you want to request activate General Template with name ${dataActivate?.templateName || ""
+              }?`}
+            openModalInactivate={modalActivate}
+            handleCloseModalInactivate={handleCloseModalActivate}
+            onFinish={onFinishActivate}
+            selector="general_template"
+          />
+        ) : null}
+
+        {modalActivateError ? (
+          <ModalError
+            isOpen={modalActivateError}
+            handleOk={handleRetryActivate}
+            handleCancel={handleCloseModalActivateError}
+            customText={"Try Again"}
+          >
+            <div className="px-5 pt-5 pb-[10px] justify-center">
+              <div className="w-full flex gap-[20px]">
+                <SVGIcon name="IconFailed" width={48} />
+                <p className="text-[18px] font-bold">{"Failed"}</p>
+              </div>
+              <p className="pl-[70px]">{bodyActivateError?.message}</p>
+              <p className="pl-[70px]">Please try again.</p>
+            </div>
+          </ModalError>
         ) : null}
       </Spin>
     </>

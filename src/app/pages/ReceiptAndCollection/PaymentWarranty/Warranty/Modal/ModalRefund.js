@@ -323,7 +323,7 @@ const ModalRefund = ({
 
       // 2. Dispatch the specific thunk
       const submitRes = await dispatch(submitRefund(submitBody)).unwrap();
-      const transIds = submitRes?.data?.transIds || [];
+      const transIds = submitRes?.transIds || [];
 
       // 3. Upload new attachments per transId
       const newAttachments = listDataAttachment.filter(item => item.dataType !== "exist");

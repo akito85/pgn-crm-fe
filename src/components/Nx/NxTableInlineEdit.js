@@ -283,6 +283,7 @@ const onActionCell        = () => ({ style: actionColCellStyle });
  *   inputType     {string}   — 'text' | 'number' | 'select' (default: 'text')
  *   placeholder   {string}   — placeholder text
  *   selectOptions {Array}    — [{ value, label }] for inputType 'select'
+ *   searchable    {boolean}  — enable type-to-search on a select (default: false)
  *   min           {number}   — min for inputType 'number'
  *   max           {number}   — max for inputType 'number'
  *   precision     {number}   — decimal precision for inputType 'number'
@@ -446,6 +447,12 @@ const NxTableInlineEdit = ({
                   placeholder={col.placeholder || `Select ${col.title}`}
                   onChange={(v) => handleEditChange(col.dataIndex, v)}
                   style={{ width: "100%", height: "34px", fontFamily: FONT_FAMILY }}
+                  showSearch={!!col.searchable}
+                  filterOption={col.searchable
+                    ? (input, option) =>
+                        String(option?.children ?? "").toLowerCase().includes(input.toLowerCase())
+                    : undefined
+                  }
                 >
                   {(col.selectOptions || []).map((opt) => (
                     <Option key={opt.value} value={opt.value}>{opt.label}</Option>

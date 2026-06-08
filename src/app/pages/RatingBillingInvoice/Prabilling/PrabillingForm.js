@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Form, Modal, Spin, Select, DatePicker } from "antd";
+import { Form, Modal, Spin, Select, DatePicker, Tooltip } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import moment from "moment";
 import BreadCrumb from "../../../../components/BreadCrumb";
@@ -435,7 +435,7 @@ const PrabillingForm = ({ type }) => {
           error?.response?.data?.message ||
           error?.message ||
           error?.toString() ||
-          "Terjadi kesalahan. Silakan coba lagi.";
+          "An error occurred. Please try again.";
         setBodyError({ message });
         setModalError(true);
       });
@@ -601,6 +601,68 @@ const PrabillingForm = ({ type }) => {
     setBodyError({});
   };
 
+  const sharedTagRender = (props) => {
+    const { label, closable, onClose } = props;
+    return (
+      <Tooltip title={label} placement="top">
+        <span
+          className="ant-select-selection-item"
+          style={{ display: "inline-flex", alignItems: "center", maxWidth: 200 }}
+        >
+          <span
+            className="ant-select-selection-item-content"
+            style={{
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+              maxWidth: 170,
+            }}
+          >
+            {label}
+          </span>
+          {closable && (
+            <span
+              className="ant-select-selection-item-remove"
+              onClick={onClose}
+              style={{ cursor: "pointer", flexShrink: 0 }}
+            >
+              ×
+            </span>
+          )}
+        </span>
+      </Tooltip>
+    );
+  };
+
+  const sharedMaxTagPlaceholder = (omittedValues) => {
+    const tooltipContent = (
+      <div style={{ maxHeight: 200, overflowY: "auto", padding: "4px 0" }}>
+        {omittedValues.map((val) => (
+          <div
+            key={val.value}
+            style={{ padding: "2px 0", fontSize: 12, whiteSpace: "nowrap" }}
+          >
+            {val.label}
+          </div>
+        ))}
+      </div>
+    );
+    return (
+      <Tooltip title={tooltipContent} overlayStyle={{ maxWidth: 420 }} placement="topLeft">
+        <span
+          style={{
+            cursor: "pointer",
+            color: "#ffffff",
+            fontWeight: 500,
+            fontSize: 12,
+          }}
+        >
+          +{omittedValues.length} more
+        </span>
+      </Tooltip>
+    );
+  };
+
   return (
     <>
       <BreadCrumb routes={routes} />
@@ -691,6 +753,8 @@ const PrabillingForm = ({ type }) => {
                   mode={"multiple"}
                   onChange={handleChangeCostCenter}
                   disabled={defaultData?.costCenter?.length !== 0}
+                  tagRender={sharedTagRender}
+                  maxTagPlaceholder={sharedMaxTagPlaceholder}
                   options={list_cost_center?.data?.map((item) => {
                     return {
                       label: item?.name,
@@ -712,6 +776,8 @@ const PrabillingForm = ({ type }) => {
                     !dataSpecificCustomer?.costCenterId ||
                     dataSpecificCustomer?.costCenterId?.length === 0
                   }
+                  tagRender={sharedTagRender}
+                  maxTagPlaceholder={sharedMaxTagPlaceholder}
                   options={mergedArrayMrc?.map((item) => {
                     return {
                       label: item?.name,
@@ -729,6 +795,8 @@ const PrabillingForm = ({ type }) => {
                 <SelectComponent
                   mode={"multiple"}
                   onChange={handleAccountSegment}
+                  tagRender={sharedTagRender}
+                  maxTagPlaceholder={sharedMaxTagPlaceholder}
                   options={(list_customer_segment?.Data || []).map((item) => {
                     return {
                       label: item?.name,
@@ -750,6 +818,8 @@ const PrabillingForm = ({ type }) => {
                     !dataSpecificCustomer?.accountSegmentId ||
                     dataSpecificCustomer?.accountSegmentId?.length === 0
                   }
+                  tagRender={sharedTagRender}
+                  maxTagPlaceholder={sharedMaxTagPlaceholder}
                   options={(list_account_group || [])?.map((item) => {
                     return {
                       label: item?.glbValue || item?.name,
@@ -802,6 +872,49 @@ const PrabillingForm = ({ type }) => {
                       }));
                     }}
                     allowClear
+                    maxTagCount="responsive"
+                    maxTagPlaceholder={(omittedValues) => {
+                      const tooltipContent = (
+                        <div style={{ maxHeight: 200, overflowY: "auto", padding: "4px 0" }}>
+                          {omittedValues.map((val) => {
+                            const customerData = selectedCustomersMap[val.value];
+                            const displayText = customerData
+                              ? `${customerData.accountName} - ${customerData.accountNumber}`
+                              : val.value;
+                            return (
+                              <div
+                                key={val.value}
+                                style={{
+                                  padding: "2px 0",
+                                  fontSize: 12,
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {displayText}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      );
+                      return (
+                        <Tooltip
+                          title={tooltipContent}
+                          overlayStyle={{ maxWidth: 420 }}
+                          placement="topLeft"
+                        >
+                          <span
+                            style={{
+                              cursor: "pointer",
+                              color: "#ffffff",
+                              fontWeight: 500,
+                              fontSize: 12,
+                            }}
+                          >
+                            +{omittedValues.length} more
+                          </span>
+                        </Tooltip>
+                      );
+                    }}
                     placeholder={`Type at least 3 characters to search (max ${MAX_SEARCH_LENGTH} chars)...`}
                     tagRender={(props) => {
                       const { value, closable, onClose } = props;
@@ -812,26 +925,37 @@ const PrabillingForm = ({ type }) => {
                         : value;
 
                       return (
-                        <span
-                          className="ant-select-selection-item"
-                          style={{
-                            display: "inline-flex",
-                            alignItems: "center",
-                          }}
-                        >
-                          <span className="ant-select-selection-item-content">
-                            {displayText}
-                          </span>
-                          {closable && (
+                        <Tooltip title={displayText} placement="top">
+                          <span
+                            className="ant-select-selection-item"
+                            style={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              maxWidth: 200,
+                            }}
+                          >
                             <span
-                              className="ant-select-selection-item-remove"
-                              onClick={onClose}
-                              style={{ cursor: "pointer" }}
+                              className="ant-select-selection-item-content"
+                              style={{
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
+                                maxWidth: 170,
+                              }}
                             >
-                              ×
+                              {displayText}
                             </span>
-                          )}
-                        </span>
+                            {closable && (
+                              <span
+                                className="ant-select-selection-item-remove"
+                                onClick={onClose}
+                                style={{ cursor: "pointer", flexShrink: 0 }}
+                              >
+                                ×
+                              </span>
+                            )}
+                          </span>
+                        </Tooltip>
                       );
                     }}
                     notFoundContent={
@@ -892,6 +1016,8 @@ const PrabillingForm = ({ type }) => {
               >
                 <SelectComponent
                   mode={"multiple"}
+                  tagRender={sharedTagRender}
+                  maxTagPlaceholder={sharedMaxTagPlaceholder}
                   options={(list_component_prabilling || []).map((item) => {
                     return {
                       label: item?.componentName,

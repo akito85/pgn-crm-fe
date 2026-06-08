@@ -91,6 +91,7 @@ const CreateServiceAgreement = ({ saType }) => {
   const [saDetailObj, setSaDetailObj] = useState({ createFrom: 1 });
   const [saApprovalObj, setSaApprovalObj] = useState({});
   const [typeSubmit, setTypeSubmit] = useState("");
+  const [confirmationRemark, setConfirmationRemark] = useState("");
   const [dataListVersion, setDataListVersion] = useState([]);
 
   const [dataTableDetailProduct, setDataTableDetailProduct] = useState({});
@@ -2007,6 +2008,10 @@ const CreateServiceAgreement = ({ saType }) => {
       return;
     }
 
+      if (submitType === "draft") {
+        setConfirmationRemark("");
+      }
+
       const objPaymentType = {
         name: {
           label: null,
@@ -2095,7 +2100,7 @@ const CreateServiceAgreement = ({ saType }) => {
                 ? saDetailObj?.serviceAgreementChildType
                 : null,
           }),
-          isCustom: saDetailObj.createFrom === 1 ? "Y" : "N",
+          isCustom: saDetailObj.createFrom === 1 ? "N" : "Y",
           productDetail: tempArrayProduct.map((item) => {
             return {
               name: item.name !== null ? item.name.value : null,
@@ -2214,6 +2219,7 @@ const CreateServiceAgreement = ({ saType }) => {
 
     const body = {
       ...dataFinal,
+      ...(typeSubmit !== "draft" ? { remark: confirmationRemark || null } : {}),
       saDetail: {
         ...dataFinal.saDetail,
         productPricing: {
@@ -2266,6 +2272,10 @@ const CreateServiceAgreement = ({ saType }) => {
   const handleCloseModalError = () => {
     setModalError(false);
     setBodyError({});
+  };
+  const handleCloseConfirmationModal = () => {
+    setModalConfirm(false);
+    setConfirmationRemark("");
   };
   const handleRetry = () => {
     handleConfirm();
@@ -2467,10 +2477,13 @@ const CreateServiceAgreement = ({ saType }) => {
         modalConfirm ? (
           <ConfirmationSa
             isOpen={modalConfirm}
-            setModalConfirm={setModalConfirm}
+            setModalConfirm={handleCloseConfirmationModal}
             dataFinal={dataFinal}
             handleConfirm={handleConfirm}
             loadingSubmit={loadingForm}
+            typeSubmit={typeSubmit}
+            remark={confirmationRemark}
+            setRemark={setConfirmationRemark}
             listDataAttachment={listDataAttachment}
             saInfoObj={saInfoObj}
             saDetailObj={saDetailObj}

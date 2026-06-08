@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Form, Select, Spin } from "antd";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -13,7 +13,6 @@ import {
   FormFooter,
 } from "../../../../../components/FormStepNavigation";
 import { getConfigFileRBIData } from "../../../../../redux/slices/attachmentSlice";
-import { hasValue } from "../../../../../utils";
 import {
   showModalError,
   validateCreateUpdate,
@@ -74,6 +73,7 @@ const CalendarForm = ({ type }) => {
   const [appHierOptions, setAppHierOptions] = useState([]);
   const [appHierDataDetail, setAppHierDataDetail] = useState([]);
   const [listDataAttachment, setListDataAttachment] = useState([]);
+  const [deletedAttachmentIds, setDeletedAttachmentIds] = useState([]);
   const [listDataCriteria, setListDataCriteria] = useState([]);
   const [criteriaOptions, setCriteriaOptions] = useState([]);
   const [criteriaValues, setCriteriaValues] = useState([]);
@@ -92,7 +92,14 @@ const CalendarForm = ({ type }) => {
   const [listSectionInfo, setListSectionInfo] = useState([
     {
       value: "Calendar",
-      paramValue: ["name", "startDate", "holidayType", "criteria"],
+      paramValue: [
+        "name",
+        "startDate",
+        "endDate",
+        "holidayType",
+        "criteria",
+        "description",
+      ],
     },
     { value: "Approval", paramValue: ["apphierId"] },
     { value: "Attachment" },
@@ -102,6 +109,23 @@ const CalendarForm = ({ type }) => {
   const steps = STEPS;
 
   const [valuePage, setValuePage] = useState(steps[0].value);
+
+  const handleUpdateAttachment = useCallback((updater) => {
+    setListDataAttachment((prevState) => {
+      const newState =
+        typeof updater === "function" ? updater(prevState) : updater;
+      const removedItems = prevState.filter(
+        (item) => !newState.some((newItem) => newItem.key === item.key),
+      );
+      const removedExistingIds = removedItems
+        .filter((item) => item.dataType === "exist" && item.id)
+        .map((item) => item.id);
+      if (removedExistingIds.length > 0) {
+        setDeletedAttachmentIds((prev) => [...prev, ...removedExistingIds]);
+      }
+      return newState;
+    });
+  }, []);
 
   useEffect(() => {
     setValuePage(steps[current].value);
@@ -136,22 +160,10 @@ const CalendarForm = ({ type }) => {
     }
   };
 
-  // Disable end date logic
-  const isDisabledDate = useMemo(() => {
-    if (
-      hasValue(form?.getFieldsValue()?.endDate) === true &&
-      listDataCriteria?.length > 0
-    ) {
-      return true;
-    }
-    return false;
-  }, [form, listDataCriteria]);
-
   // Use Effect
   useEffect(() => {
     dispatch(getCriteria());
     dispatch(getAvailableApproval());
-    dispatch(getSelectedApproval({ id: 0 }));
     dispatch(getHolidayType());
   }, [dispatch]);
 
@@ -213,6 +225,7 @@ const CalendarForm = ({ type }) => {
 
     const callendar = data_detail?.callendar || {};
     if (!callendar.calendarId) return;
+    const calendarAppHierId = callendar.appHierId ?? callendar.apphierId;
 
     const criterias = Array.isArray(data_detail?.criterias)
       ? data_detail.criterias
@@ -258,12 +271,12 @@ const CalendarForm = ({ type }) => {
       holidayType: callendar.holidayType,
       criteria: criteriaSelect,
       description: callendar.description,
-      apphierId: callendar.apphierId,
+      apphierId: calendarAppHierId,
     });
 
     setStartDate(callendar.startDate ? moment(callendar.startDate) : undefined);
     setEndDate(callendar.endDate ? moment(callendar.endDate) : undefined);
-    setSelectedHierarchy(callendar.apphierId);
+    setSelectedHierarchy(calendarAppHierId);
     setListDataAttachment(mapAttachments(data_detail?.attachments));
     setCriteriaValues(criteriaSelect || []);
     setListDataCriteria(dataCriteriaList);
@@ -300,6 +313,33 @@ const CalendarForm = ({ type }) => {
       setAppHierOptions(tempAppHier);
     }
   }, [dataListAppHierId]);
+
+  useEffect(() => {
+    if (!id || type !== "update") return;
+
+    const appHierId =
+      data_detail?.callendar?.appHierId ?? data_detail?.callendar?.apphierId;
+    if (appHierId === undefined || appHierId === null || !appHierOptions.length)
+      return;
+
+    const matchedOption = appHierOptions.find(
+      (option) => String(option.value) === String(appHierId),
+    );
+    const normalizedAppHierId = matchedOption ? matchedOption.value : appHierId;
+
+    setSelectedHierarchy(normalizedAppHierId);
+    form.setFieldsValue({ apphierId: normalizedAppHierId });
+  }, [id, type, data_detail, appHierOptions, form]);
+
+  useEffect(() => {
+    if (
+      selectedHierarchy !== undefined &&
+      selectedHierarchy !== null &&
+      selectedHierarchy !== ""
+    ) {
+      form.setFieldsValue({ apphierId: selectedHierarchy });
+    }
+  }, [selectedHierarchy, form]);
 
   // Breadcrumbs
   const routes = [
@@ -637,7 +677,14 @@ const CalendarForm = ({ type }) => {
           setListSectionInfo([
             {
               value: "Calendar",
-              paramValue: ["name", "startDate", "holidayType", "criteria"],
+              paramValue: [
+                "name",
+                "startDate",
+                "endDate",
+                "holidayType",
+                "criteria",
+                "description",
+              ],
             },
             { value: "Approval", paramValue: ["apphierId"] },
             { value: "Attachment" },
@@ -692,6 +739,12 @@ const CalendarForm = ({ type }) => {
           const filterDataAttach = listDataAttachment.filter(
             (item) => item.dataType !== "exist",
           );
+          if (type === "update" && deletedAttachmentIds.length > 0) {
+            await ratingBillingHttpService.deleteDataWithBody(
+              `/v1/dbs/api/attachment/delete-attachment`,
+              { fileId: deletedAttachmentIds },
+            );
+          }
           setLoadingForm(true);
           for (let i = 0; i < filterDataAttach.length; i++) {
             const element = filterDataAttach[i];
@@ -735,7 +788,14 @@ const CalendarForm = ({ type }) => {
       setListSectionInfo([
         {
           value: "Calendar",
-          paramValue: ["name", "startDate", "holidayType", "criteria"],
+          paramValue: [
+            "name",
+            "startDate",
+            "endDate",
+            "holidayType",
+            "criteria",
+            "description",
+          ],
         },
         { value: "Approval", paramValue: ["apphierId"] },
         { value: "Attachment" },
@@ -821,8 +881,12 @@ const CalendarForm = ({ type }) => {
                   name={"endDate"}
                   rules={[
                     {
+                      required: true,
+                      message: "Please input your End Date!",
+                    },
+                    {
                       validator: (_, value) =>
-                        (value && moment(startDate) <= moment(value)) || !value
+                        value && moment(startDate) <= moment(value)
                           ? Promise.resolve()
                           : Promise.reject(
                               new Error("End date must be after Start date"),
@@ -891,6 +955,12 @@ const CalendarForm = ({ type }) => {
                   <Form.Item
                     label={"Description"}
                     name={"description"}
+                    rules={[
+                      {
+                        required: true,
+                        message: "Please input your Description!",
+                      },
+                    ]}
                     className={"w-full"}
                   >
                     <InputComponent type="textarea" />
@@ -946,7 +1016,7 @@ const CalendarForm = ({ type }) => {
               <AttachmentComponent
                 type={type}
                 data={listDataAttachment}
-                updateData={setListDataAttachment}
+                updateData={handleUpdateAttachment}
                 dispatch={dispatch}
                 getAPICategory={getAttachmentCategoryCalendar}
                 typeSelector="calendar"

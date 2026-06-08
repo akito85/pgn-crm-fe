@@ -11,7 +11,9 @@ import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import Toolbar from "../../../../../components/Toolbar";
 import TableRBI from "../../../../../components/TableRBI";
+import { DownloadOutlined } from "@ant-design/icons";
 import SVGIcon from "../../../../../assets/Icon/index";
+import IconViewList from "../../../../../assets/Icon/Nx/IconViewList";
 import {
     getListPaymentPeriod,
     inactivePaymentPeriod,
@@ -47,7 +49,7 @@ const ListPaymentPeriod = () => {
         STATUS: 110,
         STATUS_APPROVAL: 160,
         ACTION: 60,
-        NO: 60,
+        NO: 90,
     };
 
     const initialPageSize = 100;
@@ -273,7 +275,7 @@ const ListPaymentPeriod = () => {
                     onClick={handleDownload}
                     type="submit"
                     border={false}
-                    icon={<SVGIcon name="IconButtonDownload" width={20} />}
+                    icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
                 >
                     Download List
                 </ButtonComponent>
@@ -304,8 +306,9 @@ const ListPaymentPeriod = () => {
                         <Link
                             to="/system-setup/payment-period/view"
                             state={{ id: record.idPaymentPeriod, statusApproval: record.statusApproval }}
+                            className="inline-flex items-center text-[#1976D2] hover:text-[#1976D2] transition-colors duration-200"
                         >
-                            <SVGIcon name="IconDetail" width={20} />
+                            <IconViewList width={20} />
                         </Link>
                     </Tooltip>
                 );
@@ -365,46 +368,44 @@ const ListPaymentPeriod = () => {
             action: "Activate",
             type: "table",
             render: (record, data_length) => {
-                const statusLowerCase = record?.status?.toLowerCase();
+                const isDisabled = disabledActionByStatus("activate", record?.status, record?.statusApproval);
+                const label = record?.status?.toUpperCase() === "ACTIVE" ? "Inactivate" : "Activate";
                 return (
                     data_length > 3 ? (
-                        <div className="w-full">
-                            <ButtonComponent
-                                border={false}
-                                className={"gap-5"}
-                                onClick={() => {
-                                    setDataInactivate(record?.idPaymentPeriod);
-                                    setModalActiveInactive(true);
-                                    setStatus(record?.status);
-                                }}
-                                disabled={disabledActionByStatus("activate", record?.status, record?.statusApproval)}
-                                type="action"
-                            >
-                                <Checkbox
-                                    onClick={() => {
-                                        setDataInactivate(record?.idPaymentPeriod);
-                                        setModalActiveInactive(true);
-                                        setStatus(record?.status);
-                                    }}
-                                    checked={record?.status?.toUpperCase() !== "ACTIVE"}
-                                    disabled={disabledActionByStatus("activate", record?.status, record?.statusApproval)}
-                                />
-                                <span className={"text-black ml-6 gap-2 text-center"}>
-                                    {record?.status?.toUpperCase() === "ACTIVE" ? "Inactivate" : "Activate"}
-                                </span>
-                            </ButtonComponent>
-                        </div>
+                        <ButtonComponent
+                            className="gap-5"
+                            icon={
+                                <SVGIcon name={record?.status?.toUpperCase() === "ACTIVE" ? "IconInactive" : "IconSquareCheck"} width={24} color={isDisabled ? "#8D91A0" : "#0075bf"} />
+                            }
+                            border={false}
+                            disabled={isDisabled}
+                            onClick={() => {
+                                setDataInactivate(record?.idPaymentPeriod);
+                                setModalActiveInactive(true);
+                                setStatus(record?.status);
+                            }}
+                            type="action"
+                        >
+                            <span className={"text-black gap-2 text-center"}>
+                                {label}
+                            </span>
+                        </ButtonComponent>
                     ) : (
-                        <Tooltip title={statusLowerCase === "active" ? "Inactivate" : "Activate"}>
-                            <div>
-                                <Checkbox
-                                    checked={record?.status?.toUpperCase() !== "ACTIVE"}
-                                    onClick={() => {
+                        <Tooltip title={label}>
+                            <div
+                                onClick={() => {
+                                    if (!isDisabled) {
                                         setDataInactivate(record?.idPaymentPeriod);
                                         setModalActiveInactive(true);
                                         setStatus(record?.status);
-                                    }}
-                                    disabled={disabledActionByStatus("activate", record?.status, record?.statusApproval)}
+                                    }
+                                }}
+                                className={isDisabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"}
+                            >
+                                <SVGIcon
+                                    name={record?.status?.toUpperCase() === "ACTIVE" ? "IconInactive" : "IconSquareCheck"}
+                                    color={isDisabled ? "#8D91A0" : "#ACC424"}
+                                    width={20}
                                 />
                             </div>
                         </Tooltip>

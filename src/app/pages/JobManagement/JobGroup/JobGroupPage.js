@@ -22,29 +22,12 @@ import useGrantAccessHooks from "../../../../components/useGrantAccessHooks";
 import { useGetAccessGroupsQuery } from "../../../../redux/slices/job_management/jobApiSlice";
 import { configApp } from "../../../../constants/configApp";
 import IconThreeDots from "../../../../assets/Icon/Nx/IconThreeDots";
+import ViewListIcon from "../../../../assets/Icon/Nx/IconViewList";
+import IconEditMenu from "../../../../assets/Icon/Nx/IconEditMenu";
+import IconDeleteMenu from "../../../../assets/Icon/Nx/IconDeleteMenu";
+import ModalRunGroup from "./ModalRunGroup";
 
 const PAGE_SIZE = 20;
-
-const ViewListIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M5.625 5.625H18.125M5.625 10H18.125M5.625 14.375H18.125" stroke="#1976D2" strokeWidth="1.875" strokeLinejoin="round"/>
-    <path d="M2.5 5H3.75V6.25H2.5V5ZM2.5 9.375H3.75V10.625H2.5V9.375ZM2.5 13.75H3.75V15H2.5V13.75Z" stroke="#1976D2" strokeWidth="1.25" strokeLinecap="square" strokeLinejoin="round"/>
-  </svg>
-);
-
-const EditMenuIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M9 7H6C4.89543 7 4 7.89543 4 9V18C4 19.1046 4.89543 20 6 20H15C16.1046 20 17 19.1046 17 18V15" stroke="black" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M9 15H12L20.5 6.49998C21.3284 5.67156 21.3284 4.32841 20.5 3.49998C19.6716 2.67156 18.3284 2.67156 17.5 3.49998L9 12V15" stroke="black" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M16 5L19 8" stroke="black" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
-
-const DeleteMenuIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M10 11V17M14 11V17M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6M3 6H21M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6" stroke="#D32F2F" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
@@ -86,6 +69,7 @@ const JobGroupPage = () => {
   const [expandedRowKeys, setExpandedRowKeys] = useState([]);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [groupToDelete, setGroupToDelete] = useState(null);
+  const [runModalGroup, setRunModalGroup] = useState(null);
 
   // Fetch JobGroup paginated list
   const handleFetch = useCallback(() => {
@@ -176,35 +160,43 @@ const JobGroupPage = () => {
       }));
   }, [accessGroupsMap]);
 
-  // Action column — always present so the fixed-right column never
-  // appears/disappears (no layout shift). Skeleton and permission checks
-  // live inside render so only cell content changes during loading.
-  const actionColumn = useMemo(() => ({
-    title: "ACTIONS",
-    key: "actions",
-    width: 120,
-    align: "center",
-    fixed: "right",
-    render: (_, record) => {
-      if (permissionsLoading) {
-        return (
-          <div style={{ width: "100%", height: 14, overflow: "hidden", borderRadius: 20 }}>
-            <Skeleton.Button active size="small" shape="round" block />
-          </div>
-        );
-      }
+  const actionColumn = useMemo(() => {
+    const hasAnyAction = canUpdate || canDelete || canView;
+    if (!permissionsLoading && !hasAnyAction) return null;
+    return {
+      title: "ACTIONS",
+      key: "actions",
+      width: 120,
+      align: "center",
+      fixed: "right",
+      render: (_, record) => {
+        if (permissionsLoading) {
+          return (
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <div style={{ width: "100%", transform: "scaleY(0.55)", transformOrigin: "center" }}>
+                <Skeleton.Button active size="small" shape="round" block />
+              </div>
+            </div>
+          );
+        }
 
-      const hasAnyAction = canUpdate || canDelete || canView;
-      if (!hasAnyAction) return null;
-
-      if (!record || !record.id) return <span>—</span>;
+        if (!record || !record.id) return <span>—</span>;
 
       const menuItems = [
         canUpdate && {
+          key: "run",
+          label: (
+            <span style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, padding: "2px 0" }}>
+              ▶ Run
+            </span>
+          ),
+          onClick: () => setRunModalGroup(record),
+        },
+        canUpdate && {
           key: "update",
           label: (
-            <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <EditMenuIcon /> Update
+            <span style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, padding: "2px 0" }}>
+              <IconEditMenu width="18" height="18" /> Update
             </span>
           ),
           onClick: () => navigate(JOB_MGMT_ROUTES.UPDATE_JOB_GROUP, { state: { id: record.id } }),
@@ -212,8 +204,8 @@ const JobGroupPage = () => {
         canDelete && {
           key: "delete",
           label: (
-            <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <DeleteMenuIcon /> Delete
+            <span style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, padding: "2px 0" }}>
+              <IconDeleteMenu width="18" height="18" /> Delete
             </span>
           ),
           onClick: () => {
@@ -225,7 +217,7 @@ const JobGroupPage = () => {
             setDeleteModalOpen(true);
           },
         },
-      ].filter(Boolean);
+      ].filter(Boolean).sort((a, b) => a.key.localeCompare(b.key));
 
       return (
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
@@ -256,6 +248,7 @@ const JobGroupPage = () => {
                 padding: 4,
                 display: "flex",
                 alignItems: "center",
+                color: "#1976D2",
               }}
               onClick={(e) => {
                 e.stopPropagation();
@@ -268,8 +261,9 @@ const JobGroupPage = () => {
           )}
         </div>
       );
-    },
-  }), [permissionsLoading, navigate, canUpdate, canDelete, canView]);
+      },
+    };
+  }, [permissionsLoading, navigate, canUpdate, canDelete, canView]);
 
   // Parent column definitions (memoized — stable reference, not re-created on every render)
   const parentColumns = useMemo(
@@ -405,12 +399,26 @@ const JobGroupPage = () => {
           onExpand={handleExpandRow}
           actionColumn={actionColumn}
           loadingKeys={loadingKeys}
-          // showRefresh
-          // onRefresh={handleRefresh}
+          showRefresh
+          onRefresh={handleRefresh}
           useInfiniteScroll
           onLoadMore={handleLoadMore}
           hasMore={hasMore}
           showExport={true}
+          emptyText={
+            !loading && tableDataWithJobs.length === 0 ? (
+              <div style={{ padding: "32px 0", textAlign: "center" }}>
+                <div style={{ fontSize: "28px", marginBottom: "8px" }}>🔒</div>
+                <div style={{ fontSize: "14px", fontWeight: 500, color: "#374151", marginBottom: "6px" }}>
+                  No job groups available
+                </div>
+                <div style={{ fontSize: "13px", color: "#6B7280" }}>
+                  Your account has not been assigned to any job group yet.<br />
+                  Please contact your administrator to request access.
+                </div>
+              </div>
+            ) : undefined
+          }
         />
       </NxCardContainer>
 
@@ -448,6 +456,12 @@ const JobGroupPage = () => {
           </div>
         </div>
       </NxModal>
+
+      <ModalRunGroup
+        open={!!runModalGroup}
+        group={runModalGroup}
+        onClose={() => setRunModalGroup(null)}
+      />
     </>
   );
 };

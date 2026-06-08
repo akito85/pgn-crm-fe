@@ -62,7 +62,7 @@ const ListDetailDeduction = () => {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
-  const approvalName = dataListAppHierId?.find(x => x.appHierId === data_detail?.deduction?.appHierId)?.approvalName || dataHeader?.approvalName || dataHeader?.appHierId || "-";
+  const approvalName = dataListAppHierId?.find(x => x.appHierId === data_detail?.deduction?.appHierId)?.approvalName || dataHeader?.approvalName || dataHeader?.appHierId || "";
 
   useEffect(() => {
     if (id) {
@@ -214,7 +214,7 @@ const ListDetailDeduction = () => {
     },
     {
       path: "",
-      breadcrumbName: "Payment Warranty",
+      breadcrumbName: "Payment  Guarantee",
     },
     {
       path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_DEDUCTION,
@@ -289,11 +289,11 @@ const ListDetailDeduction = () => {
 
         <LogHistoryInfo
           data={{
-            recordId: dataHeader?.id || "-",
+            recordId: dataHeader?.id || "",
             createdDate: dataHeader?.createdDate ? moment(dataHeader.createdDate).format("DD MMM YYYY HH:mm:ss") : "-",
-            createdBy: dataHeader?.createdBy || "-",
+            createdBy: dataHeader?.createdBy || "",
             updatedDate: dataHeader?.updatedDate ? moment(dataHeader.updatedDate).format("DD MMM YYYY HH:mm:ss") : "-",
-            updatedBy: dataHeader?.updatedBy || "-"
+            updatedBy: dataHeader?.updatedBy || ""
           }}
         />
         </div>

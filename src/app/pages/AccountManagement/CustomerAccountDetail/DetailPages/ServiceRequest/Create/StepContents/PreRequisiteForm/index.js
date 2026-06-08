@@ -6,8 +6,8 @@ import { Button, Popconfirm, Tooltip } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 
 import {
-  getPrerequisitesByServiceRequest,
-  deletePrerequisiteForServiceRequest,
+  getSrPrerequisites,
+  deleteSrPrerequisite,
 } from "../../../../../../../../../redux/slices/account_management/detailAccount/ServiceRequestSlice";
 import ButtonComponent from "../../../../../../../../../components/ButtonComponent";
 import NxTable from "../../../../../../../../../components/Nx/NxTable";
@@ -82,7 +82,7 @@ export default function PreRequisiteForm({
     async (page) => {
       if (!accountId || !srId) return;
       const result = await dispatch(
-        getPrerequisitesByServiceRequest({ accountId, srId, page, size: PAGE_SIZE }),
+        getSrPrerequisites({ accountId, srId, page, size: PAGE_SIZE }),
       ).unwrap();
 
       const payload = result?.data ?? result;
@@ -175,7 +175,7 @@ export default function PreRequisiteForm({
         return;
       }
       await dispatch(
-        deletePrerequisiteForServiceRequest({ accountId, srId, id: record.id }),
+        deleteSrPrerequisite({ accountId, srId, id: record.id }),
       );
       loadFirst();
     },
@@ -298,47 +298,33 @@ export default function PreRequisiteForm({
     <Fragment>
       <NxCardContainer header={"PREREQUISITE LIST"}>
         <NxBaseContainer border>
-        {/* Create Button */}
-        <div className="w-full flex justify-end items-center gap-2.5 mb-5">
-          <ButtonComponent
-            type={"submit"}
-            onClick={handleCreateClick}
-            icon={
-              <PlusOutlined
-                style={{
-                  color: "#fff",
-                  fontSize: 20,
-                }}
-              />
-            }
-            style={{
-              backgroundColor: "#0075bf",
-              color: "#fff",
-              borderColor: "#0075bf",
-              border: "1px solid #0075bf",
-              borderRadius: "5px",
-              height: "48px",
-            }}
-          >
-            Create
-          </ButtonComponent>
-        </div>
+          {/* Create Button */}
+          <div className="w-full flex justify-end items-center">
+            <Button
+              icon={<SVGIcon name="IconButtonCreate" width={14} />}
+              type={"submit"}
+              border={false}
+              onClick={handleCreateClick}
+            >
+              Create
+            </Button>
+          </div>
 
-        {/* Prerequisite Table */}
-        <NxTable
-          idTable="prerequisite-table"
-          usePagination={false}
-          useInfiniteScroll={!isCreateFlow}
-          onLoadMore={handleLoadMore}
-          hasMore={isCreateFlow ? false : prereqHasMore}
-          useSelect={true}
-          dataMain={isCreateFlow ? localPrereqs : prereqData}
-          columnMain={columnMain}
-          fontSize={"medium"}
-          loading={isCreateFlow ? false : prereqLoading}
-          tableScrolled={{ x: "max-content", y: 400 }}
-          border="true"
-        />
+          {/* Prerequisite Table */}
+          <NxTable
+            idTable="prerequisite-table"
+            usePagination={false}
+            useInfiniteScroll={!isCreateFlow}
+            onLoadMore={handleLoadMore}
+            hasMore={isCreateFlow ? false : prereqHasMore}
+            useSelect={true}
+            dataMain={isCreateFlow ? localPrereqs : prereqData}
+            columnMain={columnMain}
+            fontSize={"medium"}
+            loading={isCreateFlow ? false : prereqLoading}
+            tableScrolled={{ x: "max-content", y: 400 }}
+            border="true"
+          />
         </NxBaseContainer>
       </NxCardContainer>
 

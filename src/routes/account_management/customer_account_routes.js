@@ -90,22 +90,12 @@ export const ACCOUNT_MANAGEMENT_ROUTES = {
   UPDATE_GAS_SOURCE: "/system-setup/gas-sources/update",
   VIEW_GAS_SOURCE: "/system-setup/gas-sources",
   UPLOAD_GAS_SOURCE: "/system-setup/gas-sources/upload",
-
-  // Gas Deposit Stand Alone
-  VIEW_GAS_DEPOSIT_SA: "/account-management/gas-deposit",
-  VIEW_DETAIL_GAS_DEPOSIT_SA: "/account-management/gas-deposit/view",
-  RECALCULATE_GAS_DEPOSIT_SA: "/account-management/gas-deposit/recalculate",
-  EXPIRE_GAS_DEPOSIT_SA: "/account-management/gas-deposit/expire",
   
   // Gas Deposit Account Standard
   VIEW_DETAIL_GAS_DEPOSIT: "/account-management/account-standard/gas-deposit/view",
-  RECALCULATE_GAS_DEPOSIT: "/account-management/account-standard/gas-deposit/recalculate",
-  EXPIRE_GAS_DEPOSIT: "/account-management/account-standard/gas-deposit/expire",
 
   // Gas Deposit Account One Time
   VIEW_DETAIL_GAS_DEPOSIT_ONETIME: "/account-management/account-onetime/gas-deposit/view",
-  RECALCULATE_GAS_DEPOSIT_ONETIME: "/account-management/account-onetime/gas-deposit/recalculate",
-  EXPIRE_GAS_DEPOSIT_ONETIME: "/account-management/account-onetime/gas-deposit/expire",
 
   // Multi Destination
   VIEW_DETAIL_MULTI_DESTINATION: "/account-management/account-standard/multi-destination/view",

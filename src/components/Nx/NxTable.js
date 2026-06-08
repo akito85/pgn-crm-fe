@@ -10,15 +10,18 @@ import { Button, Input, Pagination, Select, Table } from "antd";
 import { debounce } from 'lodash';
 import ColumnSettings from "../ColumnSettings/ColumnSettings";
 import NxAdvanceSearch from "./NxAdvanceSearch";
+import { computeEffectiveWidths } from './NxTable/hooks/useColumnLayout';
+import { NO_COL_KEY, NO_COL_WIDTH, ACTION_COL_KEY, ACTION_COL_MIN_WIDTH } from './NxTable/constants';
 
 const { Option } = Select;
 
 // ── Shared visual constants (mirror NxTableNested) ─────────────────────────
-const HEADER_BG    = "#2C6FAD";
-const BORDER_COL   = "#C8CDD4";
-const ROW_WHITE    = "#FFFFFF";
-const ROW_HOVER    = "#EBF2FA";
-const FONT_FAMILY  = "'PlusJakartaSans', 'PublicSans', sans-serif";
+const HEADER_BG        = "#2C6FAD";
+const BORDER_COL       = "#C8CDD4";
+const ROW_WHITE        = "#FFFFFF";
+const ROW_HOVER        = "#EBF2FA";
+const FONT_FAMILY      = "'PlusJakartaSans', 'PublicSans', sans-serif";
+const EXPAND_COL_WIDTH = 48; // Ant Design's default expand column width (px)
 
 // ── SearchBar Component ─────────────────────────────────────────────────────
 // Owns its own local input state so the parent's re-render (triggered by
@@ -83,7 +86,7 @@ const SearchBar = React.memo(({ placeholder = "Search content here ....", onSear
 
 // Resizable Title Component
 const ResizableTitle = (props) => {
-  const { onResize, width, ...restProps } = props;
+  const { onResize, width, noResize, minWidth, ...restProps } = props;
   const isResizingRef = React.useRef(false);
 
   // NOTE: useRef must be called before any conditional return (Rules of Hooks).
@@ -114,63 +117,65 @@ const ResizableTitle = (props) => {
       onDragEnd={restProps.onDragEnd}
     >
       {restProps.children}
-      <div
-        style={{
-          position: "absolute",
-          right: 0,
-          top: 0,
-          bottom: 0,
-          width: "10px",
-          cursor: "col-resize",
-          userSelect: "none",
-          zIndex: 1,
-        }}
-        onClick={(e) => {
-          e.stopPropagation();
-          e.preventDefault();
-        }}
-        onMouseDown={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          isResizingRef.current = false;
-          const startX = e.pageX;
-          const startWidth = width;
-          let hasMoved = false;
+      {!noResize && (
+        <div
+          style={{
+            position: "absolute",
+            right: 0,
+            top: 0,
+            bottom: 0,
+            width: "10px",
+            cursor: "col-resize",
+            userSelect: "none",
+            zIndex: 1,
+          }}
+          onClick={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+          }}
+          onMouseDown={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            isResizingRef.current = false;
+            const startX = e.pageX;
+            const startWidth = width;
+            let hasMoved = false;
 
-          const handleMouseMove = (e) => {
-            hasMoved = true;
-            const newWidth = startWidth + (e.pageX - startX);
-            if (newWidth > 50) {
-              onResize(newWidth);
-            }
-          };
+            const handleMouseMove = (e) => {
+              hasMoved = true;
+              const newWidth = startWidth + (e.pageX - startX);
+              if (newWidth > (minWidth ?? 50)) {
+                onResize(newWidth);
+              }
+            };
 
-          const handleMouseUp = () => {
-            document.removeEventListener("mousemove", handleMouseMove);
-            document.removeEventListener("mouseup", handleMouseUp);
-            document.body.style.cursor = "default";
-            document.body.style.userSelect = "auto";
+            const handleMouseUp = () => {
+              document.removeEventListener("mousemove", handleMouseMove);
+              document.removeEventListener("mouseup", handleMouseUp);
+              document.body.style.cursor = "default";
+              document.body.style.userSelect = "auto";
 
-            if (hasMoved) {
-              isResizingRef.current = true;
-              setTimeout(() => {
-                isResizingRef.current = false;
-              }, 100);
-            }
-          };
+              if (hasMoved) {
+                isResizingRef.current = true;
+                setTimeout(() => {
+                  isResizingRef.current = false;
+                }, 100);
+              }
+            };
 
-          document.addEventListener("mousemove", handleMouseMove);
-          document.addEventListener("mouseup", handleMouseUp);
-          document.body.style.cursor = "col-resize";
-          document.body.style.userSelect = "none";
-        }}
-        onMouseOver={(e) => {
-          e.currentTarget.style.borderRight = "2px solid #1890ff";
-        }}
-        onMouseOut={(e) => {
-          e.currentTarget.style.borderRight = "none";
-        }}
-      />
+            document.addEventListener("mousemove", handleMouseMove);
+            document.addEventListener("mouseup", handleMouseUp);
+            document.body.style.cursor = "col-resize";
+            document.body.style.userSelect = "none";
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.borderRight = "2px solid #1890ff";
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.borderRight = "none";
+          }}
+        />
+      )}
     </th>
   );
 };
@@ -298,6 +303,9 @@ const NxTable = ({
   showSearchBar = true,
   showRefresh = false,
   onRefresh,
+  rounded = true,
+  showFooter = true,
+  showBorder = true,
   enableRowClick = false,
   selectedRowKey = null,
   onRowClick = () => { },
@@ -312,6 +320,8 @@ const NxTable = ({
   // fetchFailed: set to true when the data fetch errored so the table can show
   //              an actionable empty state instead of the generic Ant Design one.
   fetchFailed = false,
+  // emptyText: custom message shown in the table body when data is empty and fetchFailed is false.
+  emptyText,
   // onInitialLoad: called once on mount when dataSource is empty and not loading,
   //                giving the parent a chance to trigger the first fetch if it
   //                hasn't been called yet (e.g. RTK Query with skip=true).
@@ -527,6 +537,10 @@ const NxTable = ({
   const [draggedColumnKey, setDraggedColumnKey] = useState(null);
   const [columnOrder, setColumnOrder] = useState(() => initColumnOrder);
   const [searchValue, setSearchValue] = useState('');
+  // Declared here (before displayedColumns useMemo) to avoid TDZ — the memo
+  // references containerWidth in its dependency array.
+  const containerRef = React.useRef(null);
+  const [containerWidth, setContainerWidth] = React.useState(0);
 
   // ── Persist column preferences on every relevant state change ─────────────
   // Debounced 400 ms inside writePrefs so rapid resize events don't thrash
@@ -952,7 +966,7 @@ const NxTable = ({
 
   // Fungsi rekursif untuk memproses kolom dengan children
   const processColumn = useCallback(
-    (col, fixedPos = null) => {
+    (col, fixedPos = null, effectiveWidthMap = null) => {
       const colKey = col.key || col.dataIndex || col.title;
 
       // Jika kolom punya children, proses children secara rekursif
@@ -960,7 +974,7 @@ const NxTable = ({
         return {
           ...col,
           key: colKey,
-          children: col.children.map((childCol) => processColumn(childCol, fixedPos)),
+          children: col.children.map((childCol) => processColumn(childCol, fixedPos, effectiveWidthMap)),
         };
       }
 
@@ -973,11 +987,20 @@ const NxTable = ({
       }
 
       const isDraggable = !fixedPos && !col.fixed;
+      const isNoCol     = colKey === NO_COL_KEY;
+      const isActionCol = colKey === ACTION_COL_KEY;
+
+      // Use distributed effective width when available; otherwise fall back to
+      // stored user resize → column definition → default.
+      const width = effectiveWidthMap?.[colKey]
+        ?? columnWidths[colKey]
+        ?? col.width
+        ?? 150;
 
       const newCol = {
         ...col,
         key: colKey,
-        width: columnWidths[colKey] || col.width || 150,
+        width,
         align: col.align || textAlign,
         ellipsis: {
           showTitle: true,
@@ -995,8 +1018,10 @@ const NxTable = ({
           }
 
           return {
-            width: columnWidths[colKey] || col.width || 150,
-            onResize: handleResize(colKey),
+            width,
+            onResize:  isNoCol ? undefined : handleResize(colKey),
+            noResize:  isNoCol,
+            minWidth:  isActionCol ? ACTION_COL_MIN_WIDTH : undefined,
             style: baseStyle,
             draggable: isDraggable,
             onDragStart: isDraggable
@@ -1157,10 +1182,18 @@ const NxTable = ({
       }
     }
 
+    const allVisibleCols = [...leftFixed, ...normal, ...rightFixed];
+    const effectiveWidthMap = computeEffectiveWidths(
+      allVisibleCols,
+      columnWidths,
+      containerWidth,
+      tableScrolled?.x ?? 0,
+    );
+
     const finalCols = [
-      ...leftFixed.map((c) => processColumn(c, "left")),
-      ...normal.map((c) => processColumn(c, undefined)),
-      ...rightFixed.map((c) => processColumn(c, "right")),
+      ...leftFixed.map((c) => processColumn(c, "left",    effectiveWidthMap)),
+      ...normal.map((c)    => processColumn(c, undefined, effectiveWidthMap)),
+      ...rightFixed.map((c) => processColumn(c, "right",  effectiveWidthMap)),
     ];
 
     return finalCols;
@@ -1173,6 +1206,9 @@ const NxTable = ({
     processColumn,
     searchValue,
     highlightText,
+    columnWidths,
+    containerWidth,
+    tableScrolled,
   ]);
 
   const handleAdvanceSearch = useCallback((searchData) => {
@@ -1274,10 +1310,9 @@ const NxTable = ({
   );
 
   // ── Container width measurement ───────────────────────────────────────────
-  // Track the actual rendered width of the table wrapper so the fixed-column
-  // warning can compare real pixel widths, not assumed/prop values.
-  const containerRef = React.useRef(null);
-  const [containerWidth, setContainerWidth] = React.useState(0);
+  // containerRef and containerWidth are declared near the other state declarations
+  // (above displayedColumns useMemo) to avoid a TDZ error. This effect wires up
+  // the ResizeObserver that keeps containerWidth in sync with the rendered width.
   React.useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
@@ -1291,6 +1326,20 @@ const NxTable = ({
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
+
+  // ── Own border-radius via inline style ───────────────────────────────────
+  // CSS descendant selectors from any ancestor NxTable (e.g. `#parentId .ant-table-container`)
+  // bleed into this NxTable's own DOM nodes. Inline `!important` styles have
+  // absolute highest priority and cannot be overridden by any stylesheet rule,
+  // so we apply border-radius directly on this NxTable's own elements only.
+  React.useLayoutEffect(() => {
+    if (!containerRef.current) return;
+    const radius = rounded ? (showFooter ? '8px 8px 0 0' : '8px') : '0';
+    const antTable = containerRef.current.querySelector(`#${safeId} .ant-table`);
+    const antTableContainer = containerRef.current.querySelector(`#${safeId} .ant-table-container`);
+    if (antTable) antTable.style.setProperty('border-radius', radius, 'important');
+    if (antTableContainer) antTableContainer.style.setProperty('border-radius', radius, 'important');
+  }, [safeId, rounded, showFooter]);
 
   // ── Fixed-column overflow warning ─────────────────────────────────────────
   // Computes a warning when the combined width of all fixed columns leaves no
@@ -1356,6 +1405,40 @@ const NxTable = ({
       setWarningDismissed(false);
     }
   }, [fixedColumnWarning]);
+
+  // ── Expandable row — filler column & zero-padding ────────────────────────
+  const hasExpandedRowRender = !!expandable?.expandedRowRender;
+  const expandColumnWidth = expandable?.columnWidth ?? EXPAND_COL_WIDTH;
+
+  const processedExpandable = useMemo(() => {
+    if (!expandable) return expandable;
+    const showFiller = expandable.showExpandColumn !== false;
+
+    return {
+      ...expandable,
+      fixed: expandable.fixed ?? 'left',
+      expandedRowRender: expandable.expandedRowRender
+        ? (record, index, indent, expanded) => {
+            const bg = index % 2 === 0 ? ROW_WHITE : ROW_HOVER;
+            return (
+              <div style={{ display: 'flex', alignItems: 'stretch' }}>
+                {showFiller && (
+                  <div style={{
+                    width: expandColumnWidth,
+                    flexShrink: 0,
+                    background: bg,
+                    borderRight: `1px solid ${BORDER_COL}`,
+                  }} />
+                )}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  {expandable.expandedRowRender(record, index, indent, expanded)}
+                </div>
+              </div>
+            );
+          }
+        : undefined,
+    };
+  }, [expandable, expandColumnWidth]);
 
   return (
     <div
@@ -1501,25 +1584,26 @@ const NxTable = ({
             }
 
             #${safeId} .ant-table {
-              border-radius: 8px 8px 0 0;
-              overflow: hidden;
+              border-radius: ${rounded ? (showFooter ? '8px 8px 0 0' : '8px') : '0'};
+              overflow: clip;
               border: none;
               border-collapse: collapse;
               border-spacing: 0;
             }
 
             #${safeId} .ant-table-container {
-              border-radius: 8px 8px 0 0;
-              overflow: hidden;
-              border: none;
+              border-radius: ${rounded ? (showFooter ? '8px 8px 0 0' : '8px') : '0'};
+              overflow: clip;
+              border: ${showBorder ? `1px solid ${BORDER_COL}` : 'none'};
+              border-bottom: none;
             }
 
             #${safeId} .ant-table-container table > thead > tr:first-child > *:first-child {
-              border-start-start-radius: 8px;
+              border-start-start-radius: 0;
             }
 
             #${safeId} .ant-table-container table > thead > tr:first-child > *:last-child {
-              border-start-end-radius: 8px;
+              border-start-end-radius: 0;
             }
 
             #${safeId} .ant-table-tbody > tr:last-child > *:first-child {
@@ -1537,6 +1621,11 @@ const NxTable = ({
               border-color: ${BORDER_COL} !important;
             }
 
+            #${safeId} .ant-table-container > .ant-table-header > table,
+            #${safeId} .ant-table-container > .ant-table-body > table {
+              border-top: none !important;
+            }
+
             #${safeId} .ant-table-thead > tr > th {
               background-color: ${HEADER_BG} !important;
               color: #fff !important;
@@ -1547,10 +1636,6 @@ const NxTable = ({
               border-right: 1px solid rgba(255,255,255,0.2) !important;
               border-bottom: 1px solid ${BORDER_COL} !important;
               font-family: ${FONT_FAMILY};
-            }
-
-            #${safeId} .ant-table-thead > tr:first-child > th {
-              border-top: 1px solid ${BORDER_COL} !important;
             }
 
             /* Alternating row colors for the main table body */
@@ -1589,7 +1674,7 @@ const NxTable = ({
             }
 
             #${safeId} .ant-table-tbody > tr:not(.ant-table-measure-row) > td:first-child {
-              border-left: 1px solid ${BORDER_COL} !important;
+              border-left: none !important;
             }
 
             /* Neutralise any vertical margin on inline badges/chips inside cells
@@ -1601,7 +1686,15 @@ const NxTable = ({
             }
 
             #${safeId} .ant-table-thead > tr > th:first-child {
-              border-left: 1px solid ${BORDER_COL} !important;
+              border-left: none !important;
+            }
+
+            #${safeId} .ant-table-thead > tr > th:last-child {
+              border-right: none !important;
+            }
+
+            #${safeId} .ant-table-tbody > tr:not(.ant-table-measure-row) > td:last-child {
+              border-right: none !important;
             }
 
             /* Left border on the first right-fixed column — marks the separator
@@ -1624,14 +1717,15 @@ const NxTable = ({
                consistent with NxTableNested's "No data" row and NxTableInlineEdit */
             #${safeId} .ant-table-placeholder > td {
               background-color: ${ROW_WHITE} !important;
-              border-left: 1px solid ${BORDER_COL} !important;
-              border-right: 1px solid ${BORDER_COL} !important;
+              border-left: none !important;
+              border-right: none !important;
               border-bottom: 1px solid ${BORDER_COL} !important;
             }
 
             #${safeId} .ant-table-placeholder:hover > td {
               background-color: ${ROW_WHITE} !important;
             }
+
 
             /* ── Nested table alignment ───────────────────────────────────────
                Child first column left edge aligns with parent second column
@@ -1671,7 +1765,6 @@ const NxTable = ({
                and alternating row styling as parent tables. */
 
             #${safeId} .ant-table-expanded-row .ant-table {
-              border-left: 1px solid ${BORDER_COL} !important;
               border-radius: 0 !important;
               border-top: none !important;
               border-right: none !important;
@@ -1720,12 +1813,28 @@ const NxTable = ({
               background-color: ${ROW_HOVER} !important;
             }
 
-            /* Re-add left border on child's first header/cell so the vertical
-               line from the parent second-column separator continues cleanly */
-            #${safeId} .ant-table-expanded-row .ant-table-thead > tr > th:first-child,
-            #${safeId} .ant-table-expanded-row .ant-table-tbody > tr > td:first-child {
-              border-left: 1px solid ${BORDER_COL} !important;
+            ${!showBorder ? `
+            #${safeId} .ant-table-tbody > tr:not(.ant-table-measure-row):last-child > td {
+              border-bottom: none !important;
             }
+            ` : ''}
+
+            ${hasExpandedRowRender ? `
+            #${safeId} .ant-table-tbody > tr.ant-table-expanded-row > td,
+            #${safeId} .ant-table-tbody > tr.ant-table-expanded-row > td.ant-table-cell,
+            #${safeId} .ant-table-tbody > tr.ant-table-expanded-row > td.ant-table-cell-ellipsis {
+              padding: 0 !important;
+              height: auto !important;
+              max-height: none !important;
+              line-height: normal !important;
+              border-left: none !important;
+              overflow: visible !important;
+            }
+
+            #${safeId} .ant-table-expanded-row-fixed {
+              padding: 0 !important;
+            }
+            ` : ''}
           `}
       </style>
       {useSelect ? (
@@ -1928,7 +2037,7 @@ const NxTable = ({
           className={`w-full${className ? ` ${className}` : ''}`}
           loading={loading}
           tableLayout="fixed"
-          expandable={expandable}
+          expandable={processedExpandable}
           id={safeId}
           onChange={onSort}
           rowSelection={rowSelection}
@@ -1953,11 +2062,11 @@ const NxTable = ({
                 )}
               </div>
             )
-          } : undefined}
+          } : emptyText ? { emptyText } : undefined}
         />
 
-        {useInfiniteScroll ? (
-          <div style={{ position: "relative", zIndex: "1", marginTop: "-1px", borderTop: `1px solid ${BORDER_COL}`, borderLeft: `1px solid ${BORDER_COL}`, borderRight: `1px solid ${BORDER_COL}`, borderBottom: `1px solid ${BORDER_COL}`, borderRadius: "0 0 8px 8px", background: "#fff", padding: "6px 12px", display: "flex", justifyContent: "flex-end", alignItems: "center", gap: "8px", width: "100%" }}>
+        {showFooter && (useInfiniteScroll ? (
+          <div style={{ position: "relative", zIndex: "1", marginTop: "-1px", borderTop: `1px solid ${BORDER_COL}`, borderLeft: showBorder ? `1px solid ${BORDER_COL}` : 'none', borderRight: showBorder ? `1px solid ${BORDER_COL}` : 'none', borderBottom: showBorder ? `1px solid ${BORDER_COL}` : 'none', borderRadius: rounded ? "0 0 8px 8px" : "0", background: "#fff", padding: "6px 12px", display: "flex", justifyContent: "flex-end", alignItems: "center", gap: "8px", width: "100%" }}>
             <span style={{ fontSize: "12px", color: "#6B7280" }}>
               Showing {resolvedDataSource?.length || 0} of {Math.max(resolvedTotalData, resolvedDataSource?.length || 0)} entries
               {isLoadingMore && hasMore && " · Loading..."}
@@ -1970,7 +2079,7 @@ const NxTable = ({
             )}
           </div>
         ) : usePagination ? (
-          <div style={{ position: "relative", zIndex: "1", marginTop: "-2px", borderTop: `1px solid ${BORDER_COL}`, borderLeft: `1px solid ${BORDER_COL}`, borderRight: `1px solid ${BORDER_COL}`, borderBottom: `1px solid ${BORDER_COL}`, borderRadius: "0 0 8px 8px", background: "#fff", padding: "6px 12px", display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
+          <div style={{ position: "relative", zIndex: "1", marginTop: "-2px", borderTop: `1px solid ${BORDER_COL}`, borderLeft: showBorder ? `1px solid ${BORDER_COL}` : 'none', borderRight: showBorder ? `1px solid ${BORDER_COL}` : 'none', borderBottom: showBorder ? `1px solid ${BORDER_COL}` : 'none', borderRadius: rounded ? "0 0 8px 8px" : "0", background: "#fff", padding: "6px 12px", display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
               <Select
                 value={pageSize}
@@ -2003,7 +2112,7 @@ const NxTable = ({
             />
           </div>
         ) : (
-          <div style={{ position: "relative", zIndex: "1", marginTop: "-1px", borderTop: `1px solid ${BORDER_COL}`, borderLeft: `1px solid ${BORDER_COL}`, borderRight: `1px solid ${BORDER_COL}`, borderBottom: `1px solid ${BORDER_COL}`, borderRadius: "0 0 8px 8px", background: "#fff", padding: "6px 12px", display: "flex", justifyContent: "flex-end", alignItems: "center", gap: "8px", width: "100%" }}>
+          <div style={{ position: "relative", zIndex: "1", marginTop: "-1px", borderTop: `1px solid ${BORDER_COL}`, borderLeft: showBorder ? `1px solid ${BORDER_COL}` : 'none', borderRight: showBorder ? `1px solid ${BORDER_COL}` : 'none', borderBottom: showBorder ? `1px solid ${BORDER_COL}` : 'none', borderRadius: rounded ? "0 0 8px 8px" : "0", background: "#fff", padding: "6px 12px", display: "flex", justifyContent: "flex-end", alignItems: "center", gap: "8px", width: "100%" }}>
             <span style={{ fontSize: "12px", color: "#6B7280" }}>
               Showing {resolvedDataSource?.length || 0} of {resolvedTotalData} entries
             </span>
@@ -2014,7 +2123,7 @@ const NxTable = ({
               </>
             )}
           </div>
-        )}
+        ))}
 
         {loading && (
           <div style={{
@@ -2022,10 +2131,10 @@ const NxTable = ({
             bottom: 0,
             left: 0,
             right: 0,
-            height: (useInfiniteScroll || usePagination) ? "33px" : 0,
+            height: showFooter && (useInfiniteScroll || usePagination) ? "33px" : 0,
             background: "rgba(255, 255, 255, 0.65)",
             zIndex: 10,
-            borderRadius: "0 0 8px 8px",
+            borderRadius: rounded ? "0 0 8px 8px" : "0",
           }} />
         )}
       </div>

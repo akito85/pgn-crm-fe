@@ -10,6 +10,7 @@ const ApprovalComponentGeneral = ({
   showSelect = true,
   disableSelect = false,
   approvalName = "",
+  loading = false,
 }) => {
   // Declaration
   const searchInput = useRef(null);
@@ -41,6 +42,7 @@ const ApprovalComponentGeneral = ({
         showSelect={showSelect}
         disableSelect={disableSelect}
         approvalName={approvalName}
+        loading={loading}
       />
     </div>
   );

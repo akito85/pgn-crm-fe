@@ -78,7 +78,6 @@ const ModalMutation = ({
   useEffect(() => {
     if (isOpen) {
       dispatch(getAllApprovalList());
-      dispatch(getMutationCategoryOptions());
       dispatch(getCurrencyDDL());
       
       if (modalType !== "create") {
@@ -165,7 +164,7 @@ const ModalMutation = ({
       form.validateFields(["source", "mutationNumber", "type", "category", "date", "amount", "convertedCurrency", "rate", "eqvAmount", "description"])
         .then(() => {
           const values = form.getFieldsValue();
-          const currencyName = values.convertedCurrency || "-";
+          const currencyName = values.convertedCurrency || "";
           setMutationData({
             ...values,
             convertedCurrencyName: currencyName
@@ -288,17 +287,17 @@ const ModalMutation = ({
         <div style={{ display: valuePage !== "Mutation Details" ? "none" : undefined }}>
           <SubSectionCard title="MUTATION INFORMATION">
             <div className="grid grid-cols-5 gap-y-4 gap-x-4">
-              <DetailText label="Source"><div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(mutationData.source || '-') }} /></DetailText>
-              <DetailText label="Mutation Number"><div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(mutationData.mutationNumber || '-') }} /></DetailText>
-              <DetailText label="Type"><div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(mutationData.type || '-') }} /></DetailText>
-              <DetailText label="Category"><div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(mutationData.category || '-') }} /></DetailText>
+              <DetailText label="Source"><div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize((mutationData.source || "").toUpperCase()) }} /></DetailText>
+              <DetailText label="Mutation Number"><div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(mutationData.mutationNumber || "") }} /></DetailText>
+              <DetailText label="Type"><div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(mutationData.type || "") }} /></DetailText>
+              <DetailText label="Category"><div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(mutationData.category || "") }} /></DetailText>
               <DetailText label="Date">{mutationData.date ? moment(mutationData.date).format("DD MMM YYYY") : "-"}</DetailText>
-              <DetailText label="Amount">{mutationData.amount?.toLocaleString() || "-"}</DetailText>
-              <DetailText label="Converted Currency"><div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(mutationData.convertedCurrencyName || '-') }} /></DetailText>
-              <DetailText label="Rate">{mutationData.rate?.toLocaleString() || "-"}</DetailText>
-              <DetailText label="EQV Amount">{mutationData.eqvAmount?.toLocaleString() || "-"}</DetailText>
+              <DetailText label="Amount">{mutationData.amount?.toLocaleString() || ""}</DetailText>
+              <DetailText label="Converted Currency"><div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(mutationData.convertedCurrencyName || "") }} /></DetailText>
+              <DetailText label="Rate">{mutationData.rate?.toLocaleString() || ""}</DetailText>
+              <DetailText label="EQV Amount">{mutationData.eqvAmount?.toLocaleString() || ""}</DetailText>
               <div className="col-span-5">
-                <DetailText label="Description"><div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(mutationData.description || '-') }} /></DetailText>
+                <DetailText label="Description"><div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(mutationData.description || "") }} /></DetailText>
               </div>
             </div>
           </SubSectionCard>

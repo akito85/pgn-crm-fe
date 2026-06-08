@@ -17,6 +17,7 @@ import ModalInactivateWithHierarchy from "../../../../../components/Modal/ModalI
 import ModalHistory from "../../../../../components/Modal/ModalHistory";
 import {
   downloadTOPS,
+  requestActivateTOP,
   getAllApprovalList,
   getApprovalHistoryTOP,
   getListApprovalById,
@@ -37,360 +38,360 @@ export const columnTOP = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => {},
+  handleSearch = () => { },
 ) => [
-  {
-    title: "NO",
-    dataIndex: "no",
-    key: "no",
-    width: 60,
-    align: "center",
-    render: (text, object, index) => (page - 1) * pageSize + index + 1,
-  },
-  {
-    title: "NAME",
-    dataIndex: "name",
-    width: 150,
-    key: "name",
-    sorter: true,
-    align: "left",
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "name",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-    ),
-    render: (text) =>
-      renderColumn(
+    {
+      title: "NO",
+      dataIndex: "no",
+      key: "no",
+      width: 60,
+      align: "center",
+      render: (text, object, index) => (page - 1) * pageSize + index + 1,
+    },
+    {
+      title: "NAME",
+      dataIndex: "name",
+      width: 150,
+      key: "name",
+      sorter: true,
+      align: "left",
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
         "name",
-        hasValue(search["name"]),
+        searchInput,
+        searchedColumn,
         searchText,
-        text,
-        false,
-        "input",
-        search,
+        handleSearch,
       ),
-  },
-  {
-    title: "TYPE",
-    dataIndex: "topType",
-    key: "topType",
-    width: 150,
-    sorter: true,
-    align: "center",
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "topType",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-    ),
-    render: (text) =>
-      renderColumn(
+      render: (text) =>
+        renderColumn(
+          "name",
+          hasValue(search["name"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
+    },
+    {
+      title: "TYPE",
+      dataIndex: "topType",
+      key: "topType",
+      width: 150,
+      sorter: true,
+      align: "center",
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
         "topType",
-        hasValue(search["topType"]),
+        searchInput,
+        searchedColumn,
         searchText,
-        text,
-        false,
-        "input",
-        search,
+        handleSearch,
       ),
-  },
-  {
-    title: "TERMS",
-    dataIndex: "topTerms",
-    key: "topTerms",
-    width: 150,
-    sorter: true,
-    align: "right",
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "topTerms",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-    ),
-    render: (text) =>
-      renderColumn(
+      render: (text) =>
+        renderColumn(
+          "topType",
+          hasValue(search["topType"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
+    },
+    {
+      title: "TERMS",
+      dataIndex: "topTerms",
+      key: "topTerms",
+      width: 150,
+      sorter: true,
+      align: "right",
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
         "topTerms",
-        hasValue(search["topTerms"]),
+        searchInput,
+        searchedColumn,
         searchText,
-        text,
-        false,
-        "input",
-        search,
+        handleSearch,
       ),
-  },
-  {
-    title: "CALENDAR",
-    dataIndex: "includeCalendar",
-    key: "includeCalendar",
-    width: 150,
-    sorter: true,
-    align: "center",
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "includeCalendar",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-    ),
-    render: (text) =>
-      renderColumn(
+      render: (text) =>
+        renderColumn(
+          "topTerms",
+          hasValue(search["topTerms"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
+    },
+    {
+      title: "CALENDAR",
+      dataIndex: "includeCalendar",
+      key: "includeCalendar",
+      width: 150,
+      sorter: true,
+      align: "center",
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
         "includeCalendar",
-        hasValue(search["includeCalendar"]),
+        searchInput,
+        searchedColumn,
         searchText,
-        text,
-        false,
-        "input",
-        search,
+        handleSearch,
       ),
-  },
-  {
-    title: "SATURDAY",
-    dataIndex: "includeSaturday",
-    key: "includeSaturday",
-    width: 150,
-    sorter: true,
-    align: "center",
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "includeSaturday",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-    ),
-    render: (text) =>
-      renderColumn(
+      render: (text) =>
+        renderColumn(
+          "includeCalendar",
+          hasValue(search["includeCalendar"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
+    },
+    {
+      title: "SATURDAY",
+      dataIndex: "includeSaturday",
+      key: "includeSaturday",
+      width: 150,
+      sorter: true,
+      align: "center",
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
         "includeSaturday",
-        hasValue(search["includeSaturday"]),
+        searchInput,
+        searchedColumn,
         searchText,
-        text,
-        false,
-        "input",
-        search,
+        handleSearch,
       ),
-  },
-  {
-    title: "SUNDAY",
-    dataIndex: "includeSunday",
-    key: "includeSunday",
-    width: 150,
-    sorter: true,
-    align: "center",
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "includeSunday",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-    ),
-    render: (text) =>
-      renderColumn(
+      render: (text) =>
+        renderColumn(
+          "includeSaturday",
+          hasValue(search["includeSaturday"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
+    },
+    {
+      title: "SUNDAY",
+      dataIndex: "includeSunday",
+      key: "includeSunday",
+      width: 150,
+      sorter: true,
+      align: "center",
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
         "includeSunday",
-        hasValue(search["includeSunday"]),
+        searchInput,
+        searchedColumn,
         searchText,
-        text,
-        false,
-        "input",
-        search,
+        handleSearch,
       ),
-  },
-  {
-    title: "CRITERIA",
-    dataIndex: "criterias",
-    key: "criterias",
-    width: 150,
-    sorter: true,
-    align: "left",
-    ellipsis: {
-      showTitle: false,
+      render: (text) =>
+        renderColumn(
+          "includeSunday",
+          hasValue(search["includeSunday"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search,
+        ),
     },
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "criterias",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-    ),
-    render: (text) =>
-      renderColumn(
+    {
+      title: "CRITERIA",
+      dataIndex: "criterias",
+      key: "criterias",
+      width: 150,
+      sorter: true,
+      align: "left",
+      ellipsis: {
+        showTitle: false,
+      },
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
         "criterias",
-        hasValue(search["criterias"]),
+        searchInput,
+        searchedColumn,
         searchText,
-        text,
-        true,
-        "input",
-        search,
+        handleSearch,
       ),
-  },
-  {
-    title: "START DATE",
-    dataIndex: "startDate",
-    key: "startDate",
-    width: 150,
-    sorter: true,
-    align: "center",
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "startDate",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true,
-      "dateCapital",
-    ),
-    render: (text) =>
-      renderDateColumn(
+      render: (text) =>
+        renderColumn(
+          "criterias",
+          hasValue(search["criterias"]),
+          searchText,
+          text,
+          true,
+          "input",
+          search,
+        ),
+    },
+    {
+      title: "START DATE",
+      dataIndex: "startDate",
+      key: "startDate",
+      width: 150,
+      sorter: true,
+      align: "center",
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
         "startDate",
-        hasValue(search["startDate"]),
+        searchInput,
+        searchedColumn,
         searchText,
-        text,
-        "date",
-        search,
-      ),
-  },
-  {
-    title: "END DATE",
-    dataIndex: "endDate",
-    key: "endDate",
-    width: 150,
-    sorter: true,
-    align: "center",
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "endDate",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true,
-      "dateCapital",
-    ),
-    render: (text) =>
-      renderDateColumn(
-        "endDate",
-        hasValue(search["endDate"]),
-        searchText,
-        text,
-        "date",
-        search,
-      ),
-  },
-  {
-    title: "DESCRIPTION",
-    dataIndex: "description",
-    key: "description",
-    width: 150,
-    sorter: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "description",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-    ),
-    render: (text) =>
-      renderColumn(
-        "description",
-        hasValue(search["description"]),
-        searchText,
-        text,
+        handleSearch,
         true,
-        "input",
-        search,
+        "dateCapital",
       ),
-    ellipsis: {
-      showTitle: false,
+      render: (text) =>
+        renderDateColumn(
+          "startDate",
+          hasValue(search["startDate"]),
+          searchText,
+          text,
+          "date",
+          search,
+        ),
     },
-  },
-  {
-    title: "STATUS",
-    dataIndex: "status",
-    key: "status",
-    width: 100,
-    sorter: true,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "status",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true,
-    ),
-    render: (index) => {
-      let text;
-      switch (index) {
-        case "WAITING APPROVAL":
-          text = "Waiting Approval";
-          break;
-        default:
-          text = index
-            ? index.charAt(0).toUpperCase() + index.slice(1).toLowerCase()
-            : index;
-          break;
-      }
-      return renderColumn(
-        "status",
-        hasValue(search["status"]),
-        searchText,
-        text,
-        false,
-        "status",
+    {
+      title: "END DATE",
+      dataIndex: "endDate",
+      key: "endDate",
+      width: 150,
+      sorter: true,
+      align: "center",
+      ...getColumnSearchPropsUseFilteredValue(
         search,
-      );
+        "endDate",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+        "dateCapital",
+      ),
+      render: (text) =>
+        renderDateColumn(
+          "endDate",
+          hasValue(search["endDate"]),
+          searchText,
+          text,
+          "date",
+          search,
+        ),
     },
-  },
-  {
-    title: "STATUS APPROVAL",
-    dataIndex: "statusApproval",
-    key: "statusApproval",
-    width: 100,
-    sorter: true,
-    align: "right",
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "statusApproval",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-    ),
-    render: (index) => {
-      let text;
-      switch (index) {
-        case "WAITING APPROVAL":
-          text = "Waiting Approval";
-          break;
-        default:
-          text = index
-            ? index.charAt(0).toUpperCase() + index.slice(1).toLowerCase()
-            : index;
-          break;
-      }
-      return renderColumn(
+    {
+      title: "DESCRIPTION",
+      dataIndex: "description",
+      key: "description",
+      width: 150,
+      sorter: true,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "description",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+      ),
+      render: (text) =>
+        renderColumn(
+          "description",
+          hasValue(search["description"]),
+          searchText,
+          text,
+          true,
+          "input",
+          search,
+        ),
+      ellipsis: {
+        showTitle: false,
+      },
+    },
+    {
+      title: "STATUS",
+      dataIndex: "status",
+      key: "status",
+      width: 100,
+      sorter: true,
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "status",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        true,
+      ),
+      render: (index) => {
+        let text;
+        switch (index) {
+          case "WAITING APPROVAL":
+            text = "Waiting Approval";
+            break;
+          default:
+            text = index
+              ? index.charAt(0).toUpperCase() + index.slice(1).toLowerCase()
+              : index;
+            break;
+        }
+        return renderColumn(
+          "status",
+          hasValue(search["status"]),
+          searchText,
+          text,
+          false,
+          "status",
+          search,
+        );
+      },
+    },
+    {
+      title: "STATUS APPROVAL",
+      dataIndex: "statusApproval",
+      key: "statusApproval",
+      width: 100,
+      sorter: true,
+      align: "right",
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
         "statusApproval",
-        hasValue(search["statusApproval"]),
+        searchInput,
+        searchedColumn,
         searchText,
-        text,
-        false,
-        "status",
-        search,
-      );
+        handleSearch,
+      ),
+      render: (index) => {
+        let text;
+        switch (index) {
+          case "WAITING APPROVAL":
+            text = "Waiting Approval";
+            break;
+          default:
+            text = index
+              ? index.charAt(0).toUpperCase() + index.slice(1).toLowerCase()
+              : index;
+            break;
+        }
+        return renderColumn(
+          "statusApproval",
+          hasValue(search["statusApproval"]),
+          searchText,
+          text,
+          false,
+          "status",
+          search,
+        );
+      },
     },
-  },
-];
+  ];
 
 const TopView = () => {
   const dispatch = useDispatch();
@@ -412,9 +413,18 @@ const TopView = () => {
   const [openModalHistory, setOpenModalHistory] = useState(false);
   const [openModalInactivate, setOpenModalInactivate] = useState(false);
   const [status, setStatus] = useState("");
+  const [statusApproval, setStatusApproval] = useState("");
   const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
   const [temsName, setTemsName] = useState("");
   const [topId, setTopId] = useState();
+
+  const normalizeStatus = (value) =>
+    (value || "")
+      .toString()
+      .replace(/_/g, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+      .toUpperCase();
 
   // ✅ State untuk fix column dengan format baru { left: [], right: [] }
   const [fixedColumns, setFixedColumns] = useState(() => {
@@ -422,9 +432,9 @@ const TopView = () => {
     return saved
       ? JSON.parse(saved)
       : {
-          left: ["no"],
-          right: ["action", "status", "statusApproval"],
-        };
+        left: ["no"],
+        right: ["action", "status", "statusApproval"],
+      };
   });
 
   // ✅ Save to localStorage when fixedColumns change
@@ -511,11 +521,15 @@ const TopView = () => {
           create: dataApprovalHistory?.dataApprover?.TERMS_OF_PAYMENT || [],
           inactive:
             dataApprovalHistory?.dataApprover?.INACTIVE_TERMS_OF_PAYMENT || [],
+          activate:
+            dataApprovalHistory?.dataApprover?.ACTIVATE_TERMS_OF_PAYMENT || [],
         },
         dataHistory: {
           create: dataApprovalHistory?.dataHistory?.TERMS_OF_PAYMENT || [],
           inactive:
             dataApprovalHistory?.dataHistory?.INACTIVE_TERMS_OF_PAYMENT || [],
+          activate:
+            dataApprovalHistory?.dataHistory?.ACTIVATE_TERMS_OF_PAYMENT || [],
         },
       };
       setDataApprovalHistoryFix(temp);
@@ -536,6 +550,7 @@ const TopView = () => {
   const handleInactive = (r) => {
     setOpenModalInactivate(true);
     setStatus(r?.status);
+    setStatusApproval(r?.statusApproval);
     setTemsName(r?.name);
     setTopId(r?.id);
   };
@@ -546,12 +561,17 @@ const TopView = () => {
   };
 
   const handleSubmitModalInactivate = (res, handleClear) => {
+    const selectedStatus = normalizeStatus(status);
+    const selectedStatusApproval = normalizeStatus(statusApproval);
+    const isActivateRequest =
+      selectedStatus === "INACTIVE" &&
+      selectedStatusApproval !== "WAITING APPROVAL";
     const body = {
       topId: topId,
       appHierId: res.approvalHierarchy,
       remark: res.remark,
     };
-    dispatch(inactiveTOP({ body }))
+    dispatch((isActivateRequest ? requestActivateTOP : inactiveTOP)({ body }))
       .unwrap()
       .then(() => {
         handleClear();
@@ -655,9 +675,8 @@ const TopView = () => {
               disabled={!isEditable}
             >
               <span
-                className={`ml-0 ${
-                  isEditable ? "text-black " : "text-[#8D91A0]"
-                }`}
+                className={`ml-0 ${isEditable ? "text-black " : "text-[#8D91A0]"
+                  }`}
               >
                 {" "}
                 Update
@@ -696,14 +715,16 @@ const TopView = () => {
       action: "Activate",
       type: "table",
       render: (record, data) => {
-        const isActivateOrInactivate =
-          (record.statusApproval === "Approved" &&
-            record.status === "ACTIVE") ||
-          (record.statusApproval === "Draft" && record.status === "ACTIVE") ||
-          (record.statusApproval === "Rejected" &&
-            record.status === "ACTIVE") ||
-          (record.statusApproval === "Waiting Approval" &&
-            record.status === "ACTIVE");
+        const rowStatus = normalizeStatus(record.status);
+        const rowStatusApproval = normalizeStatus(record.statusApproval);
+        const canInactivate =
+          rowStatus === "ACTIVE" &&
+          ["APPROVED", "DRAFT", "REJECTED", "WAITING APPROVAL"].includes(
+            rowStatusApproval,
+          );
+        const canActivate =
+          rowStatus === "INACTIVE" && rowStatusApproval !== "WAITING APPROVAL";
+        const isActivateOrInactivate = canInactivate || canActivate;
 
         const Content =
           data > 3 ? (
@@ -712,8 +733,8 @@ const TopView = () => {
                 <Checkbox
                   className="inactive-check"
                   onClick={() => handleInactive(record)}
-                  disabled={record.status === "ACTIVE" ? false : true}
-                  checked={record.status === "ACTIVE" ? false : true}
+                  disabled={!isActivateOrInactivate}
+                  checked={rowStatus !== "ACTIVE"}
                 />
               }
               border={false}
@@ -722,19 +743,19 @@ const TopView = () => {
               onClick={() => handleInactive(record)}
             >
               <span className="text-black ml-1">
-                {record.status !== "ACTIVE" ? "Activate" : "Inactivate"}
+                {rowStatus !== "ACTIVE" ? "Activate" : "Inactivate"}
               </span>
             </ButtonComponent>
           ) : (
             <Tooltip
-              title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}
+              title={rowStatus === "ACTIVE" ? "Inactivate" : "Activate"}
             >
               <div className="pt-1">
                 <Checkbox
                   className="inactive-check"
                   onClick={() => handleInactive(record)}
-                  disabled={record.status === "ACTIVE" ? false : true}
-                  checked={record.status === "ACTIVE" ? false : true}
+                  disabled={!isActivateOrInactivate}
+                  checked={rowStatus !== "ACTIVE"}
                 />
               </div>
             </Tooltip>
@@ -898,9 +919,8 @@ const TopView = () => {
           getAPIOption={getAllApprovalList}
           getAPIDetail={getListApprovalById}
           selector={"top"}
-          alertMessage={`Are you sure you want to inactivate this Terms of Payment with the name ${
-            temsName || ""
-          }?`}
+          alertMessage={`Are you sure you want to ${normalizeStatus(status) === "INACTIVE" ? "activate" : "inactivate"
+            } this Terms of Payment with the name ${temsName || ""}?`}
           openModalInactivate={openModalInactivate}
           handleCloseModalInactivate={handleCancelModalInactivate}
           onFinish={handleSubmitModalInactivate}

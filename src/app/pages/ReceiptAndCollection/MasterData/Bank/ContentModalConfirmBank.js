@@ -8,19 +8,6 @@ import { intToNPWP } from "../../../../../utils/npwp";
 // --- UBAH IMPORT ATTACHMENT KE KOMPONEN YANG PUNYA PREVIEW ---
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent"; 
 
-const dummyJobs = [
-  { label: "Manager", value: 1 },
-  { label: "Staff Engineer", value: 2 },
-  { label: "Staff Engineer 2", value: 3 },
-  { label: "Director", value: 4 },
-];
-
-const dummyPositions = [
-  { label: "Finance", value: 1 },
-  { label: "IT Support", value: 2 },
-  { label: "Human Resources", value: 3 },
-];
-
 const dummyTypes = [
   { label: "Email", value: 1 },
   { label: "Phone", value: 2 },
@@ -81,16 +68,9 @@ const ContentModalConfirmBank = ({
     setValuePage(e.target?.value || e); 
   };
 
-  const glColumns = [
-    { title: "NO", width: 60, align: "center", render: (_, __, index) => index + 1 },
-    { title: "TYPE", dataIndex: "glType", width: 150, render: (val) => glTypeOptions.find(item => String(item.value) === String(val))?.label || val },
-    { title: "GL ACCOUNT NUMBER", dataIndex: "accountNumber", width: 250 },
-    { title: "GL ACCOUNT DESCRIPTION", dataIndex: "accountDes" },
-  ];
-
   const contactColumns = [
     { title: "NO", width: 60, align: "center", render: (_, __, i) => i + 1 },
-    { title: "PRIMARY", dataIndex: "isPrimary", width: 100, align: "center", render: (val) => val === "Y" ? <Tag color="blue">Primary</Tag> : "-" },
+    { title: "PRIMARY", dataIndex: "isPrimary", width: 100, align: "center", render: (val) => val === "primary" ? <Tag color="blue">Primary</Tag> : "-" },
     { title: "CONTACT NAME", dataIndex: "contactName", width: 200 },
     { 
       title: "JOB", 
@@ -176,19 +156,6 @@ const ContentModalConfirmBank = ({
             
             <div className="grid grid-cols-1 w-full">
               <DetailText label={"Address"}>{data?.address}</DetailText>
-            </div>
-
-            <div className="flex flex-col gap-4 mt-4">
-              <div className="text-primary text-xs font-bold uppercase">
-                GL ACCOUNT INFORMATION
-              </div>
-              <TableRBI
-                idTable="preview-gl-table"
-                columns={glColumns}
-                dataSource={glAccounts}
-                useSelect={false}
-                usePagination={false}
-              />
             </div>
 
             <div className="flex flex-col gap-4 mt-4">

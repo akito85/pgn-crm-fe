@@ -2,7 +2,7 @@ import { dateFormatting } from "../../../../../../../utils";
 import NxDetailText from "../../../../../../../components/Nx/NxDetailText";
 import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
 import NxDate from "../../../../../../../components/Nx/NxDatePicker";
-import StatusComponent from "../../../../../../../components/StatusComponent";
+import NxStatusComponent from "../../../../../../../components/Nx/NxStatusComponent";
 
 /**
  * Presentational info panel for a multi destination record.
@@ -32,6 +32,7 @@ const MultiDestinationDetailInfo = ({ detail = {} }) => {
     startDate,
     endDate,
     status,
+    statusApproval,
     description
   } = detail;
 
@@ -42,11 +43,11 @@ const MultiDestinationDetailInfo = ({ detail = {} }) => {
           {/* Multi Destination Information */}
           <NxDetailText label="Account">{`${accountNumber}-${accountName}`}</NxDetailText>
           <NxDetailText label="Account SOR">{sor}</NxDetailText>
-          <NxDetailText label="Account Cost Center">{costCenter}</NxDetailText>
+          <NxDetailText label="Cost Center">{costCenter}</NxDetailText>
           <NxDetailText label="Metering Reading Code">
             {meterReadingCodes}
           </NxDetailText>
-          <NxDetailText label="Account Segment">{segment}</NxDetailText>
+          <NxDetailText label="Segment">{segment}</NxDetailText>
           <NxDetailText label="Account Group Type">
             {accountGroupType}
           </NxDetailText>
@@ -66,7 +67,10 @@ const MultiDestinationDetailInfo = ({ detail = {} }) => {
             {NxDate.formatDate(endDate, dateFormatting.date)}
           </NxDetailText>
           <NxDetailText label="Status">
-            <StatusComponent colour={status}>{status}</StatusComponent>
+            <NxStatusComponent colour={status}>{status}</NxStatusComponent>
+          </NxDetailText>
+          <NxDetailText label="Status Approval">
+            <NxStatusComponent colour={statusApproval}>{statusApproval}</NxStatusComponent>
           </NxDetailText>
         </div>
         <div className="w-full">

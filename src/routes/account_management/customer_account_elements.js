@@ -62,7 +62,7 @@ import MultiDestinationDetail from "../../app/pages/AccountManagement/CustomerAc
 import CreateUpdateMultiDestination from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/MultiDestination/CreateUpdate/CreateUpdateMultiDestination";
 import CreateUpdateRelationship from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/Relationship/CreateUpdate/CreateUpdateRelationship";
 import GasDeposit from "../../app/pages/AccountManagement/GasDeposit/GasDeposit";
-import GasDepositDetail from "../../app/pages/AccountManagement/GasDeposit/Detail/GasDepositDetail";
+// import GasDepositDetail from "../../app/pages/AccountManagement/GasDeposit/Detail/GasDepositDetail";
 
 export const ACCOUNT_MANAGEMENT_ELEMENTS = {
   // Customer/Account List
@@ -140,22 +140,12 @@ export const ACCOUNT_MANAGEMENT_ELEMENTS = {
   UPDATE_GAS_SOURCE: <GasSourceForm type={"update"} />,
   VIEW_GAS_SOURCE: <ViewGasSource />,
   UPLOAD_GAS_SOURCE: <UploadGasSource />,
-
-  // Gas Deposit Stand Alone
-  VIEW_GAS_DEPOSIT_SA_PAGE: <GasDeposit moduleType="sa" />,
-  VIEW_DETAIL_GAS_DEPOSIT_SA_PAGE: <GasDepositDetail moduleType="sa" />,
-  RECALCULATE_GAS_DEPOSIT_SA_PAGE: "/account-management/gas-deposit/recalculate",
-  EXPIRE_GAS_DEPOSIT_SA_PAGE: "/account-management/gas-deposit/expire",
   
   // Gas Deposit Account Standard
-  VIEW_DETAIL_GAS_DEPOSIT_PAGE: <GasDepositDetail moduleType="ua" accountType="standard" />,
-  RECALCULATE_GAS_DEPOSIT_PAGE: "/account-management/account-standard/gas-deposit/recalculate",
-  EXPIRE_GAS_DEPOSIT_PAGE: "/account-management/account-standard/gas-deposit/expire",
+  // VIEW_DETAIL_GAS_DEPOSIT_PAGE: <GasDepositDetail accountType="standard" />,
 
   // Gas Deposit Account One Time
-  VIEW_DETAIL_GAS_DEPOSIT_ONETIME_PAGE: <GasDepositDetail moduleType="ua" accountType="oneTime" />,
-  RECALCULATE_GAS_DEPOSIT_ONETIME_PAGE: "/account-management/account-onetime/gas-deposit/recalculate",
-  EXPIRE_GAS_DEPOSIT_ONETIME_PAGE: "/account-management/account-onetime/gas-deposit/expire",
+  // VIEW_DETAIL_GAS_DEPOSIT_ONETIME_PAGE: <GasDepositDetail accountType="oneTime" />,
 
   // Multi Destination Account Standard
   VIEW_DETAIL_MULTI_DESTINATION_PAGE: <MultiDestinationDetail accountType="standard" />,

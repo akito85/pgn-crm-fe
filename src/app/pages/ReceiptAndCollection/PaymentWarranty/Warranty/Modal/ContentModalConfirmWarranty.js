@@ -30,25 +30,25 @@ const ContentModalConfirmWarranty = ({
 
   const getPartnerName = (id) => {
     const list = dataPaymentWarrantyPartner?.data || dataPaymentWarrantyPartner || [];
-    return Array.isArray(list) ? list.find(p => p.partnerId === id || p.id === id)?.partnerGuaranteeIssuer || id || "-" : id || "-";
+    return Array.isArray(list) ? list.find(p => p.partnerId === id || p.id === id)?.partnerGuaranteeIssuer || id || "" : id || "";
   };
 
   const getBranchName = (id) => {
     const list = dataPaymentWarrantyPartnerBranch?.data || dataPaymentWarrantyPartnerBranch || [];
-    return Array.isArray(list) ? list.find(b => b.partnerBranchId === id || b.id === id)?.branchName || id || "-" : id || "-";
+    return Array.isArray(list) ? list.find(b => b.partnerBranchId === id || b.id === id)?.branchName || id || "" : id || "";
   };
 
   const getAccountLabel = (id) => {
-    return dataAccNumber?.data?.find(a => a.id === id)?.name || id || "-";
+    return dataAccNumber?.data?.find(a => a.id === id)?.name || id || "";
   };
 
   const getRateTypeName = (id) => {
-    return rateTypeDDL?.data?.find(r => r.id === id)?.name || id || "-";
+    return rateTypeDDL?.data?.find(r => r.id === id)?.name || id || "";
   };
 
   const getCurrencyName = (idOrName) => {
     const found = currencyDDL?.data?.find(c => c.id === idOrName || c.name === idOrName);
-    return found ? found.name : idOrName || "-";
+    return found ? found.name : idOrName || "";
   };
 
   const accDetail = dataAccountNumber?.data || {};
@@ -58,22 +58,22 @@ const ContentModalConfirmWarranty = ({
 
   const mutationColumns = [
     { title: "No", dataIndex: "key", width: 50, render: (t, r, i) => i + 1 },
-    { title: "REFF. DOCUMENT NUMBER", dataIndex: "mutationNumber", width: 180, render: (text, record) => text || record.documentNumber || "-" },
-    { title: "SOURCE", dataIndex: "source", width: 120, render: (text, record) => text || record.sourceNumber || "-" },
-    { title: "TYPE", dataIndex: "type", width: 80, render: (text) => text || "-" },
-    { title: "CATEGORY", dataIndex: "category", width: 150, render: (text) => text || "-" },
+    { title: "REFF. DOCUMENT NUMBER", dataIndex: "mutationNumber", width: 180, render: (text, record) => text || record.documentNumber || "" },
+    { title: "SOURCE", dataIndex: "source", width: 120, render: (text, record) => text || record.sourceNumber || "" },
+    { title: "TYPE", dataIndex: "type", width: 80, render: (text) => text || "" },
+    { title: "CATEGORY", dataIndex: "category", width: 150, render: (text) => text || "" },
     { title: "DATE", dataIndex: "date", width: 120, render: (text, record) => {
       const dateVal = text || record.transactionDate;
       return dateVal ? moment(dateVal).format("DD MMM YYYY") : "-";
     }},
     { title: "AMOUNT", dataIndex: "amount", width: 130, align: "right", render: (val, record) => (val?.toLocaleString() || "0") },
-    { title: "CONVERTED CURRENCY", dataIndex: "convertedCurrencyName", width: 150, render: (text, record) => text || record.convertedCurrency || "-" },
+    { title: "CONVERTED CURRENCY", dataIndex: "convertedCurrencyName", width: 150, render: (text, record) => text || record.convertedCurrency || "" },
     { title: "RATE", dataIndex: "rate", width: 100, align: "right", render: (val) => val?.toLocaleString() || "0" },
     { title: "EQV AMOUNT", dataIndex: "eqvAmount", width: 130, align: "right", render: (val, record) => {
       const eqv = val ?? record.equivalentAmount;
       return (eqv?.toLocaleString() || "0");
     }},
-    { title: "DESCRIPTION", dataIndex: "description", width: 200, render: (text) => text || "-" },
+    { title: "DESCRIPTION", dataIndex: "description", width: 200, render: (text) => text || "" },
   ];
 
   const items = [
@@ -85,46 +85,46 @@ const ContentModalConfirmWarranty = ({
           <SectionCard title="ACCOUNT INFORMATION">
             <div className="grid grid-cols-4 gap-y-4 gap-x-4 w-full">
               <DetailText label="Account Number">{getAccountLabel(data?.accountId)}</DetailText>
-              <DetailText label="Account Name">{data?.accountName || accDetail.accountName || "-"}</DetailText>
-              <DetailText label="Customer Number">{data?.customerNumber || accDetail.customerNumber || "-"}</DetailText>
-              <DetailText label="Customer Name">{data?.customerName || accDetail.customerName || "-"}</DetailText>
-              <DetailText label="Cost Center">{data?.costCenter || accDetail.area || "-"}</DetailText>
-              <DetailText label="Customer Segment">{data?.customerSegment || accDetail.segment || "-"}</DetailText>
-              <DetailText label="Customer Group">{data?.customerGroup || accDetail.accountType || "-"}</DetailText>
-              <DetailText label="Account Type">{data?.accountType || accDetail.accountType || "-"}</DetailText>
-              <DetailText label="Classification Type">{data?.classificationType || accDetail.accountType || "-"}</DetailText>
+              <DetailText label="Account Name">{data?.accountName || accDetail.accountName || ""}</DetailText>
+              <DetailText label="Customer Number">{data?.customerNumber || accDetail.customerNumber || ""}</DetailText>
+              <DetailText label="Customer Name">{data?.customerName || accDetail.customerName || ""}</DetailText>
+              <DetailText label="Cost Center">{data?.costCenter || accDetail.area || ""}</DetailText>
+              <DetailText label="Customer Segment">{data?.customerSegment || accDetail.segment || ""}</DetailText>
+              <DetailText label="Customer Group">{data?.customerGroup || accDetail.accountType || ""}</DetailText>
+              <DetailText label="Account Type">{data?.accountType || accDetail.accountType || ""}</DetailText>
+              <DetailText label="Classification Type">{data?.classificationType || accDetail.accountType || ""}</DetailText>
             </div>
           </SectionCard>
 
           <SectionCard title="SERVICE AGREEMENT INFORMATION">
             <div className="grid grid-cols-4 gap-y-4 gap-x-4 w-full">
-              <DetailText label="SA Number">{data?.saNumber || "-"}</DetailText>
-              <DetailText label="SA Reference">{data?.saReference || selectedSA.saReference || "-"}</DetailText>
-              <DetailText label="SA Type">{data?.saType || selectedSA.serviceType?.value || "-"}</DetailText>
-              <DetailText label="Type">{data?.type || selectedSA.saType?.value || "-"}</DetailText>
-              <DetailText label="PBG Type">{data?.pbgType || selectedSA.pjbgType?.value || "-"}</DetailText>
+              <DetailText label="SA Number">{data?.saNumber || ""}</DetailText>
+              <DetailText label="SA Reference">{data?.saReference || selectedSA.saReference || ""}</DetailText>
+              <DetailText label="SA Type">{data?.saType || selectedSA.serviceType?.value || ""}</DetailText>
+              <DetailText label="Type">{data?.type || selectedSA.saType?.value || ""}</DetailText>
+              <DetailText label="PBG Type">{data?.pbgType || selectedSA.pjbgType?.value || ""}</DetailText>
               <DetailText label="SA Date">{data?.saDate || (selectedSA.saDate ? moment(selectedSA.saDate).format("DD/MM/YYYY") : "-")}</DetailText>
               <DetailText label="SA Start Date">{data?.saStartDate || (selectedSA.startDate ? moment(selectedSA.startDate).format("DD/MM/YYYY") : "-")}</DetailText>
               <DetailText label="SA End Date">{data?.saEndDate || (selectedSA.endDate ? moment(selectedSA.endDate).format("DD/MM/YYYY") : "-")}</DetailText>
               <DetailText label="Commitment Date">{data?.commitmentDate || (selectedSA.commitmentDate ? moment(selectedSA.commitmentDate).format("DD/MM/YYYY") : "-")}</DetailText>
-              <DetailText label="Status Approval">{data?.saStatusApproval || selectedSA.approvalStatus || "-"}</DetailText>
-              <DetailText label="Status">{data?.saStatus || selectedSA.status || "-"}</DetailText>
+              <DetailText label="Status Approval">{data?.saStatusApproval || selectedSA.approvalStatus || ""}</DetailText>
+              <DetailText label="Status">{data?.saStatus || selectedSA.status || ""}</DetailText>
               <div className="col-span-4">
-                <DetailText label="Description">{DOMPurify.sanitize(data?.saDescription || selectedSA.description) || "-"}</DetailText>
+                <DetailText label="Description">{DOMPurify.sanitize(data?.saDescription || selectedSA.description) || ""}</DetailText>
               </div>
             </div>
           </SectionCard>
 
           <SectionCard title="PAYMENT GUARANTEE INFORMATION">
             <div className="grid grid-cols-5 gap-y-4 gap-x-4 w-full">
-              <DetailText label="Type">{DOMPurify.sanitize(data?.warrantyType) || "-"}</DetailText>
-              <DetailText label="Document Number">{DOMPurify.sanitize(data?.documentNumber) || "-"}</DetailText>
+              <DetailText label="Type">{DOMPurify.sanitize(data?.warrantyType) || ""}</DetailText>
+              <DetailText label="Document Number">{DOMPurify.sanitize(data?.documentNumber) || ""}</DetailText>
               <DetailText label="Document Date">{data?.documentDate ? moment(data.documentDate).format("DD MMM YYYY") : "-"}</DetailText>
               <DetailText label="Issuer Bank">{getPartnerName(data?.issuerBank)}</DetailText>
               <DetailText label="Issuer Branch">{getBranchName(data?.issuerBranch)}</DetailText>
               
               <DetailText label="Currency">{getCurrencyName(data?.currency)}</DetailText>
-              <DetailText label="Rate">{data?.rateAmount?.toLocaleString() || "-"}</DetailText>
+              <DetailText label="Rate">{data?.rateAmount?.toLocaleString() || ""}</DetailText>
               {isCash && (
                 <>
                   <DetailText label="Rate Type">{getRateTypeName(data?.rateType)}</DetailText>
@@ -135,13 +135,13 @@ const ContentModalConfirmWarranty = ({
               <DetailText label="Eff Start Date">{(data?.effStartDate || data?.effectiveStartDate) ? moment(data?.effStartDate || data?.effectiveStartDate).format("DD MMM YYYY") : "-"}</DetailText>
               <DetailText label="Eff End Date">{(data?.effEndDate || data?.effectiveEndDate) ? moment(data?.effEndDate || data?.effectiveEndDate).format("DD MMM YYYY") : "-"}</DetailText>
               <DetailText label="Term Of Claim Period">
-                {data?.claimPeriodTermValue 
-                  ? `${data?.claimPeriodTermType || "DATE"}: ${moment(data.claimPeriodTermValue).format("DD MMM YYYY")}` 
+                {data?.claimPeriodTermValue || data?.claimPeriodTermDate
+                  ? `${data?.claimPeriodTermType || "DATE"}: ${moment(data.claimPeriodTermValue || data.claimPeriodTermDate).format("DD MMM YYYY")}` 
                   : "-"}
               </DetailText>
 
               <div className="col-span-5">
-                <DetailText label="Description">{DOMPurify.sanitize(data?.description) || "-"}</DetailText>
+                <DetailText label="Description">{DOMPurify.sanitize(data?.description) || ""}</DetailText>
               </div>
             </div>
           </SectionCard>

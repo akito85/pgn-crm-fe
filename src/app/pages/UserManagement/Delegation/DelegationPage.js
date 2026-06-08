@@ -1,262 +1,295 @@
-import { Spin, Tooltip } from "antd";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import { Tooltip } from "antd";
+import React, { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, NavLink } from "react-router-dom";
 import { USER_ROUTES } from "../../../../routes/user_management/user_routes";
-import BaseContainer from "../../../../components/BaseContainer";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import RadioTabs from "../../../../components/RadioTabs";
-import TablePagination from "../../../../components/TablePagination";
 import SVGIcon from "../../../../assets/Icon/index";
 import { getDelegationList } from "../../../../redux/slices/user_management/delegation";
-import { approvalDelegation } from "./Table/TableApprovalDelegation";
-import { delegationRequest } from "./Table/TableDelegationRequest";
-import Toolbar from "../../../../components/Toolbar";
+import NxCardContainer from "../../../../components/Nx/NxCardContainer";
+import NxTable from "../../../../components/Nx/NxTable";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
 import { useTryAgainHooks } from "../../../../utils/useTryAgainHooks";
+import StatusComponent from "../../../../components/StatusComponent";
+import { renderDateConverter } from "../../../../utils";
+
+const OPERATOR_MAP = {
+  "Contains": "LIKE", "Equal to": "EQUALS", "Not equal to": "NOT_EQUALS",
+  "Greater than": "GREATER_THAN", "Less than": "LESS_THAN",
+  "Is empty": "IS_NULL", "Is not empty": "IS_NOT_NULL",
+};
 
 const DelegationPage = () => {
-  // Selector
-  const { loading, data_Delegation } = useSelector((state) => state.delegation);
-
-  // Declaration
   const dispatch = useDispatch();
-  const searchInput = useRef(null);
-  const searchInputRequest = useRef(null);
+  const rawToken = useSelector((state) => state.auth?.token);
+  const userId = useMemo(() => {
+    try { const t = JSON.parse(rawToken || "{}"); return t?.userId || t?.id || t?.username || null; }
+    catch { return null; }
+  }, [rawToken]);
 
-  // State
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const [searchText, setSearchText] = useState("");
-  const [searchedColumn, setSearchedColumn] = useState("");
-  const [sort, setSort] = useState("");
-  const [search, setSearch] = useState({});
-  const [pageRequest, setPageRequest] = useState(1);
-  const [pageSizeRequest, setPageSizeRequest] = useState(10);
-  const [searchTextRequest, setSearchTextRequest] = useState("");
-  const [searchedColumnRequest, setSearchedColumnRequest] = useState("");
-  const [sortRequest, setSortRequest] = useState("");
-  const [searchRequest, setSearchRequest] = useState({});
-
-  const [listSectionInfo, setListSectionInfo] = useState([
+  const listSectionInfo = [
     { value: "Approval Delegation" },
     { value: "Delegation Request" },
-  ]);
+  ];
 
   const [valuePage, setValuePage] = useState(listSectionInfo[0].value);
+  const [allData, setAllData] = useState([]);
+  const [totalElements, setTotalElements] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [pageSize, setPageSize] = useState(30);
+  const [sort, setSort] = useState("");
+  const [advancedSearch, setAdvancedSearch] = useState(null);
+  const [fixedColumns, setFixedColumns] = useState({ left: [], right: [] });
+
+  const pageRef = useRef(0);
+  const isFetchingRef = useRef(false);
+  const hasMoreRef = useRef(false);
+  const handleCancelTryAgainRef = useRef(null);
+
+  const buildSearch = useCallback((advSearch) => {
+    const combined = {};
+    const applyFilter = (f) => {
+      if (!f.column) return;
+      const selector = OPERATOR_MAP[f.operator] || "LIKE";
+      const isNullOp = selector === "IS_NULL" || selector === "IS_NOT_NULL";
+      if (isNullOp) { combined[f.column] = `~${selector}`; }
+      else if (f.value) { combined[f.column] = `${f.value}~${selector}`; }
+    };
+    if (advSearch?.filters) advSearch.filters.forEach(applyFilter);
+    if (advSearch?.filterRules) advSearch.filterRules.forEach((r) => r.filters.forEach(applyFilter));
+    return encodeURIComponent(JSON.stringify(combined));
+  }, []);
+
+  const fetchPage = useCallback(async (page, replace = false, signal = null) => {
+    if (isFetchingRef.current) return;
+    if (signal?.aborted) return;
+    isFetchingRef.current = true;
+    setIsLoading(true);
+    try {
+      const reqSearch = buildSearch(advancedSearch);
+      const result = await dispatch(
+        getDelegationList({ page: page + 1, pageSize, sort, search: reqSearch })
+      ).unwrap();
+      if (signal?.aborted) return;
+      const rows = result?.result ?? [];
+      const pageInfo = result?.page ?? {};
+      const nextHasMore = page < (pageInfo.totalPages ?? 0) - 1;
+      setAllData((prev) => (replace ? rows : [...prev, ...rows]));
+      setTotalElements(pageInfo.totalElements ?? 0);
+      setHasMore(nextHasMore);
+      hasMoreRef.current = nextHasMore;
+      pageRef.current = page;
+    } catch (e) {
+      if (!signal?.aborted) console.error("Delegation fetchPage error", e);
+    } finally {
+      isFetchingRef.current = false;
+      if (!signal?.aborted) setIsLoading(false);
+    }
+  }, [advancedSearch, sort, pageSize, dispatch, buildSearch]);
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    const signal = { aborted: false };
+    pageRef.current = 0;
+    setAllData([]);
+    setHasMore(false);
+    setIsLoading(true);
+    fetchPage(0, true, signal);
+    return () => { signal.aborted = true; isFetchingRef.current = false; };
+  }, [advancedSearch, sort, pageSize, valuePage]); // fetchPage intentionally omitted — same pattern as Entity page
+
+  const onLoadMore = useCallback(() => {
+    if (!hasMoreRef.current || isFetchingRef.current) return;
+    return fetchPage(pageRef.current + 1, false);
+  }, [fetchPage]);
+
+  const onSort = useCallback((_, __, sortInfo) => {
+    const dataSort = sortInfo.order
+      ? `${sortInfo.field}~${sortInfo.order === "ascend" ? "asc" : "desc"}`
+      : "";
+    setSort(dataSort);
+  }, []);
+
+  const onAdvanceSearch = useCallback((searchData) => setAdvancedSearch(searchData), []);
+  const handleChange = useCallback((_, pageSizeChange) => setPageSize(pageSizeChange), []);
+
+  const resetAndReload = useCallback(() => {
+    const signal = { aborted: false };
+    pageRef.current = 0; setAllData([]); setHasMore(false); setIsLoading(true);
+    fetchPage(0, true, signal);
+  }, [fetchPage]);
+
+  const onChange = useCallback((e) => {
+    setValuePage(e.target.value);
+    setAdvancedSearch(null);
+    setSort("");
+    setFixedColumns({ left: [], right: [] });
+  }, []);
 
   const routes = [
-    {
-      path: "",
-      breadcrumbName: "User Management",
-    },
-    {
-      path: "",
-      breadcrumbName: "Delegation",
-    },
-    {
-      path: "",
-      breadcrumbName: valuePage,
-    },
+    { path: "", breadcrumbName: "User Management" },
+    { path: "", breadcrumbName: "Delegation" },
+    { path: "", breadcrumbName: valuePage },
   ];
 
-  const handleFetch = useCallback(() => {
-    const reqSearch = encodeURIComponent(JSON.stringify(valuePage === 'Approval Delegation' ? search : searchRequest));
-    const sortValue = valuePage === 'Approval Delegation' ? sort : sortRequest
-    dispatch(getDelegationList({ search: reqSearch, page, pageSize, sortValue }));
-  }, [dispatch, page, pageSize, search, searchRequest, sort, sortRequest, valuePage])
-
-  useEffect(() => {
-    handleFetch()
-  }, [handleFetch]);
-
-  const onSort = (_, __, sort) => {
-    const dataSort =
-      sort.order !== undefined
-        ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
-        : "";
-    setSort(dataSort);
-  };
-  const onSortRequest = (_, __, sort) => {
-    const dataSort =
-      sort.order !== undefined
-        ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
-        : "";
-    setSortRequest(dataSort);
-  };
-
-  const onChange = (e) => {
-    setPage(1);
-    setPageSize(10);
-    setSearch({})
-    setSort('')
-    setSearchText("")
-    setSearchedColumn('')
-    setPageRequest(1);
-    setPageSizeRequest(10);
-    setSearchRequest({})
-    setSortRequest('')
-    setSearchTextRequest("")
-    setSearchedColumn('')
-    setValuePage(e.target.value);
-  };
-
-  const handleSearch = (selectedKeys, confirm, dataIndex) => {
-    confirm();
-    setSearchText(selectedKeys[0]);
-    setSearchedColumn(dataIndex);
-    setSearch((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
-      }
-      return {
-        ...prevState,
-        [dataIndex]: selectedKeys[0],
-      };
-    });
-  };
-  const handleSearchRequest = (selectedKeys, confirm, dataIndex) => {
-    confirm();
-    setSearchTextRequest(selectedKeys[0]);
-    setSearchedColumnRequest(dataIndex);
-    setSearchRequest((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPageRequest(1);
-      }
-      return {
-        ...prevState,
-        [dataIndex]: selectedKeys[0],
-      };
-    });
-  };
-
-
-  const handleChange = (page, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : page;
-    setPage(tempPage);
-    setPageSize(pageSizeChange);
-  };
-  const handleChangeRequest = (page, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : page;
-    setPageRequest(tempPage);
-    setPageSizeRequest(pageSizeChange);
-  };
-
-  const itemActions = [
-    // toolbar items
+  const approvalColumns = useMemo(() => [
+    { title: "NO", key: "no", width: 60, align: "center", render: (_, __, i) => i + 1 },
+    { title: "FROM", dataIndex: "delegateFrom", key: "delegateFrom", sorter: true, align: "left" },
     {
-      action: "Create",
-      render: (
-        <NavLink to={USER_ROUTES.CREATE_DELEGATION}>
-          <ButtonComponent
-            icon={<SVGIcon name="IconButtonCreate" width={24} />}
-            type="submit"
-          >
-            Create Delegation
-          </ButtonComponent>
-        </NavLink>
-      ),
+      title: "POSITION", dataIndex: "positionFromDelegator", key: "positionFromDelegator",
+      sorter: true, align: "left", ellipsis: { showTitle: false },
     },
-
-    // column action
     {
-      action: "View",
-      type: 'table',
-      render: (record, data_length) => {
-        return (
-          <Link to={USER_ROUTES.DETAIL_DELEGATION} state={{ id: record?.id }}>
-            <Tooltip title="Detail">
-              <div className="pt-1">
-                <SVGIcon name="IconDetail" width={24} />
-              </div>
-            </Tooltip>
-          </Link>
-        );
+      title: "START DATE", dataIndex: "startDate", key: "startDate", sorter: true, align: "center",
+      render: (v) => v ? renderDateConverter(v, "date") : "",
+    },
+    {
+      title: "END DATE", dataIndex: "endDate", key: "endDate", sorter: true, align: "center",
+      render: (v) => v ? renderDateConverter(v, "date") : "",
+    },
+    {
+      title: "REQUEST REMARK", dataIndex: "requestRemark", key: "requestRemark",
+      sorter: true, align: "left", ellipsis: { showTitle: false },
+    },
+    {
+      title: "APPROVAL REMARK", dataIndex: "approvalRemark", key: "approvalRemark",
+      sorter: true, align: "left", ellipsis: { showTitle: false },
+    },
+    {
+      title: "STATUS", dataIndex: "status", key: "status", sorter: true, align: "center",
+      width: 160, fixed: "right",
+      render: (index) => {
+        let text;
+        switch (index) {
+          case "WAITING_APPROVAL": text = "Waiting Approval"; break;
+          default: text = index ? index.charAt(0).toUpperCase() + index.slice(1).toLowerCase() : index; break;
+        }
+        return text ? (
+          <div className="flex justify-center"><StatusComponent colour={text}>{text}</StatusComponent></div>
+        ) : text;
       },
     },
-  ];
+  ], []);
 
-  // hooks column action
-  const columnAction = useColumnActionPermission(
-    ["view"],
-    itemActions
+  const requestColumns = useMemo(() => [
+    { title: "NO", key: "no", width: 60, align: "center", render: (_, __, i) => i + 1 },
+    { title: "DELEGATION TO", dataIndex: "delegateTo", key: "delegateTo", sorter: true, align: "left" },
+    {
+      title: "POSITION", dataIndex: "positionFromDelegator", key: "positionFromDelegator",
+      sorter: true, align: "left", ellipsis: { showTitle: false },
+    },
+    {
+      title: "START DATE", dataIndex: "startDate", key: "startDate", sorter: true, align: "center",
+      render: (v) => v ? renderDateConverter(v, "date") : "",
+    },
+    {
+      title: "END DATE", dataIndex: "endDate", key: "endDate", sorter: true, align: "center",
+      render: (v) => v ? renderDateConverter(v, "date") : "",
+    },
+    {
+      title: "REQUEST REMARK", dataIndex: "requestRemark", key: "requestRemark",
+      sorter: true, align: "left", ellipsis: { showTitle: false },
+    },
+    {
+      title: "APPROVAL REMARK", dataIndex: "approvalRemark", key: "approvalRemark",
+      sorter: true, align: "left", ellipsis: { showTitle: false },
+    },
+  ], []);
+
+  const viewActionItem = useMemo(() => ({
+    action: "View",
+    type: "table",
+    render: (record) => (
+      <Link to={USER_ROUTES.DETAIL_DELEGATION} state={{ id: record?.id }}>
+        <Tooltip title="Detail">
+          <div className="pt-1"><SVGIcon name="IconDetail" width={24} /></div>
+        </Tooltip>
+      </Link>
+    ),
+  }), []);
+
+  const createActionItem = useMemo(() => ({
+    action: "Create",
+    render: (
+      <NavLink to={USER_ROUTES.CREATE_DELEGATION}>
+        <ButtonComponent icon={<SVGIcon name="IconButtonCreate" width={24} />} type="submit">
+          Create Delegation
+        </ButtonComponent>
+      </NavLink>
+    ),
+  }), []);
+
+  const columnAction = useColumnActionPermission(["view"], [viewActionItem]);
+
+  const allApprovalColumns = useMemo(
+    () => [...approvalColumns, ...columnAction],
+    [approvalColumns, columnAction]
+  );
+  const allRequestColumns = useMemo(
+    () => [...requestColumns, ...columnAction],
+    [requestColumns, columnAction]
   );
 
-  const handleRetry = () => {
-    handleCancelTryAgain();
+  const isApprovalTab = valuePage === "Approval Delegation";
+  const activeColumns = isApprovalTab ? allApprovalColumns : allRequestColumns;
+  const activeColumnDefinitions = isApprovalTab ? approvalColumns : requestColumns;
+  const activeTableId = isApprovalTab ? "delegation-approval" : "delegation-request";
 
-  }
+  const currentNxActions = useMemo(
+    () => isApprovalTab ? [viewActionItem] : [createActionItem, viewActionItem],
+    [isApprovalTab, createActionItem, viewActionItem]
+  );
 
-  const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
+  const handleRetry = useCallback(() => {
+    handleCancelTryAgainRef.current?.();
+    resetAndReload();
+  }, [resetAndReload]);
+
+  const { handleCancelTryAgain, renderModal } = useTryAgainHooks(handleRetry);
+  handleCancelTryAgainRef.current = handleCancelTryAgain;
+
   return (
     <>
-      <Spin spinning={loading}>
-        <BreadCrumb routes={routes} />
-        <RadioTabs
-          data={listSectionInfo}
-          onChange={onChange}
-          currentPosition={valuePage}
+      <BreadCrumb routes={routes} />
+      <RadioTabs
+        data={listSectionInfo}
+        onChange={onChange}
+        currentPosition={valuePage}
+      />
+      <NxCardContainer
+        header={valuePage + " LIST"}
+        className="mt-4"
+        actions={currentNxActions}
+      >
+        <NxTable
+          idTable={activeTableId}
+          userId={userId}
+          dataSource={allData}
+          columns={activeColumns}
+          columnDefinitions={activeColumnDefinitions}
+          rowKey={(r) => r.id}
+          loading={isLoading}
+          totalData={totalElements}
+          current={pageRef.current + 1}
+          pageSize={pageSize}
+          onChange={handleChange}
+          onSizeChanger={handleChange}
+          onSort={onSort}
+          onAdvanceSearch={onAdvanceSearch}
+          fixedColumns={fixedColumns}
+          setFixedColumns={setFixedColumns}
+          useInfiniteScroll={true}
+          onLoadMore={onLoadMore}
+          hasMore={hasMore}
+          showAdvanceSearch={true}
+          showSearchBar={true}
+          tableScrolled={{ x: 1700, y: 525 }}
         />
-        {valuePage === "Delegation Request" && (
-          <Toolbar items={itemActions} />
-        )}
-        <BaseContainer header={valuePage + " list"}>
-          {valuePage === "Approval Delegation" ? (
-            <div className={"w-full"}>
-              <TablePagination
-                dataSource={data_Delegation?.result}
-                columns={[
-                  ...approvalDelegation(
-                    search,
-                    page,
-                    pageSize,
-                    searchInput,
-                    searchedColumn,
-                    searchText,
-                    handleSearch
-                  ),
-                  ...columnAction,
-                ]}
-                current={page}
-                pageSize={pageSize}
-                onChange={handleChange}
-                onSizeChanger={handleChange}
-                totalData={data_Delegation?.page?.totalElements || 0}
-                onSort={onSort}
-                tableScrolled={{ y: 525, x: 1700 }}
-              />
-            </div>
-          ) : (
-            <div className={"w-full"}>
-              <TablePagination
-                dataSource={data_Delegation?.result}
-                columns={[
-                  ...delegationRequest(
-                    searchRequest,
-                    pageRequest,
-                    pageSizeRequest,
-                    searchInputRequest,
-                    searchedColumnRequest,
-                    searchTextRequest,
-                    handleSearchRequest
-                  ),
-                ]}
-                current={pageRequest}
-                pageSize={pageSizeRequest}
-                onChange={handleChangeRequest}
-                onSizeChanger={handleChangeRequest}
-                totalData={data_Delegation?.page?.totalElements || 0}
-                onSort={onSortRequest}
-                tableScrolled={{ y: 525, x: 1700 }}
-              />
-            </div>
-          )}
-
-          {/* render modal */}
-          {renderModal()}
-        </BaseContainer>
-      </Spin>
+      </NxCardContainer>
+      {renderModal()}
     </>
   );
 };

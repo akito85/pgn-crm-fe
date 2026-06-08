@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import moment from 'moment'
@@ -10,8 +10,8 @@ import TosSubmission from "./TosSubmission";
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
 import HeaderDetail from "../../../HeaderDetail";
 import { approveOrRejectInactiveServiceAgreement, approveOrRejectServiceAgreement, getDetailServiceAgreement, getDetailServiceAgreementDraft } from "../../../../../../../redux/slices/account_management/detailAccount/serviceAgreementSlice";
-import { Spin, Form } from "antd";
-import ModalApproveOrReject from "../../../../../../../components/Modal/ModalApproveOrReject";
+import { Spin } from "antd";
+import NxApproveOrRejectModal from "../../../../../../../components/Nx/NxApproveOrRejectModal";
 import ModalErrorApproveOrRejectServiceAgreement from "./Modal/ModalErrorApproveOrRejectServiceAgreement";
 import { dateFormatting } from "../../../../../../../utils";
 import { usePrevLocContext } from "../../../../../../../utils/usePrevLoc";
@@ -22,13 +22,13 @@ import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer"
 import Attachment from "./Attachment";
 import NxDetailText from "../../../../../../../components/Nx/NxDetailText";
 import ServiceAgreementHistoryLogInformation from "../shared/HistoryLogInformation";
+import SVGIcon from "../../../../../../../assets/Icon/index";
 
 const DetailServiceAgreement = () => {
   const { path } = usePrevLocContext();
-  const [form] = Form.useForm();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { data_detail, data_detail_draft, loading, message } = useSelector(
+  const { data_detail, data_detail_draft, loading, message, loading_approveRejectSa } = useSelector(
     (state) => state.accountServiceAgreement
   );
   //declare
@@ -44,7 +44,7 @@ const DetailServiceAgreement = () => {
 
   // Modal Approve Or Reject SA
   const [modalError, setModalError] = useState(false);
-  const [modalApproveOrReject, setModalApproveOrReject] = useState('')
+  const [modalApproveOrReject, setModalApproveOrReject] = useState(false);
   const [approveOrReject, setApproveOrReject] = useState('')
   const [bodyApproval, setBodyApproval] = useState({
     isApprover: false,
@@ -52,6 +52,8 @@ const DetailServiceAgreement = () => {
     approvalDetail: null,
     approvalType: null,
   });
+  const lastSubmitDataRef = useRef(null);
+  const lastHandleClearRef = useRef(null);
   const showButtonApproval =
     bodyApproval.isApprover !== null && bodyApproval.isApprover;
 
@@ -120,17 +122,23 @@ const DetailServiceAgreement = () => {
 
     dispatch(getDetailServiceAgreementDraft(idSA))
       .unwrap()
-      .then((res) => {
-      })
       .catch((error) => {
         console.log(error)
       });
   }, [dispatch, idSA]);
 
 
-  // handle confirm
   const handleConfirm = (formValue, handleClear) => {
-    setModalApproveOrReject(false);
+    const submission = formValue ?? lastSubmitDataRef.current;
+    if (!submission?.remark) {
+      return;
+    }
+
+    lastSubmitDataRef.current = submission;
+    if (handleClear) {
+      lastHandleClearRef.current = handleClear;
+    }
+
     const successApprove = {
       title: `Successful`,
       description: `Your data has been approved.`,
@@ -143,11 +151,32 @@ const DetailServiceAgreement = () => {
     };
     const data = {
       saId: idSA,
-      description: formValue.remark,
+      description: submission.remark,
       approvalId: bodyApproval.tappId,
       action: approveOrReject.toUpperCase(),
     };
-    if (bodyApproval.approvalType === "SERVICE_AGREEMENT" || bodyApproval.approvalType === "UPDATE_SERVICE_AGREEMENT") {
+
+    const finalizeSuccess = () => {
+      if (lastHandleClearRef.current) {
+        lastHandleClearRef.current();
+        lastHandleClearRef.current = null;
+      }
+      lastSubmitDataRef.current = null;
+      setModalError(false);
+      setModalApproveOrReject(false);
+    };
+
+    const finalizeError = (error) => {
+      const statusCode = error?.response?.data?.code;
+      if (Math.floor((statusCode || 0) / 100) === 5) {
+        setModalError(true);
+      }
+    };
+
+    if (
+      bodyApproval.approvalType === "SERVICE_AGREEMENT" ||
+      bodyApproval.approvalType === "UPDATE_SERVICE_AGREEMENT"
+    ) {
       dispatch(
         approveOrRejectServiceAgreement({
           body: data,
@@ -156,15 +185,8 @@ const DetailServiceAgreement = () => {
         })
       )
         .unwrap()
-        .then(() => {
-          handleClear()
-        })
-        .catch((error) => {
-          if (Math.floor((error.response.data.code || 0) / 100) === 5) {
-            setModalError(true);
-            form.resetFields();
-          }
-        });
+        .then(finalizeSuccess)
+        .catch(finalizeError);
     } else {
       dispatch(
         approveOrRejectInactiveServiceAgreement({
@@ -174,20 +196,14 @@ const DetailServiceAgreement = () => {
         })
       )
         .unwrap()
-        .then(() => {
-          form.resetFields();
-        })
-        .catch((error) => {
-          if (Math.floor((error.response.data.code || 0) / 100) === 5) {
-            setModalError(true);
-            form.resetFields();
-          }
-        });
+        .then(finalizeSuccess)
+        .catch(finalizeError);
     }
-
-  }
+  };
   const handleCancel = () => {
     setModalApproveOrReject(false);
+    lastSubmitDataRef.current = null;
+    lastHandleClearRef.current = null;
   };
 
 
@@ -404,41 +420,56 @@ const DetailServiceAgreement = () => {
             />
 
             <NxBaseContainer border>
-              <ButtonComponent
-                type={"menu"}
-                className="!w-fit"
-                onClick={() => navigate(-1)}
-              >
-                Back
-              </ButtonComponent>
-              {showButtonApproval ? (
-                <div className={"w-full flex justify-end gap-5"}>
-                  <ButtonComponent
-                    type="reject"
-                    onClick={() => {
-                      setModalApproveOrReject(true);
-                      setApproveOrReject("Reject");
-                    }}
-                  >
-                    Reject
-                  </ButtonComponent>
-                  <ButtonComponent
-                    type="approve"
-                    onClick={() => {
-                      setModalApproveOrReject(true);
-                      setApproveOrReject("Approve");
-                    }}
-                  >
-                    Approve
-                  </ButtonComponent>
-                </div>
-              ) : null}
+              <div className="">
+                {showButtonApproval ? (
+                  <div className={"w-full grid grid-cols-2"}>
+                    <ButtonComponent
+                      type={"menu"}
+                      className="!w-fit"
+                      onClick={() => navigate(-1)}
+                    >
+                      Back
+                    </ButtonComponent>
+                    <div className="flex justify-end gap-4">
+                       <ButtonComponent
+                         type="reject"
+                         icon={<SVGIcon width={14} height={14} name="IconSquareX" />}
+                         className="!w-fit !flex-row-reverse"
+                         onClick={() => {
+                           setModalApproveOrReject(true);
+                           setApproveOrReject("Reject");
+                         }}
+                       >
+                        Reject
+                      </ButtonComponent>
+                       <ButtonComponent
+                         type="approve"
+                         icon={<SVGIcon width={14} height={14} name="IconSquareCheck" />}
+                         className="!w-fit !flex-row-reverse"
+                         onClick={() => {
+                           setModalApproveOrReject(true);
+                           setApproveOrReject("Approve");
+                         }}
+                       >
+                        Approve
+                      </ButtonComponent>
+                    </div>
+                  </div>
+                ) : 
+                <ButtonComponent
+                  type={"menu"}
+                  className="!w-fit"
+                  onClick={() => navigate(-1)}
+                >
+                  Back
+                </ButtonComponent>}
+              </div>
             </NxBaseContainer>
           </div>
         </Spin>
 
         {/* ModalConfirmation Approve Or Reject SA */}
-        <ModalApproveOrReject
+        <NxApproveOrRejectModal
           isOpen={modalApproveOrReject}
           handleCloseModal={handleCancel}
           onFinish={handleConfirm}
@@ -446,6 +477,8 @@ const DetailServiceAgreement = () => {
           approveOrReject={approveOrReject}
           menu={"Service Agreement"}
           named={data_detail?.saInfo?.saNumber}
+          customMessage={`Are you sure you want to ${approveOrReject} Service Agreement - ${data_detail?.saInfo?.saNumber}?`}
+          loading={loading_approveRejectSa}
         />
 
         {/* Modal Error Approve/Reject */}

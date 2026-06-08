@@ -26,6 +26,7 @@ const WarrantyForm = ({
   isPartialEdit,
   isWaitingApproval,
   isApprover,
+  hasMutations,
   mutationTotalData,
   mutationPage,
   mutationPageSize,
@@ -56,6 +57,7 @@ const WarrantyForm = ({
         rateTypeDDL={rateTypeDDL}
         getPaymentWarrantyPartnerBranchList={getPaymentWarrantyPartnerBranchList}
         isPartialEdit={isPartialEdit}
+        hasMutations={hasMutations}
       />
       <MutationInfoSection 
         mutationDataInfo={mutationDataInfo}

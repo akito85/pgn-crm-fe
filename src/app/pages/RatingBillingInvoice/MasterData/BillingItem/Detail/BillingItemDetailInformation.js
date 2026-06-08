@@ -1,7 +1,7 @@
 import { Fragment, useRef, useState } from "react";
 import { Tabs } from "antd";
 import DetailText from "../../../../../../components/DetailText";
-import TablePaginationNew from "../../../../../../components/TablePaginationNew";
+import TableRBI from "../../../../../../components/TableRBI";
 import columnsDetail from "../Table/TableDetailMappingInformation";
 import columnsMapping from "../Table/TableMappingInformation";
 import { renderDateTime } from "../../GeneralTemplate/Utils/Utils";
@@ -19,6 +19,7 @@ const buildCriteriaColumns = () => [
   {
     title: "NO",
     dataIndex: "no",
+    key: "no",
     width: 60,
     align: "center",
     render: (_, __, index) => index + 1,
@@ -26,36 +27,42 @@ const buildCriteriaColumns = () => [
   {
     title: "CRITERIA VALUE",
     dataIndex: "criteriaValue",
+    key: "criteriaValue",
     width: 180,
     render: (val) => val || "-",
   },
   {
     title: "GL ACCOUNT",
     dataIndex: "glAccount",
+    key: "glAccount",
     width: 280,
     render: (val) => val || "-",
   },
   {
     title: "DESCRIPTION ACCOUNT",
     dataIndex: "descriptionAccount",
+    key: "descriptionAccount",
     width: 220,
     render: (val) => val || "-",
   },
   {
     title: "SPECIAL GL",
     dataIndex: "specialGl",
+    key: "specialGl",
     width: 140,
     render: (val) => val || "-",
   },
   {
     title: "START DATE",
     dataIndex: "startDate",
+    key: "startDate",
     width: 150,
     render: (val) => (val ? moment(val).format(dateFormatting.date) : "-"),
   },
   {
     title: "END DATE",
     dataIndex: "endDate",
+    key: "endDate",
     width: 150,
     render: (val) => (val ? moment(val).format(dateFormatting.date) : "-"),
   },
@@ -121,6 +128,10 @@ const BillingItemDetailInformation = ({
   const [modalHistory, setModalHistory] = useState(false);
   const [isDetailMapShown, setIsDetailMapShown] = useState(false);
 
+  const [fixedMapping, setFixedMapping] = useState({ left: [], right: [] });
+  const [fixedDetail, setFixedDetail] = useState({ left: [], right: [] });
+  const [fixedCriteria, setFixedCriteria] = useState({ left: [], right: [] });
+
   const [mappingTab, setMappingTab] = useState("mapping");
   const handleChange = (pageChange, pageSizeChange) => {
     setPage(pageSize !== pageSizeChange ? 1 : pageChange);
@@ -167,10 +178,28 @@ const BillingItemDetailInformation = ({
         )?.category,
       );
       setCategory(e.categoryId);
-      const detailMappingInfo = dataBillingItem?.mappingInformation?.find(
+      const detailInfo = dataBillingItem?.mappingInformation?.find(
         (item) => item.categoryId === e.categoryId,
       )?.detailMappingInfo;
-      setDataDetailTable(detailMappingInfo || []);
+      
+      const mappedDetail = (detailInfo || []).map((detail, idx) => ({
+          key: `${idx + 1}`,
+          rMappingId: detail?.rMappingId,
+          item: detail?.item,
+          itemName: detail?.itemName,
+          startDate: detail?.startDate
+            ? moment(detail?.startDate).format(dateFormatting.date)
+            : null,
+          endDate: detail?.endDate
+            ? moment(detail?.endDate).format(dateFormatting.date)
+            : null,
+          description: detail?.description,
+          createdDate: detail?.createdDate,
+          createdBy: detail?.createdBy,
+          updatedDate: detail?.updatedDate,
+          updatedBy: detail?.updatedBy,
+      }));
+      setDataDetailTable(mappedDetail);
       setIsDetailMapShown(true);
     }
   };
@@ -322,7 +351,9 @@ const BillingItemDetailInformation = ({
       >
         {mappingTab === "mapping" && (
           <>
-            <TablePaginationNew
+            <TableRBI
+              fixedColumns={fixedMapping}
+              setFixedColumns={setFixedMapping}
               dataSource={dataMapping}
               type="FE"
               totalData={dataMapping.length || 0}
@@ -355,7 +386,9 @@ const BillingItemDetailInformation = ({
                       <span className="text-primary">{subHeader}</span>
                     </div>
                   )}
-                  <TablePaginationNew
+                  <TableRBI
+                    fixedColumns={fixedDetail}
+                    setFixedColumns={setFixedDetail}
                     dataSource={dataDetailTable || []}
                     type="FE"
                     totalData={dataDetailTable?.length || 0}
@@ -387,7 +420,9 @@ const BillingItemDetailInformation = ({
 
         {/* ── Tab: Criteria Detail ── */}
         {mappingTab === "criteria" && (
-          <TablePaginationNew
+          <TableRBI
+            fixedColumns={fixedCriteria}
+            setFixedColumns={setFixedCriteria}
             dataSource={criteriaTableData}
             type="FE"
             totalData={criteriaTableData.length || 0}
@@ -435,19 +470,23 @@ const BillingItemDetailInformation = ({
         }
       >
         <CardComponent header="HISTORY LOG INFORMATION" cols={5}>
-          <DetailText label="Record ID">{dataHistory.recordId}</DetailText>
+          <DetailText label="Record ID">{dataHistory?.recordId ?? "-"}</DetailText>
           <DetailText label="Created Date">
             {dataHistory?.createdDate
-              ? moment(dataHistory.createdDate).format(dateFormatting.dateTime)
-              : ""}
+              ? (moment(dataHistory.createdDate, [moment.ISO_8601, "DD MMM YYYY HH:mm:ss"], true).isValid()
+                  ? moment(dataHistory.createdDate, [moment.ISO_8601, "DD MMM YYYY HH:mm:ss"]).format(dateFormatting.dateTime)
+                  : dataHistory.createdDate)
+              : "-"}
           </DetailText>
-          <DetailText label="Created By">{dataHistory?.createdBy}</DetailText>
+          <DetailText label="Created By">{dataHistory?.createdBy || "-"}</DetailText>
           <DetailText label="Updated Date">
             {dataHistory?.updatedDate
-              ? moment(dataHistory.updatedDate).format(dateFormatting.dateTime)
-              : ""}
+              ? (moment(dataHistory.updatedDate, [moment.ISO_8601, "DD MMM YYYY HH:mm:ss"], true).isValid()
+                  ? moment(dataHistory.updatedDate, [moment.ISO_8601, "DD MMM YYYY HH:mm:ss"]).format(dateFormatting.dateTime)
+                  : dataHistory.updatedDate)
+              : "-"}
           </DetailText>
-          <DetailText label="Updated By">{dataHistory?.updatedBy}</DetailText>
+          <DetailText label="Updated By">{dataHistory?.updatedBy || "-"}</DetailText>
         </CardComponent>
       </ModalCustom>
     </Fragment>

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Button, Form, Collapse, Input, Tag, message, Popconfirm } from "antd";
+import { Button, Checkbox, Form, Collapse, Input, Tag, message } from "antd";
 import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import CardContainer from "../../../../../components/CardContainer";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
@@ -56,9 +56,11 @@ const ContactSection = ({
         return;
       }
 
+      const isPrimary = values.primaryContact ?? false;
+
       const updatedContact = {
         key: editingContactKey ? editingContactKey : Date.now(),
-        primary: editingContactKey ? mainData.find(item => item.key === editingContactKey)?.primary : mainData.length === 0,
+        primary: isPrimary,
         name: `${values.firstName} ${values.middleName || ''} ${values.lastName || ''}`.replace(/\s+/g, ' ').trim(),
         firstName: values.firstName,
         middleName: values.middleName,
@@ -72,9 +74,16 @@ const ContactSection = ({
       };
 
       if (editingContactKey) {
-        setMainData(mainData.map(item => item.key === editingContactKey ? updatedContact : item));
+        setMainData(mainData.map(item =>
+          item.key === editingContactKey
+            ? updatedContact
+            : isPrimary ? { ...item, primary: false } : item
+        ));
       } else {
-        setMainData([...mainData, updatedContact]);
+        const newList = isPrimary
+          ? mainData.map(item => ({ ...item, primary: false }))
+          : mainData;
+        setMainData([...newList, updatedContact]);
       }
 
       handleModalClose();
@@ -101,6 +110,7 @@ const ContactSection = ({
       position: record.position,
       contactAddress: record.address,
       additionalNote: record.note,
+      primaryContact: record.primary,
       description: record.desc,
     });
     setCriteriaData(record.criteriaList || []);
@@ -113,15 +123,6 @@ const ContactSection = ({
       filteredData[0].primary = true;
     }
     setMainData(filteredData);
-  };
-
-  const handleSetPrimary = (key) => {
-    const updatedData = mainData.map(item => ({
-      ...item,
-      primary: item.key === key
-    }));
-    setMainData(updatedData);
-    message.success("Primary contact berhasil diubah!");
   };
 
   // ==========================================
@@ -211,6 +212,7 @@ const ContactSection = ({
               value={tempRow.inputType}
               onChange={(val) => setTempRow({ ...tempRow, inputType: val })}
               options={inputTypeOptions}
+              disabled={true}
             />
           );
         }
@@ -288,8 +290,8 @@ const ContactSection = ({
     name: item.contactName, 
     job: item.jobId,
     position: item.positionId,
-    address: item.address || "-", 
-    desc: item.description || "-",
+    address: item.address || "", 
+    desc: item.description || "",
     criteriaList: (item.contactDetails || []).map(detail => ({
       key: detail.contactDetailsId,
       type: detail.type,
@@ -345,27 +347,11 @@ const ContactSection = ({
       dataIndex: "primary",
       width: 120,
       align: "center",
-      render: (isPrimary, record) => {
+      render: (isPrimary) => {
         if (isPrimary) {
           return <Tag color="blue">Primary</Tag>;
         }
-        return (
-          <Popconfirm
-            title="Set as Primary"
-            description="Kontak primary sebelumnya akan dinonaktifkan. Lanjutkan?"
-            onConfirm={(e) => {
-              e.stopPropagation();
-              handleSetPrimary(record.key);
-            }}
-            onCancel={(e) => e.stopPropagation()}
-            okText="Yes"
-            cancelText="No"
-          >
-            <Button type="link" size="small" onClick={(e) => e.stopPropagation()}>
-              Set Primary
-            </Button>
-          </Popconfirm>
-        );
+        return <span className="text-gray-400">-</span>;
       }
     },
     { title: "CONTACT NAME", dataIndex: "name", width: 200 },
@@ -496,6 +482,13 @@ const ContactSection = ({
                   {/* ---------------------------------------------------------- */}
                   
                   <Form.Item label="Contact Address Additional Note" name="additionalNote"><Input placeholder="Input Note.." /></Form.Item>
+
+                  <Form.Item name="primaryContact" valuePropName="checked" className="flex items-start pt-1">
+                    <Checkbox>
+                      <span className="font-semibold">Primary Contact</span>
+                      <p className="text-gray-400 text-xs font-normal mt-0.5">Click or tap this checkbox if data is a branch</p>
+                    </Checkbox>
+                  </Form.Item>
 
                   <div className="col-span-5">
                     <Form.Item label="Description" name="description" rules={[{ required: true, message: 'Wajib diisi' }]}><Input.TextArea rows={3} placeholder="Input.." /></Form.Item>

@@ -21,7 +21,7 @@ export const getRefundDetailColumns = (
       width: 220,
       sorter: true,
       ...getColumnSearchPropsPaging("receiptCode", searchInput, searchedColumn, searchText, handleSearch),
-      render: (text, record) => record.receiptCode || record.warrantyCode || "-" 
+      render: (text, record) => record.receiptCode || record.warrantyCode || "" 
     },
     { 
       title: "ACCOUNT", 
@@ -29,7 +29,7 @@ export const getRefundDetailColumns = (
       width: 200,
       sorter: true,
       ...getColumnSearchPropsPaging("accountNumber", searchInput, searchedColumn, searchText, handleSearch),
-      render: (text, record) => record.accountNumber || "-" 
+      render: (text, record) => record.accountNumber || "" 
     },
     { 
       title: "BALANCE", 

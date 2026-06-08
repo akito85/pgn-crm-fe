@@ -131,7 +131,7 @@ const PrabillingAccountLog = ({ data, tabHeader }) => {
         render: (text) => {
           const formattedDate = text
             ? moment(text).format("DD MMM YYYY HH:mm:ss")
-            : "-";
+            : "";
           return renderDateColumn(
             "createdDate", hasValue(search["createdDate"]),
             searchText, formattedDate, "datetime", search
@@ -198,7 +198,7 @@ const PrabillingAccountLog = ({ data, tabHeader }) => {
         ),
         render: (text) =>
           renderColumn("message", hasValue(search["message"]),
-            searchText, text || "-", true, "input", search),
+            searchText, text || "", true, "input", search),
       },
     ],
     [search, searchText, searchedColumn]

@@ -270,7 +270,7 @@ const EntityForm = (props) => {
     {
       title: "NO",
       dataIndex: "no",
-      width: 60,
+      width: 90,
       render: (text, object, index) => {
         return (page - 1) * pageSize + index + 1;
       },

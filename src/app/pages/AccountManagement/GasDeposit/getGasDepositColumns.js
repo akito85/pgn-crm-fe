@@ -1,21 +1,20 @@
 import { toTitleCase } from "../../../../utils";
-import { getColumnSearchPropsUseFilteredValue } from "../../../../utils/getColumnSearchProps";
-import StatusComponent from "../../../../components/StatusComponent";
+import { getColumnSearchPropsUseFilteredValue, getColumnSearchPropsUseFilteredValueFE } from "../../../../utils/getColumnSearchProps";
 import NxDate from "../../../../components/Nx/NxDatePicker";
+import NxStatusComponent from "../../../../components/Nx/NxStatusComponent";
 
 /**
  * Returns the column definitions for the Gas Deposit table.
  *
- * Each column includes search/filter props via `getColumnSearchPropsUseFilteredValue`.
- * Date columns (earnPeriodStart, earnPeriodEnd, redeemPeriodStart, redeemPeriodEnd) are
- * formatted as "DD MMM YYYY". Status columns are conditionally included based on `includeStatus`.
- *
- * @param {Object} search - Current active search/filter values keyed by column dataIndex.
- * @param {React.RefObject} searchInput - Ref to the search input element (used for focus).
- * @param {string} searchedColumn - The dataIndex of the column currently being searched.
- * @param {string} searchText - The current search text value.
- * @param {Function} handleSearch - Callback invoked when a search/filter is confirmed.
- * @param {boolean} [includeStatus=true] - Whether to include the statusApproval and status columns.
+ * @param {Object}          params                        - Column configuration options.
+ * @param {Object}          params.search                 - Current active search/filter values keyed by column dataIndex.
+ * @param {React.RefObject} params.searchInput            - Ref to the search input element (used for focus).
+ * @param {string}          params.searchedColumn         - The dataIndex of the column currently being searched.
+ * @param {string}          params.searchText             - The current search text value.
+ * @param {Function}        params.handleSearch           - Callback invoked when a search/filter is confirmed.
+ * @param {boolean}         [params.isApproval=false]     - When true, fixes the NO column left and shows the statusApproval column.
+ * @param {boolean}         [params.includeStatus=true]   - When false, hide the status and statusApproval columns.
+ * @param {boolean}         [params.isFrontEnd=false]     - When true, uses client-side search/filter props.
  * @returns {Array<Object>} Array of Ant Design column definition objects.
  */
 const getGasDepositColumns = ({
@@ -24,254 +23,352 @@ const getGasDepositColumns = ({
   searchedColumn,
   searchText,
   handleSearch,
+  isApproval = false,
   includeStatus = true,
-  isUnderAccount = false,
+  isFrontEnd = false,
 }) => [
   {
     key: "no",
     title: "NO",
     align: "center",
     dataIndex: "no",
-    width: 40,
+    width: 50,
+    fixed: isApproval ? "left" : undefined,
     render: (_, __, index) => index + 1,
   },
-  isUnderAccount && {
-    key: "accountName",
-    title: "ACCOUNT NAME",
-    dataIndex: "accountName",
-    width: 200,
+  {
+    key: "termsEarn",
+    title: "TERMS EARN",
+    dataIndex: "termsEarn",
+    width: 150,
     sorter: true,
     align: "center",
-    filteredValue: [search?.accountName] || null,
-    ...getColumnSearchPropsUseFilteredValue(
+    ...(isFrontEnd ? getColumnSearchPropsUseFilteredValueFE : getColumnSearchPropsUseFilteredValue)(
       search,
-      "accountName",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true
-    ),
-  },
-  isUnderAccount && {
-    key: "earnPeriodStart",
-    title: "EARN PERIOD START",
-    dataIndex: "earnPeriodStart",
-    width: 180,
-    align: "center",
-    filteredValue: [search?.earnPeriodStart] || null,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "earnPeriodStart",
+      "termsEarn",
       searchInput,
       searchedColumn,
       searchText,
       handleSearch,
       true,
-      "date"
+    ),
+  },
+  {
+    key: "termsRedeem",
+    title: "TERMS REDEEM",
+    dataIndex: "termsRedeem",
+    width: 150,
+    sorter: true,
+    align: "center",
+    ...(isFrontEnd ? getColumnSearchPropsUseFilteredValueFE : getColumnSearchPropsUseFilteredValue)(
+      search,
+      "termsRedeem",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+    ),
+  },
+  {
+    key: "periodEarn",
+    title: "PERIOD EARN",
+    dataIndex: "periodEarn",
+    width: 150,
+    sorter: true,
+    align: "center",
+    ...(isFrontEnd ? getColumnSearchPropsUseFilteredValueFE : getColumnSearchPropsUseFilteredValue)(
+      search,
+      "periodEarn",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+      "dateFormal"
     ),
     render: (date) => NxDate.formatDate(date, "DD MMM YYYY"),
   },
   {
-    key: "earnPeriodEnd",
-    title: "EARN PERIOD END",
-    dataIndex: "earnPeriodEnd",
-    width: 180,
-    align: "center",
-    filteredValue: [search?.earnPeriodEnd] || null,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "earnPeriodEnd",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true,
-      "date"
-    ),
-    render: (date) => NxDate.formatDate(date, "DD MMM YYYY"),
+    title: "PERIOD REDEEM",
+    width: 150,
+    children: [
+      {
+        key: "redeemPeriodStart",
+        title: "START",
+        dataIndex: "redeemPeriodStart",
+        width: 150,
+        sorter: true,
+        align: "center",
+        ...(isFrontEnd ? getColumnSearchPropsUseFilteredValueFE : getColumnSearchPropsUseFilteredValue)(
+          search,
+          "redeemPeriodStart",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true,
+          "dateFormal"
+        ),
+        render: (date) => NxDate.formatDate(date, "DD MMM YYYY"),
+      },
+      {
+        key: "redeemPeriodEnd",
+        title: "END",
+        dataIndex: "redeemPeriodEnd",
+        width: 150,
+        sorter: true,
+        align: "center",
+        ...(isFrontEnd ? getColumnSearchPropsUseFilteredValueFE : getColumnSearchPropsUseFilteredValue)(
+          search,
+          "redeemPeriodEnd",
+          searchInput,
+          searchedColumn,
+          searchText,
+          handleSearch,
+          true,
+          "dateFormal"
+        ),
+        render: (date) => NxDate.formatDate(date, "DD MMM YYYY"),
+      },
+    ]
   },
   {
-    key: "redeemPeriodStart",
-    title: "REDEEM PERIOD START",
-    dataIndex: "redeemPeriodStart",
-    width: 200,
+    key: "billingPeriod",
+    title: "BILLING PERIOD",
+    dataIndex: "billingPeriod",
+    width: 150,
+    sorter: true,
     align: "center",
-    filteredValue: [search?.redeemPeriodStart] || null,
-    ...getColumnSearchPropsUseFilteredValue(
+    ...(isFrontEnd ? getColumnSearchPropsUseFilteredValueFE : getColumnSearchPropsUseFilteredValue)(
       search,
-      "redeemPeriodStart",
+      "billingPeriod",
       searchInput,
       searchedColumn,
       searchText,
       handleSearch,
-      true,
-      "date"
     ),
-    render: (date) => NxDate.formatDate(date, "DD MMM YYYY"),
   },
   {
-    key: "redeemPeriodEnd",
-    title: "REDEEM PERIOD END",
-    dataIndex: "redeemPeriodEnd",
-    width: 200,
+    key: "timeUnit",
+    title: "TIME UNIT",
+    dataIndex: "timeUnit",
+    width: 150,
+    sorter: true,
     align: "center",
-    filteredValue: [search?.redeemPeriodEnd] || null,
-    ...getColumnSearchPropsUseFilteredValue(
+    ...(isFrontEnd ? getColumnSearchPropsUseFilteredValueFE : getColumnSearchPropsUseFilteredValue)(
       search,
-      "redeemPeriodEnd",
+      "timeUnit",
       searchInput,
       searchedColumn,
       searchText,
       handleSearch,
-      true,
-      "date"
     ),
-    render: (date) => NxDate.formatDate(date, "DD MMM YYYY"),
   },
   {
     key: "currency",
     title: "CURRENCY",
     dataIndex: "currency",
-    width: 120,
+    width: 150,
     sorter: true,
     align: "center",
-    filteredValue: [search?.currency] || null,
-    ...getColumnSearchPropsUseFilteredValue(
+    ...(isFrontEnd ? getColumnSearchPropsUseFilteredValueFE : getColumnSearchPropsUseFilteredValue)(
       search,
       "currency",
       searchInput,
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
-    key: "balanceM3",
-    title: "BALANCE (M3)",
-    dataIndex: "balanceM3",
+    key: "uom",
+    title: "UOM",
+    dataIndex: "uom",
     width: 150,
     sorter: true,
     align: "center",
-    filteredValue: [search?.balanceM3] || null,
-    ...getColumnSearchPropsUseFilteredValue(
+    ...(isFrontEnd ? getColumnSearchPropsUseFilteredValueFE : getColumnSearchPropsUseFilteredValue)(
       search,
-      "balanceM3",
+      "uom",
       searchInput,
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
-    key: "balanceMscf",
-    title: "BALANCE (MSCF)",
-    dataIndex: "balanceMscf",
+    key: "quantity",
+    title: "QUANTITY",
+    dataIndex: "quantity",
+    width: 150,
+    sorter: true,
+    align: "center",
+    ...(isFrontEnd ? getColumnSearchPropsUseFilteredValueFE : getColumnSearchPropsUseFilteredValue)(
+      search,
+      "quantity",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+    ),
+  },
+  {
+    key: "amount",
+    title: "AMOUNT",
+    dataIndex: "amount",
+    width: 150,
+    sorter: true,
+    align: "center",
+    ...(isFrontEnd ? getColumnSearchPropsUseFilteredValueFE : getColumnSearchPropsUseFilteredValue)(
+      search,
+      "amount",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+    ),
+  },
+  {
+    key: "cashBalance",
+    title: "CASH BALANCE",
+    dataIndex: "cashBalance",
+    width: 150,
+    sorter: true,
+    align: "center",
+    ...(isFrontEnd ? getColumnSearchPropsUseFilteredValueFE : getColumnSearchPropsUseFilteredValue)(
+      search,
+      "cashBalance",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+    ),
+  },
+  {
+    key: "type",
+    title: "TYPE",
+    dataIndex: "type",
+    width: 150,
+    sorter: true,
+    align: "center",
+    ...(isFrontEnd ? getColumnSearchPropsUseFilteredValueFE : getColumnSearchPropsUseFilteredValue)(
+      search,
+      "type",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+    ),
+  },
+  {
+    key: "accountType",
+    title: "ACCOUNT TYPE",
+    dataIndex: "accountType",
     width: 160,
     sorter: true,
     align: "center",
-    filteredValue: [search?.balanceMscf] || null,
-    ...getColumnSearchPropsUseFilteredValue(
+    ...(isFrontEnd ? getColumnSearchPropsUseFilteredValueFE : getColumnSearchPropsUseFilteredValue)(
       search,
-      "balanceMscf",
+      "accountType",
       searchInput,
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
-    key: "balanceMmbtu",
-    title: "BALANCE (MMBTU)",
-    dataIndex: "balanceMmbtu",
-    width: 170,
+    key: "classificationType",
+    title: "CLASSIFICATION TYPE",
+    dataIndex: "classificationType",
+    width: 160,
     sorter: true,
     align: "center",
-    filteredValue: [search?.balanceMmbtu] || null,
-    ...getColumnSearchPropsUseFilteredValue(
+    ...(isFrontEnd ? getColumnSearchPropsUseFilteredValueFE : getColumnSearchPropsUseFilteredValue)(
       search,
-      "balanceMmbtu",
+      "classificationType",
       searchInput,
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
-    key: "balanceAmount",
-    title: "BALANCE AMOUNT",
-    dataIndex: "balanceAmount",
-    width: 170,
+    key: "source",
+    title: "SOURCE",
+    dataIndex: "source",
+    width: 160,
     sorter: true,
     align: "center",
-    filteredValue: [search?.balanceAmount] || null,
-    ...getColumnSearchPropsUseFilteredValue(
+    ...(isFrontEnd ? getColumnSearchPropsUseFilteredValueFE : getColumnSearchPropsUseFilteredValue)(
       search,
-      "balanceAmount",
+      "source",
       searchInput,
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
-    key: "availableAmount",
-    title: "AVAILABLE AMOUNT",
-    dataIndex: "availableAmount",
-    width: 180,
+    key: "sapCustId",
+    title: "SAP CUST ID",
+    dataIndex: "sapCustId",
+    width: 160,
     sorter: true,
     align: "center",
-    filteredValue: [search?.availableAmount] || null,
-    ...getColumnSearchPropsUseFilteredValue(
+    ...(isFrontEnd ? getColumnSearchPropsUseFilteredValueFE : getColumnSearchPropsUseFilteredValue)(
       search,
-      "availableAmount",
+      "sapCustId",
       searchInput,
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
-    key: "remark",
-    title: "REMARK",
-    dataIndex: "remark",
-    width: 200,
+    key: "description",
+    title: "DESCRIPTION",
+    dataIndex: "description",
+    width: 160,
     sorter: true,
     align: "center",
-    filteredValue: [search?.remark] || null,
-    ...getColumnSearchPropsUseFilteredValue(
+    ...(isFrontEnd ? getColumnSearchPropsUseFilteredValueFE : getColumnSearchPropsUseFilteredValue)(
       search,
-      "remark",
+      "description",
       searchInput,
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   includeStatus && {
+    key: "status",
+    title: "STATUS",
+    dataIndex: "status",
+    width: 150,
+    fixed: "right",
+    render: (status) => {
+      const displayText = {
+        "active": "Active",
+        "inactive": "Inactive",
+      };
+
+      return (
+        <div className={" flex justify-center"}>
+          <NxStatusComponent colour={status}>
+            {displayText[status] || toTitleCase(String(status || "")) || "-"}
+          </NxStatusComponent>
+        </div>
+      )
+    },
+  },
+  !isApproval && includeStatus && {
     key: "statusApproval",
     title: "STATUS APPROVAL",
     dataIndex: "statusApproval",
-    width: 170,
-    sorter: true,
+    width: 140,
     align: "center",
-    filteredValue: [search?.statusApproval] || null,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "statusApproval",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true
-    ),
+    fixed: "right",
     render: (status) => {
       const displayText = {
         "approved": "Approved",
@@ -283,42 +380,11 @@ const getGasDepositColumns = ({
       };
       return (
         <div className="flex justify-center">
-          <StatusComponent colour={status}>
+          <NxStatusComponent colour={status}>
             {displayText[status] || toTitleCase(String(status || "")) || "-"}
-          </StatusComponent>
+          </NxStatusComponent>
         </div>
       );
-    },
-  },
-  includeStatus && {
-    key: "status",
-    title: "STATUS",
-    dataIndex: "status",
-    width: 120,
-    sorter: true,
-    filteredValue: [search?.status] || null,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "status",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true
-    ),
-    render: (status) => {
-      const displayText = {
-        "active": "Active",
-        "inactive": "Inactive",
-      };
-
-      return (
-        <div className={" flex justify-center"}>
-          <StatusComponent colour={status}>
-            {displayText[status] || toTitleCase(String(status || "")) || "-"}
-          </StatusComponent>
-        </div>
-      )
     },
   },
 ].filter(Boolean);

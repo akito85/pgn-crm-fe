@@ -17,6 +17,7 @@ import SVGIcon from "../../../../../assets/Icon/index";
 import { dateFormatting } from "../../../../../utils";
 import FunctionalCriteriaInvoiceTemplate from "./Form/FunctionalCriteriaInvoiceTemplate";
 import {
+  approveOrRejectActivatedInvoiceTemplate,
   approveOrRejectInactiveInvoiceTemplate,
   approveOrRejectInvoiceTemplate,
   getDetailDraftInvoiceTemplate,
@@ -29,7 +30,7 @@ import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOr
 const InvoiceTemplateDetail = () => {
   // Selector
   const { loading, data_detail, data_detail_draft } = useSelector(
-    (state) => state.invoice_template
+    (state) => state.invoice_template,
   );
 
   // Declaration
@@ -68,7 +69,9 @@ const InvoiceTemplateDetail = () => {
 
   // Determine which criteria data to show based on draft availability
   const displayCriteriaValues = hasDraft ? criteriaValuesDraft : criteriaValues;
-  const displayCriteriaData = hasDraft ? listDataCriteriaDraft : listDataCriteria;
+  const displayCriteriaData = hasDraft
+    ? listDataCriteriaDraft
+    : listDataCriteria;
 
   // Use Effect
   useEffect(() => {
@@ -110,7 +113,7 @@ const InvoiceTemplateDetail = () => {
               : "",
             dataType: "exist",
           };
-        }
+        },
       );
 
       // Data Criteria Information
@@ -181,7 +184,7 @@ const InvoiceTemplateDetail = () => {
             id: item.id,
             criteria: item.criteria,
           };
-        }
+        },
       );
 
       const mappingCriteria = criteriaSelect?.map((a) => a.criteria);
@@ -237,8 +240,8 @@ const InvoiceTemplateDetail = () => {
       breadcrumbName: "Invoice Template",
     },
     {
-      path: RBI_ROUTES.INVOICE_TEMPLATE_DETAIL,
-      breadcrumbName: "Detail",
+      path: "",
+      breadcrumbName: "Detail Invoice Template",
     },
   ];
 
@@ -257,9 +260,7 @@ const InvoiceTemplateDetail = () => {
     setModalConfirm(false);
   };
 
-  // handle Confirm
   const handleConfirm = (res, handleClear) => {
-    setModalConfirm(false);
     const data = {
       id: id,
       remark: res.remark,
@@ -267,17 +268,23 @@ const InvoiceTemplateDetail = () => {
       action: approveOrReject.toUpperCase(),
     };
 
-    dispatch(
+    const approvalAction =
       bodyApproval.approvalType === "INACTIVE_INVOICE_TEMPLATE"
         ? approveOrRejectInactiveInvoiceTemplate({
             body: data,
           })
-        : approveOrRejectInvoiceTemplate({
-            body: data,
-          })
-    )
+        : bodyApproval.approvalType === "ACTIVATED_INVOICE_TEMPLATE"
+          ? approveOrRejectActivatedInvoiceTemplate({
+              body: data,
+            })
+          : approveOrRejectInvoiceTemplate({
+              body: data,
+            });
+
+    return dispatch(approvalAction)
       .unwrap()
       .then(() => {
+        setModalConfirm(false);
         handleClear();
         dispatch(getDetailDraftInvoiceTemplate(id));
         dispatch(getDetailInvoiceTemplate(id));
@@ -422,7 +429,7 @@ const InvoiceTemplateDetail = () => {
             <DetailText label="Created Date">
               {dataLogInformation?.createdDate
                 ? moment(dataLogInformation.createdDate).format(
-                    dateFormatting.dateTime
+                    dateFormatting.dateTime,
                   )
                 : ""}
             </DetailText>
@@ -432,7 +439,7 @@ const InvoiceTemplateDetail = () => {
             <DetailText label="Updated Date">
               {dataLogInformation?.updatedDate
                 ? moment(dataLogInformation.updatedDate).format(
-                    dateFormatting.dateTime
+                    dateFormatting.dateTime,
                   )
                 : ""}
             </DetailText>

@@ -16,7 +16,7 @@ import { ModalError } from "../../../../components/Modal/ModalPopUp";
 import NxHistoryModal from "../../../../components/Nx/NxHistoryModal";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
-import NxInactivateModal from "../../../../components/Nx/NxInactivateModal";
+import NxActivateInactivateModal from "../../../../components/Nx/NxActivateInactivateModal";
 import NxBreadCrumb from "../../../../components/Nx/NxBreadCrumb";
 
 const PromoDiscountView = () => {
@@ -254,7 +254,7 @@ const PromoDiscountView = () => {
       </Spin>
       
       {/* Modal Inactive */}
-      <NxInactivateModal
+      <NxActivateInactivateModal
         isOpen={modalInactive}
         header={"INACTIVATE"}
         handleCloseModal={() => handleInactivateModal(false)}

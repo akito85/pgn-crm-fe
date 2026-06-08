@@ -40,6 +40,7 @@ import { columnsTableCriteriaTOP } from "../TableCriteria/TableCriteriaTOP";
 import CreateTOP from "./CreateTOP";
 import ModalConfirmationTOPS from "./ModalConfirmationTOPS";
 import ModalBack from "../../../../../../components/Modal/ModalBack";
+import { ModalError } from "../../../../../../components/Modal/ModalPopUp";
 import CardContainer from "../../../../../../components/CardContainer";
 
 const ListCreateForm = ({ type }) => {
@@ -61,9 +62,13 @@ const ListCreateForm = ({ type }) => {
   const status = location?.state?.status;
   const statusApproval = location?.state?.statusApproval;
 
-  const listTypeSubmit = ["submit", "draft"];
   const [modalConfirm, setModalConfirm] = useState(false);
   const [modalBack, setModalBack] = useState(false);
+  const [modalIncomplete, setModalIncomplete] = useState({
+    isOpen: false,
+    stepName: "",
+    stepIndex: 0,
+  });
 
   const [appHierOptions, setAppHierOptions] = useState([]);
   const [appHierDataDetail, setAppHierDataDetail] = useState([]);
@@ -80,7 +85,7 @@ const ListCreateForm = ({ type }) => {
   const [isC, setIsC] = useState(false);
   const [isSat, setIsSat] = useState(false);
   const [isSun, setIsSun] = useState(false);
-  const [flag, setFlag] = useState(false);
+  const flagRef = React.useRef(false);
   const [startDate, setStartDate] = useState();
   const [endDate, setEndDate] = useState();
 
@@ -188,7 +193,7 @@ const ListCreateForm = ({ type }) => {
       breadcrumbName: "Terms of Payment",
     },
     {
-      path: RBI_ROUTES.TERMS_OF_PAYMENT_CREATE,
+      path: "",
       breadcrumbName: `${type === "create" ? "Create Terms of Payment" : "Update Terms of Payment"}`,
     },
   ];
@@ -267,6 +272,21 @@ const ListCreateForm = ({ type }) => {
   // Handle Error Tab Form
   const handleError = ({ values, errorFields, outOfDate }) => {
     handleMandatory(setTabData, listDataAttachment, errorFields);
+
+    if (errorFields?.length > 0) {
+      const firstError = errorFields[0].name[0];
+      const stepIndex = tabData.findIndex((page) =>
+        page.paramValue?.includes(firstError),
+      );
+
+      if (stepIndex !== -1) {
+        setModalIncomplete({
+          isOpen: true,
+          stepName: STEPS[stepIndex].title,
+          stepIndex: stepIndex,
+        });
+      }
+    }
   };
 
   const handleUpdateAttachment = useCallback((updater) => {
@@ -336,7 +356,7 @@ const ListCreateForm = ({ type }) => {
         apphierId: data_detail?.information?.apphierId,
         criteria: mappingCriteria,
         description: data_detail?.information?.description,
-        isSubmit: flag,
+        isSubmit: flagRef.current,
       });
       setStartDate(moment(data_detail?.information?.startDate));
       setEndDate(
@@ -414,7 +434,7 @@ const ListCreateForm = ({ type }) => {
         apphierId: data_detail_draft?.information?.apphierId,
         criteria: mappingCriteria,
         description: data_detail_draft?.information?.description,
-        isSubmit: flag,
+        isSubmit: flagRef.current,
       });
       setStartDate(moment(data_detail_draft?.information?.startDate));
       setEndDate(
@@ -647,9 +667,75 @@ const ListCreateForm = ({ type }) => {
 
   //handle submit setelah muncul modal
   const handleSubmitForm = async (formValue) => {
+    // Jika draft, langsung simpan tanpa validasi ketat
+    if (!flagRef.current) {
+      // Save as Draft - skip strict validation
+      const dataValue = {
+        id: type === "update" ? data_detail?.information?.id : undefined,
+        name: formValue?.name,
+        startDate: formValue?.startDate,
+        endDate: formValue?.endDate,
+        type: formValue?.type,
+        term: formValue?.terms,
+        isCalendar: isC,
+        isSunday: isSun,
+        isSaturday: isSat,
+        apphierId: formValue?.apphierId,
+        criterias: (formValue?.criteria || []).map((item) => {
+          const tempData =
+            id && data_detail_draft?.id === id
+              ? data_detail_draft?.criteria || []
+              : data_detail?.criteria || [];
+          const temp = tempData?.filter((a) => item === a.criteria);
+          return {
+            termOfPaymentCriteriaId: temp[0]?.id || null,
+            criteria: item,
+          };
+        }),
+        criteriaData: list.map((item) => ({
+          id: item?.id || null,
+          referenceId: item?.referenceId || null,
+          startDate: item.startDate
+            ? moment(item.startDate).format(dateFormatting.date)
+            : null,
+          endDate: item.endDate
+            ? moment(item.endDate).format(dateFormatting.date)
+            : null,
+          customer: item.customer?.value || null,
+          budget: item.budget?.value || null,
+          subDistrict: item.subDistrict?.value || null,
+          district: item.district?.value || null,
+          city: item.city?.value || null,
+          province: item.province?.value || null,
+          area: item.area?.value || null,
+          sor: item.sor?.value || null,
+          industrialSector: item.industrialSector?.value || null,
+          product: item.product?.value || null,
+          gsizes: item.gsizes?.value || null,
+          customerSegment: item.customerSegment?.value || null,
+          accountGroup: item.accountGroup?.value || null,
+          serviceType: item.serviceType?.value || null,
+          accountCategory: item.accountCategory?.value || null,
+          allCriteria: item.all?.value || null,
+        })),
+        description: formValue?.description,
+        isSubmit: flagRef.current,
+      };
+
+      setModalConfirm(true);
+      setKirimBody(dataValue);
+      return;
+    }
+
+    // Submit - validasi ketat
     let errorBody = {};
     if (listDataAttachment.length === 0) {
       handleMandatory(setTabData, listDataAttachment);
+      setModalIncomplete({
+        isOpen: true,
+        stepName: "ATTACHMENT",
+        stepIndex: 2,
+      });
     } else {
       const isOverlapping = checkOverlappingData(
         { startDate: formValue?.startDate, endDate: formValue?.endDate },
@@ -771,7 +857,7 @@ const ListCreateForm = ({ type }) => {
           criterias: criteriaArrayObject,
           criteriaData: includesAll ? [{ allCriteria: true }] : Object,
           description: formValue?.description,
-          isSubmit: flag,
+          isSubmit: flagRef.current,
         };
 
         let temp = { ...dataValue };
@@ -841,6 +927,7 @@ const ListCreateForm = ({ type }) => {
           handleClear();
         })
         .catch((error) => {
+          handleCancelModalConfirm();
           if (Math.floor((error.response.data.code || 0) / 100) === 5) {
             const message =
               (error.response &&
@@ -885,6 +972,7 @@ const ListCreateForm = ({ type }) => {
           handleClear();
         })
         .catch((error) => {
+          handleCancelModalConfirm();
           if (Math.floor((error.response.data.code || 0) / 100) === 5) {
             const message =
               (error.response &&
@@ -971,6 +1059,7 @@ const ListCreateForm = ({ type }) => {
               handleStartDate={handleStartDate}
               handleEndDate={handleEndDate}
               disbaledDate={isDisabledDate}
+              isDraft={!flagRef.current}
             />
           </div>
 
@@ -1020,16 +1109,17 @@ const ListCreateForm = ({ type }) => {
             onCancel={() => setModalBack(true)}
             onClear={handleClear}
             onSaveDraft={() => {
-              setFlag(false);
+              flagRef.current = false;
               setTimeout(() => form.submit(), 0);
             }}
             onSubmit={() => {
-              setFlag(true);
+              flagRef.current = true;
               setTimeout(() => form.submit(), 0);
             }}
             type={type}
             disabled={storedData}
             saveDraftLabel={"Save as Draft"}
+            isLoading={loadingForm}
           />
         </Form>
       </Spin>
@@ -1041,6 +1131,31 @@ const ListCreateForm = ({ type }) => {
         handleOk={() => navigate(-1)}
       />
 
+      {/* Modal Incomplete */}
+      <ModalError
+        isOpen={modalIncomplete.isOpen}
+        handleOk={() => {
+          setCurrent(modalIncomplete.stepIndex);
+          setValuePage(STEPS[modalIncomplete.stepIndex].value);
+          setModalIncomplete({ isOpen: false, stepName: "", stepIndex: 0 });
+        }}
+        handleCancel={() =>
+          setModalIncomplete({ isOpen: false, stepName: "", stepIndex: 0 })
+        }
+        customText="Go to Step"
+      >
+        <div className="px-5 pt-5 pb-[10px] justify-center">
+          <div className="w-full flex gap-[20px]">
+            <SVGIcon name="IconFailed" width={48} />
+            <p className="text-[18px] font-bold">{"Incomplete Data"}</p>
+          </div>
+          <p className="pl-[70px]">
+            Please complete the mandatory fields in the{" "}
+            <b>{modalIncomplete.stepName}</b> section before proceeding.
+          </p>
+        </div>
+      </ModalError>
+
       {/* Modal Confirmation */}
       <ModalCustom
         isOpen={modalConfirm}
@@ -1050,10 +1165,19 @@ const ListCreateForm = ({ type }) => {
         type={"confirmation"}
         footer={
           <div className="w-full flex justify-end gap-2 p-4">
-            <ButtonComponent onClick={handleCancelModalConfirm} type="default">
+            <ButtonComponent
+              onClick={handleCancelModalConfirm}
+              type="default"
+              disabled={loadingForm}
+            >
               Cancel
             </ButtonComponent>
-            <ButtonComponent type="submit" onClick={handleProcessModalConfirm}>
+            <ButtonComponent
+              type="submit"
+              onClick={handleProcessModalConfirm}
+              isLoading={loadingForm}
+              disabled={loadingForm}
+            >
               Confirm
             </ButtonComponent>
           </div>

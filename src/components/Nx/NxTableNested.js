@@ -675,7 +675,8 @@ const ChildTable = React.memo(({
   // resize handle and drag events are actually wired up.  Previously ChildTable
   // rendered plain <div>s and the _on* callbacks were silently ignored.
   // isLastBorder: whether to omit the right border (last column in the visual row).
-  // All columns use explicit col.width — no flex:1 anywhere.
+  // Fill columns (col._fill) use flex:1 to absorb remaining width; all others
+  // use explicit widths matching the parent row behaviour.
   const renderHeaderCell = (col, isLastBorder, extraStyle = {}) => (
     <ResizableHeaderCell
       key={col.key || col.dataIndex}
@@ -688,9 +689,9 @@ const ChildTable = React.memo(({
       onDragEnd={col._onDragEnd}
       style={{
         ...HEADER_CELL_STYLE,
-        width:      col.width,
-        flex:       "none",
-        minWidth:   col.width,
+        ...(col._fill
+          ? { flex: 1, minWidth: col.width }
+          : { flex: "none", width: col.width, minWidth: col.width }),
         justifyContent: "center",
         borderRight: isLastBorder ? "none" : `1px solid rgba(255,255,255,0.2)`,
         opacity:    col._isDragging ? 0.5 : 1,
@@ -740,29 +741,31 @@ const ChildTable = React.memo(({
   const rightFixed = processedColumns.filter(c => c._fixed === "right");
   const normal     = processedColumns.filter(c => !c._fixed);
   const hasFixed   = leftFixed.length > 0 || rightFixed.length > 0;
+  // When any column is a fill column the row containers must stretch to 100%
+  // width instead of max-content so the fill column has space to grow into.
+  const hasFill = processedColumns.some(c => c._fill);
 
   if (!hasFixed) {
     return (
       <div className="nx-child-scroll" style={{ overflowX: "auto", width: "100%" }}>
         {/* Header row — ResizableHeaderCell for resize + drag */}
-        <div style={{ display: "flex", minWidth: "max-content" }}>
+        <div style={{ display: "flex", minWidth: hasFill ? "100%" : "max-content" }}>
           {processedColumns.map((col, colIdx) =>
             renderHeaderCell(col, colIdx === lastIdx)
           )}
         </div>
         {/* Data rows — column-per-flex-div layout for perf.
-             All columns use explicit widths — same rule as parent. */}
-        <div style={{ display: "flex", minWidth: "max-content" }}>
+             Fill columns (col._fill) use flex:1; all others use explicit widths. */}
+        <div style={{ display: "flex", minWidth: hasFill ? "100%" : "max-content" }}>
           {processedColumns.map((col, colIdx) => {
             const isLastBorder = colIdx === lastIdx;
             return (
               <div
                 key={col.key || col.dataIndex || colIdx}
                 style={{
-                  width:         col.width,
-                  minWidth:      col.width,
-                  flexShrink:    0,
-                  flex:          "none",
+                  ...(col._fill
+                    ? { flex: 1, minWidth: col.width }
+                    : { flex: "none", width: col.width, minWidth: col.width, flexShrink: 0 }),
                   borderRight:   isLastBorder ? "none" : `1px solid ${BORDER_COL}`,
                   display:       "flex",
                   flexDirection: "column",
@@ -771,8 +774,11 @@ const ChildTable = React.memo(({
                 {filteredRows.map((row, rowIdx) => {
                   const rawValue = row[col.dataIndex ?? col.key];
                   const cellValue = col.render ? col.render(rawValue, row, rowIdx) : (rawValue ?? "—");
+                  const cellStyle = col._fill
+                    ? { ...dataCellStyle(col, rowIdx, false), width: "100%", minWidth: 0 }
+                    : dataCellStyle(col, rowIdx, false);
                   return (
-                    <div key={row.id ?? row.key ?? rowIdx} style={dataCellStyle(col, rowIdx, false)}>
+                    <div key={row.id ?? row.key ?? rowIdx} style={cellStyle}>
                       {highlightText(cellValue, searchValue)}
                     </div>
                   );
@@ -1075,6 +1081,7 @@ const NxTableNested = ({
   onRowClick         = () => {},
   // ── Error / empty state ───────────────────────────────────────────────────
   fetchFailed        = false,
+  emptyText,
   onInitialLoad,
   onClearPreferences,
   // ── Deprecated (accepted for compat, no-op) ───────────────────────────────
@@ -2116,9 +2123,13 @@ const NxTableNested = ({
               )}
             </div>
           ) : filteredDataSource.length === 0 ? (
-            <div style={{ padding: "40px 20px", textAlign: "center", color: "#999", fontFamily: FONT_FAMILY, fontSize: 12 }}>
-              No data
-            </div>
+            emptyText ? (
+              <div>{emptyText}</div>
+            ) : (
+              <div style={{ padding: "40px 20px", textAlign: "center", color: "#999", fontFamily: FONT_FAMILY, fontSize: 12 }}>
+                No data
+              </div>
+            )
           ) : (
             filteredDataSource.map((row, i) => (
               <ParentRow

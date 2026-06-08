@@ -3,12 +3,18 @@ import { useState } from "react";
 import RelationshipTable from "./RelationshipTable";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  getApprovalHistory,
+  getRelationshipApprovalHistory,
   inactivateRelationship,
-  getApprovalHierarchies,
-  getApprovalHierarchyDetail,
+  getRelationshipApprovalHierarchies,
+  getRelationshipApprovalHierarchy,
 } from "../../../../../../redux/slices/account_management/detailAccount/relationshipSlice";
-import NxInactivateModal from "../../../../../../components/Nx/NxInactivateModal";
+import {
+  getStandaloneRelationshipApprovalHistory,
+  inactivateStandaloneRelationship,
+  getStandaloneRelationshipApprovalHierarchies,
+  getStandaloneRelationshipApprovalHierarchy,
+} from "../../../../../../redux/slices/relationship/standaloneRelationshipSlice";
+import NxActivateInactivateModal from "../../../../../../components/Nx/NxActivateInactivateModal";
 import NxHistoryModal from "../../../../../../components/Nx/NxHistoryModal";
 import NxCardContainer from "../../../../../../components/Nx/NxCardContainer";
 import { getGrantedAccessAccount } from "../../../../../../redux/slices/account_management/accountManagement";
@@ -17,13 +23,15 @@ import NxBaseContainer from "../../../../../../components/Nx/NxBaseContainer";
 import RelationshipApprovalModal from "./RelationshipApprovalModal";
 
 /**
- * Relationship list table module
- * @param {{ accountId: number; customerId: number; type: string }} props
- * @returns
+ * Relationship list table module.
+ * When isStandalone=true, operates without an account context (cross-account list).
+ *
+ * @param {{ accountId: number; customerId: number; isStandalone: boolean }} props
  */
 const Relationship = ({
   accountId,
   customerId,
+  isStandalone = false,
 }) => {
   // --- Hooks ---
   const location = useLocation();
@@ -32,14 +40,15 @@ const Relationship = ({
   const isStandard = location.pathname.includes("account-standard");
   const isOneTime = location.pathname.includes("account-onetime");
 
-  const { data_approvalHistory } = useSelector((state) => state.relationship);
+  const sliceKey = isStandalone ? "standaloneRelationship" : "relationship";
+  const { detail_relationshipApprovalHistory } = useSelector((state) => state[sliceKey]);
 
   const [refreshSignal, setRefreshSignal] = useState(0);
   const [showApprovalModal, setShowApprovalModal] = useState(false);
 
   const [showInactiveModal, setShowInactiveModal] = useState(false);
   const [inactivateId, setInactivateId] = useState(0);
-  const [inactivateName, setInactivateName] = useState("");
+  const [inactivateNumber, setInactivateNumber] = useState("");
 
   const [showApprovalHistoryModal, setShowApprovalHistoryModal] = useState(false);
   const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
@@ -47,57 +56,46 @@ const Relationship = ({
   // --- Functions / handlers ---
   const triggerRefresh = () => setRefreshSignal((prev) => prev + 1);
 
-  /**
-   * Open or close inactivate modal
-   * @param {boolean} show
-   * @param {number} relationshipId
-   * @param {string} name
-   */
-  const handleInactivateModal = (show, relationshipId = 0, name = "") => {
+  const handleInactivateModal = (show, relationshipId = 0, relatedNumber = "") => {
     if (show) {
       setInactivateId(relationshipId);
-      setInactivateName(name);
+      setInactivateNumber(relatedNumber);
       setShowInactiveModal(true);
     } else {
       setInactivateId(0);
-      setInactivateName("");
+      setInactivateNumber("");
       setShowInactiveModal(false);
     }
   };
 
-  /**
-   * @param {string} remark
-   * @param {() => {}} handleClear
-   */
   const handleInactivate = ({ remark, appHierId }, handleClear) => {
-    const body = {
-      id: inactivateId,
-      appHierId,
-      remark,
-    };
+    const body = { id: inactivateId, appHierId, remark };
 
-    dispatch(
-      inactivateRelationship({
-        accountId,
-        body,
-      })
-    )
-      .unwrap()
-      .then(() => {
+    if (isStandalone) {
+      dispatch(inactivateStandaloneRelationship({ body, onSuccess: () => {
         setShowInactiveModal(false);
         triggerRefresh();
         handleClear();
-      })
-      .catch(() => {});
+      }}));
+    } else {
+      dispatch(inactivateRelationship({ accountId, body }))
+        .unwrap()
+        .then(() => {
+          setShowInactiveModal(false);
+          triggerRefresh();
+          handleClear();
+        })
+        .catch(() => {});
+    }
   };
 
-  /**
-   * @param {boolean} show
-   * @param {number} relationshipId
-   */
   const handleApprovalHistoryModal = (show, relationshipId = 0) => {
     if (show) {
-      dispatch(getApprovalHistory({ accountId, relationshipId }));
+      if (isStandalone) {
+        dispatch(getStandaloneRelationshipApprovalHistory({ relationshipId }));
+      } else {
+        dispatch(getRelationshipApprovalHistory({ accountId, relationshipId }));
+      }
       setShowApprovalHistoryModal(true);
     } else {
       setShowApprovalHistoryModal(false);
@@ -106,36 +104,32 @@ const Relationship = ({
 
   // --- Effects ---
   useEffect(() => {
-    if (isStandard) {
-      dispatch(
-        getGrantedAccessAccount(`/account-management/account-standard/relationship`)
-      );
+    if (isStandalone) {
+      dispatch(getGrantedAccessAccount("/relationship"));
+    } else if (isStandard) {
+      dispatch(getGrantedAccessAccount("/account-management/account-standard/relationship"));
     } else if (isOneTime) {
-      dispatch(
-        getGrantedAccessAccount(`/account-management/account-onetime/relationship`)
-      );
+      dispatch(getGrantedAccessAccount("/account-management/account-onetime/relationship"));
     }
   }, []);
 
-  // Reshape raw API approval history into { create, inactive } buckets.
   useEffect(() => {
-    if (data_approvalHistory && data_approvalHistory?.dataApprover) {
+    if (detail_relationshipApprovalHistory && detail_relationshipApprovalHistory?.dataApprover) {
       const temp = {
         dataApprover: {
-          create: data_approvalHistory?.dataApprover?.ACCOUNT_RELATIONSHIP || [],
-          inactive: data_approvalHistory?.dataApprover?.INACTIVE_ACCOUNT_RELATIONSHIP || [],
+          create: detail_relationshipApprovalHistory?.dataApprover?.ACCOUNT_RELATIONSHIP || [],
+          inactive: detail_relationshipApprovalHistory?.dataApprover?.INACTIVE_ACCOUNT_RELATIONSHIP || [],
         },
         dataHistory: {
-          create: data_approvalHistory?.dataHistory?.ACCOUNT_RELATIONSHIP || [],
-          inactive: data_approvalHistory?.dataHistory?.INACTIVE_ACCOUNT_RELATIONSHIP || [],
+          create: detail_relationshipApprovalHistory?.dataHistory?.ACCOUNT_RELATIONSHIP || [],
+          inactive: detail_relationshipApprovalHistory?.dataHistory?.INACTIVE_ACCOUNT_RELATIONSHIP || [],
         },
       };
-
       setDataApprovalHistoryFix(temp);
     } else {
       setDataApprovalHistoryFix({});
     }
-  }, [data_approvalHistory]);
+  }, [detail_relationshipApprovalHistory]);
 
   return (
     <NxCardContainer header={"RELATIONSHIP LIST"}>
@@ -147,6 +141,7 @@ const Relationship = ({
           handleInactivateModal={handleInactivateModal}
           handleApprovalHistoryModal={handleApprovalHistoryModal}
           handleApproval={setShowApprovalModal}
+          isStandalone={isStandalone}
         />
 
         <RelationshipApprovalModal
@@ -154,25 +149,26 @@ const Relationship = ({
           isOpen={showApprovalModal}
           handleCancel={() => setShowApprovalModal(false)}
           afterFinish={triggerRefresh}
+          isStandalone={isStandalone}
         />
 
         {/* Inactivate Modal */}
-        <NxInactivateModal
+        <NxActivateInactivateModal
           isOpen={showInactiveModal}
           header={"INACTIVATE"}
           handleCloseModal={() => handleInactivateModal(false)}
-          customMessage={`Are you sure you want to inactivate relationship - ${inactivateName}?`}
+          customMessage={`Are you sure you want to inactivate relationship - ${inactivateNumber}?`}
           onFinish={({ remark, appHierId }, handleClear) => handleInactivate({ remark, appHierId }, handleClear)}
-          named={inactivateName}
+          named={inactivateNumber}
           menu="relationship"
-          sliceName="relationship"
-          approvalOptionsName="data_approvalHierarchies"
-          approvalHierarchtDetailsName="data_approvalHierarchyDetail"
+          sliceName={sliceKey}
+          approvalOptionsName="list_relationshipApprovalHierarchy"
+          approvalHierarchtDetailsName="detail_relationshipApprovalHierarchy"
           loadingInactivateName="loading_inactivateRelationship"
-          loadingListApprovalOptionsName="loading_listRelationshipApprovalOption"
-          loadingListHierarchyDetailName="loading_listRelationshipApprovalHierarchyDetail"
-          getApprovalOptions={getApprovalHierarchies}
-          getApprovalHierarchyDetails={getApprovalHierarchyDetail}
+          loadingListApprovalOptionsName="loading_listRelationshipApprovalHierarchy"
+          loadingListHierarchyDetailName="loading_detailRelationshipApprovalHierarchy"
+          getApprovalOptions={isStandalone ? getStandaloneRelationshipApprovalHierarchies : getRelationshipApprovalHierarchies}
+          getApprovalHierarchyDetails={isStandalone ? getStandaloneRelationshipApprovalHierarchy : getRelationshipApprovalHierarchy}
         />
 
         {/* Approval History Modal */}

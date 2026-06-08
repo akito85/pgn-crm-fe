@@ -87,7 +87,7 @@ const ModalApproveOrReject = ({
             }
             type={"warning"}
             showIcon
-            className="p-0 m-0"
+            className="p-0 m-0 break-all"
           />
 
           {children}

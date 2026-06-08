@@ -15,6 +15,7 @@ import {
   getDetailTaxCode,
   approvalRejectTaxCode,
   approvalInactiveTaxCode,
+  approvalActivatedTaxCode,
 } from "../../../../../redux/slices/rating_billing_invoice/MasterData/taxCode";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
@@ -204,7 +205,9 @@ const TaxCodeDetail = () => {
       data_detail_draft?.taxCodeId === data_detail?.taxCodeId &&
       data_detail &&
       (!data_detail?.approvalDto?.approvalType ||
-        data_detail?.approvalDto?.approvalType !== "INACTIVE_TAX_CODE")
+        !["INACTIVE_TAX_CODE", "ACTIVATED_TAX_CODE"].includes(
+          data_detail?.approvalDto?.approvalType,
+        ))
     ) {
       const criteriaSelect = (data_detail_draft?.taxCodeCriteriaDtos || []).map(
         (item) => {
@@ -358,7 +361,6 @@ const TaxCodeDetail = () => {
   };
 
   const handleConfirm = (res, handleClear) => {
-    setModalConfirm(false);
     const data = {
       id: id,
       description: res.remark,
@@ -366,17 +368,22 @@ const TaxCodeDetail = () => {
       action: approveOrReject.toUpperCase(),
     };
 
-    dispatch(
+    return dispatch(
       bodyApproval.approvalType === "INACTIVE_TAX_CODE"
         ? approvalInactiveTaxCode({
             body: data,
           })
-        : approvalRejectTaxCode({
-            body: data,
-          }),
+        : bodyApproval.approvalType === "ACTIVATED_TAX_CODE"
+          ? approvalActivatedTaxCode({
+              body: data,
+            })
+          : approvalRejectTaxCode({
+              body: data,
+            }),
     )
       .unwrap()
       .then(() => {
+        setModalConfirm(false);
         handleClear();
         dispatch(getDetailDraftTaxCode(id));
         dispatch(getDetailTaxCode(id));
@@ -393,7 +400,6 @@ const TaxCodeDetail = () => {
           setModalErrorServer(true);
         }
       });
-    console.log(data);
   };
 
   return (
@@ -404,8 +410,16 @@ const TaxCodeDetail = () => {
         <div className="flex flex-col w-full gap-4">
           {bodyApproval.isApprover &&
             bodyApproval.approvalType &&
-            bodyApproval.approvalType === "INACTIVE_TAX_CODE" && (
-              <CardContainer header={"inactive request information"}>
+            ["INACTIVE_TAX_CODE", "ACTIVATED_TAX_CODE"].includes(
+              bodyApproval.approvalType,
+            ) && (
+              <CardContainer
+                header={
+                  bodyApproval.approvalType === "ACTIVATED_TAX_CODE"
+                    ? "activate request information"
+                    : "inactive request information"
+                }
+              >
                 <div className="w-full grid grid-cols-4 gap-3">
                   <DetailText label={"Requested Date"}>
                     {bodyApproval.approvalDetail.requestedDate}
@@ -478,9 +492,8 @@ const TaxCodeDetail = () => {
               <SVGIcon name="IconFailed" width={48} />
               <p className="text-[18px] font-bold">{"Failed"}</p>
             </div>
-            <p className="pl-[70px]">{`Your data was not ${
-              approveOrReject === "Approve" ? "Approved" : "Rejected"
-            }. ${bodyError.message}.`}</p>
+            <p className="pl-[70px]">{`Your data was not ${approveOrReject === "Approve" ? "Approved" : "Rejected"
+              }. ${bodyError.message}.`}</p>
             <p className="pl-[70px]">Please try again.</p>
           </div>
         </ModalError>

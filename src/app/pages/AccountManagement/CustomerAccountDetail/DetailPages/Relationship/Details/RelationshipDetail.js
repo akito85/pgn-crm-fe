@@ -8,11 +8,18 @@ import {
   getGrantedAccessAccount,
 } from "../../../../../../../redux/slices/account_management/accountManagement";
 import {
-  getRelationshipDetail,
-  getDetailDraftRelationship,
+  getRelationship,
+  getRelationshipDraft,
   approveOrRejectRelationship,
   approveOrRejectInactiveRelationship,
 } from "../../../../../../../redux/slices/account_management/detailAccount/relationshipSlice";
+import {
+  getStandaloneRelationship,
+  getStandaloneRelationshipDraft,
+  approveOrRejectStandaloneRelationship,
+  approveOrRejectInactiveStandaloneRelationship,
+} from "../../../../../../../redux/slices/relationship/standaloneRelationshipSlice";
+import { RELATIONSHIP_ROUTES } from "../../../../../../../routes/relationship/relationship_routes";
 import { showModalError } from "../../../../../../../redux/slices/general_slice";
 import NxCardContainer from "../../../../../../../components/Nx/NxCardContainer";
 import NxBreadCrumb from "../../../../../../../components/Nx/NxBreadCrumb";
@@ -31,18 +38,18 @@ import SVGIcon from "../../../../../../../assets/Icon/index";
  * @param {object}                    props
  * @param {"standard"|"oneTime"}      [props.accountType="standard"] - Account type context.
  */
-const RelationshipDetail = ({ accountType = "standard" }) => {
+const RelationshipDetail = ({ accountType = "standard", isStandalone = false }) => {
   // --- Hooks ---
   const dispatch = useDispatch();
+  const sliceKey = isStandalone ? "standaloneRelationship" : "relationship";
 
   const {
-    data_relationshipDetail,
-    detailDraft_relationshipDetail,
+    detail_relationship,
+    detailDraft_relationship,
     loading_detailRelationship,
     loading_detailDraftRelationship,
     loading_approveRejectRelationship,
-    data_attachmentList,
-  } = useSelector((state) => state.relationship);
+  } = useSelector((state) => state[sliceKey]);
 
   const { loading: loadingCustomer, loadingAccount } = useSelector(
     (state) => state.customerAccount
@@ -63,7 +70,7 @@ const RelationshipDetail = ({ accountType = "standard" }) => {
   ];
   const originalKey = tabOptions[0]?.key;
   const [activeKey, setActiveKey] = useState(originalKey || "");
-  const detail = (activeKey === originalKey ? data_relationshipDetail : detailDraft_relationshipDetail) || {};
+  const detail = (activeKey === originalKey ? detail_relationship : detailDraft_relationship) || {};
 
   const [showApprovalModal, setShowApprovalModal] = useState(false);
   const [approveOrReject, setApproveOrReject] = useState("");
@@ -72,23 +79,23 @@ const RelationshipDetail = ({ accountType = "standard" }) => {
   const isStandard = accountType === "standard";
   const isOneTime = accountType === "oneTime";
 
-  const { status, statusApproval } = data_relationshipDetail;
+  const { status, statusApproval, approvalType } = detail_relationship;
   const {
     id,
-    approvalType,
-    subjectName,
-    objectName,
+    relatedAccountNumber,
     createdDate,
     createdBy,
     updatedDate,
     updatedBy,
-    tappId,
   } = detail;
 
   const draftExist = status && status !== "DRAFT" && statusApproval && statusApproval !== "APPROVED";
   const isApproval = ["ACCOUNT_RELATIONSHIP", "INACTIVE_ACCOUNT_RELATIONSHIP"].includes(approvalType);
 
-  const routes = [
+  const routes = isStandalone ? [
+    { path: RELATIONSHIP_ROUTES.VIEW_RELATIONSHIP, breadcrumbName: "Relationship" },
+    { path: "", breadcrumbName: "Detail Relationship" },
+  ] : [
     {
       path: "",
       breadcrumbName: "Account",
@@ -146,7 +153,7 @@ const RelationshipDetail = ({ accountType = "standard" }) => {
    * @param {Function}           handleClear - Resets the form after successful submission
    */
   const handleApproveOrReject = (description, action, handleClear) => {
-    const { id, approvalType, tappId } = data_relationshipDetail;
+    const { id, approvalType, tappId } = detail_relationship;
     const body = [
       {
         id,
@@ -157,27 +164,19 @@ const RelationshipDetail = ({ accountType = "standard" }) => {
     ];
 
     if (approvalType === "ACCOUNT_RELATIONSHIP") {
-      dispatch(
-        approveOrRejectRelationship({
-          accountId,
-          body,
-          action: action.toUpperCase(),
-        })
-      )
-        .unwrap()
-        .then(() => navigate(-1))
-        .catch(() => {});
+      if (isStandalone) {
+        dispatch(approveOrRejectStandaloneRelationship({ body, onSuccess: () => navigate(-1) }));
+      } else {
+        dispatch(approveOrRejectRelationship({ accountId, body, action: action.toUpperCase() }))
+          .unwrap().then(() => navigate(-1)).catch(() => {});
+      }
     } else if (approvalType === "INACTIVE_ACCOUNT_RELATIONSHIP") {
-      dispatch(
-        approveOrRejectInactiveRelationship({
-          accountId,
-          body,
-          action: action.toUpperCase(),
-        })
-      )
-        .unwrap()
-        .then(() => navigate(-1))
-        .catch(() => {});
+      if (isStandalone) {
+        dispatch(approveOrRejectInactiveStandaloneRelationship({ body, onSuccess: () => navigate(-1) }));
+      } else {
+        dispatch(approveOrRejectInactiveRelationship({ accountId, body, action: action.toUpperCase() }))
+          .unwrap().then(() => navigate(-1)).catch(() => {});
+      }
     } else {
       dispatch(showModalError({
         title: "Failed",
@@ -188,21 +187,33 @@ const RelationshipDetail = ({ accountType = "standard" }) => {
 
   // --- Effects ---
   useEffect(() => {
-    if (isStandard)
+    if (isStandalone) {
+      dispatch(getGrantedAccessAccount('/relationship'));
+    } else if (isStandard) {
       dispatch(getGrantedAccessAccount('/account-management/account-standard/relationship'));
-    else if (isOneTime)
+    } else if (isOneTime) {
       dispatch(getGrantedAccessAccount('/account-management/account-onetime/relationship'));
+    }
   }, []);
 
   useEffect(() => {
-    if (accountId && idRelationship) {
-      dispatch(getRelationshipDetail({ accountId, idRelationship }));
+    if (idRelationship) {
+      if (isStandalone) {
+        dispatch(getStandaloneRelationship({ id: idRelationship, subjectAccountId: accountId }));
+      } else if (accountId) {
+        dispatch(getRelationship({ accountId, idRelationship }));
+      }
     }
   }, [accountId, idRelationship]);
 
   useEffect(() => {
-    if (accountId && idRelationship && draftExist)
-      dispatch(getDetailDraftRelationship({ accountId, idRelationship }));
+    if (idRelationship && draftExist) {
+      if (isStandalone) {
+        dispatch(getStandaloneRelationshipDraft({ id: idRelationship, subjectAccountId: accountId }));
+      } else if (accountId) {
+        dispatch(getRelationshipDraft({ accountId, idRelationship }));
+      }
+    }
   }, [accountId, idRelationship, draftExist]);
 
   return (
@@ -210,13 +221,16 @@ const RelationshipDetail = ({ accountType = "standard" }) => {
       <Spin spinning={isLoading} className={"w-full top-20"}>
         <div className="flex flex-col gap-y-4">
           <NxBreadCrumb routes={routes} />
-          <HeaderDetail
-            data_header={["CUSTOMER INFORMATION", "ACCOUNT INFORMATION"]}
-            dispatch={dispatch}
-            idAccount={accountId}
-            idCustomer={customerId}
-            type={accountType}
-          />
+          {!isStandalone && (
+            <HeaderDetail
+              data_header={["CUSTOMER INFORMATION", "ACCOUNT INFORMATION"]}
+              dispatch={dispatch}
+              idAccount={accountId}
+              idCustomer={customerId}
+              type={accountType}
+              collapsible
+            />
+          )}
 
           {draftExist && (
             <NxBaseContainer border padding={false}>
@@ -245,31 +259,38 @@ const RelationshipDetail = ({ accountType = "standard" }) => {
             </NxBaseContainer>
           </NxCardContainer>
 
-          {isApproval && (
-            <NxBaseContainer border>
-              <div className="flex justify-between">
-                <Button type={"menu"} onClick={() => navigate(-1)}>Cancel</Button>
-                <div className={"w-full flex justify-end gap-5"}>
-                  <Button
-                    type="reject"
-                    icon={<SVGIcon width={14} height={14} name="IconSquareX" />}
-                    className="flex-row-reverse"
-                    onClick={() => handleApprovalModal(true, "reject")}
-                  >
-                    Reject
+          <NxBaseContainer border>
+            <div className="flex justify-between">
+              {isApproval ? (
+                <>
+                  <Button type={"menu"} onClick={() => navigate(-1)}>
+                    Cancel
                   </Button>
-                  <Button
-                    type="approve"
-                    icon={<SVGIcon width={14} height={14} name="IconSquareCheck" />}
-                    className="flex-row-reverse"
-                    onClick={() => handleApprovalModal(true, "approve")}
-                  >
-                    Approve
-                  </Button>
-                </div>
-              </div>
-            </NxBaseContainer>
-          )}
+                  <div className={"w-full flex justify-end gap-x-2"}>
+                    <Button
+                      type="reject"
+                      icon={<SVGIcon width={14} height={14} name="IconSquareX" />}
+                      className="flex-row-reverse"
+                      onClick={() => handleApprovalModal(true, "reject")}
+                    >
+                      Reject
+                    </Button>
+                    <Button
+                      type="approve"
+                      icon={<SVGIcon width={14} height={14} name="IconSquareCheck" />}
+                      className="flex-row-reverse"
+                      onClick={() => handleApprovalModal(true, "approve")}
+                    >
+                      Approve
+                    </Button>
+                  </div>
+                </>
+              ) :
+              <Button type={"menu"} icon={<SVGIcon name="IconChevronLeft" width={14} />} onClick={() => navigate(-1)}>
+                Back      
+              </Button>}
+            </div>
+          </NxBaseContainer>
         </div>
       </Spin>
       <NxApproveOrRejectModal
@@ -282,11 +303,7 @@ const RelationshipDetail = ({ accountType = "standard" }) => {
             : ""
         }
         handleCloseModal={() => handleApprovalModal(false)}
-        customMessage={`Are you sure you want to ${approveOrReject} relationship - ${
-          data_relationshipDetail?.subjectName ||
-          data_relationshipDetail?.objectName ||
-          ""
-        }?`}
+        customMessage={`Are you sure you want to ${approveOrReject} relationship - ${relatedAccountNumber}?`}
         onFinish={({ remark }, handleClear) =>
           handleApproveOrReject(remark, approveOrReject, handleClear)
         }

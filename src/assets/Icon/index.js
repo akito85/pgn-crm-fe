@@ -14,6 +14,7 @@ import IconDelete from "./IconDelete";
 import IconDetail from "./IconDetail";
 import IconDownload from "./IconDownload";
 import IconDropdown from "./IconDropdown";
+import IconEarlyRepayment from "./IconEarlyRepayment";
 import IconEdit from "./IconEdit";
 import IconEditTable from "./IconEditTable";
 import IconEraserTable from "./IconEraserTable";
@@ -72,7 +73,13 @@ import IconExpire from "./IconExpire";
 import IconSquareX from "./IconSquareX";
 import IconSquareCheck from "./IconSquareCheck";
 import IconTripleDot from "./IconTripleDot";
+import IconChevronLeft from "./IconChevronLeft";
+import IconChevronDown from "./IconChevronDown";
 import IconAddTable from "./IconAddTable";
+import IconRePlan from "./IconRePlan";
+import IconRestructureActive from "./IconRestructureActive";
+import IconOutstandingBalance from "./IconOutstandingBalance";
+import IconActiveReceivable from "./IconActiveReceivable";
 import { FileOutlined } from "@ant-design/icons";
 
 const Icon = (props) => {
@@ -230,8 +237,22 @@ const Icon = (props) => {
       return <IconSquareCheck {...props} />
     case "IconTripleDot":
       return <IconTripleDot {...props} />;
+    case "IconChevronLeft":
+      return <IconChevronLeft {...props} />;
+    case "IconChevronDown":
+      return <IconChevronDown {...props} />;
     case "IconAddTable":
       return <IconAddTable {...props} />;
+    case "IconEarlyRepayment":
+      return <IconEarlyRepayment {...iconProps} />;
+    case "IconRePlan":
+      return <IconRePlan {...iconProps} />;
+    case "IconRestructureActive":
+      return <IconRestructureActive {...iconProps} />;
+    case "IconOutstandingBalance":
+      return <IconOutstandingBalance {...iconProps} />;
+    case "IconActiveReceivable":
+      return <IconActiveReceivable {...iconProps} />;
     default:
       return;
   }

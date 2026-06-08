@@ -60,7 +60,7 @@ const getServiceAgreementColumns = (
         key: "saServiceType",
         title: "SERVICE TYPE",
         dataIndex: "saServiceType",
-        width: 140,
+        width: 150,
         sorter: true,
         filteredValue: [search?.saServiceType] || null,
         ...getColumnSearchPropsUseFilteredValue(
@@ -96,7 +96,7 @@ const getServiceAgreementColumns = (
         key: "pjbgType",
         title: "PJBG TYPE",
         dataIndex: "pjbgType",
-        width: 120,
+        width: 150,
         sorter: true,
         filteredValue: [search?.pjbgType] || null,
         ...getColumnSearchPropsUseFilteredValue(
@@ -134,7 +134,7 @@ const getServiceAgreementColumns = (
         key: "startDate",
         title: "START DATE",
         dataIndex: "startDate",
-        width: 120,
+        width: 150,
         align: "center",
         sorter: true,
         filteredValue: [search?.startDate] || null,
@@ -174,7 +174,7 @@ const getServiceAgreementColumns = (
         key: "commitmentDate",
         title: "COMMITMENT DATE",
         dataIndex: "commitmentDate",
-        width: 150,
+        width: 190,
         align: "center",
         sorter: true,
         filteredValue: [search?.commitmentDate] || null,
@@ -194,7 +194,7 @@ const getServiceAgreementColumns = (
         key: "billingCycle",
         title: "BILLING CYCLE",
         dataIndex: "billingCycle",
-        width: 130,
+        width: 160,
         sorter: true,
         filteredValue: [search?.billingCycle] || null,
         ...getColumnSearchPropsUseFilteredValue(
@@ -212,7 +212,7 @@ const getServiceAgreementColumns = (
         key: "termsOfPaymentName",
         title: "TERM OF PAYMENT",
         dataIndex: "termsOfPaymentName",
-        width: 150,
+        width: 180,
         align: "center",
         sorter: true,
         filteredValue: [search?.termsOfPaymentName] || null,
@@ -231,7 +231,7 @@ const getServiceAgreementColumns = (
         key: "invoiceTemplate",
         title: "INVOICE TEMPLATE",
         dataIndex: "invoiceTemplate",
-        width: 150,
+        width: 180,
         sorter: true,
         filteredValue: [search?.invoiceTemplate] || null,
         ...getColumnSearchPropsUseFilteredValue(
@@ -249,7 +249,7 @@ const getServiceAgreementColumns = (
         key: "gasInPlanDate",
         title: "GAS IN PLAN DATE",
         dataIndex: "gasInPlanDate",
-        width: 150,
+        width: 180,
         align: "center",
         sorter: true,
         filteredValue: [search?.gasInPlanDate] || null,
@@ -269,7 +269,7 @@ const getServiceAgreementColumns = (
         key: "alreadyGasIn",
         title: "ALREADY GAS IN",
         dataIndex: "alreadyGasIn",
-        width: 130,
+        width: 180,
         sorter: true,
         filteredValue: [search?.alreadyGasIn] || null,
         ...getColumnSearchPropsUseFilteredValue(
@@ -281,7 +281,255 @@ const getServiceAgreementColumns = (
             handleSearch,
             true
         ),
-        render: (text) => text?.value || "No",
+        render: (text) => text ? 'Yes' : 'No',
+    },
+    {
+        key: "gasInDate",
+        title: "GAS IN DATE",
+        dataIndex: "gasInDate",
+        width: 180,
+        align: "center",
+        sorter: true,
+        filteredValue: [search?.gasInPlanDate] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+            search,
+            "gasInDate",
+            searchInput,
+            searchedColumn,
+            searchText,
+            handleSearch,
+            true,
+            "date"
+        ),
+        render: (date) => date ? moment(date, "DD-MM-YYYY").format(dateFormatting.date) : "-",
+    },
+    {
+        key: "product",
+        title: "PRODUCT",
+        dataIndex: "product",
+        width: 150,
+        sorter: true,
+        filteredValue: [search?.product] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+            search,
+            "product",
+            searchInput,
+            searchedColumn,
+            searchText,
+            handleSearch,
+            true
+        ),
+        render: (text) => text.productName || "-",
+    },
+    {
+        key: "productType",
+        title: "PRODUCT TYPE",
+        dataIndex: "product",
+        width: 150,
+        sorter: true,
+        filteredValue: [search?.product] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+            search,
+            "product",
+            searchInput,
+            searchedColumn,
+            searchText,
+            handleSearch,
+            true
+        ),
+        render: (text) => text.productType || "-",
+    },
+    {
+        key: "productClass",
+        title: "PRODUCT TYPE",
+        dataIndex: "product",
+        width: 150,
+        sorter: true,
+        filteredValue: [search?.product] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+            search,
+            "product",
+            searchInput,
+            searchedColumn,
+            searchText,
+            handleSearch,
+            true
+        ),
+        render: (text) => text.productClass || "-",
+    },
+    {
+        key: "productVersion",
+        title: "PRODUCT VERSION",
+        dataIndex: "product",
+        width: 175,
+        sorter: true,
+        filteredValue: [search?.product] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+            search,
+            "product",
+            searchInput,
+            searchedColumn,
+            searchText,
+            handleSearch,
+            true
+        ),
+        render: (text) => text.productVersion || "-",
+    },
+    {
+        key: "createFrom",
+        title: "CREATE FROM",
+        dataIndex: "isCustom",
+        width: 175,
+        sorter: true,
+        filteredValue: [search?.isCustom] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+            search,
+            "isCustom",
+            searchInput,
+            searchedColumn,
+            searchText,
+            handleSearch,
+            true
+        ),
+        render: (text) => text === "N" ? "Product" : "Custom",
+    },
+    {
+        key: "minUsage",
+        title: "MINIMUM USAGE",
+        dataIndex: "product",
+        width: 175,
+        sorter: true,
+        filteredValue: [search?.product] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+            search,
+            "product",
+            searchInput,
+            searchedColumn,
+            searchText,
+            handleSearch,
+            true
+        ),
+        render: (product) => {
+          const minUsageItem = product?.productDetail?.find(                                                                                                                  
+              (d) => d.name === "Min Usage" || d.name === "Minimum Usage"
+          );                                                                                                                                                                  
+          return minUsageItem?.value || "-";                                                                                                                                  
+      },
+    },
+    {
+        key: "maxUsage",
+        title: "MAXIMUM USAGE",
+        dataIndex: "product",
+        width: 175,
+        sorter: true,
+        filteredValue: [search?.product] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+            search,
+            "product",
+            searchInput,
+            searchedColumn,
+            searchText,
+            handleSearch,
+            true
+        ),
+        render: (product) => {
+          const maxUsage = product?.productDetail?.find(                                                                                                                  
+              (d) => d.name === "Max Usage" || d.name === "Maximum Usage"
+          );                                                                                                                                                                  
+          return maxUsage?.value || "-";                                                                                                                                  
+      },
+    },
+    {
+        key: "timeUnit",
+        title: "TIME UNIT",
+        dataIndex: "product",
+        width: 175,
+        sorter: true,
+        filteredValue: [search?.product] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+            search,
+            "product",
+            searchInput,
+            searchedColumn,
+            searchText,
+            handleSearch,
+            true
+        ),
+        render: (product) => {
+          const timeUnit = product?.productDetail?.find(                                                                                                                  
+              (d) => d.name === "Time Unit"
+          );                                                                                                                                                                  
+          return timeUnit?.unitName || "-";                                                                                                                                  
+      },
+    },
+    {
+        key: "uom",
+        title: "UNIT OF MEASUREMENT",
+        dataIndex: "product",
+        width: 175,
+        sorter: true,
+        filteredValue: [search?.product] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+            search,
+            "product",
+            searchInput,
+            searchedColumn,
+            searchText,
+            handleSearch,
+            true
+        ),
+        render: (product) => {
+          const uom = product?.productDetail?.find(                                                                                                                  
+              (d) => d.name === "Unit of Measurement" || d.name === "Unit of Measure" || d.name === "uom"
+          );                                                                                                                                                                  
+          return uom?.unitName || "-";                                                                                                                                  
+      },
+    },
+    {
+        key: "currency",
+        title: "CURRENCY",
+        dataIndex: "product",
+        width: 175,
+        sorter: true,
+        filteredValue: [search?.product] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+            search,
+            "product",
+            searchInput,
+            searchedColumn,
+            searchText,
+            handleSearch,
+            true
+        ),
+        render: (product) => {
+          const uom = product?.productDetail?.find(                                                                                                                  
+              (d) => d.name === "Currency" 
+          );                                                                                                                                                                  
+          return uom?.unitName || "-";                                                                                                                                  
+      },
+    },
+    {
+        key: "calculationType",
+        title: "CALCULATION TYPE",
+        dataIndex: "product",
+        width: 175,
+        sorter: true,
+        filteredValue: [search?.product] || null,
+        ...getColumnSearchPropsUseFilteredValue(
+            search,
+            "product",
+            searchInput,
+            searchedColumn,
+            searchText,
+            handleSearch,
+            true
+        ),
+        render: (product) => {
+          const uom = product?.productDetail?.find(                                                                                                                  
+              (d) => d.name === "Unit of Measurement" || d.name === "Unit of Measure" || d.name === "uom"
+          );                                                                                                                                                                  
+          return uom?.unitName || "-";                                                                                                                                  
+      },
     },
     includeStatus && {
         key: "approvalStatus",
@@ -310,7 +558,7 @@ const getServiceAgreementColumns = (
             };
             return (
                 <div className="flex justify-center">
-                    <StatusComponent colour={status?.toLowerCase()}>
+                    <StatusComponent colour={status?.toLowerCase()} size="small">
                         {displayText[status] || toTitleCase(String(status || "")) || "-"}
                     </StatusComponent>
                 </div>
@@ -342,7 +590,7 @@ const getServiceAgreementColumns = (
             };
             return (
                 <div className="flex justify-center">
-                    <StatusComponent colour={status?.toLowerCase()}>
+                    <StatusComponent colour={status?.toLowerCase()} size="small">
                         {displayText[status] || toTitleCase(String(status || "")) || "-"}
                     </StatusComponent>
                 </div>

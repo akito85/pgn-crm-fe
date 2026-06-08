@@ -1,16 +1,24 @@
 import React from "react";
 
-const ComparisonCard = ({ title, leftColumn, rightColumn }) => {
+const ComparisonCard = ({ title, leftColumn, rightColumn, onSeeDetails }) => {
   return (
     <div
       className="bg-white rounded-lg overflow-hidden"
       style={{ border: "1px solid #BDBDBD" }}
     >
       {/* Header */}
-      <div className="bg-white px-3 py-1.5" style={{ borderBottom: "1px solid #BDBDBD" }}>
+      <div className="bg-white px-3 py-1.5 flex items-center justify-between" style={{ borderBottom: "1px solid #BDBDBD" }}>
         <h3 className="text-[#0175BF] font-semibold text-xs uppercase m-0">
           {title}
         </h3>
+        {onSeeDetails && (
+          <button
+            onClick={onSeeDetails}
+            className="text-[#595959] border border-[#BDBDBD] rounded-md px-[10px] py-[2px] text-[11px] font-medium leading-relaxed whitespace-nowrap cursor-pointer bg-white transition-colors duration-200 hover:text-[#0175bf] hover:border-[#0175bf]"
+          >
+            See Details
+          </button>
+        )}
       </div>
 
       {/* Content */}

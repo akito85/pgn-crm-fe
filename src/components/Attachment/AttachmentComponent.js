@@ -249,6 +249,7 @@ const AttachmentComponent = ({
   getAPIGuard,
   typeRBI,
   mandatory = false,
+  idTable = "attachment-table",
 }) => {
   // Selector
   const { dataListCategory } = useSelector((state) => state[typeSelector]);
@@ -377,6 +378,7 @@ const AttachmentComponent = ({
           </div>
         ) : null}
         <NxTable
+          idTable={idTable}
           dataSource={data}
           totalData={data.length}
           tableScrolled={{ y: 300, x: 1500 }}

@@ -1,104 +1,36 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../routes/account_management/customer_account_routes";
+import { RELATIONSHIP_ROUTES } from "../../../../../../routes/relationship/relationship_routes";
 import { useColumnActionPermission } from "../../../../../../components/ColumnActionPermission";
 import Toolbar from "../../../../../../components/Toolbar";
 import NxTable from "../../../../../../components/Nx/NxTable";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { getRelationshipColumns } from "./getRelationshipColumns";
+import { getStandaloneRelationshipColumns } from "./getStandaloneRelationshipColumns";
 import { nxGetAccountActions } from "../../../../../../components/Nx/NxGetAccountActions";
-import { nxApplyFixedColumns } from "../../../../../../utils/Nx/nxApplyFixedColumns";
-import TablePagination from "../../../../../../components/TablePagination";
 import { useDispatch, useSelector } from "react-redux";
+import RelationshipDetailTable from "./RelationshipDetailTable";
 import {
-  getRelationshipList,
+  getRelationships,
   downloadRelationship,
 } from "../../../../../../redux/slices/account_management/detailAccount/relationshipSlice";
-
-// Nested columns configuration for expandable rows
-const NESTED_COLUMNS = [
-  {
-    title: "NO",
-    align: "center",
-    width: 60,
-    render: (text, object, index) => (
-      <div style={{ padding: "8px 0" }}>{index + 1}</div>
-    ),
-  },
-  {
-    title: "ACCOUNT NUMBER",
-    dataIndex: "accountNumber",
-    align: "left",
-    sorter: (a, b) => (a.accountNumber || "").localeCompare(b.accountNumber || ""),
-    render: (text) => <div style={{ padding: "8px 16px" }}>{text || "-"}</div>,
-  },
-  {
-    title: "ACCOUNT NAME",
-    dataIndex: "accountName",
-    align: "left",
-    sorter: (a, b) => (a.accountName || "").localeCompare(b.accountName || ""),
-    render: (text) => <div style={{ padding: "8px 16px" }}>{text || "-"}</div>,
-  },
-  {
-    title: "ACCOUNT CATEGORY",
-    dataIndex: "accountCategory",
-    align: "left",
-    sorter: (a, b) => (a.accountCategory || "").localeCompare(b.accountCategory || ""),
-    render: (text) => <div style={{ padding: "8px 16px" }}>{text || "-"}</div>,
-  },
-  {
-    title: "SOR",
-    dataIndex: "sor",
-    align: "left",
-    sorter: (a, b) => (a.sor || "").localeCompare(b.sor || ""),
-    render: (text) => <div style={{ padding: "8px 16px" }}>{text || "-"}</div>,
-  },
-  {
-    title: "COST CENTER",
-    dataIndex: "costCenter",
-    align: "left",
-    sorter: (a, b) => (a.costCenter || "").localeCompare(b.costCenter || ""),
-    render: (text) => <div style={{ padding: "8px 16px" }}>{text || "-"}</div>,
-  },
-  {
-    title: "METER READING CODE",
-    dataIndex: "meterReadingCode",
-    align: "left",
-    sorter: (a, b) => (a.meterReadingCode || "").localeCompare(b.meterReadingCode || ""),
-    render: (text) => <div style={{ padding: "8px 16px" }}>{text || "-"}</div>,
-  },
-];
-
-// Expandable row renderer for Related Detail
-const expandedRowRender = (record) => {
-  const relatedDetailData = record?.relatedDetail || [];
-
-  return (
-    <div className="bg-blue-50 -mx-2 pl-6 py-2">
-      <h4 className="text-[#0075bf] font-semibold text-sm my-2">RELATED DETAIL</h4>
-      <TablePagination
-        useSelect={false}
-        usePagination={false}
-        dataSource={relatedDetailData}
-        columns={NESTED_COLUMNS}
-        className="related-detail-nested-table"
-      />
-    </div>
-  );
-};
+import {
+  getStandaloneRelationships,
+  downloadStandaloneRelationship,
+} from "../../../../../../redux/slices/relationship/standaloneRelationshipSlice";
 
 /**
  * Relationship list table (container + presentational component).
- * Owns search, pagination, sort, filter, and download state/logic.
- * The parent (`Relationship`) is responsible only for modals and permissions.
+ * When isStandalone=true, fetches all cross-account relationships and uses standalone routes.
  *
  * @param {object}   props
- * @param {number}   props.accountId                       - Account ID
- * @param {number}   props.customerId                      - Customer ID
- * @param {string}   [props.type="standard"]               - Account type
- * @param {Function} [props.handleInactivateModal]         - Opens the inactivate confirmation modal
- * @param {Function} [props.handleApprovalHistoryModal]    - Opens the approval history modal
- * @param {Function} [props.handleApproval]                - Triggers the approval action
- * @param {number}   [props.refreshSignal=0]               - Increment to trigger a page-0 refresh from the parent
+ * @param {number}   props.accountId
+ * @param {number}   props.customerId
+ * @param {Function} [props.handleInactivateModal]
+ * @param {Function} [props.handleApprovalHistoryModal]
+ * @param {Function} [props.handleApproval]
+ * @param {number}   [props.refreshSignal=0]
+ * @param {boolean}  [props.isStandalone=false]
  */
 const RelationshipTable = ({
   accountId,
@@ -107,16 +39,19 @@ const RelationshipTable = ({
   handleApprovalHistoryModal = () => {},
   handleApproval = () => {},
   refreshSignal = 0,
+  isStandalone = false,
 }) => {
   // --- Hooks ---
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
+
+  const sliceKey = isStandalone ? "standaloneRelationship" : "relationship";
   const {
     list_relationship: dataSource,
-    pagination_relationship: pagination,
+    pagination_listRelationship: pagination,
     loading_listRelationship: loading,
-  } = useSelector((state) => state.relationship);
+  } = useSelector((state) => state[sliceKey]);
 
   // --- Derived values ---
   const isStandard = location.pathname.includes("account-standard");
@@ -135,189 +70,106 @@ const RelationshipTable = ({
   const [filters, setFilters] = useState([]);
   const [filterRules, setFilterRules] = useState([]);
 
-  const [fixedColumns, setFixedColumns] = useState(() => ({
-    right: ["statusApproval", "status", "action"],
-    left: [],
-  }));
-
-  // --- Handlers ---
-  const handleRefresh = () => {
-    const body = {
-      page: 0,
-      size: loadMoreSize,
-      sort,
-      searchs: search,
-      filters,
-      filterRules,
-    };
-
-    dispatch(
-      getRelationshipList({
-        accountId,
-        page: 0,
-        pageSize: loadMoreSize,
-        sort,
-        body,
-        isLoadMore: false,
-      })
-    );
-    setPage(0);
+  // --- Fetch helper ---
+  const fetchRelationships = ({ page: p, isLoadMore }) => {
+    const body = { page: p, size: loadMoreSize, sort, searchs: search, filters, filterRules };
+    if (isStandalone) {
+      dispatch(getStandaloneRelationships({ page: p, pageSize: loadMoreSize, sort, body, isLoadMore }));
+    } else {
+      dispatch(getRelationships({ accountId, page: p, pageSize: loadMoreSize, sort, body, isLoadMore }));
+    }
   };
 
-  /**
-   * @param {string[]} selectedKeys
-   * @param {() => {}} confirm
-   * @param {string} dataIndex
-   */
+  // --- Handlers ---
+  const handleRefresh = () => { fetchRelationships({ page: 0, isLoadMore: false }); setPage(0); };
+
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
     setSearch((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(0);
-      }
-      return {
-        ...prevState,
-        [dataIndex]: selectedKeys[0],
-      };
+      if (prevState[dataIndex] !== selectedKeys[0]) setPage(0);
+      return { ...prevState, [dataIndex]: selectedKeys[0] };
     });
   };
 
-  /**
-   * @param {*} _
-   * @param {*} __
-   * @param {import("antd/lib/table/interface").SorterResult} sort
-   */
-  const onSort = (_, __, sort) => {
-    const dataSort = sort.order
-      ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
-      : "";
-    setSort(dataSort);
+  const onSort = (_, __, sortInfo) => {
+    setSort(sortInfo.order ? `${sortInfo.field}~${sortInfo.order === "ascend" ? "asc" : "desc"}` : "");
   };
 
-  /**
-   * Loads the next page of records and appends them to the existing list.
-   */
   const handleLoadMore = async () => {
     const nextPage = page + 1;
-    const totalPages = pagination.totalPages || 0;
-
-    if (nextPage <= totalPages) {
-      const body = {
-        page: nextPage,
-        size: loadMoreSize,
-        sort,
-        searchs: search,
-        filters,
-        filterRules,
-      };
-
-      await dispatch(
-        getRelationshipList({
-          accountId,
-          page: nextPage,
-          pageSize: loadMoreSize,
-          sort,
-          body,
-          isLoadMore: true,
-        }).unwrap()
-      );
+    if (nextPage <= (pagination.totalPages || 0)) {
+      fetchRelationships({ page: nextPage, isLoadMore: true });
     }
     setPage(nextPage);
   };
 
-  /**
-   * Dispatches a download action for the current filtered/sorted view.
-   */
   const handleDownload = () => {
-    const body = {
-      sort,
-      filters,
-      filterRules,
-      searchs: search,
-    };
-
-    dispatch(downloadRelationship({ accountId, body }));
+    const body = { sort, filters, filterRules, searchs: search };
+    if (isStandalone) {
+      dispatch(downloadStandaloneRelationship({ body }));
+    } else {
+      dispatch(downloadRelationship({ accountId, body }));
+    }
   };
 
   // --- Effects ---
-  // Re-fetch page 0 whenever sort, search, or filter changes.
   useEffect(() => {
-    const body = {
-      page: 0,
-      size: loadMoreSize,
-      sort,
-      searchs: search,
-      filters,
-      filterRules,
-    };
-
     setPage(0);
-    dispatch(
-      getRelationshipList({
-        accountId,
-        page: 0,
-        pageSize: loadMoreSize,
-        sort,
-        body,
-        isLoadMore: false,
-      })
-    );
+    fetchRelationships({ page: 0, isLoadMore: false });
   }, [sort, search, filters, filterRules]);
 
-  // Trigger a page-0 refresh when the parent signals it (e.g. after inactivate/approval).
   useEffect(() => {
     if (refreshSignal > 0) handleRefresh();
   }, [refreshSignal]);
 
+  // --- Navigation helpers ---
+  const navigateTo = (route, state) => navigate(route, { state });
+
+  const getViewRoute = () => {
+    if (isStandalone) return RELATIONSHIP_ROUTES.DETAIL_RELATIONSHIP;
+    return isStandard ? ACCOUNT_MANAGEMENT_ROUTES.DETAIL_RELATIONSHIP
+      : isOneTime ? ACCOUNT_MANAGEMENT_ROUTES.DETAIL_RELATIONSHIP_ONETIME : "";
+  };
+
+  const getCreateRoute = () => {
+    if (isStandalone) return RELATIONSHIP_ROUTES.CREATE_RELATIONSHIP;
+    return isStandard ? ACCOUNT_MANAGEMENT_ROUTES.CREATE_RELATIONSHIP
+      : isOneTime ? ACCOUNT_MANAGEMENT_ROUTES.CREATE_RELATIONSHIP_ONETIME : "";
+  };
+
+  const getUpdateRoute = () => {
+    if (isStandalone) return RELATIONSHIP_ROUTES.UPDATE_RELATIONSHIP;
+    return isStandard ? ACCOUNT_MANAGEMENT_ROUTES.UPDATE_RELATIONSHIP
+      : isOneTime ? ACCOUNT_MANAGEMENT_ROUTES.UPDATE_RELATIONSHIP_ONETIME : "";
+  };
+
   // --- Column configuration ---
   const itemActions = nxGetAccountActions({
-    handleView: ({ id }) => navigate(
-      isStandard
-        ? ACCOUNT_MANAGEMENT_ROUTES.DETAIL_RELATIONSHIP
-        : isOneTime
-        ? ACCOUNT_MANAGEMENT_ROUTES.DETAIL_RELATIONSHIP_ONETIME
-        : "",
-      {
-        state: {
-          idAccount: accountId,
-          idCustomer: customerId,
-          id,
-        }
-      }
-    ),
-    handleCreate: () => navigate(
-      isStandard
-        ? ACCOUNT_MANAGEMENT_ROUTES.CREATE_RELATIONSHIP
-        : isOneTime
-        ? ACCOUNT_MANAGEMENT_ROUTES.CREATE_RELATIONSHIP_ONETIME
-        : "",
-      {
-        state: {
-          idAccount: accountId,
-          idCustomer: customerId,
-        }
-      }
-    ),
-    handleUpdate: ({ id }) => navigate(
-      isStandard
-        ? ACCOUNT_MANAGEMENT_ROUTES.UPDATE_RELATIONSHIP
-        : isOneTime
-        ? ACCOUNT_MANAGEMENT_ROUTES.UPDATE_RELATIONSHIP_ONETIME
-        : "",
-      {
-        state: {
-          idAccount: accountId,
-          idCustomer: customerId,
-          id,
-        }
-      }
-    ),
+    handleView: ({ id, subjectId }) => navigateTo(getViewRoute(), {
+      idAccount: isStandalone ? subjectId : accountId,
+      idCustomer: customerId,
+      id,
+      isStandalone,
+    }),
+    handleCreate: () => navigateTo(getCreateRoute(), {
+      idAccount: accountId,
+      idCustomer: customerId,
+      formType: "create",
+    }),
+    handleUpdate: ({ id, status, statusApproval, subjectId }) => navigateTo(getUpdateRoute(), {
+      idAccount: isStandalone ? subjectId : accountId,
+      idCustomer: customerId,
+      id,
+      status,
+      statusApproval,
+      formType: "update",
+    }),
     handleApproval,
     handleApprovalHistory: ({ id }) => handleApprovalHistoryModal(true, id),
     handleDownload,
-    handleInactivate: ({ id, accountNumber }) => handleInactivateModal(true, id, accountNumber),
+    handleInactivate: ({ id, relatedNumber }) => handleInactivateModal(true, id, relatedNumber),
   });
 
   const actionCols = useColumnActionPermission(
@@ -325,34 +177,26 @@ const RelationshipTable = ({
     itemActions,
     "View",
     "table"
-  ).map((col) => ({
-    ...col,
-    width: 70,
-    align: "center",
-  }));
+  ).map((col) => ({ ...col, width: 70, align: "center" }));
+
+  const columnParams = { search, searchInput, searchedColumn, searchText, handleSearch };
 
   const baseColumns = useMemo(
-    () =>
-      getRelationshipColumns(
-        search,
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch
-      ),
-    [search, searchText, searchedColumn]
+    () => isStandalone
+      ? getStandaloneRelationshipColumns(columnParams)
+      : getRelationshipColumns(columnParams),
+    [search, searchText, searchedColumn, isStandalone]
   );
 
-  const columnDefinitions = useMemo(() => {
+  const columns = useMemo(() => {
     return [...baseColumns, ...actionCols].map((col) => ({
       ...col,
       key: col.key || col.dataIndex || col.title,
     }));
   }, [baseColumns, actionCols]);
 
-  const columns = useMemo(() => {
-    return nxApplyFixedColumns(columnDefinitions, fixedColumns);
-  }, [columnDefinitions, fixedColumns]);
+  const expandedRowRender = (record, index) =>
+    <RelationshipDetailTable relatedDetails={record.relatedDetail ?? []} key={index} />;
 
   return (
     <div className="flex flex-col gap-y-4">
@@ -362,7 +206,7 @@ const RelationshipTable = ({
         dataSource={dataSource}
         totalData={totalElement}
         current={page}
-        tableScrolled={{ x: dataSource.length ? "max-content" : 2000 }}
+        tableScrolled={{ x: dataSource.length ? "max-content" : 1390 }}
         onSort={onSort}
         columns={columns}
         usePagination={false}
@@ -370,14 +214,8 @@ const RelationshipTable = ({
         hasMore={hasMore}
         onLoadMore={handleLoadMore}
         loadMoreThreshold={20}
-        fixedColumns={fixedColumns}
-        setFixedColumns={setFixedColumns}
-        columnDefinitions={columnDefinitions}
         loading={loading}
-        expandable={{
-          expandedRowRender,
-          rowExpandable: (record) => record?.relatedDetail && record.relatedDetail.length > 0,
-        }}
+        expandable={{ expandedRowRender }}
       />
     </div>
   );

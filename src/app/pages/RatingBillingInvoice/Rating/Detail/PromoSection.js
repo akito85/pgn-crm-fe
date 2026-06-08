@@ -108,13 +108,13 @@ const PromoSection = ({ ratingCode, calculationCode }) => {
               Calculation Code
             </p>
             <p className="text-[20px] font-medium text-[#0075bf]">
-              {calculationCode || "-"}
+              {calculationCode || ""}
             </p>
           </div>
           <div className="flex flex-col gap-1">
             <p className="text-[15px] font-normal text-gray-700">Rating Code</p>
             <p className="text-[20px] font-medium text-[#0075bf]">
-              {ratingCode || "-"}
+              {ratingCode || ""}
             </p>
           </div>
         </div>

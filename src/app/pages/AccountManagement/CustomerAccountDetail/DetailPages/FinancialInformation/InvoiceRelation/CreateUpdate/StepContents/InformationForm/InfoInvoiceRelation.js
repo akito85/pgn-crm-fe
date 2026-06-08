@@ -5,9 +5,9 @@ import {
   dateFormatting,
   requiredMessage
 } from "../../../../../../../../../../utils";
-import { getIrAccountStandard } from "../../../../../../../../../../redux/slices/account_management/detailAccount/InvoiceRelationSlice";
+import { getIrAccounts } from "../../../../../../../../../../redux/slices/account_management/detailAccount/InvoiceRelationSlice";
 import { useDispatch, useSelector } from "react-redux";
-import { getAccountStandardColumns } from "./getAccountStandardColumns";
+import { getAccountColumns } from "./getAccountColumns";
 import NxTable from "../../../../../../../../../../components/Nx/NxTable";
 import NxModal from "../../../../../../../../../../components/Nx/NxModal";
 import NxBaseContainer from "../../../../../../../../../../components/Nx/NxBaseContainer";
@@ -15,6 +15,11 @@ import NxDetailText from "../../../../../../../../../../components/Nx/NxDetailTe
 import NxDate from "../../../../../../../../../../components/Nx/NxDatePicker";
 import moment from "moment";
 
+/**
+ * Information form for invoice relation create/update
+ * @param {{ setAccount: Function; accountId: number; isUpdate: boolean; isDraft: boolean; form: object; formView: boolean }} props
+ * @returns
+ */
 export default function InfoInvoiceRelation({
   setAccount,
   accountId,
@@ -23,6 +28,7 @@ export default function InfoInvoiceRelation({
   form,
   formView = true
 }) {
+  // --- Hooks ---
   const dispatch = useDispatch();
 
   const accountNumber = Form.useWatch("accountNumber", form);
@@ -31,6 +37,7 @@ export default function InfoInvoiceRelation({
   const endDate = Form.useWatch("endDate", form);
   const description = Form.useWatch("description", form);
 
+  // --- State ---
   const [page, setPage] = useState(1);
   const [loadMoreSize] = useState(20);
   const [search, setSearch] = useState({});
@@ -39,6 +46,8 @@ export default function InfoInvoiceRelation({
   const [searchedColumn, setSearchedColumn] = useState("");
   const searchInput = useRef(null);
 
+  // --- Functions / handlers ---
+  /** @param {*} _ @param {*} __ @param {{ field: string; order: string }} sort */
   const onSort = (_, __, sort) => {
     const dataSort = sort.order
       ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
@@ -49,8 +58,9 @@ export default function InfoInvoiceRelation({
   const [isOpen, setIsOpen] = useState(false);
 
   const {
-    list_irAccountStandard: irAccountStandards,
-    pagination_irAccountStandard: pagination
+    list_irAccount: accounts,
+    pagination_irAccount: pagination,
+    loading_listIrAccount: loading
   } = useSelector((state) => state.invoiceRelation);
 
   const handleCancel = () => {
@@ -61,6 +71,7 @@ export default function InfoInvoiceRelation({
     setIsOpen(false);
   };
 
+  /** @param {string[]} selectedKeys @param {() => void} confirm @param {string} dataIndex */
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
@@ -76,6 +87,7 @@ export default function InfoInvoiceRelation({
     });
   };
 
+  /** Load next page of accounts into the table */
   const handleLoadMore = async () => {
     const nextPage = page + 1;
     const totalPage = pagination.totalPage || 0;
@@ -89,7 +101,7 @@ export default function InfoInvoiceRelation({
       };
 
       await dispatch(
-        getIrAccountStandard({
+        getIrAccounts({
           body,
           isLoadMore: true,
           id: accountId
@@ -100,6 +112,7 @@ export default function InfoInvoiceRelation({
     }
   };
 
+  // --- Effects ---
   useEffect(() => {
     if (formView) {
       const body = {
@@ -110,7 +123,7 @@ export default function InfoInvoiceRelation({
       };
 
       dispatch(
-        getIrAccountStandard({
+        getIrAccounts({
           body,
           id: accountId,
           isLoadMore: false
@@ -121,7 +134,7 @@ export default function InfoInvoiceRelation({
 
   const columnDefinitions = useMemo(
     () =>
-      getAccountStandardColumns(
+      getAccountColumns(
         search,
         searchInput,
         searchedColumn,
@@ -135,8 +148,9 @@ export default function InfoInvoiceRelation({
 
   const columns = useMemo(() => [...columnDefinitions], [columnDefinitions]);
 
+  // --- Derived values ---
   const totalElement = pagination.totalElement;
-  const hasMore = irAccountStandards.length < totalElement;
+  const hasMore = accounts.length < totalElement;
 
   if (!formView) {
     return (
@@ -159,94 +173,93 @@ export default function InfoInvoiceRelation({
   }
 
   return (
-    <div className="flex flex-col gap-y-4">
-      <div className="w-full grid grid-cols-2 gap-4">
-        <div className="flex gap-2 items-end">
+    <>
+      <div className="flex flex-col gap-y-4">
+        <div className="w-full grid grid-cols-2 gap-4">
+          <div className="flex gap-2 items-end">
+            <Form.Item
+              label={"Account Number"}
+              required
+              className="no-margin-form w-full"
+            >
+              <div className="flex gap-x-1">
+                <Form.Item
+                  key="accountNumber"
+                  name={"accountNumber"}
+                  rules={[
+                    {
+                      message: requiredMessage("Account Number"),
+                      required: true
+                    }
+                  ]}
+                  noStyle
+                >
+                  <InputComponent disabled />
+                </Form.Item>
+                <Button
+                  type="submit"
+                  className="min-w-[120px]"
+                  onClick={() => {
+                    setIsOpen(true);
+                  }}
+                  disabled={!isDraft && isUpdate}
+                >
+                  Select
+                </Button>
+              </div>
+            </Form.Item>
+          </div>
+
           <Form.Item
-            label={"Account Number"}
-            required
-            className="no-margin-form w-full"
+            key="accountName"
+            name={"accountName"}
+            label={"Account Name"}
+            className="no-margin-form"
           >
-            <div className="flex gap-x-1">
-              <Form.Item
-                key="accountNumber"
-                name={"accountNumber"}
-                rules={[
-                  {
-                    message: requiredMessage("Account Number"),
-                    required: true
-                  }
-                ]}
-                noStyle
-              >
-                <InputComponent disabled />
-              </Form.Item>
-              <Button
-                type="submit"
-                className="min-w-[120px]"
-                onClick={() => {
-                  setIsOpen(true);
-                }}
-                disabled={!isDraft && isUpdate}
-              >
-                Select
-              </Button>
-            </div>
+            <InputComponent disabled />
+          </Form.Item>
+
+          <Form.Item
+            key="startDate"
+            name={"startDate"}
+            label={"Start Date"}
+            rules={[
+              {
+                message: requiredMessage("Start Date"),
+                required: true
+              }
+            ]}
+            getValueProps={(value) => ({
+              value: value && moment(value)
+            })}
+            className="no-margin-form"
+          >
+            <NxDate
+              disabled={!isDraft && isUpdate}
+              onChange={date => {
+                if (date && endDate && date.isAfter(endDate, "day"))
+                  form.resetFields(["endDate"])
+              }}
+            />
+          </Form.Item>
+
+          <Form.Item
+            key="endDate"
+            name={"endDate"}
+            label={"End Date"}
+            getValueProps={(value) => ({
+              value: value && moment(value)
+            })}
+            className="no-margin-form"
+          >
+            <NxDate
+              dateDisable={(current) => {
+                if (!moment.isMoment(current)) return false;
+                return current.isBefore(startDate, "day");
+              }}
+            />
           </Form.Item>
         </div>
-
-        <Form.Item
-          key="accountName"
-          name={"accountName"}
-          label={"Account Name"}
-          className="no-margin-form"
-        >
-          <InputComponent disabled />
-        </Form.Item>
-
-        <Form.Item
-          key="startDate"
-          name={"startDate"}
-          label={"Start Date"}
-          rules={[
-            {
-              message: requiredMessage("Start Date"),
-              required: true
-            }
-          ]}
-          getValueProps={(value) => ({
-            value: value && moment(value, dateFormatting.dateFormal)
-          })}
-          className="no-margin-form"
-        >
-          <NxDate
-            disabled={!isDraft && isUpdate}
-            onChange={date => {
-              if (date && endDate && date.isAfter(endDate, "day"))
-                form.resetFields(["endDate"])
-            }}
-          />
-        </Form.Item>
-
-        <Form.Item
-          key="endDate"
-          name={"endDate"}
-          label={"End Date"}
-          getValueProps={(value) => ({
-            value: value && moment(value, dateFormatting.dateFormal)
-          })}
-          className="no-margin-form"
-        >
-          <NxDate
-            dateDisable={(current) => {
-              if (!moment.isMoment(current)) return false;
-              return current.isBefore(startDate, "day");
-            }}
-          />
-        </Form.Item>
-      </div>
-
-      <div className="w-full my-5">
         <Form.Item
           key="description"
           name={"description"}
@@ -261,7 +274,7 @@ export default function InfoInvoiceRelation({
           />
         </Form.Item>
       </div>
-
+      {/* Account Selection Modal */}
       <NxModal
         isOpen={isOpen}
         handleCancel={handleCancel}
@@ -278,7 +291,7 @@ export default function InfoInvoiceRelation({
           <NxBaseContainer border>
             <NxTable
               idTable="invoice-relation-account-standard"
-              dataSource={irAccountStandards}
+              dataSource={accounts}
               totalData={totalElement || 0}
               current={page}
               tableScrolled={{ x: 3000 }}
@@ -290,10 +303,11 @@ export default function InfoInvoiceRelation({
               onLoadMore={handleLoadMore}
               loadMoreThreshold={20}
               columnDefinitions={columnDefinitions}
+              loading={loading}
             />
           </NxBaseContainer>
         </div>
       </NxModal>
-    </div>
+    </>
   );
 }

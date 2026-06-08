@@ -10,6 +10,8 @@ import {
 const initialState = {
   data: [],
   loading: false,
+  loadingResult: false,
+  loadingLog: false,
   loadingCreate: false,
   loadingModal: false,
   list_sor: [],
@@ -1062,11 +1064,11 @@ const calculationSlice = createSlice({
     [getDetailCalculationResult.pending]: (state, action) => {
       // Hanya show loading saat initial fetch
       if (!action.meta.arg?.isLoadMore) {
-        state.loading = true;
+        state.loadingResult = true;
       }
     },
     [getDetailCalculationResult.fulfilled]: (state, action) => {
-      state.loading = false;
+      state.loadingResult = false;
       const isLoadMore = action.payload.isLoadMore;
       const newResult = action.payload?.result || [];
 
@@ -1085,7 +1087,7 @@ const calculationSlice = createSlice({
       }
     },
     [getDetailCalculationResult.rejected]: (state, action) => {
-      state.loading = false;
+      state.loadingResult = false;
       // Jangan clear data saat load more gagal
       if (!action.meta.arg?.isLoadMore) {
         state.list_calculation_result = { result: [], page: {} };
@@ -1140,11 +1142,11 @@ const calculationSlice = createSlice({
     [getDetailCalculationLog.pending]: (state, action) => {
       // Only show loading on initial fetch, not on load more
       if (!action.meta.arg?.isLoadMore) {
-        state.loading = true;
+        state.loadingLog = true;
       }
     },
     [getDetailCalculationLog.fulfilled]: (state, action) => {
-      state.loading = false;
+      state.loadingLog = false;
       const newData = action.payload.result || [];
       const isLoadMore = action.payload.isLoadMore;
 
@@ -1172,7 +1174,7 @@ const calculationSlice = createSlice({
       }
     },
     [getDetailCalculationLog.rejected]: (state, action) => {
-      state.loading = false;
+      state.loadingLog = false;
       // Only clear data on initial fetch failure, not on load more failure
       if (!action.meta.arg?.isLoadMore) {
         state.list_calculation_log = {
@@ -1189,14 +1191,14 @@ const calculationSlice = createSlice({
 
     // get detail calculation log no paigng
     [getDetailCalculationResultNoPaging.pending]: (state) => {
-      state.loading = true;
+      state.loadingResult = true;
     },
     [getDetailCalculationResultNoPaging.fulfilled]: (state, action) => {
-      state.loading = false;
+      state.loadingResult = false;
       state.list_calculation_no_paging = action.payload;
     },
     [getDetailCalculationResultNoPaging.rejected]: (state) => {
-      state.loading = false;
+      state.loadingResult = false;
     },
 
     //DETAIL MATCH FORCE

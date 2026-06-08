@@ -377,7 +377,7 @@ const ModalReverseReceipt = ({
                                     <div>
                                         <strong>Reverse Reason:</strong>
                                         <div className="p-2 bg-gray-50 border rounded mt-1">
-                                            {reverseReason || "-"}
+                                            {reverseReason || ""}
                                         </div>
                                     </div>
                                 )}
