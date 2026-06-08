@@ -1,5 +1,6 @@
 import React, { useMemo, useState, useEffect } from "react";
-import { Form, message } from "antd";
+import { Form, Spin, message } from "antd";
+import moment from "moment";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import NxBreadCrumb from "../../../../components/Nx/NxBreadCrumb";
@@ -7,37 +8,166 @@ import { NxFormStepper, NxFormFooter } from "../../../../components/Nx/NxFormSte
 import CardContainer from "../../../../components/CardContainer";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import TableRBI from "../../../../components/TableRBI";
+import ApprovalComponentGeneral from "../../../../components/Approval/ApprovalComponentGeneral";
+import AttachmentComponent from "../../../../components/Attachment/AttachmentComponent";
 import SVGIcon from "../../../../assets/Icon/index";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../routes/Receipt&Collection/rc_routes";
+import { configApp } from "../../../../constants/configApp";
 import SelectComponent from "../../../../components/SelectComponent";
 import InputComponent from "../../../../components/InputComponent";
 import DateComponent from "../../../../components/DateComponent";
 import PayGasDepositeMutationDetailModal from "./Modal/PayGasDepositeMutationDetailModal";
+import receiptCollectionHttpService from "../../../../redux/services/receiptCollectionHttpService";
+import {
+  getAllApprovalList,
+  getListApprovalById,
+} from "../../../../redux/slices/rating_billing_invoice/billing";
 import {
   getConvertedCurrency,
   getAccountNumberDDL,
-  getAllAccountNumberDDL,
   getCurrencyDDL,
   getRateTypeDDL,
+  resetConvertedAmount,
   resetDataAccountNumber,
 } from "../../../../redux/slices/receipt_collection/receipt";
-import { getPaymentPeriods } from "../../../../redux/slices/receipt_collection/paymentCycle";
 import {
+  getListCategory,
+  getPayGasDepositAttachmentList,
+  getPayGasDepositBillingPeriodOptions,
   getPayGasDepositMutationDetailPaginate,
   getPayGasDepositPaginate,
+  getPayGasDepositDailyRate,
+  getPayGasDepositSourceDDL,
+  getPayGasDepositBankDDL,
+  getPayGasDepositSummaryMutations,
+  createPayGasDeposit,
+  getPayAccountOptions,
 } from "../../../../redux/slices/receipt_collection/gasDepositPayment";
+import { showModalSuccess, showModalError } from "../../../../redux/slices/general_slice";
 
 const selectRule = (label) => ([{ required: true, message: `Please select ${label}.` }]);
 const inputRule = (label) => ([{ required: true, message: `Please enter ${label}.` }]);
 const autoFillRule = (label, dependency) => ([{ required: true, message: `${label} will be filled automatically after ${dependency}.` }]);
-const LOCAL_DRAFT_MUTATION_MESSAGE = "Mutation detail was added as a local draft only. It is not saved to the payment backend yet.";
-const CREATE_SUBMIT_UNAVAILABLE_MESSAGE = "Payment Gas Deposit save and submit are not connected to a backend endpoint yet. Current changes stay local in this page.";
+const LOCAL_DRAFT_MUTATION_MESSAGE = "Mutation detail was added to the form. It will be saved when the gas deposit is saved or submitted.";
+const PAYMENT_GAS_DEPOSIT_SUMMARY_CATEGORY = "PAYMENT_GAS_DEPOSIT_SUMMARY";
+const PAYMENT_GAS_DEPOSIT_MUTATION_CATEGORY = "PAYMENT_GAS_DEPOSIT_MUTATION";
+const PAYMENT_SOURCE_OPTIONS = [
+  { label: "Receipt", value: "Receipt" },
+  { label: "Manual", value: "Manual" },
+];
 
 const normalizeText = (value) => String(value || "").trim().toLowerCase();
 const formatLabel = (item) => {
   const name = item?.name || "";
   const description = item?.description ? ` - ${item.description}` : "";
   return `${name}${description}`;
+};
+
+const findCurrencyValue = (currencies = [], value) => {
+  if (value === undefined || value === null || value === "") return undefined;
+  const matched = currencies.find(
+    (item) => item.id === value || normalizeText(item.name) === normalizeText(value),
+  );
+  return matched?.id ?? value;
+};
+
+const findRateTypeValue = (rateTypes = [], value) => {
+  if (value === undefined || value === null || value === "") return undefined;
+  const matched = rateTypes.find(
+    (item) => item.id === value
+      || normalizeText(item.name) === normalizeText(value)
+      || normalizeText(item.description) === normalizeText(value),
+  );
+  return matched?.id ?? value;
+};
+
+const findBillingPeriodValue = (billingPeriods = [], value) => {
+  if (value === undefined || value === null || value === "") return undefined;
+  const matched = billingPeriods.find(
+    (item) => item.id === value
+      || normalizeText(item.periodName) === normalizeText(value)
+      || normalizeText(item.name) === normalizeText(value)
+      || normalizeText(item.period) === normalizeText(value),
+  );
+  return matched?.id ?? value;
+};
+
+const normalizePaymentSourceValue = (value) => {
+  const normalized = normalizeText(value);
+  if (normalized === "manual") return "Manual";
+  if (normalized === "receipt") return "Receipt";
+  return value;
+};
+
+const isWaitingOrDraftStatus = (statusApproval) => {
+  const normalized = normalizeText(statusApproval);
+  return normalized === "draft"
+    || normalized === "waiting approval"
+    || normalized === "waiting"
+    || normalized === "rejected";
+};
+
+const toMomentValue = (value) => {
+  if (!value) return undefined;
+  if (moment.isMoment(value)) return value;
+
+  const parsed = moment(value);
+  return parsed.isValid() ? parsed : undefined;
+};
+
+const mapMutationRowFromLedger = (item, index) => ({
+  key: item.payLedgerId || item.id || `${item.documentNumber || "mutation"}-${index}`,
+  no: index + 1,
+  documentNumber: item.documentNumber || "-",
+  type: item.type || item.transType || "-",
+  category: item.category || "-",
+  mutationDate: item.mutationDate || "-",
+  rateType: item.rateType || "-",
+  rateDate: item.rateDate || "-",
+  rate: item.rate || "-",
+  amount: item.amount ?? 0,
+  eqvBalance: item.eqvAmount ?? item.eqvBalance ?? "-",
+  source: normalizePaymentSourceValue(item.source || item.mutationSource) || "-",
+  billingPeriod: item.billingPeriod || item.billPeriode || "-",
+  description: item.description || "-",
+});
+
+const resolveSummaryReferenceId = (record) => (
+  record?.referenceId
+  ?? record?.payGasDepId
+  ?? record?.masterGasDepositId
+);
+
+const resolvePayGasDepositId = (record) => (
+  record?.payGasDepId
+  ?? record?.masterGasDepositId
+  ?? record?.gasDepositId
+  ?? resolveSummaryReferenceId(record)
+);
+
+const uploadSummaryAttachments = async (attachments = [], referenceId) => {
+  const pendingAttachments = attachments.filter(
+    (item) => item?.dataType !== "exist" && item?.file,
+  );
+
+  if (!pendingAttachments.length || !referenceId) {
+    return;
+  }
+
+  await Promise.all(
+    pendingAttachments.map((item) => {
+      const formData = new FormData();
+      formData.append("files", item.file);
+      formData.append("fileCategoryId", item.fileCategoryId);
+      formData.append("referensiId", referenceId);
+
+      return receiptCollectionHttpService.uploadAttachment(
+        "/v1/dbs/api/pay-gas-deposit/upload-attachment",
+        formData,
+        () => {},
+      );
+    }),
+  );
 };
 
 const PayGasDepositeCreatePage = () => {
@@ -49,26 +179,44 @@ const PayGasDepositeCreatePage = () => {
     data_converted_currency,
     currencyDDL,
     rateTypeDDL,
-    dataAccNumber,
     dataAccountNumber,
   } = useSelector((state) => state.receipt);
-  const { dataPaymentPeriods } = useSelector((state) => state.paymentCycle);
-  const { data_list } = useSelector((state) => state.gasDepositPayment);
+  const {
+    data_daily_rate,
+    data_billing_period_options: billingPeriodMasterOptions,
+    data_bank_ddl: bankDDL,
+  } = useSelector((state) => state.gasDepositPayment);
+  const { data_approval, data_approval_list } = useSelector((state) => state.billing);
+  const {
+    data_account_options: accountOptionsData,
+    loading_account_options: loadingAccountOptions,
+  } = useSelector((state) => state.gasDepositPayment);
+
+  const ACCOUNT_PAGE_SIZE = 100;
+  const [accountSearch, setAccountSearch] = useState("");
+  const accountPageInfo = accountOptionsData?.page || {};
+  const accountList = useMemo(() => accountOptionsData?.result || [], [accountOptionsData]);
   const [currentStep, setCurrentStep] = useState(0);
+  const [loadingSubmit, setLoadingSubmit] = useState(false);
   const [isModalCreateMutationOpen, setIsModalCreateMutationOpen] = useState(false);
+  const [editingMutation, setEditingMutation] = useState(null);
   const [mutationRows, setMutationRows] = useState([]);
   const [requestBodyConvertedRate, setRequestBodyConvertedRate] = useState({});
+  const [selectedHierarchy, setSelectedHierarchy] = useState(undefined);
+  const [appHierDataDetail, setAppHierDataDetail] = useState([]);
+  const [appHierOptions, setAppHierOptions] = useState([]);
+  const [boolApproval, setBoolApproval] = useState(false);
+  const [listDataAttachment, setListDataAttachment] = useState([]);
   const isUpdateMode =
     location.pathname === RECEIPT_AND_COLLECTION_ROUTES.GAS_DEPOSITE_UPDATE ||
     location.state?.mode === "update";
   const selectedData = useMemo(() => location.state?.selectedData ?? null, [location.state]);
 
-  const accountList = dataAccNumber?.data || [];
-
   const accountNumberOptions = useMemo(() => {
+    const seen = new Set();
     return accountList
-      .filter((item) => item?.id !== undefined && item?.id !== null)
-      .map((item) => ({ label: item?.name, value: item?.id }));
+      .filter((item) => item?.accountNumber && !seen.has(item.accountNumber) && seen.add(item.accountNumber))
+      .map((item) => ({ label: item.accountNumber, value: item.accountNumber }));
   }, [accountList]);
 
   const currencyOptions = useMemo(
@@ -77,8 +225,11 @@ const PayGasDepositeCreatePage = () => {
   );
 
   const billingPeriodOptions = useMemo(
-    () => (dataPaymentPeriods || []).map((item) => ({ label: item.periodName, value: item.id })),
-    [dataPaymentPeriods],
+    () => (billingPeriodMasterOptions || []).map((item) => ({
+      label: item.name || item.periodName || item.period,
+      value: item.id,
+    })),
+    [billingPeriodMasterOptions],
   );
 
   const rateTypeOptions = useMemo(
@@ -89,50 +240,25 @@ const PayGasDepositeCreatePage = () => {
     [rateTypeDDL],
   );
 
-  const sourceOptions = useMemo(() => {
-    const seen = new Set();
-    return (data_list?.result || [])
-      .map((item) => item?.source)
-      .filter((item) => item && !seen.has(item) && seen.add(item))
-      .map((item) => ({
-        label: String(item)
-          .toLowerCase()
-          .replaceAll("_", " ")
-          .replaceAll(/\b\w/g, (char) => char.toUpperCase()),
-        value: item,
-      }));
-  }, [data_list]);
+  const sourceOptions = useMemo(() => PAYMENT_SOURCE_OPTIONS, []);
 
-  const findCurrencyValue = (value) => {
-    if (value === undefined || value === null || value === "") return undefined;
-    const matched = (currencyDDL?.data || []).find(
-      (item) => item.id === value || normalizeText(item.name) === normalizeText(value),
-    );
-    return matched?.id ?? value;
-  };
-
-  const findRateTypeValue = (value) => {
-    if (value === undefined || value === null || value === "") return undefined;
-    const matched = (rateTypeDDL?.data || []).find(
-      (item) => item.id === value
-        || normalizeText(item.name) === normalizeText(value)
-        || normalizeText(item.description) === normalizeText(value),
-    );
-    return matched?.id ?? value;
-  };
-
-  const findBillingPeriodValue = (value) => {
-    if (value === undefined || value === null || value === "") return undefined;
-    const matched = (dataPaymentPeriods || []).find(
-      (item) => item.id === value || normalizeText(item.periodName) === normalizeText(value),
-    );
-    return matched?.id ?? value;
-  };
+  const bankOptions = useMemo(
+    () => (bankDDL || []).map((item) => ({ label: item.name, value: item.name })),
+    [bankDDL],
+  );
 
   const formatDecimal = (value) => {
     if (value === null || value === undefined || value === "") return undefined;
     const numericValue = Number(value);
     if (Number.isNaN(numericValue)) return undefined;
+
+    // Use more decimal places for small numbers (e.g. IDR→USD rate ~5.8E-5)
+    if (numericValue !== 0 && Math.abs(numericValue) < 0.01) {
+      return numericValue.toLocaleString("en-US", {
+        minimumFractionDigits: 8,
+        maximumFractionDigits: 8,
+      });
+    }
 
     return numericValue.toLocaleString("en-US", {
       minimumFractionDigits: 2,
@@ -152,6 +278,14 @@ const PayGasDepositeCreatePage = () => {
     return Number.isNaN(parsedValue) ? 0 : parsedValue;
   };
 
+const extractRequestErrorMessage = (error, fallbackMessage) => (
+  error?.message
+  || error?.description
+  || error?.data?.message
+  || error?.response?.data?.message
+  || fallbackMessage
+);
+
   const routes = [
     { path: "", breadcrumbName: "Payment & Collection" },
     { path: RECEIPT_AND_COLLECTION_ROUTES.GAS_DEPOSITE_VIEW, breadcrumbName: "Gas Deposite" },
@@ -166,13 +300,50 @@ const PayGasDepositeCreatePage = () => {
 
   useEffect(() => {
     dispatch(resetDataAccountNumber());
-    dispatch(getAllAccountNumberDDL());
+    dispatch(resetConvertedAmount());
     dispatch(getCurrencyDDL());
     dispatch(getRateTypeDDL());
-    dispatch(getPaymentPeriods());
+    dispatch(getPayGasDepositBillingPeriodOptions());
+    dispatch(getPayGasDepositSourceDDL());
+    dispatch(getPayGasDepositBankDDL());
     dispatch(getPayGasDepositPaginate({ page: 1, pageSize: 100, search: "", sort: "accountNumber~asc" }));
+    dispatch(getAllApprovalList());
   }, [dispatch]);
 
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      dispatch(getPayAccountOptions({
+        page: 1,
+        pageSize: ACCOUNT_PAGE_SIZE,
+        search: accountSearch,
+        isLoadMore: false,
+      }));
+    }, 300);
+    return () => clearTimeout(timeoutId);
+  }, [dispatch, accountSearch]);
+
+  useEffect(() => {
+    if (isUpdateMode) return undefined;
+
+    form.resetFields();
+    form.setFieldsValue({ source: "Manual" });
+    setCurrentStep(0);
+    setMutationRows([]);
+    setRequestBodyConvertedRate({});
+    setSelectedHierarchy(undefined);
+    setAppHierDataDetail([]);
+    setBoolApproval(false);
+    setListDataAttachment([]);
+    dispatch(resetDataAccountNumber());
+    dispatch(resetConvertedAmount());
+
+    return () => {
+      dispatch(resetDataAccountNumber());
+      dispatch(resetConvertedAmount());
+    };
+  }, [dispatch, form, isUpdateMode, location.key]);
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (!isUpdateMode || !selectedData) return;
 
@@ -189,21 +360,21 @@ const PayGasDepositeCreatePage = () => {
       accountType: selectedData.accountType,
       classificationType: selectedData.classificationType,
       sapCustId: selectedData.sapCustId,
-      paymentDate: selectedData.paymentDate,
-      currency: findCurrencyValue(selectedData.currency),
+      paymentDate: toMomentValue(selectedData.paymentDate),
+      currency: findCurrencyValue(currencyDDL?.data || [], selectedData.currency),
       balance: selectedData.balance ?? selectedData.balanceAmount,
-      rateType: findRateTypeValue(selectedData.rateType),
-      rateDate: selectedData.rateDate,
+      rateType: findRateTypeValue(rateTypeDDL?.data || [], selectedData.rateType),
+      rateDate: toMomentValue(selectedData.rateDate),
       rate: selectedData.rate,
       eqvBalance: selectedData.eqvBalance,
-      billingPeriod: findBillingPeriodValue(selectedData.billingPeriod),
-      billingCurrency: findCurrencyValue(selectedData.billingCurrency),
-      source: selectedData.source,
+      billingPeriod: findBillingPeriodValue(billingPeriodMasterOptions || [], selectedData.billingPeriod),
+      billingCurrency: findCurrencyValue(currencyDDL?.data || [], selectedData.billingCurrency),
+      source: normalizePaymentSourceValue(selectedData.source),
       description: selectedData.description,
     });
   }, [
     currencyDDL,
-    dataPaymentPeriods,
+    billingPeriodMasterOptions,
     form,
     isUpdateMode,
     rateTypeDDL,
@@ -211,7 +382,14 @@ const PayGasDepositeCreatePage = () => {
   ]);
 
   useEffect(() => {
-    if (isUpdateMode || !dataAccountNumber?.data) return;
+    const selectedAccountNumber = form.getFieldValue("accountNumber");
+    if (isUpdateMode || !dataAccountNumber?.data || !selectedAccountNumber) return;
+
+    const resolvedSapCustId =
+      dataAccountNumber?.data?.sapCustId
+      || dataAccountNumber?.data?.accountReferenceId
+      || form.getFieldValue("sapCustId")
+      || "";
 
     form.setFieldsValue({
       customerNumber: dataAccountNumber?.data?.customerNumber || "",
@@ -220,6 +398,7 @@ const PayGasDepositeCreatePage = () => {
       accountGroupType: dataAccountNumber?.data?.accountGroupType || "",
       accountType: dataAccountNumber?.data?.accountType || "",
       classificationType: dataAccountNumber?.data?.classificationType || "",
+      sapCustId: resolvedSapCustId ? String(resolvedSapCustId) : "",
       sor: dataAccountNumber?.data?.sor || "",
       costCenter: dataAccountNumber?.data?.area || "",
       accountSegment: dataAccountNumber?.data?.segment || "",
@@ -228,20 +407,71 @@ const PayGasDepositeCreatePage = () => {
   }, [dataAccountNumber, form, isUpdateMode]);
 
   useEffect(() => {
+    if (data_approval && data_approval.length > 0) {
+      setAppHierOptions(data_approval.map((item) => ({ name: item.approvalName, value: item.appHierId })));
+    } else {
+      setAppHierOptions([]);
+    }
+  }, [data_approval]);
+
+  useEffect(() => {
+    if (boolApproval && data_approval_list && data_approval_list.length > 0) {
+      setAppHierDataDetail(
+        data_approval_list.map((item, index) => ({
+          ...item,
+          key: index + 1,
+          employeeDetail: (item.employeeDetail || []).map((employee, employeeIndex) => ({
+            ...employee,
+            key: employeeIndex + 1,
+          })),
+        })),
+      );
+      return;
+    }
+
+    setAppHierDataDetail([]);
+  }, [boolApproval, data_approval_list]);
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
     if (!isUpdateMode || !selectedData) {
       setMutationRows([]);
       return;
     }
 
-    const gasDepositId = selectedData.gasDepositId || selectedData.masterGasDepositId || selectedData.accountId;
-    if (!gasDepositId) {
+    const summaryReferenceId = resolveSummaryReferenceId(selectedData);
+    const payGasDepId = resolvePayGasDepositId(selectedData);
+
+    if (isWaitingOrDraftStatus(selectedData.statusApproval) && summaryReferenceId) {
+      dispatch(getPayGasDepositSummaryMutations({ payGasDepId: summaryReferenceId })).then((action) => {
+        const mutationData = action.payload || [];
+        setMutationRows(mutationData.map(mapMutationRowFromLedger));
+        const firstMutation = mutationData[0];
+        if (firstMutation) {
+          form.setFieldsValue({
+            source: normalizePaymentSourceValue(selectedData?.source || firstMutation.source),
+            paymentDate: toMomentValue(selectedData?.paymentDate || firstMutation.mutationDate),
+            rateType: findRateTypeValue(rateTypeDDL?.data || [], selectedData?.rateType || firstMutation.rateType),
+            rateDate: toMomentValue(selectedData?.rateDate || firstMutation.rateDate),
+            rate: selectedData?.rate || firstMutation.rate,
+            billingPeriod: findBillingPeriodValue(
+              billingPeriodMasterOptions || [],
+              selectedData?.billingPeriod || firstMutation.billPeriode,
+            ),
+          });
+        }
+      });
+      return;
+    }
+
+    if (!payGasDepId) {
       setMutationRows([]);
       return;
     }
 
     dispatch(
       getPayGasDepositMutationDetailPaginate({
-        gasDepositId,
+        payGasDepId,
         page: 1,
         pageSize: 100,
         search: "",
@@ -249,18 +479,36 @@ const PayGasDepositeCreatePage = () => {
       }),
     ).then((action) => {
       const mutationData = action.payload?.result || [];
-      setMutationRows(
-        mutationData.map((item, index) => ({
-          key: item.id || item.stgMutId || `${item.documentNumber || "mutation"}-${index}`,
-          no: index + 1,
-          documentNumber: item.documentNumber || "-",
-          source: item.source || "-",
-          billingPeriod: item.billingPeriod || item.billPeriode || "-",
-          mutationDate: item.mutationDate || "-",
-        })),
-      );
+      setMutationRows(mutationData.map(mapMutationRowFromLedger));
+    });
+  }, [billingPeriodMasterOptions, dispatch, form, isUpdateMode, rateTypeDDL, selectedData]);
+
+  useEffect(() => {
+    if (!isUpdateMode || !selectedData) {
+      setListDataAttachment([]);
+      return;
+    }
+
+    const summaryReferenceId = resolveSummaryReferenceId(selectedData);
+    if (!summaryReferenceId) {
+      setListDataAttachment([]);
+      return;
+    }
+
+    dispatch(
+      getPayGasDepositAttachmentList({
+        referenceId: summaryReferenceId,
+      }),
+    ).then((action) => {
+      setListDataAttachment(action.payload || []);
     });
   }, [dispatch, isUpdateMode, selectedData]);
+
+  // Sync rate field when data_daily_rate changes (e.g. triggered externally or on re-mount)
+  useEffect(() => {
+    applyDailyRate(data_daily_rate);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data_daily_rate]);
 
   useEffect(() => {
     const { fromCurrency, toCurrency, rateType, rateDate } = requestBodyConvertedRate;
@@ -275,6 +523,26 @@ const PayGasDepositeCreatePage = () => {
 
     dispatch(getConvertedCurrency(requestBodyConvertedRate));
   }, [dispatch, requestBodyConvertedRate]);
+
+  // Auto-calculate Balance from sum of mutation amounts, then recalculate EQV Balance
+  useEffect(() => {
+    const total = mutationRows.reduce((sum, row) => sum + parseNumericValue(row.amount), 0);
+    const formattedBalance = formatDecimal(total);
+    form.setFieldsValue({ balance: formattedBalance });
+
+    const allValues = form.getFieldsValue();
+    if (allValues.currency && allValues.currency === allValues.billingCurrency) {
+      form.setFieldsValue({
+        rate: formatDecimal(1),
+        eqvBalance: formatDecimal(total),
+      });
+    } else {
+      const currentRate = parseNumericValue(allValues.rate);
+      if (currentRate > 0) {
+        form.setFieldsValue({ eqvBalance: formatDecimal(total * currentRate) });
+      }
+    }
+  }, [form, mutationRows]);
 
   useEffect(() => {
     const formValues = form.getFieldsValue(["currency", "billingCurrency", "balance"]);
@@ -306,20 +574,43 @@ const PayGasDepositeCreatePage = () => {
 
   const mutationColumns = useMemo(
     () => [
-      { key: "no", title: "NO", dataIndex: "no", width: 20, align: "center" },
-      { key: "documentNumber", title: "DOCUMENT NUMBER", dataIndex: "documentNumber", width: 80 },
-      { key: "source", title: "SOURCE", dataIndex: "source", width: 70 },
-      { key: "billingPeriod", title: "BILLING PERIOD", dataIndex: "billingPeriod", width: 70, align: "center" },
-      { key: "mutationDate", title: "MUTATION DATE", dataIndex: "mutationDate", width: 70, align: "center" },
+      { key: "no", title: "NO", dataIndex: "no", width: 40, align: "center" },
+      { key: "documentNumber", title: "DOCUMENT NUMBER", dataIndex: "documentNumber", width: 120 },
+      { key: "type", title: "TYPE", dataIndex: "type", width: 80 },
+      { key: "category", title: "CATEGORY", dataIndex: "category", width: 120 },
+      { key: "mutationDate", title: "MUTATION DATE", dataIndex: "mutationDate", width: 100, align: "center" },
+      { key: "rateType", title: "RATE TYPE", dataIndex: "rateType", width: 90 },
+      { key: "rateDate", title: "RATE DATE", dataIndex: "rateDate", width: 100, align: "center" },
+      { key: "rate", title: "RATE", dataIndex: "rate", width: 90, align: "right" },
+      { key: "amount", title: "AMOUNT", dataIndex: "amount", width: 100, align: "right" },
+      { key: "eqvBalance", title: "EQV BALANCE", dataIndex: "eqvBalance", width: 110, align: "right" },
+      { key: "source", title: "SOURCE", dataIndex: "source", width: 90 },
+      { key: "bank", title: "BANK", dataIndex: "bank", width: 100 },
+      { key: "billingPeriod", title: "PERIOD", dataIndex: "billingPeriod", width: 90, align: "center" },
+      { key: "description", title: "DESCRIPTION", dataIndex: "description", width: 140 },
       {
         key: "action",
         title: "ACTION",
         width: 70,
         align: "center",
-        render: () => (
+        fixed: "right",
+        render: (_, record) => (
           <div className="flex items-center justify-center gap-2">
-            <SVGIcon name="IconUpdateAction" width={18} color="#0075bf" />
-            <SVGIcon name="IconDelete" width={18} color="#ef4444" />
+            <span
+              style={{ cursor: "pointer" }}
+              onClick={() => {
+                setEditingMutation(record);
+                setIsModalCreateMutationOpen(true);
+              }}
+            >
+              <SVGIcon name="IconUpdateAction" width={18} color="#0075bf" />
+            </span>
+            <span
+              style={{ cursor: "pointer" }}
+              onClick={() => setMutationRows((prev) => prev.filter((r) => r.key !== record.key))}
+            >
+              <SVGIcon name="IconDelete" width={18} color="#ef4444" />
+            </span>
           </div>
         ),
       },
@@ -327,60 +618,246 @@ const PayGasDepositeCreatePage = () => {
     [],
   );
 
-  const handleAccountNumberChange = (value) => {
-    const selected = accountList.find((item) => item.id === value);
+  const handleAccountPopupScroll = (event) => {
+    const target = event?.target;
+    if (!target || loadingAccountOptions) return;
+    const isAtBottom = target.scrollTop + target.offsetHeight >= target.scrollHeight - 8;
+    const currentPage = Number(accountPageInfo?.currentPage || 1);
+    const totalPages = Number(accountPageInfo?.totalPages || 1);
+    if (isAtBottom && currentPage < totalPages) {
+      dispatch(getPayAccountOptions({
+        page: currentPage + 1,
+        pageSize: ACCOUNT_PAGE_SIZE,
+        search: accountSearch,
+        isLoadMore: true,
+      }));
+    }
+  };
 
-    dispatch(getAccountNumberDDL(value));
+  const handleAccountNumberChange = (value) => {
+    const selected = accountList.filter(Boolean).find((item) => item.accountNumber === value);
+    const selectedSapCustId = selected?.sapCustId || selected?.accountReferenceId;
+
+    dispatch(getAccountNumberDDL(selected?.accountId ?? value));
 
     form.setFieldsValue({
       accountNumber: value,
-      accountName: selected?.name?.split(" - ")?.[1] || selected?.name || "",
-      customerNumber: selected?.customerId || "",
+      accountName: selected?.accountName || "",
+      customerNumber: selected?.customerNumber || "",
       customerName: selected?.customerName || "",
-      sapCustId: "",
+      sapCustId: selectedSapCustId ? String(selectedSapCustId) : "",
+      // reset gas deposit information fields to avoid stale cache
+      source: "Manual",
+      paymentDate: undefined,
+      currency: undefined,
+      balance: undefined,
+      rateType: undefined,
+      rateDate: undefined,
+      rate: undefined,
+      eqvBalance: undefined,
+      billingPeriod: undefined,
+      billingCurrency: undefined,
+      description: undefined,
+    });
+    setRequestBodyConvertedRate({});
+    dispatch(resetConvertedAmount());
+  };
+
+  const handleSelectHierarchy = (value) => {
+    setSelectedHierarchy(value);
+    form.setFieldsValue({ apphierId: value });
+    dispatch(getListApprovalById(value));
+    setBoolApproval(true);
+  };
+
+  const handleResetCreateForm = () => {
+    form.resetFields();
+    form.setFieldsValue({ source: "Manual" });
+    setCurrentStep(0);
+    setMutationRows([]);
+    setRequestBodyConvertedRate({});
+    setSelectedHierarchy(undefined);
+    setAppHierDataDetail([]);
+    setBoolApproval(false);
+    setListDataAttachment([]);
+    dispatch(resetDataAccountNumber());
+    dispatch(resetConvertedAmount());
+  };
+
+  const handlePersist = async (isDraft) => {
+    setLoadingSubmit(true);
+    try {
+      let values;
+      if (isDraft) {
+        await form.validateFields(["accountNumber", "source", "paymentDate", "currency"]);
+        values = form.getFieldsValue(true);
+      } else {
+        if (mutationRows.length === 0) {
+          message.error("Please add at least one mutation detail before submitting.");
+          return;
+        }
+        values = await form.validateFields();
+      }
+
+      const accountNumberValue = values.accountNumber;
+      const selectedAccount = accountList.filter(Boolean).find((item) => item.accountNumber === accountNumberValue);
+      const accountId = selectedAccount?.accountId ?? accountNumberValue;
+      if (!accountId) {
+        dispatch(showModalError({ title: "Failed", description: "Account ID tidak ditemukan. Silakan pilih ulang Account Number." }));
+        return;
+      }
+
+      const rateDateVal = values.rateDate?.format
+        ? values.rateDate.format("YYYY-MM-DD")
+        : values.rateDate;
+      const paymentDateVal = values.paymentDate?.format
+        ? values.paymentDate.format("YYYY-MM-DD")
+        : values.paymentDate;
+
+      const body = {
+        payGasDepId: isUpdateMode ? resolvePayGasDepositId(selectedData) : undefined,
+        account_id: accountId,
+        apphier_id: values.apphierId ?? selectedHierarchy,
+        source: values.source,
+        payment_date: paymentDateVal,
+        currency: currencyOptions.find((i) => i.value === values.currency)?.label ?? values.currency,
+        billing_currency: currencyOptions.find((i) => i.value === values.billingCurrency)?.label ?? values.billingCurrency,
+        balance: parseNumericValue(values.balance),
+        rate_type: (rateTypeDDL?.data || []).find((i) => i.id === values.rateType)?.name ?? values.rateType,
+        rate_date: rateDateVal,
+        rate: parseNumericValue(values.rate),
+        eqv_balance: parseNumericValue(values.eqvBalance),
+        billing_period: (billingPeriodMasterOptions || []).find((i) => i.id === values.billingPeriod)?.name
+          ?? (billingPeriodMasterOptions || []).find((i) => i.id === values.billingPeriod)?.periodName
+          ?? values.billingPeriod,
+        description: values.description,
+        is_draft: isDraft,
+        action_type: isUpdateMode ? "UPDATE" : "CREATE",
+        sap_cust_id: values.sapCustId ? String(values.sapCustId) : undefined,
+        mutations: mutationRows.map((row) => ({
+          document_number: row.documentNumber,
+          type: row.type,
+          category: row.category,
+          bank: values.bank,
+          mutation_date: row.mutationDate,
+          rate_type: row.rateType,
+          rate_date: row.rateDate,
+          rate: parseNumericValue(row.rate),
+          amount: parseNumericValue(row.amount),
+          eqv_amount: parseNumericValue(row.eqvBalance),
+          source: row.source,
+          bill_periode: row.billingPeriod,
+          description: row.description,
+        })),
+      };
+
+      const response = await dispatch(createPayGasDeposit(body)).unwrap();
+      const responseData = response?.data || response || {};
+      const summaryReferenceId =
+        responseData?.payGasDepId ||
+        responseData?.id ||
+        resolveSummaryReferenceId(selectedData);
+
+      await uploadSummaryAttachments(listDataAttachment, summaryReferenceId);
+
+      dispatch(showModalSuccess({
+        title: "Success",
+        description: isDraft
+          ? "Gas Deposit draft saved successfully"
+          : isUpdateMode ? "Gas Deposit updated successfully" : "Gas Deposit created successfully",
+        return: false,
+      }));
+      navigate(RECEIPT_AND_COLLECTION_ROUTES.GAS_DEPOSITE_VIEW);
+    } catch (error) {
+      if (Array.isArray(error?.errorFields)) {
+        return;
+      }
+
+      dispatch(showModalError({
+        title: "Failed",
+        description: extractRequestErrorMessage(
+          error,
+          isDraft ? "Failed to save gas deposit draft." : "Failed to create gas deposit.",
+        ),
+        return: false,
+      }));
+    } finally {
+      setLoadingSubmit(false);
+    }
+  };
+
+  const handleNext = async () => {
+    if (currentStep === 0) {
+      try {
+        await form.validateFields([
+          "accountNumber",
+          "source",
+          "paymentDate",
+          "currency",
+          "balance",
+          "rateType",
+          "rateDate",
+          "rate",
+          "eqvBalance",
+          "billingPeriod",
+          "billingCurrency",
+          "description",
+        ]);
+      } catch {
+        return;
+      }
+    }
+
+    setCurrentStep((prev) => Math.min(steps.length - 1, prev + 1));
+  };
+
+  const applyDailyRate = (matched) => {
+    if (!matched) return;
+    const rawReal = Number(matched.convertedRateReal);
+    const rawStr = Number(matched.convertedRate);
+    const convertedRate = (!Number.isNaN(rawReal) && rawReal > 0) ? rawReal : rawStr;
+    const balance = parseNumericValue(form.getFieldValue("balance"));
+    form.setFieldsValue({
+      rate: formatDecimal(convertedRate),
+      eqvBalance: balance > 0 ? formatDecimal(balance * convertedRate) : undefined,
     });
   };
 
-  const handleFormValuesChange = (changedValues, allValues) => {
-    if (changedValues.balance !== undefined && allValues.currency === allValues.billingCurrency) {
+  const resolveDailyRate = (allValues, formattedRateDate) => {
+    if (!allValues.currency || !allValues.rateType || !formattedRateDate) {
+      form.setFieldsValue({ rate: undefined, eqvBalance: undefined });
+      return;
+    }
+    const currencyName = (currencyDDL?.data || []).find((item) => item.id === allValues.currency)?.name;
+    const billingCurrencyName = (currencyDDL?.data || []).find((item) => item.id === allValues.billingCurrency)?.name;
+    const rateTypeCode = (rateTypeDDL?.data || []).find((item) => item.id === allValues.rateType)?.name;
+    if (currencyName && rateTypeCode) {
+      dispatch(getPayGasDepositDailyRate({
+        fromCurrencyName: currencyName,
+        toCurrencyName: billingCurrencyName,
+        rateType: rateTypeCode,
+        rateDate: formattedRateDate,
+      }))
+        .unwrap()
+        .then((matched) => applyDailyRate(matched))
+        .catch(() => {});
+    }
+  };
+
+  const resolveConvertedCurrency = (allValues, formattedRateDate) => {
+    if (!allValues.currency || !allValues.billingCurrency) {
+      setRequestBodyConvertedRate({});
+      return;
+    }
+    if (allValues.currency === allValues.billingCurrency) {
       form.setFieldsValue({
         rate: formatDecimal(1),
         eqvBalance: formatDecimal(parseNumericValue(allValues.balance)),
       });
+      setRequestBodyConvertedRate({});
+      return;
     }
-
-    if (
-      changedValues.currency !== undefined
-      || changedValues.billingCurrency !== undefined
-      || changedValues.rateType !== undefined
-      || changedValues.rateDate !== undefined
-      || changedValues.balance !== undefined
-    ) {
-      if (!allValues.currency || !allValues.billingCurrency) {
-        form.setFieldsValue({ rate: undefined, eqvBalance: undefined });
-        setRequestBodyConvertedRate({});
-        return;
-      }
-
-      if (allValues.currency === allValues.billingCurrency) {
-        form.setFieldsValue({
-          rate: formatDecimal(1),
-          eqvBalance: formatDecimal(parseNumericValue(allValues.balance)),
-        });
-        setRequestBodyConvertedRate({});
-        return;
-      }
-
-      if (!allValues.rateType || !allValues.rateDate) {
-        form.setFieldsValue({ rate: undefined, eqvBalance: undefined });
-        setRequestBodyConvertedRate({});
-        return;
-      }
-
-      const formattedRateDate = allValues.rateDate?.format
-        ? allValues.rateDate.format("YYYY-MM-DD")
-        : allValues.rateDate;
-
+    if (allValues.rateType && formattedRateDate) {
       setRequestBodyConvertedRate({
         fromCurrency: allValues.currency,
         toCurrency: allValues.billingCurrency,
@@ -388,6 +865,22 @@ const PayGasDepositeCreatePage = () => {
         rateDate: formattedRateDate,
       });
     }
+  };
+
+  const handleFormValuesChange = (changedValues, allValues) => {
+    const rateRelatedChange = changedValues.currency !== undefined
+      || changedValues.rateType !== undefined
+      || changedValues.rateDate !== undefined
+      || changedValues.billingCurrency !== undefined;
+
+    if (!rateRelatedChange) return;
+
+    const formattedRateDate = allValues.rateDate?.format
+      ? allValues.rateDate.format("YYYY-MM-DD")
+      : allValues.rateDate;
+
+    resolveDailyRate(allValues, formattedRateDate);
+    resolveConvertedCurrency(allValues, formattedRateDate);
   };
 
   return (
@@ -398,10 +891,11 @@ const PayGasDepositeCreatePage = () => {
         steps={steps}
         current={currentStep}
         onPrev={() => setCurrentStep((prev) => Math.max(0, prev - 1))}
-        onNext={() => setCurrentStep((prev) => Math.min(steps.length - 1, prev + 1))}
+        onNext={handleNext}
       />
 
       <Form form={form} layout="vertical" onValuesChange={handleFormValuesChange}>
+        <div className={currentStep === 0 ? "" : "hidden"}>
         <CardContainer
           header={
             <div className="flex -my-4 justify-between items-center">
@@ -422,6 +916,21 @@ const PayGasDepositeCreatePage = () => {
                 onChange={handleAccountNumberChange}
                 disabled={isUpdateMode}
                 options={accountNumberOptions}
+                onPopupScroll={handleAccountPopupScroll}
+                onSearch={setAccountSearch}
+                onClear={() => setAccountSearch("")}
+                filterOption={false}
+                dropdownRender={(menu) => (
+                  <>
+                    {menu}
+                    {loadingAccountOptions && (
+                      <div className="px-3 py-2 border-t border-gray-100 flex items-center gap-2 text-xs text-gray-500">
+                        <Spin size="small" />
+                        <span>Loading more account...</span>
+                      </div>
+                    )}
+                  </>
+                )}
               />
             </Form.Item>
             <Form.Item name="accountName" label="Account Name" style={{ marginBottom: 0 }}>
@@ -475,11 +984,14 @@ const PayGasDepositeCreatePage = () => {
             <Form.Item name="paymentDate" label="Payment Date" rules={selectRule("a payment date")} style={{ marginBottom: 0 }}>
               <DateComponent placeholder="Select Payment Date" dateDisable={() => false} />
             </Form.Item>
+            <Form.Item name="bank" label="Bank" rules={selectRule("a bank")} style={{ marginBottom: 0 }}>
+              <SelectComponent placeholder="Select Bank" options={bankOptions} />
+            </Form.Item>
             <Form.Item name="currency" label="Currency" rules={selectRule("a currency")} style={{ marginBottom: 0 }}>
               <SelectComponent placeholder="Select Currency" options={currencyOptions} />
             </Form.Item>
             <Form.Item name="balance" label="Balance" rules={inputRule("a balance")} style={{ marginBottom: 0 }}>
-              <InputComponent placeholder="Input Balance" />
+              <InputComponent disabled placeholder="Auto-filled from mutation total" />
             </Form.Item>
             <Form.Item name="rateType" label="Rate Type" rules={selectRule("a rate type")} style={{ marginBottom: 0 }}>
               <SelectComponent placeholder="Select Rate Type" options={rateTypeOptions} />
@@ -551,46 +1063,100 @@ const PayGasDepositeCreatePage = () => {
             />
           </div>
         </CardContainer>
+        </div>
+
+        <div className={currentStep === 1 ? "" : "hidden"}>
+          <CardContainer subHeader="Approval Information" className="mt-2">
+            <ApprovalComponentGeneral
+              type="create"
+              dataTable={appHierDataDetail}
+              dataOption={appHierOptions}
+              selectedHierarchy={selectedHierarchy}
+              updateSelectedHierarchy={handleSelectHierarchy}
+            />
+          </CardContainer>
+        </div>
+
+        <div className={currentStep === 2 ? "" : "hidden"}>
+          <CardContainer subHeader="Attachment Information" className="mt-2">
+            <AttachmentComponent
+              type="create"
+              data={listDataAttachment}
+              updateData={setListDataAttachment}
+              dispatch={dispatch}
+              getAPICategory={getListCategory}
+              typeSelector="gasDepositPayment"
+              uploadCategory={PAYMENT_GAS_DEPOSIT_SUMMARY_CATEGORY}
+              service={receiptCollectionHttpService}
+              configApplication={configApp.PAYMENT_SERVICE}
+              typeRBI="data"
+              mandatory={true}
+            />
+          </CardContainer>
+        </div>
 
         <NxFormFooter
           current={currentStep}
           totalSteps={steps.length}
           onPrev={() => setCurrentStep((prev) => Math.max(0, prev - 1))}
-          onNext={() => setCurrentStep((prev) => Math.min(steps.length - 1, prev + 1))}
-          onCancel={() => navigate(RECEIPT_AND_COLLECTION_ROUTES.GAS_DEPOSITE_VIEW)}
-          onClear={() => form.resetFields()}
-          onSaveDraft={() => message.warning(CREATE_SUBMIT_UNAVAILABLE_MESSAGE)}
-          onSubmit={() => message.warning(CREATE_SUBMIT_UNAVAILABLE_MESSAGE)}
+          onNext={handleNext}
+          onCancel={() => {
+            handleResetCreateForm();
+            navigate(RECEIPT_AND_COLLECTION_ROUTES.GAS_DEPOSITE_VIEW);
+          }}
+          onClear={handleResetCreateForm}
+          onSaveDraft={() => handlePersist(true)}
+          onSubmit={() => handlePersist(false)}
+          loading={loadingSubmit}
         />
       </Form>
 
       <PayGasDepositeMutationDetailModal
         isOpen={isModalCreateMutationOpen}
-        handleCancel={() => setIsModalCreateMutationOpen(false)}
+        handleCancel={() => {
+          setIsModalCreateMutationOpen(false);
+          setEditingMutation(null);
+        }}
         handleRefresh={(values) => {
           if (!values) return;
           const mutationDateValue = values.mutationDate?.format
             ? values.mutationDate.format("YYYY-MM-DD")
             : values.mutationDate || "-";
+          const rateDateValue = values.rateDate?.format
+            ? values.rateDate.format("YYYY-MM-DD")
+            : values.rateDate || "-";
           const billingPeriodLabel = billingPeriodOptions.find((item) => item.value === values.period)?.label
             || values.period
             || "-";
-
-          setMutationRows((prev) => [
-            ...prev,
-            {
-              key: prev.length + 1,
-              no: prev.length + 1,
-              documentNumber: values.documentNumber || "-",
-              source: values.source || "-",
-              billingPeriod: billingPeriodLabel,
-              mutationDate: mutationDateValue,
-            },
-          ]);
-          message.info(LOCAL_DRAFT_MUTATION_MESSAGE);
+          const newRow = {
+            key: editingMutation?.key ?? Date.now(),
+            no: editingMutation?.no ?? (mutationRows.length + 1),
+            attachmentCategory: PAYMENT_GAS_DEPOSIT_MUTATION_CATEGORY,
+            documentNumber: values.documentNumber || "-",
+            type: values.type || "-",
+            category: values.category || "-",
+            bank: form.getFieldValue("bank") || "-",
+            mutationDate: mutationDateValue,
+            rateType: values.rateType || form.getFieldValue("rateType") || "-",
+            rateDate: rateDateValue,
+            rate: values.rate || form.getFieldValue("rate") || "-",
+            amount: parseNumericValue(values.amount),
+            eqvBalance: values.eqvBalance || "-",
+            source: values.source || "-",
+            billingPeriod: billingPeriodLabel,
+            description: values.description || "-",
+          };
+          if (editingMutation) {
+            setMutationRows((prev) => prev.map((r) => (r.key === editingMutation.key ? newRow : r)));
+          } else {
+            setMutationRows((prev) => [...prev, newRow]);
+            message.info(LOCAL_DRAFT_MUTATION_MESSAGE);
+          }
+          setEditingMutation(null);
         }}
         sourceOptions={sourceOptions}
         billingPeriodOptions={billingPeriodOptions}
+        editingRow={editingMutation}
         mutationContext={{
           rateType: rateTypeOptions.find((item) => item.value === form.getFieldValue("rateType"))?.label
             || form.getFieldValue("rateType"),

@@ -14,8 +14,8 @@ import {
   getPayGasDepositSummaryBalancePaginate,
   setPayGasDepositFilters,
 } from "../../../../redux/slices/receipt_collection/gasDepositPayment";
-import { columnsGasDeposit } from "../../RatingBillingInvoice/GasDeposit/Table/TableViewGasDeposit";
-import { columnsSummaryBalance } from "../../RatingBillingInvoice/GasDeposit/Table/TableSummaryBalance";
+import { columnsPayGasDeposit } from "./Table/TablePayGasDeposit";
+import { columnsPaySummaryBalance } from "./Table/TablePaySummaryBalance";
 import PayGasDepositeDetail from "./PayGasDepositeDetail";
 import TableRBI from "../../../../components/TableRBI";
 import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
@@ -32,6 +32,22 @@ const formatApprovalHistoryLabel = (key) => {
     .replaceAll("_", " ")
     .replaceAll(/\b\w/g, (char) => char.toUpperCase());
 };
+
+const resolveSummaryReferenceId = (record) =>
+  record?.referenceId
+  ?? record?.payGasDepId
+  ?? record?.masterGasDepositId;
+
+const resolvePayGasDepositId = (record) =>
+  record?.payGasDepId
+  ?? record?.masterGasDepositId
+  ?? record?.gasDepositId
+  ?? resolveSummaryReferenceId(record);
+
+const resolveRbiGasDepositId = (record) =>
+  record?.rbiGasDepId
+  ?? record?.rbiGasDepositId
+  ?? null;
 
 const mapApprovalHistoryData = (approvalHistory, preferredKeys = []) => {
   const approverSource = approvalHistory?.dataApprover || {};
@@ -72,6 +88,13 @@ const mapApprovalHistoryData = (approvalHistory, preferredKeys = []) => {
     })),
   };
 };
+
+const getPaymentGasDepositRowKey = (record) =>
+  resolvePayGasDepositId(record) ??
+  resolveSummaryReferenceId(record) ??
+  record?.masterGasDepositId ??
+  record?.accountId ??
+  record?.accountNumber;
 
 const PayGasDepositePage = () => {
   const {
@@ -247,7 +270,7 @@ const PayGasDepositePage = () => {
 
   const toggleDetail = useCallback(
     (record) => {
-      const recordKey = record.accountId;
+      const recordKey = getPaymentGasDepositRowKey(record);
 
       if (activeRowKey === recordKey && pageDetail) {
         setPageDetail(false);
@@ -276,7 +299,8 @@ const PayGasDepositePage = () => {
       dispatch(
         getPayGasDepositApprovalHistory({
           accountId: record.accountId,
-          summaryRefId: record.pendingStgSumId,
+          payGasDepId: resolveSummaryReferenceId(record),
+          billingPeriod: record.billingPeriod ?? record.period,
         }),
       );
       setModalApprovalHistory(true);
@@ -285,7 +309,25 @@ const PayGasDepositePage = () => {
   );
 
   const actionRenderer = useCallback((record) => {
+    const isEditable = record.statusApproval === "Draft" || record.statusApproval === "Rejected";
     const menuItems = [
+      {
+        key: "update",
+        label: (
+          <div className="flex items-center gap-2">
+            <SVGIcon name="IconUpdateAction" width={16} />
+            <span>Update</span>
+          </div>
+        ),
+        onClick: () =>
+          navigate(RECEIPT_AND_COLLECTION_ROUTES.GAS_DEPOSITE_UPDATE, {
+            state: {
+              mode: "update",
+              selectedData: record,
+            },
+          }),
+        disabled: !isEditable,
+      },
       {
         key: "approvalHistory",
         label: (
@@ -297,17 +339,18 @@ const PayGasDepositePage = () => {
         onClick: () => handleApprovalHistory(record),
       },
       {
-        key: "viewAccountDetail",
+        type: "divider",
+      },
+      {
+        key: "cancel",
         label: (
           <div className="flex items-center gap-2">
-            <SVGIcon name="IconDetail" width={16} />
-            <span>View Account Detail</span>
+            <SVGIcon name="IconSquareX" color="#ef4444" width={16} />
+            <span className="text-red-500">Cancel</span>
           </div>
         ),
-        onClick: () => {
-          suppressNextRowClick();
-          toggleDetail(record);
-        },
+        disabled: !isEditable,
+        onClick: () => {},
       },
     ];
 
@@ -342,10 +385,10 @@ const PayGasDepositePage = () => {
         </Tooltip>
       </div>
     );
-  }, [handleApprovalHistory, suppressNextRowClick, toggleDetail]);
+  }, [handleApprovalHistory, navigate, suppressNextRowClick, toggleDetail]);
 
   const baseColumns = useMemo(() => (
-    columnsGasDeposit(
+    columnsPayGasDeposit(
       0,
       0,
       searchInput,
@@ -389,11 +432,34 @@ const PayGasDepositePage = () => {
     () => (
       data_list?.result?.map((item) => ({
         ...item,
-        key: item.accountId,
-        gasDepositId: item.masterGasDepositId || item.accountId,
-        status: item.statusMaster ?? "-",
-        amount: item.balanceAmount ?? null,
-        cashBalance: item.balanceAmount ?? null,
+        key: getPaymentGasDepositRowKey(item),
+        accountId: item.accountId,
+        referenceId: resolveSummaryReferenceId(item),
+        payGasDepId: resolvePayGasDepositId(item),
+        rbiGasDepositId: resolveRbiGasDepositId(item),
+        gasDepositId: resolvePayGasDepositId(item),
+        status: item.status ?? "-",
+        source: item.source ?? null,
+        paymentDate: item.paymentDate ?? null,
+        bank: item.bank ?? null,
+        balance:
+          item.balance ??
+          item.billingAmountBalance ??
+          item.expiredBalance ??
+          item.amount ??
+          null,
+        rateType: item.rateType ?? null,
+        rateDate: item.rateDate ?? null,
+        rate: item.rate ?? null,
+        eqvBalance:
+          item.eqvBalance ??
+          item.eqvExpiredBalance ??
+          item.eqvAmount ??
+          null,
+        billingPeriod: item.billingPeriod ?? item.period ?? null,
+        billingCurrency: item.billingCurrency ?? item.currency ?? null,
+        amount: item.amount ?? null,
+        cashBalance: item.billingAmountBalance ?? null,
       })) ?? []
     ),
     [data_list],
@@ -418,7 +484,7 @@ const PayGasDepositePage = () => {
     () => (
       (data_expired_history || []).map((item, index) => ({
         ...item,
-        key: item.payExpId,
+        key: item.historyId ?? item.payLedgerId ?? item.payExpId ?? index,
         no: index + 1,
       }))
     ),
@@ -430,14 +496,14 @@ const PayGasDepositePage = () => {
       return;
     }
 
-    const matchedRecord = dataSourceWithKeys.find((item) => item.accountId === activeRowKey);
+    const matchedRecord = dataSourceWithKeys.find((item) => item.key === activeRowKey);
     if (matchedRecord) {
       setSelectedGasDepositData(matchedRecord);
     }
   }, [activeRowKey, dataSourceWithKeys]);
 
   const baseSummaryColumns = useMemo(() => (
-    columnsSummaryBalance(
+    columnsPaySummaryBalance(
       0,
       0,
       searchInput,
@@ -490,12 +556,20 @@ const PayGasDepositePage = () => {
 
   const expiredHistoryColumns = useMemo(() => [
     { key: "no", title: "NO", dataIndex: "no", width: 60, align: "center" },
-    { key: "payExpId", title: "PAY EXP ID", dataIndex: "payExpId", width: 120 },
-    { key: "rbiLedgerId", title: "RBI LEDGER ID", dataIndex: "rbiLedgerId", width: 140 },
+    { key: "historyAction", title: "ACTION", dataIndex: "historyAction", width: 200, render: (value) => value || "-" },
+    { key: "historyDisplayType", title: "TYPE", dataIndex: "historyDisplayType", width: 120, render: (value) => value || "-" },
+    { key: "historyCategory", title: "CATEGORY", dataIndex: "historyCategory", width: 160, render: (value) => value || "-" },
+    { key: "documentNumber", title: "DOCUMENT NUMBER", dataIndex: "documentNumber", width: 180, render: (value) => value || "-" },
+    { key: "customerNumber", title: "CUSTOMER NUMBER", dataIndex: "customerNumber", width: 160, render: (value) => value || "-" },
+    { key: "customerName", title: "CUSTOMER NAME", dataIndex: "customerName", width: 200, render: (value) => value || "-" },
+    { key: "accountNumber", title: "ACCOUNT NUMBER", dataIndex: "accountNumber", width: 160, render: (value) => value || "-" },
+    { key: "billingPeriod", title: "BILLING PERIOD", dataIndex: "billingPeriod", width: 130, render: (value) => value || "-" },
+    { key: "historyDate", title: "HISTORY DATE", dataIndex: "historyDate", width: 170, render: (value) => value || "-" },
+    { key: "currency", title: "CURRENCY", dataIndex: "currency", width: 100, render: (value) => value || "-" },
     {
-      key: "expiredBalance",
-      title: "EXPIRED BALANCE",
-      dataIndex: "expiredBalance",
+      key: "amount",
+      title: "AMOUNT",
+      dataIndex: "amount",
       width: 160,
       align: "right",
       render: (value) => (value === null || value === undefined || value === "" ? "-" : new Intl.NumberFormat("id-ID", {
@@ -503,30 +577,19 @@ const PayGasDepositePage = () => {
         maximumFractionDigits: 2,
       }).format(Number(value))),
     },
-    { key: "currency", title: "CURRENCY", dataIndex: "currency", width: 100, render: (value) => value || "-" },
+    {
+      key: "eqvAmount",
+      title: "EQV AMOUNT",
+      dataIndex: "eqvAmount",
+      width: 170,
+      align: "right",
+      render: (value) => (value === null || value === undefined || value === "" ? "-" : new Intl.NumberFormat("id-ID", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }).format(Number(value))),
+    },
+    { key: "source", title: "SOURCE", dataIndex: "source", width: 120, render: (value) => value || "-" },
     { key: "rateType", title: "RATE TYPE", dataIndex: "rateType", width: 140, render: (value) => value || "-" },
-    {
-      key: "rate",
-      title: "RATE",
-      dataIndex: "rate",
-      width: 120,
-      align: "right",
-      render: (value) => (value === null || value === undefined || value === "" ? "-" : new Intl.NumberFormat("id-ID", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      }).format(Number(value))),
-    },
-    {
-      key: "eqvExpiredBalance",
-      title: "EQV EXPIRED BALANCE",
-      dataIndex: "eqvExpiredBalance",
-      width: 190,
-      align: "right",
-      render: (value) => (value === null || value === undefined || value === "" ? "-" : new Intl.NumberFormat("id-ID", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      }).format(Number(value))),
-    },
     { key: "statusApproval", title: "STATUS APPROVAL", dataIndex: "statusApproval", width: 160, align: "center" },
     { key: "status", title: "STATUS", dataIndex: "status", width: 120, align: "center", render: (value) => value || "-" },
     { key: "createdBy", title: "CREATED BY", dataIndex: "createdBy", width: 140, render: (value) => value || "-" },
@@ -578,7 +641,7 @@ const PayGasDepositePage = () => {
                 Approval Expired
               </ButtonComponent>
               <ButtonComponent
-                icon={<SVGIcon name="IconCalendarEvent" width={16} />}
+                icon={<SVGIcon name="IconCalendarEvent" width={16} color={"#FFFFFF"} />}
                 type="submit"
                 border={false}
                 onClick={() => navigate(RECEIPT_AND_COLLECTION_ROUTES.GAS_DEPOSITE_EXPIRED_CREATE)}

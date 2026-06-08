@@ -1,38 +1,37 @@
 /* eslint-disable react/prop-types */
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import { useDispatch, useSelector } from "react-redux";
-import { Tabs, message } from "antd";
+import { Dropdown, Tabs, Tooltip, message } from "antd";
 import moment from "moment";
 import CollapsibleCardContainer from "../../../../components/CollapsibleCardContainer";
 import CollapsibleContainer from "../../../../components/CollapsibleContainer";
 import DetailText from "../../../../components/DetailText";
+import AttachmentComponent from "../../../../components/Attachment/AttachmentComponent";
 import TableRBI from "../../../../components/TableRBI";
 import ButtonComponent from "../../../../components/ButtonComponent";
+import ModalApproveOrReject from "../../../../components/Modal/ModalApproveOrReject";
 import SVGIcon from "../../../../assets/Icon";
-import { columnsMutationDetail } from "../../RatingBillingInvoice/GasDeposit/Table/TableMutationDetail";
+import { configApp } from "../../../../constants/configApp";
+import receiptCollectionHttpService from "../../../../redux/services/receiptCollectionHttpService";
+import ratingBillingHttpService from "../../../../redux/services/ratingBillingHttpService";
+import { columnsPayMutationDetail } from "./Table/TablePayMutationDetail";
 import PayGasDepositeMutationDetailModal from "./Modal/PayGasDepositeMutationDetailModal";
+import PayGasDepositeViewMutationDetailModal from "./Modal/PayGasDepositeViewMutationDetailModal";
 import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 import {
+  approvePayGasDepositEarnMutation,
+  approvePayGasDepositSummary,
+  createPayGasDepositEarnMutation,
+  getPayGasDepositAttachmentList,
   getPayGasDepositApprovalHistory,
+  getPayGasDepositPaginate,
   getPayGasDepositMutationDetailPaginate,
+  getPayGasDepositSummaryMutations,
+  rejectPayGasDepositEarnMutation,
+  rejectPayGasDepositSummary,
 } from "../../../../redux/slices/receipt_collection/gasDepositPayment";
-
-const formatPeriodEarn = (startValue, endValue) => {
-  const start = startValue ? moment(startValue) : null;
-  const end = endValue ? moment(endValue) : null;
-
-  if (start?.isValid() && end?.isValid()) {
-    if (start.year() === end.year()) {
-      return `${start.format("MMM")}-${end.format("MMM YYYY")}`;
-    }
-    return `${start.format("MMM YYYY")} - ${end.format("MMM YYYY")}`;
-  }
-
-  if (start?.isValid()) return start.format("MMM YYYY");
-  if (end?.isValid()) return end.format("MMM YYYY");
-  return "-";
-};
+import { showModalError, showModalSuccess } from "../../../../redux/slices/general_slice";
 
 const mapApprovalRows = (approvalHistory) => {
   const approverSource = approvalHistory?.dataApprover || {};
@@ -40,6 +39,40 @@ const mapApprovalRows = (approvalHistory) => {
 
   Object.values(approverSource).forEach((items) => {
     (items || []).forEach((item) => {
+      if (Array.isArray(item?.employeeDetail) && item.employeeDetail.length > 0) {
+        item.employeeDetail.forEach((employee) => {
+          rows.push({
+            key: `${rows.length + 1}`,
+            no: rows.length + 1,
+            approver:
+              employee?.approver ||
+              employee?.employeeName ||
+              employee?.employeeFullname ||
+              employee?.name ||
+              employee?.username ||
+              employee?.employeeNo ||
+              "-",
+            role:
+              employee?.role ||
+              employee?.roleName ||
+              employee?.positionName ||
+              item?.approvalName ||
+              item?.position ||
+              item?.role ||
+              item?.userLevel ||
+              "-",
+            status:
+              employee?.status ||
+              employee?.approvalStatus ||
+              item?.statusApproval ||
+              item?.status ||
+              item?.approvalStatus ||
+              "Waiting Approval",
+          });
+        });
+        return;
+      }
+
       rows.push({
         key: `${rows.length + 1}`,
         no: rows.length + 1,
@@ -70,18 +103,170 @@ const mapApprovalRows = (approvalHistory) => {
 };
 
 const LOCAL_DRAFT_MUTATION_MESSAGE = "Mutation detail was added as a local draft only. It is not saved to the payment backend yet.";
+const STANDALONE_MUTATION_SUCCESS_MESSAGE = "Mutation detail saved and waiting for separate approval.";
+const isBlankValue = (value) => value === null || value === undefined || value === "";
+const pickFirstFilled = (...values) => values.find((value) => !isBlankValue(value));
+const normalizePaymentSourceValue = (value) => {
+  const normalized = String(value || "").trim().toLowerCase();
+  if (normalized === "manual") return "Manual";
+  if (normalized === "receipt") return "Receipt";
+  return value;
+};
+
+const parseNumericValue = (value) => {
+  if (value === null || value === undefined || value === "") return 0;
+  if (typeof value === "number") return value;
+
+  const normalizedValue = String(value)
+    .replaceAll(" ", "")
+    .replaceAll(",", "");
+  const parsedValue = Number(normalizedValue);
+
+  return Number.isNaN(parsedValue) ? 0 : parsedValue;
+};
+
+const extractRequestErrorMessage = (error, fallbackMessage) => (
+  error?.message
+  || error?.description
+  || error?.data?.message
+  || error?.response?.data?.message
+  || fallbackMessage
+);
+
+const getCurrentUsername = () => {
+  try {
+    const rawToken = localStorage.getItem("token") || window.sessionStorage.getItem("token") || "{}";
+    const parsedToken = JSON.parse(rawToken);
+    return parsedToken?.username || parsedToken?.userId || parsedToken?.id || "";
+  } catch {
+    return "";
+  }
+};
+
+const isWaitingApprovalStatus = (status) => {
+  const normalized = String(status || "").trim().toLowerCase();
+  return normalized === "waiting approval" || normalized === "waiting";
+};
+
+const extractMutationRows = (response) => {
+  if (Array.isArray(response?.data?.data)) return response.data.data;
+  if (Array.isArray(response?.data)) return response.data;
+  if (Array.isArray(response)) return response;
+  return [];
+};
+
+const mapMutationRow = (item, idx) => ({
+  ...item,
+  key: item?.payLedgerId ?? idx,
+  payLedgerId: item?.payLedgerId ?? item?.id,
+  no: idx + 1,
+  type: item?.transType ?? item?.type,
+  eqvAmount: item?.eqvAmount,
+  billingPeriod: item?.billPeriode ?? item?.billingPeriod,
+  source: normalizePaymentSourceValue(item?.source),
+});
+
+const resolveSummaryReferenceId = (record) => (
+  record?.referenceId
+  ?? record?.payGasDepId
+  ?? record?.masterGasDepositId
+);
+
+const resolvePayGasDepositId = (record) => (
+  record?.payGasDepId
+  ?? record?.masterGasDepositId
+  ?? record?.gasDepositId
+  ?? resolveSummaryReferenceId(record)
+);
+
+const extractHierarchyApprovalRows = (payload) => {
+  let hierarchyRows = [];
+  if (Array.isArray(payload?.data)) {
+    hierarchyRows = payload.data;
+  } else if (Array.isArray(payload)) {
+    hierarchyRows = payload;
+  }
+  const rows = [];
+
+  hierarchyRows.forEach((item) => {
+    if (Array.isArray(item?.employeeDetail) && item.employeeDetail.length > 0) {
+      item.employeeDetail.forEach((employee) => {
+        rows.push({
+          key: `${rows.length + 1}`,
+          no: rows.length + 1,
+          approver:
+            employee?.approver ||
+            employee?.employeeName ||
+            employee?.employeeFullname ||
+            employee?.name ||
+            employee?.username ||
+            employee?.employeeNo ||
+            "-",
+          role:
+            employee?.role ||
+            employee?.roleName ||
+            employee?.positionName ||
+            item?.approvalName ||
+            item?.position ||
+            item?.role ||
+            "-",
+          status:
+            employee?.status ||
+            employee?.approvalStatus ||
+            item?.status ||
+            "Waiting Approval",
+        });
+      });
+      return;
+    }
+
+    rows.push({
+      key: `${rows.length + 1}`,
+      no: rows.length + 1,
+      approver:
+        item?.approver ||
+        item?.employeeName ||
+        item?.employeeFullname ||
+        item?.name ||
+        item?.username ||
+        item?.employeeNo ||
+        "-",
+      role: item?.role || item?.roleName || item?.positionName || item?.approvalName || "-",
+      status: item?.status || item?.approvalStatus || "Waiting Approval",
+    });
+  });
+
+  return rows;
+};
+
+const isPendingWorkflowStatusApproval = (statusApproval) => {
+  const normalized = String(statusApproval || "").trim().toLowerCase();
+  return normalized === "draft"
+    || normalized === "waiting approval"
+    || normalized === "waiting"
+    || normalized === "rejected";
+};
 
 const PayGasDepositeDetail = (props) => {
   const { selectedData } = props;
   const detailRef = useRef(null);
   const dispatch = useDispatch();
-  const selectedGasDepositId = selectedData?.gasDepositId;
+  const selectedPayGasDepositId = resolvePayGasDepositId(selectedData);
+  const selectedSummaryReferenceId = resolveSummaryReferenceId(selectedData);
+
+  // Draft / Waiting Approval / Rejected stay in the pending workflow; Approved uses ledger.
+  const isPendingWorkflow = isPendingWorkflowStatusApproval(selectedData?.statusApproval);
 
   const {
     data_approval_history,
+    data_attachment_list,
     data_mutation_detail,
+    data_summary_mutations,
+    filters,
+    loading_earn_action,
     loading_history,
     loading_mutation_detail,
+    loading_summary_mutations,
   } = useSelector((state) => state.gasDepositPayment);
 
   const searchInputMD = useRef(null);
@@ -90,26 +275,66 @@ const PayGasDepositeDetail = (props) => {
   const [searchMD, setSearchMD] = useState({});
   const [fixedColumnsMD, setFixedColumnsMD] = useState(() => ({
     left: [],
-    right: ["status", "statusApproval"],
+    right: ["status", "statusApproval", "action"],
   }));
   const [isModalCreateMutationOpen, setIsModalCreateMutationOpen] = useState(false);
+  const [editingMutation, setEditingMutation] = useState(null);
   const [draftMutationRows, setDraftMutationRows] = useState([]);
+  const [standaloneMutationRows, setStandaloneMutationRows] = useState([]);
+  const [loadingStandaloneMutations, setLoadingStandaloneMutations] = useState(false);
+  const [approvalAction, setApprovalAction] = useState("");
+  const [isApprovalModalOpen, setIsApprovalModalOpen] = useState(false);
+  const [mutationApprovalAction, setMutationApprovalAction] = useState("");
+  const [selectedMutationRow, setSelectedMutationRow] = useState(null);
+  const [isMutationApprovalModalOpen, setIsMutationApprovalModalOpen] = useState(false);
+  const [isModalViewMutationOpen, setIsModalViewMutationOpen] = useState(false);
+  const [viewMutationRecord, setViewMutationRecord] = useState(null);
+  const [approvalHierarchyRows, setApprovalHierarchyRows] = useState([]);
+  const [loadingApprovalHierarchy, setLoadingApprovalHierarchy] = useState(false);
+  const currentUsername = useMemo(() => getCurrentUsername(), []);
+
+  const refreshStandaloneMutationRows = useCallback(async () => {
+    if (!selectedPayGasDepositId || isPendingWorkflow) {
+      setStandaloneMutationRows([]);
+      return;
+    }
+
+    setLoadingStandaloneMutations(true);
+    try {
+      const response = await receiptCollectionHttpService.getAll(
+        `/v1/dbs/api/pay-gas-deposit/mutation/master/${selectedPayGasDepositId}`,
+      );
+      const rows = extractMutationRows(response)
+        .filter((item) => String(item?.statusApproval || "").trim().toLowerCase() !== "approved")
+        .map((item, idx) => ({
+          ...mapMutationRow(item, idx),
+          isStandaloneMutation: true,
+        }));
+      setStandaloneMutationRows(rows);
+    } catch {
+      setStandaloneMutationRows([]);
+    } finally {
+      setLoadingStandaloneMutations(false);
+    }
+  }, [isPendingWorkflow, selectedPayGasDepositId]);
 
   useEffect(() => {
-    if (selectedGasDepositId && detailRef.current) {
+    if (selectedPayGasDepositId && detailRef.current) {
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           detailRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
         });
       });
     }
-  }, [selectedGasDepositId]);
+  }, [selectedPayGasDepositId]);
 
   useEffect(() => {
-    if (selectedGasDepositId) {
+    if (isPendingWorkflow && selectedSummaryReferenceId) {
+      dispatch(getPayGasDepositSummaryMutations({ payGasDepId: selectedSummaryReferenceId }));
+    } else if (!isPendingWorkflow && selectedPayGasDepositId) {
       dispatch(
         getPayGasDepositMutationDetailPaginate({
-          gasDepositId: selectedGasDepositId,
+          payGasDepId: selectedPayGasDepositId,
           page: 1,
           pageSize: 100,
           search: encodeURIComponent(JSON.stringify(searchMD)),
@@ -117,18 +342,40 @@ const PayGasDepositeDetail = (props) => {
         }),
       );
     }
-  }, [dispatch, searchMD, selectedGasDepositId]);
+  }, [dispatch, isPendingWorkflow, searchMD, selectedPayGasDepositId, selectedSummaryReferenceId]);
+
+  useEffect(() => {
+    if (isPendingWorkflow || !selectedPayGasDepositId) {
+      setStandaloneMutationRows([]);
+      return;
+    }
+
+    refreshStandaloneMutationRows();
+  }, [isPendingWorkflow, refreshStandaloneMutationRows, selectedPayGasDepositId]);
 
   useEffect(() => {
     if (selectedData?.accountId) {
       dispatch(
         getPayGasDepositApprovalHistory({
           accountId: selectedData.accountId,
-          summaryRefId: selectedData.pendingStgSumId,
+          payGasDepId: selectedSummaryReferenceId,
+          billingPeriod: selectedData.billingPeriod,
         }),
       );
     }
-  }, [dispatch, selectedData?.accountId, selectedData?.pendingStgSumId]);
+  }, [dispatch, selectedData?.accountId, selectedData?.billingPeriod, selectedSummaryReferenceId]);
+
+  useEffect(() => {
+    if (!selectedSummaryReferenceId) {
+      return;
+    }
+
+    dispatch(
+      getPayGasDepositAttachmentList({
+        referenceId: selectedSummaryReferenceId,
+      }),
+    );
+  }, [dispatch, selectedSummaryReferenceId]);
 
   const handleSearchMD = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -137,19 +384,89 @@ const PayGasDepositeDetail = (props) => {
     setSearchMD((prev) => ({ ...prev, [dataIndex]: selectedKeys[0] }));
   };
 
+  const openMutationApprovalModal = useCallback((action, row) => {
+    setMutationApprovalAction(action);
+    setSelectedMutationRow(row);
+    setIsMutationApprovalModalOpen(true);
+  }, []);
+
+  const renderMutationAction = useCallback((record) => {
+    const normalizedStatus = String(record?.status || "").trim().toUpperCase();
+    const normalizedStatusApproval = String(record?.statusApproval || "").trim().toLowerCase();
+    const isStandalonePending = !isPendingWorkflow
+      && record?.isStandaloneMutation
+      && record?.payLedgerId
+      && (normalizedStatus === "PENDING" || normalizedStatusApproval === "waiting approval");
+
+    const menuItems = [
+      {
+        key: "approvalHistory",
+        label: (
+          <div className="flex items-center gap-2">
+            <SVGIcon name="IconLogHistory" width={16} />
+            <span>Approval History</span>
+          </div>
+        ),
+        onClick: () => {},
+      },
+    ];
+
+    return (
+      <div className="flex items-center justify-center gap-2">
+        {isStandalonePending && (
+          <>
+            <button
+              type="button"
+              className="text-[#0075bf] text-xs underline"
+              onClick={() => openMutationApprovalModal("Approve", record)}
+            >
+              Approve
+            </button>
+            <button
+              type="button"
+              className="text-[#ef4444] text-xs underline"
+              onClick={() => openMutationApprovalModal("Reject", record)}
+            >
+              Reject
+            </button>
+          </>
+        )}
+        <Dropdown menu={{ items: menuItems }} trigger={["click"]} placement="bottomRight">
+          <button
+            type="button"
+            className="inline-flex items-center justify-center rounded border-0 bg-transparent p-0"
+          >
+            <SVGIcon name="IconTripleDot" color="#0075bf" width={20} />
+          </button>
+        </Dropdown>
+        <Tooltip title="View Detail">
+          <button
+            type="button"
+            className="inline-flex items-center justify-center rounded border-0 bg-transparent p-0"
+            onClick={() => {
+              setViewMutationRecord(record);
+              setIsModalViewMutationOpen(true);
+            }}
+          >
+            <SVGIcon name="IconDetail" color="#0075bf" width={20} />
+          </button>
+        </Tooltip>
+      </div>
+    );
+  }, [isPendingWorkflow, openMutationApprovalModal, setIsModalViewMutationOpen, setViewMutationRecord]);
+
   const onSortMD = () => {};
 
   const baseColumnsMD = useMemo(() => (
-    columnsMutationDetail(
-      0,
-      0,
+    columnsPayMutationDetail({
       searchInputMD,
-      searchedColumnMD,
-      searchTextMD,
-      handleSearchMD,
-      searchMD,
-    )
-  ), [searchedColumnMD, searchMD, searchTextMD]);
+      searchedColumn: searchedColumnMD,
+      searchText: searchTextMD,
+      handleSearch: handleSearchMD,
+      search: searchMD,
+      actionRenderer: renderMutationAction,
+    })
+  ), [renderMutationAction, searchedColumnMD, searchMD, searchTextMD]);
 
   const processedColumnsMD = useMemo(
     () => applyFixedColumns(baseColumnsMD, fixedColumnsMD),
@@ -164,14 +481,37 @@ const PayGasDepositeDetail = (props) => {
     [baseColumnsMD],
   );
 
-  const dataSourceMD = useMemo(
-    () => data_mutation_detail?.result || [],
-    [data_mutation_detail?.result],
-  );
+  const dataSourceMD = useMemo(() => {
+    if (isPendingWorkflow) {
+      return (data_summary_mutations || []).map(mapMutationRow);
+    }
+    return data_mutation_detail?.result || [];
+  }, [data_mutation_detail?.result, data_summary_mutations, isPendingWorkflow]);
   const mutationDataSource = useMemo(
-    () => [...draftMutationRows, ...dataSourceMD],
-    [dataSourceMD, draftMutationRows],
+    () => (isPendingWorkflow
+      ? [...draftMutationRows, ...dataSourceMD]
+      : [...standaloneMutationRows, ...dataSourceMD]),
+    [dataSourceMD, draftMutationRows, isPendingWorkflow, standaloneMutationRows],
   );
+  const primaryMutationRow = useMemo(
+    () => dataSourceMD.find((item) => item && Object.keys(item).length > 0) || null,
+    [dataSourceMD],
+  );
+  const detailInfo = useMemo(() => ({
+    source: normalizePaymentSourceValue(
+      pickFirstFilled(selectedData?.source, primaryMutationRow?.source, primaryMutationRow?.mutationSource, "-"),
+    ),
+    paymentDate: pickFirstFilled(selectedData?.paymentDate, primaryMutationRow?.mutationDate, null),
+    currency: pickFirstFilled(selectedData?.currency, "-"),
+    balance: pickFirstFilled(selectedData?.balance, selectedData?.billingAmountBalance, primaryMutationRow?.amount, "-"),
+    rateType: pickFirstFilled(selectedData?.rateType, primaryMutationRow?.rateType, "-"),
+    rateDate: pickFirstFilled(selectedData?.rateDate, primaryMutationRow?.rateDate, null),
+    rate: pickFirstFilled(selectedData?.rate, primaryMutationRow?.rate, "-"),
+    eqvBalance: pickFirstFilled(selectedData?.eqvBalance, selectedData?.eqvAmount, primaryMutationRow?.eqvAmount, "-"),
+    billingPeriod: pickFirstFilled(selectedData?.billingPeriod, primaryMutationRow?.billingPeriod, primaryMutationRow?.billPeriode, "-"),
+    billingCurrency: pickFirstFilled(selectedData?.billingCurrency, "-"),
+    description: pickFirstFilled(selectedData?.description, primaryMutationRow?.description, "-"),
+  }), [primaryMutationRow, selectedData]);
 
   const sourceOptions = useMemo(() => {
     const values = new Set();
@@ -216,15 +556,197 @@ const PayGasDepositeDetail = (props) => {
   ], []);
 
   const approvalRows = useMemo(() => mapApprovalRows(data_approval_history), [data_approval_history]);
+  const approvalDataSource = useMemo(
+    () => {
+      const baseRows = approvalRows.length > 0 ? approvalRows : approvalHierarchyRows;
+      return baseRows.map((row) => {
+        if (
+          (row?.approver === "-" || !row?.approver)
+          && data_approval_history?.isApprover === true
+          && currentUsername
+          && isWaitingApprovalStatus(row?.status)
+        ) {
+          return {
+            ...row,
+            approver: currentUsername,
+          };
+        }
 
-  const attachmentColumnsGD = useMemo(() => [
-    { key: "no", title: "NO", dataIndex: "no", width: 50, align: "center" },
-    { key: "fileName", title: "FILE NAME", dataIndex: "fileName", width: 200 },
-    { key: "uploadedBy", title: "UPLOADED BY", dataIndex: "uploadedBy", width: 150 },
-    { key: "uploadDate", title: "UPLOAD DATE", dataIndex: "uploadDate", width: 130 },
-  ], []);
+        return row;
+      });
+    },
+    [approvalHierarchyRows, approvalRows, currentUsername, data_approval_history?.isApprover],
+  );
+  const canProcessApproval = useMemo(
+    () =>
+      selectedData?.statusApproval === "Waiting Approval"
+      && data_approval_history?.isApprover === true
+      && Boolean(selectedSummaryReferenceId),
+    [data_approval_history?.isApprover, selectedData?.statusApproval, selectedSummaryReferenceId],
+  );
 
-  const attachmentRows = [];
+  useEffect(() => {
+    if (!selectedData?.apphierId) {
+      setApprovalHierarchyRows([]);
+      return;
+    }
+
+    let cancelled = false;
+    setLoadingApprovalHierarchy(true);
+
+    ratingBillingHttpService
+      .getDetail(`/v1/dbs/api/billing/approval-hierarchy-detail/${selectedData.apphierId}`)
+      .then((res) => {
+        if (!cancelled) {
+          setApprovalHierarchyRows(extractHierarchyApprovalRows(res));
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setApprovalHierarchyRows([]);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setLoadingApprovalHierarchy(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedData?.apphierId]);
+
+  const handleOpenApproval = (action) => {
+    setApprovalAction(action);
+    setIsApprovalModalOpen(true);
+  };
+
+  const refreshListAndApprovalHistory = async () => {
+    await dispatch(
+      getPayGasDepositPaginate({
+        page: filters?.page || 1,
+        pageSize: 100,
+        search: encodeURIComponent(JSON.stringify(filters?.search || {})),
+        sort: filters?.sort || "accountNumber~asc",
+      }),
+    ).unwrap();
+
+    await dispatch(
+      getPayGasDepositApprovalHistory({
+        accountId: selectedData?.accountId,
+        payGasDepId: selectedSummaryReferenceId,
+        billingPeriod: selectedData?.billingPeriod,
+      }),
+    ).unwrap();
+  };
+
+  const handleConfirmApproval = async (values, handleClear) => {
+    if (!selectedSummaryReferenceId || !approvalAction) {
+      return;
+    }
+
+    const remarks = values?.remark || "";
+    const actionThunk = approvalAction === "Approve"
+      ? approvePayGasDepositSummary
+      : rejectPayGasDepositSummary;
+
+    try {
+      await dispatch(actionThunk({
+        payGasDepId: selectedSummaryReferenceId,
+        remarks,
+      })).unwrap();
+
+      dispatch(showModalSuccess({
+        title: "Success",
+        description: approvalAction === "Approve"
+          ? "Gas Deposit approved successfully"
+          : "Gas Deposit rejected successfully",
+        return: false,
+      }));
+
+      handleClear?.();
+      setIsApprovalModalOpen(false);
+      setApprovalAction("");
+
+      await refreshListAndApprovalHistory();
+
+      if (isPendingWorkflow) {
+        await dispatch(getPayGasDepositSummaryMutations({ payGasDepId: selectedSummaryReferenceId })).unwrap();
+      } else {
+        await refreshStandaloneMutationRows();
+        if (selectedPayGasDepositId) {
+          await dispatch(
+            getPayGasDepositMutationDetailPaginate({
+              payGasDepId: selectedPayGasDepositId,
+              page: 1,
+              pageSize: 100,
+              search: encodeURIComponent(JSON.stringify(searchMD)),
+              sort: "mutationDate~desc",
+            }),
+          ).unwrap();
+        }
+      }
+    } catch (error) {
+      dispatch(showModalError({
+        title: "Failed",
+        description: extractRequestErrorMessage(error, `${approvalAction} failed.`),
+      }));
+      return false;
+    }
+  };
+
+  const handleConfirmMutationApproval = async (values, handleClear) => {
+    if (!selectedMutationRow?.payLedgerId || !mutationApprovalAction) {
+      return;
+    }
+
+    const remarks = values?.remark || "";
+    const actionThunk = mutationApprovalAction === "Approve"
+      ? approvePayGasDepositEarnMutation
+      : rejectPayGasDepositEarnMutation;
+
+    try {
+      await dispatch(actionThunk({
+        payLedgerId: selectedMutationRow.payLedgerId,
+        remarks,
+      })).unwrap();
+
+      dispatch(showModalSuccess({
+        title: "Success",
+        description: mutationApprovalAction === "Approve"
+          ? "Mutation approved successfully"
+          : "Mutation rejected successfully",
+        return: false,
+      }));
+
+      handleClear?.();
+      setSelectedMutationRow(null);
+      setMutationApprovalAction("");
+      setIsMutationApprovalModalOpen(false);
+
+      await refreshStandaloneMutationRows();
+      await refreshListAndApprovalHistory();
+
+      if (selectedPayGasDepositId) {
+        await dispatch(
+          getPayGasDepositMutationDetailPaginate({
+            payGasDepId: selectedPayGasDepositId,
+            page: 1,
+            pageSize: 100,
+            search: encodeURIComponent(JSON.stringify(searchMD)),
+            sort: "mutationDate~desc",
+          }),
+        ).unwrap();
+      }
+    } catch (error) {
+      dispatch(showModalError({
+        title: "Failed",
+        description: extractRequestErrorMessage(error, `${mutationApprovalAction} mutation failed.`),
+      }));
+      return false;
+    }
+  };
 
   const gasDepositTab = (
     <div className="flex flex-col gap-1 mt-2">
@@ -247,30 +769,30 @@ const PayGasDepositeDetail = (props) => {
 
       <CollapsibleContainer header="Gas Deposit Information" border className="mt-4">
         <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-x-8 gap-y-2 sm:gap-y-1">
-          <DetailText label="Terms Earn">{selectedData?.termsEarn ?? "-"}</DetailText>
-          <DetailText label="Terms Redeem">{selectedData?.termsRedeem ?? "-"}</DetailText>
-          <DetailText label="Period Earn">
-            {selectedData?.periodEarn || formatPeriodEarn(selectedData?.earnStartDate, selectedData?.earnEndDate)}
+          <DetailText label="Source">{detailInfo.source}</DetailText>
+          <DetailText label="Payment Date">
+            {detailInfo.paymentDate
+              ? moment(detailInfo.paymentDate).format("D-MMM-YY")
+              : "-"}
           </DetailText>
-          <DetailText label="Period Start Redeem">
-            {selectedData?.redeemStartDate
-              ? moment(selectedData.redeemStartDate).format("D-MMM-YY")
-              : selectedData?.periodRedeemStart || "-"}
+          <DetailText label="Currency">{detailInfo.currency}</DetailText>
+          <DetailText label="Balance">
+            {detailInfo.balance}
           </DetailText>
-          <DetailText label="Period End Redeem">
-            {selectedData?.redeemEndDate
-              ? moment(selectedData.redeemEndDate).format("D-MMM-YY")
-              : selectedData?.periodRedeemEnd || "-"}
+          <DetailText label="Rate Type">{detailInfo.rateType}</DetailText>
+          <DetailText label="Rate Date">
+            {detailInfo.rateDate
+              ? moment(detailInfo.rateDate).format("D-MMM-YY")
+              : "-"}
           </DetailText>
-          <DetailText label="Time Unit">{selectedData?.timeUnit || "-"}</DetailText>
-          <DetailText label="Currency">{selectedData?.currency || "-"}</DetailText>
-          <DetailText label="UOM">{selectedData?.uom || "-"}</DetailText>
-          <DetailText label="Receipt Balance">{selectedData?.cashBalance ?? selectedData?.balanceAmount ?? "-"}</DetailText>
-          <DetailText label="Source">{selectedData?.source || "-"}</DetailText>
-          <DetailText label="Status">{selectedData?.status || "-"}</DetailText>
-          <DetailText label="Status Approval">{selectedData?.statusApproval || "-"}</DetailText>
+          <DetailText label="Rate">{detailInfo.rate}</DetailText>
+          <DetailText label="EQV Balance">
+            {detailInfo.eqvBalance}
+          </DetailText>
+          <DetailText label="Billing Period">{detailInfo.billingPeriod}</DetailText>
+          <DetailText label="Billing Currency">{detailInfo.billingCurrency}</DetailText>
           <DetailText label="Description" className="sm:col-span-2 lg:col-span-5">
-            {selectedData?.description || "-"}
+            {detailInfo.description}
           </DetailText>
         </div>
       </CollapsibleContainer>
@@ -282,14 +804,14 @@ const PayGasDepositeDetail = (props) => {
       <CollapsibleContainer header="Approval Information" border>
         <TableRBI
           idTable="rc-gas-deposite-approval-table"
-          dataSource={approvalRows}
+          dataSource={approvalDataSource}
           columns={approvalColumnsGD}
-          totalData={approvalRows.length}
+          totalData={approvalDataSource.length}
           tableScrolled={{ x: 800, y: 250 }}
           showExport={false}
           usePagination={false}
           showRefresh={false}
-          loading={loading_history}
+          loading={loading_history || loadingApprovalHierarchy}
         />
       </CollapsibleContainer>
     </div>
@@ -298,15 +820,12 @@ const PayGasDepositeDetail = (props) => {
   const attachmentTab = (
     <div className="mt-2">
       <CollapsibleContainer header="Attachment" border>
-        <TableRBI
-          idTable="rc-gas-deposite-attachment-table"
-          dataSource={attachmentRows}
-          columns={attachmentColumnsGD}
-          totalData={attachmentRows.length}
-          tableScrolled={{ x: 800, y: 250 }}
-          showExport={false}
-          usePagination={false}
-          showRefresh={false}
+        <AttachmentComponent
+          data={data_attachment_list}
+          type="detail"
+          typeSelector="gasDepositPayment"
+          service={receiptCollectionHttpService}
+          configApplication={configApp.PAYMENT_SERVICE}
         />
       </CollapsibleContainer>
     </div>
@@ -333,7 +852,10 @@ const PayGasDepositeDetail = (props) => {
           <ButtonComponent
             icon={<SVGIcon name="IconButtonCreate" width={20} />}
             type="submit"
-            onClick={() => setIsModalCreateMutationOpen(true)}
+            onClick={() => {
+              setEditingMutation(null);
+              setIsModalCreateMutationOpen(true);
+            }}
           >
             Create
           </ButtonComponent>
@@ -348,21 +870,20 @@ const PayGasDepositeDetail = (props) => {
           columnDefinitions={columnDefinitionsMD}
           fixedColumns={fixedColumnsMD}
           setFixedColumns={setFixedColumnsMD}
-          loading={loading_mutation_detail}
+          loading={isPendingWorkflow
+            ? loading_summary_mutations
+            : loading_mutation_detail || loadingStandaloneMutations || loading_earn_action}
           showExport={false}
           usePagination={false}
           useInfiniteScroll={true}
           hasMore={false}
         />
-        <div className="flex justify-end mt-2 text-sm text-amber-600">
-          New mutation rows added here are local drafts only.
-        </div>
       </CollapsibleCardContainer>
 
       <CollapsibleCardContainer header="HISTORY LOG INFORMATION" defaultOpen={true}>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-x-8 gap-y-3">
           <DetailText label="Record ID">
-            {selectedData?.accountId || selectedData?.gasDepositId || "-"}
+            {selectedSummaryReferenceId || selectedPayGasDepositId || selectedData?.accountId || "-"}
           </DetailText>
           <DetailText label="Created Date">
             {selectedData?.createdDate
@@ -379,11 +900,60 @@ const PayGasDepositeDetail = (props) => {
         </div>
       </CollapsibleCardContainer>
 
+      {canProcessApproval ? (
+        <div className="flex justify-end gap-3 mt-3">
+          <ButtonComponent type="reject" onClick={() => handleOpenApproval("Reject")}>
+            Reject
+          </ButtonComponent>
+          <ButtonComponent type="approve" onClick={() => handleOpenApproval("Approve")}>
+            Approve
+          </ButtonComponent>
+        </div>
+      ) : null}
+
       <PayGasDepositeMutationDetailModal
         isOpen={isModalCreateMutationOpen}
-        handleCancel={() => setIsModalCreateMutationOpen(false)}
-        handleRefresh={(values) => {
+        handleCancel={() => {
+          setEditingMutation(null);
+          setIsModalCreateMutationOpen(false);
+        }}
+        editingRow={editingMutation}
+        handleRefresh={async (values) => {
           if (!values) return;
+
+          if (!isPendingWorkflow) {
+            if (!selectedPayGasDepositId) {
+              message.error("Payment gas deposit id is not available for standalone mutation.");
+              return false;
+            }
+
+            const billingPeriodLabel = billingPeriodOptions.find((item) => item.value === values.period)?.label
+              || values.period
+              || "-";
+
+            await dispatch(createPayGasDepositEarnMutation({
+              pay_gasdep_id: selectedPayGasDepositId,
+              apphier_id: selectedData?.apphierId || null,
+              bill_periode: billingPeriodLabel,
+              trans_type: values.type || undefined,
+              currency: selectedData?.billingCurrency || selectedData?.currency || undefined,
+              category: values.category || undefined,
+              mutation_date: values.mutationDate?.toDate ? values.mutationDate.toDate() : values.mutationDate,
+              amount: parseNumericValue(values.amount),
+              eqv_amount: parseNumericValue(values.eqvBalance),
+              rate_type: values.rateType || undefined,
+              rate_date: values.rateDate?.toDate ? values.rateDate.toDate() : values.rateDate,
+              rate: parseNumericValue(values.rate),
+              description: values.description || undefined,
+              source: values.source || undefined,
+              document_number: values.documentNumber || undefined,
+            })).unwrap();
+
+            await refreshStandaloneMutationRows();
+            await refreshListAndApprovalHistory();
+            message.success(STANDALONE_MUTATION_SUCCESS_MESSAGE);
+            return true;
+          }
 
           const mutationDateValue = values.mutationDate?.format
             ? values.mutationDate.format("D-MMM-YY")
@@ -413,6 +983,7 @@ const PayGasDepositeDetail = (props) => {
             ...prev,
           ]));
           message.info(LOCAL_DRAFT_MUTATION_MESSAGE);
+          return true;
         }}
         sourceOptions={sourceOptions}
         billingPeriodOptions={billingPeriodOptions}
@@ -424,6 +995,42 @@ const PayGasDepositeDetail = (props) => {
           billingPeriod: selectedData?.billingPeriod || billingPeriodOptions[0]?.value,
         }}
       />
+
+      <ModalApproveOrReject
+        isOpen={isApprovalModalOpen}
+        handleCloseModal={() => {
+          setIsApprovalModalOpen(false);
+          setApprovalAction("");
+        }}
+        onFinish={handleConfirmApproval}
+        header={approvalAction}
+        approveOrReject={approvalAction}
+        menu="Gas Deposit Summary"
+        named={selectedData?.accountNumber || selectedData?.customerNumber || "-"}
+      />
+
+      <ModalApproveOrReject
+        isOpen={isMutationApprovalModalOpen}
+        handleCloseModal={() => {
+          setIsMutationApprovalModalOpen(false);
+          setMutationApprovalAction("");
+          setSelectedMutationRow(null);
+        }}
+        onFinish={handleConfirmMutationApproval}
+        header={mutationApprovalAction}
+        approveOrReject={mutationApprovalAction}
+        menu="Gas Deposit Mutation"
+        named={selectedMutationRow?.documentNumber || selectedMutationRow?.description || "-"}
+      />
+
+      <PayGasDepositeViewMutationDetailModal
+        isOpen={isModalViewMutationOpen}
+        handleCancel={() => {
+          setViewMutationRecord(null);
+          setIsModalViewMutationOpen(false);
+        }}
+        record={viewMutationRecord || {}}
+      />
     </div>
   );
 };
@@ -432,7 +1039,9 @@ PayGasDepositeDetail.propTypes = {
   selectedData: PropTypes.shape({
     accountId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     gasDepositId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    pendingStgSumId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    payGasDepId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    referenceId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    rbiGasDepositId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     customerNumber: PropTypes.string,
     customerName: PropTypes.string,
     accountNumber: PropTypes.string,
@@ -465,6 +1074,7 @@ PayGasDepositeDetail.propTypes = {
     createdBy: PropTypes.string,
     updatedDate: PropTypes.string,
     updatedBy: PropTypes.string,
+    apphierId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   }),
 };
 
