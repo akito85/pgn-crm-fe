@@ -66,6 +66,7 @@ export const rating_billing = [
     element: RBI_ELEMENTS.MONITORING_CUSTOMER_VIEW_ELEMENTS,
   },
 
+
   // monitoring usage
   {
     path: RBI_ROUTES.MONITORING_USAGE_VIEW,
