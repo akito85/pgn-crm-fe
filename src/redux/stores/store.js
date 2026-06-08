@@ -161,6 +161,7 @@ import { jobGroupApiSlice } from "../slices/job_management/jobGroupApiSlice";
 import auditTrailReducer from "../slices/user_management/audit_trail";
 import preRequisiteTemplateReducer from "../slices/system_setup/preRequisiteTemplate";
 import activityTemplateReducer from "../slices/system_setup/activityTemplate";
+import dataRequirementTemplateReducer from "../slices/system_setup/dataRequirementTemplate";
 
 const reducer = combineReducers({
   jobManagement: jobManagementReducer,
@@ -188,10 +189,11 @@ const reducer = combineReducers({
   profile: profileReducer,
   action: actionReducer,
   monitoring_session: monitoringSessionReducer,
-  data_access: dataAccessReducer,
+  dataAccess: dataAccessReducer,
   apphierarchy: approvHierarchyReducer,
   main_Menu: mainMenuReducer,
   general: generalReducer,
+  dataRequirementTemplate: dataRequirementTemplateReducer,
   position_hierarchy: positionHierarchyReducer,
   // menu: menuReducer
   // generate_password : generatePasswordReducer,
