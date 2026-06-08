@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getRelatedObjectData } from "../../../../../../../../../redux/slices/account_management/detailAccount/relationshipSlice";
+import { getRelatedObjects } from "../../../../../../../../../redux/slices/account_management/detailAccount/relationshipSlice";
+import { getStandaloneRelatedObjects } from "../../../../../../../../../redux/slices/relationship/standaloneRelationshipSlice";
 import NxModal from "../../../../../../../../../components/Nx/NxModal";
 import NxBaseContainer from "../../../../../../../../../components/Nx/NxBaseContainer";
 import NxTable from "../../../../../../../../../components/Nx/NxTable";
@@ -8,17 +9,34 @@ import { getCustomerColumns } from "./getCustomerColumns";
 import { getAccountColumns } from "./getAccountColumns";
 import { Button } from "antd";
 
+/**
+ * Modal for selecting a related account or customer record.
+ * Table type (account vs. customer) is derived from `relationshipTypeName`.
+ *
+ * @param {object}   props
+ * @param {boolean}  [props.isOpen=false]             - Controls modal visibility.
+ * @param {Function} [props.handleCancel=()=>{}]      - Closes the modal.
+ * @param {Function} [props.handleSelect=()=>{}]      - Called with the chosen record.
+ * @param {*}        [props.accountId=null]            - Current account identifier.
+ * @param {*}        props.relationshipType            - Relationship type ID.
+ * @param {*}        props.relationshipCategory        - Relationship category ID.
+ * @param {string}   props.relationshipTypeName        - Human-readable relationship type name.
+ */
 const ModalChooseRelated = ({
   isOpen = false,
   handleCancel = () => {},
   handleSelect = () => {},
-  idAccount = null,
+  accountId = null,
   relationshipType,
   relationshipCategory,
+  relationshipTypeName,
+  isStandalone = false,
 }) => {
+  // --- Hooks ---
   const dispatch = useDispatch();
   const searchInput = useRef(null);
 
+  // --- State ---
   const [page, setPage] = useState(0);
   const [loadMoreSize] = useState(20);
   const [search, setSearch] = useState({});
@@ -26,12 +44,14 @@ const ModalChooseRelated = ({
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
 
-  const { list_relatedObject, pagination_relatedObject, loadingRelatedObject } =
-    useSelector((state) => state.relationship);
+  // --- Redux ---
+  const { list_relatedObject, pagination_listRelatedObject, loading_listRelatedObject } =
+    useSelector((state) => isStandalone ? state.standaloneRelationship : state.relationship);
 
-  // Normalize relationshipType for comparison (convert "Child Of" to "CHILD_OF")
-  const normalizedRelationType = relationshipType
-    ? relationshipType.trim().toUpperCase().replace(/\s+/g, "_")
+  // --- Derived values ---
+  // Normalize relationshipTypeName for comparison (convert "Child Of" to "CHILD_OF")
+  const normalizedRelationType = relationshipTypeName
+    ? relationshipTypeName.trim().toUpperCase().replace(/\s+/g, "_")
     : null;
 
   // CHILD_OF, PARENT_OF = Account columns
@@ -40,6 +60,13 @@ const ModalChooseRelated = ({
     normalizedRelationType &&
     ["CHILD_OF", "PARENT_OF"].includes(normalizedRelationType);
 
+  // --- Handlers ---
+  /**
+   * Updates sort state from Ant Design table onChange.
+   * @param {*}      _        - Ignored pagination arg
+   * @param {*}      __       - Ignored filters arg
+   * @param {object} sortInfo - Sort descriptor from NxTable
+   */
   const onSort = (_, __, sortInfo) => {
     const dataSort = sortInfo.order
       ? `${sortInfo.field}~${sortInfo.order === "ascend" ? "asc" : "desc"}`
@@ -47,6 +74,12 @@ const ModalChooseRelated = ({
     setSort(dataSort);
   };
 
+  /**
+   * Applies column search filter and resets page to 0 on new queries.
+   * @param {string[]} selectedKeys - Active filter values
+   * @param {Function} confirm      - Antd confirm callback
+   * @param {string}   dataIndex    - Column key being searched
+   */
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
@@ -62,45 +95,48 @@ const ModalChooseRelated = ({
     });
   };
 
+  /**
+   * Fetches the next page of related objects and appends to the list.
+   */
   const handleLoadMore = async () => {
     const nextPage = page + 1;
-    const totalPages = pagination_relatedObject?.totalPages || 0;
+    const totalPages = pagination_listRelatedObject?.totalPages || 0;
 
+    const body = {
+      page: nextPage,
+      size: loadMoreSize,
+      sort,
+      searchs: search
+    };
+    
     if (nextPage <= totalPages) {
-      await dispatch(
-        getRelatedObjectData({
-          idAccount,
-          page: nextPage,
-          size: loadMoreSize,
-          relationshipType,
-          relationshipCategory,
-          sort,
-          searchs: JSON.stringify(search),
-          isLoadMore: true,
-        })
-      );
+      const dispatchArgs = isStandalone
+        ? { subjectAccountId: accountId, relationshipType, relationshipCategory, body, isLoadMore: true }
+        : { accountId, relationshipType, relationshipCategory, body, isLoadMore: true };
+      await dispatch(isStandalone ? getStandaloneRelatedObjects(dispatchArgs) : getRelatedObjects(dispatchArgs));
     }
     setPage(nextPage);
   };
 
+  // --- Effects ---
   useEffect(() => {
-    if (idAccount && relationshipType && relationshipCategory) {
-      setPage(0);
-      dispatch(
-        getRelatedObjectData({
-          idAccount,
-          page: 0,
-          size: loadMoreSize,
-          relationshipType,
-          relationshipCategory,
-          sort,
-          searchs: JSON.stringify(search),
-          isLoadMore: false,
-        })
-      );
-    }
-  }, [dispatch, idAccount, relationshipType, relationshipCategory, sort, search]);
+    if (accountId && relationshipType && relationshipCategory) {
+      const body = {
+        page: 0,
+        size: loadMoreSize,
+        sort,
+        searchs: search,
+      }
 
+      setPage(0);
+      const dispatchArgs = isStandalone
+        ? { subjectAccountId: accountId, relationshipType, relationshipCategory, body, isLoadMore: false }
+        : { accountId, relationshipType, relationshipCategory, body, isLoadMore: false };
+      dispatch(isStandalone ? getStandaloneRelatedObjects(dispatchArgs) : getRelatedObjects(dispatchArgs));
+    }
+  }, [dispatch, accountId, relationshipType, relationshipCategory, sort, search]);
+
+  // --- Columns ---
   const baseColumns = useMemo(() => {
     const columnFn = isAccountType ? getAccountColumns : getCustomerColumns;
     return columnFn(
@@ -131,7 +167,7 @@ const ModalChooseRelated = ({
   const currentData = useMemo(() => list_relatedObject, [list_relatedObject]);
 
   const hasMore =
-    currentData.length < (pagination_relatedObject?.totalElements || 0);
+    currentData.length < (pagination_listRelatedObject?.totalElements || 0);
 
   const dataSourceWithKeys = useMemo(() => {
     if (!currentData || currentData.length === 0) return [];
@@ -149,7 +185,7 @@ const ModalChooseRelated = ({
   return (
     <NxModal
       isOpen={isOpen}
-      header={modalHeader}
+      title={modalHeader}
       handleCancel={() => handleCancel()}
       width={1100}
       footer={
@@ -164,11 +200,11 @@ const ModalChooseRelated = ({
         <NxBaseContainer border>
           <NxTable
             idTable="modal-choose-related"
-            loading={loadingRelatedObject}
+            loading={loading_listRelatedObject}
             dataSource={dataSourceWithKeys}
-            totalData={pagination_relatedObject?.totalElements || 0}
+            totalData={pagination_listRelatedObject?.totalElements || 0}
             current={page}
-            tableScrolled={{ y: 525, x: tableScrolledX }}
+            tableScrolled={{ x: tableScrolledX }}
             onSort={onSort}
             columns={allColumns}
             usePagination={false}

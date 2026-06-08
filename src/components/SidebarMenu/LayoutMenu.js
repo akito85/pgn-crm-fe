@@ -10,7 +10,7 @@ import {
   Form,
   Input,
 } from "antd";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import SideMenu from "./Sidemenu";
 import {
   MenuUnfoldOutlined,
@@ -53,7 +53,62 @@ import { errorCode } from "../../utils";
 
 const { Content, Sider, Header } = Layout;
 
-const LayoutMenu = ({ children, grantPath }) => {
+// Isolated sidebar — React.memo prevents LayoutMenu re-renders from reaching
+// Sider. This stops SiderContext from creating new objects on every navigation/
+// Redux dispatch, which was forcing antd Menu to re-render via context
+// (bypassing React.memo on SideMenu) and triggering SubMenu animation.
+const SidebarContainer = React.memo(({ collapsed, onToggle }) => (
+  <Sider
+    trigger={null}
+    collapsible
+    collapsed={collapsed}
+    className={`site-layout-background ${
+      collapsed === true ? "width-collapsed" : "width-not-collapsed"
+    }`}
+    style={{
+      overflow: "auto",
+      height: "auto",
+      left: 0,
+      top: 0,
+      bottom: 0,
+      minWidth: "255px !important",
+    }}
+  >
+    <div
+      className={`grid grid-cols-3 gap-1 logo ${
+        collapsed
+          ? "my-6 mx-4 justify-center"
+          : "my-6 mx-4 justify-center"
+      }`}
+    >
+      <div className="col-span-2">
+        <Image
+          src={collapsed ? pgnLogoKecil : pgnLogo}
+          preview={false}
+          wrapperClassName={!collapsed ? "w-[120px]" : undefined}
+        />
+      </div>
+      <div className="flex self-center justify-end">
+        {collapsed === false &&
+          React.createElement(
+            collapsed ? MenuUnfoldOutlined : MenuFoldOutlined,
+            {
+              className: "trigger",
+              onClick: onToggle,
+              style: {
+                fontSize: "24px",
+                color: "#4B465C",
+                width: "24px",
+              },
+            },
+          )}
+      </div>
+    </div>
+    <SideMenu isCollapsed={collapsed} />
+  </Sider>
+));
+
+const LayoutMenu = ({ children }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const location = useLocation();
@@ -73,7 +128,20 @@ const LayoutMenu = ({ children, grantPath }) => {
     data_grant_access,
   } = useSelector((state) => state.general);
   const [form] = Form.useForm();
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(() => {
+    // Check if collapsed state is stored in localStorage
+    const savedCollapsed = localStorage.getItem('sidebar_collapsed');
+    return savedCollapsed ? JSON.parse(savedCollapsed) : false;
+  });
+
+  const toggleCollapsed = useCallback(() => {
+    setCollapsed((prev) => {
+      const newState = !prev;
+      // Save the new state to localStorage
+      localStorage.setItem('sidebar_collapsed', JSON.stringify(newState));
+      return newState;
+    });
+  }, []);
   const [modalConfirmation, setModalConfirmation] = useState(false);
   const tokenJSON = JSON.parse(
     localStorage.getItem("token") || window.sessionStorage.getItem("token"),
@@ -81,7 +149,7 @@ const LayoutMenu = ({ children, grantPath }) => {
   // const config =
   //   localStorage.getItem("config") || window.sessionStorage.getItem("config");
   // const configParsed = parseInt(
-  //   JSON.parse(config)?.find((item) => item?.name === "SESSION_TIME")?.vale
+  //   JSON.parse(config)?.find((item) => item?.name === "SESSION_TIME")?.value
   // );
   // const [showTimeoutModal, setShowTimeoutModal] = useState(false);
   const [isTimedout, setIsTimedout] = useState(false);
@@ -250,6 +318,13 @@ const LayoutMenu = ({ children, grantPath }) => {
       dispatch(clearBodyMessage());
       setModalConfirmation(false);
       setLoadingLogout(false);
+      // Token cleared by the thunk; navigate regardless of API failure so the
+      // user is never left stuck on a protected page with no valid session.
+      if (tokenJSON?.userLevel !== "Super User") {
+        navigate("/login");
+      } else {
+        navigate("/login-su");
+      }
     }
   };
   const initialAvatar = (fullName) => {
@@ -402,52 +477,7 @@ const LayoutMenu = ({ children, grantPath }) => {
         }}
         className="site-layout"
       >
-        <Sider
-          trigger={null}
-          collapsible
-          collapsed={collapsed}
-          className={`site-layout-background ${collapsed === true ? "width-collapsed" : "width-not-collapsed"
-            }`}
-          style={{
-            overflow: "auto",
-            height: "auto",
-            left: 0,
-            top: 0,
-            bottom: 0,
-            minWidth: "255px !important",
-          }}
-        >
-          <div
-            className={`grid grid-cols-3 gap-1 logo ${collapsed
-                ? "my-6 mx-4 justify-center"
-                : "my-6 mx-4 justify-center"
-              }`}
-          >
-            <div className="col-span-2">
-              <Image
-                src={collapsed ? pgnLogoKecil : pgnLogo}
-                preview={false}
-                wrapperClassName={!collapsed ? "w-[120px]" : undefined}
-              />
-            </div>
-            <div className=".. flex self-center justify-end">
-              {collapsed === false &&
-                React.createElement(
-                  collapsed ? MenuUnfoldOutlined : MenuFoldOutlined,
-                  {
-                    className: "trigger",
-                    onClick: () => setCollapsed(!collapsed),
-                    style: {
-                      fontSize: "24px",
-                      color: "#4B465C",
-                      width: "24px",
-                    },
-                  },
-                )}
-            </div>
-          </div>
-          <SideMenu isCollapsed={collapsed} />
-        </Sider>
+        <SidebarContainer collapsed={collapsed} onToggle={toggleCollapsed} />
         <Layout className="site-layout2 p-4">
           <Header
             className="site-layout-background2"
@@ -459,10 +489,10 @@ const LayoutMenu = ({ children, grantPath }) => {
               <div className="pl-4">
                 {collapsed === true &&
                   React.createElement(
-                    collapsed ? MenuUnfoldOutlined : MenuFoldOutlined,
+                    MenuUnfoldOutlined,
                     {
                       className: "trigger",
-                      onClick: () => setCollapsed(!collapsed),
+                      onClick: toggleCollapsed,
                       style: {
                         fontSize: "24px",
                         color: "#FFFFFF",
@@ -474,7 +504,7 @@ const LayoutMenu = ({ children, grantPath }) => {
               <div className="flex justify-end items-center align-middle gap-x-5 mr-5">
                 <NotificationDropdown />
                 <Dropdown overlay={menu} trigger={["click"]}>
-                  <a onClick={(e) => e.preventDefault()}>
+                  <button type="button" onClick={(e) => e.preventDefault()} style={{ border: 'none', background: 'transparent' }}>
                     {data_profile?.data?.urlImage2 === null ? (
                       data_profile?.data?.username === "" ? (
                         <Avatar size={"middle"} icon={<UserOutlined />} />
@@ -491,7 +521,7 @@ const LayoutMenu = ({ children, grantPath }) => {
                         src={data_profile?.data?.urlImage2}
                       />
                     )}
-                  </a>
+                  </button>
                 </Dropdown>
                 {/* <IconArrowNarrowLeft
                   name={"IconArrowNarrowLeft"}
@@ -607,8 +637,12 @@ const LayoutMenu = ({ children, grantPath }) => {
                 </div>
               </ModalError>
             ) : null}
-            {data_grant_access?.response?.data?.data?.isGranted === false &&
-              !isPublicPath ? (
+            {location.pathname === '/' ||
+            tokenJSON?.userLevel === "Super User" ? (
+              <div className="mt-[15px]">{children}</div>
+            ) :
+            (data_grant_access?.response?.data?.data?.isGranted === false &&
+              !isPublicPath) ? (
               <NotFound type={"unauthorized"} />
             ) : (
               <div className="mt-[15px]">{children}</div>
@@ -700,7 +734,13 @@ const LayoutMenu = ({ children, grantPath }) => {
                   <Input.Password />
                 </Form.Item>
                 <div className={"w-full justify-end flex gap-2"}>
-                  <ButtonComponent type={"default"} onClick={handleLogout}>
+                  <ButtonComponent
+                    type={"default"}
+                    onClick={() => {
+                      setShowModalExtendToken(false);
+                      form.resetFields();
+                    }}
+                  >
                     Logout
                   </ButtonComponent>
                   <ButtonComponent type={"submit"} htmlType={"submit"}>

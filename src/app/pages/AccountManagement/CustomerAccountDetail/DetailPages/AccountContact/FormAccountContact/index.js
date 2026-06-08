@@ -3,13 +3,13 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { Alert, Checkbox, Form, Select, Spin } from "antd";
 
-import LayoutMenu from "../../../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumbAdvanced from "../../../../../../../components/BreadCrumbAdvanced";
 import BaseContainer from "../../../../../../../components/BaseContainer";
 import HeaderDetail from "../../../HeaderDetail";
 import InputComponent from "../../../../../../../components/InputComponent";
 import SelectComponent from "../../../../../../../components/SelectComponent";
 import TablePagination from "../../../../../../../components/TablePagination";
+import NxTable from "../../../../../../../components/Nx/NxTable";
 import SVGIcon from "../../../../../../../assets/Icon/index";
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
 import ModalChooseContact from "./ModalChooseContactComp";
@@ -686,8 +686,8 @@ const FormAccountAddress = ({ type }) => {
     dispatch(resetDataDetail());
   };
   return (
-    <div>
-      <LayoutMenu>
+    <>
+      <>
         <Spin spinning={loading}>
           <BreadCrumbAdvanced routes={routes(id)}/>
           <HeaderDetail
@@ -967,12 +967,15 @@ const FormAccountAddress = ({ type }) => {
                 </span>
 
                 <div className="w-full pt-[30px]">
-                  <TablePagination
+                  <NxTable
+                    idTable="account-contact-confirmation-modal-table"
                     dataSource={dataPush?.contactDetail}
                     columns={columnsConfirmation}
-                    pageSize={10}
-                    current={1}
                     totalData={dataPush?.contactDetail?.length}
+                    usePagination={false}
+                    showAdvanceSearch={false}
+                    showSearchBar={false}
+                    tableScrolled={{ y: 400, x: "max-content" }}
                   />
                 </div>
               </div>
@@ -1113,8 +1116,8 @@ const FormAccountAddress = ({ type }) => {
             </div>
           </ModalSuccess>
         ) : null}
-      </LayoutMenu>
-    </div>
+      </>
+    </>
   );
 };
 

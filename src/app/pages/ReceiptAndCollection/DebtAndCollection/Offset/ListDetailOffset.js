@@ -7,7 +7,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import RadioTabs from "../../../../../components/RadioTabs";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import { DEBT_AND_COLLECTION_ROUTES } from "../../../../../routes/DebtAndCollection/rc_routes";
 import { getDetailOffset, resetDetail, approveOrRejectOffset, getListCategory, getListApprovalById } from "../../../../../redux/slices/receipt_collection/offset";
 import BaseContainer from "../../../../../components/BaseContainer";
@@ -90,7 +89,7 @@ const ListDetailOffset = () => {
     };
 
     return (
-        <LayoutMenu>
+        <>
             <BreadCrumb routes={routes} />
             <Spin spinning={loading}>
                 <div className="mt-5">
@@ -187,7 +186,7 @@ const ListDetailOffset = () => {
                 menu={"Offset"}
                 named={offset.id}
             />
-        </LayoutMenu>
+        </>
     );
 };
 
@@ -195,11 +194,11 @@ const HistoryLog = ({ recordId, createdDate, createdBy, updatedDate, updatedBy }
     return (
         <BaseContainer header={"HISTORY LOG INFORMATION"}>
             <GridLayout cols={5} className="p-4">
-                <DetailText label={"Record Id"}>{recordId || "-"}</DetailText>
-                <DetailText label={"Created Date"}>{createdDate || "-"}</DetailText>
-                <DetailText label={"Created By"}>{createdBy || "-"}</DetailText>
-                <DetailText label={"Updated Date"}>{updatedDate || "-"}</DetailText>
-                <DetailText label={"Updated By"}>{updatedBy || "-"}</DetailText>
+                <DetailText label={"Record Id"}>{recordId || ""}</DetailText>
+                <DetailText label={"Created Date"}>{createdDate || ""}</DetailText>
+                <DetailText label={"Created By"}>{createdBy || ""}</DetailText>
+                <DetailText label={"Updated Date"}>{updatedDate || ""}</DetailText>
+                <DetailText label={"Updated By"}>{updatedBy || ""}</DetailText>
             </GridLayout>
         </BaseContainer>
     );

@@ -8,7 +8,6 @@ import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrReject";
 import RadioTabs from "../../../../../components/RadioTabs";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import {
   getDetailWriteOff,
   approveOrRejectWriteOff,
@@ -266,7 +265,7 @@ const ListDetailWriteOff = () => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
       <div>
         <RadioTabs data={tabData} onChange={handleSegmentedPage} />
@@ -323,7 +322,7 @@ const ListDetailWriteOff = () => {
           </div>
         ) : null}
       </div>
-    </LayoutMenu>
+    </>
   );
 };
 
@@ -344,19 +343,19 @@ const HistoryLog = ({
         )}
 
         <DetailText label={"Created Date"}>
-          {createdDate || "-"}
+          {createdDate || ""}
         </DetailText>
 
         <DetailText label={"Created By"}>
-          {createdBy || "-"}
+          {createdBy || ""}
         </DetailText>
 
         <DetailText label={"Updated Date"}>
-          {updatedDate || "-"}
+          {updatedDate || ""}
         </DetailText>
 
         <DetailText label={"Updated By"}>
-          {updatedBy || "-"}
+          {updatedBy || ""}
         </DetailText>
       </GridLayout>
     </BaseContainer>

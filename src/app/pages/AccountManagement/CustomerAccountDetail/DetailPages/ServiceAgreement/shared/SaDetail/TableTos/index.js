@@ -13,6 +13,24 @@ const TableTos = ({
   setModalChooseTos,
   dataTosFromProductVersion,
 }) => {
+  const getTosDetailRowKey = (item, index) => {
+    if (item?.key !== undefined && item?.key !== null && item?.key !== "") {
+      return String(item.key);
+    }
+
+    if (item?.id !== undefined && item?.id !== null && item?.id !== "") {
+      return String(item.id);
+    }
+
+    if (item?.detailId !== undefined && item?.detailId !== null && item?.detailId !== "") {
+      return String(item.detailId);
+    }
+
+    const attributeName = item?.attributeName || "attr";
+    const value = item?.value || "value";
+    return `${attributeName}-${value}-${index}`;
+  };
+
   const searchInput = useRef(null);
   const [displayData, setDisplayData] = useState([]);
   const [loadedCount, setLoadedCount] = useState(20);
@@ -21,17 +39,18 @@ const TableTos = ({
   const [orderSort, setOrderSort] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
-  const [dataUpdate, setdataUpdate] = useState([]);
+  const [search, setSearch] = useState({});
+  const [, setdataUpdate] = useState([]);
   const [fixedColumns, setFixedColumns] = useState(() => ({
     right: ["action"],
     left: [],
   }));
 
-  const deleteRow = (record) => {
+  const deleteRow = useCallback((record) => {
     setDataTermOfService((prevState) =>
       prevState.filter((item) => item.key !== record.key)
     );
-  };
+  }, [setDataTermOfService]);
 
   // Process and filter data
   const processedData = useMemo(() => {
@@ -94,22 +113,39 @@ const TableTos = ({
     setLoadedCount(20);
   };
 
-  const handleSearch = (selectedKeys, confirm, dataIndex) => {
+  const handleSearch = useCallback((selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(selectedKeys[0] ? dataIndex : "");
+    setSearch((prevState) => ({
+      ...prevState,
+      [dataIndex]: selectedKeys[0],
+    }));
     // Reset to first page when searching
     setLoadedCount(20);
-  };
+  }, []);
 
   const columns = useMemo(() => {
     return getTosColumns({
+      search,
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
       isProduct,
       openModalFormTos,
       setdataUpdate,
       deleteRow,
     });
-  }, [isProduct]);
+  }, [
+    search,
+    searchedColumn,
+    searchText,
+    isProduct,
+    openModalFormTos,
+    handleSearch,
+    deleteRow,
+  ]);
 
   const columnDefinitions = useMemo(() => {
     return columns.map((col) => ({
@@ -133,7 +169,7 @@ const TableTos = ({
           columns={detailColumns}
           pagination={false}
           className="mb-4"
-          rowKey={(record, index) => index}
+          rowKey={getTosDetailRowKey}
         />
       </div>
     );
@@ -142,19 +178,20 @@ const TableTos = ({
   return (
     <div>
       {isProduct === 2 && (
-        <div className="flex w-full justify-end pb-6">
+        <div className="flex w-full justify-end pb-4">
           <ButtonComponent
             icon={<SVGIcon name="IconButtonCreate" width={24} />}
             type="submit"
             onClick={() => setModalChooseTos(true)}
           >
-            Choose Term of Service
+            Choose
           </ButtonComponent>
         </div>
       )}
 
       <NxTable
         idTable="tos-table"
+        rowKey="key"
         dataSource={displayData}
         columns={columns}
         totalData={processedData.length}

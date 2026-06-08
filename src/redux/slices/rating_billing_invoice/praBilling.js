@@ -4,7 +4,7 @@ import userHttpService from "../../services/userHttpService";
 import { setBodyError, showModalError, validateError } from "../general_slice";
 
 const initialState = {
-  data: [],
+  created_prabilling_data: [],
   loadingCreate: false,
   loading: false,
   loadingModal: false,
@@ -55,6 +55,7 @@ const initialState = {
     billingItem: false,
     saPrcRuleDet: false,
   },
+  loading_customer_account_detail: false,
   loading_list_prabilling: false,
   loading_log: false,
   loading_detail_log: false,
@@ -138,9 +139,8 @@ export const getPrabillSummaryServiceAgreement = createAsyncThunk(
   "GET_PRABILL_SUMMARY_SERVICE_AGREEMENT",
   async ({ id, search, page, pageSize, sort }, thunkAPI) => {
     try {
-      let url = `/v1/dbs/api/prabill/summary/service-agreement/${id}?page=${
-        page - 1
-      }&size=${pageSize}`;
+      let url = `/v1/dbs/api/prabill/summary/service-agreement/${id}?page=${page - 1
+        }&size=${pageSize}`;
 
       if (search) url += `&search=${encodeURIComponent(search)}`;
       if (sort) url += `&sort=${sort}`;
@@ -165,7 +165,7 @@ export const getPrabillSummaryServiceAgreement = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response?.data || error.message);
     }
-  }
+  },
 );
 
 // Get Prabill Summary Usage
@@ -173,14 +173,13 @@ export const getPrabillSummaryUsage = createAsyncThunk(
   "GET_PRABILL_SUMMARY_USAGE",
   async (
     { billPeriod, customerNumber, search, page, pageSize, sort },
-    thunkAPI
+    thunkAPI,
   ) => {
     try {
       let url = `/v1/dbs/api/prabill/summary/usage?billPeriod=${encodeURIComponent(
-        billPeriod
-      )}&customerNumber=${encodeURIComponent(customerNumber)}&page=${
-        page - 1
-      }&size=${pageSize}`;
+        billPeriod,
+      )}&customerNumber=${encodeURIComponent(customerNumber)}&page=${page - 1
+        }&size=${pageSize}`;
 
       if (search) url += `&search=${encodeURIComponent(search)}`;
       if (sort) url += `&sort=${sort}`;
@@ -205,7 +204,7 @@ export const getPrabillSummaryUsage = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response?.data || error.message);
     }
-  }
+  },
 );
 
 export const getListBillingPeriodForPrabilling = createAsyncThunk(
@@ -214,8 +213,6 @@ export const getListBillingPeriodForPrabilling = createAsyncThunk(
     try {
       const url = `/v1/dbs/api/rbi/calculation/billingperiod/1`;
       const response = await ratingBillingHttpService.getAll(url);
-
-      // Transform data sesuai struktur response
       const rawData =
         response?.body?.data?.data ||
         response?.data?.data ||
@@ -224,11 +221,11 @@ export const getListBillingPeriodForPrabilling = createAsyncThunk(
 
       const transformedData = Array.isArray(rawData)
         ? rawData.map((item) => ({
-            id: item.id,
-            name: item.name,
-            code: item.code,
-            ...item,
-          }))
+          id: item.id,
+          name: item.name,
+          code: item.code,
+          ...item,
+        }))
         : [];
 
       return transformedData;
@@ -249,22 +246,21 @@ export const getListBillingPeriodForPrabilling = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response?.data);
     }
-  }
+  },
 );
 
-// 3. Tambahkan thunk untuk get summary prabilling
 export const getListPrabillingSummary = createAsyncThunk(
   "GET_LIST_PRABILLING_SUMMARY",
   async (
     { billPeriod, search, page, pageSize, sort, isLoadMore = false },
-    thunkAPI
+    thunkAPI,
   ) => {
     try {
       const searchParams = search || "";
       const sortParams = sort || "prabillCustId~asc";
 
       const url = `/v1/dbs/api/prabill/summary?billPeriod=${encodeURIComponent(
-        billPeriod
+        billPeriod,
       )}&sort=${sortParams}&size=${pageSize}&page=${page}&searchs=${searchParams}`;
 
       const response = await ratingBillingHttpService.getPagination(url);
@@ -291,10 +287,9 @@ export const getListPrabillingSummary = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response?.data);
     }
-  }
+  },
 );
 
-// get lov slice
 export const getListSor = createAsyncThunk("GET_LIST_SOR", async (thunkAPI) => {
   try {
     const url = `/v1/dbs/api/rbi/calculation/sor?ccType=SOR`;
@@ -328,17 +323,16 @@ export const getListAccountGroup = createAsyncThunk(
         queryParams = segmentIds.map((id) => `idSegment=${id}`).join("&");
       }
 
-      const url = `/v1/dbs/api/account-group-type/list${
-        queryParams ? `?${queryParams}` : ""
-      }`;
+      const url = `/v1/dbs/api/account-group-type/list${queryParams ? `?${queryParams}` : ""
+        }`;
 
       const response = await ratingBillingHttpService.getAll(url);
 
       const accountGroups = Array.isArray(response)
         ? response
         : Array.isArray(response.data)
-        ? response.data
-        : [];
+          ? response.data
+          : [];
 
       return accountGroups;
     } catch (error) {
@@ -359,7 +353,7 @@ export const getListAccountGroup = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response?.data);
     }
-  }
+  },
 );
 
 export const getListCustomerSegment = createAsyncThunk(
@@ -386,7 +380,7 @@ export const getListCustomerSegment = createAsyncThunk(
       }
       return error;
     }
-  }
+  },
 );
 
 export const getListSchedulerType = createAsyncThunk(
@@ -413,7 +407,7 @@ export const getListSchedulerType = createAsyncThunk(
       }
       return error;
     }
-  }
+  },
 );
 
 export const getUserProfile = createAsyncThunk(
@@ -422,7 +416,6 @@ export const getUserProfile = createAsyncThunk(
     try {
       const url = "/v1/dbs/api/profile/view-profile";
       const response = await userHttpService.getAll(url);
-      // Ambil data langsung dari response
       return response.data?.data || response.data;
     } catch (error) {
       const message =
@@ -430,7 +423,7 @@ export const getUserProfile = createAsyncThunk(
       console.error("Error fetching user profile:", message);
       return thunkAPI.rejectWithValue(error.response?.data);
     }
-  }
+  },
 );
 
 export const getListCostCenter = createAsyncThunk(
@@ -457,7 +450,7 @@ export const getListCostCenter = createAsyncThunk(
       }
       return error;
     }
-  }
+  },
 );
 
 export const getListMeterReadingCode = createAsyncThunk(
@@ -467,7 +460,7 @@ export const getListMeterReadingCode = createAsyncThunk(
       const url = `/v1/dbs/api/rbi/calculation/meterreadingcode`;
       const response = await ratingBillingHttpService.activationWithRemark(
         url,
-        body
+        body,
       );
       return response.data;
     } catch (error) {
@@ -487,7 +480,7 @@ export const getListMeterReadingCode = createAsyncThunk(
       }
       return error;
     }
-  }
+  },
 );
 
 export const getListSpecificCustomer = createAsyncThunk(
@@ -497,7 +490,7 @@ export const getListSpecificCustomer = createAsyncThunk(
       const url = `/v1/dbs/api/customer-accounts`;
       const response = await ratingBillingHttpService.activationWithRemark(
         url,
-        body
+        body,
       );
       return response.data;
     } catch (error) {
@@ -517,7 +510,7 @@ export const getListSpecificCustomer = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response?.data);
     }
-  }
+  },
 );
 
 export const getListBillingCycle = createAsyncThunk(
@@ -553,7 +546,7 @@ export const getListBillingCycle = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response?.data);
     }
-  }
+  },
 );
 
 export const getListBillingPeriod = createAsyncThunk(
@@ -580,7 +573,7 @@ export const getListBillingPeriod = createAsyncThunk(
       }
       return error;
     }
-  }
+  },
 );
 
 export const getListComponentPrabilling = createAsyncThunk(
@@ -607,7 +600,7 @@ export const getListComponentPrabilling = createAsyncThunk(
       }
       return error;
     }
-  }
+  },
 );
 
 export const getUserDetailCalculation = createAsyncThunk(
@@ -634,7 +627,7 @@ export const getUserDetailCalculation = createAsyncThunk(
       }
       return error;
     }
-  }
+  },
 );
 
 export const createPrabilling = createAsyncThunk(
@@ -642,9 +635,7 @@ export const createPrabilling = createAsyncThunk(
   async ({ body }, thunkAPI) => {
     try {
       const url = "/v1/dbs/api/create";
-
       const response = await ratingBillingHttpService.createData(url, body);
-
       return response.data;
     } catch (error) {
       const message =
@@ -665,15 +656,14 @@ export const createPrabilling = createAsyncThunk(
 
       throw error;
     }
-  }
+  },
 );
 
-//Get list bill period
 export const getListPrabillingInitPopulate = createAsyncThunk(
   "GET_LIST_PRABILLING_INIT_POPULATE",
   async (
     { search, page, pageSize, sort, billPeriodId, isLoadMore = false },
-    thunkAPI
+    thunkAPI,
   ) => {
     try {
       const searchParams = search || "";
@@ -704,9 +694,9 @@ export const getListPrabillingInitPopulate = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response?.data);
     }
-  }
+  },
 );
-// Update  getDetailPrabillingInit thunk
+
 export const getDetailPrabillingInit = createAsyncThunk(
   "GET_DETAIL_PRABILLING_INIT",
   async (initCode, thunkAPI) => {
@@ -716,75 +706,20 @@ export const getDetailPrabillingInit = createAsyncThunk(
 
       const contentType = response.headers?.["content-type"];
       if (contentType && contentType.includes("text/html")) {
-        throw new Error(
-          "Received HTML response - Server may be in maintenance mode"
-        );
+        throw new Error("Received HTML response - Server may be in maintenance mode");
       }
 
-      // Akses data sesuai struktur response
-      const responseData = response.data?.data || response.data || response;
-      const prabillInitPopulate = responseData.prabillInitPopulate || {};
-      const details = responseData.details || [];
+      return response.data;
 
-      // Proses details untuk mengekstrak data yang unik
-      const detailsProcessed = details.map((detail) => ({
-        initCode: detail.initCode,
-        createdBy: detail.createdBy,
-        createdDtm: detail.createdDtm,
-        sorId: detail.sorId,
-        sor: detail.sor,
-        costCenter: detail.costCenter,
-        costCenterName: detail.costCenterName,
-        meterReadingCode: detail.meterReadingCode,
-        meterReadingCodeName: detail.meterReadingCodeName,
-        accountSegment: detail.accountSegment,
-        accountSegmentName: detail.accountSegmentName,
-        accountGroupType: detail.accountGroupType,
-        accountGroupTypeName: detail.accountGroupTypeName,
-        accounts: detail.accounts,
-      }));
-
-      // Kembalikan struktur yang lengkap
-      return {
-        prabillInitPopulate: {
-          initId: prabillInitPopulate.initId,
-          initCode: prabillInitPopulate.initCode,
-          processName: prabillInitPopulate.processName,
-          billingCycle: prabillInitPopulate.billingCycle,
-          billPeriod: prabillInitPopulate.billPeriod,
-          sor: prabillInitPopulate.sor,
-          sorId: prabillInitPopulate.sorId,
-          totalCustomer: prabillInitPopulate.totalCustomer,
-          status: prabillInitPopulate.status,
-          message: prabillInitPopulate.message,
-          remark: prabillInitPopulate.remark,
-          createdBy: prabillInitPopulate.createdBy,
-          createdDtm: prabillInitPopulate.createdDtm,
-          updateDtm: prabillInitPopulate.updateDtm,
-          billPeriodId: prabillInitPopulate.billPeriodId,
-          billingCycleId: prabillInitPopulate.billingCycleId,
-          shceduleType: prabillInitPopulate.shceduleType,
-          schedulerTime: prabillInitPopulate.schedulerTime,
-        },
-        details: detailsProcessed,
-      };
     } catch (error) {
-      console.error("Error in getDetailPrabillingInit:", error);
-
-      const message =
-        error?.response?.data?.message || error?.message || error?.toString();
-
-      if (
-        error?.response?.data?.code === 500 ||
-        error?.response?.data?.code === 419
-      ) {
+      const message = error?.response?.data?.message || error?.message || error?.toString();
+      if (error?.response?.data?.code === 500 || error?.response?.data?.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
       } else {
-        const errorBody = {
+        thunkAPI.dispatch(showModalError({
           title: "Failed",
           description: `Failed to fetch prabilling detail: ${message}`,
-        };
-        thunkAPI.dispatch(showModalError(errorBody));
+        }));
       }
       return thunkAPI.rejectWithValue(error.response?.data);
     }
@@ -795,11 +730,11 @@ export const getDetailPrabillingResult = createAsyncThunk(
   "GET_DETAIL_PRABILLING_RESULT",
   async (
     { initCode, search, page, pageSize, sort, isLoadMore = false },
-    thunkAPI
+    thunkAPI,
   ) => {
     try {
-      let url = `/v1/dbs/api/prabill/detail?search=${encodeURIComponent(
-        initCode
+      let url = `/v1/dbs/api/prabill/detail?initCode=${encodeURIComponent(
+        initCode,
       )}&page=${page}&size=${pageSize}`;
 
       if (sort) {
@@ -842,10 +777,9 @@ export const getDetailPrabillingResult = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response?.data);
     }
-  }
+  },
 );
 
-// Get Detail Prabilling Log
 export const getDetailPrabillingLog = createAsyncThunk(
   "GET_DETAIL_PRABILLING_LOG",
   async (
@@ -857,19 +791,18 @@ export const getDetailPrabillingLog = createAsyncThunk(
       search = "",
       isLoadMore = false,
     },
-    thunkAPI
+    thunkAPI,
   ) => {
     try {
       const searchParams = search || "";
       const sortParams = sort || "createdDtm~desc";
 
       const url = `/v1/dbs/api/logs/prabill-init-populate/${encodeURIComponent(
-        initCode
+        initCode,
       )}?page=${page}&size=${size}&sort=${sortParams}&searchs=${searchParams}`;
 
       const response = await ratingBillingHttpService.getAll(url);
 
-      // Response structure: { success, code, message, data: { result, page } }
       const apiData = response.data?.data || response.data;
 
       return {
@@ -880,7 +813,7 @@ export const getDetailPrabillingLog = createAsyncThunk(
           totalPages: 0,
           number: 0,
         },
-        isLoadMore, // Pass the flag to reducer
+        isLoadMore,
       };
     } catch (error) {
       const message =
@@ -900,10 +833,9 @@ export const getDetailPrabillingLog = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response?.data || error.message);
     }
-  }
+  },
 );
 
-// Get Prabilling Account Log
 export const getPrabillingAccountLog = createAsyncThunk(
   "GET_PRABILLING_ACCOUNT_LOG",
   async (
@@ -915,14 +847,14 @@ export const getPrabillingAccountLog = createAsyncThunk(
       search = "",
       isLoadMore = false,
     },
-    thunkAPI
+    thunkAPI,
   ) => {
     try {
       const searchParams = search || "";
       const sortParams = sort || "createdDate~desc";
 
       const url = `/v1/dbs/api/prabill/status-account?initCode=${encodeURIComponent(
-        initCode
+        initCode,
       )}&page=${page}&size=${size}&sort=${sortParams}&searchs=${searchParams}`;
 
       const response = await ratingBillingHttpService.getAll(url);
@@ -965,7 +897,7 @@ export const getPrabillingAccountLog = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response?.data || error.message);
     }
-  }
+  },
 );
 
 export const getCustomerAccountDetail = createAsyncThunk(
@@ -984,14 +916,14 @@ export const getCustomerAccountDetail = createAsyncThunk(
 
       if (!customerNumber || !billPeriod || !inSor) {
         throw new Error(
-          "Missing required parameters: customerNumber, billPeriod, or inSor"
+          "Missing required parameters: customerNumber, billPeriod, or inSor",
         );
       }
 
       let url = `/v1/dbs/api/customer-data?customerNumber=${encodeURIComponent(
-        customerNumber
+        customerNumber,
       )}&billPeriod=${encodeURIComponent(
-        billPeriod
+        billPeriod,
       )}&inSor=${encodeURIComponent(inSor)}`;
 
       if (accNumber) {
@@ -1018,13 +950,10 @@ export const getCustomerAccountDetail = createAsyncThunk(
       const dataSaPrcrule = responseData.dataSaPrcrule || [];
       const dataSATosDet = responseData.dataSATosDet || [];
       const dataTosSubDet = responseData.dataTosSubDet || [];
-
-      // Data baru
       const dataBillingBucket = responseData.dataBillingBucket || [];
       const dataBillingItem = responseData.dataBillingItem || [];
       const dataSAPrcRuleDet = responseData.dataSAPrcRuleDet || [];
 
-      // Process Usage Data
       const usageData = dataUsage.map((item) => ({
         assetSerialNum: item.assetSerialNum,
         assetType: item.assetType,
@@ -1050,7 +979,6 @@ export const getCustomerAccountDetail = createAsyncThunk(
         ratingCode: item.ratingCode,
       }));
 
-      // Process Tax Data
       const taxData = dataTaxImp.map((item) => ({
         category: item.category,
         taxImpName: item.taxImpName,
@@ -1060,7 +988,6 @@ export const getCustomerAccountDetail = createAsyncThunk(
         ratingCode: item.ratingCode,
       }));
 
-      // Process Pricing Data
       const pricingData = dataSaPrcrule.map((item) => ({
         lineNumber: item.lineNumber,
         priceCode: item.priceCodeRule || item.priceCode,
@@ -1071,7 +998,6 @@ export const getCustomerAccountDetail = createAsyncThunk(
         priceCurrency: item.priceCurrency,
       }));
 
-      // Process SA Data
       const saMap = new Map();
       dataDetail.forEach((item) => {
         if (!saMap.has(item.saNumber)) {
@@ -1101,14 +1027,12 @@ export const getCustomerAccountDetail = createAsyncThunk(
       });
       const saData = Array.from(saMap.values());
 
-      // Process SA TOS Detail
       const saTosDet = dataSATosDet.map((item) => ({
         saTosName: item.saTosName,
         attributeName: item.attributeName,
         value: item.value,
       }));
 
-      // Process TOS Sub Detail
       const tosSubDet = dataTosSubDet.map((item) => ({
         tosName: item.tosName,
         attributeName: item.attributeName,
@@ -1117,7 +1041,6 @@ export const getCustomerAccountDetail = createAsyncThunk(
         fromItem: item.fromItem,
       }));
 
-      // Process Billing Bucket Data (BARU)
       const billingBucketData = dataBillingBucket.map((item) => ({
         bucketCode: item.bucketCode,
         bucketName: item.bucketName,
@@ -1126,7 +1049,6 @@ export const getCustomerAccountDetail = createAsyncThunk(
         validEndDate: item.validEndDate,
       }));
 
-      // Process Billing Item Data (BARU)
       const billingItemData = dataBillingItem.map((item) => ({
         bucketCode: item.bucketCode,
         bucketName: item.bucketName,
@@ -1140,7 +1062,6 @@ export const getCustomerAccountDetail = createAsyncThunk(
         itemPriority: item.itemPriority,
       }));
 
-      // Process SA Price Rule Detail Data (BARU)
       const saPrcRuleDetData = dataSAPrcRuleDet.map((item) => ({
         currencyCode: item.currencyCode,
         fullPriceCode: item.fullPriceCode,
@@ -1183,17 +1104,14 @@ export const getCustomerAccountDetail = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response?.data || error.message);
     }
-  }
+  },
 );
 
-// Update download function
 export const downloadPrabillingResult = createAsyncThunk(
   "DOWNLOAD_PRABILLING_RESULT",
   async ({ initCode }, thunkAPI) => {
     try {
-      // Update endpoint sesuai dengan backend baru
       const url = `/v1/dbs/api/download?search=${encodeURIComponent(initCode)}`;
-
       const response = await ratingBillingHttpService.downloadDataPrabill(url);
       return response.data;
     } catch (error) {
@@ -1202,14 +1120,13 @@ export const downloadPrabillingResult = createAsyncThunk(
           error: error,
           action: "DOWNLOAD_PRABILLING_RESULT",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response?.data);
     }
-  }
+  },
 );
 
-// Get Header Data (Customer & Account Info)
 export const getCustomerHeaderData = createAsyncThunk(
   "GET_CUSTOMER_HEADER_DATA",
   async (params, thunkAPI) => {
@@ -1221,9 +1138,9 @@ export const getCustomerHeaderData = createAsyncThunk(
       }
 
       let url = `/v1/dbs/api/customer-data?customerNumber=${encodeURIComponent(
-        customerNumber
+        customerNumber,
       )}&billPeriod=${encodeURIComponent(
-        billPeriod
+        billPeriod,
       )}&inSor=${encodeURIComponent(inSor)}`;
 
       if (accNumber) url += `&accNumber=${encodeURIComponent(accNumber)}`;
@@ -1232,21 +1149,19 @@ export const getCustomerHeaderData = createAsyncThunk(
       const response = await ratingBillingHttpService.getAll(url);
       const responseData = response.data?.data || response.data;
 
-      // Return semua data array, bukan hanya item pertama
       return Array.isArray(responseData)
         ? responseData
         : responseData
-        ? [responseData]
-        : [];
+          ? [responseData]
+          : [];
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
       return thunkAPI.rejectWithValue(message);
     }
-  }
+  },
 );
 
-// Get Usage Data
 export const getCustomerUsageData = createAsyncThunk(
   "GET_CUSTOMER_USAGE_DATA",
   async (params, thunkAPI) => {
@@ -1263,9 +1178,9 @@ export const getCustomerUsageData = createAsyncThunk(
       } = params;
 
       let url = `/v1/dbs/api/data-usage?page=${page}&size=${size}&sort=${sort}&customerNumber=${encodeURIComponent(
-        customerNumber
+        customerNumber,
       )}&billPeriod=${encodeURIComponent(
-        billPeriod
+        billPeriod,
       )}&inSor=${encodeURIComponent(inSor)}`;
 
       if (accNumber) url += `&accNumber=${encodeURIComponent(accNumber)}`;
@@ -1288,10 +1203,9 @@ export const getCustomerUsageData = createAsyncThunk(
         error?.response?.data?.message || error?.message || error?.toString();
       return thunkAPI.rejectWithValue(message);
     }
-  }
+  },
 );
 
-// Get Tax Data
 export const getCustomerTaxData = createAsyncThunk(
   "GET_CUSTOMER_TAX_DATA",
   async (params, thunkAPI) => {
@@ -1307,9 +1221,9 @@ export const getCustomerTaxData = createAsyncThunk(
       } = params;
 
       let url = `/v1/dbs/api/data-tax-imp?page=${page}&size=${size}&customerNumber=${encodeURIComponent(
-        customerNumber
+        customerNumber,
       )}&billPeriod=${encodeURIComponent(
-        billPeriod
+        billPeriod,
       )}&inSor=${encodeURIComponent(inSor)}`;
 
       if (accNumber) url += `&accNumber=${encodeURIComponent(accNumber)}`;
@@ -1332,10 +1246,9 @@ export const getCustomerTaxData = createAsyncThunk(
         error?.response?.data?.message || error?.message || error?.toString();
       return thunkAPI.rejectWithValue(message);
     }
-  }
+  },
 );
 
-// Get Billing Bucket Data
 export const getCustomerBillingBucketData = createAsyncThunk(
   "GET_CUSTOMER_BILLING_BUCKET_DATA",
   async (params, thunkAPI) => {
@@ -1351,9 +1264,9 @@ export const getCustomerBillingBucketData = createAsyncThunk(
       } = params;
 
       let url = `/v1/dbs/api/data-billing-bucket?page=${page}&size=${size}&customerNumber=${encodeURIComponent(
-        customerNumber
+        customerNumber,
       )}&billPeriod=${encodeURIComponent(
-        billPeriod
+        billPeriod,
       )}&inSor=${encodeURIComponent(inSor)}`;
 
       if (accNumber) url += `&accNumber=${encodeURIComponent(accNumber)}`;
@@ -1376,10 +1289,9 @@ export const getCustomerBillingBucketData = createAsyncThunk(
         error?.response?.data?.message || error?.message || error?.toString();
       return thunkAPI.rejectWithValue(message);
     }
-  }
+  },
 );
 
-// Get Billing Item Data
 export const getCustomerBillingItemData = createAsyncThunk(
   "GET_CUSTOMER_BILLING_ITEM_DATA",
   async (params, thunkAPI) => {
@@ -1395,9 +1307,9 @@ export const getCustomerBillingItemData = createAsyncThunk(
       } = params;
 
       let url = `/v1/dbs/api/data-billing-item?page=${page}&size=${size}&customerNumber=${encodeURIComponent(
-        customerNumber
+        customerNumber,
       )}&billPeriod=${encodeURIComponent(
-        billPeriod
+        billPeriod,
       )}&inSor=${encodeURIComponent(inSor)}`;
 
       if (accNumber) url += `&accNumber=${encodeURIComponent(accNumber)}`;
@@ -1420,10 +1332,9 @@ export const getCustomerBillingItemData = createAsyncThunk(
         error?.response?.data?.message || error?.message || error?.toString();
       return thunkAPI.rejectWithValue(message);
     }
-  }
+  },
 );
 
-// Get SA PRC Rule Detail Data
 export const getCustomerSaPrcRuleDetData = createAsyncThunk(
   "GET_CUSTOMER_SA_PRC_RULE_DET_DATA",
   async (params, thunkAPI) => {
@@ -1439,9 +1350,9 @@ export const getCustomerSaPrcRuleDetData = createAsyncThunk(
       } = params;
 
       let url = `/v1/dbs/api/data-sa-prcrule-det?page=${page}&size=${size}&customerNumber=${encodeURIComponent(
-        customerNumber
+        customerNumber,
       )}&billPeriod=${encodeURIComponent(
-        billPeriod
+        billPeriod,
       )}&inSor=${encodeURIComponent(inSor)}`;
 
       if (accNumber) url += `&accNumber=${encodeURIComponent(accNumber)}`;
@@ -1464,10 +1375,9 @@ export const getCustomerSaPrcRuleDetData = createAsyncThunk(
         error?.response?.data?.message || error?.message || error?.toString();
       return thunkAPI.rejectWithValue(message);
     }
-  }
+  },
 );
 
-// get sa cust data
 export const getCustomerSaData = createAsyncThunk(
   "GET_CUSTOMER_SA_DATA",
   async (params, thunkAPI) => {
@@ -1482,14 +1392,14 @@ export const getCustomerSaData = createAsyncThunk(
 
       if (!customerNumber || !billPeriod) {
         throw new Error(
-          "Missing required parameters: customerNumber or billPeriod"
+          "Missing required parameters: customerNumber or billPeriod",
         );
       }
 
       let url = `/v1/dbs/api/prabill/service-agreement?customerNumber=${encodeURIComponent(
-        customerNumber
+        customerNumber,
       )}&billPeriod=${encodeURIComponent(
-        billPeriod
+        billPeriod,
       )}&page=${page}&size=${size}&sort=${sort}`;
 
       const response = await ratingBillingHttpService.getAll(url);
@@ -1509,15 +1419,14 @@ export const getCustomerSaData = createAsyncThunk(
         error?.response?.data?.message || error?.message || error?.toString();
       return thunkAPI.rejectWithValue(message);
     }
-  }
+  },
 );
 
-// Get SA Detail
 export const getPrabillSaDetail = createAsyncThunk(
   "GET_PRABILL_SA_DETAIL",
   async (
     { prabillSaId, page = 0, size = 10, search = "", sort = "" },
-    thunkAPI
+    thunkAPI,
   ) => {
     try {
       const searchParams = search
@@ -1543,15 +1452,14 @@ export const getPrabillSaDetail = createAsyncThunk(
         error?.response?.data?.message || error?.message || error?.toString();
       return thunkAPI.rejectWithValue(message);
     }
-  }
+  },
 );
 
-// Get SA Calculation Rule
 export const getPrabillSaCalcRule = createAsyncThunk(
   "GET_PRABILL_SA_CALC_RULE",
   async (
     { prabillSaId, page = 0, size = 10, search = "", sort = "" },
-    thunkAPI
+    thunkAPI,
   ) => {
     try {
       const searchParams = search
@@ -1577,15 +1485,14 @@ export const getPrabillSaCalcRule = createAsyncThunk(
         error?.response?.data?.message || error?.message || error?.toString();
       return thunkAPI.rejectWithValue(message);
     }
-  }
+  },
 );
 
-// Get SA Price Rule
 export const getPrabillSaPriceRule = createAsyncThunk(
   "GET_PRABILL_SA_PRICE_RULE",
   async (
     { prabillSaId, page = 0, size = 10, search = "", sort = "" },
-    thunkAPI
+    thunkAPI,
   ) => {
     try {
       const searchParams = search
@@ -1611,15 +1518,14 @@ export const getPrabillSaPriceRule = createAsyncThunk(
         error?.response?.data?.message || error?.message || error?.toString();
       return thunkAPI.rejectWithValue(message);
     }
-  }
+  },
 );
 
-// Get SA Price Rule
 export const getPrabillSummarySaPriceRule = createAsyncThunk(
-  "GET_PRABILL_SA_PRICE_RULE",
+  "GET_PRABILL_SUMMARY_SA_PRICE_RULE",
   async (
     { prabillSaId, page = 0, size = 10, search = "", sort = "" },
-    thunkAPI
+    thunkAPI,
   ) => {
     try {
       const searchParams = search
@@ -1645,10 +1551,9 @@ export const getPrabillSummarySaPriceRule = createAsyncThunk(
         error?.response?.data?.message || error?.message || error?.toString();
       return thunkAPI.rejectWithValue(message);
     }
-  }
+  },
 );
 
-// Get SA Price Detail
 export const getPrabillSaPriceDet = createAsyncThunk(
   "GET_PRABILL_SA_PRICE_DET",
   async (prabillSaId, thunkAPI) => {
@@ -1661,12 +1566,11 @@ export const getPrabillSaPriceDet = createAsyncThunk(
         error?.response?.data?.message || error?.message || error?.toString();
       return thunkAPI.rejectWithValue(message);
     }
-  }
+  },
 );
 
-// Get SA Price Detail summary prabill
 export const getPrabillSummarySaPriceDet = createAsyncThunk(
-  "GET_PRABILL_SA_PRICE_DET",
+  "GET_PRABILL_SUMMARY_SA_PRICE_DET",
   async (prabillSaId, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/prabill/summary/sa-price-det/${prabillSaId}`;
@@ -1677,15 +1581,14 @@ export const getPrabillSummarySaPriceDet = createAsyncThunk(
         error?.response?.data?.message || error?.message || error?.toString();
       return thunkAPI.rejectWithValue(message);
     }
-  }
+  },
 );
 
-// Get SA TOS Detail
 export const getPrabillSaTosDetail = createAsyncThunk(
   "GET_PRABILL_SA_TOS_DETAIL",
   async (
     { prabillSaId, page = 0, size = 10, search = "", sort = "" },
-    thunkAPI
+    thunkAPI,
   ) => {
     try {
       const searchParams = search
@@ -1711,15 +1614,14 @@ export const getPrabillSaTosDetail = createAsyncThunk(
         error?.response?.data?.message || error?.message || error?.toString();
       return thunkAPI.rejectWithValue(message);
     }
-  }
+  },
 );
 
-// Get SA TOS
 export const getPrabillSaTos = createAsyncThunk(
   "GET_PRABILL_SA_TOS",
   async (
     { prabillSaId, page = 0, size = 10, search = "", sort = "" },
-    thunkAPI
+    thunkAPI,
   ) => {
     try {
       const searchParams = search
@@ -1745,7 +1647,7 @@ export const getPrabillSaTos = createAsyncThunk(
         error?.response?.data?.message || error?.message || error?.toString();
       return thunkAPI.rejectWithValue(message);
     }
-  }
+  },
 );
 
 const prabillingSlice = createSlice({
@@ -1854,10 +1756,10 @@ const prabillingSlice = createSlice({
 
       if (isLoadMore) {
         const existingIds = new Set(
-          state.list_prabilling_summary.map((item) => item.prabillCustId)
+          state.list_prabilling_summary.map((item) => item.prabillCustId),
         );
         const uniqueNewData = newData.filter(
-          (item) => !existingIds.has(item.prabillCustId)
+          (item) => !existingIds.has(item.prabillCustId),
         );
         state.list_prabilling_summary = [
           ...state.list_prabilling_summary,
@@ -1886,7 +1788,6 @@ const prabillingSlice = createSlice({
         };
       }
     },
-    //sa data
     [getCustomerSaData.pending]: (state) => {
       state.loading_customer_detail.sa = true;
     },
@@ -1898,7 +1799,6 @@ const prabillingSlice = createSlice({
       state.loading_customer_detail.sa = false;
       state.customer_account_detail.saData = { result: [], page: {} };
     },
-    // SA Detail
     [getPrabillSaDetail.pending]: (state) => {
       state.loading_prabill_sa.saDetail = true;
     },
@@ -1910,8 +1810,6 @@ const prabillingSlice = createSlice({
       state.loading_prabill_sa.saDetail = false;
       state.prabill_sa_detail.saDetail = { result: [], page: {} };
     },
-
-    // SA Calc Rule
     [getPrabillSaCalcRule.pending]: (state) => {
       state.loading_prabill_sa.saCalcRule = true;
     },
@@ -1923,8 +1821,6 @@ const prabillingSlice = createSlice({
       state.loading_prabill_sa.saCalcRule = false;
       state.prabill_sa_detail.saCalcRule = { result: [], page: {} };
     },
-
-    // SA Price Rule
     [getPrabillSaPriceRule.pending]: (state) => {
       state.loading_prabill_sa.saPriceRule = true;
     },
@@ -1936,8 +1832,6 @@ const prabillingSlice = createSlice({
       state.loading_prabill_sa.saPriceRule = false;
       state.prabill_sa_detail.saPriceRule = { result: [], page: {} };
     },
-
-    // prabill summary SA Price Rule
     [getPrabillSummarySaPriceRule.pending]: (state) => {
       state.loading_prabill_sa.saPriceRule = true;
     },
@@ -1949,8 +1843,6 @@ const prabillingSlice = createSlice({
       state.loading_prabill_sa.saPriceRule = false;
       state.prabill_sa_detail.saPriceRule = { result: [], page: {} };
     },
-
-    // SA Price Det
     [getPrabillSaPriceDet.pending]: (state) => {
       state.loading_prabill_sa.saPriceDet = true;
     },
@@ -1962,8 +1854,6 @@ const prabillingSlice = createSlice({
       state.loading_prabill_sa.saPriceDet = false;
       state.prabill_sa_detail.saPriceDet = null;
     },
-
-    // SA Price Det prabill summary
     [getPrabillSummarySaPriceDet.pending]: (state) => {
       state.loading_prabill_sa.saPriceDet = true;
     },
@@ -1975,8 +1865,6 @@ const prabillingSlice = createSlice({
       state.loading_prabill_sa.saPriceDet = false;
       state.prabill_sa_detail.saPriceDet = null;
     },
-
-    // SA TOS Detail
     [getPrabillSaTosDetail.pending]: (state) => {
       state.loading_prabill_sa.saTosDetail = true;
     },
@@ -1988,8 +1876,6 @@ const prabillingSlice = createSlice({
       state.loading_prabill_sa.saTosDetail = false;
       state.prabill_sa_detail.saTosDetail = { result: [], page: {} };
     },
-
-    // SA TOS
     [getPrabillSaTos.pending]: (state) => {
       state.loading_prabill_sa.saTos = true;
     },
@@ -2001,7 +1887,6 @@ const prabillingSlice = createSlice({
       state.loading_prabill_sa.saTos = false;
       state.prabill_sa_detail.saTos = { result: [], page: {} };
     },
-    // Header Data
     [getCustomerHeaderData.pending]: (state) => {
       state.loading_customer_detail.header = true;
     },
@@ -2013,8 +1898,6 @@ const prabillingSlice = createSlice({
       state.loading_customer_detail.header = false;
       state.customer_account_detail.headerData = null;
     },
-
-    // Usage Data
     [getCustomerUsageData.pending]: (state) => {
       state.loading_customer_detail.usage = true;
     },
@@ -2026,8 +1909,6 @@ const prabillingSlice = createSlice({
       state.loading_customer_detail.usage = false;
       state.customer_account_detail.usageData = { result: [], page: {} };
     },
-
-    // Tax Data
     [getCustomerTaxData.pending]: (state) => {
       state.loading_customer_detail.tax = true;
     },
@@ -2039,8 +1920,6 @@ const prabillingSlice = createSlice({
       state.loading_customer_detail.tax = false;
       state.customer_account_detail.taxData = { result: [], page: {} };
     },
-
-    // Billing Bucket Data
     [getCustomerBillingBucketData.pending]: (state) => {
       state.loading_customer_detail.billingBucket = true;
     },
@@ -2055,8 +1934,6 @@ const prabillingSlice = createSlice({
         page: {},
       };
     },
-
-    // Billing Item Data
     [getCustomerBillingItemData.pending]: (state) => {
       state.loading_customer_detail.billingItem = true;
     },
@@ -2068,8 +1945,6 @@ const prabillingSlice = createSlice({
       state.loading_customer_detail.billingItem = false;
       state.customer_account_detail.billingItemData = { result: [], page: {} };
     },
-
-    // SA PRC Rule Det Data
     [getCustomerSaPrcRuleDetData.pending]: (state) => {
       state.loading_customer_detail.saPrcRuleDet = true;
     },
@@ -2083,31 +1958,27 @@ const prabillingSlice = createSlice({
     },
 
     [getCustomerAccountDetail.pending]: (state) => {
-      state.loading_customer_detail = true;
-      state.customer_account_detail = {
-        content: [],
-        groupedByDate: {},
-        totalElements: 0,
-        totalPages: 0,
-        pageable: {},
-      };
+      state.loading_customer_account_detail = true;
     },
     [getCustomerAccountDetail.fulfilled]: (state, action) => {
-      state.loading_customer_detail = false;
+      state.loading_customer_account_detail = false;
       state.customer_account_detail = action.payload;
     },
     [getCustomerAccountDetail.rejected]: (state) => {
-      state.loading_customer_detail = false;
+      state.loading_customer_account_detail = false;
       state.customer_account_detail = {
-        content: [],
-        groupedByDate: {},
-        totalElements: 0,
-        totalPages: 0,
-        pageable: {},
+        headerData: null,
+        saData: { result: [], page: {} },
+        usageData: { result: [], page: {} },
+        taxData: { result: [], page: {} },
+        pricingData: { result: [], page: {} },
+        saTosDet: { result: [], page: {} },
+        tosSubDet: { result: [], page: {} },
+        billingBucketData: { result: [], page: {} },
+        billingItemData: { result: [], page: {} },
+        saPrcRuleDetData: { result: [], page: {} },
       };
     },
-
-    // Get Detail Prabilling Init
     [getDetailPrabillingInit.pending]: (state) => {
       state.loading_detail_prabilling = true;
       state.detail_prabilling_init = null;
@@ -2120,10 +1991,7 @@ const prabillingSlice = createSlice({
       state.loading_detail_prabilling = false;
       state.detail_prabilling_init = null;
     },
-
-    // Get Detail Prabilling Result
     [getDetailPrabillingResult.pending]: (state, action) => {
-      // Only show loading on initial fetch, not on load more
       if (!action.meta.arg?.isLoadMore) {
         state.loading = true;
       }
@@ -2133,7 +2001,6 @@ const prabillingSlice = createSlice({
       const newData = action.payload.result || [];
       const isLoadMore = action.payload.isLoadMore;
 
-      // If it's load more, append data. Otherwise, replace data
       if (isLoadMore) {
         state.detail_prabilling_result = {
           result: [
@@ -2161,7 +2028,6 @@ const prabillingSlice = createSlice({
     },
     [getDetailPrabillingResult.rejected]: (state, action) => {
       state.loading = false;
-      // Only clear data on initial fetch failure, not on load more failure
       if (!action.meta.arg?.isLoadMore) {
         state.detail_prabilling_result = {
           result: [],
@@ -2174,10 +2040,7 @@ const prabillingSlice = createSlice({
         };
       }
     },
-
-    // Get Detail Prabilling Log
     [getDetailPrabillingLog.pending]: (state, action) => {
-      // Only show loading on initial fetch, not on load more
       if (!action.meta.arg?.isLoadMore) {
         state.loading_log = true;
       }
@@ -2187,7 +2050,6 @@ const prabillingSlice = createSlice({
       const newData = action.payload.result || [];
       const isLoadMore = action.payload.isLoadMore;
 
-      // If it's load more, append data. Otherwise, replace data
       if (isLoadMore) {
         state.detail_prabilling_log = {
           content: [
@@ -2215,7 +2077,6 @@ const prabillingSlice = createSlice({
     },
     [getDetailPrabillingLog.rejected]: (state, action) => {
       state.loading_log = false;
-      // Only clear data on initial fetch failure, not on load more failure
       if (!action.meta.arg?.isLoadMore) {
         state.detail_prabilling_log = {
           content: [],
@@ -2225,8 +2086,6 @@ const prabillingSlice = createSlice({
         };
       }
     },
-
-    // Get Prabilling Account Log
     [getPrabillingAccountLog.pending]: (state, action) => {
       if (!action.meta.arg?.isLoadMore) {
         state.loading_account_log = true;
@@ -2271,8 +2130,6 @@ const prabillingSlice = createSlice({
         };
       }
     },
-
-    // Download Prabilling Result
     [downloadPrabillingResult.pending]: (state) => {
       state.loading = true;
     },
@@ -2282,7 +2139,6 @@ const prabillingSlice = createSlice({
     [downloadPrabillingResult.rejected]: (state) => {
       state.loading = false;
     },
-
     [getListPrabillingInitPopulate.pending]: (state, action) => {
       if (!action.meta.arg?.isLoadMore) {
         state.loading = true;
@@ -2295,10 +2151,10 @@ const prabillingSlice = createSlice({
 
       if (isLoadMore) {
         const existingIds = new Set(
-          state.list_prabilling_init.map((item) => item.initId)
+          state.list_prabilling_init.map((item) => item.initId),
         );
         const uniqueNewData = newData.filter(
-          (item) => !existingIds.has(item.initId)
+          (item) => !existingIds.has(item.initId),
         );
         state.list_prabilling_init = [
           ...state.list_prabilling_init,
@@ -2327,7 +2183,6 @@ const prabillingSlice = createSlice({
         };
       }
     },
-    // lov sor
     [getListSor.pending]: (state) => {
       state.loading = true;
     },
@@ -2338,7 +2193,6 @@ const prabillingSlice = createSlice({
     [getListSor.rejected]: (state) => {
       state.loading = false;
     },
-    // lov scheduler type
     [getListSchedulerType.pending]: (state) => {
       state.loading = true;
     },
@@ -2349,7 +2203,6 @@ const prabillingSlice = createSlice({
     [getListSchedulerType.rejected]: (state) => {
       state.loading = false;
     },
-    // lov meter reading code
     [getListMeterReadingCode.pending]: (state) => {
       state.loading = true;
     },
@@ -2360,7 +2213,6 @@ const prabillingSlice = createSlice({
     [getListMeterReadingCode.rejected]: (state) => {
       state.loading = false;
     },
-    // lov customer segment
     [getListCustomerSegment.pending]: (state) => {
       state.loading = true;
     },
@@ -2371,7 +2223,6 @@ const prabillingSlice = createSlice({
     [getListCustomerSegment.rejected]: (state) => {
       state.loading = false;
     },
-    // lov cost center
     [getListCostCenter.pending]: (state) => {
       state.loading = true;
     },
@@ -2382,7 +2233,6 @@ const prabillingSlice = createSlice({
     [getListCostCenter.rejected]: (state) => {
       state.loading = false;
     },
-    //profile
     [getUserProfile.pending]: (state) => {
       state.loading_user_profile = true;
     },
@@ -2394,7 +2244,6 @@ const prabillingSlice = createSlice({
       state.loading_user_profile = false;
       state.user_profile = null;
     },
-    // lov account group
     [getListAccountGroup.pending]: (state) => {
       state.loading = true;
       state.list_account_group = [];
@@ -2407,13 +2256,11 @@ const prabillingSlice = createSlice({
       state.loading = false;
       state.list_account_group = [];
     },
-    // lov specific customer
     [getListSpecificCustomer.pending]: (state) => {
       state.loading_specific_customer = true;
     },
     [getListSpecificCustomer.fulfilled]: (state, action) => {
       state.loading_specific_customer = false;
-      // Pastikan mengambil data dari response.data atau response
       const responseData = action.payload?.data || action.payload || [];
       state.list_specific_customer = Array.isArray(responseData)
         ? responseData
@@ -2425,21 +2272,17 @@ const prabillingSlice = createSlice({
       state.list_specific_customer = [];
       state.specific_customer_message = "";
     },
-
-    // lov billing cycle
     [getListBillingCycle.pending]: (state) => {
       state.loading = true;
     },
     [getListBillingCycle.fulfilled]: (state, action) => {
       state.loading = false;
-      // Data sudah dalam bentuk array yang sudah di-transform
       state.list_billing_cycle = action.payload;
     },
     [getListBillingCycle.rejected]: (state) => {
       state.loading = false;
       state.list_billing_cycle = [];
     },
-    // lov billing period
     [getListBillingPeriod.pending]: (state) => {
       state.loading = true;
     },
@@ -2450,7 +2293,6 @@ const prabillingSlice = createSlice({
     [getListBillingPeriod.rejected]: (state) => {
       state.loading = false;
     },
-    // lov component prabilling
     [getListComponentPrabilling.pending]: (state) => {
       state.loading = true;
     },
@@ -2461,7 +2303,6 @@ const prabillingSlice = createSlice({
     [getListComponentPrabilling.rejected]: (state) => {
       state.loading = false;
     },
-    // lov user detail calculation
     [getUserDetailCalculation.pending]: (state) => {
       state.loading = true;
     },
@@ -2472,19 +2313,16 @@ const prabillingSlice = createSlice({
     [getUserDetailCalculation.rejected]: (state) => {
       state.loading = false;
     },
-
-    // create calculation
     [createPrabilling.pending]: (state) => {
       state.loadingCreate = true;
     },
     [createPrabilling.fulfilled]: (state, action) => {
       state.loadingCreate = false;
-      state.data = action.payload;
+      state.created_prabilling_data = action.payload;
     },
     [createPrabilling.rejected]: (state) => {
       state.loadingCreate = false;
     },
-    // Get Prabill Summary Service Agreement
     [getPrabillSummaryServiceAgreement.pending]: (state) => {
       state.loading_sa = true;
     },
@@ -2507,8 +2345,6 @@ const prabillingSlice = createSlice({
         page: {},
       };
     },
-
-    // Get Prabill Summary Usage
     [getPrabillSummaryUsage.pending]: (state) => {
       state.loading_usage = true;
     },

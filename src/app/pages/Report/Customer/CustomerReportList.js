@@ -6,7 +6,6 @@ import REPORT_ROUTES from '../../../../routes/report/report_routes';
 import Toolbar from '../../../../components/Toolbar';
 import TablePagination from '../../../../components/TablePagination';
 import useCustomerList from './Hooks/useCustomerList';
-const LayoutMenu = lazy(() => import("../../../../components/SidebarMenu/LayoutMenu"));
 
 
 
@@ -41,7 +40,7 @@ const CustomerReportList = () => {
 
     return (
         <Suspense fallback={<Spin />}>
-            <LayoutMenu>
+            <>
                 <Spin spinning={loading}>
                     <BreadCrumb routes={routes} />
                     <Toolbar items={itemActions} />
@@ -64,7 +63,7 @@ const CustomerReportList = () => {
                     </BaseContainer>
                 </Spin>
                 {renderModal()}
-            </LayoutMenu>
+            </>
         </Suspense>
     );
 }

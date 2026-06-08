@@ -22,7 +22,6 @@ import SVGIcon from "../../../../assets/Icon/index";
 import BaseContainer from "../../../../components/BaseContainer";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import RadioTabs from "../../../../components/RadioTabs";
 import DateComponent from "../../../../components/DateComponent";
 import InputComponent from "../../../../components/InputComponent";
@@ -32,8 +31,6 @@ import AttachmentComponent from "../../../../components/Attachment/AttachmentCom
 import ModalConfirmationDelegation from "./Modal/ModalConfirmationDelegation";
 import userHttpService from "../../../../redux/services/userHttpService";
 import { validateCreateUpdate } from "../../../../redux/slices/general_slice";
-import receiptCollectionHttpService from "../../../../redux/services/receiptCollectionHttpService";
-import { getListCategory } from "../../../../redux/slices/rating_billing_invoice/MasterData/taxCode";
 
 const DelegationForm = ({ type }) => {
   // Selector
@@ -58,7 +55,7 @@ const DelegationForm = ({ type }) => {
     {
       value: "Delegation",
       paramValue: [
-        "position",
+        "delegateTo",
         "positionDelegateTo",
         "startDate",
         "endDate",
@@ -150,7 +147,7 @@ const DelegationForm = ({ type }) => {
               referenceId: billingBucketCode,
             };
             await userHttpService.uploadImage(
-              `/vi/dbs/api/user-delegation/upload`,
+              `/v1/dbs/api/user-delegation/upload`,
               body
             );
           }
@@ -192,7 +189,7 @@ const DelegationForm = ({ type }) => {
           endDate: hasValue(formValue?.endDate) ? renderDateConverter(formValue?.endDate, 'date') : null
         },
         services: userHttpService,
-        endPoint: '/vi/dbs/api/user-delegation/validate-create',
+        endPoint: '/v1/dbs/api/user-delegation/validate-create',
         type
       }
       await dispatch(validateCreateUpdate(validateValueOBj))?.unwrap();
@@ -208,7 +205,7 @@ const DelegationForm = ({ type }) => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loadings}>
         <BreadCrumb routes={routes} />
         <Form
@@ -315,11 +312,9 @@ const DelegationForm = ({ type }) => {
                   data={listDataAttachment}
                   updateData={setListDataAttachment}
                   dispatch={dispatch}
-                  getAPICategory={getListCategory}
-                  typeSelector="tax_code"
-                  service={receiptCollectionHttpService}
-                  configApplication={configApp.PAYMENT_SERVICE}
-                  //  getAPIGuard={getConfigFileR}
+                  typeSelector="delegation"
+                  service={userHttpService}
+                  configApplication={configApp.USER_MANAGEMENT_SERVICE}
                   typeRBI={"data"}
                   mandatory={true}
                 />
@@ -375,7 +370,7 @@ const DelegationForm = ({ type }) => {
           apiPosition={position_Delegation}
         />
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

@@ -9,7 +9,6 @@ import {
   CheckOutlined,
 } from "@ant-design/icons";
 import BreadCrumb from "../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import CardContainer from "../../../../components/CardContainer";
 import StatCard from "../../../../components/StatCard";
 import TableRBI from "../../../../components/TableRBI";
@@ -235,7 +234,7 @@ const MonitoringCustomerPage = () => {
   ];
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
@@ -381,7 +380,7 @@ const MonitoringCustomerPage = () => {
           />
         </CardContainer>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

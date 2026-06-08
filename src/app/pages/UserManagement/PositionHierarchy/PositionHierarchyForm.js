@@ -4,7 +4,6 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import BaseContainer from '../../../../components/BaseContainer';
 import BreadCrumb from '../../../../components/BreadCrumb';
 import DetailText from '../../../../components/DetailText';
-import LayoutMenu from '../../../../components/SidebarMenu/LayoutMenu';
 import { ArrowLeftOutlined, UnorderedListOutlined, DeleteOutlined } from '@ant-design/icons';
 import ButtonComponent from '../../../../components/ButtonComponent';
 import ModalCustom from '../../../../components/Modal/ModalCustom';
@@ -31,7 +30,7 @@ const PositionHierarchyForm = (props) => {
     const { type } = props;
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const { loading, data_position, data_detail, data } = useSelector(state => state?.position_hierarchy)
+    const { loading, data_position, data_detail, data_employee } = useSelector(state => state?.position_hierarchy)
     const { bodyError } = useSelector(state => state?.general)
     const [form] = Form.useForm();
     const location = useLocation();
@@ -91,7 +90,7 @@ const PositionHierarchyForm = (props) => {
     const assertByRowClicked = useCallback(data => {
         if (data) {
             form.setFieldsValue({
-                id: data?.rDahId !== "" ? data?.rDahId : "",
+                id: data?.id !== "" ? data?.id : "",
                 key: data.key,
                 positionName: data.positionName,
                 positionParent: data.positionParent === null || data.positionParent === undefined ? null : data.positionParent,
@@ -129,12 +128,12 @@ const PositionHierarchyForm = (props) => {
 
     // check selected position data to setDetailDiagram
     useEffect(() => {
-        if (data && hasValue(selectedPositionData[0]?.id)) {
-            setDetailDiagram(data);
+        if (data_employee && hasValue(selectedPositionData[0]?.id)) {
+            setDetailDiagram(data_employee);
         } else {
             setDetailDiagram(selectedPositionData);
         }
-    }, [data, selectedPositionData]);
+    }, [data_employee, selectedPositionData]);
 
 
     // handle cancel modals
@@ -585,7 +584,7 @@ const PositionHierarchyForm = (props) => {
 
     const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
     return (
-        <LayoutMenu>
+        <>
             <BreadCrumb routes={breadCrumbRoutes} />
             <Spin spinning={loading}>
                 {type === "update" &&
@@ -792,7 +791,7 @@ const PositionHierarchyForm = (props) => {
 
             {/* modal try again */}
             {renderModal()}
-        </LayoutMenu>
+        </>
     );
 }
 

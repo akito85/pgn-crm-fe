@@ -1,7 +1,6 @@
 import { Spin, Checkbox, Tooltip } from "antd";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import CardContainer from "../../../../../components/CardContainer";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import SVGIcon from "../../../../../assets/Icon/index";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import TableRBI from "../../../../../components/TableRBI";
@@ -167,13 +166,13 @@ const ViewPaymentWarrantyPartner = () => {
       title: "START DATE",
       dataIndex: "startDate",
       key: "startDate",
-      render: (text, record) => renderColumn("startDate", searchedColumn, searchText, record?.startDate || "-", false, "input", search),
+      render: (text, record) => renderColumn("startDate", searchedColumn, searchText, record?.startDate || "", false, "input", search),
     },
     {
       title: "END DATE",
       dataIndex: "endDate",
       key: "endDate",
-      render: (text, record) => renderColumn("endDate", searchedColumn, searchText, record?.endDate || "-", false, "input", search),
+      render: (text, record) => renderColumn("endDate", searchedColumn, searchText, record?.endDate || "", false, "input", search),
     },
     {
       title: "STATUS",
@@ -387,7 +386,7 @@ const ViewPaymentWarrantyPartner = () => {
   const { renderModal } = useTryAgainHooks(handleRetry);
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <CardContainer header={
@@ -436,7 +435,7 @@ const ViewPaymentWarrantyPartner = () => {
         />
       </Spin>
       {renderModal()}
-    </LayoutMenu>
+    </>
   );
 };
 

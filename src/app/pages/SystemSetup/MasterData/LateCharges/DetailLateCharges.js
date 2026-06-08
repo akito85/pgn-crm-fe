@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import { Spin } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -116,7 +115,7 @@ const DetailLateCharges = () => {
   }, [id, data_detail]);
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <div className="flex flex-col">
@@ -198,7 +197,7 @@ const DetailLateCharges = () => {
           </ButtonComponent>
         </div>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

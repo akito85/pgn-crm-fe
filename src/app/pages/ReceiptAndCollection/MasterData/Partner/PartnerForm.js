@@ -1,24 +1,15 @@
-import { Select, Input, InputNumber } from "antd";
+import { InputNumber } from "antd";
 import { Form } from "antd";
-import BaseContainer from "../../../../../components/BaseContainer";
+import CardContainer from "../../../../../components/CardContainer";
 import { formMessageRequired } from "../../../../../utils";
 import InputComponent from "../../../../../components/InputComponent";
 import moment from "moment";
-import { useDispatch } from "react-redux";
-import { useLocation, useNavigate } from "react-router-dom";
 import DateComponent from "../../../../../components/DateComponent";
-import SelectComponent from "../../../../../components/SelectComponent";
 
 const PartnerForm = (props) => {
   const {
-    dataType,
     form,
   } = props;
-
-  const dispatch = useDispatch();
-  const location = useLocation();
-  const navigate = useNavigate();
-  const id = location?.state?.id;
 
   const disabledDate = (current) => {
     if (
@@ -59,7 +50,7 @@ const PartnerForm = (props) => {
   return (
     <div>
       <style>{alignStyle}</style>
-      <BaseContainer header={"PARTNER INFORMATION"}>
+      <CardContainer header={"PARTNER INFORMATION"}>
         <div className="w-full grid grid-cols-5 gap-5">
           <Form.Item
             label={"Partner Code"}
@@ -71,24 +62,14 @@ const PartnerForm = (props) => {
           <Form.Item
             label={"Partner Name"}
             name={"partnerName"}
-            rules={formMessageRequired("Partner Name")}
+            rules={[
+              ...formMessageRequired("Partner Name"),
+              { max: 20, message: "partnerName maximum length is 20" },
+            ]}
           >
-            <InputComponent placeholder="Input Partner Name" />
+            <InputComponent maxLength={20} placeholder="Input Partner Name" />
           </Form.Item>
 
-          <Form.Item
-            label={"Type"}
-            name={"type"}
-            rules={formMessageRequired("Type")}
-          >
-            <SelectComponent placeholder="Select Type">
-              {dataType?.data?.map((data) => (
-                <Select.Option key={data.name} value={data.name}>
-                  {data.name}
-                </Select.Option>
-              ))}
-            </SelectComponent>
-          </Form.Item>
           <Form.Item
             label={"Sec Key Signature"}
             name={"secKeySignature"}
@@ -112,8 +93,6 @@ const PartnerForm = (props) => {
               }}
             />
           </Form.Item>
-        </div>
-        <div className="w-full grid grid-cols-5 gap-5">
           <Form.Item
             label={"Start Date"}
             name={"effStartDate"}
@@ -130,6 +109,8 @@ const PartnerForm = (props) => {
               onChange={handleStartDate}
             />
           </Form.Item>
+        </div>
+        <div className="w-full grid grid-cols-5 gap-5">
           <Form.Item
             label={"End Date"}
             name={"effEndDate"}
@@ -138,8 +119,7 @@ const PartnerForm = (props) => {
             <DateComponent placeholder="Select End Date" dateDisable={disabledDate} />
           </Form.Item>
         </div>
-
-      </BaseContainer>
+      </CardContainer>
     </div>
   );
 };

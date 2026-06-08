@@ -9,6 +9,13 @@ import moment from "moment";
 import { hasValue } from '../../../../../../../../utils'
 import { getTaxImplication } from '../../../../../../../../redux/slices/account_management/detailAccount/serviceAgreementSlice'
 import NxBaseContainer from '../../../../../../../../components/Nx/NxBaseContainer'
+import {
+  isAmendmentServiceAgreementType,
+  isAddonServiceAgreementType,
+  isSelectedOptionSemantic,
+  SERVICE_AGREEMENT_TYPE_VALUE,
+  SERVICE_TYPE_VALUE,
+} from '../../idResolver';
 
 const SaInformation = ({
   saType,
@@ -38,8 +45,18 @@ const SaInformation = ({
 }) => {
   const [isGas, setIsGas] = useState('')
   const [inputValue, setInputValue] = useState('');
+  const isGasServiceType = isSelectedOptionSemantic(
+    dataServiceType,
+    saInfoObj?.serviceType,
+    SERVICE_TYPE_VALUE.GAS
+  );
+  const isPjbgServiceAgreementType = isSelectedOptionSemantic(
+    dataSaType,
+    saInfoObj?.serviceAgreementType,
+    SERVICE_AGREEMENT_TYPE_VALUE.PJBG
+  );
 
-  console.log(`SA Type ${saType}`)
+  // console.log(`SA Type ${saType}`)
 
   useEffect(() => {
     if (saInfoObj.serviceType) {
@@ -117,8 +134,12 @@ const SaInformation = ({
   const validateEndDate = (rule, value, callback) => {
   }
 
+  const isAddonOrAmendment =
+    isAddonServiceAgreementType(saRecordData?.typeSa) ||
+    isAmendmentServiceAgreementType(saRecordData?.typeSa);
+
   const handleDisableSaDate = (current) => {
-    if (saRecordData.typeSa === 'addon' || saRecordData.typeSa === 'amandemen') {
+    if (isAddonOrAmendment) {
       return current &&
         (current.isBefore(moment(saRecordData.saDate), 'day') ||
           current.isAfter(moment(saRecordData.endDate), 'day'))
@@ -128,7 +149,7 @@ const SaInformation = ({
     }
   };
   const handleValidateMoreSaDate = (current) => {
-    if (saRecordData.typeSa === 'addon' || saRecordData.typeSa === 'amandemen') {
+    if (isAddonOrAmendment) {
       // if(moment(saRecordData.startDate).diff(moment(), 'days') < 30){
 
       //   return current && (current < moment(saRecordData.startDate) || current > moment(saRecordData.endDate));
@@ -147,7 +168,7 @@ const SaInformation = ({
     }
   };
   const handleValidateMore = (current) => {
-    if (saRecordData.typeSa === 'addon' || saRecordData.typeSa === 'amandemen') {
+    if (isAddonOrAmendment) {
       return current && (current < moment(saInfoObj.startDate) || current > moment(saRecordData.endDate).add(1, "days"));
     } else {
       if (saInfoObj.startDate !== null) {
@@ -157,7 +178,7 @@ const SaInformation = ({
   };
 
   const handleRangeStartEnd = (current) => {
-    if (saRecordData.typeSa === 'addon' || saRecordData.typeSa === 'amandemen') {
+    if (isAddonOrAmendment) {
       return current &&
         (current.isBefore(moment(saInfoObj?.startDate), 'day') ||
           current.isAfter(moment(saRecordData.endDate), 'day'))
@@ -180,12 +201,15 @@ const SaInformation = ({
   };
 
   const onChangeChecked = (e) => {
-    setSaInfoObj({
-      ...saInfoObj,
-      alreadyGasIn: e.target.checked,
+    const checked = e.target.checked;
+    setSaInfoObj((prev) => ({
+      ...prev,
+      alreadyGasIn: checked,
       gasInPlanDate: null
-    })
-    form.resetFields(["gasInPlanDate"])
+    }))
+    handleSaInformationObj(e, "alreadyGasIn");
+    form.setFieldsValue({ gasInPlanDate: undefined })
+    form.setFields([{ name: 'gasInPlanDate', errors: [] }])
   };
 
   return (
@@ -303,11 +327,11 @@ const SaInformation = ({
               rules={[
                 {
                   message: "Please input your PJBG Type",
-                  required: saInfoObj?.serviceAgreementType === 1170 ? true : false,
+                  required: isPjbgServiceAgreementType ? true : false,
                 },
               ]}
             >
-              <SelectComponent disabled={(saInfoObj?.serviceAgreementType === 1170) ? false : true}>
+              <SelectComponent disabled={!isPjbgServiceAgreementType}>
                 {dataPjbg &&
                   dataPjbg?.map((item, index) => (
                     <Select.Option value={item.id} key={index}>
@@ -362,7 +386,8 @@ const SaInformation = ({
                   label={"Already Gas In"}
                   valuePropName="checked"
                   noStyle
-                  getValueFromEvent={(e) => handleSaInformationObj(e, "alreadyGasIn")}
+                  getValueFromEvent={(e) =>
+                    handleSaInformationObj(e, "alreadyGasIn")}
                 >
                   <div className='flex flex-col'>
                     <Checkbox checked={saInfoObj?.alreadyGasIn} onChange={onChangeChecked}>Already Gas In</Checkbox>
@@ -372,20 +397,19 @@ const SaInformation = ({
                 <Form.Item
                   name={"gasInPlanDate"}
                   label={"Gas In Plan Date"}
+                  // dependencies={["alreadyGasIn", "serviceType"]}
                   getValueFromEvent={(e) => handleSaInformationObj(e, "gasInPlanDate")}
                   rules={[
-                    {
-                      message: "Please input Gas In Plan Date",
-                      // required: (saInfoObj?.serviceType === 608 && saRecordData?.typeSa === "main") ? !saInfoObj?.alreadyGasIn: true,
-                      required: (saInfoObj?.serviceType === 608) ? !saInfoObj?.alreadyGasIn : true,
-                    },
+                  {
+                    message: "Please input Gas In Plan Date",
+                    required : isGasServiceType ? (!saInfoObj?.alreadyGasIn) : false
+                  }
                   ]}
                 >
                   <DateComponent
                     dateDisable={handleRangeStartEnd}
                     onChange={(e) => handleDateValidation(e, "gasInPlanDate")}
-                    // disabled={(saInfoObj?.serviceType !== 608 || saRecordData?.typeSa !== "main" || saInfoObj?.alreadyGasIn === true) && true} 
-                    disabled={(saInfoObj?.serviceType !== 608 || saInfoObj?.alreadyGasIn === true) && true}
+                    disabled={(!isGasServiceType || saInfoObj?.alreadyGasIn === true) && true}
                   />
                 </Form.Item>
                 <Form.Item

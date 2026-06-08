@@ -1,24 +1,30 @@
-import InvoiceRelationDetailAttch from "./InvoiceRelationDetailAttch";
 import InvoiceRelationDetailInfo from "./InvoiceRelationDetailInfo";
 import NxCardContainer from "../../../../../../../../components/Nx/NxCardContainer";
 import { useState } from "react";
 import NxTabs from "../../../../../../../../components/Nx/NxTabs";
+import NxAttachmentInput from "../../../../../../../../components/Nx/NxAttachmentInput";
+import { configApp } from "../../../../../../../../constants/configApp";
+import accountManagementService from "../../../../../../../../redux/services/account_management/accountManagementService";
 
+/**
+ * Tabbed detail view for an invoice relation record.
+ * Renders "Invoice Relation Information" and "Attachment" tabs.
+ *
+ * @param {object} props
+ * @param {object} [props.detail={}] - Invoice relation detail record
+ */
 const InvoiceRelationDetailTabs = ({
-  subjectAccountNumber,
-  idIr = 0,
-  dataDetail = {},
-  dispatch = () => {},
+  detail = {},
 }) => {
-  // Use provided options or fall back to default tabs
+  const attachments = detail.attachments;
+
   const tabOptions = [
     {
       key: "iri",
       label: "Invoice Relation Information",
       children: (
         <InvoiceRelationDetailInfo
-          subjectAccountNumber={subjectAccountNumber}
-          dataDetail={dataDetail}
+          detail={detail}
         />
       )
     },
@@ -26,9 +32,11 @@ const InvoiceRelationDetailTabs = ({
       key: "attch",
       label: "Attachment",
       children: (
-        <InvoiceRelationDetailAttch
-          dispatch={dispatch}
-          idIr={idIr}
+        <NxAttachmentInput
+          data={attachments}
+          type="detail"
+          configApplication={configApp.ACCOUNT_SERVICE}
+          service={accountManagementService}
         />
       )
     },

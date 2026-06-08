@@ -1,13 +1,11 @@
 import { Checkbox, Spin, Tooltip } from "antd";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import SVGIcon from "../../../../../assets/Icon/index";
 import { Link, NavLink } from "react-router-dom";
-import BaseContainer from "../../../../../components/BaseContainer";
 import TableRBI from "../../../../../components/TableRBI";
-import { useEffect, useRef, useState, useMemo } from "react";
+import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import {
   downloadTaxCode,
   getApprovalHistory,
@@ -15,6 +13,7 @@ import {
   getListApprovalHierarchy,
   getListApprovalHierarchyDetail,
   inactiveTaxCode,
+  requestActivateTaxCode,
 } from "../../../../../redux/slices/rating_billing_invoice/MasterData/taxCode";
 import { useDispatch, useSelector } from "react-redux";
 import { columnsTaxCodeList } from "./Table/TableTaxCodeList";
@@ -27,40 +26,56 @@ import CardContainer from "../../../../../components/CardContainer";
 
 const TaxCodeView = () => {
   const { data, loading, data_approval_history } = useSelector(
-    (state) => state.tax_code
+    (state) => state.tax_code,
   );
   const dispatch = useDispatch();
   const searchInput = useRef(null);
 
   //state
+  const initialPageSize = 100;
+  const loadMoreSize = 20;
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
+  const [allData, setAllData] = useState([]);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const shouldResetRef = useRef(true);
   const [chooseId, setChooseId] = useState();
   const [bodyError, setBodyError] = useState({});
   const [dataApprovalHistory, setDataApprovalHistory] = useState({});
+
+  const hasMore = allData.length < (data?.page?.totalElements || 0);
 
   const [modalError, setModalError] = useState(false);
   const [modalInactive, setModalInactive] = useState(false);
   const [modalApprovalHistory, setModalApprovalHistory] = useState(false);
 
-  // ✅ State untuk fix column dengan format baru { left: [], right: [] }
+  const normalizeStatus = (value) =>
+    (value || "")
+      .toString()
+      .replace(/_/g, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+      .toUpperCase();
+
   const [fixedColumns, setFixedColumns] = useState(() => {
-    const saved = localStorage.getItem("taxCodeFixedColumns");
-    return saved
-      ? JSON.parse(saved)
-      : {
-          left: ["no"],
-          right: ["action"],
-        };
+    try {
+      const saved = localStorage.getItem("taxCodeFixedColumns");
+      return saved ? JSON.parse(saved) : { left: ["NO"], right: ["status", "statusApproval", "action"] };
+    } catch (e) {
+      return { left: ["NO"], right: ["status", "statusApproval", "action"] };
+    }
   });
 
-  // ✅ Save to localStorage when fixedColumns change
+  // Save fixedColumns to localStorage when changed
   useEffect(() => {
-    localStorage.setItem("taxCodeFixedColumns", JSON.stringify(fixedColumns));
+    try {
+      localStorage.setItem("taxCodeFixedColumns", JSON.stringify(fixedColumns));
+    } catch (e) {
+      // ignore storage errors
+    }
   }, [fixedColumns]);
 
   const routes = [
@@ -82,12 +97,31 @@ const TaxCodeView = () => {
     dispatch(
       getTaxCodePaginate({
         search: encodeURIComponent(JSON.stringify(search)),
-        page,
-        pageSize,
+        page: 1,
+        pageSize: initialPageSize,
         sort,
-      })
+        isLoadMore: false,
+      }),
     );
-  }, [dispatch, search, page, pageSize, sort]);
+  }, [dispatch, search, sort, refreshKey]);
+
+  // Accumulate data for infinite scroll
+  useEffect(() => {
+    if (data?.result) {
+      if (shouldResetRef.current || page === 1) {
+        setAllData(data.result);
+        shouldResetRef.current = false;
+      } else {
+        setAllData((prev) => {
+          const ids = new Set(prev.map((item) => item.taxCodeId));
+          const newItems = data.result.filter(
+            (item) => !ids.has(item.taxCodeId),
+          );
+          return [...prev, ...newItems];
+        });
+      }
+    }
+  }, [data, page]);
 
   useEffect(() => {
     if (data_approval_history) {
@@ -96,10 +130,14 @@ const TaxCodeView = () => {
           create: data_approval_history?.dataApprover?.TAX_CODE || [],
           inactive:
             data_approval_history?.dataApprover?.INACTIVE_TAX_CODE || [],
+          activate:
+            data_approval_history?.dataApprover?.ACTIVATED_TAX_CODE || [],
         },
         dataHistory: {
           create: data_approval_history?.dataHistory?.TAX_CODE || [],
           inactive: data_approval_history?.dataHistory?.INACTIVE_TAX_CODE || [],
+          activate:
+            data_approval_history?.dataHistory?.ACTIVATED_TAX_CODE || [],
         },
       };
       setDataApprovalHistory(temp);
@@ -108,19 +146,14 @@ const TaxCodeView = () => {
     }
   }, [data_approval_history]);
 
-  // Function Change Pagination
-  const handleChange = (pageChange, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
-    setPage(tempPage);
-    setPageSize(pageSizeChange);
-  };
-
   // Function Sort Table
   const onSort = (_, __, sort) => {
     const dataSort =
       sort.order !== undefined
         ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
         : "";
+    shouldResetRef.current = true;
+    setPage(1);
     setSort(dataSort);
   };
 
@@ -129,6 +162,7 @@ const TaxCodeView = () => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
+    shouldResetRef.current = true;
     setSearch((prevState) => {
       if (prevState[dataIndex] !== selectedKeys[0]) {
         setPage(1);
@@ -145,19 +179,46 @@ const TaxCodeView = () => {
     setModalInactive(true);
   };
 
-  const handleApprovalHistory = (e) => {
-    dispatch(getApprovalHistory(e));
-    setModalApprovalHistory(true);
-  };
+  const handleApprovalHistory = useCallback(
+    (e) => {
+      dispatch(getApprovalHistory(e));
+      setModalApprovalHistory(true);
+    },
+    [dispatch],
+  );
+
+  const handleLoadMore = useCallback(async () => {
+    if (allData.length >= (data?.page?.totalElements || 0)) return;
+    const nextPage = Math.floor(allData.length / loadMoreSize) + 1;
+    setPage(nextPage);
+    await dispatch(
+      getTaxCodePaginate({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page: nextPage,
+        pageSize: loadMoreSize,
+        sort,
+        isLoadMore: true,
+      }),
+    );
+  }, [allData.length, data?.page?.totalElements, dispatch, search, sort]);
+
+  const handleRefresh = useCallback(() => {
+    shouldResetRef.current = true;
+    if (page === 1) {
+      setRefreshKey((prev) => prev + 1);
+    } else {
+      setPage(1);
+    }
+  }, [page]);
 
   const handleDownload = () => {
     dispatch(
       downloadTaxCode({
         search: encodeURIComponent(JSON.stringify(search)),
         page: 1,
-        pageSize,
+        pageSize: loadMoreSize,
         sort,
-      })
+      }),
     );
   };
 
@@ -186,23 +247,32 @@ const TaxCodeView = () => {
   };
 
   const handleOk = (res, handleClear) => {
+    const selectedStatus = normalizeStatus(chooseId?.status);
+    const selectedStatusApproval = normalizeStatus(chooseId?.statusApproval);
+    const isActivateRequest =
+      selectedStatus === "INACTIVE" &&
+      selectedStatusApproval !== "WAITING APPROVAL";
     const dataValue = {
       taxCodeId: chooseId.taxCodeId,
       apphierId: res.approvalHierarchy,
       remark: res.remark,
     };
-    dispatch(inactiveTaxCode(dataValue))
+    dispatch(
+      (isActivateRequest ? requestActivateTaxCode : inactiveTaxCode)(dataValue),
+    )
       .unwrap()
       .then(() => {
         handleClear();
         handleCancel();
+        shouldResetRef.current = true;
         dispatch(
           getTaxCodePaginate({
             search: encodeURIComponent(JSON.stringify(search)),
-            page,
-            pageSize,
+            page: 1,
+            pageSize: initialPageSize,
             sort,
-          })
+            isLoadMore: false,
+          }),
         );
       })
       .catch((error) => {
@@ -213,7 +283,12 @@ const TaxCodeView = () => {
               error.response.data.message) ||
             error.message ||
             error.toString();
-          setBodyError({ body: { ...res }, handleClear, message });
+          setBodyError({
+            body: { ...res },
+            handleClear,
+            message,
+            actionType: isActivateRequest ? "activate" : "inactivate",
+          });
           setModalError(true);
         }
       });
@@ -224,7 +299,7 @@ const TaxCodeView = () => {
       action: "Download",
       render: (
         <ButtonComponent
-          icon={<SVGIcon name="IconButtonDownload" width={24} />}
+          icon={<SVGIcon name="IconButtonDownload" width={20} />}
           type="submit"
           onClick={() => handleDownload()}
         >
@@ -237,7 +312,7 @@ const TaxCodeView = () => {
       render: (
         <NavLink to={RBI_ROUTES.TAX_CODE_CREATE}>
           <ButtonComponent
-            icon={<SVGIcon name="IconButtonCreate" width={24} />}
+            icon={<SVGIcon name="IconButtonCreate" width={20} />}
             type="submit"
           >
             Create Tax Code
@@ -260,7 +335,7 @@ const TaxCodeView = () => {
           >
             <Tooltip title="Detail">
               <div className="pt-1">
-                <SVGIcon name="IconDetail" width={24} />
+                <SVGIcon name="IconDetail" width={20} />
               </div>
             </Tooltip>
           </Link>
@@ -273,8 +348,7 @@ const TaxCodeView = () => {
       render: (record, data) => {
         const isEditable =
           record.statusApproval === "DRAFT" ||
-          record.statusApproval === "REJECTED" ||
-          (record.status === "ACTIVE" && record.statusApproval === "APPROVED");
+          record.statusApproval === "REJECTED";
 
         const linkContent =
           data > 3 ? (
@@ -286,13 +360,13 @@ const TaxCodeView = () => {
                   width={24}
                 />
               }
+              type={"action"}
               border={false}
               disabled={!isEditable}
             >
               <span
-                className={`ml-3 ${
-                  isEditable ? "text-black " : "text-[#8D91A0]"
-                }`}
+                className={`ml-0 ${isEditable ? "text-black " : "text-[#8D91A0]"
+                  }`}
               >
                 {" "}
                 Update
@@ -331,14 +405,16 @@ const TaxCodeView = () => {
       action: "Activate",
       type: "table",
       render: (record, data) => {
-        const isActivateOrInactivate =
-          (record.statusApproval === "APPROVED" &&
-            record.status === "ACTIVE") ||
-          (record.statusApproval === "DRAFT" && record.status === "ACTIVE") ||
-          (record.statusApproval === "REJECTED" &&
-            record.status === "ACTIVE") ||
-          (record.statusApproval === "WAITING APPROVAL" &&
-            record.status === "ACTIVE");
+        const rowStatus = normalizeStatus(record.status);
+        const rowStatusApproval = normalizeStatus(record.statusApproval);
+        const canInactivate =
+          rowStatus === "ACTIVE" &&
+          ["APPROVED", "DRAFT", "REJECTED", "WAITING APPROVAL"].includes(
+            rowStatusApproval,
+          );
+        const canActivate =
+          rowStatus === "INACTIVE" && rowStatusApproval !== "WAITING APPROVAL";
+        const isActivateOrInactivate = canInactivate || canActivate;
 
         const Content =
           data > 3 ? (
@@ -347,28 +423,27 @@ const TaxCodeView = () => {
                 <Checkbox
                   className="inactive-check"
                   onClick={() => handleInactive(record)}
-                  disabled={record.status === "ACTIVE" ? false : true}
-                  checked={record.status === "ACTIVE" ? false : true}
+                  disabled={!isActivateOrInactivate}
+                  checked={rowStatus !== "ACTIVE"}
                 />
               }
+              type={"action"}
               border={false}
               disabled={!isActivateOrInactivate}
               onClick={() => handleInactive(record)}
             >
-              <span className="text-black ml-5">
-                {record.status !== "ACTIVE" ? "Activate" : "Inactivate"}
+              <span className="text-black ml-1">
+                {rowStatus !== "ACTIVE" ? "Activate" : "Inactivate"}
               </span>
             </ButtonComponent>
           ) : (
-            <Tooltip
-              title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}
-            >
+            <Tooltip title={rowStatus === "ACTIVE" ? "Inactivate" : "Activate"}>
               <div className="pt-1">
                 <Checkbox
                   className="inactive-check"
                   onClick={() => handleInactive(record)}
-                  disabled={record.status === "ACTIVE" ? false : true}
-                  checked={record.status === "ACTIVE" ? false : true}
+                  disabled={!isActivateOrInactivate}
+                  checked={rowStatus !== "ACTIVE"}
                 />
               </div>
             </Tooltip>
@@ -387,10 +462,11 @@ const TaxCodeView = () => {
               icon={
                 <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
               }
+              type={"action"}
               border={false}
               onClick={() => handleApprovalHistory(record.taxCodeId)}
             >
-              <span className={"text-black ml-3"}>Approval History</span>
+              <span className={"text-black ml-0"}>Approval History</span>
             </ButtonComponent>
           ) : (
             <Tooltip title="Approval History">
@@ -413,7 +489,7 @@ const TaxCodeView = () => {
   // ✅ Call useColumnActionPermission hook at component level
   const actionColumns = useColumnActionPermission(
     ["view", "activate", "update", "history"],
-    itemGrantAccess
+    itemGrantAccess,
   );
 
   // ✅ Get base columns with key property
@@ -422,11 +498,11 @@ const TaxCodeView = () => {
       ...columnsTaxCodeList(
         search,
         page,
-        pageSize,
+        initialPageSize,
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch
+        handleSearch,
       ),
       ...actionColumns,
     ];
@@ -438,7 +514,7 @@ const TaxCodeView = () => {
     }));
 
     return columnsWithKeys;
-  }, [search, page, pageSize, searchedColumn, searchText, actionColumns]);
+  }, [search, page, searchedColumn, searchText, actionColumns]);
 
   const columnDefinitions = useMemo(() => {
     return baseColumns.map((col) => ({
@@ -483,26 +559,25 @@ const TaxCodeView = () => {
   }, [baseColumns, fixedColumns]);
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
         <CardContainer
           header={
             <div className="flex -my-4 justify-between items-center">
-              <p className="mt-[15px] font-bold w-full">TAX CODE LIST</p>
+              <p className="mt-[15px] w-full">TAX CODE LIST</p>
               <Toolbar items={itemGrantAccess} />
             </div>
           }
         >
           <div className="w-full">
             <TableRBI
-              dataSource={data?.result}
+              idTable="taxCodeTable"
+              dataSource={allData}
               columns={columns}
               current={page}
-              pageSize={pageSize}
-              onChange={handleChange}
-              onSizeChanger={handleChange}
+              pageSize={initialPageSize}
               totalData={data?.page?.totalElements || 0}
               onSort={onSort}
               tableScrolled={{ y: 525, x: 2400 }}
@@ -510,6 +585,14 @@ const TaxCodeView = () => {
               columnDefinitions={columnDefinitions}
               fixedColumns={fixedColumns}
               setFixedColumns={setFixedColumns}
+              loading={loading}
+              usePagination={false}
+              useInfiniteScroll={true}
+              onLoadMore={handleLoadMore}
+              hasMore={hasMore}
+              showRefresh={true}
+              onRefresh={handleRefresh}
+              refreshLabel="Refresh"
             />
           </div>
         </CardContainer>
@@ -519,9 +602,11 @@ const TaxCodeView = () => {
           dispatch={dispatch}
           getAPIOption={getListApprovalHierarchy}
           getAPIDetail={getListApprovalHierarchyDetail}
-          alertMessage={`Are you sure you want to inactivate this Tax Code with name ${
-            chooseId?.taxCodeName || ""
-          }?`}
+          alertMessage={`Are you sure you want to ${
+            normalizeStatus(chooseId?.status) === "INACTIVE"
+              ? "activate"
+              : "inactivate"
+          } this Tax Code with name ${chooseId?.taxCodeName || ""}?`}
           openModalInactivate={modalInactive}
           handleCloseModalInactivate={handleCancel}
           onFinish={handleOk}
@@ -547,14 +632,16 @@ const TaxCodeView = () => {
           <div className="px-5 pt-5 pb-[10px] justify-center">
             <div className="w-full flex gap-[20px]">
               <SVGIcon name="IconFailed" width={48} />
-              <p className="text-[18px] font-bold">{"Failed"}</p>
+              <p className="text-[18px]">{"Failed"}</p>
             </div>
-            <p className="pl-[70px]">{`Your data was not inactivate. ${bodyError.message}.`}</p>
+            <p className="pl-[70px]">{`Your data was not ${
+              bodyError?.actionType || "inactivate"
+            }. ${bodyError.message}.`}</p>
             <p className="pl-[70px]">Please try again.</p>
           </div>
         </ModalError>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import moment from "moment";
 import { clearBodyMessage } from "../redux/slices/general_slice";
+import ProtectedLayout from "./ProtectedLayout";
 
 const PrivateRoute = () => {
   //   const { level } = useSelector((state) => state.user_level);
@@ -13,15 +14,18 @@ const PrivateRoute = () => {
     localStorage.getItem("type") || window.sessionStorage.getItem("type");
   //   const location = useLocation();
   const type_token = JSON.parse(token);
+  // Use optional chaining to avoid crash when token is null
   const dateExpired = moment(
-    type_token?.dateExpired.toString(),
-    "YYYY-MM-DD HH:mm:ss"
+    type_token?.dateExpired?.toString() ?? "",
+    "YYYY-MM-DD HH:mm:ss",
   );
   const currentTime = moment();
+  const isExpired = type_token ? currentTime.isAfter(dateExpired) : false;
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
   useEffect(() => {
-    if (currentTime.isAfter(dateExpired)) {
+    if (isExpired) {
       localStorage.clear();
       sessionStorage.clear();
       dispatch(clearBodyMessage());
@@ -31,22 +35,31 @@ const PrivateRoute = () => {
         navigate("/login");
       }
     }
-  }, [currentTime, dateExpired, type_token, navigate, dispatch]);
+  }, [isExpired, type_token, navigate, dispatch]);
+
   const navigator = () => {
-    let to;
+    // If token is expired, redirect directly to login instead of position
+    if (isExpired) {
+      return type_token?.userLevel === "Super User" ? "/login-su" : "/login";
+    }
     if (
       type_token?.userLevel === "Super User" &&
       type_token?.type === "TEMP TOKEN"
     ) {
-      to = "/choose-entity";
-    } else {
-      to = "/position";
+      return "/choose-entity";
     }
-    return to;
+    return "/position";
   };
-  return type_token?.type === "TRUE TOKEN" ||
-    type_token?.type === "EXISTING TOKEN" ? (
-    <Outlet />
+
+  const isAuthenticated =
+    (type_token?.type === "TRUE TOKEN" ||
+      type_token?.type === "EXISTING TOKEN") &&
+    !isExpired;
+
+  return isAuthenticated ? (
+    <ProtectedLayout>
+      <Outlet />
+    </ProtectedLayout>
   ) : (
     <Navigate to={navigator()} />
   );

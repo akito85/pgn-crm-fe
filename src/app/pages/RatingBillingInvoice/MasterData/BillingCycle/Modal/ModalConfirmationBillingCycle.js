@@ -18,6 +18,7 @@ const ModalConfirmationBillingCycle = ({
   handleConfirm = () => {},
   dataOption = [],
   apiTimeUnit,
+  isLoading = false,
 }) => {
   const [valuePage, setValuePage] = useState("Billing Cycle");
   const [tabPages, setTabPages] = useState([
@@ -119,13 +120,15 @@ const ModalConfirmationBillingCycle = ({
       handleConfirm={handleConfirm}
       footer={
         <div className={"w-full flex justify-end gap-5"}>
-          <ButtonComponent type={"default"} onClick={handleCancel}>
+          <ButtonComponent type={"default"} onClick={handleCancel} disabled={isLoading}>
             Cancel
           </ButtonComponent>
           <ButtonComponent
             type={"submit"}
             border={false}
             onClick={handleConfirm}
+            isLoading={isLoading}
+            disabled={isLoading}
           >
             Confirm
           </ButtonComponent>

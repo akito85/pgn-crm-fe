@@ -1,9 +1,10 @@
 // VERIFICATION_TAG: 2026-02-17-001
-import React, { useRef, useState, useEffect, useMemo } from "react";
+import React, { useRef, useState, useEffect, useMemo, useCallback } from "react";
 import moment from "moment";
 import { useDispatch, useSelector } from "react-redux";
 import { Steps, Form, Select, Checkbox, Tooltip, message, Tabs } from "antd";
 import { DownOutlined, RightOutlined, LeftOutlined } from "@ant-design/icons";
+import { debounce } from "lodash";
 import SVGIcon from "../../../../../../assets/Icon/index";
 
 // Utils
@@ -33,11 +34,12 @@ import { configApp } from "../../../../../../constants/configApp";
 import receiptCollectionHttpService from "../../../../../../redux/services/receiptCollectionHttpService";
 import {
   getAllCustomerInfoPaginate,
-  getAllWarrantyInfoPaginate,
+  getRefundListPaginate,
+  getRefundDetailList,
+  submitRefund,
   getAllApprovalList,
   getListApprovalById,
   getListCategory,
-  submitWarrantyRequest,
 } from "../../../../../../redux/slices/receipt_collection/warranty";
 
 import { FormStepper, FormFooter } from "../../../../../../components/FormStepNavigation";
@@ -54,8 +56,7 @@ const ModalRefund = ({
   // Selector
   const {
     data_customer_info,
-    data_warranty_info,
-    data_refund_info,
+    dataRefundList,
     data_attachment_info,
     dataListAppHierId,
     dataListAppHierDetail,
@@ -68,8 +69,8 @@ const ModalRefund = ({
   const [form] = Form.useForm();
   const dispatch = useDispatch();
   const dataSourceCustomerInfo = data_customer_info?.result || [];
-  const dataSourceWarrantyInfo = data_warranty_info?.result || [];
-  const dataSourceRefundInfo = data_refund_info?.result || [];
+  const dataSourceWarrantyInfo = dataRefundList?.result || [];
+  const dataSourceRefundInfo = [];
   const dataSourceAttachmentInfo = data_attachment_info?.result || [];
 
   // Global State
@@ -111,13 +112,47 @@ const ModalRefund = ({
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(selectedKeys[0] ? dataIndex : "");
+    const shouldResetPage = search[dataIndex] !== selectedKeys[0];
     setSearch((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
-      }
+      const nextState = { ...prevState };
+      nextState[dataIndex] = selectedKeys[0];
+      return nextState;
+    });
+    if (shouldResetPage) {
+      setPage(1);
+    }
+  };
+
+  const handleGlobalSearch = useCallback(
+    debounce((value) => {
+      setSearchText(value);
+      setSearchedColumn(value ? "all" : "");
+      setSearch((prevState) => {
+        const nextState = { ...prevState };
+        if (value) {
+          nextState.all = value;
+        } else {
+          delete nextState.all;
+        }
+        return nextState;
+      });
+      setPage(1);
+    }, 500),
+    []
+  );
+
+  useEffect(() => {
+    return () => {
+      handleGlobalSearch.cancel();
+    };
+  }, [handleGlobalSearch]);
+
+  const handleAdvanceSearch = (searchData) => {
+    setSearch((prevState) => {
+      setPage(1);
       return {
         ...prevState,
-        [dataIndex]: selectedKeys[0],
+        advanceSearch: searchData
       };
     });
   };
@@ -197,6 +232,7 @@ const ModalRefund = ({
   };
 
   const clearAllState = (preSelectedRow) => {
+    handleGlobalSearch.cancel();
     setSelectedCustomerInfoRowKeys([]);
     setDataCustomerInfoSelect([]);
     
@@ -269,25 +305,9 @@ const ModalRefund = ({
     setLoadingSave(true);
     
     try {
-      // 1. Upload new attachments first to get their IDs
-      const newAttachments = listDataAttachment.filter(item => item.dataType !== "exist");
-      const attachmentIds = (listDataAttachment.filter(item => item.dataType === "exist") || []).map(item => item.id);
-      
-      for (const element of newAttachments) {
-        const uploadBody = {
-          // referensiId: null, // No reference ID yet as per new unified submit flow
-          files: element.file,
-          category: "PAYMENT_WARRANTY",
-          fileCategoryId: element.fileCategoryId,
-        };
-        const uploadRes = await receiptCollectionHttpService.uploadImage(`/v1/dbs/api/attachment/upload/v1`, uploadBody);
-        if (uploadRes?.data?.id) {
-          attachmentIds.push(uploadRes.data.id);
-        }
-      }
-
+      // 1. Prepare unified submission body first
       const submitBody = {
-        warrantyTransTypeId: WARRANTY_TRANSACTION_NAMES.REFUND, // 12 = Refund
+        type: WARRANTY_TRANSACTION_NAMES.REFUND,
         appHierId: selectedHierarchy,
         customerId: dataCustomerInfoSelect[0]?.id,
         items: dataWarrantyInfoSelect.map((item, index) => ({
@@ -298,12 +318,28 @@ const ModalRefund = ({
             ? moment(refundDateData[dataSourceRefundInfoWithKeys[index]?.key]).format("YYYY-MM-DDTHH:mm:ss") 
             : null,
         })),
-        attachmentIds: attachmentIds,
         remark: remarkRefundInformation,
       };
 
-      // 3. Dispatch the unified thunk
-      await dispatch(submitWarrantyRequest({ body: submitBody })).unwrap();
+      // 2. Dispatch the specific thunk
+      const submitRes = await dispatch(submitRefund(submitBody)).unwrap();
+      const transIds = submitRes?.transIds || [];
+
+      // 3. Upload new attachments per transId
+      const newAttachments = listDataAttachment.filter(item => item.dataType !== "exist");
+      if (newAttachments.length > 0 && transIds.length > 0) {
+        for (const transId of transIds) {
+          for (const element of newAttachments) {
+            const uploadBody = {
+              referensiId: transId, // Link attachment to the returned transaction ID
+              files: element.file,
+              category: "PAYMENT_WARRANTY_TRANS",
+              fileCategoryId: element.fileCategoryId,
+            };
+            await receiptCollectionHttpService.uploadImage(`/v1/dbs/api/attachment/upload/v1`, uploadBody);
+          }
+        }
+      }
 
       // 4. Cleanup and close
       handleRefresh();
@@ -312,7 +348,18 @@ const ModalRefund = ({
       setLoadingSave(false);
     } catch (error) {
       setLoadingSave(false);
-      const message = error?.response?.data?.message || error?.message || error?.toString();
+      let message = error?.response?.data?.message || error?.message || error?.toString();
+
+      if (message && typeof message === "object") {
+        if (Array.isArray(message)) {
+          message = message.join(", ");
+        } else {
+          message = Object.values(message)
+            .map((val) => (typeof val === "object" ? JSON.stringify(val) : val))
+            .join(", ");
+        }
+      }
+
       setBodyError({ message, type: "requested" });
       setModalError(true);
     }
@@ -322,12 +369,7 @@ const ModalRefund = ({
   // Customer Information Step
   useEffect(() => {
     if (isOpen && current === 0) {
-      const finalSearch = Object.keys(search).length > 0 
-        ? Object.entries(search)
-            .filter(([_, value]) => value !== undefined && value !== "")
-            .map(([key, value]) => `${key}~${value}`)
-            .join("|") 
-        : "";
+      const finalSearch = encodeURIComponent(JSON.stringify(search));
       dispatch(
         getAllCustomerInfoPaginate({
           search: finalSearch,
@@ -342,25 +384,14 @@ const ModalRefund = ({
   // Guarantee Information Step
   useEffect(() => {
     if (isOpen && current === 1) {
-      // NOTE: For Refund, we currently don't filter warranties by the selected customer Number.
-      // Customer selection is done in Step 1, but Guarantee selection in Step 2 fetches all available warranties.
-      // This is as per current requirement, but might change in the future (e.g., adding back customerNumber filter).
-      
-      let finalSearch = "";
-      if (Object.keys(search).length > 0) {
-        finalSearch = Object.entries(search)
-          .filter(([_, value]) => value !== undefined && value !== "")
-          .map(([key, value]) => `${key}~${value}`)
-          .join("|");
-      }
+      const finalSearch = encodeURIComponent(JSON.stringify(search));
 
       dispatch(
-        getAllWarrantyInfoPaginate({
+        getRefundListPaginate({
           search: finalSearch,
           page,
           pageSize,
           sort,
-          transTypeName: "REFUND",
         })
       );
     }
@@ -513,7 +544,15 @@ const ModalRefund = ({
 
   // Refund Information Step
   const [refundAmountData, setRefundAmountData] = useState({});
-  const handleRefundAmountChange = (value, recordKey) => {
+  const handleRefundAmountChange = (value, recordKey, maxAmount) => {
+    if (value > maxAmount) {
+      message.warning(`Refund amount cannot exceed balance: ${maxAmount.toLocaleString()}`);
+      return;
+    }
+    if (value <= 0) {
+      message.warning('Refund amount must be greater than 0');
+      return;
+    }
     setRefundAmountData(prev => ({ ...prev, [recordKey]: value }));
   };
 
@@ -724,6 +763,10 @@ const ModalRefund = ({
                 setFixedColumns={setFixedColumns}
                 loading={loading}
                 showExport={false}
+                showSearchBar={true}
+                showAdvanceSearch={true}
+                onSearch={(e) => handleGlobalSearch(e.target.value)}
+                onAdvanceSearch={handleAdvanceSearch}
                 rowSelection={rowSelectionCustomerInfo}
               />
             </div>
@@ -743,7 +786,7 @@ const ModalRefund = ({
                 pageSize={pageSize}
                 onChange={handleChange}
                 onSizeChanger={handleChange}
-                totalData={selectedRow ? 1 : (data_warranty_info?.page?.totalElements || 0)}
+                totalData={selectedRow ? 1 : (dataRefundList?.page?.totalElements || 0)}
                 tableScrolled={{ y: 525, x: 1000 }}
                 onSort={onSort}
                 columnDefinitions={columnDefinitionsWarrantyInfo}
@@ -751,6 +794,10 @@ const ModalRefund = ({
                 setFixedColumns={setFixedColumns}
                 loading={loading}
                 showExport={false}
+                showSearchBar={true}
+                showAdvanceSearch={true}
+                onSearch={(e) => handleGlobalSearch(e.target.value)}
+                onAdvanceSearch={handleAdvanceSearch}
                 rowSelection={rowSelectionWarrantyInfo}
               />
             </div>
@@ -769,7 +816,7 @@ const ModalRefund = ({
                 pageSize={pageSize}
                 onChange={handleChange}
                 onSizeChanger={handleChange}
-                totalData={data_refund_info?.page?.totalElements || 0}
+                totalData={dataSourceRefundInfoWithKeys.length}
                 tableScrolled={{ y: 525, x: 1000 }}
                 onSort={onSort}
                 columnDefinitions={columnDefinitionsRefundInfo}

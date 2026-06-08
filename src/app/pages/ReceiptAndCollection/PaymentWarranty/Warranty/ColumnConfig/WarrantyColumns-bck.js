@@ -48,7 +48,7 @@ export const columnWarranty = ({
           "document",
           hasValue(search["document"]),
           searchText,
-          text || "-",
+          text || "",
           false,
           "input",
           search
@@ -187,7 +187,7 @@ export const columnWarranty = ({
           "cabangPenerbit",
           hasValue(search["cabangPenerbit"]),
           searchText,
-          text || "-",
+          text || "",
           false,
           "input",
           search
@@ -368,7 +368,7 @@ export const columnWarranty = ({
           "customerName",
           hasValue(search["customerName"]),
           searchText,
-          text || "-",
+          text || "",
           false,
           "input",
           search
@@ -395,7 +395,7 @@ export const columnWarranty = ({
           "customerSegment",
           hasValue(search["customerSegment"]),
           searchText,
-          text || "-",
+          text || "",
           false,
           "input",
           search
@@ -422,7 +422,7 @@ export const columnWarranty = ({
           "customerGroup",
           hasValue(search["customerGroup"]),
           searchText,
-          text || "-",
+          text || "",
           false,
           "input",
           search
@@ -449,7 +449,7 @@ export const columnWarranty = ({
           "type",
           hasValue(search["type"]),
           searchText,
-          text || "-",
+          text || "",
           false,
           "input",
           search
@@ -476,7 +476,7 @@ export const columnWarranty = ({
           "penerbit",
           hasValue(search["penerbit"]),
           searchText,
-          text || "-",
+          text || "",
           false,
           "input",
           search
@@ -484,7 +484,7 @@ export const columnWarranty = ({
     },
     {
       key: "paymentWarrantyCode",
-      title: "PAYMENT WARRANTY CODE",
+      title: "PAYMENT GUARANTEE CODE",
       dataIndex: "paymentWarrantyCode",
       width: 150,
       sorter: true,
@@ -503,7 +503,7 @@ export const columnWarranty = ({
           "paymentWarrantyCode",
           hasValue(search["paymentWarrantyCode"]),
           searchText,
-          text || "-",
+          text || "",
           false,
           "input",
           search
@@ -530,7 +530,7 @@ export const columnWarranty = ({
           "costCenter",
           hasValue(search["costCenter"]),
           searchText,
-          text || "-",
+          text || "",
           false,
           "input",
           search
@@ -557,7 +557,7 @@ export const columnWarranty = ({
           "accountNumber",
           hasValue(search["accountNumber"]),
           searchText,
-          text || "-",
+          text || "",
           false,
           "input",
           search
@@ -584,7 +584,7 @@ export const columnWarranty = ({
           "accountName",
           hasValue(search["accountName"]),
           searchText,
-          text || "-",
+          text || "",
           false,
           "input",
           search
@@ -611,7 +611,7 @@ export const columnWarranty = ({
           "customerNumber",
           hasValue(search["customerNumber"]),
           searchText,
-          text || "-",
+          text || "",
           false,
           "input",
           search
@@ -698,7 +698,7 @@ export const columnWarranty = ({
           "description",
           hasValue(search["description"]),
           searchText,
-          text || "-",
+          text || "",
           false,
           "input",
           search

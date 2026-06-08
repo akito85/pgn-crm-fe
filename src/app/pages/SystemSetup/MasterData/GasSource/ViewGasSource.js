@@ -1,19 +1,23 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import {
+  DownloadOutlined,
   InfoCircleOutlined,
   PlusOutlined,
   UploadOutlined,
 } from "@ant-design/icons";
 import { useSelector, useDispatch } from "react-redux";
-import { Spin, Tooltip, Checkbox, Form, Alert } from "antd";
+import { Spin, Tooltip, Form, Alert } from "antd";
 import { Link } from "react-router-dom";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
 import { NavLink } from "react-router-dom";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../routes/account_management/customer_account_routes";
 import SVGIcon from "../../../../../assets/Icon/index";
+import IconViewList from "../../../../../assets/Icon/Nx/IconViewList";
+import IconEditNx from "../../../../../assets/Icon/Nx/IconEdit";
+import IconActive from "../../../../../assets/icons/nx/IconActive";
+import IconInactive from "../../../../../assets/icons/nx/IconInactive";
 import {
   activeOrInactiveGasSource,
   downloadGasSource,
@@ -260,7 +264,7 @@ const ViewGasSource = () => {
       {
         key: "no",
         title: "NO",
-        width: 60,
+        width: 90,
         align: "center",
         render: (text, object, index) => (page - 1) * pageSize + index + 1,
       },
@@ -412,7 +416,7 @@ const ViewGasSource = () => {
         <ButtonComponent
           type={"submit"}
           border={false}
-          icon={<SVGIcon name="IconButtonDownload" width={24} />}
+          icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
           onClick={() => {
             handleDownload();
           }}
@@ -455,11 +459,8 @@ const ViewGasSource = () => {
       render: (record, data) => {
         return (
           <Tooltip title="Detail">
-            <Link
-              to={ACCOUNT_MANAGEMENT_ROUTES.DETAIL_GAS_SOURCE}
-              state={{ id: record.gasSourceId }}
-            >
-              <SVGIcon name="IconDetail" width={24} />
+            <Link to={ACCOUNT_MANAGEMENT_ROUTES.DETAIL_GAS_SOURCE} state={{ id: record.gasSourceId }} className="inline-flex items-center text-[#1976D2] hover:text-[#1976D2] transition-colors duration-200">
+              <IconViewList width={20} />
             </Link>
           </Tooltip>
         );
@@ -469,38 +470,16 @@ const ViewGasSource = () => {
       action: "Update",
       type: "table",
       render: (record, data) => {
+        const disabled = record?.status?.toLowerCase() === "inactive";
         return (
           <Tooltip title="Update">
-            <div
-              className={`${
-                record?.status?.toLowerCase() === "inactive" &&
-                "cursor-not-allowed"
-              }`}
-            >
+            <div className={`inline-flex items-center ${disabled ? "cursor-not-allowed text-gray-300" : ""}`}>
               <Link
-                to={
-                  record?.status?.toLowerCase() !== "inactive" &&
-                  ACCOUNT_MANAGEMENT_ROUTES.UPDATE_GAS_SOURCE
-                }
-                state={
-                  record?.status?.toLowerCase() !== "inactive" && {
-                    id: record.gasSourceId,
-                  }
-                }
+                to={!disabled ? ACCOUNT_MANAGEMENT_ROUTES.UPDATE_GAS_SOURCE : undefined}
+                state={!disabled ? { id: record.gasSourceId } : undefined}
+                className={`inline-flex items-center transition-colors duration-200 ${disabled ? "text-gray-300 pointer-events-none" : "text-[#1976D2] hover:text-[#1976D2]"}`}
               >
-                <SVGIcon
-                  name="IconEdit"
-                  width={24}
-                  className={`${
-                    record?.status?.toLowerCase() === "inactive" &&
-                    "cursor-not-allowed"
-                  }`}
-                  color={
-                    record?.status?.toLowerCase() === "inactive"
-                      ? "#8D91A0"
-                      : "#ACC424"
-                  }
-                />
+                <IconEditNx width={20} />
               </Link>
             </div>
           </Tooltip>
@@ -511,18 +490,18 @@ const ViewGasSource = () => {
       action: "Activate",
       type: "table",
       render: (record, data) => {
+        const isActive = record?.status?.toUpperCase() === "ACTIVE";
+        const handleToggle = () => { handleActiveOrInactive(record); };
         return (
-          <Tooltip
-            title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}
-          >
-            <div>
-              <Checkbox
-                onClick={() => {
-                  handleActiveOrInactive(record);
-                }}
-                checked={record.status === "ACTIVE" ? false : true}
-              />
-            </div>
+          <Tooltip title={isActive ? "Inactivate" : "Activate"}>
+            {isActive
+              ? <span className="inline-flex items-center text-[#D32F2F] hover:text-[#D32F2F] transition-colors duration-200 cursor-pointer" onClick={handleToggle}>
+                  <IconInactive width={20} />
+                </span>
+              : <span className="inline-flex items-center text-green-600 hover:text-green-600 transition-colors duration-200 cursor-pointer" onClick={handleToggle}>
+                  <IconActive width={20} />
+                </span>
+            }
           </Tooltip>
         );
       },
@@ -555,112 +534,110 @@ const ViewGasSource = () => {
 
   return (
     <Spin spinning={loading}>
-      <LayoutMenu>
-        <BreadCrumb routes={routes} />
+      <BreadCrumb routes={routes} />
 
-        <CardContainer
-          header={
-            <div className="flex -my-4 justify-between items-center">
-              <p className="mt-[15px] font-bold">GAS SOURCE INFORMATION</p>
-              <div className="mt-[15px] flex gap-[20px]">
-                <Toolbar items={itemActions} />
-              </div>
+      <CardContainer
+        header={
+          <div className="flex -my-4 justify-between items-center">
+            <p className="mt-[15px] font-bold">GAS SOURCE INFORMATION</p>
+            <div className="mt-[15px] flex gap-[20px]">
+              <Toolbar items={itemActions} />
             </div>
-          }
+          </div>
+        }
+      >
+        <div className="my-0">
+          <TableRBI
+            dataSource={
+              data?.result && data?.result.length === 0 ? null : dataTable
+            }
+            columns={processedColumns}
+            current={page}
+            pageSize={pageSize}
+            onChange={handleChangePage}
+            onSizeChanger={handleChangePage}
+            totalData={data?.page?.totalElements || 0}
+            tableScrolled={{ x: 1500, y: 525 }}
+            onSort={onSort}
+            columnDefinitions={columnDefinitions}
+            handleDownload={handleDownload}
+            fixedColumns={fixedColumns}
+            setFixedColumns={setFixedColumns}
+            loading={loading}
+          />
+        </div>
+      </CardContainer>
+
+      {/* Modal Active/Inactive*/}
+      <ModalCustom
+        isOpen={modalActiveOrInactive}
+        header={`${activeOrInactive} INFORMATION`}
+        width={1000}
+        type={"confirmation"}
+        handleCancel={handleCancel}
+        footer={
+          <div className="w-full flex justify-end gap-5 px-[4px] pb-[10px]">
+            <ButtonComponent onClick={handleCancel} type="default">
+              Cancel
+            </ButtonComponent>
+            <ButtonComponent
+              form="inactivateForm"
+              type="submit"
+              htmlType="submit"
+            >
+              Confirm
+            </ButtonComponent>
+          </div>
+        }
+      >
+        <Form
+          id="inactivateForm"
+          form={form}
+          onFinish={handleConfirm}
+          layout="vertical"
         >
-          <div className="my-0">
-            <TableRBI
-              dataSource={
-                data?.result && data?.result.length === 0 ? null : dataTable
-              }
-              columns={processedColumns}
-              current={page}
-              pageSize={pageSize}
-              onChange={handleChangePage}
-              onSizeChanger={handleChangePage}
-              totalData={data?.page?.totalElements || 0}
-              tableScrolled={{ x: 1500, y: 525 }}
-              onSort={onSort}
-              columnDefinitions={columnDefinitions}
-              handleDownload={handleDownload}
-              fixedColumns={fixedColumns}
-              setFixedColumns={setFixedColumns}
-              loading={loading}
+          <div className="flex flex-col gap-6">
+            <Alert
+              message={`Are you sure want to ${activeOrInactive} Gas Source named ${calorieName}?`}
+              icon={<InfoCircleOutlined />}
+              type={"warning"}
+              showIcon
+              className="inactivate-alert"
             />
-          </div>
-        </CardContainer>
-
-        {/* Modal Active/Inactive*/}
-        <ModalCustom
-          isOpen={modalActiveOrInactive}
-          header={`${activeOrInactive} INFORMATION`}
-          width={1000}
-          type={"confirmation"}
-          handleCancel={handleCancel}
-          footer={
-            <div className="w-full flex justify-end gap-5 px-[4px] pb-[10px]">
-              <ButtonComponent onClick={handleCancel} type="default">
-                Cancel
-              </ButtonComponent>
-              <ButtonComponent
-                form="inactivateForm"
-                type="submit"
-                htmlType="submit"
-              >
-                Confirm
-              </ButtonComponent>
-            </div>
-          }
-        >
-          <Form
-            id="inactivateForm"
-            form={form}
-            onFinish={handleConfirm}
-            layout="vertical"
-          >
-            <div className="flex flex-col gap-6">
-              <Alert
-                message={`Are you sure want to ${activeOrInactive} Gas Source named ${calorieName}?`}
-                icon={<InfoCircleOutlined />}
-                type={"warning"}
-                showIcon
-                className="inactivate-alert"
+            <Form.Item
+              name={"remark"}
+              label={"Remark"}
+              rules={formMessageRequired("remark")}
+              className="w-full"
+            >
+              <InputComponent
+                group
+                rows={1}
+                type="textarea"
+                placeholder={"Type your remark"}
               />
-              <Form.Item
-                name={"remark"}
-                label={"Remark"}
-                rules={formMessageRequired("remark")}
-                className="w-full"
-              >
-                <InputComponent
-                  group
-                  rows={1}
-                  type="textarea"
-                  placeholder={"Type your remark"}
-                />
-              </Form.Item>
-            </div>
-          </Form>
-        </ModalCustom>
-
-        <ModalError
-          isOpen={modalError}
-          handleOk={handleRetry}
-          handleCancel={handleCloseModalError}
-          customText={"Try Again"}
-        >
-          <div className="px-5 pt-5 pb-[10px] justify-center">
-            <div className="w-full flex gap-[20px]">
-              <SVGIcon name="IconFailed" width={48} />
-              <p className="text-[18px] font-bold">{"Failed"}</p>
-            </div>
-            <p className="pl-[70px]">
-              {bodyError?.response?.data?.message?.toString()}
-            </p>
-            <p className="pl-[70px]">Please try again.</p>
+            </Form.Item>
           </div>
-        </ModalError>
-      </LayoutMenu>
+        </Form>
+      </ModalCustom>
+
+      <ModalError
+        isOpen={modalError}
+        handleOk={handleRetry}
+        handleCancel={handleCloseModalError}
+        customText={"Try Again"}
+      >
+        <div className="px-5 pt-5 pb-[10px] justify-center">
+          <div className="w-full flex gap-[20px]">
+            <SVGIcon name="IconFailed" width={48} />
+            <p className="text-[18px] font-bold">{"Failed"}</p>
+          </div>
+          <p className="pl-[70px]">
+            {bodyError?.response?.data?.message?.toString()}
+          </p>
+          <p className="pl-[70px]">Please try again.</p>
+        </div>
+      </ModalError>
     </Spin>
   );
 };

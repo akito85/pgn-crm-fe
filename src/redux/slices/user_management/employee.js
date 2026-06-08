@@ -170,7 +170,7 @@ export const createForwardTask = createAsyncThunk(
       const url = `/v1/dbs/api/forward-task/forward`;
       const data = await userHttpService.createData(url, body);
       const successBody = {
-        title: "Successfull",
+        title: "Successful",
         description: `Your data has been created`,
       };
       thunkAPI.dispatch(showModalSuccess(successBody));
@@ -215,7 +215,7 @@ export const createEmployee = createAsyncThunk(
       const url = `/v1/dbs/api/employees/createNewEmployee`;
       const data = await userHttpService.createData(url, body);
       const successBody = {
-        title: "Successfull",
+        title: "Successful",
         description: `Your data has been created`,
       };
       thunkAPI.dispatch(showModalSuccess(successBody));
@@ -223,7 +223,7 @@ export const createEmployee = createAsyncThunk(
     } catch (error) {
       thunkAPI.dispatch(
         validateError({
-          error: errorBody(errorCode(error), "created", errorMessage(error)),
+          error: errorBody(errorCode(error), "created", errorMessage(error), error?.response?.data?.data || null),
           action: "CREATE_EMPLOYEE",
           back: false,
         })
@@ -240,7 +240,7 @@ export const updateEmployee = createAsyncThunk(
       const url = `/v1/dbs/api/employees/updateEmployee`;
       const data = await userHttpService.updateData(url, body);
       const successBody = {
-        title: "Successfull",
+        title: "Successful",
         description: `Your data has been updated`,
       };
       thunkAPI.dispatch(showModalSuccess(successBody));
@@ -248,12 +248,12 @@ export const updateEmployee = createAsyncThunk(
     } catch (error) {
       thunkAPI.dispatch(
         validateError({
-          error: errorBody(errorCode(error), "updated", errorMessage(error)),
+          error: errorBody(errorCode(error), "updated", errorMessage(error), error?.response?.data?.data || null),
           action: "UPDATE_EMPLOYEE",
           back: false,
         })
       );
-      return thunk.rejectWithValue(error.response.data);
+      return thunkAPI.rejectWithValue(error.response.data);
     }
   }
 );
@@ -265,7 +265,7 @@ export const terminateEmployee = createAsyncThunk(
       const url = `/v1/dbs/api/employees/terminateEmployee`;
       const response = await userHttpService.terminateData(url, body);
       const successMessage = {
-        title: "Successfull",
+        title: "Successful",
         description: "Your data has been terminate",
         return: false,
       };
@@ -400,6 +400,7 @@ export const saveUploadEmployee = createAsyncThunk(
       const successBody = {
         title: "Successful",
         description: `Your file has been uploaded`,
+        return: true,
       };
       thunkAPI.dispatch(showModalSuccess(successBody));
       return data;
@@ -411,7 +412,7 @@ export const saveUploadEmployee = createAsyncThunk(
           back: false,
         })
       );
-      return thunk.rejectWithValue(error.response.data);
+      return thunkAPI.rejectWithValue(error.response.data);
     }
   }
 );

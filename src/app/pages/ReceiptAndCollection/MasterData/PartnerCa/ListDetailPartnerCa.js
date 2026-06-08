@@ -7,8 +7,7 @@ import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import FooterDetail from "../../../../../components/FooterDetail";
 import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrReject";
-import { Tabs } from "antd";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
+import { Tabs, Spin } from "antd";
 import {
   approveOrRejectPartner,
   approveOrRejectInactivePartnerCa,
@@ -44,9 +43,9 @@ const ListDetailPartnerCa = () => {
   useEffect(() => {
     if (
       id &&
-      data_detail?.partnerCa?.id &&
+      data_detail?.partnerCaMapping?.id &&
       data_detail &&
-      data_detail?.partnerCa?.id === id
+      data_detail?.partnerCaMapping?.id === id
     ) {
       const dataAttachment = (data_detail?.attachmentDtoList || []).map(
         (item) => {
@@ -70,7 +69,7 @@ const ListDetailPartnerCa = () => {
         }
       );
       setListDataAttachment(dataAttachment);
-      setDataHeader(data_detail?.partnerCa);
+      setDataHeader(data_detail?.partnerCaMapping);
     }
   }, [id, data_detail]);
 
@@ -96,10 +95,12 @@ const ListDetailPartnerCa = () => {
     },
   ];
 
-  // handle Confirm
   const handleConfirm = (res, handleClear) => {
     setLoadingConfirm(true);
-    if (data_detail?.tApprovalDto?.approvalType === "INACTIVE_PARTNER_CA") {
+    if (
+      data_detail?.tApprovalDto?.approvalType === "INACTIVE_PARTNER_CA" ||
+      data_detail?.tApprovalDto?.approvalType === "ACTIVE_PARTNER_CA"
+    ) {
       const data = {
         id: id,
         remark: res.remark,
@@ -118,7 +119,7 @@ const ListDetailPartnerCa = () => {
         });
     } else {
       const data = {
-        partnerCaId: id,
+        id: id,
         remark: res.remark,
         approvalId: data_detail?.tApprovalDto?.tAppId,
         action: approveOrReject.toUpperCase(),
@@ -141,43 +142,45 @@ const ListDetailPartnerCa = () => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
-      <div>
-        <Tabs
-          activeKey={segmentedPage}
-          onChange={setSegmentedPage}
-          items={[
-            {
-              label: "Partner Collecting Agent Mapping",
-              key: "Partner Ca",
-              children: (
-                <DetailPartnerCa
-                  key={"active"}
-                  data_detail={dataHeader}
-                  data_req={data_detail?.tApprovalDto}
-                />
-              ),
-            },
-            {
-              label: "Attachment",
-              key: "Attachment",
-              children: (
-                <BaseContainer header={"ATTACHMENT INFORMATION"}>
-                  <AttachmentComponent
-                    type={"detail"}
-                    data={listDataAttachment}
-                    updateData={setListDataAttachment}
-                    typeSelector="partner"
-                    service={receiptCollectionHttpService}
-                    configApplication={configApp.PAYMENT_SERVICE}
+      <Spin spinning={loading}>
+        <div>
+          <Tabs
+            activeKey={segmentedPage}
+            onChange={setSegmentedPage}
+            items={[
+              {
+                label: "Partner Collecting Agent Mapping",
+                key: "Partner Ca",
+                children: (
+                  <DetailPartnerCa
+                    key={"active"}
+                    data_detail={dataHeader}
+                    data_req={data_detail?.tApprovalDto}
                   />
-                </BaseContainer>
-              ),
-            },
-          ]}
-        />
-      </div>
+                ),
+              },
+              {
+                label: "Attachment",
+                key: "Attachment",
+                children: (
+                  <BaseContainer header={"ATTACHMENT INFORMATION"}>
+                    <AttachmentComponent
+                      type={"detail"}
+                      data={listDataAttachment}
+                      updateData={setListDataAttachment}
+                      typeSelector="partner"
+                      service={receiptCollectionHttpService}
+                      configApplication={configApp.PAYMENT_SERVICE}
+                    />
+                  </BaseContainer>
+                ),
+              },
+            ]}
+          />
+        </div>
+      </Spin>
 
       <ModalApproveOrReject
         isOpen={modalApprove}
@@ -185,8 +188,8 @@ const ListDetailPartnerCa = () => {
         onFinish={handleConfirm}
         header={approveOrReject}
         approveOrReject={approveOrReject}
-        menu={"Partner"}
-        named={data_detail?.partnerCa?.caCode}
+        menu={"Partner Ca Mapping"}
+        named={data_detail?.partnerCaMapping?.partner?.partnerName}
         loading={loadingConfirm}
       />
 
@@ -202,7 +205,7 @@ const ListDetailPartnerCa = () => {
         }}
         showApproval={isShowButton === true}
       />
-    </LayoutMenu>
+    </>
   );
 };
 

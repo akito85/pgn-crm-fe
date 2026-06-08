@@ -1,18 +1,20 @@
-import { Form, Spin, Input, DatePicker, Select } from "antd";
+import { Form, Spin, Select } from "antd";
 import PropTypes from "prop-types";
 import moment from "moment";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
-import BaseContainer from "../../../../../components/BaseContainer";
+import CardContainer from "../../../../../components/CardContainer";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import ConfirmModalPaymentCycle from "./Modal/ConfirmModalPaymentCycle";
 import { FormStepper, FormFooter } from "../../../../../components/FormStepNavigation";
+import InputComponent from "../../../../../components/InputComponent";
+import SelectComponent from "../../../../../components/SelectComponent";
+import DateComponent from "../../../../../components/DateComponent";
 import {
     createPaymentCycle,
     getDetailPaymentCycle,
@@ -23,7 +25,6 @@ import {
     getAllBeginEnd,
     createValidasiPaymentCycle,
     uploadAttachmentPaymentCycle,
-
     saveDraftPaymentCycle,
     getPaymentPeriods,
 } from "../../../../../redux/slices/receipt_collection/paymentCycle";
@@ -31,8 +32,17 @@ import { configApp } from "../../../../../constants/configApp";
 import receiptCollectionHttpService from "../../../../../redux/services/receiptCollectionHttpService";
 import { showModalSuccess, showModalError } from "../../../../../redux/slices/general_slice";
 
+const escapeHtml = (text) => {
+    const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+    return text ? String(text).replace(/[&<>"']/g, (s) => map[s]) : text;
+};
 
-const { TextArea } = Input;
+const getSafeErrorMessage = (error) => {
+    const message = error?.response?.data?.message || error?.message || 'An error occurred';
+    const safeMessages = ['Validation failed', 'Invalid input', 'Unauthorized'];
+    return safeMessages.some((m) => message.includes(m)) ? message : 'An unexpected error occurred';
+};
+
 
 const steps = [
     { title: "CREATE", value: "Payment Cycle" },
@@ -134,7 +144,7 @@ const PaymentCycleForm = ({ type }) => {
                 navigate("/system-setup/payment-cycle");
             })
             .catch((error) => {
-                const message = error?.message || "Failed to save draft";
+                const message = getSafeErrorMessage(error);
                 dispatch(showModalError({ title: "Error", description: message }));
             });
     };
@@ -241,6 +251,24 @@ const PaymentCycleForm = ({ type }) => {
         }
     }, [dataListAppHierDetail]);
 
+    // Custom business logic validation
+    const validateForm = (values) => {
+        const errors = {};
+        if (values.beginCycle !== undefined && values.endCycle !== undefined && values.beginCycle >= values.endCycle) {
+            errors.beginCycle = 'Begin Cycle harus lebih kecil dari End Cycle';
+        }
+        if (values.startDate && values.endDate && values.startDate > values.endDate) {
+            errors.startDate = 'Start Date harus lebih kecil dari End Date';
+        }
+        if (values.beginCycle !== undefined && (values.beginCycle < 1 || values.beginCycle > 31)) {
+            errors.beginCycle = 'Begin Cycle harus antara 1-31';
+        }
+        if (values.endCycle !== undefined && (values.endCycle < 1 || values.endCycle > 31)) {
+            errors.endCycle = 'End Cycle harus antara 1-31';
+        }
+        return errors;
+    };
+
     const handleSubmit = async (values) => {
         if (!files || files.length === 0) {
             dispatch(showModalError({
@@ -250,7 +278,12 @@ const PaymentCycleForm = ({ type }) => {
             return;
         }
 
-        // Prepare JSON Data
+        const validationErrors = validateForm(values);
+        if (Object.keys(validationErrors).length > 0) {
+            dispatch(showModalError({ message: 'Validasi Gagal', description: Object.values(validationErrors).join(', ') }));
+            return;
+        }
+
         const data = {
             id: isEdit ? id : null,
             periodId: values.period,
@@ -259,7 +292,7 @@ const PaymentCycleForm = ({ type }) => {
             timeUnit: values.timeUnit,
             startDate: values.startDate ? values.startDate.format("YYYY-MM-DD") : null,
             endDate: values.endDate ? values.endDate.format("YYYY-MM-DD") : null,
-            description: values.description,
+            description: escapeHtml(values.description),
             statusOpen: values.statusOpen,
             appHierId: values.apphierId,
         };
@@ -276,7 +309,8 @@ const PaymentCycleForm = ({ type }) => {
                 }
             })
             .catch((error) => {
-                console.log("Validation failed:", error);
+                const message = getSafeErrorMessage(error);
+                dispatch(showModalError({ title: 'Error', description: message }));
             });
     };
 
@@ -288,20 +322,26 @@ const PaymentCycleForm = ({ type }) => {
             const newId = response?.data?.id;
 
             if (files && files.length > 0) {
-                try {
-                    for (const file of files) {
-                        if (file.dataType !== 'exist' && file.file) {
+                const uploadResults = await Promise.allSettled(
+                    files
+                        .filter((file) => file.dataType !== 'exist' && file.file)
+                        .map((file) => {
                             const formData = new FormData();
-                            formData.append("files", file.file);
-                            formData.append("fileCategoryId", file.fileCategoryId);
-                            formData.append("referensiId", newId);
-                            formData.append("category", "PAYMENT_CYCLE");
+                            formData.append('files', file.file);
+                            formData.append('fileCategoryId', file.fileCategoryId);
+                            formData.append('referensiId', newId);
+                            formData.append('category', 'PAYMENT_CYCLE');
+                            return dispatch(uploadAttachmentPaymentCycle(formData)).unwrap();
+                        })
+                );
 
-                            await dispatch(uploadAttachmentPaymentCycle(formData)).unwrap();
-                        }
-                    }
-                } catch (attError) {
-                    console.error("Attachment upload failed:", attError);
+                const failedUploads = uploadResults.filter((r) => r.status === 'rejected');
+                if (failedUploads.length > 0) {
+                    dispatch(showModalError({
+                        message: 'Upload Gagal',
+                        description: `${failedUploads.length} file gagal diupload. Data akan dibatalkan.`,
+                    }));
+                    return;
                 }
             }
 
@@ -314,8 +354,7 @@ const PaymentCycleForm = ({ type }) => {
             navigate("/system-setup/payment-cycle");
 
         } catch (error) {
-            console.error("Creation failed:", error);
-            const message = error?.message || "An error occurred";
+            const message = getSafeErrorMessage(error);
             dispatch(showModalError({ title: "Failed", description: message }));
         }
     };
@@ -350,7 +389,7 @@ const PaymentCycleForm = ({ type }) => {
     ];
 
     return (
-        <LayoutMenu>
+        <>
             <BreadCrumb routes={routes} />
             <Spin spinning={loading}>
                 <FormStepper
@@ -359,7 +398,7 @@ const PaymentCycleForm = ({ type }) => {
                     onPrev={prev}
                     onNext={next}
                 />
-                <BaseContainer header={isEdit ? "EDIT PAYMENT CYCLE" : "CREATE PAYMENT CYCLE"}>
+                <div className="w-full flex flex-col justify-start pb-5">
                     <Form
                         form={form}
                         layout="vertical"
@@ -368,156 +407,144 @@ const PaymentCycleForm = ({ type }) => {
                     >
                         {/* Tab 1: Payment Cycle Information */}
                         <div style={{ display: valuePage === "Payment Cycle" ? "block" : "none" }}>
-                            <div className="grid grid-cols-5 gap-4">
-                                <Form.Item
-                                    label="Period"
-                                    name="period"
-                                    rules={[{ required: true, message: "Please select period!" }]}
-                                >
-                                    <Select placeholder="Select Period"
-                                        showSearch
-                                        filterOption={(input, option) =>
-                                            String(option.children).toLowerCase().includes(input.toLowerCase())
-                                        }
+                            <CardContainer header="PAYMENT CYCLE INFORMATION">
+                                <div className="grid grid-cols-5 gap-4">
+                                    <Form.Item
+                                        label="Period"
+                                        name="period"
+                                        rules={[{ required: true, message: "Please select period!" }]}
                                     >
-                                        {dataPaymentPeriods?.map(item => (
-                                            <Select.Option key={item.id} value={item.id}>
-                                                {item.periodName}
-                                            </Select.Option>
-                                        ))}
-                                    </Select>
-                                </Form.Item>
+                                        <SelectComponent placeholder="Select Period">
+                                            {dataPaymentPeriods?.map(item => (
+                                                <Select.Option key={item.id} value={item.id}>
+                                                    {item.periodName}
+                                                </Select.Option>
+                                            ))}
+                                        </SelectComponent>
+                                    </Form.Item>
 
-                                <Form.Item
-                                    label="Time Unit"
-                                    name="timeUnit"
-                                    rules={[{ required: true, message: "Please select time unit!" }]}
-                                >
-                                    <Select placeholder="Select Time Unit">
-                                        {data_time_unit?.map(item => (
-                                            <Select.Option key={item.id} value={item.code}>
-                                                {item.name}
-                                            </Select.Option>
-                                        ))}
-                                    </Select>
-                                </Form.Item>
-
-                                <Form.Item
-                                    label="Begin Cycle"
-                                    name="beginCycle"
-                                    rules={[{ required: true, message: "Please input begin cycle!" }]}
-                                >
-                                    <Select placeholder="Select Begin Cycle"
-                                        showSearch
-                                        filterOption={(input, option) =>
-                                            String(option.value).toLowerCase().includes(input.toLowerCase())
-                                        }
+                                    <Form.Item
+                                        label="Time Unit"
+                                        name="timeUnit"
+                                        rules={[{ required: true, message: "Please select time unit!" }]}
                                     >
-                                        {dataEndBegin?.map(item => (
-                                            <Select.Option key={item} value={item}>
-                                                {item}
-                                            </Select.Option>
-                                        ))}
-                                    </Select>
-                                </Form.Item>
+                                        <SelectComponent placeholder="Select Time Unit">
+                                            {data_time_unit?.map(item => (
+                                                <Select.Option key={item.id} value={item.code}>
+                                                    {item.name}
+                                                </Select.Option>
+                                            ))}
+                                        </SelectComponent>
+                                    </Form.Item>
 
-                                <Form.Item
-                                    label="End Cycle"
-                                    name="endCycle"
-                                    rules={[{ required: true, message: "Please input end cycle!" }]}
-                                >
-                                    <Select placeholder="Select End Cycle"
-                                        showSearch
-                                        filterOption={(input, option) =>
-                                            String(option.value).toLowerCase().includes(input.toLowerCase())
-                                        }
+                                    <Form.Item
+                                        label="Begin Cycle"
+                                        name="beginCycle"
+                                        rules={[{ required: true, message: "Please input begin cycle!" }]}
                                     >
-                                        {dataEndBegin?.map(item => (
-                                            <Select.Option key={item} value={item}>
-                                                {item}
-                                            </Select.Option>
-                                        ))}
-                                    </Select>
-                                </Form.Item>
+                                        <SelectComponent placeholder="Select Begin Cycle">
+                                            {dataEndBegin?.map(item => (
+                                                <Select.Option key={item} value={item}>
+                                                    {item}
+                                                </Select.Option>
+                                            ))}
+                                        </SelectComponent>
+                                    </Form.Item>
 
-                                <Form.Item
-                                    label="Start Date"
-                                    name="startDate"
-                                    rules={[{ required: true, message: "Please select start date!" }]}
-                                >
-                                    <DatePicker
-                                        style={{ width: "100%" }}
-                                        format="YYYY-MM-DD"
-                                        placeholder="Select Start Date"
-                                        onChange={(date) => {
-                                            const endDate = form.getFieldValue("endDate");
-                                            if (date && endDate && endDate < date) {
-                                                form.setFieldsValue({
-                                                    endDate: null,
-                                                });
-                                            }
-                                        }}
-                                    />
-                                </Form.Item>
+                                    <Form.Item
+                                        label="End Cycle"
+                                        name="endCycle"
+                                        rules={[{ required: true, message: "Please input end cycle!" }]}
+                                    >
+                                        <SelectComponent placeholder="Select End Cycle">
+                                            {dataEndBegin?.map(item => (
+                                                <Select.Option key={item} value={item}>
+                                                    {item}
+                                                </Select.Option>
+                                            ))}
+                                        </SelectComponent>
+                                    </Form.Item>
 
-                                <Form.Item
-                                    label="End Date"
-                                    name="endDate"
-                                    rules={[{ required: true, message: "Please select end date!" }]}
-                                >
-                                    <DatePicker
-                                        style={{ width: "100%" }}
-                                        format="YYYY-MM-DD"
-                                        placeholder="Select End Date"
-                                        disabledDate={disabledEndDate}
-                                    />
-                                </Form.Item>
+                                    <Form.Item
+                                        label="Start Date"
+                                        name="startDate"
+                                        rules={[{ required: true, message: "Please select start date!" }]}
+                                    >
+                                        <DateComponent
+                                            placeholder="Select Start Date"
+                                            onChange={(date) => {
+                                                const endDate = form.getFieldValue("endDate");
+                                                if (date && endDate && endDate < date) {
+                                                    form.setFieldsValue({
+                                                        endDate: null,
+                                                    });
+                                                }
+                                            }}
+                                            dateDisable={() => false}
+                                        />
+                                    </Form.Item>
 
-                                <Form.Item
-                                    label="Status Open"
-                                    name="statusOpen"
-                                >
-                                    <Select placeholder="Select Status">
-                                        <Select.Option value="OPEN">OPEN</Select.Option>
-                                        <Select.Option value="CLOSE">CLOSE</Select.Option>
-                                    </Select>
-                                </Form.Item>
+                                    <Form.Item
+                                        label="End Date"
+                                        name="endDate"
+                                        rules={[{ required: true, message: "Please select end date!" }]}
+                                    >
+                                        <DateComponent
+                                            placeholder="Select End Date"
+                                            dateDisable={disabledEndDate}
+                                        />
+                                    </Form.Item>
 
-                                <Form.Item
-                                    label="Description"
-                                    name="description"
-                                    className="col-span-3"
-                                >
-                                    <TextArea rows={4} placeholder="Enter description" showCount maxLength={255} />
-                                </Form.Item>
-                            </div>
+                                    <Form.Item
+                                        label="Status Open"
+                                        name="statusOpen"
+                                    >
+                                        <SelectComponent placeholder="Select Status">
+                                            <Select.Option value="OPEN">OPEN</Select.Option>
+                                            <Select.Option value="CLOSE">CLOSE</Select.Option>
+                                        </SelectComponent>
+                                    </Form.Item>
+
+                                    <Form.Item
+                                        label="Description"
+                                        name="description"
+                                        className="col-span-3"
+                                    >
+                                        <InputComponent type="textarea" rows={4} placeholder="Enter description" showCount maxLength={255} />
+                                    </Form.Item>
+                                </div>
+                            </CardContainer>
                         </div>
 
                         {/* Tab 2: Approval */}
                         <div style={{ display: valuePage === "Approval" ? "block" : "none" }}>
-                            <ApprovalComponentGeneral
-                                parentForm={form}
-                                dataOption={appHierOptions}
-                                dataTable={appHierDataDetail}
-                                selectedHierarchy={selectedHierarchy}
-                                updateSelectedHierarchy={handleHierarchyChange}
-                                detailData={data_detail?.paymentCycleDetail}
-                                isEditing={isEdit}
-                            />
+                            <CardContainer header="APPROVAL INFORMATION">
+                                <ApprovalComponentGeneral
+                                    parentForm={form}
+                                    dataOption={appHierOptions}
+                                    dataTable={appHierDataDetail}
+                                    selectedHierarchy={selectedHierarchy}
+                                    updateSelectedHierarchy={handleHierarchyChange}
+                                    detailData={data_detail?.paymentCycleDetail}
+                                    isEditing={isEdit}
+                                />
+                            </CardContainer>
                         </div>
 
                         {/* Tab 3: Attachment */}
                         <div style={{ display: valuePage === "Attachment" ? "block" : "none" }}>
-                            <AttachmentComponent
-                                type="create"
-                                data={files}
-                                updateData={setFiles}
-                                typeSelector="paymentCycle"
-                                dispatch={dispatch}
-                                getAPICategory={getListCategory}
-                                service={receiptCollectionHttpService}
-                                configApplication={configApp.PAYMENT_SERVICE}
-                            />
+                            <CardContainer header="ATTACHMENT INFORMATION">
+                                <AttachmentComponent
+                                    type="create"
+                                    data={files}
+                                    updateData={setFiles}
+                                    typeSelector="paymentCycle"
+                                    dispatch={dispatch}
+                                    getAPICategory={getListCategory}
+                                    service={receiptCollectionHttpService}
+                                    configApplication={configApp.PAYMENT_SERVICE}
+                                />
+                            </CardContainer>
                         </div>
 
                         <FormFooter
@@ -532,7 +559,7 @@ const PaymentCycleForm = ({ type }) => {
                             onSubmit={() => form.submit()}
                         />
                     </Form>
-                </BaseContainer>
+                </div>
                 {/* Confirmation Modal */}
                 <ModalCustom
                     title="Confirmation"
@@ -574,7 +601,7 @@ const PaymentCycleForm = ({ type }) => {
                     />
                 </ModalCustom>
             </Spin>
-        </LayoutMenu>
+        </>
     );
 };
 

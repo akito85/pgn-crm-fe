@@ -6,7 +6,6 @@ import BaseContainer from "../../../../../components/BaseContainer";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import InputComponent from "../../../../../components/InputComponent";
 import SelectComponent from "../../../../../components/SelectComponent";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../routes/account_management/customer_account_routes";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import {
@@ -258,7 +257,7 @@ const CreateGasSource = ({ type }) => {
       title: "NO",
       dataIndex: "no",
       align: "center",
-      width: 60,
+      width: 90,
       render: (t, r, i) => i + 1,
     },
     {
@@ -521,7 +520,7 @@ const CreateGasSource = ({ type }) => {
     // setBodyError({});
   };
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading || isLoading}>
         <BreadCrumb routes={routes} />
 
@@ -675,7 +674,7 @@ const CreateGasSource = ({ type }) => {
           <p className="pl-[70px]">Please try again.</p>
         </div>
       </ModalError>
-    </LayoutMenu>
+    </>
   );
 };
 

@@ -1,5 +1,4 @@
 import React, { useRef } from "react";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import BaseContainer from "../../../../components/BaseContainer";
 import ButtonComponent from "../../../../components/ButtonComponent";
@@ -201,7 +200,7 @@ const DetailDataAccessHierarchy = () => {
 
   const { handleCancelTryAgain, renderModal } = useTryAgainHooks(handleRetry);
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
       <Spin spinning={loading}>
         <div className={"w-full flex flex-col gap-5 my-5"}>
@@ -230,10 +229,13 @@ const DetailDataAccessHierarchy = () => {
                   >
                     Download Excel
                   </ButtonComponent>
+                  {/* Download PDF disabled: /v1/dbs/api/dah/download-pdf/{id} endpoint does not exist yet */}
                   <ButtonComponent
                     type={"submit"}
                     border={false}
+                    disabled={true}
                     onClick={() => downloadDetailHierarchy("pdf")}
+                    title="Feature not available"
                   >
                     Download PDF
                   </ButtonComponent>
@@ -314,7 +316,7 @@ const DetailDataAccessHierarchy = () => {
 
       {/* moda try again */}
       {renderModal()}
-    </LayoutMenu>
+    </>
   );
 };
 

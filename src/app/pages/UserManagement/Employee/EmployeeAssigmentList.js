@@ -12,7 +12,7 @@ const EmployeeAssigmentList = ({
   onChangeData = () => {},
 }) => {
   const [page, setPage] = useState(1);
-  const dispatch = useDispatch;
+  const dispatch = useDispatch();
   const [pageSize, setPageSize] = useState(10);
   const [rowCount, setRowCount] = useState(0);
 
@@ -77,7 +77,7 @@ const EmployeeAssigmentList = ({
       sorter: true,
       inputType: 'date',
       // ...getColumnSearchProps('startDate', 'date'),
-      render: (endDate) => moment(endDate).format("YYYY-MM-DD")
+      render: (startDate) => startDate ? moment(startDate).format("YYYY-MM-DD") : '-'
     },
     {
       title: "END DATE",
@@ -87,7 +87,7 @@ const EmployeeAssigmentList = ({
       sorter: true,
       inputType: 'date',
       // ...getColumnSearchProps('endDate', 'date'),
-      render: (endDate) => moment(endDate).format("YYYY-MM-DD")
+      render: (endDate) => endDate ? moment(endDate).format("YYYY-MM-DD") : '-'
     },
     {
       title: "isMain",
@@ -118,7 +118,7 @@ const EmployeeAssigmentList = ({
 
   const handleChangePage = (page, pageSize) => {
     setPage(page)
-    setPage(pageSize)
+    setPageSize(pageSize)
   }
 
   return (

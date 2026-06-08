@@ -1,27 +1,46 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-
-import { Form, Button, Tooltip, Input, DatePicker } from "antd";
-
+import { Form, Button } from "antd";
 import InputComponent from "../../../../../../../../../components/InputComponent";
-import NxPanel from "../../../../../../../../../components/Nx/NxPanel";
-import { dateFormatting, requiredMessage } from "../../../../../../../../../utils";
-
+import {
+  dateFormatting,
+  requiredMessage
+} from "../../../../../../../../../utils";
 import moment from "moment";
-import DateComponent from "../../../../../../../../../components/DateComponent";
 import { useDispatch, useSelector } from "react-redux";
-// import TablePaginationNew from "../../../../../../../../../components/TablePaginationNew";
 import NxModal from "../../../../../../../../../components/Nx/NxModal";
 import NxBaseContainer from "../../../../../../../../../components/Nx/NxBaseContainer";
 import NxTable from "../../../../../../../../../components/Nx/NxTable";
-import { getMdAccountStandard } from "../../../../../../../../../redux/slices/account_management/detailAccount/MultiDestinationSlice";
+import NxDetailText from "../../../../../../../../../components/Nx/NxDetailText";
+import NxDate from "../../../../../../../../../components/Nx/NxDatePicker";
+import { getMdAccounts } from "../../../../../../../../../redux/slices/account_management/detailAccount/MultiDestinationSlice";
 import { getAccountStandardColumns } from "./getAccountStandardColumns";
-import NxCardContainer from "../../../../../../../../../components/Nx/NxCardContainer";
 
 export default function InfoMultiDestination({
   accountId,
   setAccount,
-  className,
+  form,
+  isUpdate,
+  isDraft,
+  formView = true
 }) {
+  const account = Form.useWatch("account", form);
+  const accountSor = Form.useWatch("accountSor", form);
+  const accountCostCenter = Form.useWatch("accountCostCenter", form);
+  const meterReadingCode = Form.useWatch("meterReadingCode", form);
+  const accountSegment = Form.useWatch("accountSegment", form);
+  const accountGroupType = Form.useWatch("accountGroupType", form);
+  const accountType = Form.useWatch("accountType", form);
+  const premiseAddress = Form.useWatch("premiseAddress", form);
+  const subDistrict = Form.useWatch("subDistrict", form);
+  const district = Form.useWatch("district", form);
+  const city = Form.useWatch("city", form);
+  const province = Form.useWatch("province", form);
+  const country = Form.useWatch("country", form);
+  const longitude = Form.useWatch("longitude", form);
+  const latitude = Form.useWatch("latitude", form);
+  const startDate = Form.useWatch("startDate", form);
+  const endDate = Form.useWatch("endDate", form);
+  const description = Form.useWatch("description", form);
   const dispatch = useDispatch();
 
   const [page, setPage] = useState(1);
@@ -31,7 +50,9 @@ export default function InfoMultiDestination({
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const searchInput = useRef(null);
-                                                                                                                                                                                                                                                                                                                                      
+  const [filters, setFilters] = useState([]);
+  const [filterRules, setFilterRules] = useState([]);
+
   const onSort = (_, __, sort) => {
     const dataSort = sort.order
       ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
@@ -40,22 +61,18 @@ export default function InfoMultiDestination({
   };
 
   const [isOpen, setIsOpen] = useState(false);
-  
-  const { list_mdAccountStandard, pagination_mdAccountStandard } = useSelector(
+
+  const { list_mdAccount, pagination_listMdAccount, loading_listMdAccount } = useSelector(
     (state) => state.multiDestination
   );
-  
-  const handleOk = () => {
-    console.log("ok")
-  }
 
   const handleCancel = () => {
-    setIsOpen(false)
-  }
+    setIsOpen(false);
+  };
 
   const handleClose = () => {
-    setIsOpen(false)
-  }
+    setIsOpen(false);
+  };
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -67,57 +84,75 @@ export default function InfoMultiDestination({
       }
       return {
         ...prevState,
-        [dataIndex]: selectedKeys[0],
+        [dataIndex]: selectedKeys[0]
       };
     });
   };
 
   const handleLoadMore = async () => {
     const nextPage = page + 1;
-    const totalPages = pagination_mdAccountStandard?.totalPages || 0;
+    const totalPage = pagination_listMdAccount?.totalPage || 0;
 
-    if (nextPage <= totalPages) {
+    if (nextPage <= totalPage) {
+      const body = {
+        searchs: search,
+        page: nextPage,
+        size: loadMoreSize,
+        sort,
+        filters,
+        filterRules,
+      }
+
       await dispatch(
-        getMdAccountStandard({
-          searchs: JSON.stringify(search),
-          page: nextPage,
-          size: loadMoreSize,
-          sort,
+        getMdAccounts({
+          body,
           isLoadMore: true,
-          id: accountId,
+          id: accountId
         })
-      );
+      ).unwrap();
     }
     setPage(nextPage);
   };
 
   useEffect(() => {
-    dispatch(getMdAccountStandard({
-      page,
-      size: loadMoreSize,
-      sort,
-      searchs: JSON.stringify(search),
-      id: accountId,
-      isLoadMore: false,
-    }));
-  }, [ sort, search ]);
+    if (formView) {
+      const body = {
+        page,
+        size: loadMoreSize,
+        sort,
+        searchs: search,
+        filters,
+        filterRules,
+      }
 
-  const baseColumns = useMemo(() =>
-    getAccountStandardColumns(
-      search,
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      setAccount,
-      setIsOpen
-    ),
-  [search, searchText, searchedColumn]);
-  
+      dispatch(
+        getMdAccounts({
+          body,
+          id: accountId,
+          isLoadMore: false
+        })
+      );
+    }
+  }, [sort, search, filters, filterRules]);
+
+  const baseColumns = useMemo(
+    () =>
+      getAccountStandardColumns(
+        search,
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        setAccount,
+        setIsOpen
+      ),
+    [search, searchText, searchedColumn]
+  );
+
   const allColumns = useMemo(() => {
     const columnsWithKeys = [...baseColumns].map((col) => ({
       ...col,
-      key: col.key || col.dataIndex || col.title,
+      key: col.key || col.dataIndex || col.title
     }));
     return columnsWithKeys;
   }, [baseColumns]);
@@ -125,331 +160,290 @@ export default function InfoMultiDestination({
   const columnDefinitions = useMemo(() => {
     return allColumns.map((col) => ({
       key: col.key || col.dataIndex || col.title,
-      title: col.title,
+      title: col.title
     }));
   }, [allColumns]);
-  
-  const currentData = useMemo(() => list_mdAccountStandard, [list_mdAccountStandard]);
 
-  const hasMore = currentData.length < (pagination_mdAccountStandard?.totalElements || 0);
+  const currentData = useMemo(
+    () => list_mdAccount,
+    [list_mdAccount]
+  );
 
-  useEffect(() => {
-    console.log("hasMore", hasMore);
-  }, [hasMore])
+  const hasMore =
+    currentData.length < (pagination_listMdAccount?.totalElement || 0);
 
   const dataSourceWithKeys = useMemo(() => {
     if (!currentData || currentData.length === 0) return [];
 
     return currentData.map((item, index) => ({
       ...item,
-      key: `${item.id}-${index}`,
+      key: `${item.id}-${index}`
     }));
   }, [currentData]);
 
-  return(
-    <div className={className}>
-      <NxCardContainer header={"MULTI DESTINATION INFORMATION"}>
-        <div className="w-full grid grid-cols-3 gap-4 mb-4">
-          <div className="flex gap-2 items-end">
-            <Form.Item name={"objectId"} hidden>
-              <Input />
-            </Form.Item>
-
-            <Form.Item
-              label={"Account"}
-              required
-              className="no-margin-form"
-            >
-              <Input.Group compact>
-                <Form.Item
-                  key="account"
-                  name={"account"}
-                  rules={[
-                    {
-                      message: requiredMessage("Account"),
-                      required: true,
-                    }
-                  ]}
-                  noStyle
-                >
-                  <InputComponent disabled />
-                </Form.Item>
-                <Button
-                  type="primary"
-                  className="h-9 px-4 justify-center items-center"
-                  style={{
-                    backgroundColor: "#0075bf",
-                    borderColor: "#0075bf",
-                    borderRadius: "5px",
-                    minWidth: "112px",
-                  }}
-                  onClick={() => {
-                    // Add your select logic here
-                    setIsOpen(true)
-                  }}
-                >
-                  Select
-                </Button>
-              </Input.Group>
-            </Form.Item>
-          </div>
-
-          <Form.Item
-            key="accountSor"
-            name={"accountSor"}
-            label={"Account SOR"}
-            className="no-margin-form"
-            rules={[
-              {
-                message: requiredMessage("Account SOR"),
-                required: true,
-              }
-            ]}
-          >
-            <InputComponent disabled />
-          </Form.Item>
-
-          <Form.Item
-            key="accountCostCenter"
-            name={"accountCostCenter"}
-            label={"Account Cost Center"}
-            className="no-margin-form"
-            rules={[
-              {
-                message: requiredMessage("Account Cost Center"),
-                required: true,
-              }
-            ]}
-          >
-            <InputComponent disabled />
-          </Form.Item>
-
-          <Form.Item
-            key="meterReadingCode"
-            name={"meterReadingCode"}
-            label={"Meter Reading Code"}
-            className="no-margin-form"
-            rules={[
-              {
-                message: requiredMessage("Meter Reading Code"),
-                required: true,
-              }
-            ]}
-          >
-            <InputComponent disabled />
-          </Form.Item>
-
-          <Form.Item
-            key="accountSegment"
-            name={"accountSegment"}
-            label={"Account Segment"}
-            className="no-margin-form"
-            rules={[
-              {
-                message: requiredMessage("Account Segment"),
-                required: true,
-              }
-            ]}
-          >
-            <InputComponent disabled />
-          </Form.Item>
-
-          <Form.Item
-            key="accountGroupType"
-            name={"accountGroupType"}
-            label={"Account Group Type"}
-            className="no-margin-form"
-            rules={[
-              {
-                message: requiredMessage("Account Group Type"),
-                required: true,
-              }
-            ]}
-          >
-            <InputComponent disabled />
-          </Form.Item>
-
-          <Form.Item
-            key="accountType"
-            name={"accountType"}
-            label={"Account Type"}
-            className="no-margin-form"
-            rules={[
-              {
-                message: requiredMessage("Account Type"),
-                required: true,
-              }
-            ]}
-          >
-            <InputComponent disabled />
-          </Form.Item>
-
-          <Form.Item
-            key="premiseAddress"
-            name={"premiseAddress"}
-            label={"Premise Address"}
-            className="no-margin-form"
-            rules={[
-              {
-                message: requiredMessage("Premise Address"),
-                required: true,
-              }
-            ]}
-          >
-            <InputComponent disabled />
-          </Form.Item>
-
-          <Form.Item
-            key="subDistrict"
-            name={"subDistrict"}
-            label={"Subdistrict"}
-            className="no-margin-form"
-            rules={[
-              {
-                message: requiredMessage("Subdistrict"),
-                required: true,
-              }
-            ]}
-          >
-            <InputComponent disabled />
-          </Form.Item>
-
-          <Form.Item
-            key="district"
-            name={"district"}
-            label={"District"}
-            className="no-margin-form"
-            rules={[
-              {
-                message: requiredMessage("District"),
-                required: true,
-              }
-            ]}
-          >
-            <InputComponent disabled />
-          </Form.Item>
-
-          <Form.Item
-            key="city"
-            name={"city"}
-            label={"City"}
-            className="no-margin-form"
-            rules={[
-              {
-                message: requiredMessage("City"),
-                required: true,
-              }
-            ]}
-          >
-            <InputComponent disabled />
-          </Form.Item>
-
-          <Form.Item
-            key="country"
-            name={"country"}
-            label={"Country"}
-            className="no-margin-form"
-            rules={[
-              {
-                message: requiredMessage("Country"),
-                required: true,
-              }
-            ]}
-          >
-            <InputComponent disabled />
-          </Form.Item>
-
-          <Form.Item
-            key="longitude"
-            name={"longitude"}
-            label={"Longitude"}
-            className="no-margin-form"
-            rules={[
-              {
-                message: requiredMessage("Longitude"),
-                required: true,
-              }
-            ]}
-          >
-            <InputComponent disabled />
-          </Form.Item>
-
-          <Form.Item
-            key="latitude"
-            name={"latitude"}
-            label={"Latitude"}
-            className="no-margin-form"
-            rules={[
-              {
-                message: requiredMessage("Latitude"),
-                required: true,
-              }
-            ]}
-          >
-            <InputComponent disabled />
-          </Form.Item>
-        </div>
-
+  if (!formView) {
+    return (
+      <div className="w-full flex flex-col gap-4">
         <div className="w-full grid grid-cols-3 gap-4">
-          <Form.Item
-            key="startDate"
-            name={"startDate"}
-            label={"Start Date"}
-            rules={[
-              {
-                message: requiredMessage("Start Date"),
-                required: true,
-              },
-            ]}
-            className="no-margin-form"
-            getValueProps={(dateString) => ({
-              value: dateString ? moment(dateString, dateFormatting.dateForm) : null
-            })}
-          >
-            <DateComponent />
-          </Form.Item>
-
-          <Form.Item
-            key="endDate"
-            name={"endDate"}
-            label={"End Date"}
-            className="no-margin-form"
-            getValueProps={(dateString) => ({
-              value: dateString ? moment(dateString, dateFormatting.dateForm) : null
-            })}
-          >
-            <DateComponent />
-          </Form.Item>
+          <NxDetailText label="Account">{account}</NxDetailText>
+          <NxDetailText label="Account SOR">{accountSor}</NxDetailText>
+          <NxDetailText label="Account Cost Center">
+            {accountCostCenter}
+          </NxDetailText>
+          <NxDetailText label="Meter Reading Code">
+            {meterReadingCode}
+          </NxDetailText>
+          <NxDetailText label="Account Segment">{accountSegment}</NxDetailText>
+          <NxDetailText label="Account Group Type">
+            {accountGroupType}
+          </NxDetailText>
+          <NxDetailText label="Account Type">{accountType}</NxDetailText>
+          <NxDetailText label="Premise Address">{premiseAddress}</NxDetailText>
+          <NxDetailText label="Subdistrict">{subDistrict}</NxDetailText>
+          <NxDetailText label="District">{district}</NxDetailText>
+          <NxDetailText label="City">{city}</NxDetailText>
+          <NxDetailText label="Province">{province}</NxDetailText>
+          <NxDetailText label="Country">{country}</NxDetailText>
+          <NxDetailText label="Longitude">{longitude}</NxDetailText>
+          <NxDetailText label="Latitude">{latitude}</NxDetailText>
+          <NxDetailText label="Start Date">
+            {NxDate.formatDate(startDate, dateFormatting.date)}
+          </NxDetailText>
+          <NxDetailText label="End Date">
+            {NxDate.formatDate(endDate, dateFormatting.date)}
+          </NxDetailText>
         </div>
-
-        <div className="w-full my-5">
-          <Form.Item
-            key="description"
-            name={"description"}
-            label={"Description"}
-            className="no-margin-form"
-          >
-            <InputComponent
-              type={"textarea"}
-              rows={4}
-              placeholder="Asset meter baru PGN"
-              maxLength={255}
-            />
-          </Form.Item>
+        <div className="w-full">
+          <NxDetailText label="Description">{description}</NxDetailText>
         </div>
-      </NxCardContainer>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-y-4">
+      <div className="w-full grid grid-cols-3 gap-4">
+        <Form.Item label={"Account"} required className="no-margin-form">
+          <div className="flex gap-x-1">
+            <Form.Item
+              key="account"
+              name={"account"}
+              rules={[
+                {
+                  message: requiredMessage("Account"),
+                  required: true
+                }
+              ]}
+              noStyle
+            >
+              <InputComponent disabled />
+            </Form.Item>
+            <Button
+              type="submit"
+              onClick={() => {
+                setIsOpen(true);
+              }}
+              className="w-[120px]"
+              disabled={!isDraft && isUpdate}
+            >
+              Select
+            </Button>
+          </div>
+        </Form.Item>
+
+        <Form.Item
+          key="accountSor"
+          name={"accountSor"}
+          label={"Account SOR"}
+          className="no-margin-form"
+        >
+          <InputComponent disabled />
+        </Form.Item>
+
+        <Form.Item
+          key="accountCostCenter"
+          name={"accountCostCenter"}
+          label={"Account Cost Center"}
+          className="no-margin-form"
+        >
+          <InputComponent disabled />
+        </Form.Item>
+
+        <Form.Item
+          key="meterReadingCode"
+          name={"meterReadingCode"}
+          label={"Meter Reading Code"}
+          className="no-margin-form"
+        >
+          <InputComponent disabled />
+        </Form.Item>
+
+        <Form.Item
+          key="accountSegment"
+          name={"accountSegment"}
+          label={"Account Segment"}
+          className="no-margin-form"
+        >
+          <InputComponent disabled />
+        </Form.Item>
+
+        <Form.Item
+          key="accountGroupType"
+          name={"accountGroupType"}
+          label={"Account Group Type"}
+          className="no-margin-form"
+        >
+          <InputComponent disabled />
+        </Form.Item>
+
+        <Form.Item
+          key="accountType"
+          name={"accountType"}
+          label={"Account Type"}
+          className="no-margin-form"
+        >
+          <InputComponent disabled />
+        </Form.Item>
+
+        <Form.Item
+          key="premiseAddress"
+          name={"premiseAddress"}
+          label={"Premise Address"}
+          className="no-margin-form"
+        >
+          <InputComponent disabled />
+        </Form.Item>
+
+        <Form.Item
+          key="subDistrict"
+          name={"subDistrict"}
+          label={"Subdistrict"}
+          className="no-margin-form"
+        >
+          <InputComponent disabled />
+        </Form.Item>
+
+        <Form.Item
+          key="district"
+          name={"district"}
+          label={"District"}
+          className="no-margin-form"
+        >
+          <InputComponent disabled />
+        </Form.Item>
+
+        <Form.Item
+          key="city"
+          name={"city"}
+          label={"City"}
+          className="no-margin-form"
+        >
+          <InputComponent disabled />
+        </Form.Item>
+
+        <Form.Item
+          key="province"
+          name={"province"}
+          label={"Province"}
+          className="no-margin-form"
+        >
+          <InputComponent disabled />
+        </Form.Item>
+
+        <Form.Item
+          key="country"
+          name={"country"}
+          label={"Country"}
+          className="no-margin-form"
+        >
+          <InputComponent disabled />
+        </Form.Item>
+
+        <Form.Item
+          key="longitude"
+          name={"longitude"}
+          label={"Longitude"}
+          className="no-margin-form"
+        >
+          <InputComponent disabled />
+        </Form.Item>
+
+        <Form.Item
+          key="latitude"
+          name={"latitude"}
+          label={"Latitude"}
+          className="no-margin-form"
+        >
+          <InputComponent disabled />
+        </Form.Item>
+        <Form.Item
+          key="startDate"
+          name={"startDate"}
+          label={"Start Date"}
+          rules={[
+            {
+              message: requiredMessage("Start Date"),
+              required: true
+            }
+          ]}
+          className="no-margin-form"
+          getValueProps={(value) => ({
+            value: value && moment(value)
+          })}
+        >
+          <NxDate
+            disabled={!isDraft && isUpdate}
+            onChange={date => {
+              if (date && endDate && date.isAfter(endDate, "day"))
+                form.resetFields(["endDate"])
+            }}
+          />
+        </Form.Item>
+
+        <Form.Item
+          key="endDate"
+          name={"endDate"}
+          label={"End Date"}
+          className="no-margin-form"
+          getValueProps={(value) => ({
+            value: value && moment(value)
+          })}
+        >
+          <NxDate
+            dateDisable={(current) => {
+              if (!moment.isMoment(current)) return false;
+              return current.isBefore(startDate, "day");
+            }}
+          />
+        </Form.Item>
+      </div>
+
+      <div className="w-full">
+        <Form.Item
+          key="description"
+          name={"description"}
+          label={"Description"}
+          className="no-margin-form"
+        >
+          <InputComponent
+            type={"textarea"}
+            rows={4}
+            maxLength={255}
+            disabled={!isDraft && isUpdate}
+          />
+        </Form.Item>
+      </div>
 
       <NxModal
         isOpen={isOpen}
         handleCancel={handleCancel}
-        handleOk={handleOk}
-        header={"CHOOSE ACCOUNT"}
+        title={"CHOOSE ACCOUNT"}
         width={1100}
         type={"confirmation"}
         footer={[
-          <Button key="close" onClick={handleClose} type="menu">
+          <Button key="close" onClick={handleClose}>
             Close
-          </Button>,
+          </Button>
         ]}
       >
         <div className="p-4">
@@ -457,9 +451,9 @@ export default function InfoMultiDestination({
             <NxTable
               idTable="multi-destination-account-standard"
               dataSource={dataSourceWithKeys}
-              totalData={pagination_mdAccountStandard.totalElements || 0}
+              totalData={pagination_listMdAccount.totalElement || 0}
               current={page}
-              tableScrolled={{ y: 525, x: 3000 }}
+              tableScrolled={{ x: 3000 }}
               onSort={onSort}
               columns={allColumns}
               usePagination={false}
@@ -468,10 +462,11 @@ export default function InfoMultiDestination({
               onLoadMore={handleLoadMore}
               loadMoreThreshold={20}
               columnDefinitions={columnDefinitions}
+              loading={loading_listMdAccount}
             />
           </NxBaseContainer>
         </div>
       </NxModal>
     </div>
-  )
+  );
 }

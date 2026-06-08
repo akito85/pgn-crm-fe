@@ -1,11 +1,9 @@
 import { LeftOutlined, WarningOutlined } from "@ant-design/icons";
 import { Form, Spin } from "antd";
 import React, { useEffect, useState } from "react";
-import BaseContainer from "../../../../../../components/BaseContainer";
 import BreadCrumb from "../../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import InputComponent from "../../../../../../components/InputComponent";
-import LayoutMenu from "../../../../../../components/SidebarMenu/LayoutMenu";
 import { RBI_ROUTES } from "../../../../../../routes/rating_billing/rbi_routes";
 import { formMessageRequired } from "../../../../../../utils";
 import SVGIcon from "../../../../../../assets/Icon/index";
@@ -21,6 +19,7 @@ import {
 import ModalCustom from "../../../../../../components/Modal/ModalCustom";
 import { validateCreateUpdate } from "../../../../../../redux/slices/general_slice";
 import ratingBillingHttpService from "../../../../../../redux/services/ratingBillingHttpService";
+import CardContainer from "../../../../../../components/CardContainer";
 
 const RateTypeCreate = ({ type }) => {
   const [form] = Form.useForm();
@@ -57,10 +56,10 @@ const RateTypeCreate = ({ type }) => {
     },
     {
       path: RBI_ROUTES.DAILY_RATE_VIEW,
-      breadcrumbName: "Daily Rate",
+      breadcrumbName: "Rate Type List",
     },
     {
-      path: RBI_ROUTES.DAILY_RATE_CREATE,
+      path: "",
       breadcrumbName: `${type === "create" ? "Create" : "Update"} Rate Type`,
     },
   ];
@@ -111,7 +110,7 @@ const RateTypeCreate = ({ type }) => {
           services: ratingBillingHttpService,
           endPoint: url,
           type: type,
-        })
+        }),
       )?.unwrap();
       return true;
     } catch (error) {
@@ -158,18 +157,18 @@ const RateTypeCreate = ({ type }) => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
       <Spin spinning={loading}>
         <Form layout="vertical" form={form} onFinish={handleSubmitForm}>
-          <BaseContainer header={"Rate Type Information"}>
+          <CardContainer header={"Rate Type Information"}>
             <div className="w-1/2">
               <Form.Item
                 label="Code"
                 name={"code"}
                 rules={formMessageRequired("Code")}
               >
-                <InputComponent maxLength={100}/>
+                <InputComponent maxLength={100} />
               </Form.Item>
             </div>
             <Form.Item
@@ -179,22 +178,10 @@ const RateTypeCreate = ({ type }) => {
             >
               <InputComponent rows={5} type="textarea" />
             </Form.Item>
-          </BaseContainer>
+          </CardContainer>
 
           <div className="flex w-full justify-between align-middle my-3">
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => handleBack()}
-              icon={
-                <LeftOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 24,
-                    justifyItems: "center",
-                  }}
-                />
-              }
-            >
+            <ButtonComponent type={"submit"} onClick={() => handleBack()}>
               Back
             </ButtonComponent>
             <div className="flex align-middle gap-3">
@@ -280,7 +267,7 @@ const RateTypeCreate = ({ type }) => {
           </p>
         </div>
       </ModalConfirm>
-    </LayoutMenu>
+    </>
   );
 };
 

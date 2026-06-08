@@ -1,135 +1,265 @@
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../routes/account_management/customer_account_routes";
 import { useColumnActionPermission } from "../../../../../../components/ColumnActionPermission";
 import Toolbar from "../../../../../../components/Toolbar";
 import NxTable from "../../../../../../components/Nx/NxTable";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { getMultiDestinationColumns } from "./getMultiDestinationColumns";
 import { nxGetAccountActions } from "../../../../../../components/Nx/NxGetAccountActions";
-import { nxApplyFixedColumns } from "../../../../../../utils/Nx/nxApplyFixedColumns";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  getMultiDestinations,
+  downloadMultiDestination
+} from "../../../../../../redux/slices/account_management/detailAccount/MultiDestinationSlice";
 
+/**
+ * Multi destination list table (container + presentational component).
+ * Owns search, pagination, sort, filter, and download state/logic.
+ * The parent (`MultiDestination`) is responsible only for modals and permissions.
+ *
+ * @param {object}   props
+ * @param {number}   [props.accountId=0]                  - Account ID
+ * @param {number}   [props.customerId=0]                 - Customer ID
+ * @param {Function} [props.handleInactivateModal]        - Opens the inactivate confirmation modal
+ * @param {Function} [props.handleApprovalHistoryModal]   - Opens the approval history modal
+ * @param {Function} [props.handleApproval]               - Triggers the approval action
+ * @param {number}   [props.refreshSignal=0]              - Increment to trigger a page-0 refresh from the parent
+ */
 const MultiDestinationTable = ({
-  data = [],
-  idAccount = 0,
-  idCustomer = 0,
-  totalElement = 0,
-  page = 0,
-  onSort = () => {},
+  accountId,
+  customerId,
   handleInactivateModal = () => {},
   handleApprovalHistoryModal = () => {},
   handleApproval = () => {},
-  handleDownload = () => {},
-  handleLoadMore = () => {},
-  hasMore = false,
-  searchText = "",
-  search = "",
-  searchedColumn = {},
-  searchInput = "",
-  handleSearch = () => {},
-  loading = false,
+  refreshSignal = 0,
 }) => {
+  // --- Hooks ---
+  const location = useLocation();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const {
+    list_multiDestination: dataSource,
+    pagination_listMd: pagination,
+    loading_listMd: loading,
+  } = useSelector((state) => state.multiDestination);
 
+  // --- Derived values ---
+  const isStandard = location.pathname.includes("account-standard");
+  const isOneTime = location.pathname.includes("account-onetime");
+
+  const totalElement = pagination.totalElement;
+  const hasMore = dataSource.length < (totalElement || 0);
+
+  // --- State ---
+  const searchInput = useRef(null);
+  const [page, setPage] = useState(0);
+  const [loadMoreSize] = useState(20);
+  const [searchedColumn, setSearchedColumn] = useState("");
+  const [searchText, setSearchText] = useState("");
+  const [sort, setSort] = useState("");
+  const [search, setSearch] = useState({});
+  const [filters, setFilters] = useState([]);
+  const [filterRules, setFilterRules] = useState([]);
+
+  // --- Handlers ---
+  const handleRefresh = () => {
+    const body = {
+      page: 0,
+      size: loadMoreSize,
+      sort,
+      searchs: search,
+      filters,
+      filterRules,
+    };
+
+    dispatch(getMultiDestinations({ id: accountId, body, isLoadMore: false }));
+    setPage(0);
+  };
+
+  /**
+   * @param {string[]} selectedKeys
+   * @param {() => {}} confirm
+   * @param {string} dataIndex
+   */
+  const handleSearch = (selectedKeys, confirm, dataIndex) => {
+    confirm();
+    setSearchText(selectedKeys[0]);
+    setSearchedColumn(dataIndex);
+    setSearch((prevState) => {
+      if (prevState[dataIndex] !== selectedKeys[0]) {
+        setPage(0);
+      }
+      return {
+        ...prevState,
+        [dataIndex]: selectedKeys[0],
+      };
+    });
+  };
+
+  /**
+   * @param {*} _
+   * @param {*} __
+   * @param {import("antd/lib/table/interface").SorterResult} sort
+   */
+  const onSort = (_, __, sort) => {
+    const dataSort = sort.order
+      ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
+      : "";
+    setSort(dataSort);
+  };
+
+  /**
+   * Loads the next page of records and appends them to the existing list.
+   */
+  const handleLoadMore = async () => {
+    const nextPage = page + 1;
+    const totalPage = pagination.totalPage || 0;
+
+    if (nextPage <= totalPage) {
+      const body = {
+        page: nextPage,
+        size: loadMoreSize,
+        sort,
+        searchs: search,
+        filters,
+        filterRules,
+      };
+
+      await dispatch(
+        getMultiDestinations({ id: accountId, body, isLoadMore: true })
+      ).unwrap();
+    }
+    setPage(nextPage);
+  };
+
+  /**
+   * Dispatches a download action for the current filtered/sorted view.
+   */
+  const handleDownload = () => {
+    const body = {
+      sort,
+      filters,
+      filterRules,
+      searchs: search,
+    };
+
+    dispatch(downloadMultiDestination({ body, id: accountId }));
+  };
+
+  // --- Effects ---
+  // Re-fetch page 0 whenever sort or search changes.
+  useEffect(() => {
+    const body = {
+      page: 0,
+      size: loadMoreSize,
+      sort,
+      searchs: search,
+      filters,
+      filterRules,
+    };
+
+    setPage(0);
+    dispatch(getMultiDestinations({ id: accountId, body, isLoadMore: false }));
+  }, [sort, search, filters, filterRules]);
+
+  // Trigger a page-0 refresh when the parent signals it (e.g. after inactivate/approval).
+  useEffect(() => {
+    if (refreshSignal > 0) handleRefresh();
+  }, [refreshSignal]);
+
+  // --- Column configuration ---
   const itemActions = nxGetAccountActions({
-    idAccount,
-    idCustomer,
-    handleView: (id) => navigate(
-      ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_MULTI_DESTINATION,
+    handleView: ({ id }) => navigate(
+      isStandard ?
+        ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_MULTI_DESTINATION :
+      isOneTime ?
+        ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_MULTI_DESTINATION_ONETIME :
+        "",
       {
         state: {
-          idAccount,
-          idCustomer,
+          idAccount: accountId,
+          idCustomer: customerId,
           id,
         }
       }
     ),
     handleCreate: () => navigate(
-      ACCOUNT_MANAGEMENT_ROUTES.CREATE_MULTI_DESTINATION,
+      isStandard ?
+        ACCOUNT_MANAGEMENT_ROUTES.CREATE_MULTI_DESTINATION :
+      isOneTime ?
+        ACCOUNT_MANAGEMENT_ROUTES.CREATE_MULTI_DESTINATION_ONETIME :
+        "",
       {
         state: {
-          idAccount,
-          idCustomer,
+          idAccount: accountId,
+          idCustomer: customerId,
         }
       }
     ),
-    handleUpdate: (id) => navigate(
-      ACCOUNT_MANAGEMENT_ROUTES.UPDATE_MULTI_DESTINATION,
+    handleUpdate: ({ id, status, statusApproval }) => navigate(
+      isStandard ?
+        ACCOUNT_MANAGEMENT_ROUTES.UPDATE_MULTI_DESTINATION :
+      isOneTime ?
+        ACCOUNT_MANAGEMENT_ROUTES.UPDATE_MULTI_DESTINATION_ONETIME :
+        "",
       {
         state: {
-          idAccount,
-          idCustomer,
+          idAccount: accountId,
+          idCustomer: customerId,
           id,
+          status,
+          statusApproval,
         }
       }
     ),
     handleApproval,
-    handleApprovalHistory: (id) => handleApprovalHistoryModal(true, id),
+    handleApprovalHistory: ({ id }) => handleApprovalHistoryModal(true, id),
     handleDownload,
-    handleInactivate: handleInactivateModal,
-    idKey: "idMd",
+    handleInactivate: ({ id, accountNumber }) => handleInactivateModal(true, id, accountNumber),
   });
-
-  const [fixedColumns, setFixedColumns] = useState(() => ({
-    right: ["statusApproval", "status", "action"],
-    left: [],
-  }));
 
   const actionCols = useColumnActionPermission(["Inactivate", "View", "Update", "History"], itemActions, "View", "table").map(
     (col) => ({
       ...col,
       width: 70,
       align: "center",
+      fixed: "right",
     })
   );
 
   const baseColumns = useMemo(() =>
-    getMultiDestinationColumns(
+    getMultiDestinationColumns({
       search,
       searchInput,
       searchedColumn,
       searchText,
       handleSearch
-    ),
+    }),
   [search, searchText, searchedColumn]);
 
-  const allColumns = useMemo(() => {
-    const columnsWithKeys = [...baseColumns, ...actionCols].map((col) => ({
+  const columns = useMemo(() => {
+    return [...baseColumns, ...actionCols].map((col) => ({
       ...col,
       key: col.key || col.dataIndex || col.title,
     }));
-    return columnsWithKeys;
   }, [baseColumns, actionCols]);
-
-  const processedColumns = useMemo(() => {
-    return nxApplyFixedColumns(allColumns, fixedColumns);
-  }, [allColumns, fixedColumns]);
-
-  const columnDefinitions = useMemo(() => {
-    return allColumns.map((col) => ({
-      key: col.key || col.dataIndex || col.title,
-      title: col.title,
-    }));
-  }, [allColumns]);
 
   return (
     <div className="flex flex-col gap-y-4">
       <Toolbar items={itemActions} type="detail" />
       <NxTable
         idTable="multi-destination-table"
-        dataSource={data}
+        dataSource={dataSource}
         totalData={totalElement}
         current={page}
-        tableScrolled={{ y: 400, x: data.length ? "max-content" : 4000 }}
+        tableScrolled={{ x: dataSource.length ? "max-content" : 4000 }}
         onSort={onSort}
-        columns={processedColumns}
+        columns={columns}
         usePagination={false}
         useInfiniteScroll={true}
         hasMore={hasMore}
         onLoadMore={handleLoadMore}
         loadMoreThreshold={20}
-        fixedColumns={fixedColumns}
-        setFixedColumns={setFixedColumns}
-        columnDefinitions={columnDefinitions}
         loading={loading}
       />
     </div>

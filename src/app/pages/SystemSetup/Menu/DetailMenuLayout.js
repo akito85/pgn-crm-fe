@@ -3,6 +3,7 @@ import DetailText from "../../../../components/DetailText";
 import moment from "moment";
 import { hasValue, toTitleCase } from "../../../../utils";
 import CardComponent from "../../../../components/Card/CardComponent";
+import SVGIcon from "../../../../assets/Icon/index";
 
 const DetailMenuLayout = ({ data_detail }) => {
   const loopAction = (data) => {
@@ -33,6 +34,14 @@ const DetailMenuLayout = ({ data_detail }) => {
         <DetailText label={"Description"}>
           {data_detail?.data?.description}
         </DetailText>
+        {data_detail?.data?.icon && (
+          <DetailText label={"Icon"}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <SVGIcon name={data_detail?.data?.icon} width={20} />
+              <span>{data_detail?.data?.icon}</span>
+            </div>
+          </DetailText>
+        )}
       </CardComponent>
 
       <CardComponent header={"HISTORY LOG INFORMATION"} cols={5}>

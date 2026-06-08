@@ -1,6 +1,5 @@
 import { LeftOutlined } from "@ant-design/icons";
 import React, { useEffect, useState } from "react";
-import LayoutMenu from "../../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../../../components/BreadCrumb";
 import RadioTabs from "../../../../../../components/RadioTabs";
 import moment from "moment";
@@ -10,6 +9,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   approveOrRejectInactiveBillingCycle,
+  approveOrRejectActivatedBillingCycle,
   approveRejectBillingCycle,
   getInfoDetail,
   getInfoDetailDraft,
@@ -41,7 +41,7 @@ const BillingCycleDetail = ({ type }) => {
   const [modalErrorServer, setModalErrorServer] = useState(false);
 
   const [modalConfirm, setModalConfirm] = useState(false);
-  
+
   const [bodyError, setBodyError] = useState({});
   const [billingCycleSection, setBillingCycleSection] = useState([
     { value: "Billing Cycle" },
@@ -153,6 +153,10 @@ const BillingCycleDetail = ({ type }) => {
 
   const showButtonApproval =
     bodyApproval.isApprover !== null && bodyApproval.isApprover;
+  const isInactiveApproval =
+    bodyApproval.approvalType === "INACTIVE_BILLING_CYCLE";
+  const isActivatedApproval =
+    bodyApproval.approvalType === "ACTIVATED_BILLING_CYCLE";
 
   const routes = [
     {
@@ -174,7 +178,6 @@ const BillingCycleDetail = ({ type }) => {
   ];
 
   const handleConfirm = (res, handleClear) => {
-    setModalConfirm(false);
     const data = {
       id: id,
       remark: res.remark,
@@ -182,17 +185,22 @@ const BillingCycleDetail = ({ type }) => {
       action: approveOrReject.toUpperCase(),
     };
 
-    dispatch(
-      bodyApproval.approvalType === "INACTIVE_BILLING_CYCLE"
-        ? approveOrRejectInactiveBillingCycle({
-            body: data,
-          })
+    const approvalAction = isInactiveApproval
+      ? approveOrRejectInactiveBillingCycle({
+        body: data,
+      })
+      : isActivatedApproval
+        ? approveOrRejectActivatedBillingCycle({
+          body: data,
+        })
         : approveRejectBillingCycle({
-            body: data,
-          })
-    )
+          body: data,
+        });
+
+    return dispatch(approvalAction)
       .unwrap()
       .then(() => {
+        setModalConfirm(false);
         handleClear();
         dispatch(getInfoDetail(id));
         dispatch(getInfoDetailDraft(id));
@@ -270,19 +278,22 @@ const BillingCycleDetail = ({ type }) => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
       <div className="flex flex-col w-full gap-4">
         {bodyApproval.isApprover &&
           bodyApproval.approvalType &&
-          bodyApproval.approvalType === "INACTIVE_BILLING_CYCLE" && (
-            <BaseContainer header={"inactive request information"}>
+          (isInactiveApproval || isActivatedApproval) && (
+            <BaseContainer
+              header={`${isActivatedApproval ? "activate" : "inactive"
+                } request information`}
+            >
               <div className="w-full grid grid-cols-4 gap-3">
                 <DetailText label={"Requested Date"}>
                   {bodyApproval?.approvalDetail?.requestedDate
                     ? moment(
-                        bodyApproval?.approvalDetail?.requestedDate
-                      ).format(dateFormatting.date)
+                      bodyApproval?.approvalDetail?.requestedDate
+                    ).format(dateFormatting.date)
                     : ""}
                 </DetailText>
                 <DetailText label={"Requested By"}>
@@ -365,13 +376,12 @@ const BillingCycleDetail = ({ type }) => {
             <SVGIcon name="IconFailed" width={48} />
             <p className="text-[18px] font-bold">{"Failed"}</p>
           </div>
-          <p className="pl-[70px]">{`Your data was not ${
-            approveOrReject === "Approve" ? "Approved" : "Rejected"
-          }. ${bodyError.message}.`}</p>
+          <p className="pl-[70px]">{`Your data was not ${approveOrReject === "Approve" ? "Approved" : "Rejected"
+            }. ${bodyError.message}.`}</p>
           <p className="pl-[70px]">Please try again.</p>
         </div>
       </ModalError>
-    </LayoutMenu>
+    </>
   );
 };
 

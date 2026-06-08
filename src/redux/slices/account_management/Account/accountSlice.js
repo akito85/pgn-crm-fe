@@ -734,9 +734,9 @@ const accountSlice = createSlice({
   initialState,
   extraReducers: {
     // Get All Standard Pagination
-    [getAllAccountStandardPaginate.pending]: (state, action) => {
+    [getAllAccountStandardPaginate.pending]: (state) => {
       state.loading = true;
-      state.data_accountStandard = action.payload;
+      // Do NOT wipe data_accountStandard here — infinite scroll appends to it
     },
     [getAllAccountStandardPaginate.fulfilled]: (state, action) => {
       state.loading = false;

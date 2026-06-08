@@ -13,7 +13,6 @@ import { useNavigate } from "react-router-dom";
 import BaseContainer from "../../../../components/BaseContainer";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import InputComponent from "../../../../components/InputComponent";
 import { USER_ROUTES } from "../../../../routes/user_management/user_routes";
 import { bytesConverter } from "../../../../utils/bytesConverter";
@@ -56,34 +55,22 @@ const UploadUser = () => {
             key: (index + 1).toString(),
             userName: item?.userName,
             authType: item?.authType,
-            authTypeId: parseInt(item?.authTypeId),
+            authTypeId: item?.authTypeValue,
             employeeName: item?.employeeName,
-            employee: item?.employee === "" ? null : parseInt(item?.employee),
+            employee: (n => Number.isFinite(n) ? n : null)(parseInt(item?.employee)),
             userType: item?.userType,
-            userTypeId: parseInt(item?.userTypeId),
+            userTypeId: item?.userTypeValue,
             userLevel: item?.userLevel,
-            userLevelId: item?.userLevelId,
+            userLevelId: item?.userLevelValue,
             email: item?.email,
             phone: item?.phoneNumber,
             groupAccess: item?.groupAccess,
             groupAccessId: parseInt(item?.groupAccessId),
             status: item?.status,
-            startDate:
-              item?.startDate === "" || null
-                ? moment()
-                : moment(item?.startDate).clone(),
-            endDate:
-              item?.endDate === "" || null
-                ? moment()
-                : moment(item?.endDate).clone(),
-            startDateGa:
-              item?.startDate === "" || null
-                ? moment()
-                : moment(item?.startDateGa).clone(),
-            endDateGa:
-              item?.endDate === "" || null
-                ? moment()
-                : moment(item?.endDateGa).clone(),
+            startDate: item?.startDate ? moment(item.startDate).format("DD MMM YYYY") : null,
+            endDate: item?.endDate ? moment(item.endDate).format("DD MMM YYYY") : null,
+            startDateGa: item?.startDateGa ? moment(item.startDateGa).format("DD MMM YYYY") : null,
+            endDateGa: item?.endDateGa ? moment(item.endDateGa).format("DD MMM YYYY") : null,
             message: item?.message,
           };
         })
@@ -103,7 +90,6 @@ const UploadUser = () => {
   // handle change file
   const handleFileChange = ({ fileList }) => {
     setFileList(fileList);
-    handleUpload();
   };
 
   // props dragger
@@ -116,9 +102,10 @@ const UploadUser = () => {
     maxCount: 1,
     beforeUpload: async (file) => {
       setFileName(file);
+      handleUpload(file);
       return false;
     },
-    onChange: handleFileChange,
+    onChange: ({ fileList }) => handleFileChange({ fileList }),
     disabled: showListUpload,
   };
 
@@ -148,18 +135,20 @@ const UploadUser = () => {
   };
 
   // handle upload
-  const handleUpload = async () => {
+  const handleUpload = async (fileToUpload) => {
+    const uploadFile = fileToUpload || fileName;
+    if (!uploadFile) return;
     try {
       setFileProgress(0);
       const body = {
-        image: fileName,
+        image: uploadFile,
         onProgress: (progress) => setFileProgress(progress),
       };
       await dispatch(uploadUser(body)).unwrap();
     } catch (error) {
       setFileList((prevFileList) =>
         prevFileList.map((file) => {
-          if (file.name === fileName.name) {
+          if (file.name === uploadFile.name) {
             return { ...file, status: "error" };
           }
           return file;
@@ -188,13 +177,12 @@ const UploadUser = () => {
           return {
             userName: item?.userName?.toString(),
             authType: item?.authType?.toString(),
-            authTypeId: item?.authTypeId?.toString(),
-            employeeName: item?.employeeName?.toString(),
+            authTypeValue: item?.authTypeId?.toString(),
             employee: item?.employee === null ? "" : item?.employee?.toString(),
             userType: item?.userType?.toString(),
-            userTypeId: item?.userTypeId?.toString(),
+            userTypeValue: item?.userTypeId?.toString(),
             userLevel: item?.userLevel?.toString(),
-            userLevelId: item?.userLevelId?.toString(),
+            userLevelValue: item?.userLevelId?.toString(),
             email: item?.email?.toString(),
             phoneNumber: item?.phone?.toString(),
             groupAccess:
@@ -205,18 +193,10 @@ const UploadUser = () => {
               typeof item?.groupAccess === "string"
                 ? item?.groupAccessId?.toString()
                 : item?.groupAccess?.toString(),
-            endDate: moment(item?.endDate).isValid()
-              ? moment(item?.endDate).format(dateFormatting.dateFormal)
-              : moment(),
-            startDate: moment(item?.startDate).isValid()
-              ? moment(item?.startDate).format(dateFormatting.dateFormal)
-              : moment(),
-            endDateGa: moment(item?.endDateGa).isValid()
-              ? moment(item?.endDateGa).format(dateFormatting.dateFormal)
-              : moment(),
-            startDateGa: moment(item?.endDateGa).isValid()
-              ? moment(item?.startDateGa).format(dateFormatting.dateFormal)
-              : moment(),
+            endDate: item?.endDate ? moment(item.endDate, "DD MMM YYYY").format(dateFormatting.dateCapital) : null,
+            startDate: item?.startDate ? moment(item.startDate, "DD MMM YYYY").format(dateFormatting.dateCapital) : null,
+            endDateGa: item?.endDateGa ? moment(item.endDateGa, "DD MMM YYYY").format(dateFormatting.dateCapital) : null,
+            startDateGa: item?.startDateGa ? moment(item.startDateGa, "DD MMM YYYY").format(dateFormatting.dateCapital) : null,
           };
         });
         await dispatch(finalUploadUser(body)).unwrap();
@@ -252,7 +232,7 @@ const UploadUser = () => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <div className={"w-full flex justify-end"}>
@@ -403,7 +383,7 @@ const UploadUser = () => {
           </div>
         </ModalConfirm>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

@@ -1,5 +1,4 @@
 import { Button, Checkbox, Tooltip } from "antd";
-import ButtonComponent from "../ButtonComponent";
 import SVGIcon from "../../assets/Icon/index";
 import { Fragment } from "react";
 
@@ -9,9 +8,14 @@ const nxGetAccountActions = ({
   handleView = () => {},
   handleApproval = () => {},
   handleDownload = () => {},
+  handleActivate = () => {},
   handleInactivate = () => {},
   handleApprovalHistory = () => {},
-  handleDelete = () => {},
+  handleRecalculate = () => {},
+  handleExpire = () => {},
+  handleBulkRecalculate = () => {},
+  handleBulkExpire = () => {},
+  handleDelete = () => {}
 }) => [
   {
     action: "Download",
@@ -51,75 +55,146 @@ const nxGetAccountActions = ({
     )
   },
   {
-    action: 'View',
-    type: 'table',
+    action: "Bulk-Recalculate",
+    render: (
+      <Button
+        type={"submit"}
+        border={false}
+        onClick={handleBulkRecalculate}
+      >
+        Recalculate
+      </Button>
+    )
+  },
+  {
+    action: "Bulk-Expire",
+    render: (
+      <Button
+        type={"submit"}
+        border={false}
+        onClick={handleBulkExpire}
+      >
+        Expire
+      </Button>
+    )
+  },
+  {
+    action: "View",
+    type: "table",
     render: (record, actionLength, index) => {
       return (
-        <Tooltip
-          title="View"
-          key={`table-action-${index}`}
-          >
+        <Tooltip title="View" key={`table-action-${index}`}>
           <Button
-            onClick={() => handleView(record.id)}
+            onClick={() =>
+              handleView(record)
+            }
             type="table-action"
           >
             <SVGIcon name="IconDetail" width={20} />
           </Button>
         </Tooltip>
-      )
+      );
     }
   },
   {
-    action: 'Update',
-    type: 'table',
+    action: "Update",
+    type: "table",
     render: (record, actionLength, index) => {
       const isEditable =
         record.status !== "INACTIVE" &&
         record.statusApproval !== "WAITING_APPROVAL" &&
         record.statusApproval !== "WAITING_FOR_APPROVAL";
 
-      const content = actionLength > 3 ?
-        (
-          <ButtonComponent
-            icon={<SVGIcon name="IconEdit" className="text-black group-hover:text-[#0075BF] group-disabled:text-[#BDBDBD] transition-colors duration-300 ease-in-out" width={20} />}
-            border={false}
-            disabled={!isEditable}
-            onClick={() => handleUpdate(record.id)}
-            type={"action"}
-            className="group"
-          >
-            <span className={"text-black ml-3"}>Update</span>
-          </ButtonComponent>
-        ) : (
-          <Tooltip title={isEditable ? "Update" : ""} key={`table-action-${index}`}>
-            <Button
-              onClick={() => handleUpdate(record.id)}
-              disabled={!isEditable}
-              type="table-action"
-            >
+      const content =
+        actionLength > 3 ? (
+          <Button
+            icon={
               <SVGIcon
                 name="IconEdit"
                 width={20}
               />
+            }
+            disabled={!isEditable}
+            onClick={() =>
+              handleUpdate(record)
+            }
+            type={"action"}
+          >
+            Update
+          </Button>
+        ) : (
+          <Tooltip
+            title={isEditable ? "Update" : ""}
+            key={`table-action-${index}`}
+          >
+            <Button
+              onClick={() =>
+                handleUpdate(record)
+              }
+              disabled={!isEditable}
+              type="table-action"
+            >
+              <SVGIcon name="IconEdit" width={20} />
             </Button>
           </Tooltip>
         );
 
-      return (
-        <Fragment key={`table-action-${index}`}>{content}</Fragment>
-      )
+      return <Fragment key={`table-action-${index}`}>{content}</Fragment>;
     }
   },
   {
-    action: 'Inactivate',
-    type: 'table',
+    action: "Activate",
+    type: "table",
     render: (record, actionLength, index) => {
       const isInactive = record.status === "INACTIVE";
       const isActive = record.status === "ACTIVE";
 
-      const content = actionLength > 3 ?
-        (
-          <ButtonComponent
+      const content =
+        actionLength > 3 ? (
+          <Button
+            icon={
+              <Checkbox
+                checked={isActive}
+                style={{ transform: "scale(0.9)" }}
+                className="action-checkbox"
+              />
+            }
+            onClick={() =>
+              handleActivate(record)
+            }
+            type={"action"}
+          >
+            Inactivate
+          </Button>
+        ) : (
+          <Tooltip
+            title={isInactive ? "Activate" : ""}
+            key={`table-action-${index}`}
+          >
+            <Checkbox
+              className="action-checkbox"
+              checked={isActive}
+              onClick={() =>
+                handleActivate(record)
+              }
+              style={{ transform: "scale(0.9)" }}
+            />
+          </Tooltip>
+        );
+
+      return <Fragment key={`table-action-${index}`}>{content}</Fragment>;
+    }
+  },
+  {
+    action: "Inactivate",
+    type: "table",
+    render: (record, actionLength, index) => {
+      const isInactive = record.status === "INACTIVE";
+      const isActive = record.status === "ACTIVE";
+
+      const content =
+        actionLength > 3 ? (
+          <Button
             icon={
               <Checkbox
                 disabled={!isActive}
@@ -128,13 +203,14 @@ const nxGetAccountActions = ({
                 className="action-checkbox"
               />
             }
-            border={false}
             disabled={!isActive}
-            onClick={() => handleInactivate(true, record?.id, record?.appHierId, record?.relatedAccountNumber)}
+            onClick={() =>
+              handleInactivate(record)
+            }
             type={"action"}
           >
-            <span className={"text-black ml-3"}>Inactivate</span>
-          </ButtonComponent>
+            Inactivate
+          </Button>
         ) : (
           <Tooltip
             title={isActive ? "Inactivate" : ""}
@@ -144,70 +220,140 @@ const nxGetAccountActions = ({
               className="action-checkbox"
               disabled={!isActive}
               checked={isInactive}
-              onClick={() => handleInactivate(true, record?.id, record?.appHierId, record?.relatedAccountNumber)}
+              onClick={() =>
+                handleInactivate(record)
+              }
               style={{ transform: "scale(0.9)" }}
             />
           </Tooltip>
         );
 
-      return <Fragment key={`table-action-${index}`}>{content}</Fragment>
+      return <Fragment key={`table-action-${index}`}>{content}</Fragment>;
     }
   },
   {
-    action: 'History',
-    type: 'table',
+    action: "History",
+    type: "table",
     render: (record, actionLength, index) => {
-      const content = (actionLength > 3) ?
-        (
-          <ButtonComponent
-            icon={
-              <SVGIcon name="IconLogHistory" className="text-black group-hover:text-[#0075BF] group-disabled:text-[#BDBDBD] transition-colors duration-300 ease-in-out" width={20} />
-            }
-            border={false}
-            onClick={() => handleApprovalHistory(record?.id)}
-            type={"action"}
-            className="group"
-          >
-            <span className={"text-black ml-3"}>Approval History</span>
-          </ButtonComponent>
-        ) : (
-          <Tooltip title="Approval History" key={`table-action-${index}`}>
-            <Button
-              onClick={() => handleApprovalHistory(record?.id)}
-              type="table-action"
-            >
+      const content =
+        actionLength > 3 ? (
+          <Button
+            icon= {
               <SVGIcon
                 name="IconLogHistory"
                 width={20}
               />
+            }
+            onClick={() => handleApprovalHistory(record)}
+            type={"action"}
+          >
+            Approval History
+          </Button>
+        ) : (
+          <Tooltip title="Approval History" key={`table-action-${index}`}>
+            <Button
+              onClick={() => handleApprovalHistory(record)}
+              type="table-action"
+            >
+              <SVGIcon name="IconLogHistory" width={20} />
             </Button>
           </Tooltip>
         );
 
-      return <Fragment key={`table-action-${index}`}>{content}</Fragment>
+      return <Fragment key={`table-action-${index}`}>{content}</Fragment>;
     }
   },
   {
-    action: 'Delete',
-    type: 'table',
+    action: "Delete",
+    type: "table",
     render: (record, _, index) => {
       return (
-        <Tooltip
-          title="Delete"
-          key={`table-action-${index}`}
-        >
-          <Button
-            onClick={() => handleDelete(record.id)}
-            type="table-action"
-          >
-            <SVGIcon name="IconDelete" className="text-black group-hover:text-[#0075BF] group-disabled:text-[#BDBDBD] transition-colors duration-300 ease-in-out" width={20} />
+        <Tooltip title="Delete" key={`table-action-${index}`}>
+          <Button onClick={() => handleDelete(record)} type="table-action">
+            <SVGIcon
+              name="IconDelete"
+              className="text-black group-hover:text-[#0075BF] group-disabled:text-[#BDBDBD] transition-colors duration-300 ease-in-out"
+              width={20}
+            />
           </Button>
         </Tooltip>
-      )
+      );
+    }
+  },
+  {
+    action: "Recalculate",
+    type: "table",
+    render: (record, actionLength, index) => {
+      const disabled = ["NEED_TO_RECALCULATE", "NEED_TO_EXPIRE"].includes(record.status);
+
+      const content =
+        actionLength > 3 ? (
+          <Button
+            icon={
+              <SVGIcon
+                name="IconRating"
+                width={20}
+              />
+            }
+            border={false}
+            onClick={() => handleRecalculate(record)}
+            type={"action"}
+            disabled={disabled}
+          >
+            <span className={"text-black ml-3"}>Recalculate</span>
+          </Button>
+        ) : (
+          <Tooltip title="Recalculate" key={`table-action-${index}`}>
+            <Button
+              onClick={() => handleRecalculate(record)}
+              type="table-action"
+              disabled={disabled}
+            >
+              <SVGIcon name="IconRating" width={20} />
+            </Button>
+          </Tooltip>
+        );
+
+      return <Fragment key={`table-action-${index}`}>{content}</Fragment>;
+    }
+  },
+  {
+    action: "Expire",
+    type: "table",
+    render: (record, actionLength, index) => {
+      const disabled = ["NEED_TO_RECALCULATE", "NEED_TO_EXPIRE"].includes(record.status);
+
+      const content =
+        actionLength > 3 ? (
+          <Button
+            icon={
+              <SVGIcon
+                name="IconExpire"
+                width={20}
+              />
+            }
+            border={false}
+            onClick={() => handleExpire(record)}
+            type={"action"}
+            disabled={disabled}
+          >
+            <span className={"text-black ml-3"}>Recalculate</span>
+          </Button>
+        ) : (
+          <Tooltip title="Expire" key={`table-action-${index}`}>
+            <Button
+              onClick={() => handleExpire(record)}
+              type="table-action"
+              disabled={disabled}
+            >
+              <SVGIcon name="IconExpire" width={20} />
+            </Button>
+          </Tooltip>
+        );
+
+      return <Fragment key={`table-action-${index}`}>{content}</Fragment>;
     }
   },
 ];
 
-export {
-  nxGetAccountActions,
-}
+export { nxGetAccountActions };

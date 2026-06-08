@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Form, Select, DatePicker } from "antd";
 import CardContainer from "../../../../../components/CardContainer";
@@ -38,13 +38,38 @@ const EFakturSectionForm = ({
   const [description, setDescription] = useState("");
   const [selectedTaxPeriod, setSelectedTaxPeriod] = useState(null);
 
+  // Ref for debounce
+  const searchTimeoutRef = useRef(null);
+
   // Use Effect
   useEffect(() => {
     dispatch(getListFakturType());
     dispatch(getListTaxPeriod());
-    dispatch(getListFakturCode());
+    dispatch(getListFakturCode(""));
     dispatch(getListCountry());
   }, [dispatch]);
+
+  // Handle Faktur Code Search with debounce
+  const handleFakturCodeSearch = useCallback((value) => {
+    // Clear previous timeout
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    // Set new timeout for debounce (300ms)
+    searchTimeoutRef.current = setTimeout(() => {
+      dispatch(getListFakturCode(value || ""));
+    }, 300);
+  }, [dispatch]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Handle Tax Period Change
   const handleTaxPeriodChange = (value) => {
@@ -127,7 +152,13 @@ const EFakturSectionForm = ({
             style={{ marginBottom: 0 }}
             rules={[{ required: true, message: "Please select Faktur Code!" }]}
           >
-            <SelectComponent placeholder="Select Faktur Code">
+            <SelectComponent
+              placeholder="Select Faktur Code"
+              showSearch
+              onSearch={handleFakturCodeSearch}
+              filterOption={false}
+              notFoundContent={null}
+            >
               {dataListFakturCode &&
                 dataListFakturCode?.map((data, index) => (
                   <Select.Option value={data.value} key={index}>
@@ -205,7 +236,7 @@ const EFakturSectionForm = ({
             ]}
             style={{ marginBottom: 0 }}
           >
-            <InputComponent placeholder={"Customer Name"} />
+            <InputComponent placeholder={"Customer Name..."} />
           </Form.Item>
 
           <Form.Item
@@ -247,29 +278,29 @@ const EFakturSectionForm = ({
               },
             ]}
           >
-            <InputComponent placeholder={"Tax Identification Number"}  maxLength={16}/>
+            <InputComponent placeholder={"Tax Identification Number..."}  maxLength={16}/>
           </Form.Item>
 
           <Form.Item
             label={"NITKU"}
-            name={"npwp"}
+            name={"nitku"}
             style={{ marginBottom: 0 }}
             rules={[
               {
                 required: true,
-                message: "Please input NPWP!",
+                message: "Please input NITKU!",
               },
               {
-                min: 16,
-                message: "NITKU must be at least 16 characters!",
+                min: 22,
+                message: "NITKU must be at least 22 characters!",
               },
               {
-                max: 16,
-                message: "NITKU must not exceed 16 characters!",
+                max: 22,
+                message: "NITKU must not exceed 22 characters!",
               },
             ]}
           >
-            <InputComponent placeholder={"NPWP"}  maxLength={16}/>
+            <InputComponent placeholder={"NITKU..."}  maxLength={22}/>
           </Form.Item>
 
           <div className="col-span-4">

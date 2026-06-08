@@ -35,16 +35,16 @@ const PromoDiscountTable = ({
   const itemActions = nxGetAccountActions(
     {
       handleCreate: () => navigate(PRODUCT_PROMO_ROUTES.CREATE_PROMO_DISCOUNT),
-      handleUpdate: (id) => navigate(PRODUCT_PROMO_ROUTES.UPDATE_PROMO_DISCOUNT, { state: { id } }),
-      handleView: (id) => navigate(PRODUCT_PROMO_ROUTES.DETAIL_PROMO_DISCOUNT,  { state: { id } }),
-      handleInactivate: handleInactive,
-      handleApprovalHistory,
+      handleUpdate: ({ id }) => navigate(PRODUCT_PROMO_ROUTES.UPDATE_PROMO_DISCOUNT, { state: { id } }),
+      handleView: ({ id }) => navigate(PRODUCT_PROMO_ROUTES.DETAIL_PROMO_DISCOUNT,  { state: { id } }),
+      handleInactivate: ({ id }) => handleInactive(true, id),
+      handleApprovalHistory: ({ id }) => handleApprovalHistory(id),
       handleDownload,
     }
   );
 
   const actionCols = useColumnActionPermission(
-    ["View", "Update", "Activate", "History"],
+    ["View", "Update", "Inactivate", "History"],
     itemActions,
     "View",
   ).map((col) => ({

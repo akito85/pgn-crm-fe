@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react';
-import LayoutMenu from '../../../../../components/SidebarMenu/LayoutMenu';
 import BreadCrumb from '../../../../../components/BreadCrumb';
 import { RBI_ROUTES } from '../../../../../routes/rating_billing/rbi_routes';
 import ButtonComponent from '../../../../../components/ButtonComponent';
@@ -44,6 +43,7 @@ const DetailPage = () => {
         },
     ]);
     const [openConfirmation, setOpenConfirmation] = useState(false);
+    const [isDownloadingFailed, setIsDownloadingFailed] = useState(false);
     const [form] = Form.useForm();
     const [dataHeader, setDataHeader] = useState(null);
     const [dataTable, setDataTable] = useState([]);
@@ -119,6 +119,7 @@ const DetailPage = () => {
     }
 
     const handleDownloadFailed = () => {
+        setIsDownloadingFailed(true);
         dispatch(getDownloadFailed(batchId))
             .unwrap()
             .then((response) => {
@@ -128,7 +129,8 @@ const DetailPage = () => {
             .catch((error) => {
                 // openNotification("error","Error", error.message);
                 console.error('Download failed', error);
-            });
+            })
+            .finally(() => setIsDownloadingFailed(false));
     };
 
     const handleBack = () => {
@@ -152,7 +154,7 @@ const DetailPage = () => {
     ];
 
     return (
-        <LayoutMenu>
+        <>
             <BreadCrumb routes={routes} />
             <Spin spinning={loading}>
 
@@ -160,7 +162,7 @@ const DetailPage = () => {
                     <RadioTabs data={dataTabs} onChange={changeTabHeader} currentPosition={tabHeader } />
                 </div>
                 <div className={'w-full flex justify-end'}>
-                    {tabHeader === 'Upload' &&
+                {tabHeader === 'Upload' &&
                         <ButtonComponent
                             type={'submit'}
                             icon={<SVGIcon
@@ -168,8 +170,10 @@ const DetailPage = () => {
                                 width={24}
                             />}
                             onClick={handleDownloadFailed}
+                            loading={isDownloadingFailed}
+                            disabled={isDownloadingFailed}
                         >
-                            Download Failed Data
+                            {isDownloadingFailed ? 'Downloading...' : 'Download Failed Data'}
                         </ButtonComponent>}
                 </div>
                 <Form form={form} onFinishFailed={handleFinishError} onFinish={handleSave} layout='vertical'>
@@ -181,14 +185,6 @@ const DetailPage = () => {
                             <Form.Item>
                                 <ButtonComponent
                                     type={'submit'}
-                                    icon={
-                                        <LeftOutlined
-                                            style={{
-                                                color: "#fff",
-                                                fontSize: 16,
-                                                justifyItems: "left",
-                                            }}
-                                        />}
                                     // onClick={handleBackPage}
                                     onClick={handleBack}>
                                     Back
@@ -270,7 +266,7 @@ const DetailPage = () => {
                     />
                 </Form>
             </Spin>
-        </LayoutMenu>
+        </>
     );
 }
 

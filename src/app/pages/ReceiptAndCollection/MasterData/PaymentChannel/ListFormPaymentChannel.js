@@ -10,7 +10,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import { FormStepper, FormFooter } from "../../../../../components/FormStepNavigation";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import {
   getTypeDDL,
   createPaymentChannel,
@@ -28,7 +27,7 @@ import { dateFormatting } from "../../../../../utils";
 import PaymentChannelForm from "./PaymentChannelForm";
 import SVGIcon from "../../../../../assets/Icon/index";
 import { ModalConfirm } from "../../../../../components/Modal/ModalPopUp";
-import BaseContainer from "../../../../../components/BaseContainer";
+import CardContainer from "../../../../../components/CardContainer";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import ContentModalConfirm from "./ContentModalConfirm";
 import receiptCollectionHttpService from "../../../../../redux/services/receiptCollectionHttpService";
@@ -56,7 +55,7 @@ const ListFormPaymentChannel = (props) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [form] = Form.useForm();
-  const formValue = form.getFieldsValue();
+  const formValue = Form.useWatch([], form) ?? {};
   const location = useLocation();
   const { id } = location?.state || {};
   const [listDataAttachment, setListDataAttachment] = useState([]);
@@ -70,7 +69,7 @@ const ListFormPaymentChannel = (props) => {
   const [current, setCurrent] = useState(0);
 
   const steps = [
-    { title: "Create", value: "Create", paramValue: ["ciCode", "name", "category", "type", "effStartDate", "effEndDate"] },
+    { title: "Create", value: "Create", paramValue: ["ciCode", "name", "category", "effStartDate", "effEndDate"] },
     { title: "Approval", value: "Approval", paramValue: ["apphierId"] },
     { title: "Attachment", value: "Attachment" },
   ];
@@ -183,7 +182,6 @@ const ListFormPaymentChannel = (props) => {
           data_detail?.peOpCi?.effEndDate === null
             ? ""
             : moment(data_detail?.peOpCi?.effEndDate).clone(),
-        type: data_detail?.peOpCi?.type,
         appHierId: data_detail?.peOpCi?.appHierId,
         category: data_detail?.peOpCi?.category,
       });
@@ -206,12 +204,11 @@ const ListFormPaymentChannel = (props) => {
     const dataValue = {
       ciCode: formValue.ciCode,
       name: formValue.name,
-      type: formValue.type,
       effStartDate: moment(formValue.effStartDate).format(dateFormatting.date),
       effEndDate: formValue.effEndDate
         ? moment(formValue.effEndDate).format(dateFormatting.date)
         : null,
-      appHierId: formValue.apphierId,
+      appHierId: formValue.appHierId || formValue.apphierId,
       category: formValue.category,
     };
 
@@ -395,27 +392,31 @@ const ListFormPaymentChannel = (props) => {
   };
 
   const handleSaveDraft = () => {
+    const currentFormValue = form.getFieldsValue();
+    const existingId =
+      currentFormValue.id ||
+      data_detail?.peOpCi?.id ||
+      id;
     const dataValue = {
-      ciCode: formValue.ciCode,
-      name: formValue.name,
-      type: formValue.type,
-      effStartDate: formValue.effStartDate ? moment(formValue.effStartDate).format(dateFormatting.date) : null,
-      effEndDate: formValue.effEndDate
-        ? moment(formValue.effEndDate).format(dateFormatting.date)
+      id: existingId,
+      ciCode: currentFormValue.ciCode,
+      name: currentFormValue.name,
+      effStartDate: currentFormValue.effStartDate ? moment(currentFormValue.effStartDate).format(dateFormatting.date) : null,
+      effEndDate: currentFormValue.effEndDate
+        ? moment(currentFormValue.effEndDate).format(dateFormatting.date)
         : null,
-      appHierId: formValue.apphierId,
-      category: formValue.category,
+      appHierId: currentFormValue.appHierId || currentFormValue.apphierId,
+      category: currentFormValue.category,
     };
     dispatch(saveDraftPaymentChannel(dataValue))
       .unwrap()
       .then(() => {
-        handleClear();
-        handleBack();
+        navigate(RECEIPT_AND_COLLECTION_ROUTES.VIEW_PAYMENT_CHANNEL);
       });
   };
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
       <Spin spinning={loadingForm}>
         <FormStepper
@@ -446,21 +447,33 @@ const ListFormPaymentChannel = (props) => {
               display: current !== 1 ? "none" : undefined,
             }}
           >
-            <BaseContainer header={"APPROVAL INFORMATION"}>
+            <CardContainer
+              header={
+                <div className="flex -my-4 justify-between items-center">
+                  <p className="mt-[15px] text-primary">APPROVAL INFORMATION</p>
+                </div>
+              }
+            >
               <ApprovalComponentGeneral
                 dataTable={appHierDataDetail}
                 dataOption={appHierOptions}
                 selectedHierarchy={selectedHierarchy}
                 updateSelectedHierarchy={setSelectedHierarchy}
               />
-            </BaseContainer>
+            </CardContainer>
           </div>
           <div
             style={{
               display: current !== 2 ? "none" : undefined,
             }}
           >
-            <BaseContainer header={"ATTACHMENT INFORMATION"}>
+            <CardContainer
+              header={
+                <div className="flex -my-4 justify-between items-center">
+                  <p className="mt-[15px] text-primary">ATTACHMENT INFORMATION</p>
+                </div>
+              }
+            >
               <AttachmentComponent
                 type={type}
                 data={listDataAttachment}
@@ -471,8 +484,9 @@ const ListFormPaymentChannel = (props) => {
                 service={receiptCollectionHttpService}
                 configApplication={configApp.PAYMENT_SERVICE}
                 typeRBI={"data"}
+                mandatory={true}
               />
-            </BaseContainer>
+            </CardContainer>
           </div>
           <FormFooter
             current={current}
@@ -534,7 +548,7 @@ const ListFormPaymentChannel = (props) => {
           </p>
         </div>
       </ModalConfirm>
-    </LayoutMenu>
+    </>
   );
 };
 

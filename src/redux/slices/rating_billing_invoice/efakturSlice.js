@@ -99,6 +99,8 @@ const initialState = {
     dataApprover: {},
   },
 
+  loading_sync: false,
+
   upload_progress: 0,
   upload_results: [],
 
@@ -1265,9 +1267,9 @@ export const getListFakturType = createAsyncThunk(
 // faktur code
 export const getListFakturCode = createAsyncThunk(
   "EFAKTUR/GET_LIST_FAKTUR_CODE",
-  async (_, thunkAPI) => {
+  async (search = "", thunkAPI) => {
     try {
-      const url = "/v1/dbs/api/rbi/e-invoice/create/get-faktur-codes";
+      const url = `/v1/dbs/api/rbi/e-invoice/create/get-faktur-codes?search=${encodeURIComponent(search)}`;
       const response = await ratingBillingHttpService.getAll(url);
 
       return response.data || [];
@@ -1365,6 +1367,43 @@ export const createEFakturManual = createAsyncThunk(
   },
 );
 
+// ========================================
+// REQUEST SYNC DATA E-FAKTUR
+// ========================================
+export const requestSyncData = createAsyncThunk(
+  "EFAKTUR/REQUEST_SYNC_DATA",
+  async ({ efakturIds, reason, apphierId }, thunkAPI) => {
+    try {
+      const url = "/v1/dbs/api/rbi/e-invoice/request-sync-data";
+      const requestBody = {
+        efakturIds: efakturIds.map((id) => String(id)),
+        reason: reason || "",
+        apphierId: String(apphierId),
+      };
+
+      const response = await ratingBillingHttpService.createData(
+        url,
+        requestBody,
+      );
+
+      if (response.success) {
+        thunkAPI.dispatch(
+          showModalSuccess({
+            title: "Success",
+            description: response.message || "Request sync data berhasil dikirim",
+            return: false,
+          }),
+        );
+        return response.data;
+      } else {
+        throw new Error(response.message || "Gagal melakukan request sync data");
+      }
+    } catch (error) {
+      return handleApiError(error, thunkAPI, "Gagal melakukan request sync data");
+    }
+  },
+);
+
 const efakturSlice = createSlice({
   name: "efaktur",
   initialState,
@@ -1393,8 +1432,17 @@ const efakturSlice = createSlice({
     },
     [getListEFaktur.fulfilled]: (state, action) => {
       state.loading = false;
-      state.list_efaktur = action.payload.result || [];
+      const isLoadMore = action?.meta?.arg?.isLoadMore;
+      const incoming = action.payload.result || [];
       state.pagination = action.payload.page || initialState.pagination;
+
+      if (isLoadMore) {
+        // append
+        state.list_efaktur = [...(state.list_efaktur || []), ...incoming];
+      } else {
+        // replace
+        state.list_efaktur = incoming;
+      }
     },
     [getListEFaktur.rejected]: (state) => {
       state.loading = false;
@@ -1905,6 +1953,17 @@ const efakturSlice = createSlice({
       state.loading_modal = false;
       state.upload_progress = 0;
       state.upload_results = [];
+    },
+
+    // REQUEST SYNC DATA E-FAKTUR
+    [requestSyncData.pending]: (state) => {
+      state.loading_sync = true;
+    },
+    [requestSyncData.fulfilled]: (state) => {
+      state.loading_sync = false;
+    },
+    [requestSyncData.rejected]: (state) => {
+      state.loading_sync = false;
     },
   },
 });

@@ -1,18 +1,19 @@
-import { Form, Spin, Input, DatePicker } from "antd";
+import { Form, Spin } from "antd";
 import PropTypes from "prop-types";
 import moment from "moment";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
-import BaseContainer from "../../../../../components/BaseContainer";
+import CardContainer from "../../../../../components/CardContainer";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import ConfirmModalPaymentPeriod from "./Modal/ConfirmModalPaymentPeriod";
 import { FormStepper, FormFooter } from "../../../../../components/FormStepNavigation";
+import InputComponent from "../../../../../components/InputComponent";
+import DateComponent from "../../../../../components/DateComponent";
 import {
     createPaymentPeriod,
     getDetailPaymentPeriod,
@@ -28,7 +29,7 @@ import receiptCollectionHttpService from "../../../../../redux/services/receiptC
 import { showModalSuccess, showModalError } from "../../../../../redux/slices/general_slice";
 
 
-const { TextArea } = Input;
+
 
 const steps = [
     { title: "CREATE", value: "Payment Period" },
@@ -51,6 +52,8 @@ const PaymentPeriodForm = ({ type }) => {
     const [appHierDataDetail, setAppHierDataDetail] = useState([]);
     const [modalConfirm, setModalConfirm] = useState(false);
     const [submitData, setSubmitData] = useState(null);
+    const [deletedAttachmentIds, setDeletedAttachmentIds] = useState([]);
+    const [initialAttachmentIds, setInitialAttachmentIds] = useState([]);
 
     // Stepper State
     const [current, setCurrent] = useState(0);
@@ -104,7 +107,7 @@ const PaymentPeriodForm = ({ type }) => {
         }
     };
 
-    const handleSaveDraft = () => {
+    const handleSaveDraft = async () => {
         const values = form.getFieldsValue();
         const dataValue = {
             id: isEdit ? id : null,
@@ -115,29 +118,95 @@ const PaymentPeriodForm = ({ type }) => {
             appHierId: values.apphierId || selectedHierarchy,
         };
 
-        dispatch(saveDraftPaymentPeriod(dataValue))
-            .unwrap()
-            .then(() => {
-                dispatch(showModalSuccess({
-                    title: "Success",
-                    description: "Draft saved successfully",
-                    return: false
-                }));
-                navigate("/system-setup/payment-period");
-            })
-            .catch((error) => {
-                const message = error?.message || "Failed to save draft";
-                dispatch(showModalError({ title: "Error", description: message }));
-            });
+        const uploadedAttachmentIds = [];
+
+        try {
+            const response = await dispatch(saveDraftPaymentPeriod(dataValue)).unwrap();
+            const newId = response?.id;
+
+            if (!newId) {
+                throw new Error("Failed to get Payment Period ID from server. Attachment upload cancelled.");
+            }
+
+            // Delete removed attachments
+            const currentExistingIdsDraft = files
+                .filter((item) => item.dataType === "exist" && item.id)
+                .map((item) => item.id);
+            const calculatedDeletedIdsDraft = initialAttachmentIds.filter(
+                (idAttachment) => !currentExistingIdsDraft.includes(idAttachment)
+            );
+            const fileIdsToDeleteDraft = [...new Set([...deletedAttachmentIds, ...calculatedDeletedIdsDraft])];
+            if (fileIdsToDeleteDraft.length > 0) {
+                await receiptCollectionHttpService.deleteDataWithBody(
+                    `/v1/dbs/api/attachment/delete-attachment`,
+                    { fileId: fileIdsToDeleteDraft }
+                );
+            }
+
+            if (files && files.length > 0) {
+                for (const file of files) {
+                    if (file.dataType !== 'exist' && file.file) {
+                        try {
+                            const formData = new FormData();
+                            formData.append("files", file.file);
+                            formData.append("fileCategoryId", file.fileCategoryId);
+                            formData.append("referensiId", newId);
+                            formData.append("category", "PAYMENT_PERIOD");
+
+                            const uploadResult = await dispatch(uploadAttachmentPaymentPeriod(formData)).unwrap();
+                            uploadedAttachmentIds.push(uploadResult?.data?.id);
+                        } catch (attError) {
+                            throw new Error('Attachment upload failed. All data has been rolled back.');
+                        }
+                    }
+                }
+            }
+
+            dispatch(showModalSuccess({
+                title: "Success",
+                description: "Draft saved successfully",
+                return: false
+            }));
+            navigate("/system-setup/payment-period");
+        } catch (error) {
+            if (uploadedAttachmentIds.length > 0) {
+                await rollbackAttachments(uploadedAttachmentIds);
+            }
+            console.error("Save draft failed:", error);
+            const errorMessage = error?.message || "Failed to save draft";
+            dispatch(showModalError({ title: "Error", description: errorMessage }));
+        }
     };
+
+    const handleUpdateAttachment = useCallback((updater) => {
+        setFiles((prevState) => {
+            const newState = typeof updater === "function" ? updater(prevState) : updater;
+            const removedItems = prevState.filter(
+                (item) => !newState.some(
+                    (newItem) => (newItem.key ?? newItem.id) === (item.key ?? item.id)
+                )
+            );
+            const removedExistingIds = removedItems
+                .filter((item) => item.dataType === "exist" && item.id)
+                .map((item) => item.id);
+            if (removedExistingIds.length > 0) {
+                setDeletedAttachmentIds((prev) => [...new Set([...prev, ...removedExistingIds])]);
+            }
+            return newState;
+        });
+    }, []);
 
     const handleClear = () => {
         if (isEdit) {
+            setDeletedAttachmentIds([]);
+            setInitialAttachmentIds([]);
             if (id) dispatch(getDetailPaymentPeriod(id));
         } else {
             form.resetFields();
             setSelectedHierarchy(null);
             setFiles([]);
+            setDeletedAttachmentIds([]);
+            setInitialAttachmentIds([]);
         }
     };
 
@@ -171,13 +240,19 @@ const PaymentPeriodForm = ({ type }) => {
 
             // Handle Attachments
             if (data_detail?.attachmentList) {
-                const mappedFiles = data_detail.attachmentList.map(item => ({
-                    ...item,
-                    fileName: item.fileName,
-                    fileSize: item.fileSize,
+                const mappedFiles = data_detail.attachmentList.map((att, index) => ({
+                    key: index + 1,
+                    ...att,
+                    fileName: att.fileName,
+                    fileSize: att.fileSize,
                     dataType: "exist"
                 }));
                 setFiles(mappedFiles);
+                setInitialAttachmentIds(
+                    mappedFiles
+                        .filter((item) => item.dataType === "exist" && item.id)
+                        .map((item) => item.id)
+                );
             }
         }
     }, [data_detail, isEdit, form]);
@@ -281,7 +356,9 @@ const PaymentPeriodForm = ({ type }) => {
                 }
             })
             .catch((error) => {
-                console.log("Validation failed:", error);
+                console.error("Validation failed:", error);
+                const msg = error?.response?.data?.message || error?.message || "Validation failed, please try again.";
+                dispatch(showModalError({ title: "Validation Failed", description: msg }));
             });
     };
 
@@ -303,6 +380,25 @@ const PaymentPeriodForm = ({ type }) => {
             const response = await dispatch(createPaymentPeriod(submitData)).unwrap();
             const newId = response?.data?.id;
 
+            if (!newId) {
+                throw new Error("Failed to get Payment Period ID from server. Attachment upload cancelled.");
+            }
+
+            // Delete removed attachments
+            const currentExistingIds = files
+                .filter((item) => item.dataType === "exist" && item.id)
+                .map((item) => item.id);
+            const calculatedDeletedIds = initialAttachmentIds.filter(
+                (idAttachment) => !currentExistingIds.includes(idAttachment)
+            );
+            const fileIdsToDelete = [...new Set([...deletedAttachmentIds, ...calculatedDeletedIds])];
+            if (fileIdsToDelete.length > 0) {
+                await receiptCollectionHttpService.deleteDataWithBody(
+                    `/v1/dbs/api/attachment/delete-attachment`,
+                    { fileId: fileIdsToDelete }
+                );
+            }
+
             if (files && files.length > 0) {
                 for (const file of files) {
                     if (file.dataType !== 'exist' && file.file) {
@@ -317,7 +413,6 @@ const PaymentPeriodForm = ({ type }) => {
                             uploadedAttachmentIds.push(uploadResult?.data?.id);
                         } catch (attError) {
                             // Rollback: hapus semua attachment yang sudah ter-upload
-                            await rollbackAttachments(uploadedAttachmentIds);
                             throw new Error('Attachment upload failed. All data has been rolled back.');
                         }
                     }
@@ -372,7 +467,7 @@ const PaymentPeriodForm = ({ type }) => {
     ];
 
     return (
-        <LayoutMenu>
+        <>
             <BreadCrumb routes={routes} />
             <Spin spinning={loading}>
                 <FormStepper
@@ -381,7 +476,7 @@ const PaymentPeriodForm = ({ type }) => {
                     onPrev={prev}
                     onNext={next}
                 />
-                <BaseContainer header={isEdit ? "EDIT PAYMENT PERIOD" : "CREATE PAYMENT PERIOD"}>
+                <div className="w-full flex flex-col justify-start pb-5">
                     <Form
                         form={form}
                         layout="vertical"
@@ -390,61 +485,59 @@ const PaymentPeriodForm = ({ type }) => {
                     >
                         {/* Tab 1: Payment Period Information */}
                         <div style={{ display: valuePage === "Payment Period" ? "block" : "none" }}>
-                            <div className="grid grid-cols-4 gap-4">
-                                <Form.Item
-                                    label="Period Name"
-                                    name="periodName"
-                                    rules={[{ required: true, message: "Please input period name!" }]}
-                                >
-                                    <Input placeholder="Enter Period Name" />
-                                </Form.Item>
-
-                                <Form.Item
-                                    label="Start Date"
-                                    name="startDate"
-                                    rules={[{ required: true, message: "Please select start date!" }]}
-                                >
-                                    <DatePicker
-                                        style={{ width: "100%" }}
-                                        format="YYYY-MM-DD"
-                                        placeholder="Select Start Date"
-                                        onChange={(date) => {
-                                            const endDate = form.getFieldValue("endDate");
-                                            if (date && endDate && endDate < date) {
-                                                form.setFieldsValue({
-                                                    endDate: null,
-                                                });
-                                            }
-                                        }}
-                                    />
-                                </Form.Item>
-
-                                <Form.Item
-                                    label="End Date"
-                                    name="endDate"
-                                    rules={[{ required: true, message: "Please select end date!" }]}
-                                >
-                                    <DatePicker
-                                        style={{ width: "100%" }}
-                                        format="YYYY-MM-DD"
-                                        placeholder="Select End Date"
-                                        disabledDate={disabledEndDate}
-                                    />
-                                </Form.Item>
-
-                                <div className="col-span-4">
-                                    <Form.Item
-                                        label="Description"
-                                        name="description"
-                                    >
-                                        <TextArea rows={4} placeholder="Enter description" showCount maxLength={255} />
-                                    </Form.Item>
-                                </div>
-                            </div>
+                            <CardContainer header="PAYMENT PERIOD INFORMATION">
+                             <div className="grid grid-cols-5 gap-4">
+                                 <Form.Item
+                                     label="Period Name"
+                                     name="periodName"
+                                     rules={[{ required: true, message: "Please input period name!" }]}
+                                 >
+                                     <InputComponent placeholder="Enter Period Name" />
+                                 </Form.Item>
+ 
+                                 <Form.Item
+                                     label="Start Date"
+                                     name="startDate"
+                                     rules={[{ required: true, message: "Please select start date!" }]}
+                                 >
+                                     <DateComponent
+                                         placeholder="Select Start Date"
+                                         onChange={(date) => {
+                                             const endDate = form.getFieldValue("endDate");
+                                             if (date && endDate && endDate < date) {
+                                                 form.setFieldsValue({
+                                                     endDate: null,
+                                                 });
+                                             }
+                                         }}
+                                         dateDisable={() => false}
+                                     />
+                                 </Form.Item>
+ 
+                                 <Form.Item
+                                     label="End Date"
+                                     name="endDate"
+                                     rules={[{ required: true, message: "Please select end date!" }]}
+                                 >
+                                     <DateComponent
+                                         placeholder="Select End Date"
+                                         dateDisable={disabledEndDate}
+                                     />
+                                 </Form.Item>
+ 
+                                 <Form.Item
+                                     label="Description"
+                                     name="description"
+                                     className="col-span-2"
+                                 >
+                                     <InputComponent type="textarea" rows={4} placeholder="Enter description" showCount maxLength={255} />
+                                 </Form.Item>
+                             </div></CardContainer>
                         </div>
 
                         {/* Tab 2: Approval */}
                         <div style={{ display: valuePage === "Approval" ? "block" : "none" }}>
+                            <CardContainer header="APPROVAL INFORMATION">
                             <ApprovalComponentGeneral
                                 parentForm={form}
                                 dataOption={appHierOptions}
@@ -454,20 +547,24 @@ const PaymentPeriodForm = ({ type }) => {
                                 detailData={data_detail?.paymentPeriodDetail}
                                 isEditing={isEdit}
                             />
+                            </CardContainer>
                         </div>
 
                         {/* Tab 3: Attachment */}
                         <div style={{ display: valuePage === "Attachment" ? "block" : "none" }}>
+                            <CardContainer header="ATTACHMENT INFORMATION">
                             <AttachmentComponent
                                 type="create"
                                 data={files}
-                                updateData={setFiles}
+                                updateData={handleUpdateAttachment}
                                 typeSelector="paymentPeriod"
                                 dispatch={dispatch}
+                                mandatory={true}
                                 getAPICategory={getListCategoryPeriod}
                                 service={receiptCollectionHttpService}
                                 configApplication={configApp.PAYMENT_SERVICE}
                             />
+                            </CardContainer>
                         </div>
 
                         <FormFooter
@@ -482,7 +579,8 @@ const PaymentPeriodForm = ({ type }) => {
                             onSubmit={() => form.submit()}
                         />
                     </Form>
-                </BaseContainer>
+                </div>
+
                 {/* Confirmation Modal */}
                 <ModalCustom
                     title="Confirmation"
@@ -522,7 +620,7 @@ const PaymentPeriodForm = ({ type }) => {
                     />
                 </ModalCustom>
             </Spin>
-        </LayoutMenu>
+        </>
     );
 };
 

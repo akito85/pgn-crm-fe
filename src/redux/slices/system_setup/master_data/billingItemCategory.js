@@ -375,7 +375,6 @@ const billingItemCategorySlice = createSlice({
     },
     // detail
     [getDetailBillingItemCategory.pending]: (state, action) => {
-      state.data_detail = action.payload;
       state.loading = true;
     },
     [getDetailBillingItemCategory.fulfilled]: (state, action) => {
@@ -383,7 +382,6 @@ const billingItemCategorySlice = createSlice({
       state.loading = false;
     },
     [getDetailBillingItemCategory.rejected]: (state, action) => {
-      state.data_detail = action.payload;
       state.loading = false;
     },
     // inactive

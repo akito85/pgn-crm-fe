@@ -1,10 +1,10 @@
-import { Checkbox, Tooltip } from "antd";
+import { Checkbox, Tooltip, Dropdown } from "antd";
+import { MoreOutlined } from "@ant-design/icons";
 import React, { useEffect, useState, useRef, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, NavLink } from "react-router-dom";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import ModalHistory from "../../../../../components/Modal/ModalHistory";
 import { ModalError } from "../../../../../components/Modal/ModalPopUp";
 import ModalInactivateWithHierarchy from "../../../../../components/Modal/ModalInactivateWithHierarchy";
@@ -16,6 +16,7 @@ import {
   getAvailableApproval,
   getSelectedApproval,
   inactiveBillingItem,
+  requestActivateBillingItem,
   getApprovalHistory,
   downloadBillingItem,
 } from "../../../../../redux/slices/rating_billing_invoice/billingItem";
@@ -48,10 +49,14 @@ const BillingItemView = () => {
   const [searchedColumn, setSearchedColumn] = useState("");
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
-  const [fixedColumns, setFixedColumns] = useState(() => ({
-    left: ["no"],
-    right: ["status", "statusApproval", "action"],
-  }));
+  const [fixedColumns, setFixedColumns] = useState(() => {
+    try {
+      const saved = localStorage.getItem("billingItemFixedColumns");
+      return saved ? JSON.parse(saved) : { left: ["no"], right: ["status", "statusApproval", "action"] };
+    } catch (e) {
+      return { left: ["no"], right: ["status", "statusApproval", "action"] };
+    }
+  });
 
   const [modalInactive, setModalInactive] = useState(false);
   const [modalError, setModalError] = useState(false);
@@ -59,6 +64,23 @@ const BillingItemView = () => {
   const [chooseId, setChooseId] = useState();
   const [modalApprovalHistory, setModalApprovalHistory] = useState(false);
   const [dataApprovalHistory, setDataApprovalHistory] = useState({});
+
+  const normalizeStatus = (value) =>
+    (value || "")
+      .toString()
+      .replace(/_/g, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+      .toUpperCase();
+
+  // Save fixedColumns to localStorage when changed
+  useEffect(() => {
+    try {
+      localStorage.setItem("billingItemFixedColumns", JSON.stringify(fixedColumns));
+    } catch (e) {
+      // ignore storage errors
+    }
+  }, [fixedColumns]);
 
   useEffect(() => {
     dispatch(
@@ -92,11 +114,15 @@ const BillingItemView = () => {
           create: data_ApprovalHistory?.dataApprover?.BILLING_ITEM || [],
           inactive:
             data_ApprovalHistory?.dataApprover?.INACTIVE_BILLING_ITEM || [],
+          activate:
+            data_ApprovalHistory?.dataApprover?.ACTIVATED_BILLING_ITEM || [],
         },
         dataHistory: {
           create: data_ApprovalHistory?.dataHistory?.BILLING_ITEM || [],
           inactive:
             data_ApprovalHistory?.dataHistory?.INACTIVE_BILLING_ITEM || [],
+          activate:
+            data_ApprovalHistory?.dataHistory?.ACTIVATED_BILLING_ITEM || [],
         },
       };
       setDataApprovalHistory(temp);
@@ -212,12 +238,21 @@ const BillingItemView = () => {
   };
 
   const handleOk = (res, handleClear) => {
+    const selectedStatus = normalizeStatus(chooseId?.status);
+    const selectedStatusApproval = normalizeStatus(chooseId?.statusApproval);
+    const isActivateRequest =
+      selectedStatus === "INACTIVE" &&
+      selectedStatusApproval !== "WAITING APPROVAL";
     const dataValue = {
       id: chooseId.id,
       appHierId: res.approvalHierarchy,
       remark: res.remark,
     };
-    dispatch(inactiveBillingItem(dataValue))
+    dispatch(
+      (isActivateRequest ? requestActivateBillingItem : inactiveBillingItem)(
+        dataValue,
+      ),
+    )
       .unwrap()
       .then(() => {
         handleClear();
@@ -241,7 +276,12 @@ const BillingItemView = () => {
               error.response.data.message) ||
             error.message ||
             error.toString();
-          setBodyError({ body: { ...res }, handleClear, message });
+          setBodyError({
+            body: { ...res },
+            handleClear,
+            message,
+            actionType: isActivateRequest ? "activate" : "inactivate",
+          });
           setModalError(true);
         }
       });
@@ -280,167 +320,108 @@ const BillingItemView = () => {
 
     // Column Action Table
     {
-      action: "View",
-      type: "table",
-      render: (record) => {
-        return (
-          <Link
-            to={RBI_ROUTES.BILLING_ITEM_DETAIL}
-            state={{ id: record.billingItemCode }}
-          >
-            <Tooltip title="Detail">
-              <div>
-                <SVGIcon name="IconDetail" width={20} />
-              </div>
-            </Tooltip>
-          </Link>
-        );
-      },
-    },
-    {
       action: "Update",
       type: "table",
-      render: (record, data) => {
+      width: 40,
+      render: (record) => {
         const isEditable =
           record.statusApproval === "DRAFT" ||
-          record.statusApproval === "REJECTED" ||
-          (record.status === "ACTIVE" && record.statusApproval === "APPROVED");
+          record.statusApproval === "REJECTED";
 
-        const linkContent =
-          data > 3 ? (
-            isEditable ? (
-              <ButtonComponent
-                icon={<SVGIcon name="IconEdit" color="#0075bf" width={20} />}
-                border={false}
-              >
-                <span className="text-black ml-3">Update</span>
-              </ButtonComponent>
-            ) : (
-              <div className="flex items-center px-1 py-0 cursor-not-allowed">
-                <span className="pointer-events-none">
-                  <SVGIcon name="IconEdit" color="#8D91A0" width={20} />
-                </span>
-                <span className="text-[#8D91A0] ml-4 pointer-events-none">
-                  Update
-                </span>
-              </div>
-            )
-          ) : (
-            <Tooltip title="Update">
-              <div>
-                <SVGIcon
-                  name="IconEdit"
-                  width={20}
-                  color={isEditable ? "#ACC420" : "#8D91A0"}
-                  className={!isEditable ? "cursor-not-allowed" : undefined}
-                />
-              </div>
-            </Tooltip>
+        const rowStatus = normalizeStatus(record.status);
+        const rowStatusApproval = normalizeStatus(record.statusApproval);
+        const canInactivate =
+          rowStatus === "ACTIVE" &&
+          ["APPROVED", "DRAFT", "REJECTED", "WAITING APPROVAL"].includes(
+            rowStatusApproval,
           );
+        const canActivate =
+          rowStatus === "INACTIVE" && rowStatusApproval !== "WAITING APPROVAL";
+        const isActivateOrInactivate = canInactivate || canActivate;
+        const isActive = rowStatus === "ACTIVE";
 
-        return isEditable ? (
-          <Link
-            to={RBI_ROUTES.BILLING_ITEM_UPDATE}
-            state={{
-              id: record.billingItemCode,
-            }}
-          >
-            {linkContent}
-          </Link>
-        ) : (
-          <div>{linkContent}</div>
+        const menuItems = [
+          {
+            key: "update",
+            label: isEditable ? (
+              <Link
+                to={RBI_ROUTES.BILLING_ITEM_UPDATE}
+                state={{ id: record.id }}
+              >
+                Update
+              </Link>
+            ) : (
+              <span className="text-[#8D91A0]">Update</span>
+            ),
+            icon: (
+              <SVGIcon
+                name="IconEdit"
+                color={isEditable ? "#0075BF" : "#8D91A0"}
+                width={16}
+              />
+            ),
+            disabled: !isEditable,
+          },
+          {
+            key: "inactivate",
+            label: isActive ? "Inactivate" : "Activate",
+            icon: (
+              <Checkbox
+                className="inactive-check"
+                disabled={!isActivateOrInactivate}
+                checked={isActivateOrInactivate && !isActive}
+                style={{ pointerEvents: "none" }}
+              />
+            ),
+            disabled: !isActivateOrInactivate,
+            onClick: () => {
+              if (isActivateOrInactivate) {
+                handleInactive(record);
+              }
+            },
+          },
+          {
+            key: "approval-history",
+            label: "Approval History",
+            icon: (
+              <SVGIcon name="IconLogHistory" width={16} color="#0075BF" />
+            ),
+            onClick: () => handleApprovalHistory(record.id),
+          },
+        ];
+
+        return (
+          <Tooltip title="Aksi Lainnya">
+            <Dropdown
+              menu={{ items: menuItems }}
+              trigger={["click"]}
+              placement="bottomRight"
+            >
+              <div className="cursor-pointer">
+                <MoreOutlined style={{ fontSize: 20, color: "#0075BF" }} />
+              </div>
+            </Dropdown>
+          </Tooltip>
         );
       },
     },
     {
-      action: "Activate",
+      action: "View",
       type: "table",
-      render: (record, data) => {
-        const isActivateOrInactivate =
-          (record.statusApproval === "APPROVED" &&
-            record.status === "ACTIVE") ||
-          (record.statusApproval === "DRAFT" && record.status === "ACTIVE") ||
-          (record.statusApproval === "REJECTED" &&
-            record.status === "ACTIVE") ||
-          (record.statusApproval === "WAITING APPROVAL" &&
-            record.status === "ACTIVE");
-
-        const isActive = record.status === "ACTIVE";
-
-        const Content =
-          data > 3 ? (
-            isActivateOrInactivate ? (
-              <ButtonComponent
-                icon={
-                  <Checkbox
-                    className="inactive-check"
-                    disabled={false}
-                    checked={!isActive}
-                  />
-                }
-                border={false}
-                onClick={() => handleInactive(record)}
-              >
-                <span className="text-black ml-5">Inactivate</span>
-              </ButtonComponent>
-            ) : (
-              <div className="flex items-center px-2 py-0">
-                <Checkbox
-                  className="inactive-check"
-                  disabled={true}
-                  checked={false}
-                />
-                <span className="text-[#8D91A0] ml-5">Inactivate</span>
-              </div>
-            )
-          ) : (
-            <Tooltip title="Inactivate">
-              <div>
-                <Checkbox
-                  className="inactive-check"
-                  onClick={
-                    isActivateOrInactivate
-                      ? () => handleInactive(record)
-                      : undefined
-                  }
-                  disabled={!isActivateOrInactivate}
-                  checked={isActivateOrInactivate && !isActive}
-                />
-              </div>
-            </Tooltip>
-          );
-
-        return Content;
-      },
-    },
-    {
-      action: "History",
-      type: "table",
-      render: (record, data) => {
-        const Content =
-          data > 3 ? (
-            <ButtonComponent
-              icon={
-                <SVGIcon name="IconLogHistory" color={"#0075bf"} width={20} />
-              }
-              border={false}
-              onClick={() => handleApprovalHistory(record.id)}
+      width: 40,
+      render: (record) => {
+        return (
+          <Tooltip title="Detail">
+            <Link
+              to={RBI_ROUTES.BILLING_ITEM_DETAIL}
+              state={{ id: record.id }}
             >
-              <span className={"text-black ml-3"}>Approval History</span>
-            </ButtonComponent>
-          ) : (
-            <Tooltip title="Approval History">
-              <div>
-                <SVGIcon
-                  name="IconLogHistory"
-                  color={"#0075bf"}
-                  width={20}
-                  onClick={() => handleApprovalHistory(record.id)}
-                />
+              <div className="pt-0">
+                <SVGIcon name="IconDetail" color="#0075BF" width={20} />
               </div>
-            </Tooltip>
-          );
-        return Content;
+            </Link>
+          </Tooltip>
+        );
       },
     },
   ];
@@ -459,7 +440,7 @@ const BillingItemView = () => {
   }, [search, page, searchedColumn, searchText]);
 
   const actionCols = useColumnActionPermission(
-    ["view", "activate", "update", "history"],
+    ["view", "update"],
     itemGrantAccess,
   ).map((col) => ({
     ...col,
@@ -487,7 +468,7 @@ const BillingItemView = () => {
   }, [allColumns]);
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
 
       <CardContainer
@@ -533,9 +514,11 @@ const BillingItemView = () => {
           dispatch={dispatch}
           getAPIOption={getAvailableApproval}
           getAPIDetail={getSelectedApproval}
-          alertMessage={`Are you sure you want to inactivate this Transaction mapping with name ${
-            chooseId?.billingItemCode || ""
-          }?`}
+          alertMessage={`Are you sure you want to ${normalizeStatus(chooseId?.status) === "INACTIVE"
+              ? "activate"
+              : "inactivate"
+            } this Transaction mapping with name ${chooseId?.billingItemCode || ""
+            }?`}
           openModalInactivate={modalInactive}
           handleCloseModalInactivate={handleCancel}
           onFinish={handleOk}
@@ -566,13 +549,14 @@ const BillingItemView = () => {
             <p className="text-[18px] font-bold">{"Failed"}</p>
           </div>
           <p className="pl-[70px]">
+            {`Your data was not ${bodyError?.actionType || "inactivate"}. `}
             {bodyError?.message ||
               bodyErrorGeneral?.response?.data?.message?.toString()}
           </p>
           <p className="pl-[70px]">Please try again.</p>
         </div>
       </ModalError>
-    </LayoutMenu>
+    </>
   );
 };
 

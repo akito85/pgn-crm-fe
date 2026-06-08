@@ -1,7 +1,6 @@
-import React, { useRef, useState, useEffect, useMemo } from "react";
+import React, { useRef, useState, useEffect, useMemo, useCallback } from "react";
 import { Checkbox, Spin, Tooltip } from "antd";
 import { useDispatch, useSelector } from "react-redux";
-import LayoutMenu from "../../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import { RBI_ROUTES } from "../../../../../../routes/rating_billing/rbi_routes";
@@ -13,6 +12,7 @@ import { Link, NavLink } from "react-router-dom";
 import ModalInactivateWithHierarchy from "../../../../../../components/Modal/ModalInactivateWithHierarchy";
 import {
   activationGeneralTemplate,
+  activateRequestGneralTemplate,
   getAllGeneralTemplatePaginate,
   getApprovalHistoryGeneralTemplate,
   getApprovalList,
@@ -22,7 +22,6 @@ import {
 import Toolbar from "../../../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../../../components/ColumnActionPermission";
 import TableRBI from "../../../../../../components/TableRBI";
-import { applyFixedColumns } from "../../../../../../utils/applyFixedColumns";
 import CardContainer from "../../../../../../components/CardContainer";
 import { clearBodyMessage } from "../../../../../../redux/slices/general_slice";
 
@@ -39,40 +38,90 @@ const GeneralTemplateView = () => {
   const searchInput = useRef(null);
   const dispatch = useDispatch();
 
+  const normalizeStatus = (value) =>
+    (value || "")
+      .toString()
+      .replace(/_/g, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+      .toUpperCase();
+
   // Use State
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const initialPageSize = 100;
+  const loadMoreSize = 20;
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
-  const [fixedColumns, setFixedColumns] = useState(() => ({
-    left: ["no"],
-    right: ["statusApproval", "action"],
-  }));
+  const [allData, setAllData] = useState([]);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const shouldResetRef = useRef(true);
+
+  const hasMore = allData.length < (data_list?.page?.totalElements || 0);
+
+  const [fixedColumns, setFixedColumns] = useState(() => {
+    try {
+      const saved = localStorage.getItem("generalTemplateFixedColumns_v2");
+      return saved ? JSON.parse(saved) : { left: ["NO"], right: ["status", "statusApproval", "action"] };
+    } catch (e) {
+      return { left: ["NO"], right: ["status", "statusApproval", "action"] };
+    }
+  });
 
   const [dataApprovalHistory, setDataApprovalHistory] = useState({});
   const [dataInactivate, setDataInactivate] = useState({});
+  const [dataActivate, setDataActivate] = useState({});
 
   //modal
   const [openModalHistory, setOpenModalHistory] = useState(false);
   const [modalInactivate, setModalInactivate] = useState(false);
+  const [modalActivate, setModalActivate] = useState(false);
 
   //try again
   const [bodyError, setBodyError] = useState({});
   const [modalError, setModalError] = useState(false);
+  const [bodyActivateError, setBodyActivateError] = useState({});
+  const [modalActivateError, setModalActivateError] = useState(false);
 
   //useEffect
+  // Save fixedColumns to localStorage when changed
+  useEffect(() => {
+    try {
+      localStorage.setItem("generalTemplateFixedColumns_v2", JSON.stringify(fixedColumns));
+    } catch (e) {
+      // ignore storage errors
+    }
+  }, [fixedColumns]);
+
   useEffect(() => {
     dispatch(
       getAllGeneralTemplatePaginate({
-        page,
-        pageSize,
+        page: 1,
+        pageSize: initialPageSize,
         sort,
         search: encodeURIComponent(JSON.stringify(search)),
       })
     );
-  }, [dispatch, page, pageSize, sort, search]);
+  }, [dispatch, sort, search, refreshKey]);
+
+  // Accumulate data for infinite scroll
+  useEffect(() => {
+    if (data_list?.result) {
+      if (shouldResetRef.current || page === 1) {
+        setAllData(data_list.result);
+        shouldResetRef.current = false;
+      } else {
+        setAllData((prev) => {
+          const ids = new Set(prev.map((item) => item.templateId));
+          const newItems = data_list.result.filter(
+            (item) => !ids.has(item.templateId)
+          );
+          return [...prev, ...newItems];
+        });
+      }
+    }
+  }, [data_list, page]);
 
   // trigger modal try again from general slice
   useEffect(() => {
@@ -90,11 +139,17 @@ const GeneralTemplateView = () => {
           inactive:
             data_approval_history?.dataApprover?.INACTIVE_GENERAL_TEMPLATE ||
             [],
+          activate:
+            data_approval_history?.dataApprover?.ACTIVATED_GENERAL_TEMPLATE ||
+            [],
         },
         dataHistory: {
           create: data_approval_history?.dataHistory?.GENERAL_TEMPLATE || [],
           inactive:
             data_approval_history?.dataHistory?.INACTIVE_GENERAL_TEMPLATE || [],
+          activate:
+            data_approval_history?.dataHistory?.ACTIVATED_GENERAL_TEMPLATE ||
+            [],
         },
       };
       setDataApprovalHistory(temp);
@@ -119,7 +174,7 @@ const GeneralTemplateView = () => {
       getDownloadGeneralTemplateList({
         search: tempSearch,
         page,
-        pageSize,
+        pageSize: initialPageSize,
         sort,
       })
     );
@@ -129,6 +184,7 @@ const GeneralTemplateView = () => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
+    shouldResetRef.current = true;
     setSearch((prevState) => {
       if (prevState[dataIndex] !== selectedKeys[0]) {
         setPage(1);
@@ -140,10 +196,8 @@ const GeneralTemplateView = () => {
     });
   };
 
-  const handleChangePage = (pageChange, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
-    setPage(tempPage);
-    setPageSize(pageSizeChange);
+  const handleChange = (pageChange) => {
+    setPage(pageChange);
   };
 
   const onSort = (_, __, sorter) => {
@@ -151,8 +205,35 @@ const GeneralTemplateView = () => {
       sorter.order !== undefined
         ? `${sorter.field}~${sorter.order === "ascend" ? "asc" : "desc"}`
         : "";
+    shouldResetRef.current = true;
+    setPage(1);
     setSort(dataSort);
   };
+
+  // Handle Load More (infinite scroll)
+  const handleLoadMore = useCallback(async () => {
+    if (allData.length >= (data_list?.page?.totalElements || 0)) return;
+    const nextPage = Math.floor(allData.length / loadMoreSize) + 1;
+    setPage(nextPage);
+    await dispatch(
+      getAllGeneralTemplatePaginate({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page: nextPage,
+        pageSize: loadMoreSize,
+        sort,
+      })
+    );
+  }, [allData.length, data_list?.page?.totalElements, search, sort, dispatch, loadMoreSize]);
+
+  // Handle Refresh
+  const handleRefresh = useCallback(() => {
+    shouldResetRef.current = true;
+    if (page === 1) {
+      setRefreshKey((prev) => prev + 1);
+    } else {
+      setPage(1);
+    }
+  }, [page]);
 
   const handleRetry = () => {
     if (bodyError?.value) {
@@ -193,6 +274,16 @@ const GeneralTemplateView = () => {
     setModalInactivate(false);
   };
 
+  const handleOpenModalActivate = (value) => {
+    setDataActivate(value);
+    setModalActivate(true);
+  };
+
+  const handleCloseModalActivate = () => {
+    setDataActivate({});
+    setModalActivate(false);
+  };
+
   const onFinishInactive = (e) => {
     const body = {
       templateId: dataInactivate?.templateId,
@@ -202,23 +293,14 @@ const GeneralTemplateView = () => {
 
     dispatch(activationGeneralTemplate(body))
       .unwrap()
-      .then(async (data) => {
-        let tempSearch = "";
-        for (const dataIndex in search) {
-          if (Object.hasOwnProperty.call(search, dataIndex)) {
-            const tempSearchText = search[dataIndex];
-            if (tempSearchText) {
-              tempSearch += `${dataIndex}~${tempSearchText},`;
-            }
-          }
-        }
-        tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
+      .then(async () => {
+        shouldResetRef.current = true;
         dispatch(
           getAllGeneralTemplatePaginate({
-            page,
-            pageSize,
+            page: 1,
+            pageSize: initialPageSize,
             sort,
-            search: tempSearch,
+            search: encodeURIComponent(JSON.stringify(search)),
           })
         );
         setModalInactivate(false);
@@ -235,6 +317,54 @@ const GeneralTemplateView = () => {
           setModalError(true);
         }
       });
+  };
+
+  const onFinishActivate = (e) => {
+    const body = {
+      templateId: dataActivate?.templateId,
+      description: e.remark,
+      apphierId: e.tappId ? e.tappId : e.approvalHierarchy,
+    };
+
+    dispatch(activateRequestGneralTemplate(body))
+      .unwrap()
+      .then(async () => {
+        shouldResetRef.current = true;
+        dispatch(
+          getAllGeneralTemplatePaginate({
+            page: 1,
+            pageSize: initialPageSize,
+            sort,
+            search: encodeURIComponent(JSON.stringify(search)),
+          })
+        );
+        setModalActivate(false);
+      })
+      .catch((error) => {
+        if (Math.floor((error.response.data.code || 0) / 100) === 5) {
+          const message =
+            (error?.response &&
+              error?.response?.data &&
+              error?.response?.data?.message) ||
+            error?.message ||
+            error?.toString();
+          setBodyActivateError({ message, value: e });
+          setModalActivateError(true);
+        }
+      });
+  };
+
+  const handleRetryActivate = () => {
+    if (bodyActivateError?.value) {
+      onFinishActivate(bodyActivateError.value);
+    }
+    setModalActivateError(false);
+    setBodyActivateError({});
+  };
+
+  const handleCloseModalActivateError = () => {
+    setModalActivateError(false);
+    setBodyActivateError({});
   };
 
   // routes
@@ -298,9 +428,7 @@ const GeneralTemplateView = () => {
             }}
           >
             <Tooltip title="Detail">
-              <div>
-                <SVGIcon name="IconDetail" width={24} />
-              </div>
+              <SVGIcon name="IconDetail" width={20} />
             </Tooltip>
           </Link>
         );
@@ -312,8 +440,7 @@ const GeneralTemplateView = () => {
       render: (record, data) => {
         const isEditable =
           record.statusApproval === "DRAFT" ||
-          record.statusApproval === "REJECTED" ||
-          (record.status === "ACTIVE" && record.statusApproval === "APPROVED");
+          record.statusApproval === "REJECTED";
 
         const linkContent =
           data > 3 ? (
@@ -322,16 +449,16 @@ const GeneralTemplateView = () => {
                 <SVGIcon
                   name="IconEdit"
                   color={isEditable ? "#0075bf" : "#8D91A0"}
-                  width={24}
+                  width={20}
                 />
               }
               border={false}
               disabled={!isEditable}
+              type={"action"}
             >
               <span
-                className={`ml-3 ${
-                  isEditable ? "text-black " : "text-[#8D91A0]"
-                }`}
+                className={`ml-0 ${isEditable ? "text-black" : "text-[#8D91A0]"
+                  }`}
               >
                 {" "}
                 Update
@@ -339,10 +466,10 @@ const GeneralTemplateView = () => {
             </ButtonComponent>
           ) : (
             <Tooltip title="Update">
-              <div>
+              <div className="pt-1">
                 <SVGIcon
                   name="IconEdit"
-                  width={24}
+                  width={20}
                   color={!isEditable ? "#8D91A0" : "#ACC424"}
                   className={!isEditable ? "cursor-not-allowed" : undefined}
                 />
@@ -370,14 +497,21 @@ const GeneralTemplateView = () => {
       action: "Activate",
       type: "table",
       render: (record, data) => {
-        const isActivateOrInactivate =
-          (record.statusApproval === "APPROVED" &&
-            record.status === "ACTIVE") ||
-          (record.statusApproval === "DRAFT" && record.status === "ACTIVE") ||
-          (record.statusApproval === "REJECTED" &&
-            record.status === "ACTIVE") ||
-          (record.statusApproval === "WAITING APPROVAL" &&
-            record.status === "ACTIVE");
+        const rowStatus = normalizeStatus(record.status);
+        const rowStatusApproval = normalizeStatus(record.statusApproval);
+        const canInactivate =
+          rowStatus === "ACTIVE" &&
+          ["APPROVED", "DRAFT", "REJECTED", "WAITING APPROVAL"].includes(
+            rowStatusApproval,
+          );
+        const canActivate =
+          rowStatus === "INACTIVE" && rowStatusApproval !== "WAITING APPROVAL";
+        const isActivateOrInactivate = canInactivate || canActivate;
+        const label = rowStatus !== "ACTIVE" ? "Activate" : "Inactivate";
+        const handleClick = () =>
+          rowStatus === "ACTIVE"
+            ? handleOpenModalInactivate(record)
+            : handleOpenModalActivate(record);
 
         const Content =
           data > 3 ? (
@@ -385,29 +519,28 @@ const GeneralTemplateView = () => {
               icon={
                 <Checkbox
                   className="inactive-check"
-                  onClick={() => handleOpenModalInactivate(record)}
-                  disabled={record.status === "ACTIVE" ? false : true}
-                  checked={record.status === "ACTIVE" ? false : true}
+                  onClick={isActivateOrInactivate ? handleClick : undefined}
+                  disabled={!isActivateOrInactivate}
+                  checked={rowStatus !== "ACTIVE"}
                 />
               }
               border={false}
               disabled={!isActivateOrInactivate}
-              onClick={() => handleOpenModalInactivate(record)}
+              onClick={isActivateOrInactivate ? handleClick : undefined}
+              type={"action"}
             >
-              <span className="text-black ml-5">
-                {record.status !== "ACTIVE" ? "Activate" : "Inactivate"}
+              <span className={isActivateOrInactivate ? "text-black ml-1" : "text-[#8D91A0] ml-1"}>
+                {label}
               </span>
             </ButtonComponent>
           ) : (
-            <Tooltip
-              title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}
-            >
-              <div>
+            <Tooltip title={label}>
+              <div className="pt-1">
                 <Checkbox
                   className="inactive-check"
-                  onClick={() => handleOpenModalInactivate(record)}
-                  disabled={record.status === "ACTIVE" ? false : true}
-                  checked={record.status === "ACTIVE" ? false : true}
+                  onClick={isActivateOrInactivate ? handleClick : undefined}
+                  disabled={!isActivateOrInactivate}
+                  checked={rowStatus !== "ACTIVE"}
                 />
               </div>
             </Tooltip>
@@ -424,20 +557,21 @@ const GeneralTemplateView = () => {
           data > 3 ? (
             <ButtonComponent
               icon={
-                <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
+                <SVGIcon name="IconLogHistory" color={"#0075bf"} width={20} />
               }
+              type={"action"}
               border={false}
               onClick={() => handleApprovalHistory(record)}
             >
-              <span className={"text-black ml-3"}>Approval History</span>
+              <span className={"text-black ml-0"}>Approval History</span>
             </ButtonComponent>
           ) : (
             <Tooltip title="Approval History">
-              <div>
+              <div className="pt-1">
                 <SVGIcon
                   name="IconLogHistory"
                   color={"#0075bf"}
-                  width={24}
+                  width={20}
                   onClick={() => handleApprovalHistory(record)}
                 />
               </div>
@@ -450,51 +584,76 @@ const GeneralTemplateView = () => {
   ];
 
   // Get base columns from GeneralTemplateTableView
-  const baseColumns = useMemo(() => {
-    return GeneralTemplateTableView(
-      search,
-      page,
-      pageSize,
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    );
-  }, [search, page, pageSize, searchedColumn, searchText]);
-
   const actionCols = useColumnActionPermission(
     ["view", "activate", "update", "history"],
     itemGrantAccess
   );
 
-  const allColumns = useMemo(() => {
-    const columnsWithKeys = [...baseColumns, ...actionCols].map((col) => ({
+  const baseColumns = useMemo(() => {
+    const cols = [
+      ...GeneralTemplateTableView(
+        search,
+        page,
+        initialPageSize,
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch
+      ),
+      ...actionCols,
+    ];
+    return cols.map((col) => ({
       ...col,
       key: col.key || col.dataIndex || col.title,
     }));
-    return columnsWithKeys;
-  }, [baseColumns, actionCols]);
-
-  const processedColumns = useMemo(() => {
-    return applyFixedColumns(allColumns, fixedColumns);
-  }, [allColumns, fixedColumns]);
+  }, [search, page, searchedColumn, searchText, actionCols]);
 
   const columnDefinitions = useMemo(() => {
-    return allColumns.map((col) => ({
+    return baseColumns.map((col) => ({
       key: col.key || col.dataIndex || col.title,
       title: col.title,
     }));
-  }, [allColumns]);
+  }, [baseColumns]);
+
+  const columns = useMemo(() => {
+    const leftFixed = [];
+    const rightFixed = [];
+    const normal = [];
+
+    baseColumns.forEach((col) => {
+      const colKey = col.key || col.dataIndex || col.title;
+      if (fixedColumns.left.includes(colKey)) {
+        leftFixed.push(col);
+      } else if (fixedColumns.right.includes(colKey)) {
+        rightFixed.push(col);
+      } else {
+        normal.push(col);
+      }
+    });
+
+    return [...leftFixed, ...normal, ...rightFixed].map((col) => {
+      const newCol = { ...col };
+      const colKey = col.key || col.dataIndex || col.title;
+      if (fixedColumns.left.includes(colKey)) {
+        newCol.fixed = "left";
+      } else if (fixedColumns.right.includes(colKey)) {
+        newCol.fixed = "right";
+      } else {
+        delete newCol.fixed;
+      }
+      return newCol;
+    });
+  }, [baseColumns, fixedColumns]);
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
         <CardContainer
           header={
             <div className="flex -my-4 justify-between items-center">
-              <p className="mt-[15px] font-bold">GENERAL TEMPLATE LIST</p>
+              <p className="mt-[15px]">GENERAL TEMPLATE LIST</p>
               <div className="flex gap-[20px]">
                 <Toolbar items={itemGrantAccess} />
               </div>
@@ -503,12 +662,13 @@ const GeneralTemplateView = () => {
         >
           <div className="my-0">
             <TableRBI
-              dataSource={data_list?.result || []}
-              columns={processedColumns}
+              idTable="generalTemplateTable"
+              dataSource={allData}
+              columns={columns}
               current={page}
-              pageSize={pageSize}
-              onChange={handleChangePage}
-              onSizeChanger={handleChangePage}
+              pageSize={initialPageSize}
+              onChange={handleChange}
+              onSizeChanger={handleChange}
               totalData={data_list?.page?.totalElements || 0}
               tableScrolled={{ x: 2000, y: 525 }}
               onSort={onSort}
@@ -517,21 +677,26 @@ const GeneralTemplateView = () => {
               fixedColumns={fixedColumns}
               setFixedColumns={setFixedColumns}
               loading={loading}
+              useInfiniteScroll={true}
+              usePagination={false}
+              onLoadMore={handleLoadMore}
+              hasMore={hasMore}
+              showRefresh={true}
+              onRefresh={handleRefresh}
+              refreshLabel="Refresh"
             />
           </div>
         </CardContainer>
 
-        {ModalHistory ? (
-          <ModalHistory
-            isOpen={openModalHistory && dataApprovalHistory}
-            handleClose={() => setOpenModalHistory(false)}
-            header={"Approval History"}
-            width={1000}
-            tabOptions={handleOptions()}
-            dataApprover={dataApprovalHistory?.dataApprover}
-            dataHistory={dataApprovalHistory?.dataHistory}
-          />
-        ) : null}
+        <ModalHistory
+          isOpen={openModalHistory && dataApprovalHistory}
+          handleClose={() => setOpenModalHistory(false)}
+          header={"Approval History"}
+          width={1000}
+          tabOptions={handleOptions()}
+          dataApprover={dataApprovalHistory?.dataApprover}
+          dataHistory={dataApprovalHistory?.dataHistory}
+        />
 
         {/** Modal Retry */}
         {modalError ? (
@@ -560,17 +725,49 @@ const GeneralTemplateView = () => {
             dispatch={dispatch}
             getAPIOption={getApprovalList}
             getAPIDetail={getApprovalListDetail}
-            alertMessage={`Are you sure you want to inactivate General Template with name ${
-              dataInactivate?.templateName || ""
-            }?`}
+            alertMessage={`Are you sure you want to inactivate General Template with name ${dataInactivate?.templateName || ""
+              }?`}
             openModalInactivate={modalInactivate}
             handleCloseModalInactivate={handleCloseModalInactivate}
             onFinish={onFinishInactive}
             selector="general_template"
           />
         ) : null}
+
+        {modalActivate ? (
+          <ModalInactivateWithHierarchy
+            dispatch={dispatch}
+            getAPIOption={getApprovalList}
+            getAPIDetail={getApprovalListDetail}
+            header={"Request Activate Information"}
+            alertMessage={`Are you sure you want to request activate General Template with name ${dataActivate?.templateName || ""
+              }?`}
+            openModalInactivate={modalActivate}
+            handleCloseModalInactivate={handleCloseModalActivate}
+            onFinish={onFinishActivate}
+            selector="general_template"
+          />
+        ) : null}
+
+        {modalActivateError ? (
+          <ModalError
+            isOpen={modalActivateError}
+            handleOk={handleRetryActivate}
+            handleCancel={handleCloseModalActivateError}
+            customText={"Try Again"}
+          >
+            <div className="px-5 pt-5 pb-[10px] justify-center">
+              <div className="w-full flex gap-[20px]">
+                <SVGIcon name="IconFailed" width={48} />
+                <p className="text-[18px] font-bold">{"Failed"}</p>
+              </div>
+              <p className="pl-[70px]">{bodyActivateError?.message}</p>
+              <p className="pl-[70px]">Please try again.</p>
+            </div>
+          </ModalError>
+        ) : null}
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

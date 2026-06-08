@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import ConfirmationModalTabs from "./ConfirmationModalTabs";
 import NxModal from "../../../../../../../../../components/Nx/NxModal";
 import { Button } from "antd";
@@ -9,14 +10,21 @@ const ConfirmationModal = ({
   isOpen,
   handleCancel,
   approvalData,
-  dataAttachment,
+  attachmentDataSource,
   type = "",
   service,
   configApplication,
+  loading = false,
+  handleSubmitForm = () => {},
 }) => {
   const tabLength = type === "submit" ? 4 : 3;
 
   const [activeTab, setActiveTab] = useState(0);
+
+  const { loading_createUpdateIr } = useSelector((state) => state.invoiceRelation);
+
+  const isSubmit = type === "submit";
+  const isDraft = type === "draft";
 
   /**
    * @param {"next" | "prev"} direction
@@ -40,28 +48,29 @@ const ConfirmationModal = ({
     <NxModal
       isOpen={isOpen}
       width={1000}
-      header={"CONFIRMATION INVOICE RELATION"}
+      title={"CONFIRMATION INVOICE RELATION"}
       type={"confirmation"}
       hidePadding={{
         top: true,
       }}
+      loading={loading}
       footer={[
-        <div className={"w-full flex justify-between gap-x-4"} key={`footer-1`}>
-          <Button type={"menu"} onClick={() => handleCancel()}>
+        <div className={"flex justify-between"} key={`footer-1`}>
+          <Button type={"menu"} disabled={loading_createUpdateIr} onClick={() => handleCancel()}>
             Cancel
           </Button>
-          <div className="flex gap-x-2">
-            <Button disabled={activeTab < 1} type={"menu"} onClick={() => handleChangeTab("prev")}>
+          <div className="flex">
+            <Button disabled={loading_createUpdateIr || activeTab < 1} type={"menu"} onClick={() => handleChangeTab("prev")}>
               Previous
             </Button>
             {activeTab < (tabLength - 1)  && (
-              <Button type={"submit"} onClick={() => handleChangeTab("next")}>
+              <Button type={"submit"} disabled={loading_createUpdateIr} onClick={() => handleChangeTab("next")}>
                 Next
               </Button>
             )}
             {activeTab === (tabLength - 1) && (
-              <Button type={"submit"} form={formId} htmlType={"submit"} >
-                {type === "submit" ? "Submit" : type === "draft" ? "Save as Draft" : ""}
+              <Button type={"submit"} form={formId} htmlType={isSubmit ? "submit" : "button"} onClick={isDraft ? handleSubmitForm : undefined} loading={loading_createUpdateIr}>
+                Confirm
               </Button>
             )}
           </div>
@@ -71,12 +80,13 @@ const ConfirmationModal = ({
       <ConfirmationModalTabs
         form={form}
         approvalData={approvalData}
-        dataAttachment={dataAttachment}
+        attachmentDataSource={attachmentDataSource}
         service={service}
         type={type}
         configApplication={configApplication}
         activeTab={activeTab}
         setActiveTab={setActiveTab}
+        disabled={loading}
       />
     </NxModal>
   )

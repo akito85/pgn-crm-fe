@@ -6,7 +6,7 @@ import { columnsPeriodic } from "./Table/TablePeriodic";
 import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
 
 const PeriodicSection = ({ ratingCode, calculationCode }) => {
-  const { data_periodicSA, loading } = useSelector((state) => state.rating);
+  const { data_periodicSA, loadingPeriodic } = useSelector((state) => state.rating);
 
   const dispatch = useDispatch();
   const searchInput = useRef(null);
@@ -108,13 +108,13 @@ const PeriodicSection = ({ ratingCode, calculationCode }) => {
               Calculation Code
             </p>
             <p className="text-[20px] font-medium text-[#0075bf]">
-              {calculationCode || "-"}
+              {calculationCode || ""}
             </p>
           </div>
           <div className="flex flex-col gap-1">
             <p className="text-[15px] font-normal text-gray-700">Rating Code</p>
             <p className="text-[20px] font-medium text-[#0075bf]">
-              {ratingCode || "-"}
+              {ratingCode || ""}
             </p>
           </div>
         </div>
@@ -134,7 +134,7 @@ const PeriodicSection = ({ ratingCode, calculationCode }) => {
           columnDefinitions={columnDefinitions}
           fixedColumns={fixedColumns}
           setFixedColumns={setFixedColumns}
-          loading={loading}
+          loading={loadingPeriodic}
         />
       </div>
     </>

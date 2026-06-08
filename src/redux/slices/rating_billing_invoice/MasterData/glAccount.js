@@ -9,6 +9,8 @@ import ratingBillingHttpService from "../../../services/ratingBillingHttpService
 
 const initialState = {
   data: [],
+  gl_account_list: [],
+  gl_account_pagination: null,
   data_detail: {},
   data_approval_hierarchy: [],
   data_approval_hierarchy_detail: [],
@@ -26,14 +28,14 @@ const initialState = {
 
 export const getAllGLAccountPaginate = createAsyncThunk(
   "GET_ALL_GL_ACCOUNT_PAGINATE",
-  async ({ page, pageSize, sort, search }, thunkAPI) => {
+  async ({ page, pageSize, sort, search, isLoadMore = false }, thunkAPI) => {
     const searchParams = search === undefined ? "" : search;
     const sortParams =
       sort === undefined || sort === "" ? "createdDate~desc" : sort;
     try {
       const url = `/v1/dbs/api/gl-account?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
       const response = await ratingBillingHttpService.getPagination(url);
-      return response.data;
+      return { ...response.data, isLoadMore };
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -51,7 +53,7 @@ export const getAllGLAccountPaginate = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const getDetailGLAccount = createAsyncThunk(
@@ -78,7 +80,7 @@ export const getDetailGLAccount = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const getApprovalHierarchyList = createAsyncThunk(
@@ -105,12 +107,12 @@ export const getApprovalHierarchyList = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const getApprovalHierarchyDetail = createAsyncThunk(
   "GET_APPROVAL_HIERARCHY_DETAIL_GL_ACCOUNT",
-  async (id, thunkAPI) => {
+  async ({ id }, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/gl-account/apphier-detail/${id}`;
       const response = await ratingBillingHttpService.getDetail(url);
@@ -132,7 +134,7 @@ export const getApprovalHierarchyDetail = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const getApprovalHistory = createAsyncThunk(
@@ -159,7 +161,7 @@ export const getApprovalHistory = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const getSpecialGLList = createAsyncThunk(
@@ -186,7 +188,7 @@ export const getSpecialGLList = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const uploadAttachment = createAsyncThunk(
@@ -224,7 +226,7 @@ export const uploadAttachment = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const getCategoryList = createAsyncThunk(
@@ -254,7 +256,7 @@ export const getCategoryList = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const createGLAccount = createAsyncThunk(
@@ -278,9 +280,8 @@ export const createGLAccount = createAsyncThunk(
         } else {
           const errorBody = {
             title: "Failed",
-            description: `Your data was not ${
-              body.isSubmit === false ? "created" : "submitted"
-            }. ${message}.`,
+            description: `Your data was not ${body.isSubmit === false ? "created" : "submitted"
+              }. ${message}.`,
           };
           thunkAPI.dispatch(showModalError(errorBody));
         }
@@ -288,7 +289,7 @@ export const createGLAccount = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const updateGLAccount = createAsyncThunk(
@@ -312,9 +313,8 @@ export const updateGLAccount = createAsyncThunk(
         } else {
           const errorBody = {
             title: "Failed",
-            description: `Your data was not ${
-              body.isSubmit === false ? "updated" : "submitted"
-            }. ${message}.`,
+            description: `Your data was not ${body.isSubmit === false ? "updated" : "submitted"
+              }. ${message}.`,
           };
           thunkApi.dispatch(showModalError(errorBody));
         }
@@ -322,7 +322,7 @@ export const updateGLAccount = createAsyncThunk(
       }
       return thunkApi.rejectWithValue(response.response?.data);
     }
-  }
+  },
 );
 
 export const inactiveGLAccount = createAsyncThunk(
@@ -359,7 +359,44 @@ export const inactiveGLAccount = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
+);
+
+export const requestActivateGLAccount = createAsyncThunk(
+  "REQUEST_ACTIVATE_GL_ACCOUNT",
+  async (body, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/gl-account/request-activate`;
+      const response = await ratingBillingHttpService.createData(url, body);
+      const successBody = {
+        title: "Successful",
+        description: "Your data has been submitted.",
+        return: false,
+      };
+      thunkAPI.dispatch(showModalSuccess(successBody));
+      return response.data;
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      if (Math.floor((error.response?.data?.code || 0) / 100) === 4) {
+        if (error.response.data.code === 419) {
+          thunkAPI.dispatch(setBodyError(error));
+        } else {
+          const errorBody = {
+            title: "Failed",
+            description: `Your data was not submitted. ${message}.`,
+          };
+          thunkAPI.dispatch(showModalError(errorBody));
+        }
+        return thunkAPI.rejectWithValue(error);
+      }
+      return thunkAPI.rejectWithValue(error);
+    }
+  },
 );
 
 export const approveRejectGLAccount = createAsyncThunk(
@@ -370,9 +407,8 @@ export const approveRejectGLAccount = createAsyncThunk(
       const response = await ratingBillingHttpService.createData(url, body);
       const successApprove = {
         title: `Successful`,
-        description: `Your data has been ${
-          body.action === "APPROVE" ? "approved" : "rejected"
-        }.`,
+        description: `Your data has been ${body.action === "APPROVE" ? "approved" : "rejected"
+          }.`,
       };
       thunkAPI.dispatch(showModalSuccess(successApprove));
       return response.data;
@@ -389,9 +425,8 @@ export const approveRejectGLAccount = createAsyncThunk(
         } else {
           const errorBody = {
             title: "Failed",
-            description: `Your data was not ${
-              body.action === "APPROVE" ? "approved" : "rejected"
-            }. ${message}.`,
+            description: `Your data was not ${body.action === "APPROVE" ? "approved" : "rejected"
+              }. ${message}.`,
             return: false,
           };
           thunkAPI.dispatch(showModalError(errorBody));
@@ -400,7 +435,7 @@ export const approveRejectGLAccount = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const approveRejectInactiveGLAccount = createAsyncThunk(
@@ -411,9 +446,8 @@ export const approveRejectInactiveGLAccount = createAsyncThunk(
       const response = await ratingBillingHttpService.createData(url, body);
       const successApprove = {
         title: `Successful`,
-        description: `Your data has been ${
-          body.action === "APPROVE" ? "approved" : "rejected"
-        }.`,
+        description: `Your data has been ${body.action === "APPROVE" ? "approved" : "rejected"
+          }.`,
       };
       thunkAPI.dispatch(showModalSuccess(successApprove));
       return response.data;
@@ -430,9 +464,8 @@ export const approveRejectInactiveGLAccount = createAsyncThunk(
         } else {
           const errorBody = {
             title: "Failed",
-            description: `Your data was not ${
-              body.action === "APPROVE" ? "approved" : "rejected"
-            }. ${message}.`,
+            description: `Your data was not ${body.action === "APPROVE" ? "approved" : "rejected"
+              }. ${message}.`,
             return: false,
           };
           thunkAPI.dispatch(showModalError(errorBody));
@@ -441,7 +474,46 @@ export const approveRejectInactiveGLAccount = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
+);
+
+export const approveRejectActivatedGLAccount = createAsyncThunk(
+  "APPROVE_REJECT_ACTIVATED_GL_ACCOUNT",
+  async ({ id, body }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/gl-account/${id}/approval-activated`;
+      const response = await ratingBillingHttpService.createData(url, body);
+      const successApprove = {
+        title: `Successful`,
+        description: `Your data has been ${body.action === "APPROVE" ? "approved" : "rejected"
+          }.`,
+      };
+      thunkAPI.dispatch(showModalSuccess(successApprove));
+      return response.data;
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      if (Math.floor((error.response?.data?.code || 0) / 100) === 4) {
+        if (error.response.data.code === 419) {
+          thunkAPI.dispatch(setBodyError(error));
+        } else {
+          const errorBody = {
+            title: "Failed",
+            description: `Your data was not ${body.action === "APPROVE" ? "approved" : "rejected"
+              }. ${message}.`,
+            return: false,
+          };
+          thunkAPI.dispatch(showModalError(errorBody));
+        }
+        return thunkAPI.rejectWithValue(error);
+      }
+      return thunkAPI.rejectWithValue(error);
+    }
+  },
 );
 
 export const downloadGLAccountAttachment = createAsyncThunk(
@@ -454,7 +526,7 @@ export const downloadGLAccountAttachment = createAsyncThunk(
     } catch (err) {
       rejectWithValue(err);
     }
-  }
+  },
 );
 
 export const downloadGLAccount = createAsyncThunk(
@@ -473,11 +545,11 @@ export const downloadGLAccount = createAsyncThunk(
           error: error,
           action: "DOWNLOAD_GL_ACCOUNT",
           back: false,
-        })
+        }),
       );
       return thunkAPI.rejectWithValue(error.response?.data);
     }
-  }
+  },
 );
 
 export const getAllGLAccountApprovalList = createAsyncThunk(
@@ -504,7 +576,7 @@ export const getAllGLAccountApprovalList = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const bulkApproveGLAccount = createAsyncThunk(
@@ -541,7 +613,7 @@ export const bulkApproveGLAccount = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error);
     }
-  }
+  },
 );
 
 const glAccountSlice = createSlice({
@@ -559,12 +631,28 @@ const glAccountSlice = createSlice({
   extraReducers: (builder) => {
     builder
       // get all
-      .addCase(getAllGLAccountPaginate.pending, (state) => {
-        state.loading = true;
+      .addCase(getAllGLAccountPaginate.pending, (state, action) => {
+        if (!action.meta.arg?.isLoadMore) {
+          state.loading = true;
+        }
       })
       .addCase(getAllGLAccountPaginate.fulfilled, (state, action) => {
         state.data = action.payload;
         state.loading = false;
+        const newResult = action.payload?.result || [];
+        const isLoadMore = action.payload?.isLoadMore;
+        if (isLoadMore) {
+          const existingIds = new Set(
+            (state.gl_account_list || []).map((item) => item.glAccountId),
+          );
+          const uniqueNewData = newResult.filter(
+            (item) => !existingIds.has(item.glAccountId),
+          );
+          state.gl_account_list = [...state.gl_account_list, ...uniqueNewData];
+        } else {
+          state.gl_account_list = newResult;
+        }
+        state.gl_account_pagination = action.payload?.page || null;
       })
       .addCase(getAllGLAccountPaginate.rejected, (state) => {
         state.loading = false;
@@ -665,6 +753,19 @@ const glAccountSlice = createSlice({
         state.loading = false;
         state.message = action.payload;
       })
+      // request activate
+      .addCase(requestActivateGLAccount.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(requestActivateGLAccount.fulfilled, (state) => {
+        state.isSuccess = true;
+        state.loading = false;
+      })
+      .addCase(requestActivateGLAccount.rejected, (state, action) => {
+        state.isFailed = true;
+        state.loading = false;
+        state.message = action.payload;
+      })
       // approve reject
       .addCase(approveRejectGLAccount.pending, (state) => {
         state.loading = true;
@@ -687,6 +788,19 @@ const glAccountSlice = createSlice({
         state.loading = false;
       })
       .addCase(approveRejectInactiveGLAccount.rejected, (state, action) => {
+        state.isFailed = true;
+        state.loading = false;
+        state.message = action.payload;
+      })
+      // approve reject activated
+      .addCase(approveRejectActivatedGLAccount.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(approveRejectActivatedGLAccount.fulfilled, (state) => {
+        state.isSuccess = true;
+        state.loading = false;
+      })
+      .addCase(approveRejectActivatedGLAccount.rejected, (state, action) => {
         state.isFailed = true;
         state.loading = false;
         state.message = action.payload;

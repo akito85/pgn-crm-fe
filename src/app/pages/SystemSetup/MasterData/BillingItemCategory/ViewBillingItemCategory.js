@@ -7,7 +7,6 @@ import DetailSection from "../../../../../components/DetailSection";
 import DetailText from "../../../../../components/DetailText";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import { getDetailBillingItemCategory } from "../../../../../redux/slices/system_setup/master_data/billingItemCategory";
 import { SYSTEM_SETUP_ROUTES } from "../../../../../routes/system_setup/setup_routes";
 
@@ -66,7 +65,7 @@ const ViewBillingItemCategory = () => {
   }, [navigate]);
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
       <Spin spinning={loading}>
         <DetailSection header={"TRANSACTION MAPPING CATEGORY INFORMATION"}>
@@ -106,7 +105,7 @@ const ViewBillingItemCategory = () => {
           </ButtonComponent>
         </div>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

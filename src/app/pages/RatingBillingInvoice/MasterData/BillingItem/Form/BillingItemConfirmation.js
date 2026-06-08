@@ -20,6 +20,8 @@ const BillingItemConfirmation = ({
   dataApprovalTable = [],
   dataAttachment = [],
   listApproval = [],
+  dataCriteriaTable = [],
+  dataMappingItemTable = [],
 }) => {
   const [detailPage, setDetailPage] = useState(listDetailPage[0].value);
 
@@ -35,6 +37,8 @@ const BillingItemConfirmation = ({
             dataConfirm={dataConfirm}
             dataTable={dataTable}
             allData={allData}
+            dataCriteriaTable={dataCriteriaTable}
+            dataMappingItemTable={dataMappingItemTable}
           />
         );
       case listDetailPage[1].value:

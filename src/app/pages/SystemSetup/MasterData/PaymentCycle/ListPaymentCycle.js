@@ -3,21 +3,22 @@ import {
     Spin,
     Checkbox,
 } from "antd";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import CardContainer from "../../../../../components/CardContainer";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import Toolbar from "../../../../../components/Toolbar";
 import TableRBI from "../../../../../components/TableRBI";
+import { DownloadOutlined } from "@ant-design/icons";
 import SVGIcon from "../../../../../assets/Icon/index";
-import { EyeOutlined } from "@ant-design/icons";
+import IconViewList from "../../../../../assets/Icon/Nx/IconViewList";
 import StatusComponent from "../../../../../components/StatusComponent";
 import {
     getListPaymentCycle,
     inactivePaymentCycle,
+    openClosePaymentCycle,
     getApprovalHistory,
     getAllApprovalList,
     getListApprovalById,
@@ -26,20 +27,50 @@ import {
 import {
     renderColumn,
     renderDateColumn,
+    disabledActionByStatus,
 } from "../../../../../utils";
 import { getColumnSearchPropsPaging } from "../../../../../utils/getColumnSearchProps";
 import { useColumnActionPermission } from "../../../../../components/ColumnActionPermission";
-import ModalInactivateWithHierarchy from "../../../../../components/Modal/ModalInactivateWithHierarchy";
+import ModalActiveInactive from "../../../../../components/Modal/ModalActiveInactive";
 import ModalHistory from "../../../../../components/Modal/ModalHistory";
+import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
+import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrReject";
+
+const escapeHtml = (text) => {
+    const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+    return text ? String(text).replace(/[&<>"']/g, (s) => map[s]) : text;
+};
+
+const getSafeErrorMessage = (error) => {
+    const message = error?.response?.data?.message || error?.message || 'An error occurred';
+    const safeMessages = ['Validation failed', 'Invalid input', 'Unauthorized'];
+    return safeMessages.some((m) => message.includes(m)) ? message : 'An unexpected error occurred';
+};
 
 const ListPaymentCycle = () => {
     const dispatch = useDispatch();
-    const navigate = useNavigate();
     const searchInput = useRef(null);
+    const [fixedColumns, setFixedColumns] = useState(() => ({
+        left: ["no"],
+        right: ["status", "statusApproval", "action"],
+    }));
 
-    // State
+    const COLUMN_WIDTH = {
+        PERIOD: 150,
+        TIME_UNIT: 120,
+        BEGIN_CYCLE: 120,
+        END_CYCLE: 120,
+        DATE: 150,
+        STATUS_OPEN: 120,
+        STATUS: 110,
+        STATUS_APPROVAL: 160,
+        ACTION: 60,
+        NO: 90,
+    };
+
+    const initialPageSize = 100;
+    const [loadMoreSize] = useState(20);
     const [page, setPage] = useState(1);
-    const [pageSize, setPageSize] = useState(10);
     const [searchText, setSearchText] = useState("");
     const [searchedColumn, setSearchedColumn] = useState("");
     const [search, setSearch] = useState({});
@@ -49,6 +80,10 @@ const ListPaymentCycle = () => {
     const [modalActiveInactive, setModalActiveInactive] = useState(false);
     const [status, setStatus] = useState("");
     const [dataInactivate, setDataInactivate] = useState(null);
+    const [modalOpenClose, setModalOpenClose] = useState(false);
+    const [statusOpen, setStatusOpen] = useState("");
+    const [dataOpenClose, setDataOpenClose] = useState(null);
+    const [openOrClose, setOpenOrClose] = useState("");
     const [openModalHistory, setOpenModalHistory] = useState(false);
     const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
 
@@ -60,18 +95,42 @@ const ListPaymentCycle = () => {
 
     const handleFetch = useCallback(() => {
         const params = {
-            page: page,
-            pageSize: pageSize,
+            page: 1,
+            pageSize: initialPageSize,
             search: encodeURIComponent(JSON.stringify(search)),
             sort: sort,
+            isLoadMore: false,
         };
 
         dispatch(getListPaymentCycle(params));
-    }, [dispatch, page, pageSize, JSON.stringify(search), sort]);
+    }, [dispatch, initialPageSize, JSON.stringify(search), sort]);
 
     useEffect(() => {
         handleFetch();
     }, [handleFetch]);
+
+    const hasMore = (data?.result?.length || 0) < (data?.page?.totalElements || 0);
+
+    const handleLoadMore = async () => {
+        if (!hasMore) return;
+        const currentDataLength = data?.result?.length || 0;
+        const nextPage = Math.floor(currentDataLength / loadMoreSize) + 1;
+        await dispatch(
+            getListPaymentCycle({
+                search: encodeURIComponent(JSON.stringify(search)),
+                page: nextPage,
+                pageSize: loadMoreSize,
+                sort,
+                isLoadMore: true,
+            })
+        );
+        setPage(nextPage);
+    };
+
+    const handleRefresh = () => {
+        setPage(1);
+        handleFetch();
+    };
 
     // Approval History Logic
     useEffect(() => {
@@ -120,6 +179,7 @@ const ListPaymentCycle = () => {
             idPaymentCycle: dataInactivate,
             remark: res.remark,
             status: status === "INACTIVE" ? "ACTIVE" : "INACTIVE",
+            appHierId: res.approvalHierarchy,
         };
         dispatch(inactivePaymentCycle(data))
             .unwrap()
@@ -130,26 +190,40 @@ const ListPaymentCycle = () => {
             });
     };
 
+    const handleCancelModalOpenClose = () => {
+        setDataOpenClose(null);
+        setModalOpenClose(false);
+    };
+
+    const handleSubmitModalOpenClose = (res, handleClear) => {
+        const data = {
+            id: dataOpenClose,
+            statusOpen: statusOpen === "OPEN" ? "CLOSE" : "OPEN",
+            remark: res.remark,
+        };
+        dispatch(openClosePaymentCycle(data))
+            .unwrap()
+            .then(() => {
+                handleClear();
+                handleCancelModalOpenClose();
+                handleFetch();
+            });
+    };
+
     // Function Search Column
     const handleSearch = (selectedKeys, confirm, dataIndex) => {
         confirm();
-        setSearchText(selectedKeys[0]);
-        setSearchedColumn(selectedKeys[0] ? dataIndex : "");
+        const sanitizedValue = escapeHtml(selectedKeys[0]);
+        setSearchText(sanitizedValue);
+        setSearchedColumn(sanitizedValue ? dataIndex : "");
         setSearch((prevState) => {
-            if (prevState[dataIndex] !== selectedKeys[0]) {
-                setPage(1);
-            }
-            return {
+            const nextSearch = {
                 ...prevState,
-                [dataIndex]: selectedKeys[0],
+                [dataIndex]: sanitizedValue,
             };
+            return nextSearch;
         });
-    };
-
-    const handleChange = (page, pageSize) => {
-
-        setPage(page);
-        setPageSize(pageSize);
+        setPage(1);
     };
 
     const onSort = (_, __, sort) => {
@@ -164,8 +238,8 @@ const ListPaymentCycle = () => {
     const handleDownload = () => {
         const params = {
             search: encodeURIComponent(JSON.stringify(search)),
-            page: page,
-            pageSize: pageSize,
+            page: 1,
+            pageSize: initialPageSize,
             sort: sort,
         };
         dispatch(getDownloadPaymentCycle(params));
@@ -199,30 +273,44 @@ const ListPaymentCycle = () => {
 
         setSearch(simpleSearch);
         setPage(1);
+        dispatch(
+            getListPaymentCycle({
+                search: encodeURIComponent(JSON.stringify(simpleSearch)),
+                page: 1,
+                pageSize: initialPageSize,
+                sort,
+                isLoadMore: false,
+            })
+        );
     };
 
     const itemActions = [
         // toolbar items
         {
+            action: "Download",
+            render: (
+                <ButtonComponent
+                    onClick={handleDownload}
+                    type="submit"
+                    border={false}
+                    icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
+                >
+                    Download List
+                </ButtonComponent>
+            ),
+        },
+        {
             action: "Create",
             render: (
-                <div className="flex gap-3">
+                <Link to="/system-setup/payment-cycle/create">
                     <ButtonComponent
-                        type="primary"
-                        icon={<SVGIcon name="IconDownload" width={18} height={20} color="white" />}
-                        onClick={handleDownload}
-                        label="Download List"
-                    >
-                        Download List
-                    </ButtonComponent>
-                    <ButtonComponent
-                        icon={<SVGIcon name="IconButtonCreate" width={24} />}
+                        icon={<SVGIcon name="IconButtonCreate" width={20} />}
                         type="submit"
-                        onClick={() => navigate("/system-setup/payment-cycle/create")}
+                        border={false}
                     >
                         Create
                     </ButtonComponent>
-                </div>
+                </Link>
             ),
         },
 
@@ -236,8 +324,9 @@ const ListPaymentCycle = () => {
                         <Link
                             to="/system-setup/payment-cycle/view"
                             state={{ id: record.idPaymentCycle, statusApproval: record.statusApproval }}
+                            className="inline-flex items-center text-[#1976D2] hover:text-[#1976D2] transition-colors duration-200"
                         >
-                            <EyeOutlined style={{ fontSize: "24px" }} />
+                            <IconViewList width={20} />
                         </Link>
                     </Tooltip>
                 );
@@ -248,41 +337,46 @@ const ListPaymentCycle = () => {
             action: "Update",
             type: "table",
             render: (record, data_length) => {
-                const isEditable = record.status?.toUpperCase() === "DRAFT" || record.statusApproval?.toUpperCase() === "REJECTED";
+                const isEditable = record.statusApproval?.toUpperCase() === "DRAFT" || record.statusApproval?.toUpperCase() === "REJECTED";
                 return (
                     data_length > 3 ? (
                         <Link
-                            to={isEditable ? "/system-setup/payment-cycle/update" : "#"}
+                            to="/system-setup/payment-cycle/update"
                             state={{ id: record.idPaymentCycle }}
+                            className={!isEditable ? "pointer-events-none" : ""}
                         >
                             <ButtonComponent
-                                className="gap-5 w-full"
+                                className="gap-5"
                                 icon={
                                     <SVGIcon name="IconEdit" width={24} color={isEditable ? "#0075bf" : "#8D91A0"} />
                                 }
                                 border={false}
                                 disabled={!isEditable}
+                                type="action"
                             >
-                                <span className={"text-black gap-2 text-xl text-center w-full"}>
+                                <span className={"text-black gap-2 text-center"}>
                                     Update
                                 </span>
                             </ButtonComponent>
                         </Link>
                     ) : (
-                        <Tooltip title={isEditable ? "Update" : "Update Disabled"}>
-                            <Link
-                                to={isEditable ? "/system-setup/payment-cycle/update" : "#"}
-                                state={{ id: record.idPaymentCycle }}
+                        <Tooltip title="Update">
+                            <div
+                                onClick={(e) => { if (!isEditable) e.preventDefault(); }}
+                                className={!isEditable ? "cursor-not-allowed opacity-50" : "cursor-pointer"}
                             >
-                                <div border={false}>
+                                <Link
+                                    to="/system-setup/payment-cycle/update"
+                                    state={{ id: record.idPaymentCycle }}
+                                    className={!isEditable ? "pointer-events-none" : ""}
+                                >
                                     <SVGIcon
                                         name="IconEdit"
                                         color={isEditable ? "#ACC424" : "#8D91A0"}
-                                        width={24}
-                                        className={isEditable ? undefined : "cursor-not-allowed"}
+                                        width={20}
                                     />
-                                </div>
-                            </Link>
+                                </Link>
+                            </div>
                         </Tooltip>
                     )
                 );
@@ -293,44 +387,103 @@ const ListPaymentCycle = () => {
             type: "table",
             render: (record, data_length) => {
                 const statusLowerCase = record?.status?.toLowerCase();
-                const isActivateOrInactivate =
-                    (record.statusApproval === "APPROVED" && record.status === "ACTIVE") ||
-                    (record.statusApproval === "DRAFT" && record.status === "ACTIVE") ||
-                    (record.statusApproval === "REJECTED" && record.status === "ACTIVE") ||
-                    (record.statusApproval === "WAITING_APPROVAL" && record.status === "ACTIVE");
-
                 return (
                     data_length > 3 ? (
-                        <ButtonComponent
-                            border={false}
-                            onClick={() => {
-                                setDataInactivate(record?.idPaymentCycle);
-                                setModalActiveInactive(true);
-                                setStatus(record?.status);
-                            }}
-                            disabled={!isActivateOrInactivate}
-                        >
-                            <Checkbox
+                        <div className="w-full">
+                            <ButtonComponent
                                 border={false}
-                                disabled={record?.status !== "ACTIVE"}
-                                checked={record?.status !== "ACTIVE"}
-                            />
-                            <span className={"text-black ml-6 gap-2 text-xl text-center w-full"}>
-                                {record?.status === "ACTIVE" ? "Inactivate" : "Activate"}
-                            </span>
-                        </ButtonComponent>
-                    ) : (
-                        <Tooltip title={statusLowerCase === "active" ? "Inactivate" : "Activate"}>
-                            <div>
+                                className={"gap-5"}
+                                onClick={() => {
+                                    setDataInactivate(record?.idPaymentCycle);
+                                    setModalActiveInactive(true);
+                                    setStatus(record?.status);
+                                }}
+                                disabled={disabledActionByStatus("activate", record?.status, record?.statusApproval)}
+                                type="action"
+                            >
                                 <Checkbox
-                                    border={false}
                                     onClick={() => {
                                         setDataInactivate(record?.idPaymentCycle);
                                         setModalActiveInactive(true);
                                         setStatus(record?.status);
                                     }}
-                                    checked={record?.status !== "ACTIVE"}
-                                    disabled={record?.status !== "ACTIVE"}
+                                    checked={record?.status?.toUpperCase() !== "ACTIVE"}
+                                    disabled={disabledActionByStatus("activate", record?.status, record?.statusApproval)}
+                                />
+                                <span className={"text-black ml-6 gap-2 text-center"}>
+                                    {record?.status?.toUpperCase() === "ACTIVE" ? "Inactivate" : "Activate"}
+                                </span>
+                            </ButtonComponent>
+                        </div>
+                    ) : (
+                        <Tooltip title={statusLowerCase === "active" ? "Inactivate" : "Activate"}>
+                            <div>
+                                <Checkbox
+                                    checked={record?.status?.toUpperCase() !== "ACTIVE"}
+                                    onClick={() => {
+                                        setDataInactivate(record?.idPaymentCycle);
+                                        setModalActiveInactive(true);
+                                        setStatus(record?.status);
+                                    }}
+                                    disabled={disabledActionByStatus("activate", record?.status, record?.statusApproval)}
+                                />
+                            </div>
+                        </Tooltip>
+                    )
+                );
+            },
+        },
+        {
+            // action open-close
+            action: "update",
+            type: "table",
+            render: (record, data_length) => {
+                const canOpenClose = record?.statusApproval?.toUpperCase() === "APPROVED" && record?.status?.toUpperCase() === "ACTIVE";
+                const statusOpenLowerCase = record?.statusOpen?.toLowerCase();
+                const label = statusOpenLowerCase === "open" ? "Close Cycle" : "Open Cycle";
+                const iconName = statusOpenLowerCase === "open" ? "IconPaymentClose" : "IconPaymentOpen";
+                const iconColor = !canOpenClose ? "#8D91A0" : (statusOpenLowerCase === "open" ? "#D90000" : "#0075bf");
+                
+                return (
+                    data_length > 3 ? (
+                        <ButtonComponent
+                            className="gap-5"
+                            icon={<SVGIcon name={iconName} color={iconColor} width={24} />}
+                            border={false}
+                            disabled={!canOpenClose}
+                            onClick={() => {
+                                if (canOpenClose) {
+                                    setDataOpenClose(record?.idPaymentCycle);
+                                    setModalOpenClose(true);
+                                    setStatusOpen(record?.statusOpen?.toUpperCase());
+                                    setOpenOrClose(statusOpenLowerCase === "open" ? "close" : "open");
+                                }
+                            }}
+                            type="action"
+                        >
+                            <span className="text-black gap-2 text-center">
+                                {label}
+                            </span>
+                        </ButtonComponent>
+                    ) : (
+                        <Tooltip title={label}>
+                            <div
+                                onClick={(e) => {
+                                    if (!canOpenClose) {
+                                        e.preventDefault();
+                                        return;
+                                    }
+                                    setDataOpenClose(record?.idPaymentCycle);
+                                    setModalOpenClose(true);
+                                    setStatusOpen(record?.statusOpen?.toUpperCase());
+                                    setOpenOrClose(statusOpenLowerCase === "open" ? "close" : "open");
+                                }}
+                                className={!canOpenClose ? "cursor-not-allowed opacity-50" : "cursor-pointer"}
+                            >
+                                <SVGIcon
+                                    name={iconName}
+                                    color={iconColor}
+                                    width={24}
                                 />
                             </div>
                         </Tooltip>
@@ -349,25 +502,17 @@ const ListPaymentCycle = () => {
                             icon={<SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />}
                             border={false}
                             onClick={() => handleApprovalHistory(record)}
+                            type="action"
                         >
-                            <span className={"text-black gap-2 text-xl text-center"}>
+                            <span className={"text-black gap-2 text-center"}>
                                 Approval History
                             </span>
                         </ButtonComponent>
                     ) : (
                         <Tooltip title={'Approval History'}>
-                            <button
-                                type="button"
-                                style={{ outline: 'none', cursor: 'pointer', background: 'none', border: 'none', padding: 0 }}
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter' || e.key === ' ') {
-                                        handleApprovalHistory(record);
-                                    }
-                                }}
-                                onClick={() => handleApprovalHistory(record)}
-                            >
+                            <div onClick={() => handleApprovalHistory(record)} className="cursor-pointer">
                                 <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
-                            </button>
+                            </div>
                         </Tooltip>
                     )
                 );
@@ -375,307 +520,337 @@ const ListPaymentCycle = () => {
         },
     ];
 
-    const columns = [
-        {
-            title: "NO",
-            key: "no",
-            width: 60,
-            dataIndex: "key",
-            align: "center",
-            isClassification: true,
-            render: (text, object, index) => (page - 1) * pageSize + index + 1,
-        },
-        {
-            title: "PERIOD",
-            dataIndex: "periodName",
-            key: "periodName",
-            align: "left",
-            sorter: true,
-            ...getColumnSearchPropsPaging(
-                "periodName",
-                searchInput,
-                searchedColumn,
-                searchText,
-                handleSearch,
-                true
-            ),
-            render: (text) =>
-                renderColumn(
-                    "periodName",
-                    searchedColumn,
-                    searchText,
-                    text,
-                    true,
-                    "input",
-                    search
-                ),
-        },
-
-        {
-            title: "BEGIN CYCLE",
-            dataIndex: "beginCycle",
-            key: "beginCycle",
-            align: "right",
-            sorter: true,
-            ...getColumnSearchPropsPaging(
-                "beginCycle",
-                searchInput,
-                searchedColumn,
-                searchText,
-                handleSearch,
-                true
-            ),
-            render: (text) =>
-                renderColumn(
-                    "beginCycle",
-                    searchedColumn,
-                    searchText,
-                    text,
-                    true,
-                    "input",
-                    search
-                ),
-        },
-        {
-            title: "END CYCLE",
-            dataIndex: "endCycle",
-            key: "endCycle",
-            align: "right",
-            sorter: true,
-            ...getColumnSearchPropsPaging(
-                "endCycle",
-                searchInput,
-                searchedColumn,
-                searchText,
-                handleSearch,
-                true
-            ),
-            render: (text) =>
-                renderColumn(
-                    "endCycle",
-                    searchedColumn,
-                    searchText,
-                    text,
-                    true,
-                    "input",
-                    search
-                ),
-        },
-        {
-            title: "TIME UNIT",
-            dataIndex: "timeUnit",
-            key: "timeUnit",
-            sorter: true,
-            ...getColumnSearchPropsPaging(
-                "timeUnit",
-                searchInput,
-                searchedColumn,
-                searchText,
-                handleSearch,
-                true
-            ),
-            render: (text) =>
-                renderColumn(
-                    "timeUnit",
-                    searchedColumn,
-                    searchText,
-                    text,
-                    true,
-                    "input",
-                    search
-                ),
-        },
-        {
-            title: "START DATE",
-            dataIndex: "startDate",
-            key: "startDate",
-            sorter: true,
-            align: "center",
-            ...getColumnSearchPropsPaging(
-                "startDate",
-                searchInput,
-                searchedColumn,
-                searchText,
-                handleSearch,
-                false,
-                "date"
-            ),
-            render: (v) =>
-                renderDateColumn(
-                    "startDate",
-                    searchedColumn,
-                    searchText,
-                    v,
-                    "date",
-                    search
-                ),
-        },
-        {
-            title: "END DATE",
-            dataIndex: "endDate",
-            key: "endDate",
-            sorter: true,
-            align: "center",
-            ...getColumnSearchPropsPaging(
-                "endDate",
-                searchInput,
-                searchedColumn,
-                searchText,
-                handleSearch,
-                false,
-                "date"
-            ),
-            render: (v) =>
-                renderDateColumn(
-                    "endDate",
-                    searchedColumn,
-                    searchText,
-                    v,
-                    "date",
-                    search
-                ),
-        },
-        {
-            title: "APPHIER_ID",
-            dataIndex: "appHierId",
-            key: "appHierId",
-            sorter: true,
-            ...getColumnSearchPropsPaging(
-                "appHierId",
-                searchInput,
-                searchedColumn,
-                searchText,
-                handleSearch,
-                true
-            ),
-            render: (text) =>
-                renderColumn(
-                    "appHierId",
-                    searchedColumn,
-                    searchText,
-                    text,
-                    true,
-                    "input",
-                    search
-                ),
-        },
-        {
-            title: "DESCRIPTION",
-            key: "description",
-            dataIndex: "description",
-            sorter: true,
-            ellipsis: {
-                showTitle: false,
+    const baseColumns = useMemo(
+        () => [
+            {
+                title: "NO",
+                key: "no",
+                width: COLUMN_WIDTH.NO,
+                align: "center",
+                isClassification: true,
+                render: (text, object, index) => index + 1,
             },
-            ...getColumnSearchPropsPaging(
-                "description",
-                searchInput,
-                searchedColumn,
-                searchText,
-                handleSearch,
-                false
-            ),
-            render: (text) =>
-                renderColumn(
+            {
+                title: "PERIOD",
+                dataIndex: "periodName",
+                key: "periodName",
+                align: "left",
+                sorter: true,
+                ...getColumnSearchPropsPaging(
+                    "periodName",
+                    searchInput,
+                    searchedColumn,
+                    searchText,
+                    handleSearch,
+                    true
+                ),
+                render: (text) =>
+                    renderColumn(
+                        "periodName",
+                        searchedColumn,
+                        searchText,
+                        text,
+                        true,
+                        "input",
+                        search
+                    ),
+            },
+
+            {
+                title: "BEGIN CYCLE",
+                dataIndex: "beginCycle",
+                key: "beginCycle",
+                align: "right",
+                sorter: true,
+                ...getColumnSearchPropsPaging(
+                    "beginCycle",
+                    searchInput,
+                    searchedColumn,
+                    searchText,
+                    handleSearch,
+                    true
+                ),
+                render: (text) =>
+                    renderColumn(
+                        "beginCycle",
+                        searchedColumn,
+                        searchText,
+                        text,
+                        true,
+                        "input",
+                        search
+                    ),
+            },
+            {
+                title: "END CYCLE",
+                dataIndex: "endCycle",
+                key: "endCycle",
+                align: "right",
+                sorter: true,
+                ...getColumnSearchPropsPaging(
+                    "endCycle",
+                    searchInput,
+                    searchedColumn,
+                    searchText,
+                    handleSearch,
+                    true
+                ),
+                render: (text) =>
+                    renderColumn(
+                        "endCycle",
+                        searchedColumn,
+                        searchText,
+                        text,
+                        true,
+                        "input",
+                        search
+                    ),
+            },
+            {
+                title: "TIME UNIT",
+                dataIndex: "timeUnit",
+                key: "timeUnit",
+                sorter: true,
+                ...getColumnSearchPropsPaging(
+                    "timeUnit",
+                    searchInput,
+                    searchedColumn,
+                    searchText,
+                    handleSearch,
+                    true
+                ),
+                render: (text) =>
+                    renderColumn(
+                        "timeUnit",
+                        searchedColumn,
+                        searchText,
+                        text,
+                        true,
+                        "input",
+                        search
+                    ),
+            },
+            {
+                title: "START DATE",
+                dataIndex: "startDate",
+                key: "startDate",
+                sorter: true,
+                align: "center",
+                ...getColumnSearchPropsPaging(
+                    "startDate",
+                    searchInput,
+                    searchedColumn,
+                    searchText,
+                    handleSearch,
+                    false,
+                    "date"
+                ),
+                render: (v) =>
+                    renderDateColumn(
+                        "startDate",
+                        searchedColumn,
+                        searchText,
+                        v,
+                        "date",
+                        search
+                    ),
+            },
+            {
+                title: "END DATE",
+                dataIndex: "endDate",
+                key: "endDate",
+                sorter: true,
+                align: "center",
+                ...getColumnSearchPropsPaging(
+                    "endDate",
+                    searchInput,
+                    searchedColumn,
+                    searchText,
+                    handleSearch,
+                    false,
+                    "date"
+                ),
+                render: (v) =>
+                    renderDateColumn(
+                        "endDate",
+                        searchedColumn,
+                        searchText,
+                        v,
+                        "date",
+                        search
+                    ),
+            },
+            {
+                title: "APPHIER_ID",
+                dataIndex: "appHierId",
+                key: "appHierId",
+                sorter: true,
+                ...getColumnSearchPropsPaging(
+                    "appHierId",
+                    searchInput,
+                    searchedColumn,
+                    searchText,
+                    handleSearch,
+                    true
+                ),
+                render: (text) =>
+                    renderColumn(
+                        "appHierId",
+                        searchedColumn,
+                        searchText,
+                        text,
+                        true,
+                        "input",
+                        search
+                    ),
+            },
+            {
+                title: "DESCRIPTION",
+                key: "description",
+                dataIndex: "description",
+                sorter: true,
+                ellipsis: {
+                    showTitle: false,
+                },
+                ...getColumnSearchPropsPaging(
                     "description",
+                    searchInput,
                     searchedColumn,
                     searchText,
-                    text,
-                    true,
-                    "input",
-                    search
+                    handleSearch,
+                    false
                 ),
-        },
-        {
-            title: "STATUS OPEN",
-            dataIndex: "statusOpen",
-            key: "statusOpen",
-            width: 150,
-            sorter: true,
-            fixed: "right",
-            ...getColumnSearchPropsPaging(
-                "statusOpen",
-                searchInput,
-                searchedColumn,
-                searchText,
-                handleSearch,
-                false
-            ),
-            render: (text) => (
-                <div className="flex justify-center">
-                    <StatusComponent colour={text}>{text}</StatusComponent>
-                </div>
-            ),
-        },
-        {
-            title: "STATUS",
-            dataIndex: "status",
-            key: "status",
-            width: 150,
-            sorter: true,
-            fixed: "right",
-            ...getColumnSearchPropsPaging(
-                "status",
-                searchInput,
-                searchedColumn,
-                searchText,
-                handleSearch,
-                false
-            ),
-            render: (text) =>
-                renderColumn(
+                render: (text) =>
+                    renderColumn(
+                        "description",
+                        searchedColumn,
+                        searchText,
+                        text,
+                        true,
+                        "input",
+                        search
+                    ),
+            },
+            {
+                title: "STATUS OPEN",
+                dataIndex: "statusOpen",
+                key: "statusOpen",
+                width: COLUMN_WIDTH.STATUS_OPEN,
+                sorter: true,
+                fixed: "right",
+                ...getColumnSearchPropsPaging(
+                    "statusOpen",
+                    searchInput,
+                    searchedColumn,
+                    searchText,
+                    handleSearch,
+                    false
+                ),
+                render: (text) => (
+                    <div className="flex justify-center">
+                        <StatusComponent colour={text}>{text}</StatusComponent>
+                    </div>
+                ),
+            },
+            {
+                title: "STATUS",
+                dataIndex: "status",
+                key: "status",
+                width: COLUMN_WIDTH.STATUS,
+                sorter: true,
+                fixed: "right",
+                ...getColumnSearchPropsPaging(
                     "status",
+                    searchInput,
                     searchedColumn,
                     searchText,
-                    text ? text.toUpperCase() : text,
-                    false,
-                    "status"
+                    handleSearch,
+                    false
                 ),
-        },
-        {
-            title: "APPROVAL STATUS",
-            dataIndex: "statusApproval",
-            key: "statusApproval",
-            width: 200,
-            sorter: true,
-            fixed: "right",
-            ...getColumnSearchPropsPaging(
-                "statusApproval",
-                searchInput,
-                searchedColumn,
-                searchText,
-                handleSearch,
-                false
-            ),
-            render: (text) =>
-                renderColumn(
+                render: (text) =>
+                    renderColumn(
+                        "status",
+                        searchedColumn,
+                        searchText,
+                        text ? text.toUpperCase() : text,
+                        false,
+                        "status"
+                    ),
+            },
+            {
+                title: "APPROVAL STATUS",
+                dataIndex: "statusApproval",
+                key: "statusApproval",
+                width: COLUMN_WIDTH.STATUS_APPROVAL,
+                sorter: true,
+                fixed: "right",
+                ...getColumnSearchPropsPaging(
                     "statusApproval",
+                    searchInput,
                     searchedColumn,
                     searchText,
-                    text ? text.toUpperCase() : text,
-                    false,
-                    "status"
+                    handleSearch,
+                    false
                 ),
-        },
-    ];
+                render: (text) =>
+                    renderColumn(
+                        "status",
+                        searchedColumn,
+                        searchText,
+                        text,
+                        false,
+                        "status",
+                        search
+                    ),
+            },
+        ],
+        [search, searchText, searchedColumn, handleSearch, COLUMN_WIDTH]
+    );
+
+    const actionColsRaw = useColumnActionPermission(
+        ["view", "update", "history", "activate"],
+        itemActions
+    );
+
+    const actionCols = useMemo(
+        () =>
+            actionColsRaw.map((col) => ({
+                ...col,
+                key: col.action,
+                width: COLUMN_WIDTH.ACTION,
+                align: "center",
+            })),
+        [actionColsRaw, COLUMN_WIDTH]
+    );
+
+    const columns = useMemo(() => {
+        const base = [
+            ...baseColumns,
+            ...actionCols
+        ];
+        return applyFixedColumns(base, fixedColumns);
+    }, [baseColumns, actionCols, fixedColumns, COLUMN_WIDTH]);
+
+    const columnDefinitions = useMemo(
+        () =>
+            columns.map((col) => ({
+                key: col.key || col.dataIndex || col.title,
+                title: col.title,
+            })),
+        [columns]
+    );
 
     const routes = [
+        { path: "", breadcrumbName: "System Setup" },
+        { path: "", breadcrumbName: "Master Data" },
         {
-            path: "",
-            breadcrumbName: "System Setup",
-        },
-        {
-            path: "",
-            breadcrumbName: "Master Data",
-        },
-        {
-            path: "",
+            path: "/system-setup/payment-cycle",
             breadcrumbName: "Payment Cycle",
         },
     ];
 
     return (
-        <LayoutMenu>
+        <>
             <Spin spinning={loading}>
                 <BreadCrumb routes={routes} />
                 <CardContainer
@@ -689,30 +864,33 @@ const ListPaymentCycle = () => {
                     }
                 >
                     <TableRBI
+                        idTable="payment-cycle-table"
+                        size="small"
                         dataSource={data?.result}
-                        pageSize={pageSize}
-                        showExport={false}
-                        columns={[
-                            ...columns,
-                            ...useColumnActionPermission(
-                                ["view", "update", "history", "activate"],
-                                itemActions
-                            ),
-                        ]}
-                        current={page}
-                        onChange={handleChange}
-                        onSizeChanger={handleChange}
-                        totalData={data?.page?.totalElements}
+                        loading={loading}
+                        columns={columns}
                         onSort={onSort}
-                        tableScrolled={{
-                            x: "max-content",
-                            y: 525,
-                        }}
+                        useInfiniteScroll={true}
+                        hasMore={hasMore}
+                        onLoadMore={handleLoadMore}
+                        totalData={data?.page?.totalElements}
+                        tableScrolled={{ x: "max-content", y: 525 }}
+                        fixedColumns={fixedColumns}
+                        setFixedColumns={setFixedColumns}
+                        columnDefinitions={columnDefinitions}
+                        handleDownload={handleDownload}
+                        showExport={false}
+                        showPaginationInfo={true}
+                        paginationInfoRenderer={(total, loaded) => `Showing ${loaded} of ${total} records`}
+                        usePagination={false}
+                        showRefresh={true}
+                        onRefresh={handleRefresh}
+                        loadMoreThreshold={20}
                         onAdvanceSearch={handleAdvanceSearch}
                     />
                 </CardContainer>
-                <ModalInactivateWithHierarchy
-                    selector={"cycle"}
+                <ModalActiveInactive
+                    selector={"paymentCycle"}
                     dispatch={dispatch}
                     getAPIOption={getAllApprovalList}
                     getAPIDetail={getListApprovalById}
@@ -720,6 +898,17 @@ const ListPaymentCycle = () => {
                     openModalInactivate={modalActiveInactive}
                     handleCloseModalInactivate={handleCancelModalInactivate}
                     onFinish={handleSubmitModalInactivate}
+                />
+                <ModalApproveOrReject
+                    handleCloseModal={handleCancelModalOpenClose}
+                    onFinish={handleSubmitModalOpenClose}
+                    header={openOrClose}
+                    approveOrReject={openOrClose}
+                    menu={"Payment Cycle"}
+                    named={""}
+                    isOpen={modalOpenClose}
+                    customMessage={`Are you sure you want to ${statusOpen === "OPEN" ? "close" : "open"} this Payment Cycle?`}
+                    width={850}
                 />
                 <ModalHistory
                     isOpen={openModalHistory}
@@ -731,7 +920,7 @@ const ListPaymentCycle = () => {
                     dataHistory={dataApprovalHistoryFix?.dataHistory}
                 />
             </Spin>
-        </LayoutMenu>
+        </>
     );
 };
 

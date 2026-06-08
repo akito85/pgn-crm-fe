@@ -1,6 +1,6 @@
 import { Select, Input, InputNumber } from "antd";
 import { Form } from "antd";
-import BaseContainer from "../../../../../components/BaseContainer";
+import CardContainer from "../../../../../components/CardContainer";
 import { formMessageRequired } from "../../../../../utils";
 import InputComponent from "../../../../../components/InputComponent";
 import moment from "moment";
@@ -56,47 +56,31 @@ const PaymentChannelForm = (props) => {
 
   return (
     <div>
-      <BaseContainer header={"DELIVERY CHANNEL INFORMATION"}>
-        <div className="w-full grid grid-cols-6 gap-5">
+      <CardContainer
+        header={
+          <div className="flex -my-4 justify-between items-center">
+            <p className="mt-[15px] text-primary">
+              DELIVERY CHANNEL INFORMATION
+            </p>
+          </div>
+        }
+      >
+        <div className="w-full grid grid-cols-5 gap-5">
           <Form.Item
             label={"Delivery Channel Code"}
             name={"ciCode"}
             rules={formMessageRequired("Delivery Channel Code")}
+            style={{ marginBottom: 0 }}
           >
-            <Input allowClear maxLength={4} />
+            <InputComponent maxLength={4} />
           </Form.Item>
           <Form.Item
-            label={"Name"}
+            label={"Delivery Channel Name"}
             name={"name"}
-            rules={formMessageRequired("Name")}
+            rules={formMessageRequired("Delivery Channel Name")}
+            style={{ marginBottom: 0 }}
           >
             <InputComponent />
-          </Form.Item>
-          <Form.Item
-            label={"Category"}
-            name={"category"}
-            rules={formMessageRequired("Category")}
-          >
-            <SelectComponent>
-              {dataCategory?.data?.map((data) => (
-                <Select.Option key={data.name} value={data.name}>
-                  {data.name}
-                </Select.Option>
-              ))}
-            </SelectComponent>
-          </Form.Item>
-          <Form.Item
-            label={"Type"}
-            name={"type"}
-            rules={formMessageRequired("Type")}
-          >
-            <SelectComponent>
-              {dataType?.data?.map((data) => (
-                <Select.Option key={data.name} value={data.name}>
-                  {data.name}
-                </Select.Option>
-              ))}
-            </SelectComponent>
           </Form.Item>
           <Form.Item
             label={"Start Date"}
@@ -107,6 +91,7 @@ const PaymentChannelForm = (props) => {
                 message: "Please input your Start Date!",
               },
             ]}
+            style={{ marginBottom: 0 }}
           >
             <DateComponent
               dateDisable={disabledStartDate}
@@ -116,12 +101,27 @@ const PaymentChannelForm = (props) => {
           <Form.Item
             label={"End Date"}
             name={"effEndDate"}
-            rules={formMessageRequired("End Date")}
+            rules={[{ required: false }]}
+            style={{ marginBottom: 0 }}
           >
             <DateComponent dateDisable={disabledDate} />
           </Form.Item>
+          <Form.Item
+            label={"Category"}
+            name={"category"}
+            rules={formMessageRequired("Category")}
+            style={{ marginBottom: 0 }}
+          >
+            <SelectComponent>
+              {dataCategory?.data?.map((data) => (
+                <Select.Option key={data.name} value={data.name}>
+                  {data.name}
+                </Select.Option>
+              ))}
+            </SelectComponent>
+          </Form.Item>
         </div>
-      </BaseContainer>
+      </CardContainer>
     </div>
   );
 };

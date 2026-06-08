@@ -131,17 +131,24 @@ const GeneralTempalteCreateUpdateForm = ({
                 </span>
               </>
             }
-            // rules={[
-            //   { message: requiredMessage("Template File"), required: true },
-            // ]}
+            rules={[
+              {
+                validator: () => {
+                  if (fileList && fileList.length > 0) {
+                    return Promise.resolve();
+                  }
+                  return Promise.reject(new Error(requiredMessage("Template File")));
+                },
+              },
+            ]}
           >
             <UploadTemplate
               dispatch={dispatch}
               fileList={fileList}
               setFileList={setFileList}
               setBase64Image={setBase64Image}
-              allowedFile={"pdf,rtf"}
-              accept={".pdf, .rtf"}
+              allowedFile={"rtf,docx"}
+              accept={".rtf, .docx"}
               configApplication={configApp.RATING_BILLING_SERVICE}
               getAPIGuard={getConfigFileRBIDataGeneralTemplate}
               typeRBI={"data"}

@@ -1,5 +1,6 @@
-import { Fragment } from "react";
-import { useEffect } from "react";
+import { Fragment, useEffect, useState } from "react";
+import { Collapse } from "antd";
+import SVGIcon from "../../../../assets/Icon/index";
 import DetailText from "../../../../components/DetailText";
 import { useSelector } from "react-redux";
 import {
@@ -19,7 +20,13 @@ const HeaderDetail = ({
   idCustomer = 0,
   idAccount = 0,
   variant = "card", // "default" for legacy, "card" for new design
+  collapsible = false,
 }) => {
+  const { Panel } = Collapse;
+
+  const collapseStyle = { borderRadius: 5 };
+  const panelStyle = { border: "1px solid #d9d9d9", borderRadius: 4, overflow: "hidden" };
+  const headerStyle = { fontSize: 16, fontWeight: 400, color: "#0075bf", textTransform: "uppercase" };
   const { data_accountDetail } = useSelector(
     (state) => state.accountManagement
   );
@@ -36,6 +43,137 @@ const HeaderDetail = ({
 
   // New card-based design (selected if variant is not selected)
   if (variant === "card") {
+    if (collapsible) {
+      return (
+        <Collapse
+          defaultActiveKey={["0"]}
+          style={collapseStyle}
+          expandIconPosition="end"
+          expandIcon={({ isActive }) => (
+            <SVGIcon
+              name="IconChevronDown"
+              width={24}
+              className="text-black"
+              style={{
+                transform: `translateY(-50%) rotate(${isActive ? 180 : 0}deg)`,
+                transition: "transform 0.3s",
+              }}
+            />
+          )}
+        >
+          <Panel
+            header={<span style={headerStyle}>CUSTOMER & ACCOUNT INFORMATION</span>}
+            key="0"
+            style={panelStyle}
+          >
+            <div className="flex flex-col gap-y-4">
+              <NxBaseContainer border header={"CUSTOMER INFORMATION"}>
+                <div className="w-full grid grid-cols-4 gap-4">
+                  <NxDetailText label="Customer Number">
+                    {data_accountDetail?.accountSummary?.customerNumber}
+                  </NxDetailText>
+                  <NxDetailText label="Identification Type">
+                    {data_accountDetail?.accountSummary?.customerIdentificationType}
+                  </NxDetailText>
+                  <NxDetailText label="Customer Identification Number">
+                    {data_accountDetail?.accountSummary?.customerIdentificationNumber}
+                  </NxDetailText>
+                  <NxDetailText label="Customer Name">
+                    {data_accountDetail?.accountSummary?.customerName}
+                  </NxDetailText>
+                  <NxDetailText label="Customer Type">
+                    {data_accountDetail?.accountSummary?.customerType}
+                  </NxDetailText>
+                  <NxDetailText label="Birth/Founded Date">
+                    {renderDate(data_accountDetail?.accountSummary?.birthFoundedDate, "date")}
+                  </NxDetailText>
+                  <NxDetailText label="Birth/Founded Place">
+                    {data_accountDetail?.accountSummary?.birthFoundedPlace}
+                  </NxDetailText>
+                  <NxDetailText label="Sex">
+                    {data_accountDetail?.accountSummary?.sex}
+                  </NxDetailText>
+                  <NxDetailText label="Marital Status">
+                    {data_accountDetail?.accountSummary?.maritalStatus}
+                  </NxDetailText>
+                  <NxDetailText label="Search Key">
+                    {data_accountDetail?.accountSummary?.searchKey}
+                  </NxDetailText>
+                  <NxDetailText label="Status">
+                    {data_accountDetail?.accountSummary?.customerStatus
+                      ? data_accountDetail.accountSummary.customerStatus.charAt(0).toUpperCase() +
+                        data_accountDetail.accountSummary.customerStatus.slice(1).toLowerCase()
+                      : ""}
+                  </NxDetailText>
+                  <NxDetailText label="Description">
+                    {data_accountDetail?.accountSummary?.description}
+                  </NxDetailText>
+                </div>
+              </NxBaseContainer>
+              <NxBaseContainer border header={"ACCOUNT INFORMATION"}>
+                <div className="w-full grid grid-cols-4 gap-4">
+                  <NxDetailText label="Account Number">
+                    {data_accountDetail?.accountSummary?.accountNumber}
+                  </NxDetailText>
+                  <NxDetailText label="Registration Number">
+                    {data_accountDetail?.accountSummary?.registrationNumber}
+                  </NxDetailText>
+                  <NxDetailText label="Account Name">
+                    {data_accountDetail?.accountSummary?.accountName}
+                  </NxDetailText>
+                  <NxDetailText label="Category">
+                    {data_accountDetail?.accountSummary?.accountCategory}
+                  </NxDetailText>
+                  <NxDetailText label="SOR">
+                    {data_accountDetail?.accountSummary?.sor}
+                  </NxDetailText>
+                  <NxDetailText label="Cost Center">
+                    {data_accountDetail?.accountSummary?.costCenter}
+                  </NxDetailText>
+                  <NxDetailText label="Meter Reading Codes">
+                    {data_accountDetail?.accountSummary?.meterReadingCodes}
+                  </NxDetailText>
+                  <NxDetailText label="Customer Management">
+                    {data_accountDetail?.accountSummary?.customerManagement}
+                  </NxDetailText>
+                  <NxDetailText label="Classification Type">
+                    {data_accountDetail?.accountSummary?.classificationType}
+                  </NxDetailText>
+                  <NxDetailText label="Segment">
+                    {data_accountDetail?.accountSummary?.segment}
+                  </NxDetailText>
+                  <NxDetailText label="Account Group Type">
+                    {data_accountDetail?.accountSummary?.accountGroupType}
+                  </NxDetailText>
+                  <NxDetailText label="Premise Address">
+                    {data_accountDetail?.accountSummary?.premiseAddress}
+                  </NxDetailText>
+                  <NxDetailText label="Subdistrict">
+                    {data_accountDetail?.accountSummary?.subdistrict}
+                  </NxDetailText>
+                  <NxDetailText label="District">
+                    {data_accountDetail?.accountSummary?.district}
+                  </NxDetailText>
+                  <NxDetailText label="City">
+                    {data_accountDetail?.accountSummary?.city}
+                  </NxDetailText>
+                  <NxDetailText label="Country">
+                    {data_accountDetail?.accountSummary?.country}
+                  </NxDetailText>
+                  <NxDetailText label="Longitude">
+                    {data_accountDetail?.accountSummary?.longitude}
+                  </NxDetailText>
+                  <NxDetailText label="Latitude">
+                    {data_accountDetail?.accountSummary?.latitude}
+                  </NxDetailText>
+                </div>
+              </NxBaseContainer>
+            </div>
+          </Panel>
+        </Collapse>
+      );
+    }
+
     return (
       <NxCardContainer header={"CUSTOMER & ACCOUNT INFORMATION"}>
         <div className="flex flex-col gap-y-4">

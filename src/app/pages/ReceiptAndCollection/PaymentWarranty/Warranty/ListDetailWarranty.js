@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
+import PropTypes from 'prop-types';
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Tabs, Spin } from "antd";
+import { Tabs, Spin, Alert } from "antd";
 import moment from "moment";
 import {
   getDetailWarranty,
@@ -9,40 +10,89 @@ import {
   getListApprovalById,
   getAllApprovalList,
   submitApproval,
+  getHoldDetailList,
+  getReleaseDetailList,
+  getRefundDetailList,
 } from "../../../../../redux/slices/receipt_collection/warranty";
 import DetailWarranty from "./DetailWarranty";
 import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrReject";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import FooterDetail from "../../../../../components/FooterDetail";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import BaseContainer from "../../../../../components/BaseContainer";
+import CardContainerNoBorder from "../../../../../components/CardContainerNoBorder";
+import LogHistoryInfo from "../../../../../components/LogHistoryInfo";
+import TableRBI from "../../../../../components/TableRBI";
 import { configApp } from "../../../../../constants/configApp";
 import receiptCollectionHttpService from "../../../../../redux/services/receiptCollectionHttpService";
+import { WARRANTY_APPROVAL_STATUS } from "../../../../../constants/warranty";
+import { columnsHoldInfo } from "./Modal/Table/TableHoldInfo";
+import { columnsReleaseInfo } from "./Modal/Table/TableReleaseInfo";
+import { columnsRefundInfo } from "./Modal/Table/TableRefundInfo";
+import { getDetailWarrantyMutation } from "../../../../../redux/slices/receipt_collection/warranty";
+import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
+import { useFilteredMutations } from "../../../../../hooks/useFilteredMutations";
+import { getHoldDetailColumns } from "./ColumnConfig/ColumnHoldDetail";
+import { getReleaseDetailColumns } from "./ColumnConfig/ColumnReleaseDetail";
+import { getRefundDetailColumns } from "./ColumnConfig/ColumnRefundDetail";
+import "./warrantyStyles.css";
 
-const ListDetailWarranty = () => {
+const ListDetailWarranty = ({ id: propId, isEmbedded = false }) => {
   const location = useLocation();
-  const id = location.state?.id;
+  const id = propId || location.state?.id;
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [activeTab, setActiveTab] = useState("warranty");
+  const [activeTabHold, setActiveTabHold] = useState("hold");
+  const [activeTabRelease, setActiveTabRelease] = useState("release");
+  const [activeTabRefund, setActiveTabRefund] = useState("refund");
 
   const {
     data_detail,
     data_approval_info,
     dataListAppHierId,
     dataListAppHierDetail,
-    loading,
+    dataMutation,
+    dataHoldDetailList,
+    dataReleaseDetailList,
+    dataRefundDetailList,
+    loadingDetail,
+    loadingApproval,
+    loadingMutation,
   } = useSelector((state) => state.warranty);
+
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [fixedColumns, setFixedColumns] = useState({ left: ["no"], right: [] });
+
+  const isHold = data_detail?.withHold === true; // true;
+  const isRelease = data_detail?.withRelease === true; // true;
+  const isRefund = data_detail?.withRefund === true; // true;
 
   useEffect(() => {
     if (id) {
-      dispatch(getDetailWarranty({ id }));
+      const fetchDetails = async () => {
+        try {
+          // Fetch primary detail first
+          await dispatch(getDetailWarranty({ id })).unwrap();
+          
+          // Fetch secondary details in parallel once primary is fetched
+          await Promise.all([
+            isHold ? dispatch(getHoldDetailList({ id, page: 1, pageSize: 999 })) : Promise.resolve(),
+            isRelease ? dispatch(getReleaseDetailList({ id, page: 1, pageSize: 999 })) : Promise.resolve(),
+            isRefund ? dispatch(getRefundDetailList({ id, page: 1, pageSize: 999 })) : Promise.resolve(),
+          ]);
+        } catch (error) {
+          console.error('Failed to fetch warranty details:', error);
+        }
+      };
+      
+      fetchDetails();
     }
     dispatch(getAllApprovalList());
-  }, [id, dispatch]);
+  }, [id, dispatch, isHold, isRelease, isRefund]);
 
   useEffect(() => {
     if (activeTab === "approval") {
@@ -54,7 +104,77 @@ const ListDetailWarranty = () => {
     }
   }, [activeTab, dispatch, data_detail?.appHierId]);
 
-  const approvalName = dataListAppHierId?.find(x => x.appHierId === data_detail?.appHierId)?.approvalName || data_detail?.approvalName || "-";
+  const transactionHoldItems = useFilteredMutations(dataMutation, "Hold");
+  const transactionReleaseItems = useFilteredMutations(dataMutation, "Release");
+  const transactionRefundItems = useFilteredMutations(dataMutation, "Refund");
+
+  const approvalName = dataListAppHierId?.find(x => x.appHierId === data_detail?.appHierId)?.approvalName || data_detail?.approvalName || "";
+
+  const getCommonTabs = (dataList, fallbackData, hierarchyId) => {
+    return [
+      {
+        key: "approval",
+        label: "Approval",
+        children: (
+          <div className="p-5">
+            <BaseContainer header={"APPROVAL INFORMATION"}>
+              <ApprovalComponentGeneral
+                dataTable={
+                  dataList?.length > 0
+                    ? dataList.map((a, index) => ({
+                      ...a,
+                      key: index + 1,
+                      employeeDetail: (a.employeeDetail || []).map((b, index) => ({
+                        ...b,
+                        key: index + 1,
+                      })),
+                    }))
+                    : (fallbackData?.result || [])
+                }
+                approvalName={approvalName}
+                showSelect={false}
+                disableSelect={true}
+                selectedHierarchy={hierarchyId}
+              />
+            </BaseContainer>
+          </div>
+        ),
+      },
+      {
+        key: "attachment",
+        label: "Attachment",
+        children: (
+          <div className="p-5">
+            <BaseContainer header={"ATTACHMENT INFORMATION"}>
+              <AttachmentComponent
+                data={
+                  data_detail?.attachmentDtoList
+                    ? data_detail.attachmentDtoList.map((item) => ({
+                      id: item.id,
+                      uid: item.uid || item.id,
+                      fileName: item.fileName,
+                      fileSize: item.fileSize,
+                      fileCategoryName: item.fileCategoryName,
+                      urlFile1: item.urlFile1,
+                      urlFile2: item.urlFile2,
+                      createdBy: item.createdBy,
+                      createdDate: item.createdDate ? moment(item.createdDate).format("YYYY-MM-DD HH:mm:ss") : null,
+                      dataType: "exist",
+                      fileType: item.fileType || "application/pdf"
+                    }))
+                    : []
+                }
+                type="detail"
+                typeSelector="warranty"
+                service={receiptCollectionHttpService}
+                configApplication={configApp.PAYMENT_SERVICE}
+              />
+            </BaseContainer>
+          </div>
+        ),
+      },
+    ];
+  };
 
   const items = [
     {
@@ -62,70 +182,109 @@ const ListDetailWarranty = () => {
       label: "Guarantee",
       children: <DetailWarranty data_detail={data_detail} />,
     },
+    ...getCommonTabs(dataListAppHierDetail, data_approval_info, data_detail?.appHierId),
+  ];
+
+  const processedColumnsHold = columnsHoldInfo(1, 999, null, null, "", () => {}, {}, () => {}, true);
+  const processedColumnsRelease = columnsReleaseInfo(1, 999, null, null, "", () => {}, {}, () => {}, {}, () => {}, true);
+  const processedColumnsRefund = columnsRefundInfo(1, 999, null, null, "", () => {}, {}, () => {}, {}, () => {}, true);
+
+  const customDetailColumnsHold = getHoldDetailColumns(page, pageSize);
+  const customDetailColumnsRelease = getReleaseDetailColumns(page, pageSize);
+  const customDetailColumnsRefund = getRefundDetailColumns(page, pageSize);
+
+  const itemHold = [
     {
-      key: "approval",
-      label: "Approval",
-      children: (
-        <BaseContainer header={"APPROVAL INFORMATION"}>
-          <ApprovalComponentGeneral
-            dataTable={
-              dataListAppHierDetail?.length > 0
-                ? dataListAppHierDetail.map((a, index) => ({
-                  ...a,
-                  key: index + 1,
-                  employeeDetail: a.employeeDetail.map((b, index) => ({
-                    ...b,
-                    key: index + 1,
-                  })),
-                }))
-                : (data_approval_info?.result || [])
-            }
-            approvalName={approvalName}
-            showSelect={false}
-            disableSelect={true}
-            selectedHierarchy={data_detail?.appHierId}
-          />
-        </BaseContainer>
-      ),
+      key: "hold",
+      label: "Hold",
+      children: <div className="w-full p-5">
+                  <Spin spinning={loadingMutation}>
+                    <TableRBI
+                      dataSource={(dataHoldDetailList || []).map((item, index) => ({ ...item, key: index + 1 }))}
+                      columns={customDetailColumnsHold}
+                      fixedColumns={{ left: ["NO", "warrantyCode"], right: ["holdAmount", "status", "approvalStatus"] }}
+                      current={page}
+                      pageSize={pageSize}
+                      onChange={(p, s) => { setPage(p); setPageSize(s); }}
+                      totalData={transactionHoldItems.length}
+                      tableScrolled={{ y: 525, x: 1200 }}
+                      showExport={false}
+                      pagination={false}
+                    />
+                  </Spin>
+                  <Alert style={{ marginTop: '24px', marginBottom: '16px' }} className="font-semibold w-full" message="This Approval for HOLD" type="warning" showIcon />
+                </div>,
     },
+    ...getCommonTabs(dataListAppHierDetail, data_approval_info, data_detail?.appHierId),
+  ];
+
+  const itemRelease = [
     {
-      key: "attachment",
-      label: "Attachment",
-      children: (
-        <BaseContainer header={"ATTACHMENT INFORMATION"}>
-          <AttachmentComponent
-            data={
-              data_detail?.attachmentDtoList
-                ? data_detail.attachmentDtoList.map((item) => ({
-                  id: item.id,
-                  uid: item.uid || item.id,
-                  fileName: item.fileName,
-                  fileSize: item.fileSize,
-                  fileCategoryName: item.fileCategoryName,
-                  urlFile1: item.urlFile1,
-                  urlFile2: item.urlFile2,
-                  createdBy: item.createdBy,
-                  createdDate: item.createdDate ? moment(item.createdDate).format("YYYY-MM-DD HH:mm:ss") : null,
-                  dataType: "exist",
-                  fileType: item.fileType || "application/pdf"
-                }))
-                : []
-            }
-            type="detail"
-            typeSelector="warranty"
-            service={receiptCollectionHttpService}
-            configApplication={configApp.PAYMENT_SERVICE}
-          />
-        </BaseContainer>
-      ),
+      key: "release",
+      label: "Release",
+      children: <div className="w-full p-5">
+                  <Spin spinning={loadingMutation}>
+                    <TableRBI
+                      dataSource={(dataReleaseDetailList || []).map((item, index) => ({ ...item, key: index + 1 }))}
+                      columns={customDetailColumnsRelease}
+                      fixedColumns={{ left: ["NO", "warrantyCode"], right: ["releaseAmount", "status", "approvalStatus"] }}
+                      current={page}
+                      pageSize={pageSize}
+                      onChange={(p, s) => { setPage(p); setPageSize(s); }}
+                      totalData={transactionReleaseItems.length}
+                      tableScrolled={{ y: 525, x: 1200 }}
+                      showExport={false}
+                      pagination={false}
+                    />
+                  </Spin>
+                  <Alert style={{ marginTop: '24px', marginBottom: '16px' }} className="font-semibold w-full" message="This Approval for RELEASE" type="warning" showIcon />
+                </div>,
     },
+    ...getCommonTabs(dataListAppHierDetail, data_approval_info, data_detail?.appHierId),
+  ];
+
+  const itemRefund = [
+    {
+      key: "refund",
+      label: "Refund",
+      children: <div className="w-full p-5">
+                  <Spin spinning={loadingMutation}>
+                    <TableRBI
+                      dataSource={(dataRefundDetailList || []).map((item, index) => ({ ...item, key: index + 1 }))}
+                      columns={customDetailColumnsRefund}
+                      fixedColumns={{ left: ["NO", "receiptCode"], right: ["refundAmount", "currency"] }}
+                      current={page}
+                      pageSize={pageSize}
+                      onChange={(p, s) => { setPage(p); setPageSize(s); }}
+                      totalData={transactionRefundItems.length}
+                      tableScrolled={{ y: 525, x: 1200 }}
+                      showExport={false}
+                      pagination={false}
+                    />
+                  </Spin>
+                  <Alert style={{ marginTop: '24px', marginBottom: '16px' }} className="font-semibold w-full" message="This Approval for REFUND" type="warning" showIcon />
+                </div>,
+    },
+    ...getCommonTabs(dataListAppHierDetail, data_approval_info, data_detail?.appHierId),
   ];
 
   const handleTabChange = (key) => {
     setActiveTab(key);
   };
 
-  const isShowButton = data_detail?.isApprover || false;
+  const handleTabChangeHold = (key) => {
+    setActiveTabHold(key);
+  };
+
+  const handleTabChangeRelease = (key) => {
+    setActiveTabRelease(key);
+  };
+
+  const handleTabChangeRefund = (key) => {
+    setActiveTabRefund(key);
+  };
+
+  const isShowButton = (data_detail?.isApprover || false) && data_detail?.approvalStatus === WARRANTY_APPROVAL_STATUS.WAITING_APPROVAL;
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [approvalAction, setApprovalAction] = useState("");
@@ -175,38 +334,135 @@ const ListDetailWarranty = () => {
     },
   ];
 
-  return (
-    <LayoutMenu>
-      <Spin spinning={loading}>
-        <BreadCrumb routes={routes} />
-        <div>
+  const content = (
+    <Spin spinning={loadingDetail || loadingApproval}>
+      {!isEmbedded && <BreadCrumb routes={routes} />}
+
+      <CardContainerNoBorder
+        key={(isHold || isRelease || isRefund) ? "collapsed" : "expanded"}
+        header="GUARANTEE DETAIL"
+        className="mt-5 !border-[1.5px] !border-[#0075bf] !rounded-md !bg-white !shadow-none"
+        noPadding
+        collapsible={true}
+        defaultExpanded={!(isHold || isRelease || isRefund)}
+      >
+        <div className="full-width-tabs">
           <Tabs
             activeKey={activeTab}
             items={items}
             onChange={handleTabChange}
-            tabBarStyle={{ marginBottom: 24 }}
+            className="custom-tabs-layout"
           />
         </div>
+      </CardContainerNoBorder>
 
+      {isHold && (
+        <CardContainerNoBorder
+          header="HOLD DETAIL"
+          className="mt-5 !border-[1.5px] !border-[#0075bf] !rounded-md !bg-white !shadow-none"
+          noPadding
+          collapsible={true}
+          defaultExpanded={true}
+        >
+          <div className="full-width-tabs">
+            <Tabs
+              activeKey={activeTabHold}
+              items={itemHold}
+              onChange={handleTabChangeHold}
+              className="custom-tabs-layout"
+            />
+          </div>
+        </CardContainerNoBorder>
+      )}
+
+      {isRelease && (
+        <CardContainerNoBorder
+          header="RELEASE DETAIL"
+          className="mt-5 !border-[1.5px] !border-[#0075bf] !rounded-md !bg-white !shadow-none"
+          noPadding
+          collapsible={true}
+          defaultExpanded={true}
+        >
+          <div className="full-width-tabs">
+            <Tabs
+              activeKey={activeTabRelease}
+              items={itemRelease}
+              onChange={handleTabChangeRelease}
+              className="custom-tabs-layout"
+            />
+          </div>
+        </CardContainerNoBorder>
+      )}
+
+      {isRefund && (
+        <CardContainerNoBorder
+          header="REFUND DETAIL"
+          className="mt-5 !border-[1.5px] !border-[#0075bf] !rounded-md !bg-white !shadow-none"
+          noPadding
+          collapsible={true}
+          defaultExpanded={true}
+        >
+          <div className="full-width-tabs">
+            <Tabs
+              activeKey={activeTabRefund}
+              items={itemRefund}
+              onChange={handleTabChangeRefund}
+              className="custom-tabs-layout"
+            />
+          </div>
+        </CardContainerNoBorder>
+      )}
+
+      <LogHistoryInfo
+        data={{
+          recordId: data_detail?.recordId || data_detail?.id || "",
+          createdDate: data_detail?.createdDate ? moment(data_detail?.createdDate).format("DD MMM YYYY HH:mm:ss") : "-",
+          createdBy: data_detail?.createdBy || "",
+          updatedDate: data_detail?.updatedDate ? moment(data_detail?.updatedDate).format("DD MMM YYYY HH:mm:ss") : "-",
+          updatedBy: data_detail?.updatedBy || ""
+        }} 
+      />
+
+      {!isEmbedded && (
         <FooterDetail
           onCancel={() => navigate(RECEIPT_AND_COLLECTION_ROUTES.WARRANTY)}
           showApproval={isShowButton === true}
           onApprove={handleApprove}
           onReject={handleReject}
         />
+      )}
 
-        <ModalApproveOrReject
-          isOpen={isModalOpen}
-          handleCloseModal={() => setIsModalOpen(false)}
-          onFinish={onFinishApproval}
-          header={approvalAction === "APPROVE" ? "Approve" : "Reject"}
-          approveOrReject={approvalAction === "APPROVE" ? "approve" : "reject"}
-          menu="Payment Guarantee"
-          named={data_detail?.customerName || "-"}
-        />
-      </Spin>
-    </LayoutMenu>
+      <ModalApproveOrReject
+        isOpen={isModalOpen}
+        handleCloseModal={() => setIsModalOpen(false)}
+        onFinish={onFinishApproval}
+        header={approvalAction === "APPROVE" ? "Approve" : "Reject"}
+        approveOrReject={approvalAction === "APPROVE" ? "approve" : "reject"}
+        menu="Payment Guarantee"
+        named={data_detail?.customerName || ""}
+        customMessage={
+          (isRefund || isHold || isRelease)
+            ? `Are you sure want to ${approvalAction === "APPROVE" ? "approve" : "reject"} ${isRefund ? "Refund" : isHold ? "Hold" : "Release"} Guarantee?`
+            : undefined
+        }
+      />
+    </Spin>
   );
+
+  if (isEmbedded) {
+    return content;
+  }
+
+  return (
+    <>
+      {content}
+    </>
+  );
+};
+
+ListDetailWarranty.propTypes = {
+  id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  isEmbedded: PropTypes.bool
 };
 
 export default ListDetailWarranty;

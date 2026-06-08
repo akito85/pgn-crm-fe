@@ -1,178 +1,389 @@
+import React, { useState } from "react";
+import { Tabs, Table } from "antd";
+import { PlusOutlined, MinusOutlined, InfoCircleFilled } from "@ant-design/icons";
 import moment from "moment";
-import { Fragment, useState } from "react";
-import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
 import DetailText from "../../../../../components/DetailText";
-import RadioTabs from "../../../../../components/RadioTabs";
+import ApprovalComponentGeneral from "../../../../../components/Approval/ApprovalComponentGeneral";
 import TableRBI from "../../../../../components/TableRBI";
+import SectionCard from "../../../../../components/SectionCard";
+import StatusComponent from "../../../../../components/StatusComponent";
+
+const getMandatoryAttachments = (segment) => {
+    if (segment === "KL") {
+        return [
+            "KTP",
+            "Surat Permohonan",
+            "Akta Penunjukan",
+            "Surat Kuasa (Optional)",
+            "Surat Tugas (Optional)",
+            "Kartu Profil Pelanggan"
+        ];
+    }
+    return [
+        "KTP",
+        "Surat Permohonan",
+        "Kartu Profil Pelanggan"
+    ];
+};
 
 const ContentModalConfirmRestructure = ({
-    data,
-    badDebtList = [],
-    totalBadDebt = 0,
-    calculationList = [],
+    formValues = {},
+    contacts = [],
+    openItems = [],
+    installmentsByCurrency = {},
     listDataAttachment = [],
     appHierOptions = [],
     appHierDataDetail = [],
     selectedHierarchy,
 }) => {
-    const tabData = [
-        { value: "Restructure" },
-        { value: "Approval" },
-        { value: "Attachment" },
-    ];
-    const [valuePage, setValuePage] = useState(tabData[0].value);
+    const [valuePage, setValuePage] = useState("Payment Plan");
 
-    const badDebtColumns = [
-        { title: "NO", dataIndex: "key", width: 50 },
-        { title: "INVOICE NO", dataIndex: "invoiceNo" },
-        { title: "INVOICE PERIOD", dataIndex: "invoicePeriod" },
-        { title: "CURRENCY", dataIndex: "currency" },
+    const contactColumns = [
+        { title: "NO", dataIndex: "key", width: 50, align: "center", render: (_, __, i) => i + 1 },
         {
-            title: "TOTAL AMOUNT",
-            dataIndex: "totalAmount",
-            render: (val) => val?.toLocaleString("id-ID"),
-            align: "right"
+            title: "PRIMARY",
+            dataIndex: "isPrimary",
+            width: 120,
+            render: (val) => val ? <StatusComponent colour="primary">Primary</StatusComponent> : "-"
         },
+        { title: "CONTACT NAME", dataIndex: "cpName", width: 250 },
+        { title: "JOB", dataIndex: "job", width: 150 },
+        { title: "POSITION", dataIndex: "position", width: 150 },
+        { title: "ADDRESS", dataIndex: "address" },
     ];
 
-    const calculationColumns = [
-        { title: "NO", dataIndex: "key", width: 50 },
-        { title: "INVOICE PERIOD", dataIndex: "invoicePeriod" },
-        {
-            title: "TOTAL AMOUNT",
-            dataIndex: "totalAmount",
-            render: (val) => val?.toLocaleString("id-ID"),
-            align: "right"
-        },
+    const subColumns = [
+        { title: "NO", dataIndex: "key", width: 50, align: "center", render: (_, __, i) => i + 1 },
+        { title: "TYPE", dataIndex: "type", width: 150 },
+        { title: "VALUE", dataIndex: "value", width: 150 },
     ];
 
-    const showSection = () => {
-        switch (valuePage) {
-            case "Restructure":
-                return (
-                    <div className="flex flex-col gap-5 w-full">
-                        <div>
-                            <div className="text-primary text-xs font-bold uppercase mb-3">
-                                CUSTOMER INFORMATION
-                            </div>
-                            <div className="grid grid-cols-3 w-full gap-5">
-                                <DetailText label={"Customer Number"}>
-                                    {data?.customerNumber}
-                                </DetailText>
-                                <DetailText label={"Account Number"}>
-                                    {data?.accountNumber}
-                                </DetailText>
-                                <DetailText label={"Customer Name"}>
-                                    {data?.customerName}
-                                </DetailText>
-                                <DetailText label={"Area"}>
-                                    {data?.area}
-                                </DetailText>
-                                <DetailText label={"Segment"}>
-                                    {data?.segment}
-                                </DetailText>
-                            </div>
-                        </div>
-
-                        <div>
-                            <div className="text-primary text-xs font-bold uppercase mb-3 text-[12px]">
-                                BAD DEBT INFORMATION
-                            </div>
-                            <TableRBI
-                                dataSource={badDebtList}
-                                columns={badDebtColumns}
-                                usePagination={false}
-                                showAdvanceSearch={false}
-                                showSearchBar={false}
-                            />
-                            {badDebtList.length > 0 && (
-                                <div className="flex bg-[#F5F5F5] border border-t-0 p-2 font-bold text-[12px]">
-                                    <div className="flex-[4] text-center">TOTAL</div>
-                                    <div className="flex-1 text-right pr-4">
-                                        {totalBadDebt.toLocaleString("id-ID", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-
-                        <div>
-                            <div className="text-primary text-xs font-bold uppercase mb-3">
-                                RESTRUCTURE INFORMATION
-                            </div>
-                            <div className="grid grid-cols-2 w-full gap-5">
-                                <DetailText label={"Total Month"}>
-                                    {data?.totalMonth?.toLocaleString("id-ID")}
-                                </DetailText>
-                                <DetailText label={"Start Period"}>
-                                    {data?.startPeriod ? moment(data?.startPeriod).format("MMM YYYY") : "-"}
-                                </DetailText>
-                            </div>
-                        </div>
-
-                        <div>
-                            <div className="text-primary text-xs font-bold uppercase mb-3 text-[12px]">
-                                CALCULATION INFORMATION
-                            </div>
-                            <TableRBI
-                                dataSource={calculationList}
-                                columns={calculationColumns}
-                                usePagination={false}
-                                showAdvanceSearch={false}
-                                showSearchBar={false}
-                            />
-                            {calculationList.length > 0 && (
-                                <div className="flex bg-[#F5F5F5] border border-t-0 p-2 font-bold text-[12px]">
-                                    <div className="flex-[2] text-center ml-[-20px]">TOTAL</div>
-                                    <div className="flex-1 text-right pr-4">
-                                        {totalBadDebt.toLocaleString("id-ID", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                );
-            case "Approval":
-                return (
-                    <ApprovalComponentGeneral
-                        showSelect={false}
-                        disableSelect={true}
-                        approvalName={
-                            (appHierOptions || []).find(
-                                (opt) => opt.value === selectedHierarchy
-                            )?.name || ""
-                        }
-                        dataTable={appHierDataDetail}
-                        selectedHierarchy={selectedHierarchy}
-                    />
-                );
-            case "Attachment":
-                return (
-                    <div className="flex flex-col gap-3">
-                        <div className="text-primary text-xs font-bold uppercase">
-                            ATTACHMENT LIST
-                        </div>
-                        <TableRBI
-                            columns={[
-                                { title: "NO", dataIndex: "key", width: 50, render: (t, r, i) => i + 1 },
-                                { title: "FILE NAME", dataIndex: "fileName" },
-                                { title: "CATEGORY", dataIndex: "fileCategoryName" },
-                            ]}
-                            dataSource={listDataAttachment}
-                            usePagination={false}
-                        />
-                    </div>
-                );
-            default:
-                return <Fragment />;
-        }
+    const expandable = {
+        expandedRowRender: (record) => (
+            <div style={{ paddingLeft: "2.5em" }}>
+                <TableRBI
+                    idTable={`expanded-contact-confirm-${record.key}`}
+                    columns={subColumns}
+                    dataSource={record.details || []}
+                    useSelect={false}
+                    usePagination={false}
+                    showAdvanceSearch={true}
+                    showSearchBar={true}
+                />
+            </div>
+        ),
+        rowExpandable: (record) => !!record.details,
+        expandIcon: ({ expanded, onExpand, record }) =>
+            record.details ? (
+                expanded ? (
+                    <MinusOutlined className="cursor-pointer" onClick={(e) => onExpand(record, e)} />
+                ) : (
+                    <PlusOutlined className="cursor-pointer" onClick={(e) => onExpand(record, e)} />
+                )
+            ) : (
+                <span className="ml-4" />
+            ),
     };
 
+    const attachmentColumns = [
+        { title: "NO", dataIndex: "key", width: 50, render: (t, r, i) => i + 1 },
+        { title: "FILE NAME", dataIndex: "fileName" },
+        { title: "CATEGORY", dataIndex: "fileCategoryName" },
+    ];
+
+    const renderOpenItems = () => {
+        // Group items by currency
+        const grouped = openItems.reduce((acc, item) => {
+            const cur = item.currency || "IDR";
+            if (!acc[cur]) acc[cur] = [];
+            acc[cur].push(item);
+            return acc;
+        }, {});
+
+        const currencies = Object.keys(grouped);
+
+        if (currencies.length === 0) return <DetailText label="">No data available</DetailText>;
+
+        return currencies.map(currency => {
+            const rows = grouped[currency];
+            const isIdr = currency === "IDR";
+            const total = rows.reduce((sum, r) => {
+                const num = parseFloat(String(r.amount).replace(/,/g, "")) || 0;
+                return sum + num;
+            }, 0);
+
+            const columns = [
+                { title: "NO", dataIndex: "key", width: 50, render: (_, __, i) => i + 1 },
+                { title: "INVOICE NO", dataIndex: "invoiceNo" },
+                { title: "INVOICE PERIOD", dataIndex: "invoicePeriod" },
+                { title: "BILLING ITEM", dataIndex: "billingItem" },
+                {
+                    title: "AMOUNT",
+                    dataIndex: "amount",
+                    align: "right",
+                    render: (amount) => {
+                        const num = parseFloat(String(amount).replace(/,/g, "")) || 0;
+                        return num.toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 });
+                    }
+                },
+            ];
+
+            return (
+                <div key={currency} className="mb-4">
+                    <SectionCard title={`CURRENCY ${currency}`}>
+                        <TableRBI
+                            idTable={`open-item-confirm-${currency}`}
+                            dataSource={rows}
+                            columns={columns}
+                            usePagination={false}
+                            showAdvanceSearch={true}
+                            showSearchBar={true}
+                            summary={() => (
+                                <Table.Summary fixed>
+                                    <Table.Summary.Row className="font-bold text-[12px] bg-[#F5F5F5]">
+                                        <Table.Summary.Cell index={0} colSpan={4} className="text-center font-bold">
+                                            TOTAL
+                                        </Table.Summary.Cell>
+                                        <Table.Summary.Cell index={1} className="text-right font-bold pr-4">
+                                            {total.toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 })}
+                                        </Table.Summary.Cell>
+                                    </Table.Summary.Row>
+                                </Table.Summary>
+                            )}
+                        />
+                    </SectionCard>
+                </div>
+            );
+        });
+    };
+
+    const renderPaymentPlanDetail = () => {
+        const openItemTotals = openItems.reduce((acc, item) => {
+            const cur = item.currency || "IDR";
+            const amount = parseFloat(String(item.amount).replace(/,/g, "")) || 0;
+            acc[cur] = (acc[cur] || 0) + amount;
+            return acc;
+        }, {});
+
+        const currencies = Object.keys(installmentsByCurrency);
+        if (currencies.length === 0) return <DetailText label="">No data available</DetailText>;
+
+        return currencies.map(currency => {
+            const rows = installmentsByCurrency[currency] || [];
+            const isIdr = currency === "IDR";
+            const currentSum = rows.reduce((sum, r) => sum + (parseFloat(r.amount) || 0), 0);
+            const targetTotal = openItemTotals[currency] || 0;
+
+            const columns = [
+                { title: "NO", dataIndex: "key", width: 50, align: "center", render: (_, __, i) => i + 1 },
+                { title: "PERIODE", dataIndex: "periode" },
+                {
+                    title: "TOTAL AMOUNT",
+                    dataIndex: "amount",
+                    align: "right",
+                    render: (val) => parseFloat(val).toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 })
+                },
+                { title: "DUE DATE", dataIndex: "dueDate" },
+                {
+                    title: "BALANCE",
+                    dataIndex: "balance",
+                    align: "right",
+                    render: () => {
+                        const balance = 0;
+                        return balance.toLocaleString(isIdr ? "id-ID" : "en-US", {
+                            maximumFractionDigits: 2,
+                        });
+                    }
+                }
+            ];
+
+            return (
+                <div key={currency} className="mb-4">
+                    <SectionCard title={`CURRENCY ${currency}`}>
+                        <TableRBI
+                            idTable={`plan-detail-confirm-${currency}`}
+                            dataSource={rows}
+                            columns={columns}
+                            usePagination={false}
+                            showAdvanceSearch={true}
+                            showSearchBar={true}
+                            summary={() => (
+                                <Table.Summary fixed>
+                                    <Table.Summary.Row className="font-bold text-[12px] bg-[#F5F5F5]">
+                                        <Table.Summary.Cell index={0} colSpan={2} className="text-center font-bold">
+                                            TOTAL
+                                        </Table.Summary.Cell>
+                                        <Table.Summary.Cell index={1} className="text-right font-bold pr-4">
+                                            {currentSum.toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 })}
+                                        </Table.Summary.Cell>
+                                        <Table.Summary.Cell index={2} />
+                                        <Table.Summary.Cell index={3} className="text-right font-bold pr-4 text-gray-500">
+                                            {(0).toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 })}
+                                        </Table.Summary.Cell>
+                                    </Table.Summary.Row>
+                                </Table.Summary>
+                            )}
+                        />
+                    </SectionCard>
+                </div>
+            );
+        });
+    };
+
+    const items = [
+        {
+            key: "Payment Plan",
+            label: "Payment Plan",
+            children: (
+                <div className="p-5 bg-[#f8f7fa] min-h-[400px] flex flex-col gap-4">
+                    <SectionCard title="ACCOUNT INFORMATION">
+                        <div className="grid grid-cols-5 gap-y-4 gap-x-4 w-full">
+                            <DetailText label="Account Number">{formValues?.accountNumber || ""}</DetailText>
+                            <DetailText label="Account Name">{formValues?.accountName || ""}</DetailText>
+                            <DetailText label="Customer Number">{formValues?.customerNumber || ""}</DetailText>
+                            <DetailText label="Customer Name">{formValues?.customerName || ""}</DetailText>
+                            <DetailText label="Account Group Type">{formValues?.accountGroupType || ""}</DetailText>
+                            <DetailText label="SOR">{formValues?.sor || ""}</DetailText>
+                            <DetailText label="Cost Center">{formValues?.costCenter || ""}</DetailText>
+                            <DetailText label="Account Segment">{formValues?.accountSegment || ""}</DetailText>
+                            <DetailText label="Meter Reading Code">{formValues?.meterReadingCode || ""}</DetailText>
+                            <DetailText label="Account Type">{formValues?.accountType || ""}</DetailText>
+                            <DetailText label="Classification Type">{formValues?.classificationType || ""}</DetailText>
+                            <DetailText label="SAP Cust ID">{formValues?.sapCustId || ""}</DetailText>
+                            <DetailText label="Account Status">{formValues?.accountStatus || ""}</DetailText>
+                        </div>
+                    </SectionCard>
+
+                    <SectionCard title="SERVICE AGREEMENT INFORMATION">
+                        <div className="grid grid-cols-5 gap-y-4 gap-x-4 w-full">
+                            <DetailText label="Service Agreement Number">{formValues?.saNumber || ""}</DetailText>
+                            <DetailText label="Service Agreement Name">{formValues?.saName || ""}</DetailText>
+                            <DetailText label="Service Agreement Date">{formValues?.saDate ? moment(formValues.saDate).format("DD MMM YYYY") : "-"}</DetailText>
+                            <DetailText label="Start Date">{formValues?.startDate ? moment(formValues.startDate).format("DD MMM YYYY") : "-"}</DetailText>
+                            <DetailText label="End Date">{formValues?.endDate ? moment(formValues.endDate).format("DD MMM YYYY") : "-"}</DetailText>
+                            <DetailText label="Minimum Contract">{formValues?.minContract || ""}</DetailText>
+                            <DetailText label="Maximum Contract">{formValues?.maxContract || ""}</DetailText>
+                            <DetailText label="UOM">{formValues?.uom || ""}</DetailText>
+                        </div>
+                    </SectionCard>
+
+                    <SectionCard title="CONTACT INFORMATION">
+                        <TableRBI
+                            idTable="table-contact-confirm"
+                            dataSource={contacts}
+                            columns={contactColumns}
+                            expandable={expandable}
+                            usePagination={false}
+                            showAdvanceSearch={true}
+                            showSearchBar={true}
+                        />
+                    </SectionCard>
+
+                    <SectionCard title="PAYMENT PLAN INFORMATION">
+                        <div className="grid grid-cols-5 gap-y-4 gap-x-4 w-full">
+                            <DetailText label="Type">{formValues?.type || ""}</DetailText>
+                            <DetailText label="Tenor">{formValues?.tenor ? `${formValues.tenor} Months` : "-"}</DetailText>
+                            <DetailText label="Start Period">{formValues?.startPeriod ? moment(formValues.startPeriod).format("MMM YYYY") : "-"}</DetailText>
+                            <DetailText label="Source">{formValues?.source}</DetailText>
+                            <DetailText label="Request Date">{formValues?.requestDate ? moment(formValues.requestDate).format("DD MMM YYYY") : "-"}</DetailText>
+                            <div className="col-span-5">
+                                <DetailText label="Description">{formValues?.description || ""}</DetailText>
+                            </div>
+                        </div>
+                    </SectionCard>
+
+                    <SectionCard title="OPEN ITEM INFORMATION">
+                        {renderOpenItems()}
+                    </SectionCard>
+
+                    <SectionCard title="PAYMENT PLAN DETAIL">
+                        {renderPaymentPlanDetail()}
+                    </SectionCard>
+                </div>
+            )
+        },
+        {
+            key: "Approval",
+            label: "Approval",
+            children: (
+                <div className="p-5 bg-[#f8f7fa] min-h-[400px]">
+                    <SectionCard title="APPROVAL INFORMATION">
+                        <ApprovalComponentGeneral
+                            showSelect={false}
+                            disableSelect={true}
+                            approvalName={
+                                (appHierOptions || []).find(
+                                    (opt) => opt.value === selectedHierarchy
+                                )?.name || ""
+                            }
+                            dataTable={appHierDataDetail}
+                            selectedHierarchy={selectedHierarchy}
+                        />
+                    </SectionCard>
+                </div>
+            )
+        },
+        {
+            key: "Attachment",
+            label: "Attachment",
+            children: (() => {
+                const uploadedCategories = (listDataAttachment || []).map(a => a.fileCategoryName);
+                const mandatory = getMandatoryAttachments(formValues?.accountSegment);
+                const missingCategories = mandatory.filter(cat => !uploadedCategories.includes(cat));
+                const mandatoryMissing = missingCategories.filter(cat => !cat.toLowerCase().includes("optional"));
+
+                return (
+                    <div className="p-5 bg-[#f8f7fa] min-h-[400px] flex flex-col gap-4">
+                        {mandatoryMissing.length > 0 && (
+                            <div
+                                className="flex items-start gap-3 p-4 border"
+                                style={{
+                                    backgroundColor: "#FFF3E6",
+                                    borderColor: "#FFE0B2",
+                                    borderRadius: "8px",
+                                    color: "#B36214"
+                                }}
+                            >
+                                <InfoCircleFilled style={{ fontSize: "18px", marginTop: "2px", color: "#D97706" }} />
+                                <div className="flex flex-col gap-1 text-[14px]">
+                                    <span style={{ color: "#B36214", fontWeight: "600" }}>
+                                        Please upload the required documents below to continue the process.
+                                    </span>
+                                    <span style={{ color: "#B36214", fontWeight: "500" }}>
+                                        {missingCategories.join(", ")}
+                                    </span>
+                                </div>
+                            </div>
+                        )}
+                        <SectionCard title="ATTACHMENT INFORMATION">
+                            <TableRBI
+                                columns={attachmentColumns}
+                                dataSource={listDataAttachment}
+                                usePagination={false}
+                                showAdvanceSearch={true}
+                                showSearchBar={true}
+                            />
+                        </SectionCard>
+                    </div>
+                );
+            })()
+        }
+    ];
+
     return (
-        <div className="flex flex-col gap-4 max-h-[70vh] overflow-y-auto pr-2">
-            <RadioTabs data={tabData} onChange={(e) => setValuePage(e.target.value)} currentPosition={valuePage} />
-            <div className="flex flex-col gap-4 mt-2">
-                {showSection()}
-            </div>
+        <div className="flex flex-col gap-0 -mt-4 -mx-4 -mb-4 bg-white">
+            <Tabs
+                activeKey={valuePage}
+                onChange={(key) => setValuePage(key)}
+                items={items}
+                className="custom-confirm-tabs"
+                tabBarStyle={{
+                    paddingLeft: "16px",
+                    paddingRight: "16px",
+                    marginBottom: 0,
+                    borderBottom: "1px solid #dbdade"
+                }}
+            />
         </div>
     );
 };

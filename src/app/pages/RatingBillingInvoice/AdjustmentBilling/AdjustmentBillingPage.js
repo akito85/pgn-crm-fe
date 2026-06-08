@@ -9,7 +9,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { Link, NavLink } from "react-router-dom";
 import { Spin, Alert, Tooltip } from "antd";
 import ButtonComponent from "../../../../components/ButtonComponent";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import SVGIcon from "../../../../assets/Icon/index";
 import BaseContainer from "../../../../components/BaseContainer";
@@ -274,9 +273,13 @@ const AdjustmentBillingPage = () => {
       action: "Update",
       type: "table",
       render: (record, data) => {
+        const normalizedStatus = (record?.status || "").toUpperCase();
+        const normalizedStatusApproval = (
+          record?.statusApproval || ""
+        ).toUpperCase();
         const isEditable =
-          record.statusApproval === "DRAFT" ||
-          record.statusApproval === "REJECTED";
+          normalizedStatus === "DRAFT" ||
+          normalizedStatusApproval === "REJECTED";
 
         const content =
           data > 3 ? (
@@ -288,12 +291,13 @@ const AdjustmentBillingPage = () => {
                   width={20}
                 />
               }
+              type={"action"}
               border={false}
               disabled={!isEditable}
             >
               <span
                 className={
-                  isEditable ? "text-black ml-3" : "text-gray-400 ml-3"
+                  isEditable ? "text-black ml-0" : "text-gray-400 ml-0"
                 }
               >
                 Update
@@ -319,7 +323,7 @@ const AdjustmentBillingPage = () => {
 
         return isEditable ? (
           <Link
-            to={RBI_ROUTES.ADJUSTMENT_BILLING_UPDATE}
+            to={`${RBI_ROUTES.ADJUSTMENT_BILLING_UPDATE}`}
             state={{
               id: record.id,
               adjustmentNumber: record.adjustmentNumber,
@@ -349,12 +353,13 @@ const AdjustmentBillingPage = () => {
                   width={20}
                 />
               }
+              type={"action"}
               border={false}
               disabled={!isDelete}
               onClick={isDelete ? () => handleDelete(record.id) : undefined}
             >
               <span
-                className={isDelete ? "text-black ml-3" : "text-gray-400 ml-3"}
+                className={isDelete ? "text-black ml-0" : "text-gray-400 ml-0"}
               >
                 Delete
               </span>
@@ -392,10 +397,11 @@ const AdjustmentBillingPage = () => {
               icon={
                 <SVGIcon name="IconLogHistory" color={"#0075bf"} width={20} />
               }
+              type={"action"}
               border={false}
               onClick={() => handleApprovalHistory(record.id)}
             >
-              <span className={"text-black ml-3"}>Approval History</span>
+              <span className={"text-black ml-0"}>Approval History</span>
             </ButtonComponent>
           ) : (
             <Tooltip title="Approval History">
@@ -463,7 +469,7 @@ const AdjustmentBillingPage = () => {
   }, [dataSource]);
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
 
       <CardContainer
@@ -552,7 +558,7 @@ const AdjustmentBillingPage = () => {
         dataApprover={dataApprovalHistory?.dataApprover}
         dataHistory={dataApprovalHistory?.dataHistory}
       />
-    </LayoutMenu>
+    </>
   );
 };
 

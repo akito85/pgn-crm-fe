@@ -8,7 +8,6 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import BaseContainer from "../../../../../components/BaseContainer";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import { USER_ROUTES } from "../../../../../routes/user_management/user_routes";
 import SVGIcon from "../../../../../assets/Icon/index";
 import { useDispatch, useSelector } from "react-redux";
@@ -20,12 +19,13 @@ import InputComponent from "../../../../../components/InputComponent";
 const GeneratePasswordPage = () => {
   const dispatch = useDispatch();
   const [disabled, setDisabled] = useState(true);
-  const { loading, data } = useSelector((state) => state.user);
+  const { loading, data_generate_link } = useSelector((state) => state.user);
   const [customValue, setCustomValue] = useState(1);
   const [modalSuccess, setModalSuccess] = useState(false);
   const [modalBack, setModalBack] = useState(false);
   const location = useLocation();
   const id = location?.state?.id;
+  const data = data_generate_link;
   const dataSplit = hasValue(data?.url) && data?.url?.split('/')
   const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
@@ -107,7 +107,7 @@ const GeneratePasswordPage = () => {
     setModalSuccess(false);
   };
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <Form layout={"vertical"} form={form} onFinish={onFinish}>
@@ -235,7 +235,7 @@ const GeneratePasswordPage = () => {
           )}
         </div>
       </ModalSuccess>
-    </LayoutMenu>
+    </>
   );
 };
 

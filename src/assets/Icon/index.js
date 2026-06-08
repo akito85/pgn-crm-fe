@@ -14,7 +14,10 @@ import IconDelete from "./IconDelete";
 import IconDetail from "./IconDetail";
 import IconDownload from "./IconDownload";
 import IconDropdown from "./IconDropdown";
+import IconEarlyRepayment from "./IconEarlyRepayment";
 import IconEdit from "./IconEdit";
+import IconEditTable from "./IconEditTable";
+import IconEraserTable from "./IconEraserTable";
 import IconEye from "./IconEye";
 import IconEyeOff from "./IconEyeOff";
 import IconFilter from "./IconFilter";
@@ -63,9 +66,27 @@ import IconReGenerate from "./IconReGenerate";
 import IconRatingRecalculate from "./IconRatingRecalculate";
 import IconMonitoring from './IconMonitoring';
 import IconPlusCircle from "./IconPlusCircle";
+import IconJobList from "./IconJobList";
+import IconJobGroup from "./IconJobGroup";
+import IconJobExecution from "./IconJobExecution";
+import IconExpire from "./IconExpire";
+import IconSquareX from "./IconSquareX";
+import IconSquareCheck from "./IconSquareCheck";
+import IconTripleDot from "./IconTripleDot";
+import IconChevronLeft from "./IconChevronLeft";
+import IconChevronDown from "./IconChevronDown";
+import IconAddTable from "./IconAddTable";
+import IconRePlan from "./IconRePlan";
+import IconRestructureActive from "./IconRestructureActive";
+import IconOutstandingBalance from "./IconOutstandingBalance";
+import IconActiveReceivable from "./IconActiveReceivable";
 import { FileOutlined } from "@ant-design/icons";
 
 const Icon = (props) => {
+  const { color = "#000000" } = props;
+  // Pass color to all icons
+  const iconProps = { ...props, color };
+
   switch (props.name) {
     case "IconAccountManagement":
       return <IconAccountManagement {...props} />;
@@ -83,6 +104,7 @@ const Icon = (props) => {
       return <IconArrowNarrowLeft {...props} />;
     case "IconBilling":
       return <IconBilling {...props} />;
+    case "IconCalendar":       // alias — menu management uses "IconCalendar", component is IconCalendarEvent
     case "IconCalendarEvent":
       return <IconCalendarEvent {...props} />;
     case "IconClear":
@@ -99,6 +121,10 @@ const Icon = (props) => {
       return <IconDropdown {...props} />;
     case "IconEdit":
       return <IconEdit {...props} />;
+    case "IconEditTable":
+      return <IconEditTable {...props} />;
+    case "IconEraserTable":
+      return <IconEraserTable {...props} />;
     case "IconEye":
       return <IconEye {...props} />;
     case "IconEyeOff":
@@ -197,6 +223,36 @@ const Icon = (props) => {
       return <IconPlusCircle {...props} />;
     case "IconReporting":
       return <FileOutlined {...props} style={{ color: "#4B465C" }} />;
+    case "IconJobList":
+      return <IconJobList {...props} />;
+    case "IconJobGroup":
+      return <IconJobGroup {...props} />;
+    case "IconJobExecution":
+      return <IconJobExecution {...props} />;
+    case "IconExpire":
+      return <IconExpire {...props} />
+    case "IconSquareX":
+      return <IconSquareX {...props} />
+    case "IconSquareCheck":
+      return <IconSquareCheck {...props} />
+    case "IconTripleDot":
+      return <IconTripleDot {...props} />;
+    case "IconChevronLeft":
+      return <IconChevronLeft {...props} />;
+    case "IconChevronDown":
+      return <IconChevronDown {...props} />;
+    case "IconAddTable":
+      return <IconAddTable {...props} />;
+    case "IconEarlyRepayment":
+      return <IconEarlyRepayment {...iconProps} />;
+    case "IconRePlan":
+      return <IconRePlan {...iconProps} />;
+    case "IconRestructureActive":
+      return <IconRestructureActive {...iconProps} />;
+    case "IconOutstandingBalance":
+      return <IconOutstandingBalance {...iconProps} />;
+    case "IconActiveReceivable":
+      return <IconActiveReceivable {...iconProps} />;
     default:
       return;
   }

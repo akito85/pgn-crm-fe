@@ -1,43 +1,59 @@
-import { MoreOutlined } from "@ant-design/icons";
-import { Popover, Space } from "antd";
-import { useMemo } from "react";
+import { Popover, Skeleton } from "antd";
+import { useMemo, useState } from "react";
 import useGrantAccessHooks from "./useGrantAccessHooks";
+import IconThreeDots from "../assets/Icon/Nx/IconThreeDots";
 
 // render content column
-export const RenderContentActions = (
-  text,
+export const RenderContentActions = ({
   record,
-  index,
   itemRender = [],
   totalLength,
   permissions = [],
   sliceColumn = "View",
-) => {
-  if (totalLength > 2) {
+  stopClickPropagation = false,
+}) => {
+  const [open, setOpen] = useState(false);
+
+  if (totalLength > 3) {
     return (
-      <div className="w-full flex justify-center items-center py-1 gap-4">
+      <div className="w-full flex justify-center items-center gap-2.5">
         <Popover
+          open={open}
+          onOpenChange={setOpen}
           trigger={"click"}
           placement="bottomRight"
+          showArrow={false}
+          overlayInnerStyle={{ border: "1px solid #C8CDD4" }}
+          className="text-[#1976D2] transition-colors duration-300"
           content={
-            <Space direction="vertical">
+            <div className="flex flex-col py-1">
               {itemRender
                 ?.filter((item) => item?.action !== sliceColumn?.toLowerCase())
+                ?.sort((a, b) => (a?.action || "").localeCompare(b?.action || ""))
                 ?.map((item, index) => {
                   if (permissions?.includes(item?.action)) {
-                    return item?.render(record, totalLength, index);
+                    return (
+                      <div key={item.action} className="inline-flex items-center px-3 py-1.5 text-black" onClick={() => setOpen(false)}>
+                        {item?.render(record, totalLength, index)}
+                      </div>
+                    );
                   } else {
                     return null;
                   }
                 })}
-            </Space>
+            </div>
           }
         >
-          <div className="group">
-            <MoreOutlined className="text-xl text-black group-hover:text-[#0075BF] cursor-pointer transition-colors duration-300 ease-in-out" />
+          <div
+            className="inline-flex items-center cursor-pointer"
+            onClick={(e) => {
+              if (stopClickPropagation) e.stopPropagation();
+            }}
+          >
+            <IconThreeDots />
           </div>
         </Popover>
-        <div>
+        <div className="inline-flex items-center">
           {itemRender
             ?.filter((item) => item?.action === sliceColumn?.toLowerCase())
             ?.map((item, index) => {
@@ -55,10 +71,14 @@ export const RenderContentActions = (
     );
   } else {
     return (
-      <div className="w-full flex justify-center gap-4 py-1 items-center">
+      <div className="w-full flex justify-center gap-2.5 items-center">
         {itemRender?.map((item, index) => {
           if (permissions?.includes(item?.action)) {
-            return item?.render(record, totalLength, index);
+            return (
+              <span key={item.action} className="inline-flex items-center">
+                {item?.render(record, totalLength, index)}
+              </span>
+            );
           } else {
             return null;
           }
@@ -74,8 +94,10 @@ export const useColumnActionPermission = (
   itemsRender = [],
   sliceColumn = "View",
   type = "page",
+  stopClickPropagation = false,
 ) => {
   const access = useGrantAccessHooks(type);
+  const isLoading = access?.loading;
   // convert to lower case
   const lowerCaseAccessList = useMemo(
     () => access?.actions?.map((item) => item?.toLowerCase()),
@@ -112,30 +134,49 @@ export const useColumnActionPermission = (
   }, [lowerCaseAccessList, lowerCaseItemsRender, lowerCasePermissionList]);
 
   const columns = useMemo(() => {
-    if (arrayActions?.length === 0) {
-      return [];
-    } else {
+    if (isLoading) {
       return [
         {
           key: "action",
           title: "ACTION",
           dataIndex: "action",
           fixed: "right",
-          width: 150,
-          render: (text, record, index) =>
-            RenderContentActions(
-              text,
-              record,
-              index,
-              lowerCaseItemsRender,
-              arrayActions?.length,
-              arrayActions,
-              sliceColumn,
-            ),
+          width: 111,
+          render: () => (
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <div style={{ width: "100%", transform: "scaleY(0.55)", transformOrigin: "center" }}>
+                <Skeleton.Button active size="small" shape="round" block />
+              </div>
+            </div>
+          ),
         },
       ];
     }
-  }, [arrayActions, lowerCaseItemsRender, sliceColumn]);
+    if (!arrayActions || arrayActions.length === 0) {
+      return [];
+    }
+    return [
+      {
+        key: "action",
+        title: "ACTION",
+        dataIndex: "action",
+        fixed: "right",
+        width: 90,
+        render: (text, record, index) => (
+          <RenderContentActions
+            text={text}
+            record={record}
+            index={index}
+            itemRender={lowerCaseItemsRender}
+            totalLength={arrayActions.length}
+            permissions={arrayActions}
+            sliceColumn={sliceColumn}
+            stopClickPropagation={stopClickPropagation}
+          />
+        ),
+      },
+    ];
+  }, [isLoading, arrayActions, lowerCaseItemsRender, sliceColumn, stopClickPropagation]);
 
   return columns;
 };

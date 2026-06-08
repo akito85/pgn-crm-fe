@@ -13,13 +13,6 @@ import { applyFixedColumns } from "../../../../../../../utils/applyFixedColumns"
 import { usePromo } from "../hooks/usePromo";
 import promoRepository from "../repository/promoRepository";
 import "../infiniteScroll.css";
-import {
-  dummyPromoData,
-  dummyPromoDetailMap,
-  formatDate,
-} from "../utils/promoHelpers";
-import * as XLSX from "xlsx";
-import { saveAs } from "file-saver";
 
 const LoadingIndicator = ({ size = "default" }) => {
   const fontSize = size === "large" ? 32 : 24;
@@ -96,7 +89,6 @@ const PromoViewData = ({
 
   const pageSize = 20;
   const containerRef = useRef(null);
-  const USE_DUMMY = false; // Ubah ke false untuk API real
 
   // Destructure validPromoList state
   const {
@@ -110,36 +102,20 @@ const PromoViewData = ({
     async (record) => {
       if (!record?.id) return;
 
-      if (USE_DUMMY) {
-        const dummyDetail = dummyPromoDetailMap[record.id];
-        if (!dummyDetail) {
-          console.warn("Dummy promo detail not found:", record.id);
-          return;
-        }
-        setDetailPromoData(dummyDetail);
-      } else {
-        try {
-          // Load detail dari Redux store
-          await loadValidPromoDetail(record.id);
-        } catch (error) {
-          console.error("Error loading promo detail:", error);
-          // Fallback ke data record yang ada
-          setDetailPromoData(record);
-        }
+      try {
+        await loadValidPromoDetail(record.id);
+      } catch (error) {
+        console.error("Error loading promo detail:", error);
+        setDetailPromoData(record);
       }
       setIsModalPromoVisible(true);
     },
-    [
-      USE_DUMMY,
-      loadValidPromoDetail,
-      setDetailPromoData,
-      setIsModalPromoVisible,
-    ],
+    [loadValidPromoDetail, setDetailPromoData, setIsModalPromoVisible],
   );
 
   // Effect untuk menangani perubahan validPromoDetail
   useEffect(() => {
-    if (!USE_DUMMY && validPromoDetail?.data && !validPromoDetail.loading) {
+    if (validPromoDetail?.data && !validPromoDetail.loading) {
       // Perhatikan: validPromoDetail.data adalah response API penuh
       const apiResponse = validPromoDetail.data;
       console.log("Detail API Response:", apiResponse);
@@ -152,59 +128,22 @@ const PromoViewData = ({
           id: detailData.id,
           name: detailData.name || detailData.promoName,
           promotionType: detailData.promotionType || detailData.type,
+          promotionTypeName: detailData.promotionTypeName,
           typeName: detailData.typeName || detailData.promoType,
-          categoryName: detailData.categoryName || detailData.category,
-          criteria: detailData.criteria || detailData.criteriaCount,
+          criterias: detailData.criterias,
           startDate: detailData.startDate || detailData.startDateTime,
-          endDate: detailData.endDate || detailData.endDateTime,
+          endDate: detailData.endDate ?? detailData.endDateTime ?? null,
           description: detailData.description,
-          status: detailData.status,
+          statusApproval: detailData.statusApproval || detailData.status,
           createdBy: detailData.createdBy,
           createdDate: detailData.createdDate || detailData.createdAt,
           updatedBy: detailData.updatedBy,
-          updatedDate: detailData.updatedDate || detailData.updatedAt,
+          updatedDate: detailData.updatedDate ?? detailData.updatedAt ?? null,
         };
         setDetailPromoData(transformedData);
       }
     }
-  }, [validPromoDetail, USE_DUMMY, setDetailPromoData]);
-
-  const downloadDummyPromo = (data) => {
-    if (!data || data.length === 0) return;
-
-    const formattedData = data.map((promo, index) => ({
-      NO: index + 1,
-      NAME: promo.name,
-      "PROMOTION TYPE": promo.promotionTypeName,
-      "TYPE NAME": promo.typeName,
-      "CATEGORY NAME": promo.categoryName,
-      CRITERIAS: promo.criterias,
-      "START DATE": formatDate(promo.startDate),
-      "END DATE": formatDate(promo.endDate),
-      DESCRIPTION: promo.description,
-      STATUS: promo.status,
-    }));
-
-    const worksheet = XLSX.utils.json_to_sheet(formattedData);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "PROMO");
-
-    const excelBuffer = XLSX.write(workbook, {
-      bookType: "xlsx",
-      type: "array",
-    });
-
-    const blob = new Blob([excelBuffer], {
-      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    });
-
-    const fileName = `PROMO_UNDER_ACCOUNT_${new Date()
-      .toISOString()
-      .replace(/[-:T.Z]/g, "")
-      .slice(0, 14)}.xlsx`;
-
-    saveAs(blob, fileName);
-  };
+  }, [validPromoDetail, setDetailPromoData]);
 
   const handleDownload = useCallback(async () => {
     try {
@@ -247,10 +186,8 @@ const PromoViewData = ({
     }
   }, [handleDownload, onRegisterDownload]);
 
-  // Transform apiData dari Redux ke dataSource - PERBAIKAN UTAMA
+  // Transform apiData dari Redux ke dataSource
   useEffect(() => {
-    if (USE_DUMMY) return;
-
     console.log("API Data from Redux:", apiData);
     console.log("API Error from Redux:", apiError);
     console.log("Loading State:", loadingInitial);
@@ -272,11 +209,12 @@ const PromoViewData = ({
       try {
         console.log("Processing API data:", apiData);
 
-        // Extract data from API response - ini adalah kunci perbaikan
-        // apiData adalah response API penuh: {success, code, message, data}
-        const responseData = apiData.data; // Ambil data property
+        // Extract data from API response
+        // apiData (axios response) -> .data (response body: {success, code, message, data})
+        //   -> .data (inner: {result: [...], links: [...], page: {totalElements, number, size}})
+        const responseBody = apiData.data;
 
-        if (!responseData) {
+        if (!responseBody) {
           console.warn("No data property in API response:", apiData);
           setDataSource([]);
           setTotalElements(0);
@@ -284,13 +222,17 @@ const PromoViewData = ({
           return;
         }
 
-        const content = responseData.content || responseData.data || [];
+        const innerData = responseBody.data;
+        const content =
+          innerData?.result || innerData?.content || innerData?.data || [];
         console.log("Content data:", content);
 
         const total =
-          responseData.totalElements || responseData.total || content.length;
-        const currentPage = responseData.pageable?.pageNumber || page;
-        const pageSizeApi = responseData.pageable?.pageSize || pageSize;
+          innerData?.page?.totalElements ||
+          innerData?.totalElements ||
+          content.length;
+        const currentPage = innerData?.page?.number ?? page;
+        const pageSizeApi = innerData?.page?.size || pageSize;
 
         // Transform data for table
         const transformedData = content.map((item, index) => {
@@ -300,15 +242,14 @@ const PromoViewData = ({
             key: item.id || `promo-${currentPage}-${index}`,
             no: currentPage * pageSizeApi + index + 1,
             id: item.id,
-            name: item.name || item.promoName || "-",
-            promotionType: item.promotionType || item.type || "-",
-            typeName: item.typeName || item.promoType || "-",
-            categoryName: item.categoryName || item.category || "-",
-            criteria: item.criteria || item.criteriaCount || "-",
+            name: item.name || item.promoName || "",
+            promotionType: item.promotionType || item.type || "",
+            typeName: item.typeName || item.promoType || "",
+            criteria: item.criteria || item.criteriaCount || "",
             startDate: item.startDate || item.startDateTime,
             endDate: item.endDate || item.endDateTime,
-            description: item.description || "-",
-            status: item.status || "-",
+            description: item.description || "",
+            status: item.status || "",
             _original: item,
           };
         });
@@ -354,138 +295,44 @@ const PromoViewData = ({
     loadingInitial,
     apiError,
     page,
-    USE_DUMMY,
     dataSource.length,
     pageSize,
   ]);
 
-  const normalize = (val = "") => String(val).toLowerCase().trim();
-
-  const applyDummyFilter = (data, filters) => {
-    if (!filters || filters.length === 0) return data;
-
-    return data.filter((item) => {
-      let result = true;
-
-      filters.forEach((f, index) => {
-        const rawValue = item[f.column];
-        if (rawValue === undefined || rawValue === null) return;
-
-        const itemValue = normalize(rawValue);
-        const filterValue = normalize(f.value);
-
-        let match = false;
-
-        switch (f.operator) {
-          case "Equal to":
-          case "Equals":
-          case "=":
-            match = itemValue === filterValue;
-            break;
-
-          case "Not equal to":
-          case "!=":
-            match = itemValue !== filterValue;
-            break;
-
-          case "Contains":
-            match = itemValue.includes(filterValue);
-            break;
-
-          case "Does not contain":
-            match = !itemValue.includes(filterValue);
-            break;
-
-          case "Greater than":
-            match = Number(rawValue) > Number(f.value);
-            break;
-
-          case "Less than":
-            match = Number(rawValue) < Number(f.value);
-            break;
-
-          case "Is empty":
-            match = itemValue === "";
-            break;
-
-          case "Is not empty":
-            match = itemValue !== "";
-            break;
-
-          default:
-            match = false;
-        }
-
-        if (index === 0) {
-          result = match;
-        } else if (f.condition === "OR") {
-          result = result || match;
-        } else {
-          result = result && match;
-        }
-      });
-
-      return result;
-    });
-  };
-
   const handleSearch = useCallback(
     (keyword) => {
       setSearchKeyword(keyword);
-
-      if (USE_DUMMY) {
-        if (!keyword) {
-          setDataSource(dummyPromoData);
-        } else {
-          const keywordLower = keyword.toLowerCase();
-          const filteredData = dummyPromoData.filter((item) =>
-            Object.values(item).some(
-              (value) =>
-                value !== null &&
-                value !== undefined &&
-                String(value).toLowerCase().includes(keywordLower),
-            ),
-          );
-          setDataSource(filteredData);
-        }
-        setHasMore(false);
-      } else {
-        // Untuk API real, reset state dan load data dengan keyword
-        setActiveFilters([]);
-        setPage(0);
-        setHasMore(true);
-        setDataSource([]);
-        setTotalElements(0);
-        setError(null);
-      }
+      setActiveFilters([]);
+      setPage(0);
+      setHasMore(true);
+      setDataSource([]);
+      setTotalElements(0);
+      setError(null);
     },
-    [USE_DUMMY],
+    [],
   );
 
   const loadMoreData = useCallback(
-    async (pageNumber = 0) => {
+    async (pageNumber = 0, overrideFilters, overrideKeyword) => {
       if (!accountId) return;
 
-      const validatedPage =
-        typeof pageNumber === "number"
-          ? pageNumber
-          : pageNumber === true
-            ? 1
-            : 0; // Handle boolean true
+      const validatedPage = typeof pageNumber === "number" ? pageNumber : 0;
+      const filters = overrideFilters !== undefined ? overrideFilters : activeFilters;
+      const keyword = overrideKeyword !== undefined ? overrideKeyword : searchKeyword;
 
       const payload = {
         page: validatedPage,
         size: pageSize,
         sort: "id~desc",
-        filters: [...activeFilters],
+        filters: [...filters],
         filterRules: [],
       };
 
-      if (searchKeyword) {
+      if (keyword) {
         payload.filters.push({
           column: "name",
           operator: "Contains",
-          value: searchKeyword,
+          value: keyword,
           logic: "OR",
         });
       }
@@ -497,49 +344,38 @@ const PromoViewData = ({
 
   // Effect untuk load data saat searchKeyword atau accountId berubah
   useEffect(() => {
-    if (!USE_DUMMY && accountId) {
+    if (accountId) {
       const timer = setTimeout(() => {
-        loadMoreData(true);
+        loadMoreData(0);
       }, 300);
 
       return () => clearTimeout(timer);
     }
-  }, [searchKeyword, accountId, USE_DUMMY]);
+  }, [searchKeyword, accountId]);
 
   const loadDataWithFilter = useCallback(
-    async (filters = [], reset = true) => {
-      if (USE_DUMMY) {
-        const filteredData = applyDummyFilter(dummyPromoData, filters);
-        setDataSource(filteredData);
-        setHasMore(false);
-      } else {
-        setActiveFilters(filters);
-        setSearchKeyword("");
-        if (reset) {
-          setPage(0);
-          setHasMore(true);
-          setDataSource([]);
-          setTotalElements(0);
-          setError(null);
-          setTimeout(() => {
-            loadMoreData(0);
-          }, 0);
-        }
+    (filters = [], reset = true) => {
+      setActiveFilters(filters);
+      setSearchKeyword("");
+      if (reset) {
+        setPage(0);
+        setHasMore(true);
+        setDataSource([]);
+        setTotalElements(0);
+        setError(null);
+        loadMoreData(0, filters, "");
       }
     },
-    [USE_DUMMY, loadMoreData],
+    [loadMoreData],
   );
 
   // Inisialisasi data
   useEffect(() => {
-    if (USE_DUMMY) {
-      setDataSource(dummyPromoData);
-      setHasMore(false);
-    } else if (accountId) {
+    if (accountId) {
       console.log("Initializing with accountId:", accountId);
-      loadMoreData(true);
+      loadMoreData(0);
     }
-  }, [USE_DUMMY, accountId]);
+  }, [accountId]);
 
   const mapAdvanceSearchToBE = (searchData) => {
     if (!searchData) return [];
@@ -586,12 +422,10 @@ const PromoViewData = ({
   // Cleanup
   useEffect(() => {
     return () => {
-      if (!USE_DUMMY) {
-        clearValidPromo();
-      }
+      clearValidPromo();
       setDetailPromoData({});
     };
-  }, [clearValidPromo, setDetailPromoData, USE_DUMMY]);
+  }, [clearValidPromo, setDetailPromoData]);
 
   const baseColumns = useMemo(
     () => promoRepository.getColumns(handleViewDetail),
@@ -641,7 +475,6 @@ const PromoViewData = ({
         fixedColumns={fixedColumns}
         setFixedColumns={setFixedColumns}
         showSearchBar
-        onSearch={handleSearch}
         showAdvanceSearch
         onAdvanceSearch={handleAdvanceSearch}
         usePagination={false}

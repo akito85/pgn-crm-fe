@@ -1,7 +1,6 @@
-import { Alert, Form } from "antd";
+import { Alert, Button, Form } from "antd";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
 import { requiredMessage } from "../../utils";
-import ButtonComponent from "../ButtonComponent";
 import InputComponent from "../InputComponent";
 import NxModal from "./NxModal";
 
@@ -16,6 +15,7 @@ const NxApproveOrRejectModal = ({
   children,
   customMessage,
   width = 1000,
+  loading = false,
 }) => {
   const [form] = Form.useForm();
 
@@ -36,26 +36,27 @@ const NxApproveOrRejectModal = ({
     <NxModal
       isOpen={isOpen}
       handleCancel={handleCancelModalFinal}
-      header={`${header} information`}
+      title={`${header} INFORMATION`}
       width={width}
       type={"confirmation"}
+      loading={loading}
       footer={
-        <div className="w-full flex justify-end gap-x-4">
-          <ButtonComponent onClick={handleCancelModalFinal} type="default">
+        <div className="w-full flex justify-end">
+          <Button onClick={handleCancelModalFinal} type="menu" disabled={loading}>
             Cancel
-          </ButtonComponent>
-          <ButtonComponent
+          </Button>
+          <Button
             form="formApproveReject"
             type="submit"
             htmlType="submit"
+            loading={loading}
           >
             Confirm
-          </ButtonComponent>
+          </Button>
         </div>
       }
     >
       <div className="p-4">
-
         <Form
           id="formApproveReject"
           layout="vertical"
@@ -79,9 +80,7 @@ const NxApproveOrRejectModal = ({
             showIcon
             className="p-0 m-0"
           />
-
           {children}
-
           <Form.Item
             name={"remark"}
             label={"Remark"}
@@ -93,6 +92,7 @@ const NxApproveOrRejectModal = ({
               rows={1}
               type="textarea"
               placeholder={"Type your remark"}
+              disabled={loading}
             />
           </Form.Item>
         </Form>

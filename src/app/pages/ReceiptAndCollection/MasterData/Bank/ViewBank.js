@@ -1,28 +1,20 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { NavLink, Link } from "react-router-dom";
-import BaseContainer from "../../../../../components/BaseContainer";
+import { Link, NavLink } from "react-router-dom";
 import CardContainer from "../../../../../components/CardContainer";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
 import SVGIcon from "../../../../../assets/Icon/index";
-
 import Highlighter from "react-highlight-words";
-import {
-  DownloadOutlined,
-  EyeOutlined
-} from "@ant-design/icons";
-import {
-  Checkbox,
-  Form,
-  Spin,
-  Tooltip,
-} from "antd";
-import TablePagination from "../../../../../components/TablePagination";
+import { Checkbox, Spin, Tooltip } from "antd";
 import TableRBI from "../../../../../components/TableRBI";
-import StatusComponent from "../../../../../components/StatusComponent";
 import {
   getAllApprovalList,
   getApprovalHistory,
@@ -33,12 +25,17 @@ import {
 } from "../../../../../redux/slices/receipt_collection/bankSlice";
 import ModalInactivateWithHierarchy from "../../../../../components/Modal/ModalInactivateWithHierarchy";
 import { intToNPWP } from "../../../../../utils/npwp";
-import { getColumnSearchPropsPaging } from "../../../../../utils/getColumnSearchProps";
+import { getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
 import ModalHistory from "../../../../../components/Modal/ModalHistory";
 import { useTryAgainHooks } from "../../../../../utils/useTryAgainHooks";
 import Toolbar from "../../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../../components/ColumnActionPermission";
-import { disabledActionByStatus } from "../../../../../utils";
+import {
+  disabledActionByStatus,
+  hasValue,
+  renderColumn,
+} from "../../../../../utils";
+import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
 
 export const columnsBank = (
   page = 1,
@@ -46,231 +43,338 @@ export const columnsBank = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => { },
-  handleInactive = () => { },
-  handleApprovalHistory = () => { }
+  handleSearch = () => {},
+  handleInactive = () => {},
+  handleApprovalHistory = () => {},
+  search = {},
 ) => [
-    {
-      title: "NO",
-      width: 60,
-      align: "center",
-      isClassification: true,
-      render: (text, object, index) => (page - 1) * pageSize + index + 1,
-    },
-    {
-      title: "BANK CODE",
-      dataIndex: "bankCode",
-      key: "bankCode",
-      sorter: true,
-      align: "center",
-      ...getColumnSearchPropsPaging(
+  {
+    title: "NO",
+    key: "no",
+    width: 60,
+    align: "left",
+    render: (text, object, index) => (page - 1) * pageSize + index + 1,
+  },
+  {
+    title: "CODE BANK",
+    dataIndex: "bankCode",
+    key: "bankCode",
+    sorter: true,
+    align: "right",
+    filteredValue: [search?.bankCode] || null,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "bankCode",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+    ),
+    render: (text) =>
+      renderColumn(
         "bankCode",
-        searchInput,
-        searchedColumn,
+        hasValue(search["bankCode"]),
         searchText,
-        handleSearch
+        text,
+        false,
+        "input",
+        search,
       ),
-    },
-    {
-      title: "BANK NAME",
-      dataIndex: "bankName",
-      key: "bankName",
-      sorter: true,
-      align: "left",
-      ...getColumnSearchPropsPaging(
+  },
+  {
+    title: "BANK NAME",
+    dataIndex: "bankName",
+    key: "bankName",
+    sorter: true,
+    align: "left",
+    filteredValue: [search?.bankName] || null,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "bankName",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+    ),
+    render: (text) =>
+      renderColumn(
         "bankName",
-        searchInput,
-        searchedColumn,
+        hasValue(search["bankName"]),
         searchText,
-        handleSearch
+        text,
+        false,
+        "input",
+        search,
       ),
-    },
-    {
-      title: "BANK SHORT NAME",
-      dataIndex: "bankShortName",
-      key: "bankShortName",
-      sorter: true,
-      align: "left",
-      ...getColumnSearchPropsPaging(
+  },
+  {
+    title: "SHORT BANK NAME",
+    dataIndex: "bankShortName",
+    key: "bankShortName",
+    sorter: true,
+    align: "left",
+    filteredValue: [search?.bankShortName] || null,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "bankShortName",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+    ),
+    render: (text) =>
+      renderColumn(
         "bankShortName",
-        searchInput,
-        searchedColumn,
+        hasValue(search["bankShortName"]),
         searchText,
-        handleSearch
+        text,
+        false,
+        "input",
+        search,
       ),
-    },
-    {
-      title: "BRANCH NAME",
-      dataIndex: "branchName",
-      key: "branchName",
-      sorter: true,
-      align: "left",
-      ...getColumnSearchPropsPaging(
-        "branchName",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch
-      ),
-    },
-    {
-      title: "TAX IDENTIFICATION NUMBER (NPWP)",
-      dataIndex: "npwp",
-      key: "npwp",
-      sorter: (a, b) => a.npwp.length - b.npwp.length,
-      align: "left",
-      ...getColumnSearchPropsPaging(
-        "npwp",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) =>
-        searchedColumn === "npwp" ? (
-          <Highlighter
-            highlightStyle={{
-              backgroundColor: "#ffc069",
-              padding: 0,
-            }}
-            searchWords={[searchText]}
-            autoEscape
-            textToHighlight={text ? intToNPWP(text) : ""}
-          />
-        ) : text ? (
-          intToNPWP(text)
-        ) : (
-          "-"
-        ),
-    },
-    {
-      title: "PHONE NUMBER",
-      dataIndex: "phoneNumber",
-      key: "phoneNumber",
-      sorter: true,
-      align: "left",
-      ...getColumnSearchPropsPaging(
-        "phoneNumber",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch
-      ),
-    },
-    {
-      title: "IS BRANCH",
-      dataIndex: "isBranch",
-      key: "isBranch",
-      sorter: true,
-      align: "left",
-      ...getColumnSearchPropsPaging(
+  },
+  {
+    title: "OFFICE TYPE",
+    dataIndex: "isBranch",
+    key: "isBranch",
+    sorter: true,
+    align: "center",
+    filteredValue: [search?.isBranch] || null,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "isBranch",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+    ),
+    render: (_, record) => {
+      const val = record.isBranch;
+      const display =
+        val === true || val === "Y" || val === "BRANCH"
+          ? "BRANCH"
+          : "HEAD OFFICE";
+      return renderColumn(
         "isBranch",
-        searchInput,
-        searchedColumn,
+        hasValue(search["isBranch"]),
         searchText,
-        handleSearch,
-        true
-      ),
-      render: (text) => {
-        if (searchedColumn === "isBranch") {
-          return (
-            <Highlighter
-              highlightStyle={{
-                backgroundColor: "#ffc069",
-                padding: 0,
-              }}
-              searchWords={[searchText]}
-              autoEscape
-              textToHighlight={text ? text.toString() : ""}
-            />
-          );
-        } else {
-          return <div>{text}</div>;
-        }
-      },
+        display,
+        false,
+        "input",
+        search,
+      );
     },
-
-    {
-      title: "EMAIL",
-      dataIndex: "email",
-      key: "email",
-      sorter: true,
-      align: "left",
-      ...getColumnSearchPropsPaging(
+  },
+  {
+    title: "BRANCH NAME",
+    dataIndex: "branchName",
+    key: "branchName",
+    sorter: true,
+    align: "left",
+    filteredValue: [search?.branchName] || null,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "branchName",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+    ),
+    render: (text) =>
+      renderColumn(
+        "branchName",
+        hasValue(search["branchName"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
+  },
+  {
+    title: "TAX IDENTIFICATION NUMBER (NPWP)",
+    dataIndex: "npwp",
+    key: "npwp",
+    sorter: (a, b) => a.npwp.length - b.npwp.length,
+    align: "right",
+    filteredValue: [search?.npwp] || null,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "npwp",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+    ),
+    render: (text) =>
+      searchedColumn === "npwp" ? (
+        <Highlighter
+          highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
+          searchWords={[searchText]}
+          autoEscape
+          textToHighlight={text ? intToNPWP(text) : ""}
+        />
+      ) : text ? (
+        intToNPWP(text)
+      ) : (
+        "-"
+      ),
+  },
+  {
+    title: "TELEPHONE NUMBER",
+    dataIndex: "phoneNumber",
+    key: "phoneNumber",
+    sorter: true,
+    align: "right",
+    filteredValue: [search?.phoneNumber] || null,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "phoneNumber",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+    ),
+    render: (text) =>
+      renderColumn(
+        "phoneNumber",
+        hasValue(search["phoneNumber"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+      ),
+  },
+  {
+    title: "EMAIL",
+    dataIndex: "email",
+    key: "email",
+    sorter: true,
+    align: "left",
+    filteredValue: [search?.email] || null,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "email",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+    ),
+    render: (text) =>
+      renderColumn(
         "email",
-        searchInput,
-        searchedColumn,
+        hasValue(search["email"]),
         searchText,
-        handleSearch
+        text,
+        false,
+        "input",
+        search,
       ),
-    },
-    {
-      title: "ADDRESS",
-      dataIndex: "address",
-      key: "address",
-      sorter: true,
-      align: "left",
-      ...getColumnSearchPropsPaging(
+  },
+  {
+    title: "ADDRESS",
+    dataIndex: "address",
+    key: "address",
+    sorter: true,
+    align: "left",
+    filteredValue: [search?.address] || null,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "address",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+    ),
+    render: (text) =>
+      renderColumn(
         "address",
-        searchInput,
-        searchedColumn,
+        hasValue(search["address"]),
         searchText,
-        handleSearch
+        text,
+        false,
+        "input",
+        search,
       ),
-    },
-    {
-      title: "STATUS",
-      dataIndex: "status",
-      sorter: true,
-      align: "left",
-      fixed: "right",
-      width: 150,
-      ...getColumnSearchPropsPaging(
+  },
+  {
+    key: "status",
+    title: "STATUS",
+    dataIndex: "status",
+    sorter: true,
+    fixed: "right",
+    width: 150,
+    filteredValue: [search?.status] || null,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "status",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+    ),
+    render: (text) =>
+      renderColumn(
         "status",
-        searchInput,
-        searchedColumn,
+        hasValue(search["status"]),
         searchText,
-        handleSearch,
-        true
+        text,
+        false,
+        "status",
+        search,
       ),
-      render: (a) => (
-        <div className="flex justify-center">
-          <StatusComponent colour={a}>{a}</StatusComponent>
-        </div>
-      ),
-    },
-    {
-      title: "STATUS APPROVAL",
-      dataIndex: "statusApproval",
-      sorter: true,
-      align: "left",
-      fixed: "right",
-      width: 250,
-      ...getColumnSearchPropsPaging(
+  },
+  {
+    key: "statusApproval",
+    title: "STATUS APPROVAL",
+    dataIndex: "statusApproval",
+    sorter: true,
+    fixed: "right",
+    width: 150,
+    filteredValue: [search?.statusApproval] || null,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "statusApproval",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+    ),
+    render: (text) =>
+      renderColumn(
         "statusApproval",
-        searchInput,
-        searchedColumn,
+        hasValue(search["statusApproval"]),
         searchText,
-        handleSearch,
-        true
+        text,
+        false,
+        "status",
+        search,
       ),
-      render: (a) => (
-        <div className="flex justify-center">
-          <StatusComponent colour={a}>{a}</StatusComponent>
-        </div>
-      ),
-    },
-  ];
+  },
+];
+
 const ViewBank = () => {
-  // selector
   const { data, dataApprovalHistory, loading } = useSelector(
-    (state) => state.bank
+    (state) => state.bank,
   );
   const { bodyError } = useSelector((state) => state?.general);
   const dispatch = useDispatch();
+
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const initialPageSize = 100;
+  const loadMoreSize = 20;
   const searchInput = useRef(null);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
@@ -279,32 +383,83 @@ const ViewBank = () => {
   const [status, setStatus] = useState("");
   const [bankId, setBankId] = useState("");
   const [bankNames, setBankNames] = useState("");
-  const [form] = Form.useForm();
-  const [modalActiveInactive, setModalActiveInactive] = useState(false);
-  const [dataInactivate, setDataInactivate] = useState({});
   const [openModalInactivate, setOpenModalInactivate] = useState(false);
   const [openModalHistory, setOpenModalHistory] = useState(false);
   const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
   const [body, setBody] = useState({});
+  const [allData, setAllData] = useState([]);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const shouldResetRef = useRef(true);
+  const [fixedColumns, setFixedColumns] = useState(() => ({
+    left: ["no"],
+    right: ["status", "statusApproval", "action"],
+  }));
 
-  const handleFetch = useCallback(() => {
+  const hasMore = allData.length < (data?.page?.totalElements || 0);
+
+  // Initial fetch and search/sort changes
+  useEffect(() => {
     dispatch(
       getPaginateBank({
         search: encodeURIComponent(JSON.stringify(search)),
-        page,
-        pageSize,
+        page: 1,
+        pageSize: initialPageSize,
         sort,
-      })
+      }),
     );
-  }, [dispatch, page, pageSize, search, sort]);
+  }, [search, sort, dispatch, refreshKey]);
 
+  // Accumulate data for infinite scroll
   useEffect(() => {
-    handleFetch();
-  }, [handleFetch]);
+    if (data?.result) {
+      if (shouldResetRef.current || page === 1) {
+        setAllData(data.result);
+        shouldResetRef.current = false;
+      } else {
+        setAllData((prev) => {
+          const ids = new Set(prev.map((item) => item.id));
+          const newItems = data.result.filter((item) => !ids.has(item.id));
+          return [...prev, ...newItems];
+        });
+      }
+    }
+  }, [data, page]);
 
-  //search TIDAK BOLEH DI UBAH
-  const handleSearch = (selectedKeys, confirm, dataIndex) => {
+  // Handle Refresh
+  const handleRefresh = useCallback(() => {
+    shouldResetRef.current = true;
+    if (page === 1) {
+      setRefreshKey((prev) => prev + 1);
+    } else {
+      setPage(1);
+    }
+  }, [page]);
+
+  // Handle Load More (infinite scroll)
+  const handleLoadMore = useCallback(async () => {
+    if (allData.length >= (data?.page?.totalElements || 0)) return;
+    const nextPage = Math.floor(allData.length / loadMoreSize) + 1;
+    setPage(nextPage);
+    await dispatch(
+      getPaginateBank({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page: nextPage,
+        pageSize: loadMoreSize,
+        sort,
+      }),
+    );
+  }, [
+    allData.length,
+    data?.page?.totalElements,
+    search,
+    sort,
+    dispatch,
+    loadMoreSize,
+  ]);
+
+  const handleSearch = useCallback((selectedKeys, confirm, dataIndex) => {
     confirm();
+    shouldResetRef.current = true;
     if (dataIndex !== "isBranch") {
       setSearchText(selectedKeys[0]);
       setSearchedColumn(dataIndex);
@@ -324,9 +479,6 @@ const ViewBank = () => {
           : "N";
         setSearchText(selectedKeys[0]);
         setSearchedColumn(dataIndex);
-        // setSearch(
-        //   selectedKeys.length === 0 ? "" : `${dataIndex}~${tempSearchedText}`
-        // );
         setSearch((prevState) => {
           if (prevState[dataIndex] !== selectedKeys[0]) {
             setPage(1);
@@ -339,24 +491,20 @@ const ViewBank = () => {
       } else {
         setSearchText(selectedKeys[0]);
         setSearchedColumn(dataIndex);
-        const temp = search;
-        delete temp[dataIndex];
-
         setSearch((prevState) => {
+          const temp = { ...prevState };
+          delete temp[dataIndex];
           if (prevState[dataIndex] !== selectedKeys[0]) {
             setPage(1);
           }
-          return {
-            ...temp,
-          };
+          return temp;
         });
       }
     }
-  };
+  }, []);
 
-  const handleChange = (page, pageSize) => {
-    setPage(page);
-    setPageSize(pageSize);
+  const handleChange = (pageChange) => {
+    setPage(pageChange);
   };
 
   const handleInactive = (r) => {
@@ -367,14 +515,8 @@ const ViewBank = () => {
   };
 
   const routes = [
-    {
-      path: "",
-      breadcrumbName: "System Setup",
-    },
-    {
-      path: "",
-      breadcrumbName: "Master Data",
-    },
+    { path: "", breadcrumbName: "System Setup" },
+    { path: "", breadcrumbName: "Master Data" },
     {
       path: RECEIPT_AND_COLLECTION_ROUTES.VIEW_MASTER_BANK,
       breadcrumbName: "Bank",
@@ -386,42 +528,40 @@ const ViewBank = () => {
       sort.order !== undefined
         ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
         : "";
+    shouldResetRef.current = true;
+    setPage(1);
     setSort(dataSort);
   };
 
   const handleSubmitModalInactivate = (res, handleClear) => {
-    const body = {
+    const bodyPayload = {
       bankId: bankId,
-      appHierId: res.approvalHierarchy, // Anda dapat menghapus ini jika tidak perlu
-      remark: res.remark, // Anda dapat menghapus ini jika tidak perlu
+      appHierId: res.approvalHierarchy,
+      remark: res.remark,
       status: status === "Inactive" ? "Active" : "Inactive",
     };
-    setBody({ body });
-    dispatch(inactiveBank({ body }))
+    setBody({ body: bodyPayload });
+    dispatch(inactiveBank({ body: bodyPayload }))
       .unwrap()
       .then(() => {
         handleClear();
         handleCancelModalInactivate();
-        let tempSearch = "";
-        for (const dataIndex in search) {
-          if (Object.hasOwnProperty.call(search, dataIndex)) {
-            const tempSearchText = search[dataIndex];
-            if (tempSearchText) {
-              tempSearch += `${dataIndex}~${tempSearchText},`;
-            }
-          }
-        }
-        tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
-        dispatch(getPaginateBank({ search: tempSearch, page, pageSize, sort }));
+        shouldResetRef.current = true;
+        setPage(1);
+        dispatch(
+          getPaginateBank({
+            search: encodeURIComponent(JSON.stringify(search)),
+            page: 1,
+            pageSize: initialPageSize,
+            sort,
+          }),
+        );
       });
   };
 
   const handleCancelModalInactivate = () => {
-    setDataInactivate({});
     setOpenModalInactivate(false);
   };
-
-  //modla approver
 
   useEffect(() => {
     if (dataApprovalHistory && dataApprovalHistory?.dataApprover) {
@@ -442,45 +582,48 @@ const ViewBank = () => {
   }, [dataApprovalHistory]);
 
   const handleOptions = () => {
-    const data = dataApprovalHistoryFix?.dataApprover || {};
-    const keyData = Object.keys(data);
+    const historyData = dataApprovalHistoryFix?.dataApprover || {};
+    const keyData = Object.keys(historyData);
     return keyData.map((item) => ({
       value: item.charAt(0).toUpperCase() + item.slice(1).toLowerCase(),
     }));
   };
 
-  const handleApprovalHistory = async (data) => {
-    try {
-      setBody(data);
-      await dispatch(getApprovalHistory(data.id))?.unwrap();
-      setOpenModalHistory(true);
-    } catch (error) {
-      setOpenModalHistory(false);
-
-    }
-  };
+  const handleApprovalHistory = useCallback(
+    async (recordData) => {
+      try {
+        setBody(recordData);
+        await dispatch(getApprovalHistory(recordData.id))?.unwrap();
+        setOpenModalHistory(true);
+      } catch (error) {
+        setOpenModalHistory(false);
+      }
+    },
+    [dispatch],
+  );
 
   const handleDownload = () => {
     dispatch(
       getDownloadBank({
         search: encodeURIComponent(JSON.stringify(search)),
-        page,
-        pageSize,
+        page: 1,
+        pageSize: initialPageSize,
         sort,
-      })
+      }),
     );
   };
 
   const itemActions = [
-    // toolbar items
     {
       action: "Download",
       render: (
         <ButtonComponent
           onClick={handleDownload}
-          type={"submit"}
+          type="submit"
           border={false}
-          icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
+          icon={
+            <SVGIcon name="IconButtonDownload" style={{ fontSize: "20px" }} />
+          }
         >
           Download List
         </ButtonComponent>
@@ -488,174 +631,173 @@ const ViewBank = () => {
     },
     {
       action: "Create",
-      type: "table",
-
       render: (
         <NavLink to={RECEIPT_AND_COLLECTION_ROUTES.CREATE_MASTER_BANK}>
           <ButtonComponent
-            icon={<SVGIcon name="IconButtonCreate" width={24} />}
+            icon={
+              <SVGIcon name="IconButtonCreate" style={{ fontSize: "20px" }} />
+            }
             type="submit"
           >
-            Create Bank
+            Create
           </ButtonComponent>
         </NavLink>
       ),
     },
-
-    // column action
     {
       action: "View",
       type: "table",
-      render: (record, data_length) => {
+      render: (record) => {
         return (
-          <Tooltip title={"Detail"}>
-            <Link
-              to={RECEIPT_AND_COLLECTION_ROUTES.DETAIL_MASTER_BANK}
-              state={{ id: record?.id }}
-            >
-              {/* <ButtonComponent
-                  className="gap-5"
-                  icon={<SVGIcon name="IconDetail" width={24} />}
-                  border={falsFe}
-                /> */}
-              <EyeOutlined
-                style={{ fontSize: "24px" }}
-              />
-            </Link>
-          </Tooltip>
+          <Link
+            to={RECEIPT_AND_COLLECTION_ROUTES.DETAIL_MASTER_BANK}
+            state={{ id: record?.id }}
+          >
+            <Tooltip title="Detail">
+              <div className="pt-0">
+                <SVGIcon name="IconDetail" width={20} />
+              </div>
+            </Tooltip>
+          </Link>
         );
       },
     },
     {
       action: "Update",
       type: "table",
-
-      render: (record, data_length) => {
-        return (
-          data_length > 3 ? (
-            <Link
-              to={
-                disabledActionByStatus('update', record?.status, record?.statusApproval) === false &&
-                RECEIPT_AND_COLLECTION_ROUTES.UPDATE_MASTER_BANK}
-              state={disabledActionByStatus('update', record?.status, record?.statusApproval) === false &&
-                { id: record?.id }}
+      render: (record, data) => {
+        const isDisabled = disabledActionByStatus(
+          "update",
+          record?.status,
+          record?.statusApproval,
+        );
+        const linkContent =
+          data > 3 ? (
+            <ButtonComponent
+              icon={
+                <SVGIcon
+                  name="IconEdit"
+                  color={isDisabled ? "#8D91A0" : "#0075bf"}
+                  width={24}
+                />
+              }
+              type={"action"}
+              border={false}
+              disabled={isDisabled}
             >
-              <ButtonComponent
-                className="gap-5 w-full"
-                icon={
-                  <SVGIcon name="IconEdit" width={24} color={"#0075BF"} />
-                }
-                border={false}
+              <span
+                className={`ml-0 ${isDisabled ? "text-[#8D91A0]" : "text-black"}`}
               >
-                <span
-                  className={"text-black gap-2 text-xl text-center w-full"}
-                >
-                  Update
-                </span>
-              </ButtonComponent>
-            </Link>
+                {" "}
+                Update
+              </span>
+            </ButtonComponent>
           ) : (
-            <Tooltip title="Update" className={
-              disabledActionByStatus('update', record?.status, record?.statusApproval) ? "cursor-not-allowed" : "cursor-pointer"
-            }>
-              <Link
-                to={
-                  disabledActionByStatus('update', record?.status, record?.statusApproval) === false &&
-                  RECEIPT_AND_COLLECTION_ROUTES.UPDATE_MASTER_BANK}
-                state={
-                  disabledActionByStatus('update', record?.status, record?.statusApproval) === false &&
-                  { id: record?.id }
-                }
-              >
-                <div border={false}>
-                  <SVGIcon name="IconEdit"
-                    color={disabledActionByStatus('update', record?.status, record?.statusApproval) ? "#d3d3d3" : "#ACC424"} width={24}
-                    className={
-                      disabledActionByStatus('update', record?.status, record?.statusApproval) ? "cursor-not-allowed" : "cursor-pointer"
-                    } />
-                </div>
-              </Link>
+            <Tooltip title="Update">
+              <div className="pt-0">
+                <SVGIcon
+                  name="IconEdit"
+                  width={24}
+                  color={isDisabled ? "#8D91A0" : "#ACC424"}
+                  className={isDisabled ? "cursor-not-allowed" : undefined}
+                />
+              </div>
             </Tooltip>
-          )
+          );
+        return isDisabled ? (
+          <div>{linkContent}</div>
+        ) : (
+          <Link
+            to={RECEIPT_AND_COLLECTION_ROUTES.UPDATE_MASTER_BANK}
+            state={{ id: record?.id }}
+          >
+            {linkContent}
+          </Link>
         );
       },
     },
     {
       action: "Activate",
       type: "table",
-
-      render: (record, data_length) => {
-        const statusLowerCase = record?.status?.toLowerCase()
-        return (
-          data_length > 3 ?
-            <div className="w-full">
-              <ButtonComponent
-                border={false}
-                className={'gap-5 w-full'}
-                onClick={() => handleInactive(record)}
-                disabled={
-                  disabledActionByStatus('activate', record?.status, record?.statusApproval)
-                }
-              >
+      render: (record, data) => {
+        const statusLowerCase = record?.status?.toLowerCase();
+        const isDisabled = disabledActionByStatus(
+          "activate",
+          record?.status,
+          record?.statusApproval,
+        );
+        const Content =
+          data > 3 ? (
+            <ButtonComponent
+              icon={
                 <Checkbox
+                  className="inactive-check"
                   onClick={() => handleInactive(record)}
+                  disabled={isDisabled}
                   checked={record?.status !== "Active"}
-                  disabled={disabledActionByStatus('activate', record?.status, record?.statusApproval)}
                 />
-                <span
-                  className={"text-black ml-6 gap-2 text-xl text-center w-full"}
-                >
-                  {record?.status === "Active" ? "Inactivate" : "Activate"}
-                </span>
-              </ButtonComponent>
-            </div>
-            :
-            <Tooltip title={statusLowerCase === "active" || statusLowerCase === 'draft' ? "Inactivate" : "Activate"}>
-              <div >
+              }
+              type={"action"}
+              border={false}
+              disabled={isDisabled}
+              onClick={() => handleInactive(record)}
+            >
+              <span className="text-black ml-1">
+                {record?.status === "Active" ? "Inactivate" : "Activate"}
+              </span>
+            </ButtonComponent>
+          ) : (
+            <Tooltip
+              title={
+                statusLowerCase === "active" || statusLowerCase === "draft"
+                  ? "Inactivate"
+                  : "Activate"
+              }
+            >
+              <div className="pt-1">
                 <Checkbox
-                  border={false}
+                  className="inactive-check"
                   onClick={() => handleInactive(record)}
                   checked={record?.status !== "Active"}
-                  disabled={disabledActionByStatus('activate', record?.status, record?.statusApproval)}
+                  disabled={isDisabled}
                 />
               </div>
             </Tooltip>
-        );
+          );
+        return Content;
       },
     },
     {
       action: "history",
       type: "table",
-      render: (record, data_length) => {
-        return (
-          data_length > 3 ?
-            <ButtonComponent
-              className="gap-5"
-              icon={
-                <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
-              }
-              border={false}
-              onClick={() => handleApprovalHistory(record)}
-            >
-              <span className={"text-black gap-2 text-xl text-center"}>
-                Approval History
-              </span>
-            </ButtonComponent>
-
-            :
-            <Tooltip title={'Approval History'}>
-              <div border={false}
+      render: (record, data) => {
+        return data > 3 ? (
+          <ButtonComponent
+            icon={
+              <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
+            }
+            type={"action"}
+            border={false}
+            onClick={() => handleApprovalHistory(record)}
+          >
+            <span className={"text-black ml-0"}>Approval History</span>
+          </ButtonComponent>
+        ) : (
+          <Tooltip title="Approval History">
+            <div className="pt-1">
+              <SVGIcon
+                name="IconLogHistory"
+                color={"#0075bf"}
+                width={24}
                 onClick={() => handleApprovalHistory(record)}
-              >
-                <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
-              </div>
-            </Tooltip>
+              />
+            </div>
+          </Tooltip>
         );
       },
     },
   ];
 
-  // handle retry modal error
   const handleRetry = () => {
     try {
       handleCancelTryAgain();
@@ -666,59 +808,85 @@ const ViewBank = () => {
       } else if (bodyError?.action === "DOWNLOAD_MASTER_BANK") {
         handleDownload();
       }
-      handleFetch();
+      handleRefresh();
     } catch (error) {
-      handleFetch();
+      handleRefresh();
     }
   };
+
+  const actionCols = useColumnActionPermission(
+    ["view", "history", "update", "activate"],
+    itemActions,
+  );
+
+  const allColumns = useMemo(() => {
+    return [
+      ...columnsBank(
+        1,
+        initialPageSize,
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        handleInactive,
+        handleApprovalHistory,
+        search,
+      ),
+      ...actionCols,
+    ].map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title,
+    }));
+  }, [
+    actionCols,
+    handleApprovalHistory,
+    handleSearch,
+    search,
+    searchText,
+    searchedColumn,
+  ]);
+
+  const processedColumns = useMemo(() => {
+    return applyFixedColumns(allColumns, fixedColumns);
+  }, [allColumns, fixedColumns]);
 
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <CardContainer
           header={
             <div className="flex -my-4 justify-between items-center">
-              <p className="mt-[15px] font-bold">BANK LIST</p>
-              <div className="flex gap-2">
-                <Toolbar items={itemActions} />
-              </div>
+              <p className="mt-[15px] text-nowrap">BANK LIST</p>
+
+              <Toolbar items={itemActions} />
             </div>
           }
         >
           <TableRBI
-            dataSource={data?.result}
-            pageSize={pageSize}
+            idTable="bankTable"
+            dataSource={allData}
+            pageSize={initialPageSize}
             showExport={true}
             handleDownload={handleDownload}
-            columns={[
-              ...columnsBank(
-                page,
-                pageSize,
-                searchInput,
-                searchedColumn,
-                searchText,
-                handleSearch,
-                handleInactive,
-                handleApprovalHistory
-              ),
-              ...useColumnActionPermission(
-                ["view", "history", "update", 'activate'],
-                itemActions
-              ),
-            ]}
-            // columns={[...columns]}
+            columns={processedColumns}
             current={page}
             onChange={handleChange}
             onSizeChanger={handleChange}
             totalData={data?.page?.totalElements}
             onSort={onSort}
-            tableScrolled={{
-              x: "max-content",
-              y: 525,
-            }}
+            tableScrolled={{ x: "max-content", y: 525 }}
+            fixedColumns={fixedColumns}
+            setFixedColumns={setFixedColumns}
+            useInfiniteScroll={true}
+            usePagination={false}
+            onLoadMore={handleLoadMore}
+            hasMore={hasMore}
+            showRefresh={true}
+            onRefresh={handleRefresh}
+            refreshLabel="Refresh"
           />
         </CardContainer>
 
@@ -726,9 +894,8 @@ const ViewBank = () => {
           dispatch={dispatch}
           getAPIOption={getAllApprovalList}
           getAPIDetail={getListApprovalById}
-          selector={"bank"}
-          alertMessage={`Are you sure you want to inactivate this Bank with the name ${bankNames || ""
-            }?`}
+          selector="bank"
+          alertMessage={`Are you sure you want to inactivate this Bank with the name ${bankNames || ""}?`}
           openModalInactivate={openModalInactivate}
           handleCloseModalInactivate={handleCancelModalInactivate}
           onFinish={handleSubmitModalInactivate}
@@ -737,17 +904,16 @@ const ViewBank = () => {
         <ModalHistory
           isOpen={openModalHistory && dataApprovalHistoryFix}
           handleClose={() => setOpenModalHistory(false)}
-          header={"Approval History"}
+          header="Approval History"
           width={850}
           tabOptions={handleOptions()}
           dataApprover={dataApprovalHistoryFix?.dataApprover}
           dataHistory={dataApprovalHistoryFix?.dataHistory}
         />
 
-        {/* modal try again */}
         {renderModal()}
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

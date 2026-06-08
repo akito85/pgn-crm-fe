@@ -1,0 +1,383 @@
+import { memo, useEffect, useMemo, useRef, useState } from "react";
+import GasDepositTable from "./GasDepositTable";
+import { useDispatch, useSelector } from "react-redux";
+import NxCardContainer from "../../../../components/Nx/NxCardContainer";
+import { getGrantedAccessAccount } from "../../../../redux/slices/account_management/accountManagement";
+import { clearGasDepositDetail, getGasDeposit, getMutationList } from "../../../../redux/slices/account_management/detailAccount/GasDepositSlice";
+import { useLocation } from "react-router-dom";
+import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
+import NxTabs from "../../../../components/Nx/NxTabs";
+import NxTable from "../../../../components/Nx/NxTable";
+import NxAttachmentInput from "../../../../components/Nx/NxAttachmentInput";
+import NxDetailText from "../../../../components/Nx/NxDetailText";
+import NxDate from "../../../../components/Nx/NxDatePicker";
+import NxStatusComponent from "../../../../components/Nx/NxStatusComponent";
+import SummaryBalanceTable from "./SummaryBalanceTable";
+import getMutationDetailColumns from "./getMutationDetailColumns";
+import SVGIcon from "../../../../assets/Icon/index";
+import { Button, Spin } from "antd";
+import HistoryTable from "./HistoryTable";
+import NxModal from "../../../../components/Nx/NxModal";
+import { nxGetAccountActions } from "../../../../components/Nx/NxGetAccountActions";
+import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
+
+/**
+ * Top-level Gas Deposit module container. Renders a Gas Deposit List tab and a
+ * Recalculate/Expire History tab. Supports standalone ("sa") and under-account
+ * ("ua") contexts; account sub-type is inferred from the URL. Wrapped with `React.memo`.
+ *
+ * @param {{ accountId?: number; customerId?: number }} props
+ */
+const GasDeposit = ({ accountId, customerId }) => {
+  // --- Hooks ---
+  const location = useLocation();
+  const dispatch = useDispatch();
+  const {
+    detail_gasDeposit,
+    loading_detailGd,
+    list_mutation,
+    pagination_listMutation,
+    loading_listMutation,
+  } = useSelector((state) => state.gasDeposit);
+
+  // --- State ---
+  const [activeKey, setActiveKey] = useState(0);
+  const [refreshSignal, setRefreshSignal] = useState(0);
+  const [showDetail, setShowDetail] = useState(false);
+  const [collapsed, setCollapsed] = useState({ detail: false, mutation: false, history: false });
+
+  // --- Detail inner tab ---
+  const [detailTabKey, setDetailTabKey] = useState(0);
+
+  // --- Mutation detail modal ---
+  const [mutationModalOpen, setMutationModalOpen] = useState(false);
+  const [selectedMutation, setSelectedMutation] = useState(null);
+
+  // --- Mutation table search state ---
+  const mutationSearchInput = useRef(null);
+  const [mutationSearchedColumn, setMutationSearchedColumn] = useState("");
+  const [mutationSearchText, setMutationSearchText] = useState("");
+  const [mutationSearch, setMutationSearch] = useState({});
+
+  // --- Derived values ---
+  const isStandard = location.pathname.includes("account-standard");
+  const isOneTime = location.pathname.includes("account-onetime");
+
+  const {
+    id,
+    termsEarn,
+    termsRedeem,
+    periodEarn,
+    redeemPeriodStart,
+    redeemPeriodEnd,
+    billingPeriod,
+    timeUnit,
+    currency,
+    uom,
+    quantity,
+    amount,
+    cashBalance,
+    type,
+    accountType: gdAccountType,
+    classificationType,
+    source,
+    sapCustId,
+    description,
+    status,
+    statusApproval,
+    attachments = [],
+    createdDate,
+    createdBy,
+    updatedDate,
+    updatedBy,
+  } = detail_gasDeposit;
+
+  // --- Handlers ---
+  const triggerRefresh = () => setRefreshSignal((prev) => prev + 1);
+
+  const handleTabChange = (key) => {
+    setActiveKey(key);
+    if (key !== 0) {
+      setShowDetail(false);
+      dispatch(clearGasDepositDetail());
+      setDetailTabKey(0);
+    }
+  };
+
+  const toggleCollapse = (key) =>
+    setCollapsed((prev) => ({ ...prev, [key]: !prev[key] }));
+
+  const handleMutationViewDetail = (record) => {
+    setSelectedMutation(record);
+    setMutationModalOpen(true);
+  };
+
+  const handleMutationSearch = (selectedKeys, confirm, dataIndex) => {
+    confirm();
+    setMutationSearchText(selectedKeys[0]);
+    setMutationSearchedColumn(dataIndex);
+    setMutationSearch((prev) => ({ ...prev, [dataIndex]: selectedKeys[0] }));
+  };
+
+  const handleViewDetail = (gdId) => {
+    setShowDetail(true);
+    setCollapsed({ detail: false, mutation: false, history: false });
+    dispatch(getGasDeposit({id: gdId}));
+    dispatch(getMutationList({
+      accountId: gdId,
+      body: { page: 0, size: 10, sort: "createdDtm~desc", searchs: {}, filters: [], filterRules: [] },
+    }));
+  };
+
+  // --- Effects ---
+  useEffect(() => {
+    let path;
+    if (isStandard)
+      path = "/account-management/account-standard/gas-deposit";
+    else if (isOneTime)
+      path = "/account-management/account-onetime/gas-deposit";
+
+    if (path)
+      dispatch(getGrantedAccessAccount(path));
+  }, []);
+
+  const itemActions = nxGetAccountActions({
+    handleView: (record) => handleMutationViewDetail(record),
+  })
+
+  const actionCols = useColumnActionPermission(
+    ["View"],
+    itemActions,
+    "table"
+  ).map((col) => ({
+    ...col,
+    width: 70,
+    align: "center",
+    fixed: "right",
+  }));
+
+  const mutationColumns = useMemo(() =>
+    getMutationDetailColumns({
+      search: mutationSearch,
+      searchInput: mutationSearchInput,
+      searchedColumn: mutationSearchedColumn,
+      searchText: mutationSearchText,
+      handleSearch: handleMutationSearch,
+    }),
+  [mutationSearch, mutationSearchInput, mutationSearchedColumn, mutationSearchText]);
+
+  const columns = useMemo(
+    () => [...mutationColumns, ...actionCols],
+    [mutationColumns, actionCols]
+  );
+  
+  const tabOptions = [
+    {
+      key: 0,
+      label: "Gas Deposit",
+      children: (
+        <NxBaseContainer border>
+          <GasDepositTable
+            accountId={accountId}
+            customerId={customerId}
+            onViewDetail={handleViewDetail}
+            refreshSignal={refreshSignal}
+          />
+        </NxBaseContainer>
+      )
+    },
+    {
+      key: 1,
+      label: "Summary Balance",
+      children: (
+        <NxBaseContainer border>
+          <SummaryBalanceTable
+            accountId={accountId}
+            customerId={customerId}
+            refreshSignal={refreshSignal}
+          />
+        </NxBaseContainer>
+      )
+    },
+    {
+      key: 2,
+      label: "History",
+      children: (
+        <NxBaseContainer border>
+          <HistoryTable
+            accountId={accountId}
+            customerId={customerId}
+            onViewDetail={handleViewDetail}
+            refreshSignal={refreshSignal}
+          />
+        </NxBaseContainer>
+      )
+    },
+  ];
+
+  const collapseBtn = (key) => (
+    <button
+      onClick={() => toggleCollapse(key)}
+      className="flex items-center justify-center p-1 bg-transparent border-0"
+    >
+      <SVGIcon
+        name="IconChevronDown"
+        width={24}
+        className={`transition-transform duration-200 ${collapsed[key] ? "-rotate-180" : ""}`}
+      />
+    </button>
+  );
+
+  return (
+    <div className="flex flex-col gap-y-4">
+      <NxCardContainer header="GAS DEPOSIT LIST" withoutPadding>
+        <NxTabs
+          activeKey={activeKey}
+          onChange={handleTabChange}
+          items={tabOptions}
+        />
+      </NxCardContainer>
+
+      {showDetail && (
+        <Spin spinning={loading_detailGd}>
+          <div className="flex flex-col gap-y-4">
+            <NxCardContainer
+              header="GAS DEPOSIT DETAIL"
+              withoutPadding
+              hideChildren={collapsed.detail}
+              actionElement={collapseBtn("detail")}
+            >
+              <NxTabs
+                activeKey={detailTabKey}
+                onChange={setDetailTabKey}
+                items={[
+                  {
+                    key: 0,
+                    label: "Gas Deposit Information",
+                  },
+                  {
+                    key: 1,
+                    label: "Attachment",
+                  },
+                ]}
+              />
+              <div className="p-4">
+                {detailTabKey === 0 && (
+                  <NxBaseContainer border>
+                    <div className="w-full grid grid-cols-5 gap-4">
+                      <NxDetailText label="Terms Earn">{termsEarn}</NxDetailText>
+                      <NxDetailText label="Terms Redeem">{termsRedeem}</NxDetailText>
+                      <NxDetailText label="Period Earn">{NxDate.formatDate(periodEarn, "DD MMM YYYY")}</NxDetailText>
+                      <NxDetailText label="Period Start Redeem">{NxDate.formatDate(redeemPeriodStart, "DD MMM YYYY")}</NxDetailText>
+                      <NxDetailText label="Period End Redeem">{NxDate.formatDate(redeemPeriodEnd, "DD MMM YYYY")}</NxDetailText>
+                      {/* TODO: konfirmasi ke tim rbi period apa ini? */}
+                      <NxDetailText label="Period">{NxDate.formatDate(periodEarn, "DD MMM YYYY")}</NxDetailText>
+                      <NxDetailText label="Time Unit">{timeUnit}</NxDetailText>
+                      <NxDetailText label="UOM">{uom}</NxDetailText>
+                      <NxDetailText label="Amount">{amount}</NxDetailText>
+                      <NxDetailText label="Cash Balance">{cashBalance}</NxDetailText>
+                      <NxDetailText label="Type">{type}</NxDetailText>
+                      <NxDetailText label="Source">{source}</NxDetailText>
+                      <NxDetailText label="SAP Cust ID">{sapCustId}</NxDetailText>
+                    </div>
+                    <div className="w-full mt-4">
+                      <NxDetailText label="Description">{description}</NxDetailText>
+                    </div>
+                  </NxBaseContainer>
+                )}
+                {detailTabKey === 1 && (
+                  <NxBaseContainer border>
+                    <NxAttachmentInput
+                      data={detail_gasDeposit?.attachments || []}
+                      type="detail"
+                    />
+                  </NxBaseContainer>
+                )}
+              </div>
+            </NxCardContainer>
+
+            <NxCardContainer
+              header="MUTATION DETAIL"
+              withoutPadding
+              hideChildren={collapsed.mutation}
+              actionElement={collapseBtn("mutation")}
+            >
+              <div className="p-4">
+                <NxBaseContainer border>
+                  <NxTable
+                    idTable="gas-deposit-mutation-detail-table"
+                    dataSource={list_mutation}
+                    totalData={pagination_listMutation.totalElement}
+                    columns={columns}
+                    tableScrolled={{ x: "max-content" }}
+                    usePagination={false}
+                    useInfiniteScroll={true}
+                  />
+                </NxBaseContainer>
+              </div>
+            </NxCardContainer>
+
+            <NxCardContainer header="HISTORY LOG INFORMATION" withoutPadding>
+              <div className="p-4">
+                <NxBaseContainer border>
+                  <div className="w-full grid grid-cols-5 gap-4">
+                    <NxDetailText label="Record Id">{id}</NxDetailText>
+                    <NxDetailText label="Created Date">{NxDate.formatDate(createdDate)}</NxDetailText>
+                    <NxDetailText label="Created By">{createdBy}</NxDetailText>
+                    <NxDetailText label="Updated Date">{NxDate.formatDate(updatedDate)}</NxDetailText>
+                    <NxDetailText label="Updated By">{updatedBy}</NxDetailText>
+                  </div>
+                </NxBaseContainer>
+              </div>
+            </NxCardContainer>
+          </div>
+        </Spin>
+      )}
+      <NxModal
+        isOpen={mutationModalOpen}
+        title="MUTATION DETAIL"
+        width={1500}
+        handleCancel={() => setMutationModalOpen(false)}
+        footer={
+          <div className="flex justify-start">
+             <Button onClick={() => setMutationModalOpen(false)} type="menu">
+              Back
+            </Button>
+          </div>
+        }
+      >
+        <div className="flex flex-col p-4 gap-4">
+          <NxBaseContainer border header={"MUTATION DETAIL INFORMATION"}>
+            <div className="w-full grid grid-cols-5 gap-4">
+              <NxDetailText label="Document Number">{selectedMutation?.documentNumber}</NxDetailText>
+              <NxDetailText label="Source">{selectedMutation?.source}</NxDetailText>
+              <NxDetailText label="Billing Period">{selectedMutation?.billingPeriod}</NxDetailText>
+              <NxDetailText label="Mutation Date">{NxDate.formatDate(selectedMutation?.mutationDate, "DD MMM YYYY")}</NxDetailText>
+              <NxDetailText label="Mutation Type">{selectedMutation?.mutationType}</NxDetailText>
+              <NxDetailText label="Category">{selectedMutation?.category}</NxDetailText>
+              <NxDetailText label="Quantity">{selectedMutation?.quantity}</NxDetailText>
+              <NxDetailText label="Price">{selectedMutation?.price}</NxDetailText>
+              <NxDetailText label="Amount">{selectedMutation?.amount}</NxDetailText>
+              <NxDetailText label="Type">{selectedMutation?.type}</NxDetailText>
+              <NxDetailText label="UOM">{selectedMutation?.uom}</NxDetailText>
+            </div>
+            <div className="w-full mt-4">
+              <NxDetailText label="Description">{selectedMutation?.description}</NxDetailText>
+            </div>
+          </NxBaseContainer>
+          <NxBaseContainer border header={"HISTORY LOG INFORMATION"}>
+            <div className="w-full grid grid-cols-5 gap-4">
+              <NxDetailText label="Record ID">{selectedMutation?.id}</NxDetailText>
+              <NxDetailText label="Created Date">{NxDate.formatDate(selectedMutation?.createdDate)}</NxDetailText>
+              <NxDetailText label="Created By">{selectedMutation?.createdBy}</NxDetailText>
+              <NxDetailText label="Updated Date">{NxDate.formatDate(selectedMutation?.updatedDate)}</NxDetailText>
+              <NxDetailText label="Updated By">{selectedMutation?.updatedBy}</NxDetailText>
+            </div>
+          </NxBaseContainer>
+        </div>
+      </NxModal>
+    </div>
+  );
+};
+
+export default memo(GasDeposit);

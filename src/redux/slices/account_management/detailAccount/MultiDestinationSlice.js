@@ -3,54 +3,77 @@ import accountManagementService from "../../../services/account_management/accou
 import { setBodyError, showModalError, showModalSuccess, validateError } from "../../general_slice";
 
 const initialState = {
-  loading: false,
+  // --- List ---
+  loading_listMd: false,
   list_multiDestination: [],
-  pagination_multiDestination: {
-    totalPages: 0,
-    totalElements: 0,
+  pagination_listMd: {
+    totalPage: 0,
+    totalElement: 0,
     currentPage: 0,
     pageSize: 10,
   },
+
+  // --- Approval List ---
+  loading_listMdApproval: false,
   list_multiDestinationApproval: [],
-  pagination_multiDestinationApproval: {
-    totalPages: 0,
-    totalElements: 0,
+  pagination_listMdApproval: {
+    totalPage: 0,
+    totalElement: 0,
     currentPage: 0,
     pageSize: 10,
   },
-  data_mdApprovalHierarchy: [],
-  detail_mdApprovalHierarchy: [],
-  data_mdAttachmentCategory: [],
-  list_mdAccountStandard: [],
-  pagination_mdAccountStandard: {
-    totalPages: 0,
-    totalElements: 0,
-    currentPage: 0,
-    pageSize: 10,
-  },
+
+  // --- Detail ---
+  loading_detailMd: false,
   detail_multiDestination: {},
-  list_mdDetailAttachment: [],
-  pagination_mdDetailAttachment: {
-    totalPages: 0,
-    totalElements: 0,
+  loading_detailDraftMd: false,
+  detailDraft_multiDestination: {},
+
+  // --- Create / Update ---
+  loading_createUpdateMd: false,
+
+  // --- Approve / Reject ---
+  loading_approveRejectMd: false,
+  loading_approveMd: false,
+  loading_rejectMd: false,
+
+  // --- Inactivate ---
+  loading_inactivateMd: false,
+
+  // --- Form Options (approval hierarchy, attachment categories, account standard) ---
+  loading_listMdApprovalHierarchy: false,
+  list_mdApprovalHierarchy: [],
+  loading_detailMdApprovalHierarchy: false,
+  detail_mdApprovalHierarchy: [],
+  loading_listMdAttachmentCategory: false,
+  list_mdAttachmentCategory: [],
+  loading_listMdAccount: false,
+  list_mdAccount: [],
+  pagination_listMdAccount: {
+    totalPage: 0,
+    totalElement: 0,
     currentPage: 0,
     pageSize: 10,
   },
-  data_mdApprovalHistory: {},
-  data_globalTypeCondition: [],
-  data_globalTypeOperator: [],
-  data_globalTypeColumn: [],
+
+  // --- History ---
+  loading_mdApprovalHistory: false,
+  detail_mdApprovalHistory: {},
 };
 
-export const getMultiDestination = createAsyncThunk(
-  "GET_MULTI_DESTINATION",
+/**
+ * Fetches the paginated multi destination list for a given account.
+ * Supports infinite-scroll load-more.
+ *
+ * @param {object}  arg
+ * @param {number}  arg.id          - Account ID.
+ * @param {object}  arg.body        - Pagination / search / sort body.
+ * @param {boolean} arg.isLoadMore  - If true, appends results; otherwise replaces the list.
+ */
+export const getMultiDestinations = createAsyncThunk(
+  "GET_MULTI_DESTINATIONS",
   async ({ id, body, isLoadMore }, thunkAPI) => {
     try {
-      body = {
-        ...body,
-        listType: "all"
-      }
-
       const url = `/v1/dbs/api/multi-destination/list/${id}`;
       const response = await accountManagementService.updateDataWithMethodPost(url, body, {
           headers: { "Accept": "application/json, text/plain, */*" }
@@ -65,7 +88,17 @@ export const getMultiDestination = createAsyncThunk(
   }
 );
 
-export const getMultiDestinationApproval = createAsyncThunk(
+/**
+ * Fetches the paginated approval list for a given account's multi destinations.
+ * Always injects `listType: "approval"` into the request body.
+ * Supports infinite-scroll load-more.
+ *
+ * @param {object}  arg
+ * @param {number}  arg.id          - Account ID.
+ * @param {object}  arg.body        - Pagination / search / sort body.
+ * @param {boolean} arg.isLoadMore  - If true, appends results; otherwise replaces the list.
+ */
+export const getMultiDestinationApprovals = createAsyncThunk(
   "GET_MULTI_DESTINATION_APPROVAL",
   async ({ id, body, isLoadMore }, thunkAPI) => {
     try {
@@ -88,22 +121,55 @@ export const getMultiDestinationApproval = createAsyncThunk(
   }
 );
 
-export const getMultiDestinationAttachment = createAsyncThunk(
-  "GET_MULTI_DESTINATION_ATTACHMENT",
-  async ({ id }, thunkAPI) => {
+
+/**
+ * Fetches the current (non-draft) detail of a multi destination record.
+ *
+ * @param {number} id - Multi destination ID.
+ */
+export const getMultiDestination = createAsyncThunk(
+  "GET_MULTI_DESTINATION",
+  async (id, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/multi-destination/list-attachment/${id}`;
-      const response = await accountManagementService.getAll(url);
+      const url = `/v1/dbs/api/multi-destination/${id}`;
+      const response = await accountManagementService.getDetail(url);
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
   }
-)
+);
 
+/**
+ * Fetches the draft detail of a multi destination record.
+ *
+ * @param {number} id - Multi destination ID.
+ */
+export const getMultiDestinationDraft = createAsyncThunk(
+  "GET_MULTI_DESTINATION_DRAFT",
+  async (id, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/multi-destination/detail-draft/${id}`;
+      const response = await accountManagementService.getDetail(url);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+/**
+ * Creates a new multi destination record, then uploads any attachments in parallel.
+ * Dispatches a success or error modal on completion.
+ *
+ * @param {object}   arg
+ * @param {object}   arg.body                - Request body for the create API.
+ * @param {object[]} [arg.attachments=[]]    - Attachments to upload after creation.
+ * @param {string}   arg.action              - `"DRAFT"` or `"SUBMIT"` — used in the upload payload.
+ */
 export const createMultiDestination = createAsyncThunk(
   "CREATE_MULTI_DESTINATION",
-  async ({ body: createBody, attachments = [] }, thunkAPI) => {
+  async ({ body: createBody, attachments = [], action }, thunkAPI) => {
     try {
       const createUrl = "/v1/dbs/api/multi-destination/create";
       const response = await accountManagementService.createData(createUrl, createBody);
@@ -116,6 +182,7 @@ export const createMultiDestination = createAsyncThunk(
         files:  attachment.file,
         category: attachment.fileCategoryId,
         refId: id,
+        action,
       }));
 
       await Promise.all(uploadPromises);
@@ -128,33 +195,39 @@ export const createMultiDestination = createAsyncThunk(
       thunkAPI.dispatch(showModalSuccess(successBody))
       return response.data;
     } catch (error) {
-      const message =
+      let message =
         (error.response &&
           error.response.data &&
           error.response.data.message) ||
         error.message ||
         error.toString();
-      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
-        const errorBody = {
-          title: "Failed",
-          description: `Your data was not ${createBody?.action === "DRAFT" ? 'drafted' : 'submitted'}. ${message}.`,
-        };
-        thunkAPI.dispatch(showModalError(errorBody));
-      } else {
-        const errorBody = {
-          title: "Failed",
-          description: `Your data was not ${createBody?.action === "DRAFT" ? 'drafted' : 'submitted'}. An unknown error occured.`
-        }
-        thunkAPI.dispatch(showModalError(errorBody));
-      }
+
+      if (Math.floor((error.response?.data?.code || 0) / 100) !== 4)
+        message = "An unknown error occured";
+
+      const errorBody = {
+        title: "Failed",
+        description: `Your data was not ${createBody?.action === "DRAFT" ? 'drafted' : 'submitted'}. ${message}.`,
+      };
+      thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(error?.response);
     }
   }
 );
 
+/**
+ * Updates an existing multi destination record, then uploads any attachments in parallel.
+ * Dispatches a success or error modal on completion.
+ *
+ * @param {object}   arg
+ * @param {number}   arg.id                  - ID of the multi destination to update.
+ * @param {object}   arg.body                - Request body for the update API.
+ * @param {object[]} [arg.attachments=[]]    - Attachments to upload after update.
+ * @param {string}   arg.action              - `"DRAFT"` or `"SUBMIT"` — used in the upload payload.
+ */
 export const updateMultiDestination = createAsyncThunk(
   "UPDATE_MULTI_DESTINATION",
-  async ({ id, body: updateBody, attachments = [] }, thunkAPI) => {
+  async ({ id, body: updateBody, attachments = [], action }, thunkAPI) => {
     try {
       const updateUrl = `/v1/dbs/api/multi-destination/${id}`;
       const response = await accountManagementService.updateData(updateUrl, updateBody);
@@ -164,9 +237,11 @@ export const updateMultiDestination = createAsyncThunk(
       const uploadPromises = attachments.map((attachment) => accountManagementService.uploadAttachment(
         uploadUrl,
         {
+          id: attachment.id,
           files:  attachment.file,
           category: attachment.fileCategoryId,
           refId: id,
+          action,
         }
       ));
 
@@ -180,46 +255,32 @@ export const updateMultiDestination = createAsyncThunk(
       thunkAPI.dispatch(showModalSuccess(successBody))
       return response.data;
     } catch (error) {
-      const message =
+      let message =
         (error.response &&
           error.response.data &&
           error.response.data.message) ||
         error.message ||
         error.toString();
-      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
-        const errorBody = {
-          title: "Failed",
-          description: `Your data was not ${updateBody?.action === "DRAFT" ? 'drafted' : 'updated'}. ${message}.`,
-        };
-        thunkAPI.dispatch(showModalError(errorBody));
-      } else {
-        const errorBody = {
-          title: "Failed",
-          description: `Your data was not ${updateBody?.action === "DRAFT" ? 'drafted' : 'submitted'}. An unknown error occured.`
-        }
-        thunkAPI.dispatch(showModalError(errorBody));
-      }
+
+      if (Math.floor((error.response?.data?.code || 0) / 100) !== 4)
+        message = "An unknown error occured";
+
+      const errorBody = {
+        title: "Failed",
+        description: `Your data was not ${updateBody?.action === "DRAFT" ? 'drafted' : 'updated'}. ${message}.`,
+      };
+      thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(error?.response);
     }
   }
 );
 
-export const getDetailMultiDestination = createAsyncThunk(
-  "GET_DETAIL_MULTI_DESTINATION",
-  async (id, thunkAPI) => {
-    try {
-      const url = `/v1/dbs/api/multi-destination/${id}`;
-      const response = await accountManagementService.getDetail(url);
-      return response.data;
-    } catch (error) {
-      return thunkAPI.rejectWithValue(error?.response);
-    }
-  }
-);
-
-export const getMdApprovalHierarchy = createAsyncThunk(
-  "GET_MD_APPROVAL_HIERARCHY",
-  async (thunkAPI) => {
+/**
+ * Fetches the list of approval hierarchy options for multi destinations.
+ */
+export const getMdApprovalHierarchies = createAsyncThunk(
+  "GET_MD_APPROVAL_HIERARCHIES",
+  async (_, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/multi-destination/approval-hierarchies`;
       const response = await accountManagementService.getAll(url);
@@ -230,9 +291,14 @@ export const getMdApprovalHierarchy = createAsyncThunk(
   }
 )
 
-export const getDetailMdApprovalHierarchy = createAsyncThunk(
+/**
+ * Fetches the employee list for a specific approval hierarchy.
+ *
+ * @param {number} id - Approval hierarchy ID.
+ */
+export const getMdApprovalHierarchy = createAsyncThunk(
   "GET_DETAIL_MD_APPROVAL_HIERARCHY",
-  async ({ id }, thunkAPI) => {
+  async (id, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/multi-destination/approval-hierarchy/${id}`;
       const response = await accountManagementService.getDetail(url);
@@ -243,9 +309,12 @@ export const getDetailMdApprovalHierarchy = createAsyncThunk(
   }
 )
 
-export const getMdAttachmentCategory = createAsyncThunk(
-  "GET_MD_ATTACHMENT_CATEGORY",
-  async (thunkAPI) => {
+/**
+ * Fetches the list of attachment categories for multi destinations.
+ */
+export const getMdAttachmentCategories = createAsyncThunk(
+  "GET_MD_ATTACHMENT_CATEGORIES",
+  async (_, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/multi-destination/attachment-category`;
       const response = await accountManagementService.getAll(url);
@@ -256,28 +325,22 @@ export const getMdAttachmentCategory = createAsyncThunk(
   }
 )
 
-export const getMdAccountStandard = createAsyncThunk(
-  "GET_MD_ACCOUNT_STANDARD",
-  async ({ page, size, sort, searchs, id, isLoadMore }, thunkAPI) => {
+/**
+ * Fetches a paginated list of account standards eligible for multi destination.
+ * Supports infinite-scroll load-more by appending to the existing list when `isLoadMore` is true.
+ *
+ * @param {object}  arg
+ * @param {number}  arg.id          - Account ID used to scope the list.
+ * @param {object}  arg.body        - Pagination / search body.
+ * @param {boolean} arg.isLoadMore  - If true, appends results; otherwise replaces the list.
+ */
+export const getMdAccounts = createAsyncThunk(
+  "GET_MD_ACCOUNT",
+  async ({ id, body, isLoadMore }, thunkAPI) => {
     try {
-      const queryParams = new URLSearchParams;
+      const url = `/v1/dbs/api/multi-destination/list-account/${id}`;
 
-      if (page)
-        queryParams.append("page", page);
-      if (size)
-        queryParams.append("size", size);
-      if (sort)
-        queryParams.append("sort", sort);
-      if (searchs)
-        queryParams.append("searchs", searchs);
-
-      let url = `/v1/dbs/api/multi-destination/list-account/${id}`;
-
-      
-      if (queryParams.toString().length)
-        url += `?${queryParams.toString()}`;
-
-      const response = await accountManagementService.getPagination(url);
+      const response = await accountManagementService.updateDataWithMethodPost(url, body);
       return {
         ...response.data,
         isLoadMore,
@@ -288,6 +351,14 @@ export const getMdAccountStandard = createAsyncThunk(
   }
 );
 
+/**
+ * Approves or rejects an active multi destination record.
+ * Dispatches a success or error modal on completion.
+ *
+ * @param {object} arg
+ * @param {object} arg.body    - Request body (IDs, remark, hierarchy).
+ * @param {string} arg.action  - `"approve"` or `"reject"`.
+ */
 export const approveOrRejectMultiDestination = createAsyncThunk(
   "APPROVE_OR_REJECT_MULTI_DESTINATION",
   async ({ body, action }, thunkAPI) => {
@@ -309,7 +380,7 @@ export const approveOrRejectMultiDestination = createAsyncThunk(
           error.response.data.message) ||
         error.message ||
         error.toString();
-      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
+      if (Math.floor((error.response?.data?.code || 0) / 100) === 4) {
         const errorBody = {
           title: "Failed",
           description: `Your data was not ${action === "approve" ? "approved" : "rejected"}. ${message}.`,
@@ -327,6 +398,14 @@ export const approveOrRejectMultiDestination = createAsyncThunk(
   }
 );
 
+/**
+ * Approves or rejects an inactive multi destination record (inactivation request).
+ * Dispatches a success or error modal on completion.
+ *
+ * @param {object} arg
+ * @param {object} arg.body    - Request body (IDs, remark, hierarchy).
+ * @param {string} arg.action  - `"approve"` or `"reject"`.
+ */
 export const approveOrRejectInactiveMultiDestination = createAsyncThunk(
   "APPROVE_OR_REJECT_INACTIVE_MULTI_DESTINATION",
   async ({ body, action }, thunkAPI) => {
@@ -348,7 +427,7 @@ export const approveOrRejectInactiveMultiDestination = createAsyncThunk(
           error.response.data.message) ||
         error.message ||
         error.toString();
-      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
+      if (Math.floor((error.response?.data?.code || 0) / 100) === 4) {
         const errorBody = {
           title: "Failed",
           description: `Your data was not ${action === "approve" ? "approved" : "rejected"}. ${message}.`,
@@ -372,7 +451,7 @@ export const approveOrRejectAllMultiDestination = createAsyncThunk(
     try {
       const url = "/v1/dbs/api/multi-destination/approve";
       const inactiveUrl = "/v1/dbs/api/multi-destination/approve-inactive";
-      
+
       await Promise.all([
         body.length ? accountManagementService.activationWithRemark(url, body, {
           headers: {
@@ -401,7 +480,7 @@ export const approveOrRejectAllMultiDestination = createAsyncThunk(
           error.response.data.message) ||
         error.message ||
         error.toString();
-      if (Math.floor((error.response.data.code || 0) / 100) !== 4)
+      if (Math.floor((error.response?.data?.code || 0) / 100) !== 4)
         message = "An unknown error occured"
 
       const errorBody = {
@@ -416,6 +495,13 @@ export const approveOrRejectAllMultiDestination = createAsyncThunk(
   }
 );
 
+/**
+ * Submits an inactivation request for a multi destination record.
+ * Dispatches a success or error modal on completion.
+ *
+ * @param {object} arg
+ * @param {object} arg.body - Request body (ID, remark, hierarchy).
+ */
 export const inactivateMultiDestination = createAsyncThunk(
   "INACTIVATE_MULTI_DESTINATION",
   async ({ body }, thunkAPI) => {
@@ -437,7 +523,7 @@ export const inactivateMultiDestination = createAsyncThunk(
           error.response.data.message) ||
         error.message ||
         error.toString();
-      if (Math.floor((error.response.data.code || 0) / 100) === 4) {
+      if (Math.floor((error.response?.data?.code || 0) / 100) === 4) {
         const errorBody = {
           title: "Failed",
           description: `Your data was not submitted. ${message}.`,
@@ -485,57 +571,18 @@ export const getMdApprovalHistory = createAsyncThunk(
   }
 );
 
-export const getMdColumnApi = createAsyncThunk(
-  "GET_MD_COLUMN_API",
-  async (thunkAPI) => {
-    try {
-      const url = "/v1/dbs/api/multi-destination/list-search-column";
-      const response = await accountManagementService.getAll(url);
-      return response.data;
-    } catch (error) {
-      return thunkAPI.rejectWithValue(error?.response);
-    }
-  }
-)
-
-export const getMdConditionApi = createAsyncThunk(
-  "GET_MD_CONDITION_API",
-  async (thunkAPI) => {
-    try {
-      const url = "/v1/dbs/api/multi-destination/list-search-condition";
-      const response = await accountManagementService.getAll(url);
-      return response.data;
-    } catch (error) {
-      return thunkAPI.rejectWithValue(error?.response);
-    }
-  }
-)
-
-export const getMdOperatorApi = createAsyncThunk(
-  "GET_MD_OPERATOR_API",
-  async (thunkAPI) => {
-    try {
-      const url = "/v1/dbs/api/multi-destination/list-search-operator";
-      const response = await accountManagementService.getAll(url);
-      return response.data;
-    } catch (error) {
-      return thunkAPI.rejectWithValue(error?.response);
-    }
-  }
-)
-
 const multiDestinationSlice = createSlice({
   name: "multiDestination",
   initialState,
   extraReducers: {
     /** Get Multi Destination */
-    [getMultiDestination.pending]: (state, action) => {
+    [getMultiDestinations.pending]: (state, action) => {
       if (!action.meta.arg?.isLoadMore) {
-        state.loading = true;
+        state.loading_listMd = true;
       }
     },
-    [getMultiDestination.fulfilled]: (state, action) => {
-      state.loading = false;
+    [getMultiDestinations.fulfilled]: (state, action) => {
+      state.loading_listMd = false;
       const { result, page, isLoadMore } = action.payload;
 
       if (Array.isArray(result)) {
@@ -552,21 +599,21 @@ const multiDestinationSlice = createSlice({
           state.list_multiDestination = result;
       }
 
-      state.pagination_multiDestination = {
-        totalPages: page?.totalPages || 0,
-        totalElements: page?.totalElements || 0,
+      state.pagination_listMd = {
+        totalPage: page?.totalPages || 0,
+        totalElement: page?.totalElements || 0,
         currentPage: page?.number || 0,
         pageSize: page?.size || 10,
       }
     },
-    [getMultiDestination.rejected]: (state, action) => {
-      state.loading = false;
+    [getMultiDestinations.rejected]: (state, action) => {
+      state.loading_listMd = false;
 
       if (!action.meta.arg?.isLoadMore) {
         state.list_multiDestination = [];
-        state.pagination_multiDestination = {
-          totalPages: 0,
-          totalElements: 0,
+        state.pagination_listMd = {
+          totalPage: 0,
+          totalElement: 0,
           currentPage: 0,
           pageSize: 10,
         }
@@ -574,13 +621,13 @@ const multiDestinationSlice = createSlice({
     },
 
     /** Get Multi Destination Approval */
-    [getMultiDestinationApproval.pending]: (state, action) => {
+    [getMultiDestinationApprovals.pending]: (state, action) => {
       if (!action.meta.arg?.isLoadMore) {
-        state.loading = true;
+        state.loading_listMdApproval = true;
       }
     },
-    [getMultiDestinationApproval.fulfilled]: (state, action) => {
-      state.loading = false;
+    [getMultiDestinationApprovals.fulfilled]: (state, action) => {
+      state.loading_listMdApproval = false;
       const { result, page, isLoadMore } = action.payload;
 
       if (Array.isArray(result)) {
@@ -597,21 +644,21 @@ const multiDestinationSlice = createSlice({
           state.list_multiDestinationApproval = result;
       }
 
-      state.pagination_multiDestinationApproval = {
-        totalPages: page?.totalPages || 0,
-        totalElements: page?.totalElements || 0,
+      state.pagination_listMdApproval = {
+        totalPage: page?.totalPages || 0,
+        totalElement: page?.totalElements || 0,
         currentPage: page?.number || 0,
         pageSize: page?.size || 10,
       }
     },
-    [getMultiDestinationApproval.rejected]: (state, action) => {
-      state.loading = false;
+    [getMultiDestinationApprovals.rejected]: (state, action) => {
+      state.loading_listMdApproval = false;
 
       if (!action.meta.arg?.isLoadMore) {
         state.list_multiDestinationApproval = [];
-        state.pagination_multiDestinationApproval = {
-          totalPages: 0,
-          totalElements: 0,
+        state.pagination_listMdApproval = {
+          totalPage: 0,
+          totalElement: 0,
           currentPage: 0,
           pageSize: 10,
         }
@@ -619,164 +666,136 @@ const multiDestinationSlice = createSlice({
     },
 
     /** Get Detail Multi Destination */
-    [getDetailMultiDestination.pending]: (state, action) => {
-      state.detail_multiDestination = action.payload;
-      state.loading = true;
+    [getMultiDestination.pending]: (state) => {
+      state.loading_detailMd = true;
     },
-    [getDetailMultiDestination.fulfilled]: (state, action) => {
-      state.detail_multiDestination = action.payload;
-      state.loading = false;
+    [getMultiDestination.fulfilled]: (state, action) => {
+      state.detail_multiDestination = action.payload?.result || {};
+      state.loading_detailMd = false;
     },
-    [getDetailMultiDestination.rejected]: (state, action) => {
-      state.detail_multiDestination = action.payload;
-      state.loading = false;
+    [getMultiDestination.rejected]: (state) => {
+      state.detail_multiDestination = {};
+      state.loading_detailMd = false;
+    },
+
+    /** Get Detail Draft Multi Destination */
+    [getMultiDestinationDraft.pending]: (state) => {
+      state.loading_detailDraftMd = true;
+    },
+    [getMultiDestinationDraft.fulfilled]: (state, action) => {
+      state.detailDraft_multiDestination = action.payload?.result || {};
+      state.loading_detailDraftMd = false;
+    },
+    [getMultiDestinationDraft.rejected]: (state) => {
+      state.detailDraft_multiDestination = {};
+      state.loading_detailDraftMd = false;
     },
 
     /** Create Multi Destination */
     [createMultiDestination.pending]: (state) => {
-      state.loading = true;
+      state.loading_createUpdateMd = true;
     },
     [createMultiDestination.fulfilled]: (state) => {
-      state.loading = false;
+      state.loading_createUpdateMd = false;
     },
-    [createMultiDestination.pending]: (state) => {
-      state.loading = false;
+    [createMultiDestination.rejected]: (state) => {
+      state.loading_createUpdateMd = false;
     },
 
     /** Update Multi Destination */
     [updateMultiDestination.pending]: (state) => {
-      state.loading = true;
+      state.loading_createUpdateMd = true;
     },
     [updateMultiDestination.fulfilled]: (state) => {
-      state.loading = false;
+      state.loading_createUpdateMd = false;
     },
-    [updateMultiDestination.pending]: (state) => {
-      state.loading = false;
+    [updateMultiDestination.rejected]: (state) => {
+      state.loading_createUpdateMd = false;
     },
 
     /** Get Multi Destination Approval Hierarchy */
-    [getMdApprovalHierarchy.pending]: (state) => {
-      state.loading = true;
+    [getMdApprovalHierarchies.pending]: (state) => {
+      state.loading_listMdApprovalHierarchy = true;
     },
-    [getMdApprovalHierarchy.fulfilled]: (state, action) => {
-      state.data_mdApprovalHierarchy = action.payload;
-      state.loading = false;
+    [getMdApprovalHierarchies.fulfilled]: (state, action) => {
+      state.list_mdApprovalHierarchy = action.payload;
+      state.loading_listMdApprovalHierarchy = false;
     },
-    [getMdApprovalHierarchy.rejected]: (state) => {
-      state.data_mdApprovalHierarchy = [];
-      state.loading = false;
+    [getMdApprovalHierarchies.rejected]: (state) => {
+      state.list_mdApprovalHierarchy = [];
+      state.loading_listMdApprovalHierarchy = false;
     },
 
     /** Get Multi Destination Detail Approval Hierarchy */
-    [getDetailMdApprovalHierarchy.pending]: (state) => {
-      state.loading = true;
+    [getMdApprovalHierarchy.pending]: (state) => {
+      state.loading_detailMdApprovalHierarchy = true;
     },
-    [getDetailMdApprovalHierarchy.fulfilled]: (state, action) => {
+    [getMdApprovalHierarchy.fulfilled]: (state, action) => {
       state.detail_mdApprovalHierarchy = action.payload;
-      state.loading = false;
+      state.loading_detailMdApprovalHierarchy = false;
     },
-    [getDetailMdApprovalHierarchy.rejected]: (state) => {
+    [getMdApprovalHierarchy.rejected]: (state) => {
       state.detail_mdApprovalHierarchy = [];
-      state.loading = false;
+      state.loading_detailMdApprovalHierarchy = false;
     },
 
     /** Get Multi Destination Attachment Category */
-    [getMdAttachmentCategory.pending]: (state) => {
-      state.loading = true;
+    [getMdAttachmentCategories.pending]: (state) => {
+      state.loading_listMdAttachmentCategory = true;
     },
-    [getMdAttachmentCategory.fulfilled]: (state, action) => {
-      state.data_mdAttachmentCategory = action.payload;
-      state.loading = false;
+    [getMdAttachmentCategories.fulfilled]: (state, action) => {
+      state.list_mdAttachmentCategory = action.payload;
+      state.loading_listMdAttachmentCategory = false;
     },
-    [getMdAttachmentCategory.rejected]: (state) => {
-      state.data_mdAttachmentCategory = [];
-      state.loading = false;
+    [getMdAttachmentCategories.rejected]: (state) => {
+      state.list_mdAttachmentCategory = [];
+      state.loading_listMdAttachmentCategory = false;
     },
 
     /** Get Multi Destination Account Standard */
-    [getMdAccountStandard.pending]: (state, action) => {
+    [getMdAccounts.pending]: (state, action) => {
       if (!action.meta.arg?.isLoadMore) {
-        state.loading = true;
+        state.loading_listMdAccount = true;
       }
     },
-    [getMdAccountStandard.fulfilled]: (state, action) => {
-      state.loading = false;
+    [getMdAccounts.fulfilled]: (state, action) => {
+      state.loading_listMdAccount = false;
       const { result, page, isLoadMore } = action.payload;
 
       if (Array.isArray(result)) {
-        if (isLoadMore) {
-          const currentIds = new Set(state.list_mdAccountStandard.map((item) => item.accountId));
-          const filteredResult = result.filter((resultItem) => !currentIds.has(resultItem.accountId));
+        const resultWithIds = result.map((record) => ({
+          ...record,
+          id: record.id || record.accountId
+        }));
 
-          state.list_mdAccountStandard = [
-            ...state.list_mdAccountStandard,
+        if (isLoadMore) {
+          const currentIds = new Set(state.list_mdAccount.map((item) => item.accountId));
+          const filteredResult = resultWithIds.filter((resultItem) => !currentIds.has(resultItem.accountId));
+
+          state.list_mdAccount = [
+            ...state.list_mdAccount,
             ...filteredResult,
           ];
         }
         else
-          state.list_mdAccountStandard = result;
+          state.list_mdAccount = resultWithIds;
       }
 
-      state.pagination_mdAccountStandard = {
-        totalPages: page?.totalPages || 0,
-        totalElements: page?.totalElements || 0,
+      state.pagination_listMdAccount = {
+        totalPage: page?.totalPages || 0,
+        totalElement: page?.totalElements || 0,
         currentPage: page?.number || 0,
         pageSize: page?.size || 10,
       }
     },
-    [getMdAccountStandard.rejected]: (state, action) => {
-      state.loading = false;
+    [getMdAccounts.rejected]: (state, action) => {
+      state.loading_listMdAccount = false;
 
       if (!action.meta.arg?.isLoadMore) {
-        state.list_mdAccountStandard = [];
-        state.pagination_mdAccountStandard = {
-          totalPages: 0,
-          totalElements: 0,
-          currentPage: 0,
-          pageSize: 10,
-        }
-      }
-    },
-
-    /** Get Multi Destination Attachment */
-    [getMultiDestinationAttachment.pending]: (state, action) => {
-      if (!action.meta.arg?.isLoadMore) {
-        state.loading = true;
-      }
-    },
-    [getMultiDestinationAttachment.fulfilled]: (state, action) => {
-      state.loading = false;
-      const { result, page, isLoadMore } = action.payload;
-
-      if (Array.isArray(result)) {
-        if (isLoadMore) {
-          const currentIds = new Set(state.list_mdDetailAttachment.map((item) => item.id));
-          const filteredResult = result.filter((resultItem) => !currentIds.has(resultItem.id));
-
-          state.list_mdDetailAttachment = [
-            ...state.list_mdDetailAttachment,
-            ...filteredResult,
-          ];
-        }
-        else
-          state.list_mdDetailAttachment = result;
-      }
-
-      state.pagination_mdDetailAttachment = {
-        totalPages: page?.totalPages || 0,
-        totalElements: page?.totalElements || 0,
-        currentPage: page?.number || 0,
-        pageSize: page?.size || 10,
-      }
-    },
-    [getMultiDestinationAttachment.rejected]: (state, action) => {
-      state.loading = false;
-
-      if (!action.meta.arg?.isLoadMore) {
-        state.list_mdDetailAttachment = [];
-        state.pagination_mdDetailAttachment = {
-          totalPages: 0,
-          totalElements: 0,
+        state.list_mdAccount = [];
+        state.pagination_listMdAccount = {
+          totalPage: 0,
+          totalElement: 0,
           currentPage: 0,
           pageSize: 10,
         }
@@ -785,94 +804,67 @@ const multiDestinationSlice = createSlice({
 
     /** Approve or Reject Multi Destination */
     [approveOrRejectMultiDestination.pending]: (state) => {
-      state.loading = true;
+      state.loading_approveRejectMd = true;
     },
     [approveOrRejectMultiDestination.fulfilled]: (state) => {
-      state.loading = false;
+      state.loading_approveRejectMd = false;
     },
     [approveOrRejectMultiDestination.rejected]: (state) => {
-      state.loading = false;
+      state.loading_approveRejectMd = false;
     },
 
     /** Approve or Reject Inactive Multi Destination */
     [approveOrRejectInactiveMultiDestination.pending]: (state) => {
-      state.loading = true;
+      state.loading_approveRejectMd = true;
     },
     [approveOrRejectInactiveMultiDestination.fulfilled]: (state) => {
-      state.loading = false;
+      state.loading_approveRejectMd = false;
     },
     [approveOrRejectInactiveMultiDestination.rejected]: (state) => {
-      state.loading = false;
+      state.loading_approveRejectMd = false;
     },
 
-    /** Approve or Reject All Inactive Multi Destination */
-    [approveOrRejectAllMultiDestination.pending]: (state) => {
-      state.loading = true;
+    /** Approve or Reject All Multi Destination */
+    [approveOrRejectAllMultiDestination.pending]: (state, action) => {
+      if (action.meta.arg?.action === "APPROVE")
+        state.loading_approveMd = true;
+      else if (action.meta.arg?.action === "REJECT")
+        state.loading_rejectMd = true;
     },
-    [approveOrRejectAllMultiDestination.fulfilled]: (state) => {
-      state.loading = false;
+    [approveOrRejectAllMultiDestination.fulfilled]: (state, action) => {
+      if (action.meta.arg?.action === "APPROVE")
+        state.loading_approveMd = false;
+      else if (action.meta.arg?.action === "REJECT")
+        state.loading_rejectMd = false;
     },
-    [approveOrRejectAllMultiDestination.rejected]: (state) => {
-      state.loading = false;
+    [approveOrRejectAllMultiDestination.rejected]: (state, action) => {
+      if (action.meta.arg?.action === "APPROVE")
+        state.loading_approveMd = false;
+      else if (action.meta.arg?.action === "REJECT")
+        state.loading_rejectMd = false;
     },
 
-    /** Inactivate Multi Destination Attachment */
+    /** Inactivate Multi Destination */
     [inactivateMultiDestination.pending]: (state) => {
-      state.loading = true;
+      state.loading_inactivateMd = true;
     },
     [inactivateMultiDestination.fulfilled]: (state) => {
-      state.loading = false;
+      state.loading_inactivateMd = false;
     },
     [inactivateMultiDestination.rejected]: (state) => {
-      state.loading = false;
+      state.loading_inactivateMd = false;
     },
 
     /** Get Multi Destination Approval History */
     [getMdApprovalHistory.pending]: (state) => {
-      state.loading = true;
+      state.loading_mdApprovalHistory = true;
     },
     [getMdApprovalHistory.fulfilled]: (state, action) => {
-      state.loading = false;
-      state.data_mdApprovalHistory = action.payload;
+      state.loading_mdApprovalHistory = false;
+      state.detail_mdApprovalHistory = action.payload;
     },
     [getMdApprovalHistory.rejected]: (state) => {
-      state.loading = false;
-    },
-
-    /** Get Multi Destination Column API  */
-    [getMdColumnApi.pending]: (state) => {
-      state.loading = true;
-    },
-    [getMdColumnApi.fulfilled]: (state, action) => {
-      state.data_globalTypeColumn = action.payload;
-      state.loading = false;
-    },
-    [getMdColumnApi.rejected]: (state) => {
-      state.loading = false;
-    },
-
-    /** Get Multi Destination Condition API  */
-    [getMdConditionApi.pending]: (state) => {
-      state.loading = true;
-    },
-    [getMdConditionApi.fulfilled]: (state, action) => {
-      state.data_globalTypeCondition = action.payload;
-      state.loading = false;
-    },
-    [getMdConditionApi.rejected]: (state) => {
-      state.loading = false;
-    },
-
-    /** Get Multi Destination Operator API  */
-    [getMdOperatorApi.pending]: (state) => {
-      state.loading = true;
-    },
-    [getMdOperatorApi.fulfilled]: (state, action) => {
-      state.data_globalTypeOperator = action.payload;
-      state.loading = false;
-    },
-    [getMdOperatorApi.rejected]: (state) => {
-      state.loading = false
+      state.loading_mdApprovalHistory = false;
     },
   },
 });

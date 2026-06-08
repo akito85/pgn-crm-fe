@@ -1,15 +1,4 @@
 export const SYSTEM_SETUP_ROUTES = {
-  // job routes
-  LOGGING_VIEW_MENU: "/system-setup/logging",
-
-  // job routes
-  JOB_VIEW_MENU: "/system-setup/job-management",
-  JOB_CREATE_MENU: "/system-setup/job-management/create",
-  JOB_DETAIL_MENU: "/system-setup/job-management/view",
-
-  // job control
-  JOB_CONTROL_VIEW_MENU: "/system-setup/job-control",
-
   // menus routes
   VIEW_MENU: "/system-setup/menu",
   CREATE_MENU: "/system-setup/menu/create",
@@ -103,4 +92,27 @@ export const SYSTEM_SETUP_ROUTES = {
     "/system-setup/transaction-mapping-category/create",
   UPDATE_BILLING_ITEM_CATEGORY:
     "/system-setup/transaction-mapping-category/update",
+
+  // Calendar
+  VIEW_CALENDAR: "/system-setup/calendar",
+  DETAIL_CALENDAR: "/system-setup/calendar/view",
+  CREATE_CALENDAR: "/system-setup/calendar/create",
+  UPDATE_CALENDAR: "/system-setup/calendar/update",
+
+  // Collection Template
+  VIEW_COLLECTION_TEMPLATE: "/system-setup/template-collection",
+  CREATE_COLLECTION_TEMPLATE: "/system-setup/template-collection/create",
+  UPDATE_COLLECTION_TEMPLATE: "/system-setup/template-collection/update",
+  DETAIL_COLLECTION_TEMPLATE: "/system-setup/template-collection/view",
+  // Pre Requisite Template
+  VIEW_PRE_REQUISITE_TEMPLATE: "/system-setup/pre-requisite-template",
+  DETAIL_PRE_REQUISITE_TEMPLATE: "/system-setup/pre-requisite-template/view",
+  CREATE_PRE_REQUISITE_TEMPLATE: "/system-setup/pre-requisite-template/create",
+  UPDATE_PRE_REQUISITE_TEMPLATE: "/system-setup/pre-requisite-template/update",
+
+  // Activity Template
+  VIEW_ACTIVITY_TEMPLATE: "/system-setup/activity-template",
+  DETAIL_ACTIVITY_TEMPLATE: "/system-setup/activity-template/view",
+  CREATE_ACTIVITY_TEMPLATE: "/system-setup/activity-template/create",
+  UPDATE_ACTIVITY_TEMPLATE: "/system-setup/activity-template/update",
 };

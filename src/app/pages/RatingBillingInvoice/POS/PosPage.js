@@ -1,9 +1,8 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { Alert, Spin, Tooltip } from "antd";
+import { Tooltip, Dropdown } from "antd";
 import { useNavigate } from "react-router-dom";
-import { WarningOutlined } from "@ant-design/icons";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
+import { MoreOutlined } from "@ant-design/icons";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import SVGIcon from "../../../../assets/Icon/index";
@@ -27,10 +26,8 @@ import {
   getCustomerType,
 } from "../../../../redux/slices/rating_billing_invoice/PointOfSales";
 import ModalHistory from "../../../../components/Modal/ModalHistory";
-import {
-  ModalConfirm,
-  ModalError,
-} from "../../../../components/Modal/ModalPopUp";
+import { ModalError } from "../../../../components/Modal/ModalPopUp";
+import ModalApproveOrReject from "../../../../components/Modal/ModalApproveOrReject";
 import Toolbar from "../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
 import CardContainer from "../../../../components/CardContainer";
@@ -38,9 +35,8 @@ import TableRBI from "../../../../components/TableRBI";
 
 const PosPage = () => {
   // Selector
-  const { data_view, data_approvalHistory, loading, data_customer_type} = useSelector(
-    (state) => state.pointOfSales,
-  );
+  const { data_view, data_approvalHistory, loading, data_customer_type } =
+    useSelector((state) => state.pointOfSales);
 
   const navigate = useNavigate();
   const [modalCustomerType, setModalCustomerType] = useState(false);
@@ -48,6 +44,7 @@ const PosPage = () => {
 
   // Declaration
   const searchInput = useRef(null);
+  const detailContainerRef = useRef(null);
   const dispatch = useDispatch();
   const dataSource = data_view?.result;
 
@@ -58,6 +55,7 @@ const PosPage = () => {
   const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
+  const [tableLoading, setTableLoading] = useState(false);
 
   const [openApproval, setOpenAproval] = useState(false);
   const [dataDetail, setDataDetail] = useState({});
@@ -71,51 +69,42 @@ const PosPage = () => {
   const [bodyError, setBodyError] = useState({});
   const [modalError, setModalError] = useState(false);
 
-  const handlePreviewInvoice = async (record) => {
+  const [fixedColumns, setFixedColumns] = useState(() => {
+    const saved = localStorage.getItem("posFixedColumns");
+    return saved
+      ? JSON.parse(saved)
+      : {
+          left: ["no"],
+          right: ["ACTION", "action", "Action"],
+        };
+  });
+
+  useEffect(() => {
     try {
-      const response = await axios.get(
-        configApp.RATING_BILLING_SERVICE +
-          `/v1/dbs/api/pos/download-latest/${record.posNumber}`,
-        {
-          headers: tokenHeader(),
-          responseType: "arraybuffer",
-        },
-      );
-
-      const responseBlob = await response.data;
-      const blobText =
-        responseBlob instanceof Blob ? await responseBlob.text() : responseBlob;
-      const contentType = response.headers["content-type"];
-
-      const blob = new Blob([blobText], {
-        type: contentType ? "application/pdf" : "application/rtf",
-      });
-
-      const blobUrl = URL.createObjectURL(blob);
-      const newTab = window.open(blobUrl, "_blank");
-
-      if (newTab) {
-        newTab.document.title = `Invoice Preview - ${record.posNumber}`;
-
-        // TAMBAHAN: Gunakan DocViewer seperti di ViewInvoice.js
-        const viewerContainer = document.createElement("div");
-        newTab.document.body.appendChild(viewerContainer);
-
-        ReactDOM.render(
-          <DocViewer documents={[{ uri: blobUrl, type: contentType }]} />,
-          viewerContainer,
-        );
-      }
-    } catch (error) {
-      console.error("Error fetching invoice:", error);
-      const message =
-        error?.response?.data?.message ||
-        error?.message ||
-        "Failed to preview invoice";
-
-      setBodyError({ message });
-      setModalError(true);
+      localStorage.setItem("posFixedColumns", JSON.stringify(fixedColumns));
+    } catch (e) {
+      // ignore storage errors
     }
+  }, [fixedColumns]);
+
+  const resolveCustomerTypeForNav = (customerType) => {
+    if (customerType === 2) return "prospective";
+    if (customerType === 1) return "customer";
+
+    const normalizedCustomerType = (customerType || "")
+      .toString()
+      .trim()
+      .toLowerCase();
+
+    if (normalizedCustomerType === "prospective customer") {
+      return "prospective";
+    }
+
+    if (normalizedCustomerType === "customers") {
+      return "customer";
+    }
+
+    return "customer";
   };
 
   const handleProformaInvoice = async (record) => {
@@ -169,6 +158,7 @@ const PosPage = () => {
     try {
       await dispatch(generateProformaInvoice(record.posNumber)).unwrap();
       // Refresh data setelah generate
+      setTableLoading(true);
       dispatch(
         getListPointOfSales({
           page: 0,
@@ -177,7 +167,9 @@ const PosPage = () => {
           search: encodeURIComponent(JSON.stringify(search)),
           isLoadMore: false,
         }),
-      );
+      ).finally(() => {
+        setTableLoading(false);
+      });
       setPage(0);
     } catch (error) {
       console.error("Error generating proforma invoice:", error);
@@ -185,8 +177,8 @@ const PosPage = () => {
   };
 
   useEffect(() => {
-  dispatch(getCustomerType());
-}, [dispatch]);
+    dispatch(getCustomerType());
+  }, [dispatch]);
 
   const handleOpenCustomerTypeModal = () => {
     setSelectedCustomerType(null);
@@ -208,6 +200,7 @@ const PosPage = () => {
 
   // PERUBAHAN: Initial fetch dengan 100 data
   useEffect(() => {
+    setTableLoading(true);
     dispatch(
       getListPointOfSales({
         page: 0,
@@ -216,7 +209,9 @@ const PosPage = () => {
         search: encodeURIComponent(JSON.stringify(search)),
         isLoadMore: false, // Flag untuk initial load
       }),
-    );
+    ).finally(() => {
+      setTableLoading(false);
+    });
     setPage(0);
   }, [dispatch, sort, search]);
 
@@ -293,6 +288,8 @@ const PosPage = () => {
       .unwrap()
       .then(() => {
         setModalDelete(false);
+        setDataDelete(undefined);
+        setTableLoading(true);
         dispatch(
           getListPointOfSales({
             page: 0,
@@ -301,7 +298,9 @@ const PosPage = () => {
             search: encodeURIComponent(JSON.stringify(search)),
             isLoadMore: false,
           }),
-        );
+        ).finally(() => {
+          setTableLoading(false);
+        });
         setPage(0);
       })
       .catch((error) => {
@@ -323,6 +322,11 @@ const PosPage = () => {
     deletePos(bodyError?.value);
     setModalError(false);
     setBodyError({});
+  };
+
+  const handleCloseDeleteModal = () => {
+    setModalDelete(false);
+    setDataDelete(undefined);
   };
 
   const handleApprovalHistory = (r) => {
@@ -364,6 +368,7 @@ const PosPage = () => {
   ];
 
   const handleApproveReject = () => {
+    setTableLoading(true);
     dispatch(
       getListPointOfSales({
         page: 0,
@@ -372,7 +377,9 @@ const PosPage = () => {
         search: encodeURIComponent(JSON.stringify(search)),
         isLoadMore: false,
       }),
-    );
+    ).finally(() => {
+      setTableLoading(false);
+    });
     setPage(0);
   };
 
@@ -436,367 +443,338 @@ const PosPage = () => {
 
     // Column Action Table
     {
-      action: "View",
-      type: "table",
-      render: (record, data) => {
-        const content =
-          data > 3 ? (
-            <ButtonComponent
-              icon={<SVGIcon name="IconDetail" width={20} />}
-              border={false}
-              onClick={() => handleOpenDetail(record)}
-            >
-              <span className={"text-black ml-3"}> Detail</span>
-            </ButtonComponent>
-          ) : (
-            <Tooltip title="Detail">
-              <div className="">
-                <SVGIcon
-                  name="IconDetail"
-                  width={20}
-                  onClick={() => handleOpenDetail(record)}
-                />
-              </div>
-            </Tooltip>
-          );
-
-        return content;
-      },
-    },
-    {
-      action: "Preview",
-      type: "table",
-      render: (record, data) => {
-        const isAvailable = record.statusApproval === "APPROVED";
-        const content =
-          data > 3 ? (
-            <ButtonComponent
-              icon={<SVGIcon name="IconDownload" color={"#0075bf"} width={20} />}
-              border={false}
-              disabled={!isAvailable}
-              onClick={() => isAvailable && handlePreviewInvoice(record)}
-            >
-              <span className={"text-black ml-3"}>Preview Invoice</span>
-            </ButtonComponent>
-          ) : (
-            <Tooltip title="Preview Invoice">
-              <div
-                onClick={() => isAvailable && handlePreviewInvoice(record)}
-                style={{
-                  cursor: isAvailable ? "pointer" : "not-allowed",
-                  display: "inline-block",
-                  lineHeight: 0,
-                }}
-              >
-                <SVGIcon
-                  name="IconDownload"
-                  width={20}
-                  color={isAvailable ? "#0075bf" : "#8D91A0"}
-                />
-              </div>
-            </Tooltip>
-          );
-
-        return content;
-      },
-    },
-    {
-      action: "Preview",
-      type: "table",
-      render: (record, data) => {
-        const isAvailable = record.statusApproval === "APPROVED";
-        const content =
-          data > 3 ? (
-            <ButtonComponent
-              icon={<SVGIcon name="IconDownload" color={"#0075bf"} width={20} />}
-              border={false}
-              disabled={!isAvailable}
-              onClick={() => isAvailable && handleProformaInvoice(record)}
-            >
-              <span className={"text-black ml-3"}>Download Proforma</span>
-            </ButtonComponent>
-          ) : (
-            <Tooltip title="Download Proforma">
-              <div
-                onClick={() => isAvailable && handleProformaInvoice(record)}
-                style={{
-                  cursor: isAvailable ? "pointer" : "not-allowed",
-                  display: "inline-block",
-                  lineHeight: 0,
-                }}
-              >
-                <SVGIcon
-                  name="IconDownload"
-                  width={20}
-                  color={isAvailable ? "#0075bf" : "#8D91A0"}
-                />
-              </div>
-            </Tooltip>
-          );
-
-        return content;
-      },
-    },
-
-    {
-      action: "Preview",
-      type: "table",
-      render: (record, data) => {
-        const isAvailable = record.statusApproval === "APPROVED";
-        const content =
-          data > 3 ? (
-            <ButtonComponent
-              icon={<SVGIcon name="IconReGenerate" width={20} />}
-              border={false}
-              disabled={!isAvailable}
-              onClick={() => isAvailable && handleGenerateProforma(record)}
-            >
-              <span className={"text-black ml-3"}>Generate Proforma</span>
-            </ButtonComponent>
-          ) : (
-            <Tooltip title="Generate Proforma Invoice">
-              <div
-                onClick={() => isAvailable && handleGenerateProforma(record)}
-                style={{
-                  cursor: isAvailable ? "pointer" : "not-allowed",
-                  display: "inline-block",
-                  lineHeight: 0,
-                }}
-              >
-                <SVGIcon
-                  name="IconReGenerate"
-                  width={20}
-                  color={isAvailable ? "#ACC424" : "#8D91A0"}
-                />
-              </div>
-            </Tooltip>
-          );
-
-        return content;
-      },
-    },
-
-    {
       action: "Update",
       type: "table",
-      render: (record, data) => {
+      width: 40,
+      render: (record) => {
+        const isMeterai =
+          record?.isMeterai === true ||
+          record?.isMeterai === "true" ||
+          record?.is_meterai === true ||
+          record?.is_meterai === "true";
+
         const isEditable =
-          record.statusApproval === "DRAFT" ||
-          record.statusApproval === "REJECTED";
+          !isMeterai &&
+          (record.statusApproval === "DRAFT" ||
+            record.statusApproval === "REJECTED");
 
-        const customerTypeForNav =
-          record.customerType === 2 ? "prospective" : "customer";
+        const isApproved = !isMeterai && record.statusApproval === "APPROVED";
 
-        const content =
-          data > 3 ? (
-            <ButtonComponent
-              icon={<SVGIcon name="IconEdit" color={"#0075bf"} width={20} />}
-              border={false}
-              disabled={!isEditable}
+        const isDelete =
+          !isMeterai &&
+          (record.statusApproval === "DRAFT" ||
+            record.statusApproval === "REJECTED");
+
+        const customerTypeForNav = resolveCustomerTypeForNav(
+          record.customerType,
+        );
+
+        const menuItems = [
+          {
+            key: "update",
+            label: isEditable ? (
+              <Link
+                to={RBI_ROUTES.POS_UPDATE}
+                state={{
+                  id: record.id,
+                  idPos: record.posNumber,
+                  customerType: customerTypeForNav,
+                }}
+              >
+                Update
+              </Link>
+            ) : (
+              <span className="text-[#8D91A0]">Update</span>
+            ),
+            icon: (
+              <SVGIcon
+                name="IconEdit"
+                color={isEditable ? "#0075BF" : "#8D91A0"}
+                width={16}
+              />
+            ),
+            disabled: !isEditable,
+          },
+          {
+            key: "delete",
+            label: "Delete",
+            icon: (
+              <SVGIcon
+                name="IconDelete"
+                width={16}
+                color={isDelete ? "#D90000" : "#8D91A0"}
+              />
+            ),
+            disabled: !isDelete,
+            onClick: () => {
+              if (isDelete) handleDelete(record);
+            },
+          },
+          {
+            key: "download-proforma",
+            label: "Download Proforma",
+            icon: (
+              <SVGIcon
+                name="IconDownload"
+                width={16}
+                color={isApproved ? "#0075BF" : "#8D91A0"}
+              />
+            ),
+            disabled: !isApproved,
+            onClick: () => {
+              if (isApproved) handleProformaInvoice(record);
+            },
+          },
+          {
+            key: "generate-proforma",
+            label: "Generate Proforma",
+            icon: (
+              <SVGIcon
+                name="IconReGenerate"
+                width={16}
+                color={isApproved ? "#0075BF" : "#8D91A0"}
+              />
+            ),
+            disabled: !isApproved,
+            onClick: () => {
+              if (isApproved) handleGenerateProforma(record);
+            },
+          },
+          {
+            key: "approval-history",
+            label: "Approval History",
+            icon: <SVGIcon name="IconLogHistory" width={16} color="#0075BF" />,
+            onClick: () => handleApprovalHistory(record),
+          },
+        ];
+
+        return (
+          <Tooltip
+            title={isMeterai ? "This is a Meterai item" : "More Actions"}
+          >
+            <Dropdown
+              menu={{ items: menuItems }}
+              trigger={["click"]}
+              placement="bottomRight"
+              disabled={isMeterai}
             >
-              <span className={"text-black ml-3"}> Update</span>
-            </ButtonComponent>
-          ) : (
-            <Tooltip title="Update">
-              <div className="">
-                <SVGIcon
-                  name="IconEdit"
-                  width={24}
-                  color={!isEditable ? "#8D91A0" : "#ACC424"}
-                  className={!isEditable ? "cursor-not-allowed" : undefined}
+              <div
+                className={isMeterai ? "cursor-not-allowed" : "cursor-pointer"}
+              >
+                <MoreOutlined
+                  style={{
+                    fontSize: 20,
+                    color: isMeterai ? "#8D91A0" : "#0075BF",
+                  }}
                 />
               </div>
-            </Tooltip>
-          );
-
-        return isEditable ? (
-          <Link
-            to={RBI_ROUTES.POS_UPDATE}
-            state={{
-              id: record.id,
-              idPos: record.posNumber,
-              customerType: customerTypeForNav,
-            }}
-          >
-            {content}
-          </Link>
-        ) : (
-          <div>{content}</div>
-        );
-      },
-    },
-    {
-      action: "Delete",
-      type: "table",
-      render: (record) => {
-        const isDelete =
-          record.statusApproval === "DRAFT" ||
-          record.statusApproval === "REJECTED";
-        return (
-          <Tooltip title="Delete">
-            <SVGIcon
-              name="IconDelete"
-              width={24}
-              color={isDelete ? "#D90000" : "#8D91A0"}
-              className={isDelete ? undefined : "disabled cursor-not-allowed"}
-              onClick={isDelete ? () => handleDelete(record) : undefined}
-            />
+            </Dropdown>
           </Tooltip>
         );
       },
     },
     {
-      action: "History",
+      action: "View",
       type: "table",
-      render: (record, data) => {
-        const Content =
-          data > 3 ? (
-            <ButtonComponent
-              icon={
-                <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
-              }
-              border={false}
-              onClick={() => handleApprovalHistory(record)}
-            >
-              <span className={"text-black ml-3"}>Approval History</span>
-            </ButtonComponent>
-          ) : (
-            <Tooltip title="Approval History">
-              <div className="">
-                <SVGIcon
-                  name="IconLogHistory"
-                  color={"#0075bf"}
-                  width={24}
-                  onClick={() => handleApprovalHistory(record.id)}
-                />
-              </div>
-            </Tooltip>
-          );
+      width: 40,
+      render: (record) => {
+        const isMeterai =
+          record?.isMeterai === true ||
+          record?.isMeterai === "true" ||
+          record?.is_meterai === true ||
+          record?.is_meterai === "true";
 
-        return Content;
+        return (
+          <Tooltip title={isMeterai ? "This is a Meterai item" : "Detail"}>
+            <div
+              className={
+                isMeterai ? "cursor-not-allowed" : "pt-0 cursor-pointer"
+              }
+              onClick={() => {
+                if (!isMeterai) handleOpenDetail(record);
+              }}
+            >
+              <SVGIcon
+                name="IconDetail"
+                color={isMeterai ? "#8D91A0" : "#0075BF"}
+                width={20}
+              />
+            </div>
+          </Tooltip>
+        );
       },
     },
   ];
 
+  const actionColumns = useColumnActionPermission(
+    ["view", "update"],
+    itemGrantAccess,
+    "View",
+  );
+
+  const baseColumns = useMemo(() => {
+    const posCols = [
+      ...PosTableView(
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        search,
+      ),
+      ...actionColumns,
+    ];
+
+    return posCols.map((col) => ({
+      ...col,
+      key: col.key || col.dataIndex || col.title || "ACTION",
+    }));
+  }, [searchedColumn, searchText, search, actionColumns]);
+
+  const columnDefinitions = useMemo(() => {
+    return baseColumns.map((col) => ({
+      key: col.key || col.dataIndex || col.title || "ACTION",
+      title: col.title || "ACTION",
+    }));
+  }, [baseColumns]);
+
+  const columns = useMemo(() => {
+    const leftFixed = [];
+    const rightFixed = [];
+    const normal = [];
+
+    baseColumns.forEach((col) => {
+      const colKey = col.key || col.dataIndex || col.title || "ACTION";
+
+      if (fixedColumns.left.includes(colKey)) {
+        leftFixed.push(col);
+      } else if (fixedColumns.right.includes(colKey)) {
+        rightFixed.push(col);
+      } else {
+        normal.push(col);
+      }
+    });
+
+    const reorderedColumns = [...leftFixed, ...normal, ...rightFixed];
+
+    return reorderedColumns.map((col) => {
+      const newCol = { ...col };
+      const colKey = col.key || col.dataIndex || col.title || "ACTION";
+
+      if (fixedColumns.left.includes(colKey)) {
+        newCol.fixed = "left";
+      } else if (fixedColumns.right.includes(colKey)) {
+        newCol.fixed = "right";
+      } else {
+        delete newCol.fixed;
+      }
+
+      return newCol;
+    });
+  }, [baseColumns, fixedColumns]);
+
   return (
-    <LayoutMenu>
-      <Spin spinning={loading}>
-        <BreadCrumb routes={routes} />
+    <>
+      <BreadCrumb routes={routes} />
 
-        <CardContainer
-          header={
-            <div className="flex -my-4 justify-between items-center">
-              <p className="w-full mt-[15px]">point of sales list</p>
-              <div className={"w-full flex justify-end gap-2"}>
-                <Toolbar items={itemGrantAccess} />
-              </div>
+      <CardContainer
+        header={
+          <div className="flex -my-4 justify-between items-center">
+            <p className="w-full mt-[15px]">point of sales list</p>
+            <div className={"w-full flex justify-end gap-2"}>
+              <Toolbar items={itemGrantAccess} />
             </div>
-          }
-        >
-          <div className="-pt-3">
-            <TableRBI
-              idTable="pos-table"
-              dataSource={dataSource}
-              showExport={false}
-              columns={[
-                ...PosTableView(
-                  searchInput,
-                  searchedColumn,
-                  searchText,
-                  handleSearch,
-                  search,
-                ),
-                ...useColumnActionPermission(
-                  ["view", "update", "delete", "preview", "history", "generate"],
-                  itemGrantAccess,
-                  "Delete",
-                ),
-              ]}
-              totalData={data_view?.page?.totalElements || 0}
-              onSort={onSort}
-              tableScrolled={{ y: 525, x: 2000 }}
-              usePagination={false}
-              useInfiniteScroll={true}
-              onLoadMore={handleLoadMore}
-              hasMore={hasMore}
-              loadMoreThreshold={20}
-            />
           </div>
-        </CardContainer>
-
-        {openDetail === true ? (
-          <div className="mb-5">
-            <PosDetail id={dataDetail} dispatch={dispatch} />
-          </div>
-        ) : null}
-
-        <ApprovalPointOfSales
-          isOpen={openApproval}
-          handleCancel={() => {
-            handleCancel();
-          }}
-          handleApproveReject={handleApproveReject}
-        />
-
-        <ModalHistory
-          isOpen={openModalHistory && dataApprovalHistory}
-          handleClose={() => setOpenModalHistory(false)}
-          header={"Approval History"}
-          width={1000}
-          dataApprover={dataApprovalHistory?.dataApprover}
-          dataHistory={dataApprovalHistory?.dataHistory}
-        />
-
-        {/* Modal Delete */}
-        <ModalConfirm
-          isOpen={modalDelete}
-          handleCancel={() => setModalDelete(false)}
-          handleOk={() => deletePos(dataDelete)}
-          width={500}
-          useOk={true}
-        >
-          <div className="flex justify-center gap-[20px] mt-6">
-            <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
-            <p className={"text-[18px] font-bold"}>
-              {`Are you sure want to delete it?`}
-            </p>
-          </div>
-          <Alert
-            message="Warning! if you delete this data, it will be permanently."
-            type={"error"}
+        }
+      >
+        <div className="-pt-3">
+          <TableRBI
+            idTable="pos-table"
+            dataSource={dataSource}
+            showExport={false}
+            loading={loading || tableLoading}
+            columns={columns}
+            columnDefinitions={columnDefinitions}
+            fixedColumns={fixedColumns}
+            setFixedColumns={setFixedColumns}
+            totalData={data_view?.page?.totalElements || 0}
+            onSort={onSort}
+            tableScrolled={{ y: 525, x: 2000 }}
+            usePagination={false}
+            useInfiniteScroll={true}
+            onLoadMore={handleLoadMore}
+            hasMore={hasMore}
+            loadMoreThreshold={20}
           />
-        </ModalConfirm>
+        </div>
+      </CardContainer>
 
-        {/* Modal Customer Type */}
-        <ModalCustomerType
-          isOpen={modalCustomerType}
-          onCancel={handleCancelCustomerType}
-          onConfirm={handleConfirmCustomerType}
-          selectedType={selectedCustomerType}
-          setSelectedType={setSelectedCustomerType}
-          customerTypes={data_customer_type}
-        />
+      {openDetail === true ? (
+        <div ref={detailContainerRef} className="mb-5">
+          <PosDetail id={dataDetail} dispatch={dispatch} />
+        </div>
+      ) : null}
 
-        {/** Modal Retry */}
-        <ModalError
-          isOpen={modalError}
-          handleOk={handleRetry}
-          handleCancel={() => {
-            setModalError(false);
-          }}
-          customText={"Try Again"}
-        >
-          <div className="px-5 pt-5 pb-[10px] justify-center">
-            <div className="w-full flex gap-[20px]">
-              <SVGIcon name="IconFailed" width={48} />
-              <p className="text-[18px] font-bold">{"Failed"}</p>
-            </div>
-            <p className="pl-[70px]">{`Your data was not deleted. ${bodyError?.message}`}</p>
-            <p className="pl-[70px]">Please try again.</p>
+      <ApprovalPointOfSales
+        isOpen={openApproval}
+        handleCancel={() => {
+          handleCancel();
+        }}
+        handleApproveReject={handleApproveReject}
+      />
+
+      <ModalHistory
+        isOpen={openModalHistory && dataApprovalHistory}
+        handleClose={() => setOpenModalHistory(false)}
+        header={"Approval History"}
+        width={1000}
+        dataApprover={dataApprovalHistory?.dataApprover}
+        dataHistory={dataApprovalHistory?.dataHistory}
+      />
+
+      {/* Modal Delete */}
+      <ModalApproveOrReject
+        isOpen={modalDelete}
+        handleCloseModal={handleCloseDeleteModal}
+        onFinish={() => deletePos(dataDelete)}
+        header={"Delete Point Of Sales"}
+        approveOrReject={"delete"}
+        menu={"Point Of Sales"}
+        named={dataDelete?.posNumber || "-"}
+        customMessage={
+          "Warning! if you delete this data, it will be permanently."
+        }
+        width={700}
+      />
+
+      {/* Modal Customer Type */}
+      <ModalCustomerType
+        isOpen={modalCustomerType}
+        onCancel={handleCancelCustomerType}
+        onConfirm={handleConfirmCustomerType}
+        selectedType={selectedCustomerType}
+        setSelectedType={setSelectedCustomerType}
+        customerTypes={data_customer_type}
+      />
+
+      {/** Modal Retry */}
+      <ModalError
+        isOpen={modalError}
+        handleOk={handleRetry}
+        handleCancel={() => {
+          setModalError(false);
+        }}
+        customText={"Try Again"}
+      >
+        <div className="px-5 pt-5 pb-[10px] justify-center">
+          <div className="w-full flex gap-[20px]">
+            <SVGIcon name="IconFailed" width={48} />
+            <p className="text-[18px] font-bold">{"Failed"}</p>
           </div>
-        </ModalError>
-      </Spin>
-    </LayoutMenu>
+          <p className="pl-[70px]">{`Your data was not deleted. ${bodyError?.message}`}</p>
+          <p className="pl-[70px]">Please try again.</p>
+        </div>
+      </ModalError>
+    </>
   );
 };
 

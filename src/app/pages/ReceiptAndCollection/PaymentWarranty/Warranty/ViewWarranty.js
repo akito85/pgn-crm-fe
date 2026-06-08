@@ -1,54 +1,68 @@
-import React, { useEffect, useRef, useState, useMemo } from "react";
+import React, { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Spin, Dropdown, Menu, Tooltip, Checkbox } from "antd";
-import { DownOutlined, EyeOutlined, DownloadOutlined } from "@ant-design/icons";
-import { Link, NavLink } from "react-router-dom";
+import { Spin, Dropdown, Menu, Tooltip, Checkbox, Tabs, Popover } from "antd";
+import { debounce } from "lodash";
+import { DownOutlined, EyeOutlined, DownloadOutlined, EditOutlined } from "@ant-design/icons";
+
+import { Link, useNavigate } from "react-router-dom";
+import { disabledActionByStatus } from "../../../../../utils";
 
 import SVGIcon from "../../../../../assets/Icon/index";
 
 // Routes
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
+import SearchBar from "../../../../../components/SearchBar";
 
 // Utils
 import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
 
 // Global Custom Components
 import BreadCrumb from "../../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import TableRBI from "../../../../../components/TableRBI";
 import CardContainer from "../../../../../components/CardContainer";
 import Toolbar from "../../../../../components/Toolbar";
-import { useColumnActionPermission } from "../../../../../components/ColumnActionPermission";
+import useGrantAccessHooks from "../../../../../components/useGrantAccessHooks";
 
 // Column Configuration
 import { columnWarranty } from "./ColumnConfig/WarrantyColumns";
+import ListDetailWarranty from "./ListDetailWarranty";
+import SummaryWarrantyTable from "./SummaryWarrantyTable";
+import { WARRANTY_STATUS, WARRANTY_APPROVAL_STATUS } from "../../../../../constants/warranty";
 
 // Redux / Service
 import {
   getAllWarrantyListPaginate,
   downloadWarrantyList,
-  getApprovalHistory
+  getDetailWarranty,
+  getApprovalHistory,
+  downloadWarrantyListDetail,
+  selectAllWarranties,
+  getWarrantySummary,
 } from "../../../../../redux/slices/receipt_collection/warranty";
 
 // Modal
 import ModalRefund from "./Modal/ModalRefund";
 import ModalHold from "./Modal/ModalHold";
 import ModalRelease from "./Modal/ModalRelease";
-import ModalCreateWarranty from "./Modal/ModalCreateWarranty";
+import ModalApprovalWarranty from "./Modal/ModalApprovalWarranty";
 import ModalHistory from "../../../../../components/Modal/ModalHistory";
 import { ModalConfirm } from "../../../../../components/Modal/ModalPopUp";
 import { deleteWarranty } from "../../../../../redux/slices/receipt_collection/warranty";
 
 const ViewWarranty = () => {
-  const { data, loading, dataApprovalHistory } = useSelector(
+  const { data, loading, loadingList, dataApprovalHistory, data_detail, dataSummary, loadingSummary, loadingApproval } = useSelector(
     (state) => state.warranty
   );
+  const warranties = useSelector(selectAllWarranties);
 
   const dispatch = useDispatch();
   const searchInput = useRef(null);
-  const dataSource = data?.result;
+  const dataSource = warranties;
+  const isSubmitter = data?.isSubmitter || false;
+  const isApprover = data?.isApprover || false;
   const detailRef = useRef(null);
+  const navigate = useNavigate();
 
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -61,13 +75,14 @@ const ViewWarranty = () => {
   const [modalHold, setModalHold] = useState(false);
   const [modalRelease, setModalRelease] = useState(false);
   const [modalRefund, setModalRefund] = useState(false);
-  const [modalCreate, setModalCreate] = useState(false);
   const [activeRowKey, setActiveRowKey] = useState(null);
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [openModalHistory, setOpenModalHistory] = useState(false);
   const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
   const [modalDelete, setModalDelete] = useState(false);
   const [selectedRecordDelete, setSelectedRecordDelete] = useState(null);
+  const [modalApproval, setModalApproval] = useState(false);
+  const [activeTab, setActiveTab] = useState("all");
 
   const [fixedColumns, setFixedColumns] = useState(() => ({
     left: ["no"],
@@ -75,8 +90,9 @@ const ViewWarranty = () => {
   }));
 
   useEffect(() => {
+    let timeoutId;
     if (pageDetail && activeRowKey && detailRef.current) {
-      setTimeout(() => {
+      timeoutId = setTimeout(() => {
         detailRef.current.scrollIntoView({
           behavior: "smooth",
           block: "start",
@@ -84,18 +100,25 @@ const ViewWarranty = () => {
         });
       }, 100);
     }
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
   }, [activeRowKey, pageDetail]);
 
   useEffect(() => {
-    dispatch(
-      getAllWarrantyListPaginate({
-        search: encodeURIComponent(JSON.stringify(search)),
-        page,
-        pageSize,
-        sort,
-      })
-    );
-  }, [search, page, pageSize, sort, dispatch]);
+    if (activeTab === "summary") {
+      dispatch(getWarrantySummary());
+    } else {
+      dispatch(
+        getAllWarrantyListPaginate({
+          search: encodeURIComponent(JSON.stringify(search)),
+          page,
+          pageSize,
+          sort,
+        })
+      );
+    }
+  }, [search, page, pageSize, sort, dispatch, activeTab]);
 
   const routes = [
     {
@@ -112,20 +135,77 @@ const ViewWarranty = () => {
     }
   ];
 
-  const handleSearch = (selectedKeys, confirm, dataIndex) => {
+  const handleSearch = useCallback((selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(selectedKeys[0] ? dataIndex : "");
+
+    const shouldResetPage = search[dataIndex] !== selectedKeys[0];
+
     setSearch((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
+      const nextState = { ...prevState };
+      if (selectedKeys[0]) {
+        nextState[dataIndex] = selectedKeys[0];
+      } else {
+        delete nextState[dataIndex];
       }
-      return {
-        ...prevState,
-        [dataIndex]: selectedKeys[0],
-      };
+      return nextState;
     });
+
+    if (shouldResetPage) {
+      setPage(1);
+    }
+  }, [search]);
+
+  const handleGlobalSearch = useCallback(
+    debounce((value) => {
+      setSearchText(value);
+      setSearchedColumn(value ? "all" : "");
+      setSearch((prevState) => {
+        const nextState = { ...prevState };
+        if (value) {
+          nextState.all = value;
+        } else {
+          delete nextState.all;
+        }
+        return nextState;
+      });
+      setPage(1);
+    }, 500),
+    []
+  );
+
+  useEffect(() => {
+    return () => {
+      handleGlobalSearch.cancel();
+    };
+  }, [handleGlobalSearch]);
+
+  const handleAdvanceSearch = (searchData) => {
+    const simpleSearch = {};
+    if (searchData?.filters && Array.isArray(searchData.filters)) {
+      searchData.filters.forEach((rule) => {
+        if (rule.column && rule.value !== undefined && rule.value !== null && rule.value !== "") {
+          simpleSearch[rule.column] = rule.value;
+        }
+      });
+    }
+    if (searchData?.filterRules && Array.isArray(searchData.filterRules)) {
+      searchData.filterRules.forEach((ruleGroup) => {
+        if (Array.isArray(ruleGroup)) {
+          ruleGroup.forEach((rule) => {
+            if (rule?.column && rule?.value !== undefined && rule?.value !== null && rule?.value !== "" && rule?.condition) {
+              const conditionKey = rule.condition === "Equal to" ? "" : rule.condition;
+              simpleSearch[`${rule.column}${conditionKey}`] = rule.value;
+            }
+          });
+        }
+      });
+    }
+    setSearch(simpleSearch);
+    setPage(1);
   };
+  
 
   const handleChangePage = (pageChange, pageSizeChange) => {
     const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
@@ -134,9 +214,10 @@ const ViewWarranty = () => {
   };
 
   const onSort = (_, __, sorter) => {
+    const field = sorter.field || sorter.columnKey;
     const dataSort =
       sorter.order !== undefined
-        ? `${sorter.field}~${sorter.order === "ascend" ? "asc" : "desc"}`
+        ? `${field}~${sorter.order === "ascend" ? "asc" : "desc"}`
         : "";
     setSort(dataSort);
   };
@@ -152,15 +233,34 @@ const ViewWarranty = () => {
     );
   };
 
+  const handleDownloadDetail = () => {
+    dispatch(
+      downloadWarrantyListDetail({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page,
+        pageSize,
+        sort,
+      })
+    );
+  };
+
   const handleDetail = (record) => {
+    if (isApprover) {
+      navigate(RECEIPT_AND_COLLECTION_ROUTES.DETAIL_WARRANTY, { state: { id: record?.id } });
+      return;
+    }
+
     const recordKey = record.billingCode || record.invoiceNumber || record.id;
 
     if (activeRowKey === recordKey && pageDetail) {
       setPageDetail(false);
       setActiveRowKey(null);
+      setSelectedRecord(null);
     } else {
       setActiveRowKey(recordKey);
+      setSelectedRecord(record);
       setPageDetail(true);
+      dispatch(getDetailWarranty({ id: record.id }));
     }
   };
 
@@ -173,17 +273,19 @@ const ViewWarranty = () => {
 
   /* Effect for Approval History */
   useEffect(() => {
-    if (dataApprovalHistory && (dataApprovalHistory?.approver || dataApprovalHistory?.history)) {
+    if (dataApprovalHistory && (dataApprovalHistory?.dataApprover || dataApprovalHistory?.dataHistory)) {
       setDataApprovalHistoryFix({
         dataApprover: {
-          hold: dataApprovalHistory?.approver?.WARRANTY_HOLD || [],
-          release: dataApprovalHistory?.approver?.WARRANTY_RELEASE || [],
-          refund: dataApprovalHistory?.approver?.WARRANTY_REFUND || [],
+          guarantee: dataApprovalHistory?.dataApprover?.WARRANTY_CREATION || [],
+          hold: dataApprovalHistory?.dataApprover?.WARRANTY_HOLD || [],
+          release: dataApprovalHistory?.dataApprover?.WARRANTY_RELEASE || [],
+          refund: dataApprovalHistory?.dataApprover?.WARRANTY_REFUND || [],
         },
         dataHistory: {
-          hold: dataApprovalHistory?.history?.WARRANTY_HOLD || [],
-          release: dataApprovalHistory?.history?.WARRANTY_RELEASE || [],
-          refund: dataApprovalHistory?.history?.WARRANTY_REFUND || [],
+          guarantee: dataApprovalHistory?.dataHistory?.WARRANTY_CREATION || [],
+          hold: dataApprovalHistory?.dataHistory?.WARRANTY_HOLD || [],
+          release: dataApprovalHistory?.dataHistory?.WARRANTY_RELEASE || [],
+          refund: dataApprovalHistory?.dataHistory?.WARRANTY_REFUND || [],
         },
       });
     } else {
@@ -199,13 +301,9 @@ const ViewWarranty = () => {
     }));
   };
 
-  const handleHistory = async (record) => {
-    try {
-      await dispatch(getApprovalHistory(record.id)).unwrap();
-      setOpenModalHistory(true);
-    } catch (error) {
-      setOpenModalHistory(false);
-    }
+  const handleHistory = (record) => {
+    setOpenModalHistory(true);
+    dispatch(getApprovalHistory({ id: record.id }));
   };
 
   const handleDelete = (record) => {
@@ -233,6 +331,19 @@ const ViewWarranty = () => {
           icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
         >
           Download List
+        </ButtonComponent>
+      ),
+    },
+    {
+      action: "Download Detail",
+      render: (
+        <ButtonComponent
+          onClick={handleDownloadDetail}
+          type={"submit"}
+          border={false}
+          icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
+        >
+          Download Detail List
         </ButtonComponent>
       ),
     },
@@ -284,17 +395,45 @@ const ViewWarranty = () => {
         </ButtonComponent>
       ),
     },
+    isApprover && {
+      action: "Approval",
+      render: (
+        <ButtonComponent
+          onClick={() => setModalApproval(true)}
+          type={"submit"}
+          border={false}
+          icon={<SVGIcon name="IconRequestApproval" width={24} />}
+        >
+          Approval
+        </ButtonComponent>
+      ),
+    },
+    {
+      action: "Upload",
+      render: (
+        <Link to={RECEIPT_AND_COLLECTION_ROUTES.UPLOAD_WARRANTY}>
+          <ButtonComponent
+            type={"submit"}
+            border={false}
+            icon={<SVGIcon name="IconUpload" width={17} color={"#FFFFFF"} />}
+          >
+            Upload
+          </ButtonComponent>
+        </Link>
+      ),
+    },
     {
       action: "Create",
       render: (
-        <ButtonComponent
-          onClick={() => setModalCreate(true)}
-          type={"submit"}
-          border={false}
-          icon={<SVGIcon name="IconButtonCreate" width={24} />}
-        >
-          Create
-        </ButtonComponent>
+        <Link to={RECEIPT_AND_COLLECTION_ROUTES.CREATE_WARRANTY}>
+          <ButtonComponent
+            type={"submit"}
+            border={false}
+            icon={<SVGIcon name="IconButtonCreate" width={24} />}
+          >
+            Create
+          </ButtonComponent>
+        </Link>
       ),
     },
     {
@@ -303,31 +442,78 @@ const ViewWarranty = () => {
       render: (record, data_length) => (
         data_length > 3 ? (
           <Tooltip title={"Detail"}>
-            <Link
-              to={RECEIPT_AND_COLLECTION_ROUTES.DETAIL_WARRANTY}
-              state={{ id: record?.id }}
-            >
-              <ButtonComponent
-                className="gap-5"
-                icon={<EyeOutlined style={{ fontSize: "24px", color: "#0075bf" }} />}
-                border={false}
-                type="action"
-              />
-            </Link>
+            <ButtonComponent
+              className="gap-5"
+              icon={<SVGIcon name="IconDetail" width={24} color={"#0075bf"} />}
+              border={false}
+              type="action"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDetail(record);
+              }}
+            />
           </Tooltip>
         ) : (
           <Tooltip title={"Detail"}>
-            <Link
-              to={RECEIPT_AND_COLLECTION_ROUTES.DETAIL_WARRANTY}
-              state={{ id: record?.id }}
-            >
-              <div className="cursor-pointer">
-                <EyeOutlined style={{ fontSize: "16px", color: "#0075bf" }} />
-              </div>
-            </Link>
+            <div className="cursor-pointer" onClick={(e) => {
+              e.stopPropagation();
+              handleDetail(record);
+            }}>
+              <SVGIcon name="IconDetail" width={24} color={"#0075bf"} />
+            </div>
           </Tooltip>
         )
       ),
+    },
+    {
+      action: "Update",
+      type: "table",
+      render: (record, data_length) => {
+        const isDraft = record?.status === WARRANTY_STATUS.DRAFT;
+        const isApprDraft = record?.approvalStatus === WARRANTY_APPROVAL_STATUS.DRAFT;
+        const isApprRejected = record?.approvalStatus === WARRANTY_APPROVAL_STATUS.REJECTED;
+        const isActive = record?.status === WARRANTY_STATUS.ACTIVE;
+        const isApprApproved = record?.approvalStatus === WARRANTY_APPROVAL_STATUS.APPROVED;
+
+        const isDraftFullyEditable = isDraft && (isApprDraft || isApprRejected);
+        const isPartialEditable = isActive && isApprApproved;
+        
+        const disabled = !(isDraftFullyEditable || isPartialEditable);
+        
+        return data_length > 3 ? (
+          <ButtonComponent
+            border={false}
+            className="gap-2"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (!disabled) {
+                navigate(RECEIPT_AND_COLLECTION_ROUTES.UPDATE_WARRANTY, { state: { id: record?.id } });
+              }
+            }}
+            type="action"
+            disabled={disabled}
+            icon={<EditOutlined style={{ fontSize: "16px", color: disabled ? "#D3D3D3" : "#000" }} />}
+          >
+            <span className={disabled ? "text-gray-400" : "text-black"}>Update</span>
+          </ButtonComponent>
+        ) : (
+          <Tooltip title={"Update"}>
+            <Link
+              to={RECEIPT_AND_COLLECTION_ROUTES.UPDATE_WARRANTY}
+              state={{ id: record?.id }}
+              className={disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"}
+              onClick={(e) => {
+                if (disabled) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                }
+              }}
+            >
+              <EditOutlined style={{ fontSize: "16px", color: disabled ? "#d9d9d9" : "#0075bf" }} />
+            </Link>
+          </Tooltip>
+        );
+      },
     },
     {
       action: "Refund",
@@ -340,7 +526,8 @@ const ViewWarranty = () => {
           <ButtonComponent
             border={false}
             className="gap-2"
-            onClick={() => {
+            onClick={(e) => {
+              e.stopPropagation();
               if (!isDisabled) {
                 setActiveRowKey(record.id);
                 setSelectedRecord(record);
@@ -356,7 +543,8 @@ const ViewWarranty = () => {
         ) : (
           <Tooltip title="Refund">
             <div
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation();
                 if (!isDisabled) {
                   setActiveRowKey(record.id);
                   setSelectedRecord(record);
@@ -381,7 +569,8 @@ const ViewWarranty = () => {
           <ButtonComponent
             border={false}
             className="gap-2"
-            onClick={() => {
+            onClick={(e) => {
+              e.stopPropagation();
               if (!isDisabled) {
                 setActiveRowKey(record.id);
                 setSelectedRecord(record);
@@ -397,7 +586,8 @@ const ViewWarranty = () => {
         ) : (
           <Tooltip title="Hold">
             <div
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation();
                 if (!isDisabled) {
                   setActiveRowKey(record.id);
                   setSelectedRecord(record);
@@ -422,7 +612,8 @@ const ViewWarranty = () => {
           <ButtonComponent
             border={false}
             className="gap-2"
-            onClick={() => {
+            onClick={(e) => {
+              e.stopPropagation();
               if (!isDisabled) {
                 setActiveRowKey(record.id);
                 setSelectedRecord(record);
@@ -438,7 +629,8 @@ const ViewWarranty = () => {
         ) : (
           <Tooltip title="Release">
             <div
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation();
                 if (!isDisabled) {
                   setActiveRowKey(record.id);
                   setSelectedRecord(record);
@@ -454,26 +646,32 @@ const ViewWarranty = () => {
       },
     },
     {
-      action: "History",
+      action: "history",
       type: "table",
       render: (record, data_length) => (
         data_length > 3 ? (
           <ButtonComponent
             border={false}
             className="gap-2"
-            onClick={() => handleHistory(record)}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleHistory(record);
+            }}
             type="action"
-            icon={<SVGIcon name="IconLogHistory" color={"#000000"} width={16} />}
+            icon={<SVGIcon name="IconLogHistory" color={"#000"} width={16} />}
           >
             <span className="text-black">Approval History</span>
           </ButtonComponent>
         ) : (
-          <Tooltip title="Approval History">
-            <div
-              onClick={() => handleHistory(record)}
+          <Tooltip title={'Approval History'}>
+            <div 
+              onClick={(e) => {
+                e.stopPropagation();
+                handleHistory(record);
+              }} 
               className="cursor-pointer"
             >
-              <SVGIcon name="IconLogHistory" color={"#0075bf"} width={16} />
+              <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
             </div>
           </Tooltip>
         )
@@ -482,30 +680,46 @@ const ViewWarranty = () => {
     {
       action: "Delete",
       type: "table",
-      render: (record, data_length) => (
-        data_length > 3 ? (
+      render: (record, data_length) => {
+        const isDraft = record?.status === WARRANTY_STATUS.DRAFT;
+        const isApprDraft = record?.approvalStatus === WARRANTY_APPROVAL_STATUS.DRAFT;
+        
+        const disabled = !(isDraft && isApprDraft);
+
+        return data_length > 3 ? (
           <ButtonComponent
             border={false}
             className="gap-2"
-            onClick={() => handleDelete(record)}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (!disabled) {
+                handleDelete(record);
+              }
+            }}
             type="action"
-            icon={<SVGIcon name="IconDelete" color={"#BE3036"} width={16} />}
+            disabled={disabled}
+            icon={<SVGIcon name="IconDelete" color={disabled ? "#D3D3D3" : "#BE3036"} width={16} />}
           >
-            <span className="text-[#BE3036]">Delete</span>
+            <span className={disabled ? "text-gray-400" : "text-[#BE3036]"}>Delete</span>
           </ButtonComponent>
         ) : (
           <Tooltip title="Delete">
             <div
-              onClick={() => handleDelete(record)}
-              className="cursor-pointer"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (!disabled) {
+                  handleDelete(record);
+                }
+              }}
+              className={disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"}
             >
-              <SVGIcon name="IconDelete" color={"#BE3036"} width={16} />
+              <SVGIcon name="IconDelete" color={disabled ? "#D3D3D3" : "#BE3036"} width={16} />
             </div>
           </Tooltip>
-        )
-      ),
+        );
+      }
     },
-  ];
+  ].filter(Boolean);
 
   const baseColumns = useMemo(() => {
     return columnWarranty(
@@ -524,12 +738,60 @@ const ViewWarranty = () => {
     searchedColumn,
     searchText,
     search,
+    handleSearch
   ]);
 
-  const actionColumns = useColumnActionPermission(
-    ["view", "refund", "hold", "release", "history", "delete"],
-    itemActions
-  );
+  const { actions: accessList } = useGrantAccessHooks("page");
+
+  const actionColumns = useMemo(() => {
+    const permissions = accessList?.map(a => a.toLowerCase()) || [];
+    const tableActions = itemActions.filter(item => item.type === "table" && permissions.includes(item.action.toLowerCase()));
+    
+    if (tableActions.length === 0) return [];
+
+    return [
+      {
+        key: "action",
+        title: "ACTION",
+        fixed: "right",
+        width: 150,
+        render: (_, record) => {
+          const detailAction = tableActions.find(a => a.action.toLowerCase() === "view");
+          const otherActions = tableActions.filter(a => a.action.toLowerCase() !== "view");
+          
+          return (
+            <div className="flex justify-center items-center gap-4">
+              {otherActions.length > 0 && (
+                <Popover
+                  trigger="click"
+                  placement="bottomRight"
+                  showArrow={false}
+                  content={
+                    <div className="flex flex-col">
+                      {otherActions.map(action => (
+                        <div key={action.action} onClick={(e) => e.stopPropagation()}>
+                           {action.render(record, tableActions.length)}
+                        </div>
+                      ))}
+                    </div>
+                  }
+                >
+                  <div className="cursor-pointer" onClick={(e) => e.stopPropagation()}>
+                    <SVGIcon name="IconActionDropdown" width={20} color={"#0075bf"} />
+                  </div>
+                </Popover>
+              )}
+              {detailAction && (
+                <div onClick={(e) => e.stopPropagation()}>
+                   {detailAction.render(record, tableActions.length)}
+                </div>
+              )}
+            </div>
+          );
+        }
+      }
+    ];
+  }, [accessList, itemActions]);
 
   const allColumns = useMemo(() => {
     return [...baseColumns, ...actionColumns];
@@ -556,7 +818,7 @@ const ViewWarranty = () => {
   }, [dataSource]);
 
   return (
-    <LayoutMenu>
+    <>
       {/* <Spin spinning={loading}> */}
       <BreadCrumb routes={routes} />
       <CardContainer header={
@@ -570,42 +832,63 @@ const ViewWarranty = () => {
         </div>
       }>
         <div className="my-5">
-          <TableRBI
-            dataSource={dataSourceWithKeys}
-            columns={processedColumns}
-            current={page}
-            pageSize={pageSize}
-            showExport={true}
-            onChange={handleChangePage}
-            onSizeChanger={handleChangePage}
-            totalData={data?.page?.totalElements || 0}
-            tableScrolled={{ x: "max-content", y: 525 }}
-            onSort={onSort}
-            handleDownload={handleDownload}
-            columnDefinitions={columnDefinitions}
-            fixedColumns={fixedColumns}
-            setFixedColumns={setFixedColumns}
-            loading={loading}
-            onRow={(record) => ({
-              onClick: () => handleDetail(record),
-              style: {
-                cursor: "pointer",
-                backgroundColor:
-                  activeRowKey === (record.billingCode || record.invoiceNumber || record.id)
-                    ? "#bae7ff"
-                    : "transparent",
-                transition: "background-color 0.2s ease",
+          <Tabs
+            activeKey={activeTab}
+            onChange={(key) => setActiveTab(key)}
+            items={[
+              {
+                key: "all",
+                label: "All",
+                children: (
+                  <TableRBI
+                    dataSource={dataSourceWithKeys}
+                    columns={processedColumns}
+                    current={page}
+                    pageSize={pageSize}
+                    showExport={true}
+                    onChange={handleChangePage}
+                    onSizeChanger={handleChangePage}
+                    totalData={data?.page?.totalElements || 0}
+                    tableScrolled={{ x: "max-content", y: 525 }}
+                    onSort={onSort}
+                    handleDownload={handleDownload}
+                    columnDefinitions={columnDefinitions}
+                    fixedColumns={fixedColumns}
+                    setFixedColumns={setFixedColumns}
+                    loading={loadingList}
+                    showSearchBar={true}
+                    onAdvanceSearch={handleAdvanceSearch}
+                    onSearch={(e) => handleGlobalSearch(e.target.value)}
+                    onRow={(record) => {
+                      const recordKey = record.billingCode || record.invoiceNumber || record.id;
+                      const isActive = activeRowKey === recordKey;
+                      return {
+                        onClick: () => handleDetail(record),
+                        className: isActive ? "row-selected" : "",
+                        style: {
+                          cursor: "pointer",
+                          backgroundColor: isActive ? "#fffbea" : "transparent",
+                          transition: "background-color 0.2s ease",
+                        },
+                      };
+                    }}
+                  />
+                ),
               },
-            })}
+              {
+                key: "summary",
+                label: "Summary",
+                children: (
+                  <SummaryWarrantyTable
+                    data={dataSummary || []}
+                    loading={loadingSummary}
+                  />
+                ),
+              },
+            ]}
           />
         </div>
       </CardContainer>
-
-      <ModalCreateWarranty
-        isOpen={modalCreate}
-        handleBack={() => setModalCreate(false)}
-        handleRefresh={handleRefresh}
-      />
 
       <ModalRefund
         isOpen={modalRefund}
@@ -632,9 +915,14 @@ const ViewWarranty = () => {
       />
 
       <ModalHistory
-        isOpen={openModalHistory && dataApprovalHistoryFix}
+        isOpen={openModalHistory}
         handleClose={() => setOpenModalHistory(false)}
-        header={"Approval History"}
+        header={
+          <div className="flex items-center gap-2">
+            <span>Approval History</span>
+            {loadingApproval && <Spin size="small" />}
+          </div>
+        }
         width={850}
         tabOptions={handleOptions()}
         dataApprover={dataApprovalHistoryFix?.dataApprover}
@@ -656,10 +944,19 @@ const ViewWarranty = () => {
         </div>
       </ModalConfirm>
 
-      {/* </Spin> */}
-    </LayoutMenu>
-  );
+      {pageDetail && activeRowKey && selectedRecord && (
+        <div ref={detailRef} className="mt-5">
+           <ListDetailWarranty id={selectedRecord.id} isEmbedded={true} />
+        </div>
+      )}
 
+      <ModalApprovalWarranty
+        isOpen={modalApproval}
+        handleCancel={() => setModalApproval(false)}
+        handleListRefresh={handleRefresh}
+      />
+    </>
+  );
 };
 
 export default ViewWarranty;

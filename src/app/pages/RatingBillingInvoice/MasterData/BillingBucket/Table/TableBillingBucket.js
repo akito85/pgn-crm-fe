@@ -19,7 +19,7 @@ export const columnsBillingBucket = (
       title: "NO",
       align: "center",
       width: 60,
-      render: (text, object, index) => (page - 1) * pageSize + index + 1,
+      render: (text, object, index) => index + 1,
     },
     {
       title: "BILLING BUCKET CODE",
@@ -84,6 +84,54 @@ export const columnsBillingBucket = (
         renderColumn(
           "priorityPeriod",
           hasValue(search["priorityPeriod"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
+    },
+    {
+      title: "CATEGORY",
+      dataIndex: "category",
+      sorter: true,
+      align: "center",
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "category",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch
+      ),
+      render: (text) =>
+        renderColumn(
+          "category",
+          hasValue(search["category"]),
+          searchText,
+          text,
+          false,
+          "input",
+          search
+        ),
+    },
+       {
+      title: "CURRENCY",
+      dataIndex: "currency",
+      sorter: true,
+      align: "center",
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "currency",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch
+      ),
+      render: (text) =>
+        renderColumn(
+          "currency",
+          hasValue(search["currency"]),
           searchText,
           text,
           false,

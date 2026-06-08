@@ -2,9 +2,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ModalCustom from "../ModalCustom";
 import ButtonComponent from "../../ButtonComponent";
 import { getColumnSearchProps } from "../../../utils/getColumnSearchProps";
-import { Tooltip } from "antd";
+import { Button, Tooltip } from "antd";
 import { PlusCircleOutlined } from "@ant-design/icons";
-import TablePagination from "../../TablePagination";
+import NxTable from "../../Nx/NxTable";
+import NxModal from "../../Nx/NxModal";
+import ContactDetailExpandTable from "./ContactDetailExpandTable";
 
 const ModalChooseContact = ({
   isOpen,
@@ -16,45 +18,76 @@ const ModalChooseContact = ({
   datas = {},
 }) => {
   const searchInput = useRef(null);
-  const [pageChoose, setPageChoose] = useState(1);
-  const [pageChooseSize, setPageChooseSize] = useState(10);
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
   const [sort, setSort] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [search, setSearch] = useState({});
+  const [dataTable, setDataTable] = useState([]);
+  const [totalElements, setTotalElements] = useState(0);
+
+  const hasMore = dataTable.length < totalElements;
+
   useEffect(() => {
     if (isOpen) {
-      dispactherChoose(pageChoose, pageChooseSize, sort, search);
+      dispactherChoose(page, pageSize, sort, search);
     }
-  }, [isOpen, pageChoose, pageChooseSize, search, sort]);
+  }, [isOpen, page, sort, search]);
+
+  // accumulate data per page
+  useEffect(() => {
+    if (dataChoose?.data?.result?.length > 0) {
+      setTotalElements(dataChoose?.data?.page?.totalElements);
+      const newItems = dataChoose.data.result.map((item, index) => ({
+        ...item,
+        key: item.id?.toString() || `${page}-${index + 1}`,
+        contactDetails: item.contactDetails?.map((d, i) => ({
+          ...d,
+          key: i + 1,
+        })),
+      }));
+      setDataTable((prev) => {
+        if (page === 1) return newItems;
+        const existingIds = new Set(prev.map((item) => item.id));
+        const merged = [...prev];
+        newItems.forEach((item) => {
+          if (!existingIds.has(item.id)) merged.push(item);
+        });
+        return merged;
+      });
+    } else if (page === 1) {
+      setDataTable([]);
+    }
+  }, [dataChoose]);
 
   // handle search
   const handleSearch = useCallback((selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
-    setSearch((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPageChoose(1);
-      }
-      return {
-        ...prevState,
-        [dataIndex]: selectedKeys[0],
-      };
-    });
+    setPage(1);
+    setDataTable([]);
+    setSearch((prevState) => ({
+      ...prevState,
+      [dataIndex]: selectedKeys[0],
+    }));
   }, []);
+
   const columns = useMemo(() => {
     return [
       {
+        key: "no",
         title: "NO",
-        width: 60,
+        width: 50,
         align: "center",
-        render: (text, object, index) =>
-          (pageChoose - 1) * pageChooseSize + index + 1,
+        render: (text, object, index) => index + 1,
       },
       {
+        key: "contactName",
         title: "CONTACT NAME",
         dataIndex: "contactName",
+        width: 240,
         sorter: true,
         ...getColumnSearchProps(
           "contactName",
@@ -66,8 +99,10 @@ const ModalChooseContact = ({
         ),
       },
       {
+        key: "jobName",
         title: "JOB TITLE",
         dataIndex: "jobName",
+        width: 240,
         sorter: true,
         align: "center",
         ...getColumnSearchProps(
@@ -83,6 +118,7 @@ const ModalChooseContact = ({
       {
         title: "POSITION",
         dataIndex: "positionName",
+        width: 240,
         sorter: true,
         align: "center",
         ...getColumnSearchProps(
@@ -98,6 +134,7 @@ const ModalChooseContact = ({
       {
         title: "SOURCE",
         dataIndex: "source",
+        width: 240,
         sorter: true,
         align: "center",
         ...getColumnSearchProps(
@@ -116,129 +153,76 @@ const ModalChooseContact = ({
         dataIndex: "id",
         width: 100,
         fixed: "right",
-        render: (v, r, i) => {
-          return (
-            <div className="flex justify-center gap-2">
-              <Tooltip title="Choose">
-                <PlusCircleOutlined
-                  onClick={() => handleChooseContact(r)}
-                  style={{
-                    color: "#0075BF",
-                    cursor: "pointer",
-                  }}
-                />
-              </Tooltip>
-            </div>
-          );
-        },
+        render: (v, r) => (
+          <div className="flex justify-center gap-2">
+            <Tooltip title="Choose">
+              <PlusCircleOutlined
+                onClick={() => handleChooseContact(r)}
+                style={{ color: "#0075BF", cursor: "pointer" }}
+              />
+            </Tooltip>
+          </div>
+        ),
       },
     ];
-  }, [
-    handleChooseContact,
-    handleSearch,
-    pageChoose,
-    pageChooseSize,
-    searchText,
-    searchedColumn,
-  ]);
+  }, [handleChooseContact, handleSearch, searchText, searchedColumn]);
 
-  // expand row render
-  const expandedRowRender = (record) => {
-    const column = [
-      {
-        title: "NO",
-        align: "center",
-        width: 60,
-        render: (text, object, index) => index + 1,
-      },
-      {
-        title: "TYPE",
-        dataIndex: "typeName",
-        width: 250,
-      },
-      {
-        title: "INPUT TYPE",
-        dataIndex: "inputTypeName",
-        // editable: true,
-        // sorter: true,
-        // inputType: "select",
-        // options: dataInputType,
-      },
-      {
-        title: "VALUE",
-        dataIndex: "fullValue",
-        // width: 350,
-      },
-    ];
-
-    return (
-      <div>
-        <TablePagination
-          useSelect={false}
-          usePagination={false}
-          // onSort={onSort}
-          dataSource={record?.contactDetails}
-          columns={column}
-        />
-      </div>
-    );
-  };
-
-  const handleChange = useCallback(
-    (pageChange, pageSizeChange) => {
-      const tempPage = pageChooseSize !== pageSizeChange ? 1 : pageChange;
-      setPageChoose(tempPage);
-      setPageChooseSize(pageSizeChange);
-    },
-    [pageChooseSize]
-  );
-
-  const onSort = (_, __, sort) => {
+  const onSort = (_, __, sortInfo) => {
     const dataSort =
-      sort.order !== undefined
-        ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
+      sortInfo.order !== undefined
+        ? `${sortInfo.field}~${sortInfo.order === "ascend" ? "asc" : "desc"}`
         : "";
+    setPage(1);
+    setDataTable([]);
     setSort(dataSort);
   };
 
-  const resetState = useCallback(() => {
-    setPageChoose(1);
-    setPageChooseSize(10);
-  }, []);
+  const handleLoadMore = async () => {
+    if (hasMore) {
+      setPage((prev) => prev + 1);
+    }
+    return Promise.resolve();
+  };
+
+  const handleClose = useCallback(() => {
+    handleCancelModalChoose();
+    setPage(1);
+    setDataTable([]);
+    setTotalElements(0);
+  }, [handleCancelModalChoose]);
 
   return (
-    <ModalCustom
+    <NxModal
       isOpen={isOpen}
-      type="confirmation"
-      header={"Choose Contact"}
-      handleCancel={() => {
-        handleCancelModalChoose();
-        resetState();
-      }}
+      title={"Choose Contact"}
+      handleCancel={handleClose}
       width={1200}
       footer={[
-        <ButtonComponent onClick={handleCancelModalChoose}>
-          Back
-        </ButtonComponent>,
+        <div className="w-full flex justify-end">
+          <Button type="menu" onClick={handleClose}>Back</Button>
+        </div>,
       ]}
     >
-      <TablePagination
-        totalData={dataChoose?.data?.page?.totalElements}
-        dataSource={dataChoose?.data?.result?.map((item, index) => {
-          return { ...item, key: (index + 1)?.toString() };
-        })}
-        columns={columns}
-        current={pageChoose}
-        pageSize={pageChooseSize}
-        expandable={{
-          expandedRowRender,
-        }}
-        onChange={handleChange}
-        onSizeChanger={handleChange}
-        onSort={onSort}
-        tableScrolled={{ x: 500, y: 500 }}
-      />
-    </ModalCustom>
+      <div className="flex flex-col gap-y-4 p-4">
+        <NxTable
+          idTable="table-choose-contact"
+          dataSource={dataTable}
+          columns={columns}
+          totalData={totalElements}
+          usePagination={false}
+          useInfiniteScroll={true}
+          hasMore={hasMore}
+          onLoadMore={handleLoadMore}
+          loadMoreThreshold={20}
+          useSelect={true}
+          showAdvanceSearch={false}
+          showSearchBar={true}
+          expandable={{ expandedRowRender: dataTable.length ? (record) => <ContactDetailExpandTable contactDetails={record.contactDetails} /> : undefined }}
+          onSort={onSort}
+          tableScrolled={{ y: 400, x: "max-content" }}
+        />
+      </div>
+    </NxModal>
   );
 };
 

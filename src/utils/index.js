@@ -10,7 +10,16 @@ import {
 import moment from "moment";
 import Highlighter from "react-highlight-words";
 import StatusComponent from "../components/StatusComponent";
-import { currencyFormatting, numberFormatting, usageFormatting} from "./formatCurrency";
+import {
+  currencyFormatting,
+  numberFormatting,
+  usageFormatting,
+  temperaturFormatting,
+  tekananFormatting,
+  volumeFormatting,
+  ghvFormatting,
+  energiFormatting,
+} from "./formatCurrency";
 
 export const tableNumbering = () => {
   const n = {
@@ -44,6 +53,7 @@ export const dateFormatting = {
   dateFormal: "YYYY-MM-DD",
   datePeriod: "MMM YYYY",
   meas_date: "DD-MM-YYYY HH:mm:ss",
+  meas_date_input: "MM/DD/YYYY HH:mm:ss",
   hour_format: "HH:mm",
   f_date: "DD-MM-yyyy",
   year_only: "YYYY",
@@ -114,6 +124,10 @@ export const renderDateConverter = (data, type = "date") => {
       return moment(data)?.format(dateFormatting?.month);
     case "hour":
       return moment(data)?.format(dateFormatting?.hour_format);
+    case "meas_date":
+      return moment(data)?.format(dateFormatting?.meas_date);
+    case "meas_date_input":
+      return moment(data)?.isValid() ? moment(data).format(dateFormatting?.dateTime) : "-";
     default:
       return moment(data)?.format(dateFormatting?.date);
   }
@@ -138,10 +152,12 @@ export const errorMessage = (error) => {
   let message =
     dataError ||
     error?.response?.data?.message ||
+    error?.data?.message ||
     error?.response?.data?.error ||
+    error?.data?.error ||
     error?.message ||
     error?.description ||
-    error?.toString();
+    (typeof error === "string" ? error : error?.toString());
   return message;
 };
 export const errorCode = (error) => {
@@ -153,9 +169,10 @@ export const errorCode = (error) => {
   return code;
 };
 
-export const errorBody = (code, status, message) => ({
+export const errorBody = (code, status, message, data = null) => ({
   code: code,
   message: `Your data was not ${status}. ${errorMessage(message)}.`,
+  data: data,
 });
 
 export const renderDateColumn = (
@@ -204,7 +221,7 @@ export const renderColumn = (
   if (searchedColumn) {
     if (type === "status") {
       return (
-        <div className={"flex px-0 my-0"}>
+        <div className={"flex justify-center px-0 my-0"}>
           <StatusComponent colour={text}>{toTitleCase(text)}</StatusComponent>
         </div>
       );
@@ -273,6 +290,21 @@ export const renderColumn = (
     if (formatType === "usage") {
       return usageFormatting(text);
     }
+    if (formatType === "temperatur") {
+      return temperaturFormatting(text);
+    }
+    if (formatType === "tekanan") {
+      return tekananFormatting(text);
+    }
+    if (formatType === "volume") {
+      return volumeFormatting(text);
+    }
+    if (formatType === "ghv") {
+      return ghvFormatting(text);
+    }
+    if (formatType === "energi") {
+      return energiFormatting(text);
+    }
 
     if (useTooltip) {
       return (
@@ -307,7 +339,7 @@ export const disabledActionByStatus = (action, status, statusApproval) => {
     case "activate":
       if (
         lowerStatusApproval === "waiting approval" ||
-        lowerStatus === "inactive" ||
+        lowerStatusApproval === "draft" ||
         lowerStatus === "draft"
       ) {
         return true;
@@ -318,7 +350,8 @@ export const disabledActionByStatus = (action, status, statusApproval) => {
     case "update":
       if (
         lowerStatusApproval === "waiting approval" ||
-        lowerStatus === "inactive"
+        lowerStatus === "inactive" ||
+        (lowerStatus === "active" && lowerStatusApproval === "approved")
       ) {
         return true;
       } else {
@@ -335,7 +368,7 @@ export const disabledActionByStatus = (action, status, statusApproval) => {
 };
 
 export const countBadgeFieldsErrorMandatory = (
-  setListSectionInfo = () => {},
+  setListSectionInfo = () => { },
   listDataAttachment,
   errorFields,
 ) => {
@@ -344,10 +377,10 @@ export const countBadgeFieldsErrorMandatory = (
       const errorBadge =
         item.value !== "Attachment"
           ? (errorFields || []).reduce(
-              (current, next) =>
-                item.paramValue.includes(next.name[0]) ? current + 1 : current,
-              0,
-            )
+            (current, next) =>
+              item.paramValue.includes(next.name[0]) ? current + 1 : current,
+            0,
+          )
           : listDataAttachment.length < 1
             ? 1
             : 0;

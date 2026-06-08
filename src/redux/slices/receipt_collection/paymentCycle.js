@@ -16,6 +16,11 @@ const initialState = {
     dataPaymentPeriods: [],
 };
 
+const getSafeErrorMessage = (error) => {
+    const message = error?.response?.data?.message || error?.message || "An error occurred";
+    return message;
+};
+
 export const getTimeUnit = createAsyncThunk(
     "GET_DATA_TIME_UNIT_PAYMENT_CYCLE",
     async (thunkAPI) => {
@@ -33,14 +38,14 @@ export const getTimeUnit = createAsyncThunk(
 
 export const getPaginateCycle = createAsyncThunk(
     "GET_ALL_PAYMENT_CYCLE",
-    async ({ search, page, pageSize, sort }, thunkAPI) => {
+    async ({ search, page, pageSize, sort, isLoadMore }, thunkAPI) => {
         try {
             const searchParams = search === undefined ? "" : search;
             const sortParams =
                 sort === undefined || sort === "" ? "createdDate~desc" : sort;
             const url = `/v1/dbs/api/payment-cycle/get-list?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
             const response = await receiptCollectionHttpService.getAll(url);
-            return response.data;
+            return { ...response.data, isLoadMore: !!isLoadMore };
         } catch (error) {
             if (!error.success) {
                 return thunkAPI.rejectWithValue(error);
@@ -174,6 +179,32 @@ export const approveOrRejectInactivePaymentCycle = createAsyncThunk(
             if (!error.success) {
                 return thunkAPI.rejectWithValue(error);
             }
+        }
+    }
+);
+
+export const openClosePaymentCycle = createAsyncThunk(
+    "OPEN_CLOSE_PAYMENT_CYCLE",
+    async (param, thunkAPI) => {
+        try {
+            const url = `/v1/dbs/api/payment-cycle/open-close`;
+            const data = await receiptCollectionHttpService.activationWithRemark(url, param);
+            const successBody = {
+                title: "Successful",
+                description: `Successfully ${param.statusOpen.toLowerCase()} cycle`,
+                return: false,
+            };
+            thunkAPI.dispatch(showModalSuccess(successBody));
+            return data;
+        } catch (error) {
+            const message = getSafeErrorMessage(error);
+            thunkAPI.dispatch(
+                showModalError({
+                    title: "Failed",
+                    description: message,
+                })
+            );
+            return thunkAPI.rejectWithValue(error);
         }
     }
 );
@@ -329,8 +360,15 @@ const paymentCycleSlice = createSlice({
                 state.loading = true;
             })
             .addCase(getPaginateCycle.fulfilled, (state, action) => {
+                const { isLoadMore, ...rest } = action.payload || {};
+                if (isLoadMore && state.data?.result) {
+                    const existingIds = new Set(state.data.result.map((item) => item.idPaymentCycle));
+                    const newItems = (rest.result || []).filter((item) => !existingIds.has(item.idPaymentCycle));
+                    state.data = { ...rest, result: [...state.data.result, ...newItems] };
+                } else {
+                    state.data = rest;
+                }
                 state.loading = false;
-                state.data = action.payload;
             })
             .addCase(getPaginateCycle.rejected, (state) => {
                 state.loading = false;
@@ -448,6 +486,15 @@ const paymentCycleSlice = createSlice({
                 state.dataPaymentPeriods = action.payload;
             })
             .addCase(getPaymentPeriods.rejected, (state) => {
+                state.loading = false;
+            })
+            .addCase(openClosePaymentCycle.pending, (state) => {
+                state.loading = true;
+            })
+            .addCase(openClosePaymentCycle.fulfilled, (state) => {
+                state.loading = false;
+            })
+            .addCase(openClosePaymentCycle.rejected, (state) => {
                 state.loading = false;
             });
     },

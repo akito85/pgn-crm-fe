@@ -11,7 +11,7 @@ import TableRBI from "../../../../../components/TableRBI";
 import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
 
 const ServiceAgreementSection = ({ ratingCodeId, calculationCode }) => {
-  const { data_serviceAgreement, loading } = useSelector(
+  const { data_serviceAgreement, loadingSA } = useSelector(
     (state) => state.rating
   );
 
@@ -193,7 +193,7 @@ const ServiceAgreementSection = ({ ratingCodeId, calculationCode }) => {
           columnDefinitions={columnDefinitions}
           fixedColumns={fixedColumns}
           setFixedColumns={setFixedColumns}
-          loading={loading}
+          loading={loadingSA}
         />
       </div>
 

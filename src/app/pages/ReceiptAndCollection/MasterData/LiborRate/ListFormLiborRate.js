@@ -8,7 +8,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import { FormStepper, FormFooter } from "../../../../../components/FormStepNavigation";
 import {
   createRateIndex,
@@ -104,8 +103,12 @@ const ListFormLiborRate = (props) => {
   useEffect(() => {
     if (id && data_detail) {
       const rateIndex = data_detail?.rateIndex || {};
+      const rateSource = data_detail?.rateSource || {};
       const formattedData = {
         ...rateIndex,
+        sourceCode: rateSource.sourceCode,
+        sourceName: rateSource.sourceName,
+        description: rateSource.description,
         apphierId: rateIndex.appHierId,
         sourceId: rateIndex.sourceId,
         startDate: rateIndex.startDate ? moment(rateIndex.startDate) : null,
@@ -127,7 +130,7 @@ const ListFormLiborRate = (props) => {
   const [tabData] = useState([
     {
       value: "Rate Index", 
-      paramValue: ["indexCode", "indexName", "sourceId", "currencyCode", "tenorValue", "tenorUnit", "ratePercentage", "startDate", "endDate", "remarks"]
+      paramValue: ["indexCode", "indexName", "sourceCode", "sourceName", "description", "currencyCode", "tenorValue", "tenorUnit", "ratePercentage", "startDate", "endDate", "remarks"]
     },
     { value: "Approval", paramValue: ["apphierId"] },
     { value: "Attachment" },
@@ -173,6 +176,11 @@ const ListFormLiborRate = (props) => {
     const dataValue = {
       ...formValue,
       appHierId: selectedHierarchy,
+      sourceId: formValue.sourceId || 0,
+      createNewSource: true, // Dipaksa selalu create source baru
+      sourceCodeNew: formValue.sourceCode,
+      sourceNameNew: formValue.sourceName,
+      descriptionNew: formValue.description,
       attachmentIds: listDataAttachment.filter(a => a.dataType === 'exist').map(a => a.id)
     };
     if (id) dataValue.id = id;
@@ -185,6 +193,11 @@ const ListFormLiborRate = (props) => {
     const dataValue = {
       ...values,
       appHierId: selectedHierarchy,
+      sourceId: values.sourceId || 0,
+      createNewSource: true, // Dipaksa selalu create source baru
+      sourceCodeNew: values.sourceCode,
+      sourceNameNew: values.sourceName,
+      descriptionNew: values.description,
       id: id,
     };
     dispatch(saveDraftRateIndex(dataValue))
@@ -261,7 +274,7 @@ const ListFormLiborRate = (props) => {
   ];
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
       <Spin spinning={loading}>
         <FormStepper steps={steps} current={current} onPrev={prev} onNext={next} />
@@ -342,7 +355,7 @@ const ListFormLiborRate = (props) => {
           <p className="text-[18px] font-bold">Are you sure you want to back?</p>
         </div>
       </ModalConfirm>
-    </LayoutMenu>
+    </>
   );
 };
 

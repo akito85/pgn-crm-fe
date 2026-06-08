@@ -161,7 +161,7 @@ export const updateGroupAccess = createAsyncThunk(
   "UPDATE_GROUP_ACCESS",
   async ({ body }, thunkAPI) => {
     try {
-      const url = "/v1/dbs/api/ga//update-group-access";
+      const url = "/v1/dbs/api/ga/update-group-access";
       const response = await userHttpService.updateData(url, body);
       const successBody = {
         title: "Successfull",
@@ -198,6 +198,24 @@ export const detailGroupAccess = createAsyncThunk(
         })
       );
       return thunkAPI.rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const deleteGroupAccess = createAsyncThunk(
+  "DELETE_GROUP_ACCESS",
+  async (id, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/ga/${id}`;
+      const response = await userHttpService.deleteData(url);
+      const successBody = { title: "Successful", description: "Group access deleted successfully." };
+      thunkAPI.dispatch(showModalSuccess(successBody));
+      return response.data;
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({ error: errorBody(errorCode(error), "deleted", errorMessage(error)), action: "DELETE_GROUP_ACCESS", back: false })
+      );
+      return thunkAPI.rejectWithValue(error?.response?.data);
     }
   }
 );

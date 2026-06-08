@@ -12,12 +12,15 @@ import {
   ModalError,
 } from "../../../../../../../components/Modal/ModalPopUp";
 import ProductDistributionDetail from "./ProductDistributionDetail";
-import { deletePD, getAllPDHistoryPaginate, getDetailPDHistory } from "../../../../../../../redux/slices/account_management/detailAccount/ProductDistributionSlice";
+import { deletePD, getAllPDHistoryPaginate, getCurrentPB, getDetailPDHistory } from "../../../../../../../redux/slices/account_management/detailAccount/ProductDistributionSlice";
 import NxTable from "../../../../../../../components/Nx/NxTable";
 import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
 import { useColumnActionPermission } from "../../../../../../../components/ColumnActionPermission";
 import { nxApplyFixedColumns } from "../../../../../../../utils/Nx/nxApplyFixedColumns";
 import { nxGetAccountActions } from "../../../../../../../components/Nx/NxGetAccountActions";
+import ModalCustom from "../../../../../../../components/Modal/ModalCustom";
+import { WarningOutlined } from "@ant-design/icons";
+import { Button } from "antd";
 
 const columns = (
   search,
@@ -107,7 +110,7 @@ const columns = (
   ];
 };
 
-const ProductDistributionHistory = ({ id, idCustomer }) => {
+const ProductDistributionHistory = ({ id, idCustomer, setActiveKey }) => {
   const navigate = useNavigate();
   // Selector
   const { access_account } = useSelector((state) => state.accountManagement);
@@ -230,18 +233,18 @@ const ProductDistributionHistory = ({ id, idCustomer }) => {
   };
 
   const itemGrantAccess = nxGetAccountActions({
-    handleView: (record, _) => handleDetail(record),
-    handleUpdate: (record, _) => navigate(
+    handleView: ({ id: recordId }) => handleDetail(recordId),
+    handleUpdate: ({ id: recordId }) => navigate(
       ACCOUNT_MANAGEMENT_ROUTES.UPDATE_PRODUCT_DISTRIBUTION,
       {
         state: {
-          idPD: record,
+          idPD: recordId,
           accountId: id,
           idCustomer: idCustomer,
         }
       }
     ),
-    handleDelete: (record, _) => handleDelete(record),
+    handleDelete: ({ id: recordId }) => handleDelete(recordId),
   });
 
   // Handle Detail
@@ -267,13 +270,17 @@ const ProductDistributionHistory = ({ id, idCustomer }) => {
         setModalDetail(false);
         setIdData();
         setEffectiveData();
+        setPage(1);
+        dispatch(getCurrentPB(id));
+        setActiveKey?.("current");
         dispatch(
           getAllPDHistoryPaginate({
             id: id,
             search: encodeURIComponent(JSON?.stringify(search)),
-            page,
-            pageSize,
+            page: 1,
+            pageSize: loadMoreSize,
             sort,
+            isLoadMore: false,
           })
         );
       })
@@ -377,22 +384,33 @@ const ProductDistributionHistory = ({ id, idCustomer }) => {
       />
 
       {/* Modal Delete */}
-      <ModalConfirm
+      <ModalCustom
         isOpen={modalDelete}
         handleCancel={() => setModalDelete(false)}
+        header={"DELETE PRODUCT DISTRIBUTION"}
         handleOk={handleDeleteOk}
-        width={550}
-        useOk={true}
+        width={500}
+        type={"confirmation"}
+        footer={
+          <div className='flex justify-between'>
+            <Button key="cancel" onClick={()=>{
+              setModalDelete(false)
+            }}>
+              Cancel
+            </Button>,
+            <Button key="ok" type="primary" danger onClick={handleDeleteOk}>
+              Delete
+            </Button>
+          </div>
+        }
       >
         <div className="flex justify-center gap-[20px] mt-6">
-          <SVGIcon name="IconAlertTriangle" width={48} />
-          <p className={"text-[18px] font-bold"}>
-            {`Are you sure you want to delete Raw Material Source with effective date ${moment(
-              effectiveData
-            ).format(dateFormatting.date)}?`}
-          </p>
+          <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
+          <div className="text-[18px] font-bold">
+            <p>Are you sure want to delete product distribution, with Effective Date: {moment(effectiveData).format(dateFormatting.date)}?</p>
+          </div>
         </div>
-      </ModalConfirm>
+      </ModalCustom>
 
       {/* Modal Retry */}
       <ModalError

@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useRef, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Spin, Tag, Tooltip } from "antd";
-import CardContainer from "../../../../components/CardContainer";
+import CollapsibleContainer from "../../../../components/CollapsibleContainer";
 import TableRBI from "../../../../components/TableRBI";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../utils/getColumnSearchProps";
 import { getDetailPrabillingLog } from "../../../../redux/slices/rating_billing_invoice/praBilling";
@@ -28,7 +27,7 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
 
   const [fixedColumns, setFixedColumns] = useState(() => ({
     left: ["no"],
-    right: ["status"],
+    right: [],
   }));
 
   // Initial fetch
@@ -71,7 +70,7 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
       await dispatch(
         getDetailPrabillingLog({
           initCode: prabillData.initCode,
-          page: nextPage - 1, 
+          page: nextPage - 1,
           size: loadMoreSize,
           sort: sort || "createdDtm~desc",
           search: Object.keys(search).length > 0 ? JSON.stringify(search) : "",
@@ -87,7 +86,6 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
       sorter && sorter.order !== undefined
         ? `${sorter.field}~${sorter.order === "ascend" ? "asc" : "desc"}`
         : "";
-
     setSort(dataSort);
   };
 
@@ -108,24 +106,12 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
         sorter: true,
         filteredValue: [search?.seq] || null,
         ...getColumnSearchPropsUseFilteredValue(
-          search,
-          "seq",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
+          search, "seq", searchInput, searchedColumn,
+          searchText, handleSearch, true
         ),
         render: (text) =>
-          renderColumn(
-            "seq",
-            hasValue(search["seq"]),
-            searchText,
-            text != null ? text : "",
-            false,
-            "input",
-            search
-          ),
+          renderColumn("seq", hasValue(search["seq"]),
+            searchText, text != null ? text : "", false, "input", search),
       },
       {
         key: "processName",
@@ -135,24 +121,12 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
         sorter: true,
         filteredValue: [search?.processName] || null,
         ...getColumnSearchPropsUseFilteredValue(
-          search,
-          "processName",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
+          search, "processName", searchInput, searchedColumn,
+          searchText, handleSearch, true
         ),
         render: (text) =>
-          renderColumn(
-            "processName",
-            hasValue(search["processName"]),
-            searchText,
-            text || "",
-            false,
-            "input",
-            search
-          ),
+          renderColumn("processName", hasValue(search["processName"]),
+            searchText, text || "", false, "input", search),
       },
       {
         key: "activityName",
@@ -162,72 +136,12 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
         sorter: true,
         filteredValue: [search?.activityName] || null,
         ...getColumnSearchPropsUseFilteredValue(
-          search,
-          "activityName",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
+          search, "activityName", searchInput, searchedColumn,
+          searchText, handleSearch, true
         ),
         render: (text) =>
-          renderColumn(
-            "activityName",
-            hasValue(search["activityName"]),
-            searchText,
-            text || "",
-            false,
-            "input",
-            search
-          ),
-      },
-      {
-        key: "status",
-        title: "STATUS",
-        dataIndex: "status",
-        width: 120,
-        align: "center",
-        sorter: true,
-        filteredValue: [search?.status] || null,
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
-          "status",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
-        ),
-        render: (status) => {
-          const statusUpper = status ? status.toUpperCase() : "INFO";
-
-          const statusConfig = {
-            SUCCESS: { text: "Success", type: "status" },
-            ERROR: { text: "Failed", type: "status" },
-            FAILED: { text: "Failed", type: "status" },
-            WARNING: { text: "In Progress", type: "status" },
-            PROCESSING: { text: "In Progress", type: "status" },
-            IN_PROGRESS: { text: "In Progress", type: "status" },
-            INFO: { text: "Open", type: "status" },
-          };
-
-          const config = statusConfig[statusUpper] || {
-            text: "Unknown",
-            type: "status",
-          };
-
-          const displayText = config.text;
-
-          return renderColumn(
-            "status",
-            hasValue(search["status"]),
-            searchText,
-            displayText,
-            false,
-            "status",
-            search
-          );
-        },
+          renderColumn("activityName", hasValue(search["activityName"]),
+            searchText, text || "", false, "input", search),
       },
       {
         key: "message",
@@ -236,28 +150,14 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
         width: 280,
         sorter: true,
         filteredValue: [search?.message] || null,
-        ellipsis: {
-          showTitle: false,
-        },
+        ellipsis: { showTitle: false },
         ...getColumnSearchPropsUseFilteredValue(
-          search,
-          "message",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
+          search, "message", searchInput, searchedColumn,
+          searchText, handleSearch, true
         ),
         render: (text) =>
-          renderColumn(
-            "message",
-            hasValue(search["message"]),
-            searchText,
-            text || "",
-            true,
-            "input",
-            search
-          ),
+          renderColumn("message", hasValue(search["message"]),
+            searchText, text || "", true, "input", search),
       },
       {
         key: "createdDtm",
@@ -268,26 +168,16 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
         sorter: true,
         filteredValue: [search?.createdDtm] || null,
         ...getColumnSearchPropsUseFilteredValue(
-          search,
-          "createdDtm",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true,
-          "datetime"
+          search, "createdDtm", searchInput, searchedColumn,
+          searchText, handleSearch, true, "datetime"
         ),
         render: (text) => {
           const formattedDate = text
             ? moment(text).format("DD MMM YYYY HH:mm:ss")
-            : "-";
+            : "";
           return renderDateColumn(
-            "createdDtm",
-            hasValue(search["createdDtm"]),
-            searchText,
-            formattedDate,
-            "datetime",
-            search
+            "createdDtm", hasValue(search["createdDtm"]),
+            searchText, formattedDate, "datetime", search
           );
         },
       },
@@ -300,35 +190,22 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
         sorter: true,
         filteredValue: [search?.createdBy] || null,
         ...getColumnSearchPropsUseFilteredValue(
-          search,
-          "createdBy",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
+          search, "createdBy", searchInput, searchedColumn,
+          searchText, handleSearch, true
         ),
         render: (text) =>
-          renderColumn(
-            "createdBy",
-            hasValue(search["createdBy"]),
-            searchText,
-            text || "",
-            false,
-            "input",
-            search
-          ),
+          renderColumn("createdBy", hasValue(search["createdBy"]),
+            searchText, text || "", false, "input", search),
       },
     ],
     [search, searchText, searchedColumn]
   );
 
   const allColumns = useMemo(() => {
-    const columnsWithKeys = baseColumns.map((col) => ({
+    return baseColumns.map((col) => ({
       ...col,
       key: col.key || col.dataIndex || col.title,
     }));
-    return columnsWithKeys;
   }, [baseColumns]);
 
   const processedColumns = useMemo(() => {
@@ -346,41 +223,34 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
     ? detail_prabilling_log.content
     : [];
   const totalElements = detail_prabilling_log?.totalElements || 0;
-
   const hasMore = logData.length < totalElements;
 
   return (
-      <div className="-mt-6">
-        <CardContainer
-          header={
-            <div className="flex -my-4 justify-between items-center">
-              <p className="mt-[15px]">PRABILLING PROCESS LOG</p>
-            </div>
-          }
-        >
-          <div className="my-0">
-            <TableRBI
-              idTable="prabilling-log-table"
-              dataSource={logData}
-              columns={processedColumns}
-              totalData={totalElements}
-              tableScrolled={{ x: 700, y: 600 }}
-              onSort={onSort}
-              showExport={false}
-              columnDefinitions={columnDefinitions}
-              fixedColumns={fixedColumns}
-              setFixedColumns={setFixedColumns}
-              loading={loading_log}
-              usePagination={false}
-              useInfiniteScroll={true}
-              onLoadMore={handleLoadMore}
-              hasMore={hasMore}
-              loadMoreThreshold={20}
-              rowKey={(record) => record.id}
-            />
-          </div>
-        </CardContainer>
-      </div>
+    <div className="flex flex-col gap-1 mt-4">
+      <CollapsibleContainer header={"Prabilling Process Log"} border>
+        <div className="my-5">
+          <TableRBI
+            idTable="prabilling-log-table"
+            dataSource={logData}
+            columns={processedColumns}
+            totalData={totalElements}
+            tableScrolled={{ x: 700, y: 412 }}
+            onSort={onSort}
+            showExport={false}
+            columnDefinitions={columnDefinitions}
+            fixedColumns={fixedColumns}
+            setFixedColumns={setFixedColumns}
+            loading={loading_log}
+            usePagination={false}
+            useInfiniteScroll={true}
+            onLoadMore={handleLoadMore}
+            hasMore={hasMore}
+            loadMoreThreshold={20}
+            rowKey={(record) => record.id}
+          />
+        </div>
+      </CollapsibleContainer>
+    </div>
   );
 };
 

@@ -162,7 +162,7 @@ const TablePaginationNew = ({
         {/* Show/Hide Column Button */}
         {useSelect && (type === "BE" ? totalData : totalDataFE) !== 0 && (
           <Dropdown
-            overlay={showHideMenu}
+            menu={showHideMenu}
             trigger={["click"]}
             visible={dropdownVisible}
             onVisibleChange={(flag) => setDropdownVisible(flag)}

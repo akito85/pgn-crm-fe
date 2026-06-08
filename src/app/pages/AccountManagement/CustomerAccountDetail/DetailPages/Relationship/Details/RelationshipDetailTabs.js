@@ -1,29 +1,39 @@
-import RelationshipDetailAttch from "./RelationshipDetailAttch";
 import RelationshipDetailInfo from "./RelationshipDetailInfo";
 import { useState } from "react";
 import NxCardContainer from "../../../../../../../components/Nx/NxCardContainer";
 import NxTabs from "../../../../../../../components/Nx/NxTabs";
+import NxAttachmentInput from "../../../../../../../components/Nx/NxAttachmentInput";
+import { configApp } from "../../../../../../../constants/configApp";
+import accountManagementService from "../../../../../../../redux/services/account_management/accountManagementService";
 
+/**
+ * Tab container for relationship detail — wraps information and attachment views.
+ *
+ * @param {object} props
+ * @param {object} [props.detail={}] - Relationship detail record.
+ */
 const RelationshipDetailTabs = ({
-  idAccount = 0,
-  idRelationship = 0,
-  dataDetail = {},
-  dispatch = () => {},
+  detail = {},
 }) => {
+  // --- Derived values ---
+  const { attachments } = detail;
+
+  // --- State ---
   const tabOptions = [
     {
       key: "info",
       label: "Relationship Information",
-      children: <RelationshipDetailInfo dataDetail={dataDetail} />,
+      children: <RelationshipDetailInfo detail={detail} />,
     },
     {
       key: "attch",
       label: "Attachment",
       children: (
-        <RelationshipDetailAttch
-          idAccount={idAccount}
-          idRelationship={idRelationship}
-          dispatch={dispatch}
+        <NxAttachmentInput
+          data={attachments}
+          type="detail"
+          configApplication={configApp.ACCOUNT_SERVICE}
+          service={accountManagementService}
         />
       ),
     },

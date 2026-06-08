@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Tag, Statistic, Row, Col } from "antd";
-import CardContainer from "../../../../components/CardContainer";
+import { Row, Col } from "antd";
+import CollapsibleContainer from "../../../../components/CollapsibleContainer";
 import TableRBI from "../../../../components/TableRBI";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../utils/getColumnSearchProps";
 import { getPrabillingAccountLog } from "../../../../redux/slices/rating_billing_invoice/praBilling";
@@ -88,7 +88,6 @@ const PrabillingAccountLog = ({ data, tabHeader }) => {
       sorter && sorter.order !== undefined
         ? `${sorter.field}~${sorter.order === "ascend" ? "asc" : "desc"}`
         : "";
-
     setSort(dataSort);
   };
 
@@ -110,24 +109,12 @@ const PrabillingAccountLog = ({ data, tabHeader }) => {
         sorter: true,
         filteredValue: [search?.createdBy] || null,
         ...getColumnSearchPropsUseFilteredValue(
-          search,
-          "createdBy",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
+          search, "createdBy", searchInput, searchedColumn,
+          searchText, handleSearch, true
         ),
         render: (text) =>
-          renderColumn(
-            "createdBy",
-            hasValue(search["createdBy"]),
-            searchText,
-            text || "",
-            false,
-            "input",
-            search
-          ),
+          renderColumn("createdBy", hasValue(search["createdBy"]),
+            searchText, text || "", false, "input", search),
       },
       {
         key: "createdDate",
@@ -138,26 +125,16 @@ const PrabillingAccountLog = ({ data, tabHeader }) => {
         sorter: true,
         filteredValue: [search?.createdDate] || null,
         ...getColumnSearchPropsUseFilteredValue(
-          search,
-          "createdDate",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true,
-          "datetime"
+          search, "createdDate", searchInput, searchedColumn,
+          searchText, handleSearch, true, "datetime"
         ),
         render: (text) => {
           const formattedDate = text
-            ? moment(text).format("DD MMM YYYY")
-            : "-";
+            ? moment(text).format("DD MMM YYYY HH:mm:ss")
+            : "";
           return renderDateColumn(
-            "createdDate",
-            hasValue(search["createdDate"]),
-            searchText,
-            formattedDate,
-            "datetime",
-            search
+            "createdDate", hasValue(search["createdDate"]),
+            searchText, formattedDate, "datetime", search
           );
         },
       },
@@ -169,24 +146,12 @@ const PrabillingAccountLog = ({ data, tabHeader }) => {
         sorter: true,
         filteredValue: [search?.accountNumber] || null,
         ...getColumnSearchPropsUseFilteredValue(
-          search,
-          "accountNumber",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
+          search, "accountNumber", searchInput, searchedColumn,
+          searchText, handleSearch, true
         ),
         render: (text) =>
-          renderColumn(
-            "accountNumber",
-            hasValue(search["accountNumber"]),
-            searchText,
-            text || "",
-            false,
-            "input",
-            search
-          ),
+          renderColumn("accountNumber", hasValue(search["accountNumber"]),
+            searchText, text || "", false, "input", search),
       },
       {
         key: "status",
@@ -197,17 +162,11 @@ const PrabillingAccountLog = ({ data, tabHeader }) => {
         sorter: true,
         filteredValue: [search?.status] || null,
         ...getColumnSearchPropsUseFilteredValue(
-          search,
-          "status",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
+          search, "status", searchInput, searchedColumn,
+          searchText, handleSearch, true
         ),
         render: (status) => {
           const statusUpper = status ? status.toUpperCase() : "INFO";
-
           const statusConfig = {
             SUCCESS: { text: "Success", type: "status" },
             ERROR: { text: "Failed", type: "status" },
@@ -218,22 +177,10 @@ const PrabillingAccountLog = ({ data, tabHeader }) => {
             "IN PROGRESS": { text: "In Progress", type: "status" },
             INFO: { text: "Open", type: "status" },
           };
-
-          const config = statusConfig[statusUpper] || {
-            text: "Unknown",
-            type: "status",
-          };
-
-          const displayText = config.text;
-
+          const config = statusConfig[statusUpper] || { text: "Unknown", type: "status" };
           return renderColumn(
-            "status",
-            hasValue(search["status"]),
-            searchText,
-            displayText,
-            false,
-            "status",
-            search
+            "status", hasValue(search["status"]),
+            searchText, config.text, false, "status", search
           );
         },
       },
@@ -244,39 +191,24 @@ const PrabillingAccountLog = ({ data, tabHeader }) => {
         width: 280,
         sorter: true,
         filteredValue: [search?.message] || null,
-        ellipsis: {
-          showTitle: false,
-        },
+        ellipsis: { showTitle: false },
         ...getColumnSearchPropsUseFilteredValue(
-          search,
-          "message",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
+          search, "message", searchInput, searchedColumn,
+          searchText, handleSearch, true
         ),
         render: (text) =>
-          renderColumn(
-            "message",
-            hasValue(search["message"]),
-            searchText,
-            text || "-",
-            true,
-            "input",
-            search
-          ),
+          renderColumn("message", hasValue(search["message"]),
+            searchText, text || "", true, "input", search),
       },
     ],
     [search, searchText, searchedColumn]
   );
 
   const allColumns = useMemo(() => {
-    const columnsWithKeys = baseColumns.map((col) => ({
+    return baseColumns.map((col) => ({
       ...col,
       key: col.key || col.dataIndex || col.title,
     }));
-    return columnsWithKeys;
   }, [baseColumns]);
 
   const processedColumns = useMemo(() => {
@@ -295,82 +227,83 @@ const PrabillingAccountLog = ({ data, tabHeader }) => {
     : [];
   const totalElements = account_log_data?.listAccountResult?.page?.totalElements || 0;
   const summary = account_log_data?.summary || {};
-
   const hasMore = logData.length < totalElements;
 
   return (
-    <div className="-mt-6">
-      <CardContainer
-        header={
-          <div className="flex -my-4 justify-between items-center">
-            <p className="mt-[15px]">PRABILLING ACCOUNT LOG</p>
-          </div>
-        }
-      >
-        {/* Status Summary - Match CardContainer Style */}
-        <div className="drop-shadow-lg bg-white rounded-lg mb-4">
-          <div 
-            className="flex flex-col bg-[#F9F9F9] p-3 rounded-t-lg uppercase"
+    <div className="flex flex-col gap-1 mt-4">
+      <CollapsibleContainer header={"Prabilling Account Log"} border>
+
+        {/* Summary Box */}
+        <div
+          className="rounded-lg"
+          style={{ border: "1px solid #BDBDBD", marginBottom: "20px", marginTop: "10px" }}
+        >
+          {/* Summary Header */}
+          <div
+            className="px-3 py-2 bg-[#F9F9F9] rounded-t-lg"
             style={{ borderBottom: "1px solid #BDBDBD" }}
           >
-            <div className="text-[16px] text-primary">SUMMARY</div>
+            <span className="text-primary text-sm uppercase">
+              Summary
+            </span>
           </div>
+          {/* Summary Content */}
           <Row style={{ margin: 0 }}>
-            <Col span={8} style={{ 
-              padding: '16px', 
-              borderRight: '1px solid #BDBDBD' 
-            }}>
-              <div style={{ color: '#8c8c8c', fontSize: '14px', marginBottom: '4px' }}>
+            <Col
+              span={8}
+              style={{ padding: "20px 24px", borderRight: "1px solid #BDBDBD" }}
+            >
+              <div style={{ color: "#8c8c8c", fontSize: "14px", marginBottom: "8px" }}>
                 Total
               </div>
-              <div style={{ fontSize: '30px', fontWeight: 'bold', color: '#262626' }}>
+              <div style={{ fontSize: "32px", fontWeight: "bold", color: "#262626" }}>
                 {totalElements || 0}
               </div>
             </Col>
-            <Col span={8} style={{ 
-              padding: '16px', 
-              borderRight: '1px solid #BDBDBD' 
-            }}>
-              <div style={{ color: '#8c8c8c', fontSize: '14px', marginBottom: '4px' }}>
+            <Col
+              span={8}
+              style={{ padding: "20px 24px", borderRight: "1px solid #BDBDBD" }}
+            >
+              <div style={{ color: "#8c8c8c", fontSize: "14px", marginBottom: "8px" }}>
                 Success
               </div>
-              <div style={{ fontSize: '30px', fontWeight: 'bold', color: '#262626' }}>
+              <div style={{ fontSize: "32px", fontWeight: "bold", color: "#262626" }}>
                 {summary.success || 0}
               </div>
             </Col>
-            <Col span={8} style={{ padding: '16px' }}>
-              <div style={{ color: '#8c8c8c', fontSize: '14px', marginBottom: '4px' }}>
+            <Col span={8} style={{ padding: "20px 24px" }}>
+              <div style={{ color: "#8c8c8c", fontSize: "14px", marginBottom: "8px" }}>
                 Failed
               </div>
-              <div style={{ fontSize: '30px', fontWeight: 'bold', color: '#262626' }}>
+              <div style={{ fontSize: "32px", fontWeight: "bold", color: "#262626" }}>
                 {summary.failed || 0}
               </div>
             </Col>
           </Row>
         </div>
 
-        <div className="my-0">
-          <TableRBI
-            idTable="prabilling-account-log-table"
-            dataSource={logData}
-            columns={processedColumns}
-            totalData={totalElements}
-            tableScrolled={{ x: 700, y: 600 }}
-            onSort={onSort}
-            showExport={false}
-            columnDefinitions={columnDefinitions}
-            fixedColumns={fixedColumns}
-            setFixedColumns={setFixedColumns}
-            loading={loading_account_log}
-            usePagination={false}
-            useInfiniteScroll={true}
-            onLoadMore={handleLoadMore}
-            hasMore={hasMore}
-            loadMoreThreshold={20}
-            rowKey={(record) => record.id}
-          />
-        </div>
-      </CardContainer>
+        {/* Tabel */}
+        <TableRBI
+          idTable="prabilling-account-log-table"
+          dataSource={logData}
+          columns={processedColumns}
+          totalData={totalElements}
+          tableScrolled={{ x: 700, y: 412 }}
+          onSort={onSort}
+          showExport={false}
+          columnDefinitions={columnDefinitions}
+          fixedColumns={fixedColumns}
+          setFixedColumns={setFixedColumns}
+          loading={loading_account_log}
+          usePagination={false}
+          useInfiniteScroll={true}
+          onLoadMore={handleLoadMore}
+          hasMore={hasMore}
+          loadMoreThreshold={20}
+          rowKey={(record) => record.id}
+        />
+
+      </CollapsibleContainer>
     </div>
   );
 };

@@ -5,7 +5,7 @@ import { dateFormatting, hasValue } from ".";
 import moment from "moment";
 // import InputComponent from "../components/InputComponent";
 // import { format } from "react-number-format/types/numeric_format";
-
+import SVGIcon from "../assets/Icon/index";
 
 // BE
 export const getColumnSearchPropsPaging = (
@@ -327,10 +327,11 @@ export const getColumnSearchPropsUseFilteredValue = (
   handleSearch,
   excludeRender = false,
   typeFilter = "input",
-  selectOptions = [] // tambahkan parameter baru untuk options
+  selectOptions = [],
+  handleReset = null
 ) => {
   let obj = {
-    filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }) => {
+    filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => {
       const onDataChange = (value, dateString) => {
         setSelectedKeys(dateString ? [dateString] : null);
         handleSearch(dateString ? [dateString] : [], confirm, dataIndex);
@@ -351,6 +352,9 @@ export const getColumnSearchPropsUseFilteredValue = (
           ) : null}
           {typeFilter === "datetime" ? (
             <DatePicker onChange={onDataChange} showTime={true} format={dateFormatting.dateTime} ref={searchInput} value={hasValue(search[dataIndex]) && moment(search[dataIndex]).clone()} />
+          ) : null}
+          {typeFilter === "dateFormal" ? (
+            <DatePicker onChange={onDataChange} format={dateFormatting.dateFormal} ref={searchInput} value={hasValue(search[dataIndex]) && moment(search[dataIndex]).clone()} />
           ) : null}
           {typeFilter === "datePeriod" ? (
             <DatePicker onChange={onDataChange} picker="month" format={dateFormatting.datePeriod} ref={searchInput} value={hasValue(search[dataIndex]) && moment(search[dataIndex]).clone()} />
@@ -440,14 +444,24 @@ export const getColumnSearchPropsUseFilteredValue = (
               maxLength={3}
             />
           ) : null}
+          {handleReset ? (
+            <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 4 }}>
+              <button
+                onClick={() => handleReset(clearFilters, dataIndex)}
+                style={{ cursor: "pointer", padding: "2px 8px", fontSize: 12 }}
+              >
+                Reset
+              </button>
+            </div>
+          ) : null}
         </div>
       );
     },
     filterIcon: (filtered) => (
-      <FilterOutlined
-        style={{
-          color: filtered && hasValue(search[dataIndex]) === true ? "#1890ff" : undefined,
-        }}
+      <SVGIcon
+        name="IconFilter"
+        width={15}
+        className={filtered && hasValue(search[dataIndex]) === true ? "text-[#1890ff]" : "text-white"}
       />
     ),
     onFilterDropdownOpenChange: (visible) => {

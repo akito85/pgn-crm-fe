@@ -1,66 +1,74 @@
 import { toTitleCase } from "../../../../../../../utils";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../../../utils/getColumnSearchProps";
-import StatusComponent from "../../../../../../../components/StatusComponent";
 import NxDate from "../../../../../../../components/Nx/NxDatePicker";
+import NxStatusComponent from "../../../../../../../components/Nx/NxStatusComponent";
 
-const getPaymentRelationColumns = (
+/**
+ * Returns the column definitions for the Payment Relation list table.
+ *
+ * @param {Object}          params                   - Column configuration options.
+ * @param {Object}          params.search            - Current active search/filter values keyed by column dataIndex.
+ * @param {React.RefObject} params.searchInput       - Ref to the search input element (used for focus).
+ * @param {string}          params.searchedColumn    - The dataIndex of the column currently being searched.
+ * @param {string}          params.searchText        - The current search text value.
+ * @param {Function}        params.handleSearch      - Callback invoked when a search/filter is confirmed.
+ * @param {boolean}         [params.isApproval=true] - When true, omits the statusApproval and status columns.
+ * @returns {Array<Object>} Array of Ant Design column definition objects.
+ */
+const getPaymentRelationColumns = ({
   search,
   searchInput,
   searchedColumn,
   searchText,
   handleSearch,
-  includeStatus = true,
-) => [
+  isApproval = false,
+}) => [
   {
     key: "no",
     title: "NO",
     align: "center",  
     dataIndex: "no",
-    width: 40,
+    width: 50,
+    fixed: isApproval ? "left" : undefined,
     render: (_, __, index) => index + 1,
   },
   {
-    key: "relatedAccountName",
+    key: "accountName",
     title: "ACCOUNT NAME",
-    dataIndex: "relatedAccountName",
-    width: 200,
+    dataIndex: "accountName",
+    width: 210,
     sorter: true,
-    filteredValue: [search?.relatedAccountName] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "relatedAccountName",
+      "accountName",
       searchInput,
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
-    key: "relatedAccountNumber",
+    key: "accountNumber",
     title: "ACCOUNT NUMBER",
-    dataIndex: "relatedAccountNumber",
-    width: 200,
+    dataIndex: "accountNumber",
+    width: 210,
     sorter: true,
-    filteredValue: [search?.relatedAccountNumber] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "relatedAccountNumber",
+      "accountNumber",
       searchInput,
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
     key: "priority",
     title: "PRIORITY",
     dataIndex: "priority",
-    width: 150,
+    width: 130,
     align: "center",
     sorter: true,
-    filteredValue: [search?.relatedAccountNumber] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "priority",
@@ -68,7 +76,6 @@ const getPaymentRelationColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
   },
   {
@@ -77,7 +84,7 @@ const getPaymentRelationColumns = (
     dataIndex: "startDate",
     width: 140,
     align: "center",
-    filteredValue: [search?.relatedAccountNumber] || null,
+    sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "startDate",
@@ -85,7 +92,6 @@ const getPaymentRelationColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
     render: (startDate) => NxDate.formatDate(startDate, "DD MMM YYYY"),
   },
@@ -95,7 +101,7 @@ const getPaymentRelationColumns = (
     dataIndex: "endDate",
     width: 140,
     align: "center",
-    filteredValue: [search?.relatedAccountNumber] || null,
+    sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "endDate",
@@ -103,27 +109,37 @@ const getPaymentRelationColumns = (
       searchedColumn,
       searchText,
       handleSearch,
-      true
     ),
     render: (endDate) => NxDate.formatDate(endDate, "DD MMM YYYY"),
   },
-  includeStatus && {
+  {
+    key: "status",
+    title: "STATUS",
+    dataIndex: "status",
+    width: 100,
+    fixed: "right",
+    render: (status) => {
+      const displayText = {
+        "active": "Active",
+        "inactive": "Inactive",
+      };
+      
+      return (
+        <div className={" flex justify-center"}>
+          <NxStatusComponent colour={status}>
+            {displayText[status] || toTitleCase(String(status || "")) || "-"}
+          </NxStatusComponent>
+        </div>
+      )
+    },
+  },
+  !isApproval && {
     key: "statusApproval",
     title: "STATUS APPROVAL",
     dataIndex: "statusApproval",
-    width: 170,
-    sorter: true,
+    width: 140,
     align: "center",
-    filteredValue: [search?.statusApproval] || null,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "statusApproval",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true
-    ),
+    fixed: "right",
     render: (status) => {
       const displayText = {
         "approved": "Approved",
@@ -135,42 +151,11 @@ const getPaymentRelationColumns = (
       };
       return (
         <div className="flex justify-center">
-          <StatusComponent colour={status}>
+          <NxStatusComponent colour={status}>
             {displayText[status] || toTitleCase(String(status || "")) || "-"}
-          </StatusComponent>
+          </NxStatusComponent>
         </div>
       );
-    },
-  },
-  includeStatus && {
-    key: "status",
-    title: "STATUS",
-    dataIndex: "status",
-    width: 120,
-    sorter: true,
-    filteredValue: [search?.status] || null,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "statusApproval",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true
-    ),
-    render: (status) => {
-      const displayText = {
-        "active": "Active",
-        "inactive": "Inactive",
-      };
-
-      return (
-        <div className={" flex justify-center"}>
-          <StatusComponent colour={status}>
-            {displayText[status] || toTitleCase(String(status || "")) || "-"}
-          </StatusComponent>
-        </div>
-      )
     },
   },
 ].filter(Boolean);

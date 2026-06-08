@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import BaseContainer from "../../../../components/BaseContainer";
 import BreadCrumb from "../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import DetailText from "../../../../components/DetailText";
 import ModalCustom from "../../../../components/Modal/ModalCustom";
@@ -25,7 +24,7 @@ import { useTryAgainHooks } from "../../../../utils/useTryAgainHooks";
 
 const DetailPositionHierarchy = () => {
   const navigate = useNavigate();
-  const { data_detail, loading, data_position, data } = useSelector(
+  const { data_detail, loading, data_position, data_employee } = useSelector(
     (state) => state?.position_hierarchy
   );
   const { bodyError } = useSelector((state) => state?.general);
@@ -255,7 +254,7 @@ const DetailPositionHierarchy = () => {
   console.log(transformDataToTree(dataDiagram));
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
       <Spin spinning={loading}>
         <BaseContainer header={"POSITION HIERARCHY INFORMATION"}>
@@ -392,7 +391,7 @@ const DetailPositionHierarchy = () => {
         >
           <Spin spinning={loading}>
             <DetailPosition
-              data_detail={data}
+              data_detail={data_employee}
               handleCancelModal={handleCancel}
               data_position={data_position}
             />
@@ -402,7 +401,7 @@ const DetailPositionHierarchy = () => {
         {/* render modal try again */}
         {renderModal()}
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

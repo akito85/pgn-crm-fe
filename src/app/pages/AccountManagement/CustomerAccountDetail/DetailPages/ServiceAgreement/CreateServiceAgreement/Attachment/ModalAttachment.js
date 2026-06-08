@@ -1,6 +1,5 @@
 import { Form, Modal, Progress, Select, Typography } from "antd";
-import React, { useState, useCallback, useEffect } from "react";
-import { useDispatch } from "react-redux";
+import React, { useState, useEffect } from "react";
 import SelectComponent from "../../../../../../../../components/SelectComponent";
 import Dragger from "antd/lib/upload/Dragger";
 import {
@@ -26,8 +25,6 @@ const ModalAttachment = ({
   valueGuard = {},
 }) => {
   const [form] = Form.useForm();
-  const dispatch = useDispatch();
-
   const [fileList, setFileList] = useState([]);
   const [category, setCategory] = useState();
   const [submit, setSubmit] = useState(false);
@@ -35,13 +32,6 @@ const ModalAttachment = ({
   const [urlLink, setUrlLink] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [dataGuard, setDataGuard] = useState({});
-
-
-  // Use Effect
-  // useEffect(() => {
-  //   dispatch(getSelectCategory());
-  // }, []);
-
   useEffect(() => {
     const tempFileExt = (valueGuard?.fileExt || "")
       .split(",")
@@ -49,11 +39,22 @@ const ModalAttachment = ({
         return `.${current}${index !== 0 ? ", " : ""}${prev}`;
       }, "");
     const tempSize = parseInt(valueGuard?.size || "0") * 1000000;
-    setDataGuard({
+    const nextGuard = {
       fileExt: tempFileExt === "." ? ExtensionFile : tempFileExt,
       size: tempSize || MAX_FILE_SIZE,
+    };
+
+    setDataGuard((prevState) => {
+      if (
+        prevState?.fileExt === nextGuard.fileExt &&
+        prevState?.size === nextGuard.size
+      ) {
+        return prevState;
+      }
+
+      return nextGuard;
     });
-  }, [valueGuard]);
+  }, [valueGuard?.fileExt, valueGuard?.size]);
 
   const handleClose = () => {
     setFileList([]);
@@ -88,34 +89,30 @@ const ModalAttachment = ({
     multiple: true,
     fileList: fileList,
     showUploadList: false,
-    // accept: ExtensionFile,
     accept: dataGuard.fileExt,
     disabled: !category,
-    beforeUpload: useCallback(
-      async (file) => {
-        const base64 = await getBase64(file);
-        const file_extension = getFileExtension(file?.name);
-        if (dataGuard.fileExt.includes(file_extension)) {
-          setFileList((prevState) => {
-            const res = {
-              file: file,
-              size: file.size,
-              fileName: file.name,
-              fileSize: bytesConverter(file.size),
-              fileType: file.type,
-              fileStatus: file.status,
-              percent: 100,
-              type: "new",
-              base64: base64,
-            };
-            return [...prevState, res];
-          });
-          setSubmit(true);
-        }
-        return false;
-      },
-      [category]
-    ),
+    beforeUpload: async (file) => {
+      const base64 = await getBase64(file);
+      const file_extension = getFileExtension(file?.name);
+      if (dataGuard.fileExt.includes(file_extension)) {
+        setFileList((prevState) => {
+          const res = {
+            file: file,
+            size: file.size,
+            fileName: file.name,
+            fileSize: bytesConverter(file.size),
+            fileType: file.type,
+            fileStatus: file.status,
+            percent: 100,
+            type: "new",
+            base64: base64,
+          };
+          return [...prevState, res];
+        });
+        setSubmit(true);
+      }
+      return false;
+    },
   };
 
   const handleUpload = (value) => {
@@ -166,7 +163,10 @@ const ModalAttachment = ({
 
   const handleUploadLink = async (e) => {
     e.stopPropagation();
-    const url = urlLink;
+    const url =
+      urlLink.startsWith("http://") || urlLink.startsWith("https://")
+        ? urlLink
+        : `https://${urlLink}`;
     if (url) {
       try {
         const fileName = url.split("/").pop();
@@ -185,16 +185,22 @@ const ModalAttachment = ({
           type: "new",
           base64: base64,
         };
-        if (res.size <= MAX_FILE_SIZE) {
+        const file_extension = getFileExtension(file?.name);
+
+        if (res.size <= dataGuard.size && dataGuard.fileExt.includes(file_extension)) {
           setDataLink(res);
           setSubmit(true);
         } else {
           setSubmit(true);
-          setErrorMessage("The file size more than 5 MB");
+          setErrorMessage(
+            res.size > dataGuard.size
+              ? "The file size more than 5 MB"
+              : "Format file not valid"
+          );
         }
       } catch (error) {
         setSubmit(true);
-        setErrorMessage("Link cannot access to get the file");
+        setErrorMessage(error?.message || "Link cannot access to get the file");
       }
     }
   };
@@ -204,8 +210,6 @@ const ModalAttachment = ({
     setUrlLink(e.target.value);
   };
 
-  // console.log(categoryOptions);
-  
   return (
     <Modal
       open={openUpload}
@@ -236,8 +240,8 @@ const ModalAttachment = ({
                 onChange={handleCategory}
                 labelInValue
               >
-                {categoryOptions?.map((data, index) => (
-                  <Select.Option key={index} value={data.id}>
+                {categoryOptions?.map((data) => (
+                  <Select.Option key={data.id} value={data.id}>
                     {data.text}
                   </Select.Option>
                 ))}
@@ -267,21 +271,23 @@ const ModalAttachment = ({
                       <span>or</span>
                       <div className="border-t-0 rounded-full border-x-0 border-solid border-gray-300 w-24 h-0" />
                     </div>
-                    <p className="ant-upload-text">Put URL link below</p>
-                    <div className="flex justify-center items-center gap-3">
-                      <InputComponent
-                        width={"24%"}
-                        onChange={updateLink}
-                        onClick={(e) => e.stopPropagation()}
-                        disabled={!category}
-                      />
-                      <ButtonComponent
-                        onClick={handleUploadLink}
-                        icon={<UploadOutlined />}
-                        type={"submit"}
-                        border={false}
-                        disabled={!category}
-                      />
+                    <div className="flex flex-col items-center gap-4">
+                      <p className="ant-upload-text">Put URL link below</p>
+                      <div className="flex justify-center items-center gap-3">
+                        <InputComponent
+                          width={"24%"}
+                          onChange={updateLink}
+                          onClick={(e) => e.stopPropagation()}
+                          disabled={!category}
+                        />
+                        <ButtonComponent
+                          onClick={handleUploadLink}
+                          icon={<UploadOutlined />}
+                          type={"submit"}
+                          border={false}
+                          disabled={!category}
+                        />
+                      </div>
                     </div>
                   </>
                 )}
@@ -304,7 +310,7 @@ const ModalAttachment = ({
           {fileList.map((file, index) => (
             <div
               className="border-solid border-[0.12rem] border-black rounded-[0.5rem] my-4 py-2 px-3 flex gap-4 items-center"
-              key={index}
+              key={`${file.fileName}-${file.fileSize}-${file.fileType}`}
             >
               <div>
                 <FileOutlined style={{ fontSize: "20px" }} />
@@ -329,7 +335,7 @@ const ModalAttachment = ({
                       <UndoOutlined style={{ color: "#58804D" }} />
                     </ButtonComponent>
                   </div>
-                ) : file.size <= MAX_FILE_SIZE ? (
+                ) : file.size <= dataGuard.size ? (
                   <Progress
                     percent={file.percent || 0}
                     format={(percent) => `${percent}%`}

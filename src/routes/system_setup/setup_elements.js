@@ -31,10 +31,6 @@ import FormAssets from "../../app/pages/SystemSetup/MasterData/Assets/FormAssets
 import ViewAssets from "../../app/pages/SystemSetup/MasterData/Assets/ViewAssets";
 import DetailAssets from "../../app/pages/SystemSetup/MasterData/Assets/DetailAssets";
 import GroupAccessFormBackup from "../../app/pages/SystemSetup/GroupAccess/GroupAccessFormBackup";
-import ListJob from "../../app/pages/SystemSetup/JobManagement/ListJob";
-import FormJob from "../../app/pages/SystemSetup/JobManagement/FormJob";
-import JobControlPage from "../../app/pages/SystemSetup/JobControl/JobControlPage";
-import LoggingPage from "../../app/pages/SystemSetup/Logging/LoggingPage";
 import ListPaymentCycle from "../../app/pages/SystemSetup/MasterData/PaymentCycle/ListPaymentCycle";
 import PaymentCycleForm from "../../app/pages/SystemSetup/MasterData/PaymentCycle/PaymentCycleForm";
 import ViewPaymentCycle from "../../app/pages/SystemSetup/MasterData/PaymentCycle/ViewPaymentCycle";
@@ -44,23 +40,23 @@ import ViewPaymentPeriod from "../../app/pages/SystemSetup/MasterData/PaymentPer
 import ListBillingItemCategory from "../../app/pages/SystemSetup/MasterData/BillingItemCategory/ListBillingItemCategory";
 import BillingItemCategoryForm from "../../app/pages/SystemSetup/MasterData/BillingItemCategory/BillingItemCategoryForm";
 import BillingItemCategoryDetail from "../../app/pages/SystemSetup/MasterData/BillingItemCategory/BillingItemCategoryDetail";
+import CalendarView from "../../app/pages/SystemSetup/MasterData/Calendar/CalendarView";
+import CalendarForm from "../../app/pages/SystemSetup/MasterData/Calendar/CalendarForm";
+import CalendarDetail from "../../app/pages/SystemSetup/MasterData/Calendar/CalendarDetail";
+import ListCollectionTemplate from "../../app/pages/SystemSetup/MasterData/CollectionTemplate/ListCollectionTemplate";
+import CollectionTemplateForm from "../../app/pages/SystemSetup/MasterData/CollectionTemplate/CollectionTemplateForm";
+import PreRequisiteTemplate from "../../app/pages/SystemSetup/PreRequisiteTemplate/PreRequisiteTemplate";
+import PreRequisiteTemplateDetail from "../../app/pages/SystemSetup/PreRequisiteTemplate/Details/PreRequisiteTemplateDetail";
+import CreateUpdatePreRequisiteTemplate from "../../app/pages/SystemSetup/PreRequisiteTemplate/CreateUpdate/CreateUpdatePreRequisiteTemplate";
+import ActivityTemplate from "../../app/pages/SystemSetup/ActivityTemplate/ActivityTemplate";
+import ActivityTemplateDetail from "../../app/pages/SystemSetup/ActivityTemplate/Details/ActivityTemplateDetail";
+import CreateUpdateActivityTemplate from "../../app/pages/SystemSetup/ActivityTemplate/CreateUpdate/CreateUpdateActivityTemplate";
 
 export const SYSTEM_SETUP_ELEMENTS = {
-  // logging
-  VIEW_LOGGING_PAGE: <LoggingPage />,
-
   // menu
   VIEW_MENU_PAGE: <Menu />,
   CREATE_MENU_PAGE: <FormMenu type={"create"} />,
   UPDATE_MENU_PAGE: <FormMenu type={"update"} />,
-
-  //Job Management
-  VIEW_JOBM_PAGE: <ListJob />,
-  CREATE_JOBM_PAGE: <FormJob type={"create"} />,
-  DETAIL_JOBM_PAGE: <FormJob type={"view"} />,
-
-  //Job Control
-  VIEW_JOB_CONTROL_PAGE: <JobControlPage />,
 
   // global type
   VIEW_GLOBAL_PAGE: <ViewGlobalType />,
@@ -149,4 +145,26 @@ export const SYSTEM_SETUP_ELEMENTS = {
   DETAIL_BILLING_ITEM_CATEGORY: <BillingItemCategoryDetail />,
   CREATE_BILLING_ITEM_CATEGORY: <BillingItemCategoryForm type="create" />,
   UPDATE_BILLING_ITEM_CATEGORY: <BillingItemCategoryForm type="update" />,
+
+  // Calendar
+  VIEW_CALENDAR_PAGE: <CalendarView />,
+  DETAIL_CALENDAR_PAGE: <CalendarDetail />,
+  CREATE_CALENDAR_PAGE: <CalendarForm type="create" />,
+  UPDATE_CALENDAR_PAGE: <CalendarForm type="update" />,
+
+  // Collection Template
+  VIEW_COLLECTION_TEMPLATE_PAGE: <ListCollectionTemplate />,
+  CREATE_COLLECTION_TEMPLATE_PAGE: <CollectionTemplateForm type="create" />,
+  UPDATE_COLLECTION_TEMPLATE_PAGE: <CollectionTemplateForm type="update" />,
+  // Pre Requisite Template
+  VIEW_PRE_REQUISITE_TEMPLATE_PAGE: <PreRequisiteTemplate />,
+  DETAIL_PRE_REQUISITE_TEMPLATE_PAGE: <PreRequisiteTemplateDetail />,
+  CREATE_PRE_REQUISITE_TEMPLATE_PAGE: <CreateUpdatePreRequisiteTemplate type="create" />,
+  UPDATE_PRE_REQUISITE_TEMPLATE_PAGE: <CreateUpdatePreRequisiteTemplate type="update" />,
+
+  // Activity Template
+  VIEW_ACTIVITY_TEMPLATE_PAGE: <ActivityTemplate />,
+  DETAIL_ACTIVITY_TEMPLATE_PAGE: <ActivityTemplateDetail />,
+  CREATE_ACTIVITY_TEMPLATE_PAGE: <CreateUpdateActivityTemplate type="create" />,
+  UPDATE_ACTIVITY_TEMPLATE_PAGE: <CreateUpdateActivityTemplate type="update" />,
 };

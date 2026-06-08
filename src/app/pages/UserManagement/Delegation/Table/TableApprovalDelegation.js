@@ -11,7 +11,6 @@ export const approvalDelegation = (
   searchText,
   handleSearch = () => { },
 ) => {
-  console.log(filteredInfo);
   return [
     {
       title: "NO",

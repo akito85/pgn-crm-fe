@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import ConfirmationModalTabs from "./ConfirmationModalTabs";
 import NxModal from "../../../../../../../../components/Nx/NxModal";
 import { Button } from "antd";
@@ -7,16 +8,21 @@ const ConfirmationModal = ({
   form,
   formId,
   isOpen,
-  handleCancel,
+  handleCancel = () => {},
   type = "",
   approvalData,
-  attachmentData,
+  attachmentDataSource,
   configApplication,
   service,
   relatedDetails,
+  handleSubmitForm = () => {},
 }) => {
+  const { loading_createUpdateRelationship } = useSelector((state) => state.relationship);
   const tabLength = type === "submit" ? 4 : 3;
   const [activeTab, setActiveTab] = useState(0);
+
+  const isSubmit = type === "submit";
+  const isDraft = type === "draft";
 
   /**
    * @param {"next" | "prev"} direction
@@ -39,28 +45,35 @@ const ConfirmationModal = ({
     <NxModal
       isOpen={isOpen}
       width={1000}
-      header={"CONFIRMATION RELATIONSHIP"}
+      title={"CONFIRMATION RELATIONSHIP"}
       type={"confirmation"}
+      loading={loading_createUpdateRelationship}
       hidePadding={{
         top: true,
       }}
       footer={[
-        <div className={"w-full flex justify-between gap-x-4"} key={`footer-1`}>
-          <Button type={"menu"} onClick={() => handleCancel()}>
+        <div className={"flex justify-between"} key={`footer-1`}>
+          <Button type={"menu"} disabled={loading_createUpdateRelationship} onClick={() => handleCancel()}>
             Cancel
           </Button>
-          <div className="flex gap-x-2">
-            <Button type={"menu"} disabled={activeTab < 1} onClick={() => handleChangeTab("prev")}>
+          <div className="flex">
+            <Button type={"menu"} disabled={loading_createUpdateRelationship || activeTab < 1} onClick={() => handleChangeTab("prev")}>
               Previous
             </Button>
             {activeTab < (tabLength - 1) && (
-              <Button type={"submit"} onClick={() => handleChangeTab("next")}>
+              <Button type={"submit"} disabled={loading_createUpdateRelationship} onClick={() => handleChangeTab("next")}>
                 Next
               </Button>
             )}
             {activeTab === (tabLength - 1) && (
-              <Button type={"submit"} form={formId} htmlType={"submit"}>
-                {type === "submit" ? "Submit" : type === "draft" ? "Save as Draft" : ""}
+              <Button
+                type={"submit"}
+                form={formId}
+                htmlType={isSubmit ? "submit" : "button"}
+                onClick={isDraft ? handleSubmitForm : undefined}
+                loading={loading_createUpdateRelationship}
+              >
+                Confirm
               </Button>
             )}
           </div>
@@ -69,14 +82,15 @@ const ConfirmationModal = ({
     >
       <ConfirmationModalTabs
         form={form}
-        hierarchyTableData={approvalData}
-        dataAttachment={attachmentData}
+        approvalData={approvalData}
+        attachmentDataSource={attachmentDataSource}
         service={service}
         type={type}
         configApplication={configApplication}
         activeTab={activeTab}
         relatedDetails={relatedDetails}
         setActiveTab={setActiveTab}
+        disabled={loading_createUpdateRelationship}
       />
     </NxModal>
   );

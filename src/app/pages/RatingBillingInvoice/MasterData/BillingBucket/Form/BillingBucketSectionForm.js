@@ -4,7 +4,6 @@ import moment from "moment";
 import DateComponent from "../../../../../../components/DateComponent";
 import SelectComponent from "../../../../../../components/SelectComponent";
 import InputComponent from "../../../../../../components/InputComponent";
-import BaseContainer from "../../../../../../components/BaseContainer";
 import RadioTabs from "../../../../../../components/RadioTabs";
 import { useDispatch, useSelector } from "react-redux";
 import BillingBucketDetailSectionForm from "../Modal/BillingBucketDetailSectionForm";
@@ -12,7 +11,10 @@ import FunctionalCriteriaBillingBucket from "./FunctionalCriteriaBillingBucket";
 import {
   getListPriorityPeriod,
   getCriteria,
+  getBillingBucketCurrency,
+  getBillingBucketCategory,
 } from "../../../../../../redux/slices/rating_billing_invoice/MasterData/billingBucket";
+import CardContainer from "../../../../../../components/CardContainer";
 
 const BillingBucketSectionForm = ({
   type,
@@ -26,18 +28,18 @@ const BillingBucketSectionForm = ({
   startDate,
   endDate,
   listDataBI = [],
-  setListDataBI = () => { },
-  handleStartDate = () => { },
-  handleEndDate = () => { },
+  setListDataBI = () => {},
+  handleStartDate = () => {},
+  handleEndDate = () => {},
   priority,
   setPriority,
   status,
   statusApproval,
-  disabledDate = false
+  disabledDate = false,
 }) => {
   // Selector
-  const { data_priority_period, data_criteria } = useSelector(
-    (state) => state.billing_bucket
+  const { data_priority_period, data_criteria, data_bucket_currency, data_bucket_category } = useSelector(
+    (state) => state.billing_bucket,
   );
 
   // Declaration
@@ -55,6 +57,8 @@ const BillingBucketSectionForm = ({
   useEffect(() => {
     dispatch(getListPriorityPeriod());
     dispatch(getCriteria());
+    dispatch(getBillingBucketCurrency());
+    dispatch(getBillingBucketCategory());
   }, [dispatch]);
 
   // Validation Handle End Date
@@ -124,8 +128,8 @@ const BillingBucketSectionForm = ({
 
   return (
     <div>
-      <BaseContainer header={"Billing Bucket Information"}>
-        <div className="w-full grid grid-cols-3 gap-3">
+      <CardContainer header={"Billing Bucket Information"}>
+        <div className="w-full grid grid-cols-5 gap-3">
           <Form.Item
             label={"Billing Bucket Code"}
             name={"billingBucketCode"}
@@ -137,7 +141,8 @@ const BillingBucketSectionForm = ({
             ]}
           >
             <InputComponent
-              disabled={status !== "DRAFT" && type === "update" ? true : false} maxLength={100}
+              disabled={status !== "DRAFT" && type === "update" ? true : false}
+              maxLength={100}
             />
           </Form.Item>
 
@@ -152,7 +157,8 @@ const BillingBucketSectionForm = ({
             ]}
           >
             <InputComponent
-              disabled={status !== "DRAFT" && type === "update" ? true : false} maxLength={100}
+              disabled={status !== "DRAFT" && type === "update" ? true : false}
+              maxLength={100}
             />
           </Form.Item>
 
@@ -176,17 +182,54 @@ const BillingBucketSectionForm = ({
           </Form.Item>
 
           <Form.Item
+            label={"Currency"}
+            name={"currency"}
+            rules={[
+              { required: true, message: "Please select Currency!" },
+            ]}
+          >
+            <SelectComponent allowClear>
+              {data_bucket_currency?.map((item) => (
+                <Select.Option key={item.value} value={item.value}>
+                  {item.label}
+                </Select.Option>
+              ))}
+            </SelectComponent>
+          </Form.Item>
+
+          <Form.Item
+            label={"Category"}
+            name={"category"}
+            rules={[
+              { required: true, message: "Please select Category!" },
+            ]}
+          >
+            <SelectComponent allowClear>
+              {data_bucket_category?.map((item) => (
+                <Select.Option key={item.value} value={item.value}>
+                  {item.label}
+                </Select.Option>
+              ))}
+            </SelectComponent>
+          </Form.Item>
+
+          <Form.Item
             label={"Start Date"}
             name={"startDate"}
             rules={[
               { required: true, message: "Please input your Start Date!" },
             ]}
-          // getValueFromEvent={handleStartDate}
+            // getValueFromEvent={handleStartDate}
           >
             <DateComponent
               onChange={(e) => handleStartDate(e)}
               dateDisable={disabledStartDate}
-              disabled={(status !== "DRAFT" && type === "update" ) || disabledDate ? true : false}
+              disabled={
+                (status !== "DRAFT" && type === "update") ||
+                disabledDate ||
+                listDataBI?.some((item) => item.startDate) ||
+                listDataCriteria?.some((item) => item.startDate)
+              }
             />
           </Form.Item>
 
@@ -199,19 +242,23 @@ const BillingBucketSectionForm = ({
                   (value && moment(startDate) <= moment(value)) || !value
                     ? Promise.resolve()
                     : Promise.reject(
-                      new Error("End date must before Start date")
-                    ),
+                        new Error("End date must before Start date"),
+                      ),
               },
             ]}
           >
             <DateComponent
               onChange={(e) => handleEndDate(e)}
               dateDisable={handleDisableEndDate}
-              disabled={disabledDate}
+              disabled={
+                disabledDate ||
+                listDataBI?.some((item) => item.endDate) ||
+                listDataCriteria?.some((item) => item.endDate)
+              }
             />
           </Form.Item>
 
-          <div className="col-span-3">
+          <div className="col-span-2">
             <Form.Item
               label={"Criteria"}
               name={"criteria"}
@@ -250,9 +297,9 @@ const BillingBucketSectionForm = ({
             </Form.Item>
           </div>
         </div>
-      </BaseContainer>
+      </CardContainer>
 
-      <BaseContainer
+      <CardContainer
         header="BILLING BUCKET DETAIL INFORMATION"
         type={"tabs"}
         element={
@@ -275,6 +322,7 @@ const BillingBucketSectionForm = ({
             statusApproval={statusApproval}
             validStartDate={startDate}
             validEndDate={endDate}
+            setStoredData={setStoredDataInline}
           />
         ) : (
           <FunctionalCriteriaBillingBucket
@@ -292,7 +340,7 @@ const BillingBucketSectionForm = ({
             validEndDate={endDate}
           />
         )}
-      </BaseContainer>
+      </CardContainer>
     </div>
   );
 };

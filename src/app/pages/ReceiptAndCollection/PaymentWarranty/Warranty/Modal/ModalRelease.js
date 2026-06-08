@@ -1,8 +1,9 @@
 // VERIFICATION_TAG: 2026-02-17-001
-import React, { useRef, useState, useEffect, useMemo } from "react";
+import React, { useRef, useState, useEffect, useMemo, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Steps, Form, Select, Checkbox, Tooltip, message, Tabs } from "antd";
 import { DownOutlined, RightOutlined, LeftOutlined } from "@ant-design/icons";
+import { debounce } from "lodash";
 import SVGIcon from "../../../../../../assets/Icon/index";
 
 // Utils
@@ -31,11 +32,12 @@ import { columnsAttachmentInfo } from "./Table/TableAttachmentInfo";
 import { configApp } from "../../../../../../constants/configApp";
 import receiptCollectionHttpService from "../../../../../../redux/services/receiptCollectionHttpService";
 import {
-  getAllWarrantyInfoPaginate,
+  getReleaseListPaginate,
+  getReleaseDetailList,
+  submitRelease,
   getAllApprovalList,
   getListApprovalById,
   getListCategory,
-  submitWarrantyRequest,
 } from "../../../../../../redux/slices/receipt_collection/warranty";
 
 import { FormStepper, FormFooter } from "../../../../../../components/FormStepNavigation";
@@ -51,13 +53,11 @@ const ModalRelease = ({
 }) => {
   // Selector
   const {
-    data_customer_info,
-    data_warranty_info,
-    data_release_info,
+    dataReleaseList,
     data_attachment_info,
     dataListAppHierId,
     dataListAppHierDetail,
-    loading,
+    loadingReleaseList,
   } = useSelector((state) => state.warranty);
 
   // Declaration
@@ -65,9 +65,9 @@ const ModalRelease = ({
   const searchInput = useRef(null);
   const [form] = Form.useForm();
   const dispatch = useDispatch();
-  const dataSourceCustomerInfo = data_customer_info?.result || [];
-  const dataSourceWarrantyInfo = data_warranty_info?.result || [];
-  const dataSourceReleaseInfo = data_release_info?.result || [];
+  const dataSourceCustomerInfo = []; 
+  const dataSourceWarrantyInfo = dataReleaseList?.result || [];
+  const dataSourceReleaseInfo = []; 
   const dataSourceAttachmentInfo = data_attachment_info?.result || [];
 
   // Global State
@@ -107,13 +107,47 @@ const ModalRelease = ({
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(selectedKeys[0] ? dataIndex : "");
+    const shouldResetPage = search[dataIndex] !== selectedKeys[0];
     setSearch((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
-      }
+      const nextState = { ...prevState };
+      nextState[dataIndex] = selectedKeys[0];
+      return nextState;
+    });
+    if (shouldResetPage) {
+      setPage(1);
+    }
+  };
+
+  const handleGlobalSearch = useCallback(
+    debounce((value) => {
+      setSearchText(value);
+      setSearchedColumn(value ? "all" : "");
+      setSearch((prevState) => {
+        const nextState = { ...prevState };
+        if (value) {
+          nextState.all = value;
+        } else {
+          delete nextState.all;
+        }
+        return nextState;
+      });
+      setPage(1);
+    }, 500),
+    []
+  );
+
+  useEffect(() => {
+    return () => {
+      handleGlobalSearch.cancel();
+    };
+  }, [handleGlobalSearch]);
+
+  const handleAdvanceSearch = (searchData) => {
+    setSearch((prevState) => {
+      setPage(1);
       return {
         ...prevState,
-        [dataIndex]: selectedKeys[0],
+        advanceSearch: searchData
       };
     });
   };
@@ -166,12 +200,6 @@ const ModalRelease = ({
       if (!remarkReleaseInformation) {
         return message.warning("Please input your Remark!");
       }
-      const isTableIncomplete = dataSourceReleaseInfoWithKeys.some(
-        (item) => !releaseAmountData[item.key]
-      );
-      if (isTableIncomplete) {
-        return message.warning("Please input Release Amount for all items!");
-      }
     }
     if (current === 2 && !selectedHierarchy) {
       return message.warning("Please select Approval Hierarchy!");
@@ -223,6 +251,7 @@ const ModalRelease = ({
   };
 
   const clearAllState = (preSelectedRow) => {
+    handleGlobalSearch.cancel();
     setSelectedCustomerInfoRowKeys([]);
     setDataCustomerInfoSelect([]);
     
@@ -237,8 +266,6 @@ const ModalRelease = ({
       setCurrent(0);
     }
 
-    setReleaseAmountData({});
-    setReleaseDateData({});
     setRemarkReleaseInformation("");
     setListDataAttachment([]);
     setSelectedHierarchy(null);
@@ -295,38 +322,37 @@ const ModalRelease = ({
     setLoadingSave(true);
     
     try {
-      // 1. Upload new attachments first to get their IDs
-      const newAttachments = listDataAttachment.filter(item => item.dataType !== "exist");
-      const attachmentIds = (listDataAttachment.filter(item => item.dataType === "exist") || []).map(item => item.id);
-      
-      for (const element of newAttachments) {
-        const uploadBody = {
-          // referensiId: null, // No reference ID yet as per new unified submit flow
-          files: element.file,
-          category: "PAYMENT_WARRANTY",
-          fileCategoryId: element.fileCategoryId,
-        };
-        const uploadRes = await receiptCollectionHttpService.uploadImage(`/v1/dbs/api/attachment/upload/v1`, uploadBody);
-        if (uploadRes?.data?.id) {
-          attachmentIds.push(uploadRes.data.id);
-        }
-      }
-
-      // 2. Prepare unified submission body
+      // 1. Prepare unified submission body first
       const submitBody = {
-        warrantyTransTypeId: WARRANTY_TRANSACTION_NAMES.RELEASE, // 11 = Release
+        type: WARRANTY_TRANSACTION_NAMES.RELEASE,
         appHierId: selectedHierarchy,
-        items: dataWarrantyInfoSelect.map((item, index) => ({
+        items: dataWarrantyInfoSelect.map((item) => ({
           payWarrantyId: item.id,
-          amount: releaseAmountData[dataSourceReleaseInfoWithKeys[index]?.key] || 0,
+          amount: item.currencyBalance || 0,
           currency: item.currency || "IDR",
         })),
-        attachmentIds: attachmentIds,
         remark: remarkReleaseInformation,
       };
 
-      // 3. Dispatch the unified thunk
-      await dispatch(submitWarrantyRequest({ body: submitBody })).unwrap();
+      // 2. Dispatch the specific thunk
+      const submitRes = await dispatch(submitRelease(submitBody)).unwrap();
+      const transIds = submitRes?.transIds || [];
+
+      // 3. Upload new attachments per transId
+      const newAttachments = listDataAttachment.filter(item => item.dataType !== "exist");
+      if (newAttachments.length > 0 && transIds.length > 0) {
+        for (const transId of transIds) {
+          for (const element of newAttachments) {
+            const uploadBody = {
+              referensiId: transId, // Link attachment to the returned transaction ID
+              files: element.file,
+              category: "PAYMENT_WARRANTY_TRANS",
+              fileCategoryId: element.fileCategoryId,
+            };
+            await receiptCollectionHttpService.uploadImage(`/v1/dbs/api/attachment/upload/v1`, uploadBody);
+          }
+        }
+      }
 
       // 4. Cleanup and close
       handleRefresh();
@@ -335,7 +361,18 @@ const ModalRelease = ({
       setLoadingSave(false);
     } catch (error) {
       setLoadingSave(false);
-      const message = error?.response?.data?.message || error?.message || error?.toString();
+      let message = error?.response?.data?.message || error?.message || error?.toString();
+
+      if (message && typeof message === "object") {
+        if (Array.isArray(message)) {
+          message = message.join(", ");
+        } else {
+          message = Object.values(message)
+            .map((val) => (typeof val === "object" ? JSON.stringify(val) : val))
+            .join(", ");
+        }
+      }
+
       setBodyError({ message, type: "requested" });
       setModalError(true);
     }
@@ -345,20 +382,14 @@ const ModalRelease = ({
   // Guarantee Information Step
   useEffect(() => {
     if (isOpen && current === 0) {
-      const finalSearch = Object.keys(search).length > 0 
-        ? Object.entries(search)
-            .filter(([_, value]) => value !== undefined && value !== "")
-            .map(([key, value]) => `${key}~${value}`)
-            .join("|") 
-        : "";
+      const finalSearch = encodeURIComponent(JSON.stringify(search));
 
       dispatch(
-        getAllWarrantyInfoPaginate({
+        getReleaseListPaginate({
           search: finalSearch,
           page,
           pageSize,
           sort,
-          transTypeName: "RELEASE",
         })
       );
     }
@@ -510,15 +541,6 @@ const ModalRelease = ({
   };
 
   // Release Information Step
-  const [releaseAmountData, setReleaseAmountData] = useState({});
-  const handleReleaseAmountChange = (value, recordKey) => {
-    setReleaseAmountData(prev => ({ ...prev, [recordKey]: value }));
-  };
-
-  const [releaseDateData, setReleaseDateData] = useState({});
-  const handleReleaseDateChange = (value, recordKey) => {
-    setReleaseDateData(prev => ({ ...prev, [recordKey]: value }));
-  }; 
 
   const [remarkReleaseInformation, setRemarkReleaseInformation] = useState("");
 
@@ -544,14 +566,9 @@ const ModalRelease = ({
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch,
-        releaseAmountData,
-        handleReleaseAmountChange,
-        releaseDateData,
-        handleReleaseDateChange,
-        false
+        handleSearch
       ),
-    [searchedColumn, searchText, releaseAmountData, releaseDateData]
+    [searchedColumn, searchText]
   );
 
   const baseColumnsReleaseInfoConfirmation = useMemo(
@@ -562,14 +579,9 @@ const ModalRelease = ({
         searchInput,
         searchedColumn,
         searchText,
-        handleSearch,
-        releaseAmountData,
-        handleReleaseAmountChange,
-        releaseDateData,
-        handleReleaseDateChange,
-        true
+        handleSearch
       ),
-    [searchedColumn, searchText, releaseAmountData, releaseDateData]
+    [searchedColumn, searchText]
   );
 
   const processedColumnsReleaseInfoConfirmation = useMemo(() => {
@@ -715,14 +727,18 @@ const ModalRelease = ({
                 pageSize={pageSize}
                 onChange={handleChange}
                 onSizeChanger={handleChange}
-                totalData={selectedRow ? 1 : (data_warranty_info?.page?.totalElements || 0)}
+                totalData={selectedRow ? 1 : (dataReleaseList?.page?.totalElements || 0)}
                 tableScrolled={{ y: 525, x: 1000 }}
                 onSort={onSort}
                 columnDefinitions={columnDefinitionsWarrantyInfo}
                 fixedColumns={fixedColumns}
                 setFixedColumns={setFixedColumns}
-                loading={loading}
+                loading={loadingReleaseList}
                 showExport={false}
+                showSearchBar={true}
+                showAdvanceSearch={true}
+                onSearch={(e) => handleGlobalSearch(e.target.value)}
+                onAdvanceSearch={handleAdvanceSearch}
                 rowSelection={rowSelectionWarrantyInfo}
               />
             </div>
@@ -748,7 +764,7 @@ const ModalRelease = ({
                 columnDefinitions={columnDefinitionsReleaseInfo}
                 fixedColumns={fixedReleaseColumns}
                 setFixedColumns={setFixedReleaseColumns}
-                loading={loading}
+                loading={loadingReleaseList}
                 showExport={false}
               />
               

@@ -1,12 +1,15 @@
 import { DownloadOutlined } from "@ant-design/icons";
-import { Checkbox, Form, Spin, Tooltip } from "antd";
+import { Form, Spin, Tooltip } from "antd";
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { Link, NavLink } from "react-router-dom";
 import BaseContainer from "../../../../../components/BaseContainer";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import SVGIcon from "../../../../../assets/Icon/index";
+import IconViewList from "../../../../../assets/Icon/Nx/IconViewList";
+import IconEditNx from "../../../../../assets/Icon/Nx/IconEdit";
+import IconActive from "../../../../../assets/icons/nx/IconActive";
+import IconInactive from "../../../../../assets/icons/nx/IconInactive";
 import { SYSTEM_SETUP_ROUTES } from "../../../../../routes/system_setup/setup_routes";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -85,7 +88,7 @@ const Job = () => {
   const columns = [
     {
       title: "NO",
-      width: 60,
+      width: 90,
       align: "center",
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
@@ -316,13 +319,9 @@ const Job = () => {
       render: (record, data_length) => {
         return (
           <Tooltip title="Detail">
-            <div
-              onClick={() => {
-                handleDetail(record?.jobId);
-              }}
-            >
-              <SVGIcon name="IconDetail" width={24} />
-            </div>
+            <span className="inline-flex items-center text-[#1976D2] hover:text-[#1976D2] transition-colors duration-200 cursor-pointer" onClick={() => handleDetail(record?.jobId)}>
+              <IconViewList width={20} />
+            </span>
           </Tooltip>
         );
       },
@@ -331,38 +330,16 @@ const Job = () => {
       action: "Update",
       type: "table",
       render: (record, data_length) => {
+        const disabled = record?.status?.toLowerCase() === "inactive";
         return (
           <Tooltip title="Update">
-            <div
-              className={`${
-                record?.status?.toLowerCase() === "inactive" &&
-                "cursor-not-allowed"
-              }`}
-            >
+            <div className={`inline-flex items-center ${disabled ? "cursor-not-allowed text-gray-300" : ""}`}>
               <Link
-                to={
-                  record?.status?.toLowerCase() !== "inactive" &&
-                  SYSTEM_SETUP_ROUTES.UPDATE_JOB
-                }
-                state={
-                  record?.status?.toLowerCase() !== "inactive" && {
-                    id: record?.jobId,
-                  }
-                }
+                to={!disabled ? SYSTEM_SETUP_ROUTES.UPDATE_JOB : undefined}
+                state={!disabled ? { id: record?.jobId } : undefined}
+                className={`inline-flex items-center transition-colors duration-200 ${disabled ? "text-gray-300 pointer-events-none" : "text-[#1976D2] hover:text-[#1976D2]"}`}
               >
-                <SVGIcon
-                  name="IconEdit"
-                  className={`${
-                    record?.status?.toLowerCase() === "inactive" &&
-                    "cursor-not-allowed"
-                  }`}
-                  color={
-                    record?.status?.toLowerCase() === "inactive"
-                      ? "#8D91A0"
-                      : "#ACC424"
-                  }
-                  width={24}
-                />
+                <IconEditNx width={20} />
               </Link>
             </div>
           </Tooltip>
@@ -373,25 +350,25 @@ const Job = () => {
       action: "Activate",
       type: "table",
       render: (record, data_length) => {
+        const isActive = record?.status?.toUpperCase() === "ACTIVE";
+        const handleToggle = () => { onClick(record); };
         return (
-          <Tooltip
-            title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}
-          >
-            <div>
-              <Checkbox
-                onClick={() => {
-                  onClick(record);
-                }}
-                checked={record.status !== "ACTIVE"}
-              />
-            </div>
+          <Tooltip title={isActive ? "Inactivate" : "Activate"}>
+            {isActive
+              ? <span className="inline-flex items-center text-[#D32F2F] hover:text-[#D32F2F] transition-colors duration-200 cursor-pointer" onClick={handleToggle}>
+                  <IconInactive width={20} />
+                </span>
+              : <span className="inline-flex items-center text-green-600 hover:text-green-600 transition-colors duration-200 cursor-pointer" onClick={handleToggle}>
+                  <IconActive width={20} />
+                </span>
+            }
           </Tooltip>
         );
       },
     },
   ];
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <Toolbar items={itemActions} />
@@ -441,7 +418,7 @@ const Job = () => {
         {/* modal try again */}
         {renderModal()}
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

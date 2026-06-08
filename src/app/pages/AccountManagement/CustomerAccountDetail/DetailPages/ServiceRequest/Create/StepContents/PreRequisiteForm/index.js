@@ -1,18 +1,19 @@
-import { Fragment, useState, useEffect } from "react";
+import { Fragment, useState, useEffect, useRef, useCallback } from "react";
+import { useDispatch } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 
-import { Space, Button, Popconfirm, Form } from "antd";
-import {
-  PlusOutlined,
-  EditOutlined,
-  DeleteOutlined,
-  PlusCircleOutlined,
-} from "@ant-design/icons";
+import { Button, Popconfirm, Tooltip } from "antd";
+import { PlusOutlined } from "@ant-design/icons";
 
+import {
+  getSrPrerequisites,
+  deleteSrPrerequisite,
+} from "../../../../../../../../../redux/slices/account_management/detailAccount/ServiceRequestSlice";
 import ButtonComponent from "../../../../../../../../../components/ButtonComponent";
 import NxTable from "../../../../../../../../../components/Nx/NxTable";
 import NxCardContainer from "../../../../../../../../../components/Nx/NxCardContainer";
 import NxBaseContainer from "../../../../../../../../../components/Nx/NxBaseContainer";
+import SVGIcon from "../../../../../../../../../assets/Icon/index";
 
 import ModalPreRequisiteDetail from "./ModalPreRequisiteDetail";
 
@@ -20,169 +21,165 @@ export default function PreRequisiteForm({
   form,
   account,
   customer,
+  dropdowns,
   currentStep,
 }) {
+  const dispatch = useDispatch();
   const [isOpen, setIsOpen] = useState(false);
+  const [selectedPrerequisite, setSelectedPrerequisite] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const srId = location?.state?.id;
+  const accountId = account?.accountInformation?.accountId;
+  const isCreateFlow = !srId; // TRUE = SR baru, belum punya ID
 
-  const PREREQUISITE = [
-    {
-      no: 1,
-      type: "Administrative",
-      name: "Menerbitkan BBG",
-      description: "Desc",
-      status: "status",
-    },
-    {
-      no: 2,
-      type: "Administrative",
-      name: "Menerbitkan BBG yang telah disetujui oleh pimpinan sales and operation regional I",
-      description: "Desc",
-      status: "status",
-    },
-    {
-      no: 3,
-      type: "Administrative",
-      name: "Menerbitkan BBG",
-      description: "Desc",
-      status: "status",
-    },
-    {
-      no: 4,
-      type: "Technical",
-      name: "Verifikasi Dokumen Pelanggan",
-      description: "Desc",
-      status: "status",
-    },
-    {
-      no: 5,
-      type: "Technical",
-      name: "Pemeriksaan Kelengkapan Formulir",
-      description: "Desc",
-      status: "status",
-    },
-    {
-      no: 6,
-      type: "Administrative",
-      name: "Validasi Data di Sistem",
-      description: "Desc",
-      status: "status",
-    },
-    {
-      no: 7,
-      type: "Financial",
-      name: "Verifikasi Pembayaran Awal",
-      description: "Desc",
-      status: "status",
-    },
-    {
-      no: 8,
-      type: "Administrative",
-      name: "Persetujuan dari Departemen Legal",
-      description: "Desc",
-      status: "status",
-    },
-    {
-      no: 9,
-      type: "Technical",
-      name: "Inspeksi Lokasi Pemasangan",
-      description: "Desc",
-      status: "status",
-    },
-    {
-      no: 10,
-      type: "Technical",
-      name: "Pemeriksaan Kesiapan Peralatan",
-      description: "Desc",
-      status: "status",
-    },
-    {
-      no: 11,
-      type: "Administrative",
-      name: "Penerbitan Surat Izin Operasi",
-      description: "Desc",
-      status: "status",
-    },
-    {
-      no: 12,
-      type: "Financial",
-      name: "Konfirmasi Asuransi",
-      description: "Desc",
-      status: "status",
-    },
-    {
-      no: 13,
-      type: "Administrative",
-      name: "Penyelesaian Kontrak Kerja",
-      description: "Desc",
-      status: "status",
-    },
-    {
-      no: 14,
-      type: "Technical",
-      name: "Kalibrasi Perangkat",
-      description: "Desc",
-      status: "status",
-    },
-    {
-      no: 15,
-      type: "Safety",
-      name: "Pemeriksaan Keselamatan",
-      description: "Desc",
-      status: "status",
-    },
-    {
-      no: 16,
-      type: "Administrative",
-      name: "Arsip Digital Dokumen",
-      description: "Desc",
-      status: "status",
-    },
-    {
-      no: 17,
-      type: "Financial",
-      name: "Pembayaran Administrasi Akhir",
-      description: "Desc",
-      status: "status",
-    },
-    {
-      no: 18,
-      type: "Technical",
-      name: "Testing Sistem Integrasi",
-      description: "Desc",
-      status: "status",
-    },
-    {
-      no: 19,
-      type: "Administrative",
-      name: "Penandatanganan Berita Acara",
-      description: "Desc",
-      status: "status",
-    },
-    {
-      no: 20,
-      type: "Safety",
-      name: "Sertifikasi K3",
-      description: "Desc",
-      status: "status",
-    },
-    {
-      no: 21,
-      type: "Administrative",
-      name: "Penyerahan Dokumen ke Pelanggan",
-      description: "Desc",
-      status: "status",
-    },
-  ];
+  const PAGE_SIZE = 10;
+  // Remote data (UPDATE flow: srId ada)
+  const [prereqData, setPrereqData] = useState([]);
+  const [prereqPage, setPrereqPage] = useState(1);
+  const [prereqHasMore, setPrereqHasMore] = useState(false);
+  const [prereqLoading, setPrereqLoading] = useState(false);
+  const loadingRef = useRef(false);
+  const newPrerequisiteProcessed = useRef(false);
 
+  // Local data (CREATE flow: belum ada srId, simpan di form field)
+  const [localPrereqs, setLocalPrereqs] = useState(() =>
+    form?.getFieldValue("srFormPreRequisites") || []
+  );
 
-  const paginatedData = PREREQUISITE.slice(
-    (page - 1) * pageSize,
-    page * pageSize
+  const getPrerequisiteLabel = useCallback(
+    (prerequisiteId) => {
+      const source = dropdowns?.serviceRequestPrerequisites;
+      const options = Array.isArray(source) ? source : Array.isArray(source?.data) ? source.data : [];
+      const matched = options.find(
+        (item) =>
+          item?.glbTypeValId?.toString() === prerequisiteId?.toString() ||
+          item?.id?.toString() === prerequisiteId?.toString(),
+      );
+      return matched?.name || matched?.glbTypeValName || prerequisiteId || "-";
+    },
+    [dropdowns],
+  );
+
+  const mapItems = useCallback(
+    (content = [], page) =>
+      content.map((item, idx) => ({
+        ...item,
+        key: item.id ?? `${page}-${idx}`,
+        type: getPrerequisiteLabel(item.prerequisiteId),
+        name: item.prerequisiteName || getPrerequisiteLabel(item.prerequisiteId),
+        description: item.prerequisiteComments || item.prerequisiteValue || "-",
+        status: item.prerequisiteStatus || "-",
+        dueDateLabel: item.dueDate || "-",
+        completedDateLabel: item.completedDate || "-",
+        assignedToLabel: item.assignedTo || "-",
+      })),
+    [getPrerequisiteLabel],
+  );
+
+  const fetchPage = useCallback(
+    async (page) => {
+      if (!accountId || !srId) return;
+      const result = await dispatch(
+        getSrPrerequisites({ accountId, srId, page, size: PAGE_SIZE }),
+      ).unwrap();
+
+      const payload = result?.data ?? result;
+      const content = payload?.content ?? payload?.result ?? [];
+      const totalElements = payload?.totalElements ?? payload?.page?.totalElements ?? 0;
+      const hasMore = page * PAGE_SIZE < totalElements;
+
+      return { items: mapItems(content, page), hasMore };
+    },
+    [dispatch, accountId, srId, mapItems],
+  );
+
+  const loadFirst = useCallback(() => {
+    if (!accountId || !srId) return;
+    setPrereqData([]);
+    setPrereqPage(1);
+    setPrereqHasMore(false);
+    setPrereqLoading(true);
+    loadingRef.current = false;
+    fetchPage(1)
+      .then(({ items, hasMore }) => {
+        setPrereqData(items);
+        setPrereqHasMore(hasMore);
+      })
+      .catch(() => {})
+      .finally(() => setPrereqLoading(false));
+  }, [fetchPage, accountId, srId]);
+
+  useEffect(() => {
+    loadFirst();
+  }, [loadFirst]);
+
+  // Tangkap prerequisite baru dari Create page (CREATE flow)
+  // Ref guard untuk React StrictMode double-mount; window.history.replaceState
+  // untuk mencegah duplikat saat komponen unmount+remount (user pindah step lalu kembali)
+  useEffect(() => {
+    const newPrerequisite = location?.state?.newPrerequisite;
+    if (newPrerequisite && isCreateFlow && !newPrerequisiteProcessed.current) {
+      newPrerequisiteProcessed.current = true;
+
+      // Hapus newPrerequisite dari history state agar tidak diproses ulang saat remount
+      window.history.replaceState(
+        { ...window.history.state, usr: { ...location.state, newPrerequisite: undefined } },
+        "",
+      );
+
+      const mapped = {
+        ...newPrerequisite,
+        key: `local-${Date.now()}`,
+        type: getPrerequisiteLabel(newPrerequisite.prerequisiteId),
+        name: newPrerequisite.prerequisiteName || getPrerequisiteLabel(newPrerequisite.prerequisiteId),
+        description: newPrerequisite.prerequisiteComments || "-",
+        status: "-",
+        dueDateLabel: "-",
+        completedDateLabel: "-",
+        assignedToLabel: "-",
+      };
+      setLocalPrereqs((prev) => {
+        const updated = [...prev, mapped];
+        form?.setFieldsValue({ srFormPreRequisites: updated });
+        return updated;
+      });
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleLoadMore = useCallback(() => {
+    if (loadingRef.current || !prereqHasMore) return Promise.resolve();
+    loadingRef.current = true;
+    const nextPage = prereqPage + 1;
+    return fetchPage(nextPage)
+      .then(({ items, hasMore }) => {
+        setPrereqData((prev) => [...prev, ...items]);
+        setPrereqPage(nextPage);
+        setPrereqHasMore(hasMore);
+      })
+      .catch(() => {})
+      .finally(() => {
+        loadingRef.current = false;
+      });
+  }, [prereqPage, prereqHasMore, fetchPage]);
+
+  const handleDelete = useCallback(
+    async (record) => {
+      if (isCreateFlow) {
+        setLocalPrereqs((prev) => {
+          const updated = prev.filter((item) => item.key !== record.key);
+          form?.setFieldsValue({ srFormPreRequisites: updated });
+          return updated;
+        });
+        return;
+      }
+      await dispatch(
+        deleteSrPrerequisite({ accountId, srId, id: record.id }),
+      );
+      loadFirst();
+    },
+    [dispatch, accountId, srId, isCreateFlow, form, loadFirst],
   );
 
   const columnMain = [
@@ -190,26 +187,12 @@ export default function PreRequisiteForm({
       title: "NO",
       dataIndex: "no",
       key: "no",
-      filter: true,
-      render: (text, record, index) => {
-        // If you want to show numbers considering pagination:
-        // current and pageSize should be available in your component scope
-        const current = 1; // Replace with actual current page from state
-        const pageSize = 10; // Replace with actual pageSize
-        
-        // With pagination:
-        // return (current - 1) * pageSize + index + 1;
-        
-        // Without pagination (just sequential):
-        return index + 1;
-      },
-      fixed: "left"
+      render: (_, __, index) => index + 1,
     },
     {
       title: "TYPE",
       dataIndex: "type",
       key: "type",
-      fixed: "left"
     },
     {
       title: "PREREQUISITE NAME",
@@ -225,188 +208,131 @@ export default function PreRequisiteForm({
       key: "description",
     },
     {
-      title: "STATUS0",
-      dataIndex: "status0",
+      title: "STATUS",
+      dataIndex: "status",
       key: "status",
     },
     {
-      title: "STATUS1",
-      dataIndex: "status1",
-      key: "status",
-    },    {
-      title: "STATUS2",
-      dataIndex: "status2",
-      key: "status",
-    },    {
-      title: "STATUS3",
-      dataIndex: "status3",
-      key: "status",
-    },    {
-      title: "STATUS4",
-      dataIndex: "status4",
-      key: "status",
-    },    {
-      title: "STATUS5",
-      dataIndex: "status5",
-      key: "status",
-    },    {
-      title: "STATUS6",
-      dataIndex: "status6",
-      key: "status",
-      fixed: "right"
-    },    {
+      title: "DUE DATE",
+      dataIndex: "dueDateLabel",
+      key: "dueDate",
+    },
+    {
+      title: "COMPLETED DATE",
+      dataIndex: "completedDateLabel",
+      key: "completedDate",
+    },
+    {
+      title: "ASSIGNED TO",
+      dataIndex: "assignedToLabel",
+      key: "assignedTo",
+    },
+    {
       title: "ACTIONS",
       key: "actions",
       width: 150,
       fixed: "right",
       render: (_, record) => (
-        <Space size="small">
-          <Button type="link" onClick={() => setIsOpen(true)}>
-            Detail
-          </Button>
-          <Button
-            type="link"
-            icon={<EditOutlined />}
-            onClick={() => console.log("edit")}
-          >
-            Edit
-          </Button>
-
+        <div className="flex justify-center align-middle gap-2 py-1">
+          <Tooltip title="Detail">
+            <Button
+              type="table-action"
+              onClick={() => {
+                setSelectedPrerequisite(record);
+                setIsOpen(true);
+              }}
+            >
+              <SVGIcon name="IconDetail" width={20} />
+            </Button>
+          </Tooltip>
           <Popconfirm
-            title="Are you sure?"
-            onConfirm={() => console.log("delete")}
+            title="Are you sure you want to delete this prerequisite?"
+            onConfirm={() => handleDelete(record)}
             okText="Yes"
             cancelText="No"
           >
-            <Button type="link" danger icon={<DeleteOutlined />}>
-              Delete
-            </Button>
+            <Tooltip title="Delete">
+              <Button type="table-action">
+                <SVGIcon name="IconDelete" width={20} />
+              </Button>
+            </Tooltip>
           </Popconfirm>
-        </Space>
+        </div>
       ),
     },
   ];
 
-  const handleChange = (pageChange, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
-    setPage(tempPage);
-    setPageSize(pageSizeChange);
-  };
-
   const handleCreateClick = () => {
-    // Use getFieldsValue(true) to get ALL fields, not just touched ones
     const currentFormData = form?.getFieldsValue(true);
-    // Check if required service request fields are filled
-    const requiredFields = [
-      "type",
-      "category",
-      "subCategory",
-      "channel",
-      "priority",
-      "requestSource",
-      "requestDate",
-    ];
-    const missingFields = requiredFields.filter(
-      (field) => !currentFormData?.[field],
-    );
-
     const serializedData = {
       ...currentFormData,
-      // Moment objects have toISOString() method, use it to convert to string
-      requestDate:
-        currentFormData?.requestDate &&
-        currentFormData.requestDate._isAMomentObject
-          ? currentFormData.requestDate.toISOString()
-          : currentFormData?.requestDate,
+      requestDate: currentFormData?.requestDate?._isAMomentObject
+        ? currentFormData.requestDate.toISOString()
+        : currentFormData?.requestDate,
     };
 
-    navigate(
-      "/account-management/account-standard/service-requests/pre-requisites/create",
-      {
-        state: {
-          account,
-          customer,
-          serviceRequestData: serializedData,
-          fromWizard: true,
-          returnPath: window.location.pathname,
-          returnToStep: currentStep || 2, // Pass the current step index (PreRequisite is step 2)
-          // Pass original wizard state so it can be restored
-          id: location?.state?.id,
-          idAccount: location?.state?.idAccount,
-          idCustomer: location?.state?.idCustomer,
-          type: location?.state?.type,
-        },
+    // Simpan ke sessionStorage agar tidak hilang saat halaman remount
+    try {
+      sessionStorage.setItem("srWizardFormData", JSON.stringify(serializedData));
+    } catch (_) {}
+
+    const basePath = location?.pathname?.includes("account-standard")
+      ? "/account-management/account-standard"
+      : "/account-management/account-onetime";
+
+    navigate(`${basePath}/service-requests/pre-requisites/create`, {
+      state: {
+        account,
+        customer,
+        serviceRequestData: serializedData,
+        srId,
+        accountId,
+        fromWizard: true,
+        returnPath: location?.pathname,
+        returnToStep: currentStep ?? 2,
       },
-    );
+    });
   };
 
   return (
     <Fragment>
       <NxCardContainer header={"PREREQUISITE LIST"}>
         <NxBaseContainer border>
-        {/* Create Button */}
-        <div className="w-full flex justify-end items-center gap-2.5 mb-5">
-          <ButtonComponent
-            type={"submit"}
-            onClick={handleCreateClick}
-            icon={
-              <PlusOutlined
-                style={{
-                  color: "#fff",
-                  fontSize: 20,
-                }}
-              />
-            }
-            style={{
-              backgroundColor: "#0075bf",
-              color: "#fff",
-              borderColor: "#0075bf",
-              border: "1px solid #0075bf",
-              borderRadius: "5px",
-              height: "48px",
-            }}
-          >
-            Create
-          </ButtonComponent>
-        </div>
+          {/* Create Button */}
+          <div className="w-full flex justify-end items-center">
+            <Button
+              icon={<SVGIcon name="IconButtonCreate" width={14} />}
+              type={"submit"}
+              border={false}
+              onClick={handleCreateClick}
+            >
+              Create
+            </Button>
+          </div>
 
-        {/* Main Contact Table */}
-        <NxTable
-          className="border-[0.5px] border-[#c8cdd4] border-solid "
-          usePagination={true}
-          useSelect={true}
-          dataMain={paginatedData}
-          totalData={PREREQUISITE.length}
-          current={page}
-          pageSize={pageSize}
-          columnMain={columnMain}
-          fontSize={"medium"}
-          dataExpand={null}
-          columnExpand={null}
-          useCheckbox={true}
-          rowKey={(PREREQUISITE) => PREREQUISITE.no}
-          onSelectionChange={(keys, rows) => {
-            console.log("Selected keys:", keys);
-            console.log("Full row data:", rows); // All props of selected rows
-          }}
-          onChange={handleChange}
-          getCheckboxProps={(record) => ({
-            disabled: record.status === "Inactive",
-          })}
-          border="true"
-        />
+          {/* Prerequisite Table */}
+          <NxTable
+            idTable="prerequisite-table"
+            usePagination={false}
+            useInfiniteScroll={!isCreateFlow}
+            onLoadMore={handleLoadMore}
+            hasMore={isCreateFlow ? false : prereqHasMore}
+            useSelect={true}
+            dataMain={isCreateFlow ? localPrereqs : prereqData}
+            columnMain={columnMain}
+            fontSize={"medium"}
+            loading={isCreateFlow ? false : prereqLoading}
+            tableScrolled={{ x: "max-content", y: 400 }}
+            border="true"
+          />
         </NxBaseContainer>
       </NxCardContainer>
 
       <ModalPreRequisiteDetail
         isOpen={isOpen}
-        footer={null}
-        handleCancel={() => {
-          setIsOpen(false);
-        }}
-        handleOk={() => {
-          setIsOpen(false);
-        }}
+        data={selectedPrerequisite}
+        handleCancel={() => setIsOpen(false)}
+        handleOk={() => setIsOpen(false)}
       />
     </Fragment>
   );

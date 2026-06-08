@@ -1,10 +1,12 @@
 import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link, useNavigate } from "react-router-dom";
-import { Spin, Tooltip } from "antd";
+import { Link } from "react-router-dom";
+import { Tooltip } from "antd";
+import axios from "axios";
+import { configApp } from "../../../../constants/configApp";
+import { tokenHeader } from "../../../../utils/tokenHeader";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { INVOICE_ROUTES } from "../../../../routes/invoice/invoice_routes";
 import SVGIcon from "../../../../assets/Icon/index";
 import { columnsTaxExemption } from "./TableViewTaxExemption";
@@ -26,7 +28,6 @@ const ViewTaxExemption = () => {
 
   // Declaration
   const dispatch = useDispatch();
-  const navigate = useNavigate();
   const searchInput = useRef(null);
 
   const dataSource = data?.result || [];
@@ -175,6 +176,25 @@ const ViewTaxExemption = () => {
     setSort(dataSort);
   };
 
+  // Preview proforma invoice handler
+  const handlePreview = async (record) => {
+    try {
+      const response = await axios.get(
+        configApp.RATING_BILLING_SERVICE +
+          `/v1/dbs/api/rbi/proforma-invoice/download/latest/${record?.proformaInvoiceNumber}`,
+        {
+          headers: tokenHeader(),
+          responseType: "arraybuffer",
+        },
+      );
+      const blob = new Blob([response.data], { type: "application/pdf" });
+      const blobUrl = URL.createObjectURL(blob);
+      window.open(blobUrl, "_blank", "noopener,noreferrer");
+    } catch (error) {
+      console.error("Error previewing proforma invoice:", error);
+    }
+  };
+
   // Refresh handler
   const handleRefresh = () => {
     const searchParam = Object.keys(search).some((k) => search[k])
@@ -239,33 +259,33 @@ const ViewTaxExemption = () => {
       render: (record) => {
         const isDraft = record?.statusApproval === "DRAFT";
         return (
-          <Tooltip title={isDraft ? "Create Tax Exemption" : "Only available for DRAFT status"}>
-            <span>
-              <ButtonComponent
-                type="ghost"
-                border={false}
-                disabled={!isDraft}
-                icon={
-                  <SVGIcon
-                    name="IconButtonCreate"
-                    width={20}
-                    style={{ filter: isDraft ? "invert(1)" : "invert(0.5)" }}
-                  />
-                }
-                onClick={() => {
-                  if (!isDraft) return;
-                  setSelectedRecord(record);
-                  setModalCreate(true);
-                }}
-                style={{
-                  cursor: isDraft ? "pointer" : "not-allowed",
-                  display: "inline-block",
-                  lineHeight: 0,
-                }}
-              >
-                Create Tax Exemption
-              </ButtonComponent>
-            </span>
+          <Tooltip
+            title={
+              isDraft
+                ? "Create Tax Exemption"
+                : "Only available for DRAFT status"
+            }
+          >
+            <div
+              // disabled={!isDraft}
+              onClick={() => {
+                if (!isDraft) return;
+                setSelectedRecord(record);
+                setModalCreate(true);
+              }}
+              style={{
+                display: "inline-block",
+                lineHeight: 0,
+                cursor: isDraft ? "pointer" : "not-allowed",
+                opacity: isDraft ? 1 : 0.4,
+              }}
+            >
+              <SVGIcon
+                name="IconButtonCreate"
+                width={20}
+                style={{ filter: isDraft ? "invert(1)" : "invert(0.5)" }}
+              />
+            </div>
           </Tooltip>
         );
       },
@@ -276,19 +296,16 @@ const ViewTaxExemption = () => {
       type: "table",
       render: (record) => (
         <Tooltip title="Approval History">
-          <ButtonComponent
-            type="ghost"
-            border={false}
+          <div
             onClick={() => handleApprovalHistory(record?.taxExemptionId)}
-            icon={<SVGIcon name="IconLogHistory" width={20} />}
             style={{
               cursor: "pointer",
               display: "inline-block",
               lineHeight: 0,
             }}
           >
-            Approval History
-          </ButtonComponent>
+            <SVGIcon name="IconLogHistory" width={20} />
+          </div>
         </Tooltip>
       ),
     },
@@ -323,7 +340,7 @@ const ViewTaxExemption = () => {
     itemGrantAccess,
   ).map((col) => ({
     ...col,
-    width: 100,
+    width: 60,
     align: "center",
   }));
 
@@ -335,6 +352,7 @@ const ViewTaxExemption = () => {
       searchedColumn,
       searchText,
       handleSearch,
+      handlePreview,
     );
 
     const allCols = [...taxExemptionCols, ...actionCols];
@@ -391,8 +409,8 @@ const ViewTaxExemption = () => {
   }, [baseColumns, fixedColumns]);
 
   return (
-    <LayoutMenu>
-      <Spin spinning={loading || false}>
+    <>
+      <>
         <BreadCrumb routes={routes} />
 
         <CardContainer
@@ -416,6 +434,8 @@ const ViewTaxExemption = () => {
               columnDefinitions={columnDefinitions}
               fixedColumns={fixedColumns}
               setFixedColumns={setFixedColumns}
+              loading={loading}
+              showRefresh={true}
               showExport={false}
               usePagination={false}
               useInfiniteScroll={true}
@@ -455,8 +475,8 @@ const ViewTaxExemption = () => {
           dataApprover={dataApprovalHistory?.dataApprover}
           dataHistory={dataApprovalHistory?.dataHistory}
         />
-      </Spin>
-    </LayoutMenu>
+      </>
+    </>
   );
 };
 

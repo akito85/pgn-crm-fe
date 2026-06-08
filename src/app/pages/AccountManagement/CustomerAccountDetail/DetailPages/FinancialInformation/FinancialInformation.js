@@ -1,5 +1,6 @@
 import { useEffect, memo } from "react";
 import { Collapse } from "antd";
+import { DownOutlined } from "@ant-design/icons";
 import { useLocation } from "react-router-dom";
 import { useState } from "react";
 import { Fragment } from "react";
@@ -15,6 +16,7 @@ import { getGrantedAccessAccount } from "../../../../../../redux/slices/account_
 import InvoiceRelation from "./InvoiceRelation/InvoiceRelation";
 import { usePrevLocContext } from "../../../../../../utils/usePrevLoc";
 import NxBaseContainer from "../../../../../../components/Nx/NxBaseContainer";
+import SVGIcon from "../../../../../../assets/Icon/index";
 
 const { Panel } = Collapse;
 
@@ -124,8 +126,8 @@ const FinancialInformation = ({
       header: "Invoice Relation",
       children: (
         <InvoiceRelation
-          id={id}
-          idCustomer={idCustomer}
+          accountId={id}
+          customerId={idCustomer}
           isActive={current === 7}
         />
       ),
@@ -166,8 +168,8 @@ const FinancialInformation = ({
   };
 
   const headerStyle = {
-    fontSize: 15,
-    fontWeight: 500,
+    fontSize: 16,
+    fontWeight: 400,
     color: "#0075bf",
     textTransform: "uppercase",
   };
@@ -185,6 +187,18 @@ const FinancialInformation = ({
 								(e) => handleCollapse(e,index)
 							}
               style={collapseStyle}
+              expandIconPosition="end"
+              expandIcon={({ isActive }) => (
+                <SVGIcon
+                  name="IconChevronDown"
+                  width={24}
+                  className="text-black"
+                  style={{
+                    transform: `translateY(-50%) rotate(${isActive ? 180 : 0}deg)`,
+                    transition: "transform 0.3s",
+                  }}
+                />
+              )}
             >
               <Panel
                 header={

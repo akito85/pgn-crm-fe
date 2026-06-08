@@ -9,10 +9,11 @@ import { columnsReceipt } from "../ColumnReceiptView";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 import receiptCollectionHttpService from "../../../../../redux/services/receiptCollectionHttpService";
 import { configApp } from "../../../../../constants/configApp";
-import { getReceiptCustomerList, getListCategoryReceipt } from "../../../../../redux/slices/receipt_collection/receipt";
+import { getReceiptCustomerList, getListCategoryReceipt, getAllApprovalListReceipt, getListApprovalByIdReceipt } from "../../../../../redux/slices/receipt_collection/receipt";
 import RadioTabs from "../../../../../components/RadioTabs";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import { FormStepper } from "../../../../../components/FormStepNavigation";
+import ApprovalSectionForm from "../../../ProductAndPromo/Pricing/Form/ApprovalSectionForm";
 
 const ModalRefundReceipt = ({
     isOpen,
@@ -20,9 +21,14 @@ const ModalRefundReceipt = ({
     onSubmit,
 }) => {
     const dispatch = useDispatch();
-    const { data_customer_list, loading } = useSelector((state) => state.receipt);
+    const { data_customer_list, loading, dataListAppHierId, dataListAppHierDetail } = useSelector((state) => state.receipt);
 
     const [currentStep, setCurrentStep] = useState(0);
+
+    // Approval State
+    const [appHierOptions, setAppHierOptions] = useState([]);
+    const [appHierDataDetail, setAppHierDataDetail] = useState([]);
+    const [selectedAppHierId, setSelectedAppHierId] = useState(null);
 
     // Step 1 Selection State
     const [localSelectedData, setLocalSelectedData] = useState([]);
@@ -92,9 +98,34 @@ const ModalRefundReceipt = ({
             setLocalSelectedData([]);
             setSelectedRowKeys([]);
             setPage(1);
+            setSelectedAppHierId(null);
+            setAppHierDataDetail([]);
             dispatch(getReceiptCustomerList({ page: 1, pageSize: 10, sort: "createdDate~desc" }));
+            dispatch(getAllApprovalListReceipt());
         }
     }, [isOpen, dispatch]);
+
+    // Sync approval hierarchy options
+    useEffect(() => {
+        if (dataListAppHierId && dataListAppHierId.length > 0) {
+            setAppHierOptions(dataListAppHierId.map((a) => ({ name: a.approvalName, value: a.appHierId })));
+        }
+    }, [dataListAppHierId]);
+
+    // Sync approval hierarchy detail
+    useEffect(() => {
+        if (selectedAppHierId) {
+            dispatch(getListApprovalByIdReceipt({ id: selectedAppHierId }));
+        }
+    }, [selectedAppHierId, dispatch]);
+
+    useEffect(() => {
+        if (dataListAppHierDetail && dataListAppHierDetail.length > 0) {
+            setAppHierDataDetail(dataListAppHierDetail.map((a, idx) => ({ ...a, key: idx + 1, employeeDetail: a.employeeDetail?.map((b, i) => ({ ...b, key: i + 1 })) || [] })));
+        } else {
+            setAppHierDataDetail([]);
+        }
+    }, [dataListAppHierDetail]);
 
     // Fetch eligible receipts when entering Step 2 (Approved & Balance > 0)
     useEffect(() => {
@@ -139,6 +170,10 @@ const ModalRefundReceipt = ({
             key: "refundReceiptInfo",
         },
         {
+            title: "Approval",
+            key: "approvalInfo",
+        },
+        {
             title: "Attachment",
             key: "attachmentInfo",
         },
@@ -178,6 +213,12 @@ const ModalRefundReceipt = ({
                 return;
             }
         }
+
+        // Validate Approval step
+        if (currentStep === 4 && !selectedAppHierId) {
+            message.warning("Please select an Approval Hierarchy.");
+            return;
+        }
         
         setCurrentStep(currentStep + 1);
     };
@@ -196,7 +237,26 @@ const ModalRefundReceipt = ({
             return;
         }
 
-        onSubmit(localSelectedData);
+        if (!selectedAppHierId) {
+            message.warning("Please select an Approval Hierarchy.");
+            return;
+        }
+
+        // Build the receipts payload from selectedReceipts and refundReceiptAmountData
+        const receiptsPayload = selectedReceipts.map((r) => ({
+            receiptId: r.id,
+            refundAmount: refundReceiptAmountData[r.key] || refundReceiptAmountData[r.id] || 0,
+            remark: remarkStep4,
+        }));
+
+        onSubmit({
+            customerId: localSelectedData[0]?.customerId || localSelectedData[0]?.key,
+            appHierId: selectedAppHierId,
+            refundDate: refundDate?.toDate(),
+            remark: remarkStep3,
+            attachmentIds: listDataAttachment.map((a) => a.id).filter(Boolean),
+            receipts: receiptsPayload,
+        });
     };
 
     const onSelectChange = (newSelectedRowKeys, newSelectedRows) => {
@@ -230,7 +290,7 @@ const ModalRefundReceipt = ({
             key: "costCenter",
             sorter: true,
             width: 200,
-            render: (val) => val || "-"
+            render: (val) => val || ""
         },
         {
             title: "CUSTOMER NUMBER",
@@ -250,7 +310,7 @@ const ModalRefundReceipt = ({
             dataIndex: "accountNumber",
             key: "accountNumber",
             width: 200,
-            render: (_, record) => record.accountNumber || record.accountId || "-"
+            render: (_, record) => record.accountNumber || record.accountId || ""
         },
         {
             title: "TOTAL UNAPPLY AMOUNT",
@@ -281,7 +341,7 @@ const ModalRefundReceipt = ({
             dataIndex: "costCenter",
             key: "costCenter",
             width: 200,
-            render: (val) => val || "-"
+            render: (val) => val || ""
         },
         {
             title: "CUSTOMER NUMBER",
@@ -301,7 +361,7 @@ const ModalRefundReceipt = ({
             dataIndex: "accountNumber",
             key: "accountNumber",
             width: 200,
-            render: (_, record) => record.accountNumber || record.accountId || "-"
+            render: (_, record) => record.accountNumber || record.accountId || ""
         },
         {
             title: "TOTAL UNAPPLY AMOUNT",
@@ -562,7 +622,21 @@ const ModalRefundReceipt = ({
                         </div>
                     </div>
                 );
-            case 4: // Attachment Information
+            case 4: // Approval Information
+                return (
+                    <div className="flex flex-col gap-4">
+                        <div className="flex justify-between items-center">
+                            <h3 className="text-blue-500 font-bold uppercase">Approval Information</h3>
+                        </div>
+                        <ApprovalSectionForm
+                            dataTable={appHierDataDetail}
+                            dataOption={appHierOptions}
+                            selectedHierarchy={selectedAppHierId}
+                            updateSelectedHierarchy={setSelectedAppHierId}
+                        />
+                    </div>
+                );
+            case 5: // Attachment Information
                 return (
                     <div className="flex flex-col gap-4">
                         <div className="flex justify-between items-center">
@@ -580,7 +654,7 @@ const ModalRefundReceipt = ({
                         />
                     </div>
                 );
-            case 5: // Confirmation
+            case 6: // Confirmation
                 return (
                     <div className="flex flex-col gap-4">
                         <div className="w-full">
@@ -588,6 +662,7 @@ const ModalRefundReceipt = ({
                                 data={[
                                     { value: "Customer", label: "Customer" },
                                     { value: "Refund", label: "Refund" },
+                                    { value: "Approval", label: "Approval" },
                                     { value: "Attachment", label: "Attachment" },
                                 ]}
                                 currentPosition={confirmationTab}
@@ -608,11 +683,11 @@ const ModalRefundReceipt = ({
                                         />
                                         <div className="mt-4">
                                             <p className="mb-2 font-bold">Refund Date</p>
-                                            <div className="text-gray-700">{refundDate?.format('DD MMM YYYY') || "-"}</div>
+                                            <div className="text-gray-700">{refundDate?.format('DD MMM YYYY') || ""}</div>
                                         </div>
                                         <div className="mt-4">
                                             <p className="mb-2 font-bold">Remark</p>
-                                            <div className="text-gray-700">{remarkStep3 || "-"}</div>
+                                            <div className="text-gray-700">{remarkStep3 || ""}</div>
                                         </div>
                                     </>
                                 )}
@@ -630,9 +705,18 @@ const ModalRefundReceipt = ({
                                         />
                                         <div className="mt-4">
                                             <p className="mb-2 font-bold">Remark</p>
-                                            <div className="text-gray-700">{remarkStep4 || "-"}</div>
+                                            <div className="text-gray-700">{remarkStep4 || ""}</div>
                                         </div>
                                     </>
+                                )}
+                                {confirmationTab === "Approval" && (
+                                    <ApprovalSectionForm
+                                        showSelect={false}
+                                        disableSelect={true}
+                                        approvalName={appHierOptions.find((o) => o.value === selectedAppHierId)?.name}
+                                        dataTable={appHierDataDetail}
+                                        selectedHierarchy={selectedAppHierId}
+                                    />
                                 )}
                                 {confirmationTab === "Attachment" && (
                                     <AttachmentComponent

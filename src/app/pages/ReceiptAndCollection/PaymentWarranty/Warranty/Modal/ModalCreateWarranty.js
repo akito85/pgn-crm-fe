@@ -9,7 +9,7 @@ import InputComponent from "../../../../../../components/InputComponent";
 import { FormStepper, FormFooter } from "../../../../../../components/FormStepNavigation";
 import ApprovalSectionForm from "../../../../ProductAndPromo/Pricing/Form/ApprovalSectionForm";
 import AttachmentComponent from "../../../../../../components/Attachment/AttachmentComponent";
-import { dateFormatting, hasValue, parseMonetaryValue } from "../../../../../../utils";
+import { hasValue } from "../../../../../../utils";
 
 // Redux Actions
 import {
@@ -18,10 +18,10 @@ import {
     getListApprovalById,
     getPaymentWarrantyPartnerList,
     getPaymentWarrantyPartnerBranchList,
+    getWarrantyRate,
 } from "../../../../../../redux/slices/receipt_collection/warranty";
 
 import {
-    getConvertedCurrency,
     getAllAccountNumberDDL,
     getAccountNumberDDL,
     resetDataAccountNumber,
@@ -30,6 +30,8 @@ import {
     getRateTypeDDL,
     getListCategoryReceipt,
 } from "../../../../../../redux/slices/receipt_collection/receipt";
+
+import { CLAIM_PERIOD_TERM_TYPES } from "../../../../../../constants/warranty";
 
 import { configApp } from "../../../../../../constants/configApp";
 import receiptCollectionHttpService from "../../../../../../redux/services/receiptCollectionHttpService";
@@ -45,7 +47,7 @@ const ModalCreateWarranty = ({
     const dispatch = useDispatch();
 
     // Redux Warranty state
-    const { dataListAppHierId, dataListAppHierDetail, loading, dataPaymentWarrantyPartner, dataPaymentWarrantyPartnerBranch } = useSelector((state) => state.warranty);
+    const { dataListAppHierId, dataListAppHierDetail, loading, dataPaymentWarrantyPartner, dataPaymentWarrantyPartnerBranch, warrantyRate } = useSelector((state) => state.warranty);
 
     // Redux Receipt state (reusing master data)
     const {
@@ -54,7 +56,6 @@ const ModalCreateWarranty = ({
         payGatewayDDL,
         currencyDDL,
         rateTypeDDL,
-        data_converted_currency
     } = useSelector((state) => state.receipt);
 
     const [current, setCurrent] = useState(0);
@@ -121,7 +122,8 @@ const ModalCreateWarranty = ({
 
     // Format auto-filled Account Data
     useEffect(() => {
-        if (dataAccountNumber && dataAccountNumber.data) {
+        const currentAccountId = form.getFieldValue("accountId");
+        if (dataAccountNumber && dataAccountNumber.data && currentAccountId) {
             form.setFieldsValue({
                 accountName: dataAccountNumber.data.accountName,
                 cusNumber: dataAccountNumber.data.customerNumber,
@@ -142,46 +144,38 @@ const ModalCreateWarranty = ({
         } else {
             dispatch(getAllAccountNumberDDL());
             dispatch(resetDataAccountNumber());
-            form.resetFields([
-                "accountName", "cusNumber", "cusName",
-                "costCenterCode", "costCenterName", "segment",
-                "accountGroupType", "accountType", "classificationType"
-            ]);
+            form.setFieldsValue({
+                accountName: null, cusNumber: null, cusName: null,
+                costCenterCode: null, costCenterName: null, segment: null,
+                accountGroupType: null, accountType: null, classificationType: null
+            });
         }
     };
 
     // --- Rate Amount Logic ---
-    const [requestBodyConvertedRate, setRequestBodyConvertedRate] = useState({});
-
     useEffect(() => {
-        const { fromCurrency, toCurrency, rateType, rateDate } = requestBodyConvertedRate;
-        if (fromCurrency && toCurrency && rateType && rateDate) {
-            const body = {
-                ...requestBodyConvertedRate,
-                rateType: rateTypeDDL?.data?.filter((item) => item?.id === rateType)[0]?.name,
-            };
-            dispatch(getConvertedCurrency(body));
-        }
-    }, [dispatch, requestBodyConvertedRate, rateTypeDDL]);
-
-    useEffect(() => {
-        if (hasValue(data_converted_currency) && Object.keys(data_converted_currency).length !== 0) {
-            const rateAmountValue = data_converted_currency?.convertedRate?.toLocaleString(
+        if (warrantyRate?.convertedRate != null) {
+            const rateAmountValue = warrantyRate.convertedRate.toLocaleString(
                 "en-US",
                 { minimumFractionDigits: 2, maximumFractionDigits: 2 }
             );
             form.setFieldsValue({ rateAmount: rateAmountValue });
         }
-    }, [data_converted_currency, form]);
+    }, [warrantyRate, form]);
 
     const onFormValuesChange = (changedValues, allValues) => {
-        if (changedValues.currency || changedValues.convertedCurrency || changedValues.rateType || changedValues.rateDate) {
-            setRequestBodyConvertedRate({
-                fromCurrency: allValues.currency,
-                toCurrency: allValues.convertedCurrency || allValues.currency,
-                rateType: allValues.rateType,
-                rateDate: allValues.rateDate ? moment(allValues.rateDate).format(dateFormatting.date) : null
-            });
+        const isCash = allValues.warrantyType === 'CASH';
+        const warrantyTypeChanged = 'warrantyType' in changedValues;
+        const currencyChanged = 'currency' in changedValues;
+        const rateTypeChanged = 'rateType' in changedValues;
+        const rateDateChanged = 'rateDate' in changedValues;
+        if (isCash && (warrantyTypeChanged || currencyChanged || rateTypeChanged || rateDateChanged)) {
+            const fromCurrency = allValues.currency;
+            const rateTypeName = rateTypeDDL?.data?.find((item) => item?.id === allValues.rateType)?.name;
+            const rateDate = allValues.rateDate ? moment(allValues.rateDate).format('YYYY-MM-DD') : null;
+            if (fromCurrency && rateTypeName && rateDate) {
+                dispatch(getWarrantyRate({ fromCurrency, rateType: rateTypeName, rateDate }));
+            }
         }
     };
 
@@ -214,7 +208,6 @@ const ModalCreateWarranty = ({
         setCurrent(0);
         setListDataAttachment([]);
         setSelectedHierarchy(null);
-        setRequestBodyConvertedRate({});
         dispatch(resetDataAccountNumber());
         form.resetFields();
     };
@@ -230,9 +223,12 @@ const ModalCreateWarranty = ({
             const values = await form.validateFields();
 
             // Format Term of Claim Period
-            let claimValue = values.claimPeriodTermValue;
-            if (claimValue) {
-                claimValue = parseInt(claimValue, 10);
+            let claimValue = null;
+            let claimDate = null;
+            if (values.claimPeriodTermType === CLAIM_PERIOD_TERM_TYPES.DATE || values.claimPeriodTermType === 'Date') {
+                if (values.claimPeriodTermDate) claimDate = moment(values.claimPeriodTermDate).format("YYYY-MM-DD");
+            } else {
+                if (values.claimPeriodTermValue) claimValue = parseInt(values.claimPeriodTermValue, 10);
             }
 
             // Format Amount Rate
@@ -253,8 +249,9 @@ const ModalCreateWarranty = ({
                 rateDate: moment(values.rateDate).format("YYYY-MM-DD"),
                 effectiveStartDate: moment(values.effStartDate).format("YYYY-MM-DD"),
                 effectiveEndDate: moment(values.effEndDate).format("YYYY-MM-DD"),
-                claimPeriodTermType: (values.claimPeriodTermType || "Date").toUpperCase(),
+                claimPeriodTermType: values.claimPeriodTermType || CLAIM_PERIOD_TERM_TYPES.DATE,
                 claimPeriodTermValue: claimValue,
+                claimPeriodTermDate: claimDate,
                 description: values.description,
                 isDraft: isDraft,
                 partners: [
@@ -290,6 +287,8 @@ const ModalCreateWarranty = ({
             handleRefresh();
             handleBackForm();
         } catch (error) {
+            const errorMsg = error?.response?.data?.message || error?.message || 'Failed to save warranty';
+            message.error(`Save failed: ${errorMsg}`);
             console.error(error);
         } finally {
             setLoadingSave(false);
@@ -335,17 +334,21 @@ const ModalCreateWarranty = ({
                             <Col span={8}>
                                 <Form.Item name="accountId" label="Account Number" rules={[{ required: true }]}>
                                     <Select
-                                        placeholder="Select Account"
+                                        placeholder="Select Account Number"
                                         onChange={handleAccountChange}
                                         showSearch
                                         optionFilterProp="children"
-                                        options={
-                                            dataAccNumber?.data?.map((item) => ({
+                                        allowClear={true}
+                                        filterOption={(input, option) =>
+                                            (option?.children ?? '').toLowerCase().includes(input.toLowerCase())
+                                        }
+                                    >
+                                        {dataAccNumber?.data?.map((item) => ({
                                                 label: item.name,
                                                 value: item.id,
                                             })) || []
                                         }
-                                    />
+                                    </Select>
                                 </Form.Item>
                             </Col>
                             <Col span={8}>
@@ -487,19 +490,30 @@ const ModalCreateWarranty = ({
                                 </Form.Item>
                             </Col>
 
-                            <Col span={8}>
+                            <Col span={10}>
                                 <Form.Item label="Term Of Claim Period" style={{ marginBottom: 0 }}>
-                                    <Input.Group compact className="flex gap-2">
-                                        <Form.Item name="claimPeriodTermType" style={{ width: '40%', marginBottom: 0 }}>
-                                            <Select placeholder="Type" defaultValue="Date">
-                                                <Option value="Date">Date</Option>
-                                                <Option value="Days">Days</Option>
+                                    <div className="flex gap-2 w-full">
+                                        <Form.Item name="claimPeriodTermType" style={{ flex: '0 0 75px', marginBottom: 0 }}>
+                                            <Select placeholder="Type" defaultValue={CLAIM_PERIOD_TERM_TYPES.DATE}>
+                                                <Option value={CLAIM_PERIOD_TERM_TYPES.DATE}>Date</Option>
+                                                <Option value={CLAIM_PERIOD_TERM_TYPES.AFTER}>After</Option>
                                             </Select>
                                         </Form.Item>
-                                        <Form.Item name="claimPeriodTermValue" style={{ width: '60%', marginBottom: 0 }}>
-                                            <Input maxLength={2} placeholder="Input Value" onInput={(e) => { e.target.value = e.target.value.replace(/[^0-9]/g, ''); }} className="w-full" style={{ borderRadius: '8px', padding: '8px 12px' }} />
+                                        <Form.Item noStyle shouldUpdate={(prevValues, currentValues) => prevValues.claimPeriodTermType !== currentValues.claimPeriodTermType}>
+                                            {({ getFieldValue }) => {
+                                                const termType = getFieldValue('claimPeriodTermType') || CLAIM_PERIOD_TERM_TYPES.DATE;
+                                                return termType === CLAIM_PERIOD_TERM_TYPES.DATE || termType === 'Date' ? (
+                                                    <Form.Item name="claimPeriodTermDate" style={{ flex: 1, marginBottom: 0 }} rules={[{ required: true }]}>
+                                                      <DatePicker placeholder="Select Date" className="w-full" style={{ borderRadius: '8px', minWidth: 0 }} />
+                                                    </Form.Item>
+                                                ) : (
+                                                    <Form.Item name="claimPeriodTermValue" style={{ flex: 1, marginBottom: 0 }} rules={[{ required: true }]}>
+                                                      <Input maxLength={2} placeholder="Input Value" onInput={(e) => { e.target.value = e.target.value.replace(/[^0-9]/g, ''); }} className="w-full" style={{ borderRadius: '8px', padding: '8px 12px', minWidth: 0 }} />
+                                                    </Form.Item>
+                                                );
+                                            }}
                                         </Form.Item>
-                                    </Input.Group>
+                                    </div>
                                 </Form.Item>
                             </Col>
                             <Col span={24}>

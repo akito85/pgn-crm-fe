@@ -53,7 +53,8 @@ const ModalApprovalGLAccount = ({
   const [bodyError, setBodyError] = useState({});
 
   const [fixedColumns, setFixedColumns] = useState({
-    no: "left",
+    left: ["no"],
+    right: [],
   });
 
   // Use Effect

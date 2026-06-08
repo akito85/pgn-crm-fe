@@ -3,28 +3,41 @@ import { toTitleCase } from "../../../../../../utils";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
 import StatusComponent from "../../../../../../components/StatusComponent";
 
-const getServiceRequestColumns = (
+/**
+ * Returns the column definitions for the Service Request list table.
+ *
+ * @param {Object}          params                    - Column configuration options.
+ * @param {Object}          params.search             - Current active search/filter values keyed by column dataIndex.
+ * @param {React.RefObject} params.searchInput        - Ref to the search input element (used for focus).
+ * @param {string}          params.searchedColumn     - The dataIndex of the column currently being searched.
+ * @param {string}          params.searchText         - The current search text value.
+ * @param {Function}        params.handleSearch       - Callback invoked when a search/filter is confirmed.
+ * @param {boolean}         [params.isApproval=false] - When true, fixes the NO column left and shows the statusApproval column.
+ * @returns {Array<Object>} Array of Ant Design column definition objects.
+ */
+const getServiceRequestColumns = ({
   search,
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch
-) => [
+  handleSearch,
+  isApproval = false
+}) => [
   {
     key: "no",
     title: "NO",
     align: "center",
     dataIndex: "no",
     width: 50,
+    fixed: isApproval ? "left" : undefined,
     render: (_, __, index) => index + 1,
   },
   {
     key: "serviceRequestNumber",
-    title: "SERVICE REQUEST NUMBER",
+    title: "SR NUMBER",
     dataIndex: "serviceRequestNumber",
-    width: 220,
+    width: 150,
     sorter: true,
-    filteredValue: [search?.serviceRequestNumber] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "serviceRequestNumber",
@@ -37,11 +50,10 @@ const getServiceRequestColumns = (
   },
   {
     key: "serviceRequestReference",
-    title: "SERVICE REQUEST REFERENCE",
+    title: "SR REFERENCE",
     dataIndex: "serviceRequestReference",
-    width: 230,
+    width: 150,
     sorter: true,
-    filteredValue: [search?.serviceRequestReference] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "serviceRequestReference",
@@ -63,7 +75,6 @@ const getServiceRequestColumns = (
     dataIndex: "type",
     width: 150,
     sorter: true,
-    filteredValue: [search?.type] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "type",
@@ -78,9 +89,8 @@ const getServiceRequestColumns = (
     key: "category",
     title: "CATEGORY",
     dataIndex: "category",
-    width: 160,
+    width: 150,
     sorter: true,
-    filteredValue: [search?.category] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "category",
@@ -95,9 +105,8 @@ const getServiceRequestColumns = (
     key: "subCategory",
     title: "SUB CATEGORY",
     dataIndex: "subCategory",
-    width: 160,
+    width: 150,
     sorter: true,
-    filteredValue: [search?.subCategory] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "subCategory",
@@ -112,12 +121,27 @@ const getServiceRequestColumns = (
     key: "channel",
     title: "CHANNEL",
     dataIndex: "channel",
-    width: 140,
+    width: 150,
     sorter: true,
-    filteredValue: [search?.channel] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "channel",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true
+    ),
+  },
+  {
+    key: "priority",
+    title: "PRIORITY",
+    dataIndex: "priority",
+    width: 150,
+    sorter: true,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "priority",
       searchInput,
       searchedColumn,
       searchText,
@@ -131,7 +155,6 @@ const getServiceRequestColumns = (
     dataIndex: "requestSource",
     width: 150,
     sorter: true,
-    filteredValue: [search?.requestSource] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "requestSource",
@@ -146,9 +169,8 @@ const getServiceRequestColumns = (
     key: "requestDate",
     title: "REQUEST DATE",
     dataIndex: "requestDate",
-    width: 180,
+    width: 140,
     sorter: true,
-    filteredValue: [search?.requestDate] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "requestDate",
@@ -164,9 +186,8 @@ const getServiceRequestColumns = (
     key: "openDate",
     title: "OPEN DATE",
     dataIndex: "openDate",
-    width: 180,
+    width: 140,
     sorter: true,
-    filteredValue: [search?.openDate] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "openDate",
@@ -182,9 +203,8 @@ const getServiceRequestColumns = (
     key: "resolvedDate",
     title: "RESOLVED DATE",
     dataIndex: "resolvedDate",
-    width: 180,
+    width: 140,
     sorter: true,
-    filteredValue: [search?.resolvedDate] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "resolvedDate",
@@ -200,9 +220,8 @@ const getServiceRequestColumns = (
     key: "closedDate",
     title: "CLOSED DATE",
     dataIndex: "closedDate",
-    width: 180,
+    width: 140,
     sorter: true,
-    filteredValue: [search?.closedDate] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "closedDate",
@@ -218,10 +237,9 @@ const getServiceRequestColumns = (
     key: "age",
     title: "AGE (HOUR)",
     dataIndex: "age",
-    width: 120,
+    width: 150,
     sorter: true,
     align: "center",
-    filteredValue: [search?.age] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "age",
@@ -239,7 +257,6 @@ const getServiceRequestColumns = (
     dataIndex: "description",
     width: 200,
     sorter: true,
-    filteredValue: [search?.description] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "description",
@@ -251,94 +268,29 @@ const getServiceRequestColumns = (
     ),
   },
   {
-    key: "statusApproval",
-    title: "STATUS APPROVAL",
-    dataIndex: "statusApproval",
-    width: 170,
+    key: "escalation",
+    title: "ESCALATION",
+    dataIndex: "escalation",
+    width: 150,
     sorter: true,
     align: "center",
-    filteredValue: [search?.statusApproval] || null,
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "statusApproval",
+      "escalation",
       searchInput,
       searchedColumn,
       searchText,
       handleSearch,
       true
     ),
-    render: (status) => {
-      const displayText = {
-        approved: "Approved",
-        APPROVED: "Approved",
-        waitingApproval: "Waiting Approval",
-        WAITING_APPROVAL: "Waiting Approval",
-        pending: "Pending",
-        PENDING: "Pending",
-        rejected: "Rejected",
-        REJECTED: "Rejected",
-      };
-      return (
-        <div className="flex justify-center">
-          <StatusComponent colour={status}>
-            {displayText[status] || toTitleCase(String(status || "")) || "-"}
-          </StatusComponent>
-        </div>
-      );
-    },
-  },
-  {
-    key: "statusPrerequisite",
-    title: "STATUS PRE-REQUISITE",
-    dataIndex: "statusPrerequisite",
-    width: 180,
-    sorter: true,
-    align: "center",
-    filteredValue: [search?.statusPrerequisite] || null,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "statusPrerequisite",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true
-    ),
-    render: (status) => {
-      const displayText = {
-        completed: "Completed",
-        COMPLETED: "Completed",
-        pending: "Pending",
-        PENDING: "Pending",
-        none: "None",
-        NONE: "None",
-      };
-      return (
-        <div className="flex justify-center">
-          <StatusComponent colour={status}>
-            {displayText[status] || toTitleCase(String(status || "")) || "-"}
-          </StatusComponent>
-        </div>
-      );
-    },
   },
   {
     key: "status",
     title: "STATUS",
     dataIndex: "status",
-    width: 130,
-    sorter: true,
+    width: 100,
     align: "center",
-    filteredValue: [search?.status] || null,
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "status",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch,
-      true
-    ),
+    fixed: "right",
     render: (status) => {
       const displayText = {
         inProgress: "In Progress",
@@ -356,13 +308,71 @@ const getServiceRequestColumns = (
       };
       return (
         <div className="flex justify-center">
-          <StatusComponent colour={status}>
+          <StatusComponent colour={status} size="small">
             {displayText[status] || toTitleCase(String(status || "")) || "-"}
           </StatusComponent>
         </div>
       );
     },
   },
-];
+  {
+    key: "statusPrerequisite",
+    title: "STATUS PRE-REQUISITE",
+    dataIndex: "statusPrerequisite",
+    width: 150,
+    align: "center",
+    fixed: "right",
+    render: (status) => {
+      const displayText = {
+        completed: "Completed",
+        COMPLETED: "Completed",
+        approve: "Approve",
+        APPROVE: "Approve",
+        approved: "Approve",
+        APPROVED: "Approve",
+        pending: "Pending",
+        PENDING: "Pending",
+        none: "None",
+        NONE: "None",
+      };
+      return (
+        <div className="flex justify-center">
+          <StatusComponent colour={status} size="small">
+            {displayText[status] || toTitleCase(String(status || "")) || "-"}
+          </StatusComponent>
+        </div>
+      );
+    },
+  },
+  !isApproval && {
+    key: "statusApproval",
+    title: "STATUS APPROVAL",
+    dataIndex: "statusApproval",
+    width: 140,
+    align: "center",
+    fixed: "right",
+    render: (status) => {
+      const displayText = {
+        draft: "Draft",
+        DRAFT: "Draft",
+        approved: "Approved",
+        APPROVED: "Approved",
+        waitingApproval: "Waiting Approval",
+        WAITING_APPROVAL: "Waiting Approval",
+        rejected: "Rejected",
+        REJECTED: "Rejected",
+        pending: "Pending",
+        PENDING: "Pending",
+      };
+      return (
+        <div className="flex justify-center">
+          <StatusComponent colour={status} size="small">
+            {displayText[status] || toTitleCase(String(status || "")) || "-"}
+          </StatusComponent>
+        </div>
+      );
+    },
+  },
+].filter(Boolean);
 
 export { getServiceRequestColumns };

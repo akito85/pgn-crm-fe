@@ -1,24 +1,19 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import moment from 'moment'
 
-import LayoutMenu from "../../../../../../../components/SidebarMenu/LayoutMenu";
-import BreadCrumbAdvanced from "../../../../../../../components/BreadCrumbAdvanced";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
-import DetailText from "../../../../../../../components/DetailText";
 import ServiceAgreementDetailCompoment from "./ServiceAgreementDetailCompoment";
 import Warranty from "./Warranty";
 import TosSubmission from "./TosSubmission";
 import ButtonComponent from "../../../../../../../components/ButtonComponent";
-import { LeftOutlined } from "@ant-design/icons";
 import HeaderDetail from "../../../HeaderDetail";
 import { approveOrRejectInactiveServiceAgreement, approveOrRejectServiceAgreement, getDetailServiceAgreement, getDetailServiceAgreementDraft } from "../../../../../../../redux/slices/account_management/detailAccount/serviceAgreementSlice";
-import { Spin, Form } from "antd";
-import ModalApproveOrReject from "../../../../../../../components/Modal/ModalApproveOrReject";
+import { Spin } from "antd";
+import NxApproveOrRejectModal from "../../../../../../../components/Nx/NxApproveOrRejectModal";
 import ModalErrorApproveOrRejectServiceAgreement from "./Modal/ModalErrorApproveOrRejectServiceAgreement";
 import { dateFormatting } from "../../../../../../../utils";
-import DraftComponent from "./ServiceAgreementDetailCompoment/DraftComponent";
 import { usePrevLocContext } from "../../../../../../../utils/usePrevLoc";
 import NxCardContainer from "../../../../../../../components/Nx/NxCardContainer";
 import NxTabs from "../../../../../../../components/Nx/NxTabs";
@@ -26,13 +21,14 @@ import NxBreadCrumb from "../../../../../../../components/Nx/NxBreadCrumb";
 import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
 import Attachment from "./Attachment";
 import NxDetailText from "../../../../../../../components/Nx/NxDetailText";
+import ServiceAgreementHistoryLogInformation from "../shared/HistoryLogInformation";
+import SVGIcon from "../../../../../../../assets/Icon/index";
 
 const DetailServiceAgreement = () => {
   const { path } = usePrevLocContext();
-  const [form] = Form.useForm();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { data_detail, data_detail_draft, loading, message } = useSelector(
+  const { data_detail, data_detail_draft, loading, message, loading_approveRejectSa } = useSelector(
     (state) => state.accountServiceAgreement
   );
   //declare
@@ -48,7 +44,7 @@ const DetailServiceAgreement = () => {
 
   // Modal Approve Or Reject SA
   const [modalError, setModalError] = useState(false);
-  const [modalApproveOrReject, setModalApproveOrReject] = useState('')
+  const [modalApproveOrReject, setModalApproveOrReject] = useState(false);
   const [approveOrReject, setApproveOrReject] = useState('')
   const [bodyApproval, setBodyApproval] = useState({
     isApprover: false,
@@ -56,6 +52,8 @@ const DetailServiceAgreement = () => {
     approvalDetail: null,
     approvalType: null,
   });
+  const lastSubmitDataRef = useRef(null);
+  const lastHandleClearRef = useRef(null);
   const showButtonApproval =
     bodyApproval.isApprover !== null && bodyApproval.isApprover;
 
@@ -92,6 +90,14 @@ const DetailServiceAgreement = () => {
       )
     ) {
       setActiveTab("tosSubmission");
+    } else if (
+      path && (
+        path.pathname.includes("/account-management/account-standard/service-agreement/warranty/create") ||
+        path.pathname.includes("/account-management/account-standard/service-agreement/warranty/view") ||
+        path.pathname.includes("/account-management/account-standard/service-agreement/warranty/update")
+      )
+    ) {
+      setActiveTab("warranty");
     } else {
       setActiveTab("saInformation");
     }
@@ -116,17 +122,23 @@ const DetailServiceAgreement = () => {
 
     dispatch(getDetailServiceAgreementDraft(idSA))
       .unwrap()
-      .then((res) => {
-      })
       .catch((error) => {
         console.log(error)
       });
   }, [dispatch, idSA]);
 
 
-  // handle confirm
   const handleConfirm = (formValue, handleClear) => {
-    setModalApproveOrReject(false);
+    const submission = formValue ?? lastSubmitDataRef.current;
+    if (!submission?.remark) {
+      return;
+    }
+
+    lastSubmitDataRef.current = submission;
+    if (handleClear) {
+      lastHandleClearRef.current = handleClear;
+    }
+
     const successApprove = {
       title: `Successful`,
       description: `Your data has been approved.`,
@@ -139,11 +151,32 @@ const DetailServiceAgreement = () => {
     };
     const data = {
       saId: idSA,
-      description: formValue.remark,
+      description: submission.remark,
       approvalId: bodyApproval.tappId,
       action: approveOrReject.toUpperCase(),
     };
-    if (bodyApproval.approvalType === "SERVICE_AGREEMENT" || bodyApproval.approvalType === "UPDATE_SERVICE_AGREEMENT") {
+
+    const finalizeSuccess = () => {
+      if (lastHandleClearRef.current) {
+        lastHandleClearRef.current();
+        lastHandleClearRef.current = null;
+      }
+      lastSubmitDataRef.current = null;
+      setModalError(false);
+      setModalApproveOrReject(false);
+    };
+
+    const finalizeError = (error) => {
+      const statusCode = error?.response?.data?.code;
+      if (Math.floor((statusCode || 0) / 100) === 5) {
+        setModalError(true);
+      }
+    };
+
+    if (
+      bodyApproval.approvalType === "SERVICE_AGREEMENT" ||
+      bodyApproval.approvalType === "UPDATE_SERVICE_AGREEMENT"
+    ) {
       dispatch(
         approveOrRejectServiceAgreement({
           body: data,
@@ -152,15 +185,8 @@ const DetailServiceAgreement = () => {
         })
       )
         .unwrap()
-        .then(() => {
-          handleClear()
-        })
-        .catch((error) => {
-          if (Math.floor((error.response.data.code || 0) / 100) === 5) {
-            setModalError(true);
-            form.resetFields();
-          }
-        });
+        .then(finalizeSuccess)
+        .catch(finalizeError);
     } else {
       dispatch(
         approveOrRejectInactiveServiceAgreement({
@@ -170,26 +196,16 @@ const DetailServiceAgreement = () => {
         })
       )
         .unwrap()
-        .then(() => {
-          form.resetFields();
-        })
-        .catch((error) => {
-          if (Math.floor((error.response.data.code || 0) / 100) === 5) {
-            setModalError(true);
-            form.resetFields();
-          }
-        });
+        .then(finalizeSuccess)
+        .catch(finalizeError);
     }
-
-  }
+  };
   const handleCancel = () => {
     setModalApproveOrReject(false);
+    lastSubmitDataRef.current = null;
+    lastHandleClearRef.current = null;
   };
 
-
-  function convertToNormalcase(inputText) {
-    return inputText.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
-  }
 
   // SA Information content
   const renderSaInformation = () => (
@@ -295,8 +311,16 @@ const DetailServiceAgreement = () => {
     {
       key: "warranty",
       label: "Warranty",
-      disabled: true,
-      children: <Warranty />,
+      disabled: statusSa !== "ACTIVE",
+      children: (
+        <Warranty
+          idSA={idSA}
+          idAccount={idAccount}
+          idCustomer={idCustomer}
+          type={type}
+          dataDetailSA={data_detail}
+        />
+      ),
     },
     {
       key: "tosSubmission",
@@ -336,8 +360,8 @@ const DetailServiceAgreement = () => {
   ];
 
   return (
-    <div>
-      <LayoutMenu>
+    <>
+      <div>
         <Spin spinning={loading}>
           <div className="flex flex-col gap-y-4">
             {/* <BreadCrumbAdvanced routes={routes(location?.state)} /> */}
@@ -354,9 +378,9 @@ const DetailServiceAgreement = () => {
             {data_detail?.approvalDetail !== null && data_detail?.isApprover === true && (
               <NxCardContainer
                 header={
-                  data_detail?.approvalDetail.type == 'inactive' ?
+                  data_detail?.approvalDetail.type === 'inactive' ?
                     'INACTIVE REQUEST INFORMATION' :
-                    data_detail?.approvalDetail.type == 'create' ?
+                    data_detail?.approvalDetail.type === 'create' ?
                       'CREATE REQUEST INFORMATION' :
                       'UPDATE REQUEST INFORMATION'
                 }
@@ -364,7 +388,7 @@ const DetailServiceAgreement = () => {
                 <div className="w-full grid grid-cols-4 gap-3">
                   <NxDetailText label={"Requested Date"}>{data_detail?.approvalDetail?.requestedDate ? moment(data_detail?.approvalDetail?.requestedDate).format(dateFormatting.dateTime) : ''}</NxDetailText>
                   <NxDetailText label={"Requested By"}>{data_detail?.approvalDetail?.requestedBy}</NxDetailText>
-                  {data_detail?.approvalDetail.type == 'inactive' && (
+                  {data_detail?.approvalDetail.type === 'inactive' && (
                     <NxDetailText label={"Remarks"}>{data_detail?.approvalDetail?.remarks}</NxDetailText>
                   )}
                 </div>
@@ -380,63 +404,72 @@ const DetailServiceAgreement = () => {
               />
             </NxCardContainer>
 
-            <NxCardContainer border header={"HISTORY LOG INFORMATION"}>
-              <NxBaseContainer border>
-                <div className="w-full grid grid-cols-5 gap-4">
-                  <NxDetailText label={"Record ID"}>
-                  {data_detail?.saHistory?.saId}
-                </NxDetailText>
-                <NxDetailText label={"Created Date"}>
-                  {data_detail?.saHistory?.createdDate ? moment(data_detail?.saHistory?.createdDate).format(dateFormatting.dateTime) : ''}
-                </NxDetailText>
-                <NxDetailText label={"Created By"}>
-                {data_detail?.saHistory?.createdBy}
-                </NxDetailText>
-                <NxDetailText label={"Updated Date"}>
-                  {data_detail?.saHistory?.updateDate ? moment(data_detail?.saHistory?.updateDate).format(dateFormatting.dateTime) : ''}
-                </NxDetailText>
-                <NxDetailText label={"Updated By"}>
-                {data_detail?.saHistory?.updatedBy}
-                </NxDetailText>
-              </div>
-              </NxBaseContainer>
-            </NxCardContainer>
+            <ServiceAgreementHistoryLogInformation
+              showRecordId
+              historyData={{
+                recordId: data_detail?.saHistory?.saId,
+                createdDate: data_detail?.saHistory?.createdDate
+                  ? moment(data_detail?.saHistory?.createdDate).format(dateFormatting.dateTime)
+                  : "",
+                createdBy: data_detail?.saHistory?.createdBy,
+                updatedDate: data_detail?.saHistory?.updateDate
+                  ? moment(data_detail?.saHistory?.updateDate).format(dateFormatting.dateTime)
+                  : "",
+                updatedBy: data_detail?.saHistory?.updatedBy,
+              }}
+            />
 
-            <>
-              <ButtonComponent
-                type={"menu"}
-                onClick={() => navigate(-1)}
-              >
-                Back
-              </ButtonComponent>
-              {showButtonApproval ? (
-                <div className={"w-full flex justify-end gap-5"}>
-                  <ButtonComponent
-                    type="reject"
-                    onClick={() => {
-                      setModalApproveOrReject(true);
-                      setApproveOrReject("Reject");
-                    }}
-                  >
-                    Reject
-                  </ButtonComponent>
-                  <ButtonComponent
-                    type="approve"
-                    onClick={() => {
-                      setModalApproveOrReject(true);
-                      setApproveOrReject("Approve");
-                    }}
-                  >
-                    Approve
-                  </ButtonComponent>
-                </div>
-              ) : null}
-            </>
+            <NxBaseContainer border>
+              <div className="">
+                {showButtonApproval ? (
+                  <div className={"w-full grid grid-cols-2"}>
+                    <ButtonComponent
+                      type={"menu"}
+                      className="!w-fit"
+                      onClick={() => navigate(-1)}
+                    >
+                      Back
+                    </ButtonComponent>
+                    <div className="flex justify-end gap-4">
+                       <ButtonComponent
+                         type="reject"
+                         icon={<SVGIcon width={14} height={14} name="IconSquareX" />}
+                         className="!w-fit !flex-row-reverse"
+                         onClick={() => {
+                           setModalApproveOrReject(true);
+                           setApproveOrReject("Reject");
+                         }}
+                       >
+                        Reject
+                      </ButtonComponent>
+                       <ButtonComponent
+                         type="approve"
+                         icon={<SVGIcon width={14} height={14} name="IconSquareCheck" />}
+                         className="!w-fit !flex-row-reverse"
+                         onClick={() => {
+                           setModalApproveOrReject(true);
+                           setApproveOrReject("Approve");
+                         }}
+                       >
+                        Approve
+                      </ButtonComponent>
+                    </div>
+                  </div>
+                ) : 
+                <ButtonComponent
+                  type={"menu"}
+                  className="!w-fit"
+                  onClick={() => navigate(-1)}
+                >
+                  Back
+                </ButtonComponent>}
+              </div>
+            </NxBaseContainer>
           </div>
         </Spin>
 
         {/* ModalConfirmation Approve Or Reject SA */}
-        <ModalApproveOrReject
+        <NxApproveOrRejectModal
           isOpen={modalApproveOrReject}
           handleCloseModal={handleCancel}
           onFinish={handleConfirm}
@@ -444,6 +477,8 @@ const DetailServiceAgreement = () => {
           approveOrReject={approveOrReject}
           menu={"Service Agreement"}
           named={data_detail?.saInfo?.saNumber}
+          customMessage={`Are you sure you want to ${approveOrReject} Service Agreement - ${data_detail?.saInfo?.saNumber}?`}
+          loading={loading_approveRejectSa}
         />
 
         {/* Modal Error Approve/Reject */}
@@ -457,8 +492,8 @@ const DetailServiceAgreement = () => {
           approveOrReject={approveOrReject}
           message={message}
         />
-      </LayoutMenu>
-    </div>
+      </div>
+    </>
   );
 };
 

@@ -1,10 +1,15 @@
-import React, { useEffect, useState, useRef, useMemo } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useState,
+  useRef,
+  useMemo,
+} from "react";
 import { PlusOutlined } from "@ant-design/icons";
 import { Checkbox, Spin, Tooltip } from "antd";
 import { Link, NavLink } from "react-router-dom";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import { useDispatch, useSelector } from "react-redux";
 import SVGIcon from "../../../../../assets/Icon/index";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
@@ -15,6 +20,7 @@ import {
   getApprovalHierarchyList,
   getApprovalHierarchyDetail,
   inactiveGLAccount,
+  requestActivateGLAccount,
   downloadGLAccount,
 } from "../../../../../redux/slices/rating_billing_invoice/MasterData/glAccount";
 import TableRBI from "../../../../../components/TableRBI";
@@ -27,22 +33,29 @@ import CardContainer from "../../../../../components/CardContainer";
 import ModalApprovalGLAccount from "./ModalApprovalGLAccount";
 
 const GLAccountView = () => {
-  const { data, loading, data_approval_history } = useSelector(
-    (state) => state.glAccount,
-  );
+  const {
+    loading,
+    data_approval_history,
+    gl_account_list,
+    gl_account_pagination,
+  } = useSelector((state) => state.glAccount);
 
   // Declaration
   const dispatch = useDispatch();
   const searchInput = useRef(null);
-  const dataSource = data?.result;
+  const isLoadMoreInFlight = useRef(false);
+  const lastRequestedPage = useRef(1);
 
   // State
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const initialPageSize = 100;
+  const loadMoreSize = 20;
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const [search, setSearch] = useState({});
   const [sort, setSort] = useState("");
+
+  const hasMore =
+    gl_account_list.length < (gl_account_pagination?.totalElements || 0);
 
   const [modalInactive, setModalInactive] = useState(false);
   const [modalApprovalHistory, setModalApprovalHistory] = useState(false);
@@ -52,33 +65,46 @@ const GLAccountView = () => {
   const [dataApprovalHistory, setDataApprovalHistory] = useState({});
   const [chooseId, setChooseId] = useState();
 
-  // State untuk fix column dengan format baru { left: [], right: [] }
   const [fixedColumns, setFixedColumns] = useState(() => {
-    const saved = localStorage.getItem("glAccountFixedColumns");
-    return saved
-      ? JSON.parse(saved)
-      : {
-          left: ["no"],
-          right: ["action"],
-        };
+    try {
+      const saved = localStorage.getItem("glAccountFixedColumns");
+      return saved ? JSON.parse(saved) : { left: ["no"], right: ["action"] };
+    } catch (e) {
+      return { left: ["no"], right: ["action"] };
+    }
   });
 
-  // Save to localStorage when fixedColumns change
+  const normalizeStatus = (value) =>
+    (value || "")
+      .toString()
+      .replace(/_/g, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+      .toUpperCase();
+
+  // Save fixedColumns to localStorage when changed
   useEffect(() => {
-    localStorage.setItem("glAccountFixedColumns", JSON.stringify(fixedColumns));
+    try {
+      localStorage.setItem("glAccountFixedColumns", JSON.stringify(fixedColumns));
+    } catch (e) {
+      // ignore storage errors
+    }
   }, [fixedColumns]);
 
   // Use Effect - Fetch data
   useEffect(() => {
+    isLoadMoreInFlight.current = false;
+    lastRequestedPage.current = 1;
     dispatch(
       getAllGLAccountPaginate({
         search: encodeURIComponent(JSON.stringify(search)),
-        page,
-        pageSize,
+        page: 1,
+        pageSize: initialPageSize,
         sort,
+        isLoadMore: false,
       }),
     );
-  }, [search, sort, page, pageSize, dispatch]);
+  }, [search, sort, dispatch]);
 
   useEffect(() => {
     if (data_approval_history) {
@@ -87,11 +113,15 @@ const GLAccountView = () => {
           create: data_approval_history?.dataApprover?.GL_ACCOUNT || [],
           inactive:
             data_approval_history?.dataApprover?.INACTIVE_GL_ACCOUNT || [],
+          activate:
+            data_approval_history?.dataApprover?.ACTIVATED_GL_ACCOUNT || [],
         },
         dataHistory: {
           create: data_approval_history?.dataHistory?.GL_ACCOUNT || [],
           inactive:
             data_approval_history?.dataHistory?.INACTIVE_GL_ACCOUNT || [],
+          activate:
+            data_approval_history?.dataHistory?.ACTIVATED_GL_ACCOUNT || [],
         },
       };
       setDataApprovalHistory(temp);
@@ -121,23 +151,60 @@ const GLAccountView = () => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
-    setSearch((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
-      }
-      return {
-        ...prevState,
-        [dataIndex]: selectedKeys[0],
-      };
-    });
+    setSearch((prevState) => ({
+      ...prevState,
+      [dataIndex]: selectedKeys[0],
+    }));
   };
 
-  // Handle Change Page Table
-  const handleChange = (pageChange, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
-    setPage(tempPage);
-    setPageSize(pageSizeChange);
+  // Handle Sort Table
+  const onSort = (_, __, sort) => {
+    const dataSort =
+      sort.order !== undefined
+        ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
+        : "";
+    setSort(dataSort);
   };
+
+  const handleLoadMore = useCallback(async () => {
+    if (isLoadMoreInFlight.current) return;
+    if (gl_account_list.length >= (gl_account_pagination?.totalElements || 0))
+      return;
+
+    const nextPage = Math.floor(gl_account_list.length / loadMoreSize) + 1;
+    if (nextPage <= lastRequestedPage.current) return;
+
+    isLoadMoreInFlight.current = true;
+    const action = await dispatch(
+      getAllGLAccountPaginate({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page: nextPage,
+        pageSize: loadMoreSize,
+        sort,
+        isLoadMore: true,
+      }),
+    );
+
+    if (getAllGLAccountPaginate.fulfilled.match(action)) {
+      lastRequestedPage.current = nextPage;
+    }
+
+    isLoadMoreInFlight.current = false;
+  }, [dispatch, gl_account_list.length, gl_account_pagination, search, sort]);
+
+  const handleRefresh = useCallback(() => {
+    isLoadMoreInFlight.current = false;
+    lastRequestedPage.current = 1;
+    dispatch(
+      getAllGLAccountPaginate({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page: 1,
+        pageSize: initialPageSize,
+        sort,
+        isLoadMore: false,
+      }),
+    );
+  }, [dispatch, search, sort]);
 
   const handleRetry = () => {
     handleOk();
@@ -150,15 +217,6 @@ const GLAccountView = () => {
     setBodyError({});
   };
 
-  // Handle Sort Table
-  const onSort = (_, __, sort) => {
-    const dataSort =
-      sort.order !== undefined
-        ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
-        : "";
-    setSort(dataSort);
-  };
-
   const handleOptions = () => {
     const data = dataApprovalHistory?.dataApprover || {};
     const keyData = Object.keys(data);
@@ -168,32 +226,34 @@ const GLAccountView = () => {
   };
 
   const handleOk = (res, handleClear) => {
+    const selectedStatus = normalizeStatus(chooseId?.status);
+    const selectedApprovalStatus = normalizeStatus(chooseId?.approvalStatus);
+    const isActivateRequest =
+      selectedStatus === "INACTIVE" &&
+      selectedApprovalStatus !== "WAITING APPROVAL";
     const dataValue = {
       glAccountId: chooseId.glAccountId,
       apphierId: res.approvalHierarchy,
       remark: res.remark,
     };
-    dispatch(inactiveGLAccount(dataValue))
+    dispatch(
+      (isActivateRequest ? requestActivateGLAccount : inactiveGLAccount)(
+        dataValue,
+      ),
+    )
       .unwrap()
       .then(() => {
         handleClear();
         handleCancel();
-        let tempSearch = "";
-        for (const dataIndex in search) {
-          if (Object.hasOwnProperty.call(search, dataIndex)) {
-            const tempSearchText = search[dataIndex];
-            if (tempSearchText) {
-              tempSearch += `${dataIndex}~${tempSearchText},`;
-            }
-          }
-        }
-        tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
+        isLoadMoreInFlight.current = false;
+        lastRequestedPage.current = 1;
         dispatch(
           getAllGLAccountPaginate({
-            search: tempSearch,
-            page,
-            pageSize,
+            search: encodeURIComponent(JSON.stringify(search)),
+            page: 1,
+            pageSize: loadMoreSize,
             sort,
+            isLoadMore: false,
           }),
         );
       })
@@ -205,7 +265,12 @@ const GLAccountView = () => {
               error.response.data.message) ||
             error.message ||
             error.toString();
-          setBodyError({ body: { ...res }, handleClear, message });
+          setBodyError({
+            body: { ...res },
+            handleClear,
+            message,
+            actionType: isActivateRequest ? "activate" : "inactivate",
+          });
           setModalError(true);
         }
       });
@@ -245,20 +310,8 @@ const GLAccountView = () => {
     dispatch(
       downloadGLAccount({
         search: tempSearch,
-        page,
-        pageSize,
-        sort,
-      }),
-    );
-  };
-
-  // Handle Refresh after approval
-  const handleRefresh = () => {
-    dispatch(
-      getAllGLAccountPaginate({
-        search: encodeURIComponent(JSON.stringify(search)),
-        page,
-        pageSize,
+        page: 1,
+        pageSize: loadMoreSize,
         sort,
       }),
     );
@@ -271,7 +324,7 @@ const GLAccountView = () => {
       render: (
         <ButtonComponent
           icon={
-            <SVGIcon name="IconRequestApproval" width={24} color="#ffffff" />
+            <SVGIcon name="IconRequestApproval" width={20} color="#ffffff" />
           }
           type="submit"
           className="bg-red-500"
@@ -287,7 +340,7 @@ const GLAccountView = () => {
         <ButtonComponent
           type={"submit"}
           border={false}
-          icon={<SVGIcon name="IconButtonDownload" width={24} />}
+          icon={<SVGIcon name="IconButtonDownload" width={20} />}
           onClick={() => {
             handleDownload();
           }}
@@ -301,7 +354,7 @@ const GLAccountView = () => {
       render: (
         <NavLink to={RBI_ROUTES.GLACCOUNT_CREATE}>
           <ButtonComponent
-            icon={<PlusOutlined style={{ fontSize: "24px" }} />}
+            icon={<PlusOutlined style={{ fontSize: "20px" }} />}
             type="submit"
           >
             Create GL Account
@@ -335,8 +388,7 @@ const GLAccountView = () => {
       render: (record, data) => {
         const isEditable =
           record.approvalStatus === "DRAFT" ||
-          record.approvalStatus === "REJECTED" ||
-          (record.status === "ACTIVE" && record.approvalStatus === "APPROVED");
+          record.approvalStatus === "REJECTED";
         const linkContent =
           data > 3 ? (
             <ButtonComponent
@@ -347,13 +399,13 @@ const GLAccountView = () => {
                   width={24}
                 />
               }
+              type={"action"}
               border={false}
               disabled={!isEditable}
             >
               <span
-                className={`ml-3 ${
-                  isEditable ? "text-black " : "text-[#8D91A0]"
-                }`}
+                className={`ml-0 ${isEditable ? "text-black " : "text-[#8D91A0]"
+                  }`}
               >
                 {" "}
                 Update
@@ -392,14 +444,16 @@ const GLAccountView = () => {
       action: "Activate",
       type: "table",
       render: (record, data) => {
-        const isActivateOrInactivate =
-          (record.approvalStatus === "APPROVED" &&
-            record.status === "ACTIVE") ||
-          (record.approvalStatus === "DRAFT" && record.status === "ACTIVE") ||
-          (record.approvalStatus === "REJECTED" &&
-            record.status === "ACTIVE") ||
-          (record.approvalStatus === "WAITING APPROVAL" &&
-            record.status === "ACTIVE");
+        const rowStatus = normalizeStatus(record.status);
+        const rowApprovalStatus = normalizeStatus(record.approvalStatus);
+        const canInactivate =
+          rowStatus === "ACTIVE" &&
+          ["ACTIVE", "APPROVED", "DRAFT", "REJECTED", "WAITING APPROVAL"].includes(
+            rowApprovalStatus,
+          );
+        const canActivate =
+          rowStatus === "INACTIVE" && rowApprovalStatus !== "WAITING APPROVAL";
+        const isActivateOrInactivate = canInactivate || canActivate;
 
         const Content =
           data > 3 ? (
@@ -408,28 +462,29 @@ const GLAccountView = () => {
                 <Checkbox
                   className="inactive-check"
                   onClick={() => handleInactive(record)}
-                  disabled={record.status === "ACTIVE" ? false : true}
-                  checked={record.status === "ACTIVE" ? false : true}
+                  disabled={!isActivateOrInactivate}
+                  checked={rowStatus !== "ACTIVE"}
                 />
               }
+              type={"action"}
               border={false}
               disabled={!isActivateOrInactivate}
               onClick={() => handleInactive(record)}
             >
-              <span className="text-black ml-5">
-                {record.status !== "ACTIVE" ? "Activate" : "Inactivate"}
+              <span className="text-black ml-1">
+                {rowStatus !== "ACTIVE" ? "Activate" : "Inactivate"}
               </span>
             </ButtonComponent>
           ) : (
             <Tooltip
-              title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}
+              title={rowStatus === "ACTIVE" ? "Inactivate" : "Activate"}
             >
               <div className="pt-1">
                 <Checkbox
                   className="inactive-check"
                   onClick={() => handleInactive(record)}
-                  disabled={record.status === "ACTIVE" ? false : true}
-                  checked={record.status === "ACTIVE" ? false : true}
+                  disabled={!isActivateOrInactivate}
+                  checked={rowStatus !== "ACTIVE"}
                 />
               </div>
             </Tooltip>
@@ -448,10 +503,11 @@ const GLAccountView = () => {
               icon={
                 <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
               }
+              type={"action"}
               border={false}
               onClick={() => handleApprovalHistory(record.glAccountId)}
             >
-              <span className={"text-black ml-3"}>Approval History</span>
+              <span className={"text-black ml-0"}>Approval History</span>
             </ButtonComponent>
           ) : (
             <Tooltip title="Approval History">
@@ -482,8 +538,8 @@ const GLAccountView = () => {
     const glAccountCols = [
       ...columnsGLAccount(
         search,
-        page,
-        pageSize,
+        1,
+        loadMoreSize,
         searchInput,
         searchedColumn,
         searchText,
@@ -499,7 +555,7 @@ const GLAccountView = () => {
     }));
 
     return columnsWithKeys;
-  }, [search, page, pageSize, searchedColumn, searchText, actionColumns]);
+  }, [search, searchedColumn, searchText, actionColumns]);
 
   const columnDefinitions = useMemo(() => {
     return baseColumns.map((col) => ({
@@ -543,17 +599,24 @@ const GLAccountView = () => {
     });
   }, [baseColumns, fixedColumns]);
 
+  // Render keys just like Prabilling module to prevent rows changing weirdly
+  const dataSourceWithKeys = useMemo(() => {
+    if (!gl_account_list || gl_account_list.length === 0) return [];
+    return gl_account_list.map((item) => ({
+      ...item,
+      key: item.glAccountId,
+    }));
+  }, [gl_account_list]);
+
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
         <CardContainer
           header={
             <div className="flex -my-4 justify-between items-center">
-              <p className="w-full mt-[15px] font-bold text-primary">
-                GL ACCOUNT LIST
-              </p>
+              <p className="w-full mt-[15px] text-primary">GL ACCOUNT LIST</p>
 
               <Toolbar items={itemGrantAccess} />
             </div>
@@ -561,19 +624,25 @@ const GLAccountView = () => {
         >
           <div className={"w-full"}>
             <TableRBI
-              dataSource={dataSource}
+              idTable="glAccountTable"
+              dataSource={dataSourceWithKeys}
               columns={columns}
-              current={page}
-              pageSize={pageSize}
-              onChange={handleChange}
-              onSizeChanger={handleChange}
-              totalData={data?.page?.totalElements || 0}
+              totalData={gl_account_pagination?.totalElements || 0}
               onSort={onSort}
               tableScrolled={{ y: 525, x: 1000 }}
               handleDownload={handleDownload}
               columnDefinitions={columnDefinitions}
               fixedColumns={fixedColumns}
               setFixedColumns={setFixedColumns}
+              loading={loading}
+              usePagination={false}
+              useInfiniteScroll={true}
+              onLoadMore={handleLoadMore}
+              hasMore={hasMore}
+              showRefresh={true}
+              onRefresh={handleRefresh}
+              refreshLabel="Refresh"
+              loadMoreThreshold={20}
             />
           </div>
         </CardContainer>
@@ -603,9 +672,10 @@ const GLAccountView = () => {
           dispatch={dispatch}
           getAPIOption={getApprovalHierarchyList}
           getAPIDetail={getApprovalHierarchyDetail}
-          alertMessage={`Are you sure you want to inactivate this GL Account with account number ${
-            chooseId?.glAccount || ""
-          }?`}
+          alertMessage={`Are you sure you want to ${normalizeStatus(chooseId?.status) === "INACTIVE"
+            ? "activate"
+            : "inactivate"
+            } this GL Account with account number ${chooseId?.glAccount || ""}?`}
           openModalInactivate={modalInactive}
           handleCloseModalInactivate={handleCancel}
           onFinish={handleOk}
@@ -623,12 +693,13 @@ const GLAccountView = () => {
               <SVGIcon name="IconFailed" width={48} />
               <p className="text-[18px] font-bold">{"Failed"}</p>
             </div>
-            <p className="pl-[70px]">{`Your data was not inactivate. ${bodyError.message}.`}</p>
+            <p className="pl-[70px]">{`Your data was not ${bodyError.actionType || "inactivate"
+              }. ${bodyError.message}.`}</p>
             <p className="pl-[70px]">Please try again.</p>
           </div>
         </ModalError>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

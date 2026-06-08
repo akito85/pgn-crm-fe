@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import LayoutMenu from "../../../../../../../components/SidebarMenu/LayoutMenu";
 import { Form, Spin } from "antd";
 import SVGIcon from "../../../../../../../assets/Icon/index";
 import BreadCrumbAdvanced from "../../../../../../../components/BreadCrumbAdvanced";
@@ -133,10 +132,6 @@ const ProductDistributionForm = ({ type }) => {
   const handleStartDate = (value) => {
     setStartDate(value);
     return value;
-  };
-
-  const disabledDate = (current) => {
-    return false;
   };
 
   const processData = (data) => {
@@ -310,7 +305,7 @@ const ProductDistributionForm = ({ type }) => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumbAdvanced routes={routes(id)} />
 
@@ -340,7 +335,6 @@ const ProductDistributionForm = ({ type }) => {
                     <DateComponent
                       disabled={type !== "create" ? true : false}
                       onChange={(e) => handleStartDate(e)}
-                      dateDisable={disabledDate}
                     />
                   </Form.Item>
 
@@ -491,7 +485,7 @@ const ProductDistributionForm = ({ type }) => {
           </div>
         </ModalError>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

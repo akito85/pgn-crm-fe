@@ -11,7 +11,6 @@ import {
 import moment from "moment";
 import { useNavigate } from "react-router-dom";
 import BreadCrumb from "../../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../routes/account_management/customer_account_routes";
 import BaseContainer from "../../../../../components/BaseContainer";
 import { dateFormatting } from "../../../../../utils";
@@ -1492,7 +1491,7 @@ const StandardForm = () => {
             : `${(caiObj?.firstName || "").toUpperCase()} ${(
                 caiObj?.middleName || ""
               ).toUpperCase()} ${(caiObj?.lastName || "").toUpperCase()}` || null,
-          foundedBirthDate2: caiObj?.birthDate ?
+          foundedBirthDate: caiObj?.birthDate ?
             moment(caiObj?.birthDate).format(dateFormatting.date) || null : null,
           foundedBirthPlace: caiObj?.birthPlace || null,
           sex: caiObj?.sex || null,
@@ -1894,7 +1893,7 @@ const StandardForm = () => {
         setModalConfirm(false);
       })
       .catch((error) => {
-        if (Math.floor((error.response.data_create.code || 0) / 100) === 5) {
+        if (Math.floor((error?.response?.data?.code || 0) / 100) === 5) {
           const message =
             (error.response &&
               error.response.data &&
@@ -1920,7 +1919,7 @@ const StandardForm = () => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={isLoading}>
         <BreadCrumb routes={routes} />
 
@@ -2252,7 +2251,7 @@ const StandardForm = () => {
         }
 
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

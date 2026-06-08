@@ -218,11 +218,11 @@ export const downloadPromoConditionList = createAsyncThunk(
 // Promo History Operations
 export const fetchPromoHistoryList = createAsyncThunk(
   "promo/fetchPromoHistoryList",
-  async ({ params, advancedSearch }, { rejectWithValue }) => {
+  async ({ params, payload }, { rejectWithValue }) => {
     try {
       const response = await promoService.getListPromoHistory(
         params,
-        advancedSearch,
+        payload,
       );
       return response;
     } catch (error) {

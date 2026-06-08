@@ -84,18 +84,18 @@ const TableGasUtilHistory = ({idAccount, idCustomer, access}) => {
   );
 
   const itemActions = nxGetAccountActions({
-    handleView: (record, _) => handleDetail(record),
-    handleUpdate: (record, _) => navigate(
+    handleView: ({ id: recordId }) => handleDetail(recordId),
+    handleUpdate: ({ id: recordId }) => navigate(
       ACCOUNT_MANAGEMENT_ROUTES.UPDATE_GAS_UTILIZATION,
       {
         state: {
-          id: record,
+          id: recordId,
           accountId: idAccount,
           customerId: idCustomer,
         }
       }
     ),
-    handleDelete: (record, _) => handleOpenDelete(record),
+    handleDelete: (record) => handleOpenDelete(record),
   });
 
   const [page, setPage] = useState(1);
@@ -108,6 +108,7 @@ const TableGasUtilHistory = ({idAccount, idCustomer, access}) => {
   const [dataDetail, setDataDetail] = useState({});
   const [openModalDelete, setOpenModalDelete] = useState(false);
   const [idSelected, setIdSelected] = useState('');
+  const [deleteItemData, setDeleteItemData] = useState(null);
   const [loadMoreSize] = useState(20);
 
   const currentData = useMemo(() => {
@@ -193,10 +194,10 @@ const TableGasUtilHistory = ({idAccount, idCustomer, access}) => {
     // dispatch()
   }
 
-  const handleOpenDelete = (r) => {
+  const handleOpenDelete = (record) => {
     setOpenModalDelete(true)
-    console.log('id delete', r)
-    setIdSelected(r)
+    setIdSelected(record.id)
+    setDeleteItemData(record)
   }
 
   const handleConfirmModalDelete = () => {
@@ -206,11 +207,12 @@ const TableGasUtilHistory = ({idAccount, idCustomer, access}) => {
     .then((data) => {
       const reqSearch = encodeURIComponent(JSON.stringify(search));
       dispatch(
-        getListGasUtilizationHistory({
-          id:idAccount, search: reqSearch, sort, page, pageSize: loadMoreSize
+        getListGasUtilizationHistoryNew({
+          id:idAccount, search: reqSearch, sort, page: 1, pageSize: loadMoreSize, isLoadMore: false
         })
       );
-    })  
+      setPage(1);
+    })
     .catch((err) => {
       console.log(err)
       return;
@@ -290,29 +292,33 @@ const TableGasUtilHistory = ({idAccount, idCustomer, access}) => {
         isOpen={openModalDelete}
         handleCancel={()=>{
           setIdSelected('')
+          setDeleteItemData(null)
           setOpenModalDelete(false)
         }}
         handleOk={handleConfirmModalDelete}
         header={"DELETE GAS UTILIZATION"}
         width={500}
         type={"confirmation"}
-        footer={[
-          <Button key="cancel" onClick={()=>{
-            setIdSelected('')
-            setOpenModalDelete(false)
-          }}>
-            Cancel
-          </Button>,
-          <Button key="ok" type="primary" danger onClick={handleConfirmModalDelete}>
-            Delete
-          </Button>,
-        ]}
+        footer={
+          <div className='flex justify-between'>
+            <Button key="cancel" onClick={()=>{
+              setIdSelected('')
+              setDeleteItemData(null)
+              setOpenModalDelete(false)
+            }}>
+              Cancel
+            </Button>,
+            <Button key="ok" type="primary" danger onClick={handleConfirmModalDelete}>
+              Delete
+            </Button>
+          </div>
+        }
       >
         <div className="flex justify-center gap-[20px] mt-6">
           <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
-          <p className={"text-[18px] font-bold"}>
-            Are you sure want to delete gas utilization ?
-          </p>
+          <div className="text-[18px] font-bold">
+            <p>Are you sure want to delete gas utilization, with Effective Date: {deleteItemData?.effectiveDate || "-"} ?</p>
+          </div>
         </div>
       </ModalCustom>
     </>

@@ -12,12 +12,16 @@ import {
   getCostCenterDetail,
   downloadMasterCostCenter,
 } from "../../../../../redux/slices/system_setup/master_data/master_cost_center";
-import { Spin, Checkbox, Form, Tooltip } from "antd";
+import { DownloadOutlined } from "@ant-design/icons";
+import { Spin, Form, Tooltip } from "antd";
 import BreadCrumb from "../../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import { NavLink, Link } from "react-router-dom";
 import SVGIcon from "../../../../../assets/Icon/index";
+import IconViewList from "../../../../../assets/Icon/Nx/IconViewList";
+import IconEditNx from "../../../../../assets/Icon/Nx/IconEdit";
+import IconActive from "../../../../../assets/icons/nx/IconActive";
+import IconInactive from "../../../../../assets/icons/nx/IconInactive";
 import { SYSTEM_SETUP_ROUTES } from "../../../../../routes/system_setup/setup_routes";
 import DetailCostCenter from "./DetailCostCenter";
 import { hasValue, renderColumn } from "../../../../../utils";
@@ -99,7 +103,7 @@ const CostCenter = () => {
         title: "NO",
         dataIndex: "key",
         align: "center",
-        width: 60,
+        width: 90,
         render: (text, object, index) => (page - 1) * pageSize + index + 1,
       },
       {
@@ -427,7 +431,7 @@ const CostCenter = () => {
         <ButtonComponent
           type={"submit"}
           border={false}
-          icon={<SVGIcon name="IconButtonDownload" width={24} />}
+          icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
           onClick={() => {
             handleDownload();
           }}
@@ -457,13 +461,9 @@ const CostCenter = () => {
       render: (record, data_length) => {
         return (
           <Tooltip title="Detail">
-            <div
-              onClick={() => {
-                handleDetail(record?.ccId);
-              }}
-            >
-              <SVGIcon name="IconDetail" width={24} />
-            </div>
+            <span className="inline-flex items-center text-[#1976D2] hover:text-[#1976D2] transition-colors duration-200 cursor-pointer" onClick={() => handleDetail(record?.ccId)}>
+              <IconViewList width={20} />
+            </span>
           </Tooltip>
         );
       },
@@ -472,40 +472,16 @@ const CostCenter = () => {
       action: "Update",
       type: "table",
       render: (record, data_length) => {
+        const disabled = record?.status?.toLowerCase() === "inactive";
         return (
           <Tooltip title="Update">
-            <div
-              className={`${
-                record?.status?.toLowerCase() === "inactive" &&
-                "cursor-not-allowed"
-              }`}
-            >
+            <div className={`inline-flex items-center ${disabled ? "cursor-not-allowed text-gray-300" : ""}`}>
               <Link
-                to={
-                  record?.status?.toLowerCase() !== "inactive" &&
-                  SYSTEM_SETUP_ROUTES.UPDATE_COST_CENTER
-                }
-                state={
-                  record?.status?.toLowerCase() !== "inactive" && {
-                    id: record?.ccId,
-                  }
-                }
+                to={!disabled ? SYSTEM_SETUP_ROUTES.UPDATE_COST_CENTER : undefined}
+                state={!disabled ? { id: record?.ccId } : undefined}
+                className={`inline-flex items-center transition-colors duration-200 ${disabled ? "text-gray-300 pointer-events-none" : "text-[#1976D2] hover:text-[#1976D2]"}`}
               >
-                <div>
-                  <SVGIcon
-                    name="IconEdit"
-                    className={`${
-                      record?.status?.toLowerCase() === "inactive" &&
-                      "cursor-not-allowed"
-                    }`}
-                    color={
-                      record?.status?.toLowerCase() === "inactive"
-                        ? "#8D91A0"
-                        : "#ACC424"
-                    }
-                    width={24}
-                  />
-                </div>
+                <IconEditNx width={20} />
               </Link>
             </div>
           </Tooltip>
@@ -516,18 +492,18 @@ const CostCenter = () => {
       action: "Activate",
       type: "table",
       render: (record, data_length) => {
+        const isActive = record?.status?.toUpperCase() === "ACTIVE";
+        const handleToggle = () => { onClick(record); };
         return (
-          <Tooltip
-            title={record?.status === "ACTIVE" ? "Inactivate" : "Activate"}
-          >
-            <div>
-              <Checkbox
-                onClick={() => {
-                  onClick(record);
-                }}
-                checked={record?.status !== "ACTIVE"}
-              />
-            </div>
+          <Tooltip title={isActive ? "Inactivate" : "Activate"}>
+            {isActive
+              ? <span className="inline-flex items-center text-[#D32F2F] hover:text-[#D32F2F] transition-colors duration-200 cursor-pointer" onClick={handleToggle}>
+                  <IconInactive width={20} />
+                </span>
+              : <span className="inline-flex items-center text-green-600 hover:text-green-600 transition-colors duration-200 cursor-pointer" onClick={handleToggle}>
+                  <IconActive width={20} />
+                </span>
+            }
           </Tooltip>
         );
       },
@@ -560,63 +536,61 @@ const CostCenter = () => {
 
   return (
     <Spin spinning={loading}>
-      <LayoutMenu>
-        <BreadCrumb routes={routes} />
+      <BreadCrumb routes={routes} />
 
-        <CardContainer
-          header={
-            <div className="flex -my-4 justify-between items-center">
-              <p className="mt-[15px] font-bold">COST CENTER LIST</p>
-              <div className="mt-[15px] flex gap-[20px]">
-                <Toolbar items={itemActions} />
-              </div>
+      <CardContainer
+        header={
+          <div className="flex -my-4 justify-between items-center">
+            <p className="mt-[15px] font-bold">COST CENTER LIST</p>
+            <div className="mt-[15px] flex gap-[20px]">
+              <Toolbar items={itemActions} />
             </div>
-          }
-        >
-          <div className="my-0">
-            <TableRBI
-              dataSource={dataSource}
-              columns={processedColumns}
-              current={page}
-              pageSize={pageSize}
-              onChange={handleChangePage}
-              onSizeChanger={handleChangePage}
-              totalData={data?.page?.totalElements || 0}
-              tableScrolled={{ x: 1700, y: 525 }}
-              onSort={onSort}
-              columnDefinitions={columnDefinitions}
-              handleDownload={handleDownload}
-              fixedColumns={fixedColumns}
-              setFixedColumns={setFixedColumns}
-              loading={loading}
-            />
           </div>
-        </CardContainer>
+        }
+      >
+        <div className="my-0">
+          <TableRBI
+            dataSource={dataSource}
+            columns={processedColumns}
+            current={page}
+            pageSize={pageSize}
+            onChange={handleChangePage}
+            onSizeChanger={handleChangePage}
+            totalData={data?.page?.totalElements || 0}
+            tableScrolled={{ x: 1700, y: 525 }}
+            onSort={onSort}
+            columnDefinitions={columnDefinitions}
+            handleDownload={handleDownload}
+            fixedColumns={fixedColumns}
+            setFixedColumns={setFixedColumns}
+            loading={loading}
+          />
+        </div>
+      </CardContainer>
 
-        {/* Modal Detail */}
-        <DetailCostCenter
-          data={data_detail?.data}
-          openModal={modalDetail}
-          closeModal={handleCancelModal}
-        />
+      {/* Modal Detail */}
+      <DetailCostCenter
+        data={data_detail?.data}
+        openModal={modalDetail}
+        closeModal={handleCancelModal}
+      />
 
-        {/* Modal Active/Inactive */}
-        <ModalApproveOrReject
-          isOpen={modalConfirm}
-          handleCloseModal={handleCancelModal}
-          onFinish={handleConfirm}
-          header={activeOrInactive === "INACTIVE" ? "activate" : "inactivate"}
-          approveOrReject={
-            activeOrInactive === "INACTIVE" ? "activate" : "inactivate"
-          }
-          menu={"Cost Center"}
-          named={record?.name}
-          width={800}
-        />
+      {/* Modal Active/Inactive */}
+      <ModalApproveOrReject
+        isOpen={modalConfirm}
+        handleCloseModal={handleCancelModal}
+        onFinish={handleConfirm}
+        header={activeOrInactive === "INACTIVE" ? "activate" : "inactivate"}
+        approveOrReject={
+          activeOrInactive === "INACTIVE" ? "activate" : "inactivate"
+        }
+        menu={"Cost Center"}
+        named={record?.name}
+        width={800}
+      />
 
-        {/* modal try again */}
-        {renderModal()}
-      </LayoutMenu>
+      {/* modal try again */}
+      {renderModal()}
     </Spin>
   );
 };

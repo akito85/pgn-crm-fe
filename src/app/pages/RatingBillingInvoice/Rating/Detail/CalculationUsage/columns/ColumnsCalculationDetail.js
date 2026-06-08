@@ -7,6 +7,7 @@ import {
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../../../utils/getColumnSearchProps";
 import {
   currencyFormatting,
+  energiFormatting,
   numberFormatting,
   usageFormatting,
 } from "../../../../../../../utils/formatCurrency";
@@ -99,7 +100,7 @@ export const columnsCalculationDetail = (
       false,
       "input",
     ),
-    render: (text) =>
+    render: (text, record) =>
       renderColumn(
         "usage",
         hasValue(search["usage"]),
@@ -108,7 +109,7 @@ export const columnsCalculationDetail = (
         false,
         "input",
         search,
-        "usage",
+        record.calculatedUsageUom === "MMBTU" ? "energi" : "usage",
       ),
   },
   {
@@ -128,7 +129,7 @@ export const columnsCalculationDetail = (
       false,
       "input",
     ),
-    render: (text) =>
+    render: (text, record) =>
       renderColumn(
         "minUsage",
         hasValue(search["minUsage"]),
@@ -137,7 +138,7 @@ export const columnsCalculationDetail = (
         false,
         "input",
         search,
-        "usage",
+        record.calculatedUsageUom === "MMBTU" ? "energi" : "usage",
       ),
   },
   {
@@ -157,7 +158,7 @@ export const columnsCalculationDetail = (
       false,
       "input",
     ),
-    render: (text) =>
+    render: (text, record) =>
       renderColumn(
         "maxUsage",
         hasValue(search["maxUsage"]),
@@ -166,7 +167,7 @@ export const columnsCalculationDetail = (
         false,
         "input",
         search,
-        "usage",
+        record.calculatedUsageUom === "MMBTU" ? "energi" : "usage",
       ),
   },
   {
@@ -217,7 +218,10 @@ export const columnsCalculationDetail = (
         width: 130,
         isNumber: true,
         sorter: true,
-        render: (text) => usageFormatting(text),
+        render: (text, record) =>
+          record.calculatedUsageUom === "MMBTU"
+            ? energiFormatting(text)
+            : usageFormatting(text),
       },
       {
         title: "NORMAL",
@@ -226,7 +230,10 @@ export const columnsCalculationDetail = (
         width: 150,
         isNumber: true,
         sorter: true,
-        render: (text) => usageFormatting(text),
+        render: (text, record) =>
+          record.calculatedUsageUom === "MMBTU"
+            ? energiFormatting(text)
+            : usageFormatting(text),
       },
       {
         title: "OUP",
@@ -235,7 +242,10 @@ export const columnsCalculationDetail = (
         width: 130,
         isNumber: true,
         sorter: true,
-        render: (text) => usageFormatting(text),
+        render: (text, record) =>
+          record.calculatedUsageUom === "MMBTU"
+            ? energiFormatting(text)
+            : usageFormatting(text),
       },
     ],
   },
@@ -259,7 +269,10 @@ export const columnsCalculationDetail = (
         width: 130,
         isNumber: true,
         sorter: true,
-        render: (text) => usageFormatting(text),
+        render: (text, record) =>
+          record.convertedCalculatedUom === "MMBTU"
+            ? energiFormatting(text)
+            : usageFormatting(text),
       },
       {
         title: "NORMAL",
@@ -268,7 +281,10 @@ export const columnsCalculationDetail = (
         width: 150,
         isNumber: true,
         sorter: true,
-        render: (text) => usageFormatting(text),
+        render: (text, record) =>
+          record.convertedCalculatedUom === "MMBTU"
+            ? energiFormatting(text)
+            : usageFormatting(text),
       },
       {
         title: "OUP",
@@ -277,7 +293,10 @@ export const columnsCalculationDetail = (
         width: 130,
         isNumber: true,
         sorter: true,
-        render: (text) => usageFormatting(text),
+        render: (text, record) =>
+          record.convertedCalculatedUom === "MMBTU"
+            ? energiFormatting(text)
+            : usageFormatting(text),
       },
     ],
   },
@@ -307,7 +326,7 @@ export const columnsCalculationDetail = (
             "priceCode",
             hasValue(search["priceCode"]),
             searchText,
-            text || "-",
+            text || "",
             false,
             "input",
             search,

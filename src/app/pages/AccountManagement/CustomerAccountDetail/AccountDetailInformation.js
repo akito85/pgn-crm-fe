@@ -1,5 +1,5 @@
 import { LeftCircleFilled, RightCircleFilled } from "@ant-design/icons";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import AccountInformation from "./DetailPages/AccountInformation/AccountInformation";
 import LastActivity from "./DetailPages/LastActivity";
 import ServiceRequest from "./DetailPages/ServiceRequest/ServiceRequest";
@@ -20,10 +20,9 @@ import EquipmentPage from "./DetailPages/Equipment/Equipment";
 import ProductDistribution from "./DetailPages/ProductDistribution/ProductDistribution";
 import RawMaterialSource from "./DetailPages/RawMaterialSource/RawMaterialSource";
 import GasUtilization from "./DetailPages/GasUtilization/GasUtilization";
-import { getGrantedAccessAccount } from "../../../../redux/slices/account_management/accountManagement";
-import { Switch } from "antd";
 import AccountPromo from "./DetailPages/Promo/AccountPromo";
 import MultiDestination from "./DetailPages/MultiDestination/MultiDestination";
+import GasDeposit from "../GasDeposit/GasDeposit";
 
 const dataTabs = {
   // ci: "Customer Information",
@@ -42,6 +41,7 @@ const dataTabs = {
   dm: "Distribution Media",
   premise: "Premise",
   gs: "Gas Source",
+  gd: "Gas Deposit",
   adi: "Additional Information",
   fi: "Financial Information",
   eq: "Equipment",
@@ -186,22 +186,10 @@ const AccountDetailInformation = ({
       path &&
       (
         path.pathname.includes(
-          "/account-management/account-standard/relationship/create"
+          "/account-management/account-standard/relationship"
         ) ||
         path.pathname.includes(
-          "/account-management/account-standard/relationship/update"
-        ) ||
-        path.pathname.includes(
-          "/account-management/account-standard/relationship/details"
-        ) ||
-        path.pathname.includes(
-          "/account-management/account-onetime/relationship/create"
-        ) ||
-        path.pathname.includes(
-          "/account-management/account-onetime/relationship/update"
-        ) ||
-        path.pathname.includes(
-          "/account-management/account-onetime/relationship/details"
+          "/account-management/account-onetime/relationship"
         )
       )
     ) {
@@ -210,22 +198,10 @@ const AccountDetailInformation = ({
       path &&
       (
         path.pathname.includes(
-          "/account-management/account-standard/financial-information/payment-relation/view"
+          "/account-management/account-standard/financial-information"
         ) ||
         path.pathname.includes(
-          "/account-management/account-standard/financial-information/payment-relation/create"
-        ) ||
-        path.pathname.includes(
-          "/account-management/account-standard/financial-information/payment-relation/update"
-        ) ||
-        path.pathname.includes(
-          "/account-management/account-standard/financial-information/invoice-relation/view"
-        ) ||
-        path.pathname.includes(
-          "/account-management/account-standard/financial-information/invoice-relation/create"
-        ) ||
-        path.pathname.includes(
-          "/account-management/account-standard/financial-information/invoice-relation/update"
+          "/account-management/account-onetime/financial-information"
         )
       )
     ) {
@@ -234,17 +210,39 @@ const AccountDetailInformation = ({
       path &&
       (
         path.pathname.includes(
-          "/account-management/account-standard/multi-destination/view"
+          "/account-management/account-standard/multi-destination"
         ) ||
         path.pathname.includes(
-          "/account-management/account-standard/multi-destination/create"
-        ) ||
-        path.pathname.includes(
-          "/account-management/account-standard/multi-destination/update"
+          "/account-management/account-onetime/multi-destination"
         )
       )
     ) {
       setTypeAccountInfoDetailSection(dataTabs.md);
+    } else if (
+      path &&
+      (
+        path.pathname.includes(
+          "/account-management/account-standard/gas-deposit"
+        ) ||
+        path.pathname.includes(
+          "/account-management/account-onetime/gas-deposit"
+        )
+      )
+    ) {
+      setTypeAccountInfoDetailSection(dataTabs.gd);
+    }
+    else if (
+      path &&
+      (
+        path.pathname.includes(
+          "/account-management/account-standard/service-request"
+        ) ||
+        path.pathname.includes(
+          "/account-management/account-onetime/service-request"
+        )
+      )
+    ) {
+      setTypeAccountInfoDetailSection(dataTabs.sr);
     }
     else {
       setTypeAccountInfoDetailSection(dataTabs.ai);
@@ -326,6 +324,8 @@ const AccountDetailInformation = ({
         );
       case dataTabs.gs:
         return <GasSourceInformation />;
+      case dataTabs.gd:
+        return <GasDeposit moduleType="ua" accountId={id} customerId={idCustomer} />
       case dataTabs.rec:
         return (
           <AccountReceipt
@@ -354,9 +354,8 @@ const AccountDetailInformation = ({
       case dataTabs.rs:
         return (
           <Relationship
-            id={id}
-            type={type}
-            idCustomer={idCustomer}
+            accountId={id}
+            customerId={idCustomer}
           />
         );
       case dataTabs.adi:
@@ -383,8 +382,8 @@ const AccountDetailInformation = ({
       case dataTabs.md:
         return (
           <MultiDestination
-            id={id}
-            idCustomer={idCustomer}
+            accountId={id}
+            customerId={idCustomer}
           />
         )
       default:

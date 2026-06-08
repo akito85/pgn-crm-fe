@@ -25,10 +25,20 @@ export const ACCOUNT_MANAGEMENT_ROUTES = {
   CREATE_PAYMENT_RELATION: "/account-management/account-standard/financial-information/payment-relation/create",
   UPDATE_PAYMENT_RELATION: "/account-management/account-standard/financial-information/payment-relation/update",
 
+  // Payment Relation Account One Time
+  VIEW_DETAIL_PAYMENT_RELATION_ONETIME: "/account-management/account-onetime/financial-information/payment-relation/view",
+  CREATE_PAYMENT_RELATION_ONETIME: "/account-management/account-onetime/financial-information/payment-relation/create",
+  UPDATE_PAYMENT_RELATION_ONETIME: "/account-management/account-onetime/financial-information/payment-relation/update",
+
   // Invoice Relation Detail
   VIEW_DETAIL_INVOICE_RELATION: "/account-management/account-standard/financial-information/invoice-relation/view",
   CREATE_INVOICE_RELATION: "/account-management/account-standard/financial-information/invoice-relation/create",
   UPDATE_INVOICE_RELATION: "/account-management/account-standard/financial-information/invoice-relation/update",
+
+  // Invoice Relation Account One Time
+  VIEW_DETAIL_INVOICE_RELATION_ONETIME: "/account-management/account-onetime/financial-information/invoice-relation/view",
+  CREATE_INVOICE_RELATION_ONETIME: "/account-management/account-onetime/financial-information/invoice-relation/create",
+  UPDATE_INVOICE_RELATION_ONETIME: "/account-management/account-onetime/financial-information/invoice-relation/update",
 
   //Detail Service Agreement
   VIEW_DETAIL_SERVICE_AGREEMENT:
@@ -80,11 +90,22 @@ export const ACCOUNT_MANAGEMENT_ROUTES = {
   UPDATE_GAS_SOURCE: "/system-setup/gas-sources/update",
   VIEW_GAS_SOURCE: "/system-setup/gas-sources",
   UPLOAD_GAS_SOURCE: "/system-setup/gas-sources/upload",
+  
+  // Gas Deposit Account Standard
+  VIEW_DETAIL_GAS_DEPOSIT: "/account-management/account-standard/gas-deposit/view",
+
+  // Gas Deposit Account One Time
+  VIEW_DETAIL_GAS_DEPOSIT_ONETIME: "/account-management/account-onetime/gas-deposit/view",
 
   // Multi Destination
   VIEW_DETAIL_MULTI_DESTINATION: "/account-management/account-standard/multi-destination/view",
   CREATE_MULTI_DESTINATION: "/account-management/account-standard/multi-destination/create",
   UPDATE_MULTI_DESTINATION: "/account-management/account-standard/multi-destination/update",
+
+  // Multi Destination Account One Time
+  VIEW_DETAIL_MULTI_DESTINATION_ONETIME: "/account-management/account-onetime/multi-destination/view",
+  CREATE_MULTI_DESTINATION_ONETIME: "/account-management/account-onetime/multi-destination/create",
+  UPDATE_MULTI_DESTINATION_ONETIME: "/account-management/account-onetime/multi-destination/update",
 
   //Premise
   DETAIL_PREMISE: "/account-management/account-standard/premise/view",
@@ -103,13 +124,21 @@ export const ACCOUNT_MANAGEMENT_ROUTES = {
   UPDATE_ACCOUNT_ONETIME:
     "/account-management/account-onetime/account-information/update",
 
-  //Relationship
+  //Relationship Account Standard
   CREATE_RELATIONSHIP:
     "/account-management/account-standard/relationship/create",
   UPDATE_RELATIONSHIP:
     "/account-management/account-standard/relationship/update",
   DETAIL_RELATIONSHIP:
     "/account-management/account-standard/relationship/view",
+
+  //Relationship Account Standard
+  CREATE_RELATIONSHIP_ONETIME:
+    "/account-management/account-onetime/relationship/create",
+  UPDATE_RELATIONSHIP_ONETIME:
+    "/account-management/account-onetime/relationship/update",
+  DETAIL_RELATIONSHIP_ONETIME:
+    "/account-management/account-onetime/relationship/view",
 
   //SA-Approve-Reject-TOS
   APPROVE_REJECT_TOS:
@@ -126,6 +155,14 @@ export const ACCOUNT_MANAGEMENT_ROUTES = {
     "/account-management/account-standard/service-agreement/tos/update",
   DETAIL_TOS_SUBMISSION:
     "/account-management/account-standard/service-agreement/tos/view",
+
+  // WARRANTY TERM
+  CREATE_WARRANTY_TERM:
+    "/account-management/account-standard/service-agreement/warranty/create",
+  UPDATE_WARRANTY_TERM:
+    "/account-management/account-standard/service-agreement/warranty/update",
+  DETAIL_WARRANTY_TERM:
+    "/account-management/account-standard/service-agreement/warranty/view",
 
   // Raw Material Source
   CREATE_RAW_MATERIAL_SOURCE:

@@ -1,13 +1,16 @@
 import React,{useRef, useState} from "react";
 import ModalCustom from "../../../../../../components/Modal/ModalCustom";
-import CardComponent from "../../../../../../components/Card/CardComponent";
+import NxCardContainer from "../../../../../../components/Nx/NxCardContainer";
 import DetailText from "../../../../../../components/DetailText";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import moment from 'moment'
 import { dateFormatting, renderColumn} from "../../../../../../utils";
 import { getColumnSearchPropsUseFilteredValueFE } from "../../../../../../utils/getColumnSearchProps";
 import { sorterFunction } from "../../../../../../utils/sorterFunction";
-import TablePaginationNew from "../../../../../../components/TablePaginationNew";
+import NxTable from "../../../../../../components/Nx/NxTable";
+import NxModal from "../../../../../../components/Nx/NxModal";
+import { Button } from "antd";
+import NxDetailText from "../../../../../../components/Nx/NxDetailText";
 
 
 const ModalDetail = ({
@@ -15,8 +18,6 @@ const ModalDetail = ({
   closeModal = () => {} ,
   dataDetail
 }) => {
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
   const searchInput = useRef(null);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
@@ -33,9 +34,6 @@ const ModalDetail = ({
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
     setSearch((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
-      }
       return {
         ...prevState,
         [dataIndex]: selectedKeys[0],
@@ -47,7 +45,7 @@ const ModalDetail = ({
       title: "NO",
       width: 20,
       align: "center",
-      render: (text, object, index) => (page - 1) * pageSize + index + 1,
+      render: (text, object, index) => index + 1,
     },
     {
       title: "TYPE",
@@ -89,69 +87,76 @@ const ModalDetail = ({
   ];
 
 
-  const handleChangeDetail = (pageChange, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
-    setPage(tempPage);
-    setPageSize(pageSizeChange);
-  };
-
-
   return (
-    <ModalCustom
-      header={"Detail Contact"}
+    <NxModal
+      title={"Detail Contact"}
       isOpen={isOpen}
       handleCancel={() => {
         handleCloseModal()
       }}
-      type={"detail"}
       width={1000}
       footer={
-        <ButtonComponent
-          type={"default"}
-          onClick={() => {
-            handleCloseModal()
-          }}
-        >
-          Back
-        </ButtonComponent>
+        <div className="flex justify-end w-full">
+          <Button
+            type={"menu"}
+            onClick={() => {
+              handleCloseModal()
+            }}
+          >
+            Back
+          </Button>
+        </div>
       }
     >
-      <CardComponent header={"CONTACT INFORMATION"} cols={3}>
-        <DetailText label="First Name">{dataDetail?.contact?.firstName}</DetailText>
-        <DetailText label="Middle Name">{dataDetail?.contact?.middleName}</DetailText>
-        <DetailText label="Last Name">{dataDetail?.contact?.lastName}</DetailText>
-        <DetailText label="Job">{dataDetail?.contact?.jobName}</DetailText>
-        <DetailText label="Position">{dataDetail?.contact?.positionName}</DetailText>
-      </CardComponent>
+      <div className="flex flex-col gap-y-4 p-4">
 
-      <div className="mb-6">
-        <div className="text-primary text-xs font-semibold uppercase py-[30px]">CONTACT DETAIL INFORMATION</div>
-        <TablePaginationNew
-          type='FE'
-          useSelect
-          pageSize={pageSize}
-          current={page}
-          dataSource={dataDetail?.contact?.contactDetail}
-          tableScrolled={{ y: 625 }}
-          onChange={handleChangeDetail}
-          columns={columns}
-        />
+        <NxCardContainer header="CONTACT INFORMATION">
+          <div className="grid grid-cols-3 gap-4">
+            <NxDetailText label="First Name">{dataDetail?.contact?.firstName}</NxDetailText>
+            <NxDetailText label="Middle Name">{dataDetail?.contact?.middleName}</NxDetailText>
+            <NxDetailText label="Last Name">{dataDetail?.contact?.lastName}</NxDetailText>
+            <NxDetailText label="Job">{dataDetail?.contact?.jobName}</NxDetailText>
+            <NxDetailText label="Position">{dataDetail?.contact?.positionName}</NxDetailText>
+          </div>
+        </NxCardContainer>
+
+        <NxCardContainer header="CONTACT DETAIL INFORMATION">
+          <NxTable
+            idTable="account-contact-detail-modal-table"
+            useSelect
+            usePagination={false}
+            showAdvanceSearch={false}
+            showSearchBar={false}
+            dataSource={dataDetail?.contact?.contactDetail}
+            totalData={dataDetail?.contact?.contactDetail?.length || 0}
+            tableScrolled={{ y: 300, x: "max-content" }}
+            columns={columns}
+          />
+        </NxCardContainer>
+
+        <NxCardContainer header="CONTACT PURPOSE INFORMATION">
+          <div className="flex flex-col gap-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <NxDetailText label="Contact Address">{dataDetail?.contactAddress}</NxDetailText>
+              <NxDetailText label="Contact Address Additional Note">{dataDetail?.additionalNote}</NxDetailText>
+              <NxDetailText label="Primary">{dataDetail?.primaryFlagValue ? "Yes" : "No"}</NxDetailText>
+            </div>
+            <NxDetailText label="Description">{dataDetail?.description}</NxDetailText>
+          </div>
+        </NxCardContainer>
+
+        <NxCardContainer header="HISTORY LOG INFORMATION">
+          <div className="grid grid-cols-5 gap-4">
+            <NxDetailText label="Record ID">{dataDetail?.accountContactId}</NxDetailText>
+            <NxDetailText label="Created Date">{moment(dataDetail?.cretedDate).format(dateFormatting.dateTime)}</NxDetailText>
+            <NxDetailText label="Created By">{dataDetail?.createdBy}</NxDetailText>
+            <NxDetailText label="Updated Date">{dataDetail?.updatedDate !== null ? moment(dataDetail?.updatedDate).format(dateFormatting.dateTime) : ""}</NxDetailText>
+            <NxDetailText label="Updated By">{dataDetail?.updatedBy}</NxDetailText>
+          </div>
+        </NxCardContainer>
+
       </div>
-
-      <CardComponent header={"CONTACT PURPOSE INFORMATION"} cols={2}>
-        <DetailText label="Contact Address">{dataDetail?.contactAddress}</DetailText>
-        <DetailText label="Contact Address Additional Note">{dataDetail?.additionalNote}</DetailText>
-        <DetailText label="Description">{dataDetail?.description}</DetailText>
-        <DetailText label="Primary">{dataDetail?.primaryFlagValue ? "Yes" : "No"}</DetailText>
-      </CardComponent>
-      <CardComponent header={"HISTORY LOG INFORMATION"} cols={5}>
-        <DetailText label="Record ID">{dataDetail?.accountContactId}</DetailText>
-        <DetailText label="Created Date">{moment(dataDetail?.cretedDate).format(dateFormatting.dateTime)}</DetailText>
-        <DetailText label="Created By">{dataDetail?.createdBy}</DetailText>
-        <DetailText label="Updated Date">{dataDetail?.updatedDate !== null ? moment(dataDetail?.updatedDate).format(dateFormatting.dateTime) : ""}</DetailText>
-        <DetailText label="Updated By">{dataDetail?.updatedBy}</DetailText>
-      </CardComponent>
-    </ModalCustom>
+    </NxModal>
   );
 };
 

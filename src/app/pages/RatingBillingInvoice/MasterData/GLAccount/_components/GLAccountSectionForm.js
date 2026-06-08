@@ -1,6 +1,6 @@
 import { Form } from "antd";
 import { useDispatch, useSelector } from "react-redux";
-import BaseContainer from "../../../../../../components/BaseContainer";
+import CardContainer from "../../../../../../components/CardContainer";
 import InputComponent from "../../../../../../components/InputComponent";
 
 const GLAccountSectionForm = ({ type, form }) => {
@@ -9,7 +9,7 @@ const GLAccountSectionForm = ({ type, form }) => {
 
   return (
     <div className="flex flex-col gap-3">
-      <BaseContainer header="GL ACCOUNT INFORMATION">
+      <CardContainer header="GL ACCOUNT INFORMATION">
         <div className="flex flex-col w-full gap-3">
 
           <div className="flex gap-3">
@@ -22,11 +22,19 @@ const GLAccountSectionForm = ({ type, form }) => {
                     required: true,
                     message: "Please input GL Account Number!",
                   },
+                  {
+                    pattern: /^[0-9]+$/,
+                    message: "GL Account Number must be numeric!",
+                  },
                 ]}
               >
                 <InputComponent
                   placeholder="GL Account Number.."
-                  maxLength={255}
+                  maxLength={50}
+                  onKeyPress={(e) => {
+                    if (!/[0-9]/.test(e.key)) e.preventDefault();
+                  }}
+                  autoComplete="off"
                 />
               </Form.Item>
             </div>
@@ -51,23 +59,23 @@ const GLAccountSectionForm = ({ type, form }) => {
           </div>
 
           <Form.Item
-            label="Reference"
+            label="Description"
             name="remark"
             rules={[
               {
                 required: true,
-                message: "Please input Reference!",
+                message: "Please input Description!",
               },
             ]}
           >
             <InputComponent
               type="textarea"
-              placeholder="Reference.."
+              placeholder="Description.."
               maxLength={255}
             />
           </Form.Item>
         </div>
-      </BaseContainer>
+      </CardContainer>
     </div>
   );
 };

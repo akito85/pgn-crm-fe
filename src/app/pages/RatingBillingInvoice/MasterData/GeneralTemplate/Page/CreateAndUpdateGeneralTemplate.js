@@ -5,7 +5,6 @@ import {
 } from "../../../../../../components/Modal/ModalPopUp";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import BaseContainer from "../../../../../../components/BaseContainer";
-import LayoutMenu from "../../../../../../components/SidebarMenu/LayoutMenu";
 import { Form, Spin } from "antd";
 import BreadCrumb from "../../../../../../components/BreadCrumb";
 import { FormStepper, FormFooter } from "../../../../../../components/FormStepNavigation";
@@ -77,6 +76,7 @@ const CreateAndUpdateGeneralTemplate = ({ type }) => {
         "startDate",
         "endDate",
         "description",
+        "uploadTemplate",
       ],
     },
     { value: "Approval", paramValue: ["apphierId"] },
@@ -94,6 +94,7 @@ const CreateAndUpdateGeneralTemplate = ({ type }) => {
 
   //state attachment
   const [dataAttachment, setDataAttachment] = useState([]);
+  const [deletedAttachmentIds, setDeletedAttachmentIds] = useState([]);
 
   //general template
   const [fileList, setFileList] = useState([]);
@@ -108,6 +109,11 @@ const CreateAndUpdateGeneralTemplate = ({ type }) => {
   //modal
   const [modalBack, setModalBack] = useState(false);
   const [modalConfirm, setModalConfirm] = useState(false);
+  const [modalIncomplete, setModalIncomplete] = useState({
+    isOpen: false,
+    stepName: "",
+    stepIndex: 0,
+  });
 
   // Update valuePage when current changes
   useEffect(() => {
@@ -180,9 +186,10 @@ const CreateAndUpdateGeneralTemplate = ({ type }) => {
       }
 
       setDataAttachment([
-        ...(data_detail?.attachment || []).map((item) => {
+        ...(data_detail?.attachment || []).map((item, index) => {
           return {
             ...item,
+            key: index + 1,
             createdDate: moment(item.createdDate).format(dateFormatting.date),
             uploadBy: item.createdBy,
             uploadDate: moment(item.createdDate).format(dateFormatting.date),
@@ -310,6 +317,23 @@ const CreateAndUpdateGeneralTemplate = ({ type }) => {
     }
   }, [dataListAppHierDetail]);
 
+  const handleUpdateAttachment = useCallback((updater) => {
+    setDataAttachment((prevState) => {
+      const newState =
+        typeof updater === "function" ? updater(prevState) : updater;
+      const removedItems = prevState.filter(
+        (item) => !newState.some((newItem) => newItem.key === item.key),
+      );
+      const removedExistingIds = removedItems
+        .filter((item) => item.dataType === "exist" && item.id)
+        .map((item) => item.id);
+      if (removedExistingIds.length > 0) {
+        setDeletedAttachmentIds((prev) => [...prev, ...removedExistingIds]);
+      }
+      return newState;
+    });
+  }, []);
+
   //general template form
   const handleStartDate = (e) => {
     form.resetFields(["endDate"]);
@@ -345,6 +369,11 @@ const CreateAndUpdateGeneralTemplate = ({ type }) => {
   const onFinish = async (e) => {
     if (dataAttachment.length === 0 || fileList.length === 0) {
       handleMandatory(setTabData, dataAttachment, fileList);
+      setModalIncomplete({
+        isOpen: true,
+        stepName: steps[2].title,
+        stepIndex: 2,
+      });
     } else {
       handleMandatory(setTabData, dataAttachment, fileList);
 
@@ -407,6 +436,12 @@ const CreateAndUpdateGeneralTemplate = ({ type }) => {
   );
 
   const handleSendDataFile = async (data) => {
+    if (type === "update" && deletedAttachmentIds.length > 0) {
+      await ratingBillingHttpService.deleteDataWithBody(
+        `/v1/dbs/api/attachment/delete-attachment`,
+        { fileId: deletedAttachmentIds }
+      );
+    }
     if (fileList[0]?.dataType !== "exist") {
       const body_upload = {
         files: fileList[0].file,
@@ -459,9 +494,20 @@ const CreateAndUpdateGeneralTemplate = ({ type }) => {
       .unwrap()
       .then(async (data) => {
         setLoadingForm(true);
-        await handleSendDataFile(data);
-        handleDescriptionSuccess(body, type);
-        handleClearOrReset();
+        try {
+          await handleSendDataFile(data);
+          handleDescriptionSuccess(body, type);
+          handleClearOrReset(type);
+        } catch (error) {
+          const message =
+            error?.response?.data?.data ||
+            error?.response?.data?.message ||
+            error?.message ||
+            "Failed to upload file";
+          setBodyError({ message, value: data });
+          setModalError(true);
+          setLoadingForm(false);
+        }
         setLoadingSave(false);
         setModalConfirm(false);
       })
@@ -511,19 +557,53 @@ const CreateAndUpdateGeneralTemplate = ({ type }) => {
       });
       return res;
     });
+
+    if (errorFields?.length > 0) {
+      const firstError = errorFields[0].name[0];
+      const stepIndex = tabData.findIndex((page) =>
+        page.paramValue?.includes(firstError)
+      );
+
+      if (stepIndex !== -1) {
+        setModalIncomplete({
+          isOpen: true,
+          stepName: steps[stepIndex].title,
+          stepIndex: stepIndex,
+        });
+      }
+    }
   };
 
   const handleClearOrReset = (type_action = "create") => {
     if (type_action === "update") {
-      handleFormSetUpdate(data_detail, data_template_type, id);
+      dispatch(getDetailGeneralTemplate(id));
+      dispatch(getDetailDraftGeneralTemplate(id));
     } else {
       form.resetFields();
       setFileList([]);
       setDataApprovalId();
       setDataListDetailApproval([]);
       setDataAttachment([]);
+      setDeletedAttachmentIds([]);
       setTypeSubmit(false);
+      setStartDate(undefined);
+      setTabData([
+        {
+          value: "General Template",
+          paramValue: [
+            "name",
+            "templateType",
+            "startDate",
+            "endDate",
+            "description",
+            "uploadTemplate",
+          ],
+        },
+        { value: "Approval", paramValue: ["apphierId"] },
+        { value: "Attachment" },
+      ]);
     }
+    setCurrent(0);
     setLoadingForm(false);
   };
 
@@ -576,7 +656,7 @@ const CreateAndUpdateGeneralTemplate = ({ type }) => {
   ];
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading || loadingForm}>
         <BreadCrumb routes={routes} />
         
@@ -636,7 +716,7 @@ const CreateAndUpdateGeneralTemplate = ({ type }) => {
               <GeneralTempalteAttachment
                 dispatch={dispatch}
                 dataAttachment={dataAttachment}
-                setDataAttachment={setDataAttachment}
+                setDataAttachment={handleUpdateAttachment}
               />
             </BaseContainer>
           </div>
@@ -651,7 +731,7 @@ const CreateAndUpdateGeneralTemplate = ({ type }) => {
             onSaveDraft={handleSaveDraft}
             onSubmit={handleSaveSubmit}
             type={type}
-            loading={loadingSave}
+            isLoading={loadingSave}
           />
         </Form>
 
@@ -716,6 +796,7 @@ const CreateAndUpdateGeneralTemplate = ({ type }) => {
                     setModalConfirm(false);
                     setTypeSubmit(false);
                   }}
+                  disabled={loadingSave}
                 >
                   Cancel
                 </ButtonComponent>
@@ -724,8 +805,8 @@ const CreateAndUpdateGeneralTemplate = ({ type }) => {
                   onClick={() => {
                     handleSendData(dataConfirm);
                   }}
-                  loading={loadingSave}
-                  disabled={loading || loadingForm}
+                  isLoading={loadingSave}
+                  disabled={loading || loadingForm || loadingSave}
                 >
                   Confirm
                 </ButtonComponent>
@@ -744,8 +825,27 @@ const CreateAndUpdateGeneralTemplate = ({ type }) => {
             />
           </ModalCustom>
         ) : null}
+
+        {/* Modal Incomplete */}
+        <ModalError
+          isOpen={modalIncomplete.isOpen}
+          handleOk={() => {
+            setCurrent(modalIncomplete.stepIndex);
+            setModalIncomplete({ isOpen: false, stepName: "", stepIndex: 0 });
+          }}
+          handleCancel={() => setModalIncomplete({ isOpen: false, stepName: "", stepIndex: 0 })}
+          customText="Go to Step"
+        >
+          <div className="px-5 pt-5 pb-[10px] justify-center">
+            <div className="w-full flex gap-[20px]">
+              <SVGIcon name="IconFailed" width={48} />
+              <p className="text-[18px] font-bold">{"Incomplete Data"}</p>
+            </div>
+            <p className="pl-[70px]">Please complete the mandatory fields in the <b>{modalIncomplete.stepName}</b> section before proceeding.</p>
+          </div>
+        </ModalError>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

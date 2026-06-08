@@ -3,7 +3,6 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ACCOUNT_MANAGEMENT_ROUTES } from '../../../../../routes/account_management/customer_account_routes';
-import LayoutMenu from '../../../../../components/SidebarMenu/LayoutMenu';
 import BreadCrumb from '../../../../../components/BreadCrumb';
 import InputComponent from '../../../../../components/InputComponent';
 import BaseContainer from '../../../../../components/BaseContainer';
@@ -467,7 +466,7 @@ const FormContact = ({ type }) => {
                 title: "NO",
                 dataIndex: "no",
                 align: "center",
-                width: 60,
+                width: 90,
                 render: (text, object, index) => (page - 1) * pageSize + index + 1,
             },
             {
@@ -549,7 +548,7 @@ const FormContact = ({ type }) => {
     }, [dataContactType, dataCountryCode, dataInputType, data_country_zone, handleChangeInputType, handleChangeType, handleDispatcher, handleSearch, page, pageSize, renderDataOptions, search, searchTextInlane, searchedColumnInlane])
 
     return (
-        <LayoutMenu>
+        <>
             <Spin spinning={loading || isLoading}>
                 <BreadCrumb routes={routes} />
                 <Form form={form} layout={'vertical'} onFinish={handleFinish}>
@@ -661,7 +660,7 @@ const FormContact = ({ type }) => {
                 width={900}
                 header={'confirmation'}
                 footer={[
-                    <div className="w-full flex justify-end gap-5 px-[4px] pb-[10px]">
+                    <div key="footer" className="w-full flex justify-end gap-5 px-[4px] pb-[10px]">
                         <ButtonComponent
                             onClick={handleCancel}
                             type="default"
@@ -729,7 +728,7 @@ const FormContact = ({ type }) => {
                 handleCancel={() => setModalBack(false)}
                 handleOk={() => navigate(-1)}
             />
-        </LayoutMenu>
+        </>
     );
 }
 

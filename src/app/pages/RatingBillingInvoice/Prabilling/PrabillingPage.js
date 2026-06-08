@@ -2,7 +2,6 @@ import React, { useEffect, useState, useMemo, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Tabs } from "antd";
 import { NavLink } from "react-router-dom";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
 import ButtonComponent from "../../../../components/ButtonComponent";
@@ -56,18 +55,30 @@ const PrabillingPage = () => {
   const [searchText, setSearchText] = useState(
     filters[currentTabKey]?.searchText || "",
   );
-  const [selectedBillingPeriod, setSelectedBillingPeriod] = useState(
-    filters[currentTabKey]?.selectedBillingPeriod || null,
-  );
+  const [selectedBillingPeriod, setSelectedBillingPeriod] = useState(null);
 
   const [pageDetail, setPageDetail] = useState(false);
   const [activeRowKey, setActiveRowKey] = useState(null);
   const [selectedRecord, setSelectedRecord] = useState(null);
 
-  const [fixedColumns, setFixedColumns] = useState(() => ({
-    left: ["no"],
-    right: valueTab === "All" ? ["action"] : [],
-  }));
+  const [fixedColumns, setFixedColumns] = useState(() => {
+    try {
+      const saved = localStorage.getItem("prabillingFixedColumns_all");
+      return saved ? JSON.parse(saved) : { left: ["no"], right: ["action"] };
+    } catch (e) {
+      return { left: ["no"], right: ["action"] };
+    }
+  });
+
+  // Save fixedColumns to localStorage per tab when changed
+  useEffect(() => {
+    const tabKey = valueTab === "All" ? "prabillingFixedColumns_all" : "prabillingFixedColumns_summary";
+    try {
+      localStorage.setItem(tabKey, JSON.stringify(fixedColumns));
+    } catch (e) {
+      // ignore storage errors
+    }
+  }, [fixedColumns, valueTab]);
 
   useEffect(() => {
     dispatch(
@@ -130,18 +141,20 @@ const PrabillingPage = () => {
       if (currentPeriod) {
         setSelectedBillingPeriod(currentPeriod.id);
       } else {
-        const latestPeriod =
-          list_period_summary[list_period_summary.length - 1];
-        setSelectedBillingPeriod(latestPeriod.id);
+        setSelectedBillingPeriod(list_period_summary[0].id);
       }
     }
   }, [list_period_summary, selectedBillingPeriod]);
 
   useEffect(() => {
-    setFixedColumns({
-      left: ["no"],
-      right: valueTab === "All" ? ["action"] : [],
-    });
+    const tabKey = valueTab === "All" ? "prabillingFixedColumns_all" : "prabillingFixedColumns_summary";
+    const defaultRight = valueTab === "All" ? ["action"] : [];
+    try {
+      const saved = localStorage.getItem(tabKey);
+      setFixedColumns(saved ? JSON.parse(saved) : { left: ["no"], right: defaultRight });
+    } catch (e) {
+      setFixedColumns({ left: ["no"], right: defaultRight });
+    }
   }, [valueTab]);
 
   useEffect(() => {
@@ -380,9 +393,7 @@ const PrabillingPage = () => {
       if (currentPeriod) {
         setSelectedBillingPeriod(currentPeriod.id);
       } else {
-        const latestPeriod =
-          list_period_summary[list_period_summary.length - 1];
-        setSelectedBillingPeriod(latestPeriod.id);
+        setSelectedBillingPeriod(list_period_summary[0].id);
       }
     }
   };
@@ -520,7 +531,7 @@ const PrabillingPage = () => {
   ];
 
   return (
-    <LayoutMenu>
+    <>
       <BreadCrumb routes={routes} />
 
       <CardContainer
@@ -643,7 +654,7 @@ const PrabillingPage = () => {
           />
         </div>
       )}
-    </LayoutMenu>
+    </>
   );
 };
 

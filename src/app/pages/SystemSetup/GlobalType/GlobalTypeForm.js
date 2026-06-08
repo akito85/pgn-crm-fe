@@ -2,7 +2,6 @@ import React, { useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import { SYSTEM_SETUP_ROUTES } from "../../../../routes/system_setup/setup_routes";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import BaseContainer from "../../../../components/BaseContainer";
 import {
@@ -304,7 +303,7 @@ const GlobalTypeForm = (props) => {
     {
       title: "NO",
       align: "center",
-      width: 60,
+      width: 90,
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {
@@ -757,7 +756,7 @@ const GlobalTypeForm = (props) => {
 
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry)
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <Form form={globalTypeForm} layout={"vertical"} onFinish={handleFinish}>
@@ -1136,7 +1135,7 @@ const GlobalTypeForm = (props) => {
         {/** Modal Retry */}
         {renderModal()}
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

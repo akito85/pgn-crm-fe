@@ -1,35 +1,31 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Form, Steps, Button, Spin } from "antd";
+import { Form, Steps, Spin } from "antd";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   LeftCircleOutlined,
   RightCircleOutlined,
-  RightOutlined,
 } from "@ant-design/icons";
 
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
-import BaseContainer from "../../../../../../../components/BaseContainer";
-import LayoutMenu from "../../../../../../../components/SidebarMenu/LayoutMenu";
+import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
 import HeaderDetail from "../../../HeaderDetail";
 import TosInformation from "./TosInformation";
 import BreadCrumbAdvanced from "../../../../../../../components/BreadCrumbAdvanced";
 import SVGIcon from "../../../../../../../assets/Icon/index";
 import ApprovalSectionForm from "../../../../../ProductAndPromo/Pricing/Form/ApprovalSectionForm";
-import AttachmentSectionForm from "../../../../../ProductAndPromo/Pricing/Form/AttachmentSectionForm";
+import Attachment from "../../ServiceAgreement/CreateServiceAgreement/Attachment";
 import { useDispatch, useSelector } from "react-redux";
 import {
   createTosSubmissionBody,
   getDetailTosSubmission,
   getListAppHier,
   getListAppHierDetail,
-  getListCategory,
   updateTosSubmissionBody,
   validateOverlapTos
 } from "../../../../../../../redux/slices/account_management/detailAccount/tosSubmissionSlice";
 import moment from "moment";
 import { bytesConverter } from "../../../../../../../utils/bytesConverter";
 import ModalBack from "../../../../../../../components/Modal/ModalBack";
-import ModalCustom from "../../../../../../../components/Modal/ModalCustom";
 import ContentModalConfirm from "./ContentModalConfirm";
 import { dateFormatting } from "../../../../../../../utils";
 import accountManagementService from "../../../../../../../redux/services/account_management/accountManagementService";
@@ -97,7 +93,6 @@ const CreateTosSubmission = ({ typeForm }) => {
     dataListAppHierIdForm = [],
     dataListAppHierDetailForm = [],
     dataDetail = {},
-    dataOverlap= {}
   } = useSelector((state) => state.tosSubmission);
   
   const isLoading = loading || loadingForm;
@@ -234,61 +229,79 @@ const CreateTosSubmission = ({ typeForm }) => {
     {
       title: "Approval",
       content: (
-        <BaseContainer header={"APPROVAL HIERARCHY"}>
-          <ApprovalSectionForm
-            dataTable={dataListAppHierDetailForm}
-            dataOption={dataListAppHierIdForm}
-            selectedHierarchy={selectedHierarchy}
-            updateSelectedHierarchy={setSelectedHierarchy}
-          />
-        </BaseContainer>
+        <ApprovalSectionForm
+          dataTable={dataListAppHierDetailForm}
+          dataOption={dataListAppHierIdForm}
+          selectedHierarchy={selectedHierarchy}
+          updateSelectedHierarchy={setSelectedHierarchy}
+        />
       ),
       disabled: !selectedHierarchy,
     },
     {
       title: "Attachment",
       content: (
-        <BaseContainer header={"ATTACHMENT"}>
-          <AttachmentSectionForm
-            type={type}
-            data={listDataAttachment}
-            updateData={setListDataAttachment}
-            typeSelector="tosSubmission"
-            dispatch={dispatch}
-            getAPICategory={getListCategory}
-            mandatory={true}
-          />
-        </BaseContainer>
+        <Attachment
+          data={listDataAttachment}
+          updateData={setListDataAttachment}
+          type={typeForm}
+        />
       ),
       disabled: false,
     },
   ];
 
-  const next = () => {
-    if(current === 0) {
+  const next = useCallback(() => {
+    if (current === 0) {
       const body = {
         saId: idSA,
         saTosId: tosSubmissionObj.tosId,
         startDate: moment(tosSubmissionObj.startDate).format(dateFormatting.dateCapital),
         endDate: moment(tosSubmissionObj.endDate).format(dateFormatting.dateCapital)
-      }
-      dispatch(validateOverlapTos(body))
-      .unwrap()
-      .then((data)=>{
-        data.success === true ? setCurrent(current + 1) : setCurrent(current = 0);
-      })
-      .catch((er)=>{
-        console.log(er);
-        setMessageValidateOverlap(er.data.message)
-        setModalValidateOverlap(true)
-        er.data.succes === false && setCurrent(current = 0);
-      })
-    }else{
-      setCurrent(current + 1);
+      };
+
+      return dispatch(validateOverlapTos(body))
+        .unwrap()
+        .then((data) => {
+          if (data.success === true) {
+            setCurrent((prev) => prev + 1);
+            return true;
+          }
+
+          setCurrent(0);
+          return false;
+        })
+        .catch((error) => {
+          setMessageValidateOverlap(error?.data?.message || "Failed validate overlap data");
+          setModalValidateOverlap(true);
+          setCurrent(0);
+          return false;
+        });
     }
+
+    setCurrent((prev) => prev + 1);
+    return Promise.resolve(true);
+  }, [current, dispatch, idSA, tosSubmissionObj.endDate, tosSubmissionObj.startDate, tosSubmissionObj.tosId]);
+
+  const handleSetCurrent = (targetStep) => {
+    if (targetStep === current) {
+      return;
+    }
+
+    if (targetStep < current) {
+      setCurrent(targetStep);
+      return;
+    }
+
+    if (targetStep !== current + 1 || steps[current].disabled) {
+      return;
+    }
+
+    next();
   };
+
   const prev = () => {
-    setCurrent(current - 1);
+    setCurrent((prevState) => prevState - 1);
   };
   const scrollRightHandler = () => {
     if (containerRef.current) {
@@ -296,8 +309,11 @@ const CreateTosSubmission = ({ typeForm }) => {
     }
   };
   const handleButtonNext = () => {
-    next();
-    scrollRightHandler();
+    next().then((isSuccess) => {
+      if (isSuccess) {
+        scrollRightHandler();
+      }
+    });
   };
 
   const items = steps.map((item) => ({
@@ -311,24 +327,35 @@ const CreateTosSubmission = ({ typeForm }) => {
     }
   };
 
-  const preventSubmit = () => {
-    let count = 0;
-    const length = steps.length;
-    steps.forEach((item) => {
-      if (!item.disabled) {
-        count++;
-      }
-    });
-    return count !== length;
-  };
+  const hasIncompleteStep = steps.some((item) => item.disabled);
+  const hasAttachment = listDataAttachment.length > 0;
+  const isSubmitDisabled = hasIncompleteStep || !hasAttachment;
 
-  const handleSubmitForm = (value) => {
+  const handleSubmitForm = () => {
+    if (typeSubmit === 2 && !hasAttachment) {
+      return;
+    }
+
     setModalConfirm(true);
   };
   const handleCancelModalConfirm = () => {
     setModalConfirm(false);
   };
   const handleProcessModalConfirm = () => {
+    if (loadingForm) {
+      return;
+    }
+
+    setLoadingForm(true);
+    const resolveAttachmentCategoryId = (attachment) => {
+      return (
+        attachment?.categoryId ||
+        attachment?.fileCategoryId ||
+        attachment?.category?.value ||
+        null
+      );
+    };
+
     const body = {
       id: typeForm === "update" ? id : undefined,
       saId: idSA,
@@ -357,18 +384,20 @@ const CreateTosSubmission = ({ typeForm }) => {
         .unwrap()
         .then(async (data) => {
           const idTosSubmission = data.id;
-          setLoadingForm(true);
           for (let element of listDataAttachment) {
+            const categoryId = resolveAttachmentCategoryId(element);
+            if (!categoryId) {
+              throw new Error("Attachment category is required");
+            }
             const body = {
               files: element.file,
-              category: element.fileCategoryId,
+              category: categoryId,
             };
-            const response = await accountManagementService.uploadAttachment(
+            await accountManagementService.uploadAttachment(
               `/v1/dbs/api/tossubmission/uploadAttachment/${idTosSubmission}`,
               body
             );
           }
-          setLoadingForm(false);
           handleCancelModalConfirm();
           handleClear();
         })
@@ -381,26 +410,31 @@ const CreateTosSubmission = ({ typeForm }) => {
             setBodyError({ message });
             setModalError(true);
           }
+        })
+        .finally(() => {
+          setLoadingForm(false);
         });
     } else {
       dispatch(updateTosSubmissionBody(body))
         .unwrap()
         .then(async () => {
-          setLoadingForm(true);
           const filterDataAttach = listDataAttachment.filter(
             (item) => item.dataType !== "exist"
           );
           for (let element of filterDataAttach) {
+            const categoryId = resolveAttachmentCategoryId(element);
+            if (!categoryId) {
+              throw new Error("Attachment category is required");
+            }
             const body = {
               files: element.file,
-              category: element.fileCategoryId,
+              category: categoryId,
             };
-            const response = await accountManagementService.uploadAttachment(
+            await accountManagementService.uploadAttachment(
               `/v1/dbs/api/tossubmission/uploadAttachment/${id}`,
               body
             );
           }
-          setLoadingForm(false);
           handleCancelModalConfirm();
           form.resetFields();
           setSelectedHierarchy(undefined);
@@ -417,6 +451,9 @@ const CreateTosSubmission = ({ typeForm }) => {
             setBodyError({ message });
             setModalError(true);
           }
+        })
+        .finally(() => {
+          setLoadingForm(false);
         });
     }
   };
@@ -443,7 +480,7 @@ const CreateTosSubmission = ({ typeForm }) => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={isLoading}>
         <BreadCrumbAdvanced routes={routes(location?.state)} />
         <div className="flex flex-col w-full gap-4">
@@ -455,150 +492,125 @@ const CreateTosSubmission = ({ typeForm }) => {
             data_header={["CUSTOMER INFORMATION", "ACCOUNT INFORMATION"]}
           />
         </div>
-        <div className="flex flex-row gap-x-6 justify-center pt-10">
-          <span className="mt-[10px]">
-            <LeftCircleOutlined
-              style={{ fontSize: "24px", color: "#0075bf" }}
-              onClick={scrollLeftHandler}
-            />
-          </span>
-          <div ref={containerRef} className="overflow-x-scroll scrollStepsCstm">
-            <Steps current={current} items={items} labelPlacement="vertical" />
+        <NxBaseContainer border className="mt-8">
+          <div className="flex flex-row gap-x-6 justify-center">
+            <span className="mt-[10px]">
+              <LeftCircleOutlined
+                style={{ fontSize: "24px", color: "#0075bf" }}
+                onClick={scrollLeftHandler}
+              />
+            </span>
+            <div ref={containerRef} className="overflow-x-scroll scrollStepsCstm">
+              <Steps
+                current={current}
+                items={items}
+                labelPlacement="vertical"
+                onChange={handleSetCurrent}
+              />
+            </div>
+            <span className="mt-[10px]">
+              <RightCircleOutlined
+                style={{ fontSize: "24px", color: "#0075bf" }}
+                onClick={scrollRightHandler}
+              />
+            </span>
           </div>
-          <span className="mt-[10px]">
-            <RightCircleOutlined
-              style={{ fontSize: "24px", color: "#0075bf" }}
-              onClick={scrollRightHandler}
-            />
-          </span>
-        </div>
+        </NxBaseContainer>
         <Form
           id="tosSubmissionForm"
           form={form}
           layout={"vertical"}
           onFinish={handleSubmitForm}
         >
-          {/* Steps Contents */}
+          <div className="steps-content mt-6">{steps[current].content}</div>
 
-          <div className="steps-content">{steps[current].content}</div>
-
-          {/* Section Action Steps */}
-          <div className="steps-action my-8 flex w-full justify-between gap-x-2">
-            <ButtonComponent
-              type={"submit"}
-              icon={<SVGIcon name="IconArrowNarrowLeft" width={24} />}
-              onClick={() => {
-                setModalBack(true);
-              }}
-            >
-              Back
-            </ButtonComponent>
-            <div className="flex w-full justify-end gap-x-4">
+          <NxBaseContainer border className="mt-6">
+            <div className="steps-action flex w-full justify-between gap-x-2">
               <ButtonComponent
-                icon={
-                  <SVGIcon
-                    name={
-                      typeForm === "update"
-                        ? `IconButtonReset`
-                        : `IconButtonClear`
-                    }
-                    width={24}
-                  />
-                }
-                type="submit"
-                onClick={handleClear}
-              >
-                {typeForm === "update" ? "Reset" : "Clear"}
-              </ButtonComponent>
-              {current > 0 && (
-                <ButtonComponent
-                  onClick={() => {
-                    prev();
-                    scrollLeftHandler();
-                  }}
-                  type={"submit"}
-                  icon={<SVGIcon name="IconArrowNarrowLeft" width={24} />}
-                >
-                  Previous
-                </ButtonComponent>
-              )}
-              {current < steps.length - 1 && (
-                <Button
-                  onClick={handleButtonNext}
-                  type="primary"
-                  className="ant-btn ant-btn-submit flex w-full justify-center"
-                  disabled={steps[current].disabled}
-                >
-                  <span className="p-1 text-[18px] text-center">Next</span>
-                  <RightOutlined
-                    style={{
-                      justifyItems: "center",
-                      fontSize: "18px",
-                      color: "#fff",
-                    }}
-                  />
-                </Button>
-              )}
-              {current === steps.length - 1 ? (
-                <>
-                  <ButtonComponent
-                    disabled={preventSubmit()}
-                    form="tosSubmissionForm"
-                    htmlType="submit"
-                    type="submit"
-                    onClick={() => setTypeSubmit(1)}
-                  >
-                    Save as Draft
-                  </ButtonComponent>
-                  <ButtonComponent
-                    disabled={preventSubmit()}
-                    form="tosSubmissionForm"
-                    htmlType="submit"
-                    type="submit"
-                    onClick={() => setTypeSubmit(2)}
-                  >
-                    Save & Submit
-                  </ButtonComponent>
-                </>
-              ) : null}
-            </div>
-          </div>
-        </Form>
-        {/** Modal Confirm */}
-        <ModalCustom
-          isOpen={modalConfirm}
-          handleCancel={handleCancelModalConfirm}
-          header={"Confirmation"}
-          width={1000}
-          type={"confirmation"}
-          footer={
-            <div className="w-full flex justify-end gap-5 p-4">
-              <ButtonComponent
-                onClick={handleCancelModalConfirm}
-                type="default"
+                type="menu"
+                onClick={() => setModalBack(true)}
               >
                 Cancel
               </ButtonComponent>
-              <ButtonComponent
-                type="submit"
-                onClick={handleProcessModalConfirm}
-              >
-                Confirm
-              </ButtonComponent>
+              <div className="flex w-full justify-end gap-x-4">
+                <ButtonComponent
+                  icon={
+                    <SVGIcon
+                      name={typeForm === "update" ? "IconButtonReset" : "IconButtonClear"}
+                      width={24}
+                    />
+                  }
+                  type="reject"
+                  onClick={handleClear}
+                >
+                  {typeForm === "update" ? "Reset" : "Clear"}
+                </ButtonComponent>
+                {current > 0 && (
+                  <ButtonComponent
+                    onClick={() => {
+                      prev();
+                      scrollLeftHandler();
+                    }}
+                    type="menu"
+                  >
+                    Previous
+                  </ButtonComponent>
+                )}
+                <>
+                  <ButtonComponent
+                      disabled={hasIncompleteStep}
+                      form="tosSubmissionForm"
+                      htmlType="submit"
+                      type="secondary"
+                      onClick={() => setTypeSubmit(1)}
+                    >
+                      Save as Draft
+                    </ButtonComponent>
+                </>
+                {current < steps.length - 1 && (
+                  <ButtonComponent
+                    onClick={handleButtonNext}
+                    disabled={steps[current].disabled}
+                    type="submit"
+                    icon={<SVGIcon name="IconArrowNarrowRight" width={24} />}
+                  >
+                    Next
+                  </ButtonComponent>
+                )}
+                
+                {current === steps.length - 1 ? (
+                  <>
+                    
+                    <ButtonComponent
+                      disabled={isSubmitDisabled}
+                      form="tosSubmissionForm"
+                      htmlType="submit"
+                      type="approve"
+                      onClick={() => setTypeSubmit(2)}
+                    >
+                      Submit
+                    </ButtonComponent>
+                  </>
+                ) : null}
+              </div>
             </div>
-          }
-        >
-          {modalConfirm ? (
-            <ContentModalConfirm
-              dataTosSubmissionObj={tosSubmissionObj}
-              selectedHierarchy={selectedHierarchy}
-              listDataAttachment={listDataAttachment}
-              listDataAppHierDetail={dataListAppHierDetailForm}
-              dataDetailTosSubmission={dataDetailTosSubmission}
-              listApproval={dataListAppHierIdForm}
-            />
-          ) : null}
-        </ModalCustom>
+          </NxBaseContainer>
+        </Form>
+        {/** Modal Confirm */}
+        {modalConfirm ? (
+          <ContentModalConfirm
+            isOpen={modalConfirm}
+            loadingSubmit={loadingForm}
+            handleCancel={handleCancelModalConfirm}
+            handleConfirm={handleProcessModalConfirm}
+            dataTosSubmissionObj={tosSubmissionObj}
+            selectedHierarchy={selectedHierarchy}
+            listDataAttachment={listDataAttachment}
+            listDataAppHierDetail={dataListAppHierDetailForm}
+            dataDetailTosSubmission={dataDetailTosSubmission}
+            listApproval={dataListAppHierIdForm}
+          />
+        ) : null}
         {/** Modal Back */}
         <ModalBack
           isOpen={modalBack}
@@ -639,7 +651,7 @@ const CreateTosSubmission = ({ typeForm }) => {
         </div>
       </ModalError>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

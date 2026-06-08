@@ -6,7 +6,6 @@ import { Spin, Tabs } from "antd";
 import moment from "moment";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
-import LayoutMenu from "../../../../../components/SidebarMenu/LayoutMenu";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 import CardContainer from "../../../../../components/CardContainer";
@@ -19,6 +18,7 @@ import { configApp } from "../../../../../constants/configApp";
 import {
   approveRejectGLAccount,
   approveRejectInactiveGLAccount,
+  approveRejectActivatedGLAccount,
   resetGLAccountState,
   getDetailGLAccount,
 } from "../../../../../redux/slices/rating_billing_invoice/MasterData/glAccount";
@@ -48,6 +48,10 @@ const GLAccountDetail = () => {
 
   const showButtonApproval =
     bodyApproval.isApprover !== null && bodyApproval.isApprover;
+  const isInactiveApproval =
+    bodyApproval.approvalType === "INACTIVE_GL_ACCOUNT";
+  const isActivatedApproval =
+    bodyApproval.approvalType === "ACTIVATED_GL_ACCOUNT";
 
   useEffect(() => {
     if (id) {
@@ -114,7 +118,7 @@ const GLAccountDetail = () => {
     { path: "", breadcrumbName: "System Setup" },
     { path: "", breadcrumbName: "Master Data" },
     { path: RBI_ROUTES.GLACCOUNT, breadcrumbName: "GL Account" },
-    { path: RBI_ROUTES.GLACCOUNT_DETAIL, breadcrumbName: "Detail" },
+    { path: RBI_ROUTES.GLACCOUNT_DETAIL, breadcrumbName: "Detail GL Account" },
   ];
 
   const handleRetry = () => {
@@ -133,19 +137,20 @@ const GLAccountDetail = () => {
   };
 
   const handleConfirm = (res, handleClear) => {
-    setModalConfirm(false);
     const data = {
       remark: res.remark,
       action: approveOrReject.toUpperCase(),
       approvalId: bodyApproval.tAppId,
     };
-    dispatch(
-      bodyApproval.approvalType === "INACTIVE_GL_ACCOUNT"
-        ? approveRejectInactiveGLAccount({ id, body: data })
-        : approveRejectGLAccount({ id, body: data }),
-    )
+    const approvalAction = isInactiveApproval
+      ? approveRejectInactiveGLAccount({ id, body: data })
+      : isActivatedApproval
+        ? approveRejectActivatedGLAccount({ id, body: data })
+        : approveRejectGLAccount({ id, body: data });
+    return dispatch(approvalAction)
       .unwrap()
       .then(() => {
+        setModalConfirm(false);
         if (handleClear) handleClear();
         dispatch(getDetailGLAccount(id));
       })
@@ -160,10 +165,10 @@ const GLAccountDetail = () => {
   };
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
-        
+
         <CardContainer
           header={
             <div className="flex -my-4 justify-between items-center">
@@ -173,6 +178,36 @@ const GLAccountDetail = () => {
             </div>
           }
         >
+          {bodyApproval.isApprover && (
+            <div className="border border-[#D6E1F0] rounded-lg mb-4">
+              <div className="px-4 py-3 border-b border-[#D6E1F0]">
+                <p className="font-semibold text-primary">
+                  {isActivatedApproval
+                    ? "ACTIVATE REQUEST INFORMATION"
+                    : isInactiveApproval
+                      ? "INACTIVE REQUEST INFORMATION"
+                      : "APPROVAL REQUEST INFORMATION"}
+                </p>
+              </div>
+              <div className="p-4">
+                <div className="w-full grid grid-cols-4 gap-x-8 gap-y-2">
+                  <DetailText label={"Requested Date"}>
+                    {bodyApproval.approvalDetail?.requestedDate
+                      ? moment(
+                          bodyApproval.approvalDetail.requestedDate,
+                        ).format(dateFormatting.date)
+                      : ""}
+                  </DetailText>
+                  <DetailText label={"Requested By"}>
+                    {bodyApproval.approvalDetail?.requestedBy || ""}
+                  </DetailText>
+                  <DetailText label={"Remark"}>
+                    {bodyApproval.approvalDetail?.remarks || ""}
+                  </DetailText>
+                </div>
+              </div>
+            </div>
+          )}
           <Tabs
             activeKey={activeTab}
             onChange={setActiveTab}
@@ -182,34 +217,6 @@ const GLAccountDetail = () => {
                 label: "Content Setup",
                 children: (
                   <div className="flex flex-col gap-3">
-                    {bodyApproval.isApprover &&
-                      bodyApproval.approvalType === "INACTIVE_GL_ACCOUNT" && (
-                        <div className="border border-[#D6E1F0] rounded-lg">
-                          <div className="px-4 py-3 border-b border-[#D6E1F0]">
-                            <p className="font-semibold text-primary">
-                              INACTIVE REQUEST INFORMATION
-                            </p>
-                          </div>
-                          <div className="p-4">
-                            <div className="w-full grid grid-cols-4 gap-x-8 gap-y-2">
-                              <DetailText label={"Requested Date"}>
-                                {bodyApproval.approvalDetail?.requestedDate
-                                  ? moment(
-                                      bodyApproval.approvalDetail.requestedDate,
-                                    ).format(dateFormatting.date)
-                                  : "-"}
-                              </DetailText>
-                              <DetailText label={"Requested By"}>
-                                {bodyApproval.approvalDetail?.requestedBy ||
-                                  "-"}
-                              </DetailText>
-                              <DetailText label={"Remark"}>
-                                {bodyApproval.approvalDetail?.remarks || "-"}
-                              </DetailText>
-                            </div>
-                          </div>
-                        </div>
-                      )}
                     <div
                       style={{
                         border: "1px solid #D6E1F0",
@@ -219,13 +226,13 @@ const GLAccountDetail = () => {
                       <div style={{ padding: "16px" }}>
                         <div className="w-full grid grid-cols-3 gap-x-8 gap-y-2">
                           <DetailText label={"GL Account Number"}>
-                            {dataDetail?.glAccount || "-"}
+                            {dataDetail?.glAccount || ""}
                           </DetailText>
                           <DetailText label={"GL Account Description"}>
-                            {dataDetail?.glAccountDesc || "-"}
+                            {dataDetail?.glAccountDesc || ""}
                           </DetailText>
                           <DetailText label={"Description"}>
-                            {dataDetail?.remark || "-"}
+                            {dataDetail?.remark || ""}
                           </DetailText>
                         </div>
                       </div>
@@ -372,7 +379,7 @@ const GLAccountDetail = () => {
           </div>
         </ModalError>
       </Spin>
-    </LayoutMenu>
+    </>
   );
 };
 

@@ -11,13 +11,13 @@ import Highlighter from "react-highlight-words";
 import { PlusOutlined, WarningOutlined } from "@ant-design/icons";
 
 import StatusComponent from "../../../../../../components/StatusComponent";
-import TablePagination from "../../../../../../components/TablePagination";
+import NxTable from "../../../../../../components/Nx/NxTable";
 import SVGIcon from "../../../../../../assets/Icon/index";
 import BaseContainer from "../../../../../../components/BaseContainer";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import ModalDetail from "./ModalDetail";
 import ModalUpdate from "./ModalUpdate";
-import ModalApproveOrReject from "../../../../../../components/Modal/ModalApproveOrReject";
+import NxActivateInactivateModal from "../../../../../../components/Nx/NxActivateInactivateModal";
 import {
   getListDetailAccountContact,
   activationAccountContact,
@@ -48,42 +48,10 @@ import DetailText from "../../../../../../components/DetailText";
 import TableContact from "../../../../../../components/Table/Contact/TableContact";
 import { sorterFunction } from "../../../../../../utils/sorterFunction";
 import { useLocation } from "react-router-dom";
-
-const expandedRowRender = (record) => {
-  const dataExpand = record?.contactDetails;
-
-  const columns = [
-    {
-      title: "NO",
-      align: "center",
-      width: 60,
-      render: (text, object, index) => index + 1,
-    },
-    {
-      title: "TYPE",
-      dataIndex: "typeName",
-    },
-    {
-      title: "VALUE",
-      dataIndex: "contactValue",
-    },
-  ];
-  return (
-    <div>
-      <p className="text-primary text-xs font-bold uppercase">CONTACT DETAIL</p>
-      <TablePagination
-        useSelect={false}
-        usePagination={false}
-        // className="table-expand-custom"
-        dataSource={dataExpand}
-        columns={columns}
-        tableScrolled={{
-          x: 1300,
-        }}
-      />
-    </div>
-  );
-};
+import NxCardContainer from "../../../../../../components/Nx/NxCardContainer";
+import { nxGetAccountActions } from "../../../../../../components/Nx/NxGetAccountActions";
+import ContactDetailTable from "./ContactDetailTable";
+import NxStatusComponent from "../../../../../../components/Nx/NxStatusComponent";
 
 const AccountContact = ({ id, idCustomer, type }) => {
   
@@ -134,6 +102,8 @@ const AccountContact = ({ id, idCustomer, type }) => {
   const location = useLocation();
   // state contact global
   const [openModalContact, setOpenModalContact] = useState(false);
+  const totalElements = data?.page?.totalElements || 0;
+  const hasMore = dataTable.length < totalElements;
 
   const assertChoose = useCallback((data) => {
     if (typeContact === 'choosed') {
@@ -287,23 +257,31 @@ const AccountContact = ({ id, idCustomer, type }) => {
     if (data?.result && data?.result.length > 0) {
       const dataModif = data?.result.map((a, index) => ({
         ...a,
-        key: index + 1,
+        key: a?.accountContactId || `${page}-${index + 1}`,
         contactDetail: a.contactDetail?.map((b, index) => ({
           ...b,
           key: index + 1,
         })),
       }));
-      setDataTable(dataModif);
+      setDataTable((prevState) => {
+        if (page === 1) {
+          return dataModif;
+        }
+        const existingKeys = new Set(prevState.map((item) => item.accountContactId));
+        const merged = [...prevState];
+        dataModif.forEach((item) => {
+          if (!existingKeys.has(item.accountContactId)) {
+            merged.push(item);
+          }
+        });
+        return merged;
+      });
     } else {
-      setDataTable([])
+      if (page === 1) {
+        setDataTable([])
+      }
     }
-  }, [data]);
-
-  const handleChangeSize = (pageChange, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
-    setPage(tempPage);
-    setPageSize(pageSizeChange);
-  };
+  }, [data, page]);
 
   // const handleSearch = (selectedKeys, confirm, dataIndex) => {
   //   confirm();
@@ -330,6 +308,7 @@ const AccountContact = ({ id, idCustomer, type }) => {
           setPage(1); // Reset the page only if there was a previous search
         }
         const { [dataIndex]: _, ...rest } = prevState; // Remove the current dataIndex from state
+        setDataTable([]);
         return rest;
       });
       return;
@@ -341,6 +320,7 @@ const AccountContact = ({ id, idCustomer, type }) => {
       setSearch((prevState) => {
         if (prevState[dataIndex] !== selectedKeys[0]) {
           setPage(1);
+          setDataTable([]);
         }
         return {
           ...prevState,
@@ -361,6 +341,7 @@ const AccountContact = ({ id, idCustomer, type }) => {
       setSearch((prevState) => {
         if (prevState[dataIndex]?.value !== tempSearchedText?.value) {
           setPage(1);
+          setDataTable([]);
         }
         return {
           ...prevState,
@@ -374,8 +355,17 @@ const AccountContact = ({ id, idCustomer, type }) => {
   const onSort = (_, __, sort) => {
     const dataOrder = sort.order === "ascend" ? "asc" : "desc";
     const dataSort = sort.order ? `${sort.field}~${dataOrder}` : "";
+    setPage(1);
+    setDataTable([]);
     setSort(dataSort);
   };
+
+  const handleLoadMore = useCallback(async () => {
+    if (!loading && hasMore) {
+      setPage((prevState) => prevState + 1);
+    }
+    return Promise.resolve();
+  }, [hasMore, loading]);
 
   // Handle Cancel Modal Active/Inactive
   const handleCancel = () => {
@@ -416,12 +406,14 @@ const AccountContact = ({ id, idCustomer, type }) => {
         // setRemark("");
         handleClear()
         form.resetFields();
+        setPage(1);
+        setDataTable([]);
 
         const reqSearch = encodeURIComponent(JSON.stringify(search));
         dispatch(
           getListDetailAccountContact({
             id,
-            page,
+            page: 1,
             pageSize,
             search: reqSearch,
             sort,
@@ -446,14 +438,14 @@ const AccountContact = ({ id, idCustomer, type }) => {
     return [
       {
         title: "NO",
-        width: 60,
+        width: 50,
         align: "center",
-        render: (text, object, index) => (page - 1) * pageSize + index + 1,
+        render: (text, object, index) => index + 1,
       },
       {
         title: "PRIMARY",
         dataIndex: "primaryFlag",
-        width: 150,
+        width: 200,
         sorter: true,
         ...getColumnSearchPropsPaging(
           "primaryFlag",
@@ -462,44 +454,11 @@ const AccountContact = ({ id, idCustomer, type }) => {
           searchText,
           handleSearch
         ),
-        // render: (v, r, i) => (
-        //   <div className={" flex justify-center"}>
-        //     {r.primaryFlagValue ? (
-        //       <StatusComponent colour={"active"}>{r.primaryFlag}</StatusComponent>
-        //     ) : (
-        //       ""
-        //     )}
-        //   </div>
-        // ),
-        render: (data, record, index) => {
-          let text;
-          switch (record?.primaryFlagValue) {
-            case true:
-              text = "Primary";
-              break;
-            case false:
-              text = "Non Primary";
-              break;
-            default:
-              text = index
-                ? index.charAt(0).toUpperCase() + index.slice(1).toLowerCase()
-                : index;
-              break;
-          }
-          return text ? (
-            <div className={"flex justify-center"}>
-              <StatusComponent colour={text}>{text}</StatusComponent>
-            </div>
-          ) : (
-            text
-          );
-        },
-
       },
       {
         title: "CONTACT NAME",
         dataIndex: "contactName",
-        width: 250,
+        width: 200,
         sorter: true,
         ...getColumnSearchPropsPaging(
           "contactName",
@@ -512,7 +471,7 @@ const AccountContact = ({ id, idCustomer, type }) => {
       {
         title: "JOB",
         dataIndex: "jobName",
-        width: 150,
+        width: 200,
         sorter: true,
         ...getColumnSearchPropsPaging(
           "jobName",
@@ -525,7 +484,7 @@ const AccountContact = ({ id, idCustomer, type }) => {
       {
         title: "POSITION",
         dataIndex: "positionName",
-        width: 150,
+        width: 200,
         sorter: true,
         ...getColumnSearchPropsPaging(
           "positionName",
@@ -538,7 +497,7 @@ const AccountContact = ({ id, idCustomer, type }) => {
       {
         title: "CONTACT ADDRESS",
         dataIndex: "contactAddress",
-        width: 350,
+        width: 200,
         sorter: true,
         ...getColumnSearchPropsPaging(
           "contactAddress",
@@ -574,7 +533,7 @@ const AccountContact = ({ id, idCustomer, type }) => {
       {
         title: "Contact Address Additional Note"?.toUpperCase(),
         dataIndex: "additionalNote",
-        width: 340,
+        width: 200,
         sorter: true,
         ...getColumnSearchPropsPaging(
           "additionalNote",
@@ -587,7 +546,7 @@ const AccountContact = ({ id, idCustomer, type }) => {
       {
         title: "DESCRIPTION",
         dataIndex: "description",
-        width: 350,
+        width: 200,
         sorter: true,
         ...getColumnSearchPropsPaging(
           "description",
@@ -623,23 +582,15 @@ const AccountContact = ({ id, idCustomer, type }) => {
       {
         title: "STATUS",
         dataIndex: "status",
-        width: 140,
+        width: 100,
         fixed: "right",
-        sorter: true,
-        ...getColumnSearchPropsPaging(
-          "status",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch
-        ),
         render: (index) => {
           const text = index
             ? index.charAt(0).toUpperCase() + index.slice(1).toLowerCase()
             : index;
           return text ? (
             <div className={" flex justify-center"}>
-              <StatusComponent colour={index}>{text}</StatusComponent>
+              <NxStatusComponent colour={index}>{text}</NxStatusComponent>
             </div>
           ) : (
             text
@@ -649,107 +600,24 @@ const AccountContact = ({ id, idCustomer, type }) => {
     ];
   }
 
-  const itemActions = [
-    //action toolbar
-    {
-      action: 'Create',
-      render: (
-        <ButtonComponent
-          onClick={() => {
-            setOpenModalContact(true)
-            setTypeContact('default')
-          }}
-          icon={<PlusOutlined style={{ fontSize: "24px" }} />}
-          type="submit"
-        >
-          Create Contact
-        </ButtonComponent>
-
-      )
+  const itemActions = nxGetAccountActions({
+    handleCreate: () => {
+      setOpenModalContact(true)
+      setTypeContact('default')
     },
-
-    // Column Action Table
-    {
-      action: "View",
-      type: "table",
-      render: (record, data) => {
-        return (
-          <Tooltip title="Detail">
-            <div className="pt-1">
-              <SVGIcon
-                name="IconDetail"
-                color={"#0075bf"}
-                width={24}
-                onClick={() => {
-                  setModalDetail(true);
-                  dispatch(getDetailAccountContact(record.accountContactId));
-                }}
-              />
-            </div>
-          </Tooltip>
-        )
-      }
+    handleView: (record) => {
+      setModalDetail(true);
+      dispatch(getDetailAccountContact(record.accountContactId));
     },
-
-    {
-      action: "Update",
-      type: "table",
-      render: (record, data) => {
-        return (
-          <Tooltip title="Update">
-            <div className="pt-1">
-              <SVGIcon
-                name="IconEdit"
-                color={record?.status === 'INACTIVE' ? "#8D91A0" : "#ACC424"}
-                className={record?.status === 'INACTIVE' ? "cursor-not-allowed" : undefined}
-                width={24}
-                onClick={record?.status === 'INACTIVE' ? null : () => {
-                  setOpenModalContact(true)
-                  dispatch(getDetailAccountContact(record.accountContactId));
-                  setTypeContact('update')
-                }}
-              />
-            </div>
-          </Tooltip>
-          // <ButtonComponent
-          //   onClick={() => {
-          //     setOpenModalContact(true)
-          //     dispatch(getDetailAccountContact(record.accountContactId));
-          //     setTypeContact('update')
-          //   }}
-          //   icon={<SVGIcon name="IconEdit" width={24}
-          //     color={record?.status === 'INACTIVE' ? "#8D91A0" : "#ACC424"}
-          //   />}
-          //   border={false}
-          //   disabled={record?.status === 'INACTIVE'}
-          // />
-
-        )
-      }
+    handleUpdate: (record) => {
+      setOpenModalContact(true)
+      dispatch(getDetailAccountContact(record.accountContactId));
+      setTypeContact('update')
     },
-
-    {
-      action: "Activate",
-      type: "table",
-      render: (record, data) => {
-        return (
-          <Tooltip
-            title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}
-          >
-            <div className="pt-1">
-              <Checkbox
-                onClick={() => {
-                  handleActiveOrInactive(record);
-                }}
-                checked={record.status === "ACTIVE" ? false : true}
-              />
-            </div>
-          </Tooltip>
-        )
-      }
+    handleActivate: (record) => {
+      handleActiveOrInactive(record);
     }
-  ]
-
+  })
 
   const handleSaveContact = useCallback(async (formValue, tableData) => {
     try {
@@ -856,11 +724,13 @@ const AccountContact = ({ id, idCustomer, type }) => {
 
       }
       setModalConfirm(false)
+      setPage(1);
+      setDataTable([]);
       const reqSearch = encodeURIComponent(JSON.stringify(search));
       await dispatch(
         getListDetailAccountContact({
           id,
-          page,
+          page: 1,
           pageSize,
           search: reqSearch,
           sort,
@@ -875,7 +745,7 @@ const AccountContact = ({ id, idCustomer, type }) => {
     } catch (error) {
 
     }
-  }, [body, dispatch, formContact, formModal, id, page, pageSize, search, sort, typeContact])
+  }, [body, dispatch, formContact, formModal, id, pageSize, search, sort, typeContact])
 
 
 
@@ -964,12 +834,13 @@ const AccountContact = ({ id, idCustomer, type }) => {
   return (
     <>
       <Spin spinning={loading}>
-        <BaseContainer header={"ACCOUNT CONTACT LIST"}>
+        <NxCardContainer header={"ACCOUNT CONTACT LIST"}>
           <div className="flex w-full justify-end gap-3 mb-5">
             <ToolbarAccount items={itemActions} advancedAccess={access_account} />
           </div>
-          <div className={"w-full"}>
-            <TablePagination
+          <div className="flex flex-col gap-y-4">
+            <NxTable
+              idTable="account-contact-table"
               dataSource={data && data?.length === 0 ? null : dataTable}
               columns={[
                 ...columns(
@@ -986,16 +857,18 @@ const AccountContact = ({ id, idCustomer, type }) => {
                   access_account
                 ),
               ]}
-              pageSize={pageSize}
-              current={page}
-              expandable={{ expandedRowRender }}
+              expandable={{ expandedRowRender: dataTable?.length ? (record) => <ContactDetailTable contactDetails={record?.contactDetails} /> : undefined } }
               totalData={data?.page?.totalElements}
-              onChange={handleChangeSize}
+              usePagination={false}
+              useInfiniteScroll={true}
+              hasMore={hasMore}
+              onLoadMore={handleLoadMore}
+              loadMoreThreshold={20}
               onSort={onSort}
-              tableScrolled={{ x: 1300 }}
+              tableScrolled={{ y: 400, x: "max-content" }}
             />
           </div>
-        </BaseContainer>
+        </NxCardContainer>
       </Spin>
 
       {/* Modal Update */}
@@ -1009,13 +882,12 @@ const AccountContact = ({ id, idCustomer, type }) => {
       <ModalUpdate isOpen={modalUpdate} closeModal={setModalUpdate} />
 
       {/* Modal Activate */}
-      <ModalApproveOrReject
+      <NxActivateInactivateModal
         isOpen={modalActivate}
         handleCloseModal={handleCancel}
         onFinish={handleConfirmActivation}
-        header={titleActiveOrInactive}
-        approveOrReject={titleActiveOrInactive}
-        menu={"Contact"}
+        action={titleActiveOrInactive === "Inactivate" ? "inactivate" : "activate"}
+        menu="Contact"
         named={contactName}
       />
 

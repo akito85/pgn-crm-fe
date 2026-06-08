@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
 import BreadCrumb from "../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { useSelector, useDispatch } from "react-redux";
 import BaseContainer from "../../../../components/BaseContainer";
 import {
@@ -170,7 +169,7 @@ const EntityDetail = () => {
   const columnsTI = [
     {
       title: "NO",
-      width: 60,
+      width: 90,
       align: "center",
       render: (text, object, index) => index + 1,
     },
@@ -306,7 +305,7 @@ const EntityDetail = () => {
   const columns_activation = [
     {
       title: "NO",
-      width: 60,
+      width: 90,
       align: "center",
       render: (text, object, index) => (currentLog - 1) * sizeLog + index + 1,
     },
@@ -408,7 +407,7 @@ const EntityDetail = () => {
 
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <div className={"my-5"}>
@@ -544,7 +543,7 @@ const EntityDetail = () => {
           </p>
         </div>
       </ModalConfirm>
-    </LayoutMenu>
+    </>
   );
 };
 

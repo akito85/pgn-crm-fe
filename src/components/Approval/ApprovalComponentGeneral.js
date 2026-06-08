@@ -10,6 +10,7 @@ const ApprovalComponentGeneral = ({
   showSelect = true,
   disableSelect = false,
   approvalName = "",
+  loading = false,
 }) => {
   // Declaration
   const searchInput = useRef(null);
@@ -28,7 +29,7 @@ const ApprovalComponentGeneral = ({
   };
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-y-4">
       <FunctionalApproval
         dataTable={dataTable}
         dataOption={dataOption}
@@ -41,6 +42,7 @@ const ApprovalComponentGeneral = ({
         showSelect={showSelect}
         disableSelect={disableSelect}
         approvalName={approvalName}
+        loading={loading}
       />
     </div>
   );

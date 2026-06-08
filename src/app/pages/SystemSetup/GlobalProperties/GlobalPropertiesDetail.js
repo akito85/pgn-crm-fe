@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Spin } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
-import LayoutMenu from "../../../../components/SidebarMenu/LayoutMenu";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import { SYSTEM_SETUP_ROUTES } from "../../../../routes/system_setup/setup_routes";
@@ -86,7 +85,7 @@ const GlobalPropertiesDetail = () => {
     {
       title: "NO",
       align: "center",
-      width: 60,
+      width: 90,
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {
@@ -176,7 +175,7 @@ const GlobalPropertiesDetail = () => {
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry)
 
   return (
-    <LayoutMenu>
+    <>
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
         <BaseContainer header={"global properties information"}>
@@ -253,7 +252,7 @@ const GlobalPropertiesDetail = () => {
         </div>
       </Spin>
       {renderModal()}
-    </LayoutMenu>
+    </>
   );
 };
 

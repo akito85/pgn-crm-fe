@@ -1,52 +1,63 @@
-import ConfirmationModalInfo from "./ConfirmationModalInfo";
-import ConfirmationModalApproval from "./ConfirmationModalApproval";
-import ConfirmationModalAttachment from "./ConfirmationModalAttachment";
-import ConfirmationModalRemark from "./ConfirmationModalRemark";
 import NxTabs from "../../../../../../../../../components/Nx/NxTabs";
+import NxBaseContainer from "../../../../../../../../../components/Nx/NxBaseContainer";
+import NxApprovalInput from "../../../../../../../../../components/Nx/NxApprovalInput";
+import NxAttachmentInput from "../../../../../../../../../components/Nx/NxAttachmentInput";
+import InfoPaymentRelation from "../StepContents/InformationForm/InfoPaymentRelation";
+import NxRemarkInput from "../../../../../../../../../components/Nx/NxRemarkIInput";
 
 const ConfirmationModalTabs = ({
   form,
   approvalData,
-  dataAttachment,
+  attachmentDataSource,
   service,
   type = "",
   configApplication,
   activeTab = 0,
   setActiveTab = () => {},
+  disabled = false,
 }) => {
   const tabOptions = [
     {
       key: 0,
       label: "Payment Relation Information",
-      children: <ConfirmationModalInfo form={form} />
+      disabled,
+      children: <InfoPaymentRelation form={form} formView={false} />
     },
     {
       key: 1,
       label: "Approval",
+      disabled,
       children: (
-        <ConfirmationModalApproval
-          dataTable={approvalData}
-          form={form}
-        />
+        <NxApprovalInput form={form} hierarchyDetails={approvalData} formView={false} />
       )
     },
     {
       key: 2,
       label: "Attachment",
+      disabled,
       children: (
-        <ConfirmationModalAttachment
-          data={dataAttachment}
+        <NxAttachmentInput
+          data={attachmentDataSource}
           service={service}
           configApplication={configApplication}
+          type={"confirmation"}
         />
       )
     },
     type === "submit" && {
       key: 3,
       label: "Remark",
-      children: <ConfirmationModalRemark />
+      disabled,
+      children: <NxRemarkInput disabled={disabled} />,
+      required: true
     },
-  ].filter(Boolean);
+  ].filter(Boolean).map((tabOption) => ({
+    ...tabOption,
+    children:
+      <NxBaseContainer border header={tabOption.label} required={tabOption.required}>
+        {tabOption.children}
+      </NxBaseContainer>
+  }));
 
   return (
     <NxTabs

@@ -99,12 +99,15 @@ export const previewInvoicePOS = createAsyncThunk(
 
 export const getDetailListPointOfSales = createAsyncThunk(
   "GET_DETAIL_LIST_POINT_OF_SALES",
-  async ({ id, search, page, pageSize, sort }, thunkAPI) => {
+  async ({ id, search, page, pageSize, sort, customerType }, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "posDetailId~asc" : sort;
-      const url = `/v1/dbs/api/pos/list-pos-detail/${id}?sort=${sortParams}&size=${pageSize}&page=${page}&searchs=${searchParams}`;
+      // Route based on customerType: 2 = prospective, 1 = customer
+      const isProspective = customerType === 2;
+      const endpoint = isProspective ? "list-pos-detail-non-cust" : "list-pos-detail";
+      const url = `/v1/dbs/api/pos/${endpoint}/${id}?sort=${sortParams}&size=${pageSize}&page=${page}&searchs=${searchParams}`;
       const response = await ratingBillingHttpService.getPagination(url);
       return response.data;
     } catch (error) {
@@ -1036,6 +1039,27 @@ export const generateProformaInvoice = createAsyncThunk(
 const pointOfSalesSlice = createSlice({
   name: "pointOfSales",
   initialState,
+  reducers: {
+    resetPOSFormState: (state) => {
+      state.data_globalBillingPeriod = [];
+      state.data_approvalListDetail = [];
+      state.data_globalTermsOfPaymentValue = [];
+      state.data_rate = {};
+      state.data_detailPos = {};
+      state.data_materai = {};
+      state.data_rate_tax = {};
+      state.data_attachment = [];
+      state.data_account_segment = [];
+      state.data_account_group_type = [];
+      state.data_meter_reading_code = [];
+      state.data_user_detail = {};
+      state.data_sor_list = [];
+      state.data_cost_center_list = [];
+      state.data_account_type = [];
+      state.data_classification_type = [];
+      state.loading_prospective = false;
+    },
+  },
   extraReducers: {
     // pagination view
     [getListPointOfSales.pending]: (state, action) => {
@@ -1522,5 +1546,6 @@ const pointOfSalesSlice = createSlice({
   },
 });
 
+export const { resetPOSFormState } = pointOfSalesSlice.actions;
 const { reducer } = pointOfSalesSlice;
 export default reducer;

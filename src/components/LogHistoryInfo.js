@@ -15,9 +15,9 @@ const LogHistoryInfo = ({ data }) => {
     <CardContainer
       header={
         <div className="flex -my-4 justify-between items-center">
-            <p className="w-full mt-[15px] text-primary">
-            LOG HISTORY INFORMATION
-            </p>
+          <p className="w-full mt-[15px] text-primary">
+            History Log Information
+          </p>
         </div>
       }
     >

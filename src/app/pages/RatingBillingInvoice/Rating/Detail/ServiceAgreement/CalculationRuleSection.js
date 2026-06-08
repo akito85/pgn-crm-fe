@@ -75,7 +75,7 @@ export const columnsCalculationRuleServiceAgreement = (
 
 const CalculationRuleSection = ({ SAId }) => {
   // Selector
-  const { data_calculationRuleServiceAgreement, loading } = useSelector(
+  const { data_calculationRuleServiceAgreement, loadingSA } = useSelector(
     (state) => state.rating
   );
 
@@ -195,7 +195,7 @@ const CalculationRuleSection = ({ SAId }) => {
           columnDefinitions={columnDefinitions}
           fixedColumns={fixedColumns}
           setFixedColumns={setFixedColumns}
-          loading={loading}
+          loading={loadingSA}
         />
       </div>
     </>

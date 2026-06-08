@@ -1,42 +1,26 @@
-import moment from "moment";
-import BaseContainer from "../../../../../components/BaseContainer";
+import React from "react";
 import DetailText from "../../../../../components/DetailText";
+import GridLayout from "../../../../../components/GridLayout";
 
 const DetailDeduction = ({ data_detail }) => {
   return (
-    <div>
-      <BaseContainer header={"DEDUCTION INFORMATION"}>
-        <div className="w-full grid grid-cols-3 gap-3">
-          <DetailText label={"Deduction Period"}>
-            {data_detail?.deductionPeriod}
-          </DetailText>
+      <GridLayout cols={3} gap={4}>
+        <DetailText label={"Deduction Period"}>
+          {data_detail?.deductionPeriod || ""}
+        </DetailText>
 
-          <DetailText label={"Type"}>
-            {data_detail?.type}
-          </DetailText>
+        <DetailText label={"Type"}>
+          {data_detail?.type || ""}
+        </DetailText>
 
-          <DetailText label={"Deduction Date"}>
-            {data_detail?.deductionDate}
-          </DetailText>
-        </div>
-      </BaseContainer>
+        <DetailText label={"Deduction Date"}>
+          {data_detail?.deductionDate || ""}
+        </DetailText>
 
-      <BaseContainer header={"LOG INFORMATION"}>
-        <div className="w-full grid grid-cols-5">
-          <DetailText label={"Record ID"}>{data_detail?.id}</DetailText>
-          <DetailText label={"Created Date"}>
-            {data_detail?.createdDate ? moment(data_detail?.createdDate).format("DD MMM YYYY HH:mm:ss") : "-"}
-          </DetailText>
-          <DetailText label={"Created By"}>{data_detail?.createdBy || "-"}</DetailText>
-          <DetailText label={"Updated Date"}>
-            {data_detail?.updatedDate
-              ? moment(data_detail?.updatedDate).format("DD MMM YYYY HH:mm:ss")
-              : "-"}
-          </DetailText>
-          <DetailText label={"Updated By"}>{data_detail?.updatedBy || "-"}</DetailText>
-        </div>
-      </BaseContainer>
-    </div>
+        <DetailText label={"Description"}>
+          {data_detail?.description || ""}
+        </DetailText>
+      </GridLayout>
   );
 };
 

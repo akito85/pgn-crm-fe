@@ -1,11 +1,10 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { useSelector } from "react-redux";
 import CardContainer from "../../../../components/CardContainer";
 import DetailText from "../../../../components/DetailText";
 
 const FormConfirmation = ({ data }) => {
   const {
-    loading,
     list_sor,
     list_account_group,
     list_customer_segment,
@@ -15,6 +14,7 @@ const FormConfirmation = ({ data }) => {
     list_billing_cycle,
     list_billing_period,
     list_scheduler_type,
+    list_component_prabilling,
   } = useSelector((state) => state.rbi_prabilling);
 
   const getPeriodName = (val) => {
@@ -77,20 +77,18 @@ const FormConfirmation = ({ data }) => {
     return "";
   };
 
+  const mergeMrcDto = useMemo(
+    () =>
+      (list_meter_reading_code ?? []).reduce(
+        (acc, cur) => acc.concat(cur?.dtoList ?? []),
+        []
+      ),
+    [list_meter_reading_code]
+  );
+
   const getMrcName = (val) => {
-    let mergeMrcDto = list_meter_reading_code?.reduce(
-      (result, current) => result?.concat(current?.dtoList),
-      []
-    );
-    const mrcName =
-      mergeMrcDto && mergeMrcDto?.filter((item) => item?.id === val);
-    if (mrcName === undefined) {
-      return "";
-    }
-    if (mrcName.length !== 0) {
-      return mrcName[0].name;
-    }
-    return "";
+    const found = mergeMrcDto.find((item) => item?.id === val);
+    return found?.name ?? "";
   };
 
   const getAccSegmentName = (val) => {
@@ -124,6 +122,13 @@ const FormConfirmation = ({ data }) => {
       return scheduleType.name;
     }
     return "";
+  };
+
+  const getComponentName = (val) => {
+    const found = (list_component_prabilling || []).find(
+      (item) => item?.componenetCode === val
+    );
+    return found?.componentName ?? val ?? "";
   };
 
   const renderSpecificCustomer = () => {
@@ -253,6 +258,21 @@ const FormConfirmation = ({ data }) => {
           <DetailText label="Specific Customer Account">
             {renderSpecificCustomer()}
           </DetailText>
+
+          <div className="col-span-2">
+            <DetailText label="Specific Component Prabilling">
+              {(data?.specificComponentPrabilling || []).length > 0
+                ? (data?.specificComponentPrabilling || []).map(
+                    (code, index, array) => (
+                      <span key={index}>
+                        {getComponentName(code)}
+                        {index < array.length - 1 && ", "}
+                      </span>
+                    )
+                  )
+                : ""}
+            </DetailText>
+          </div>
         </div>
       </CardContainer>
 

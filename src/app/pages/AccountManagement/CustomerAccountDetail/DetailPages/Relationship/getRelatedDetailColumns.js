@@ -2,17 +2,28 @@ import { hasValue, renderColumn, renderDateColumn } from "../../../../../../util
 import { getColumnSearchPropsUseFilteredValueFE } from "../../../../../../utils/getColumnSearchProps";
 import { sorterFunction } from "../../../../../../utils/sorterFunction";
 
-const getRelatedDetailColumns = (
+/**
+ * Returns the column definitions for the Related Detail list table.
+ *
+ * @param {Object}          params                - Column configuration options.
+ * @param {Object}          params.search         - Current active search/filter values keyed by column dataIndex.
+ * @param {React.RefObject} params.searchInput    - Ref to the search input element (used for focus).
+ * @param {string}          params.searchedColumn - The dataIndex of the column currently being searched.
+ * @param {string}          params.searchText     - The current search text value.
+ * @param {Function}        params.handleSearch   - Callback invoked when a search/filter is confirmed.
+ * @returns {Array<Object>} Array of Ant Design column definition objects.
+ */
+const getRelatedDetailColumns = ({
   search,
   searchInput,
   searchedColumn,
   searchText,
   handleSearch
-) => [
+}) => [
   {
     key: "no",
     title: "NO",
-    width: 60,
+    width: 50,
     align: "center",
     render: (_, __, index) => index + 1,
   },
@@ -20,8 +31,8 @@ const getRelatedDetailColumns = (
     key: "accountNumber",
     title: "ACCOUNT NUMBER",
     dataIndex: "accountNumber",
-    width: 200,
-    sorter: (a, b) => sorterFunction("accountNumber", a, b),
+    width: 150,
+    sorter: true,
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
       "accountNumber",
@@ -39,8 +50,8 @@ const getRelatedDetailColumns = (
     key: "accountName",
     title: "ACCOUNT NAME",
     dataIndex: "accountName",
-    width: 200,
-    sorter: (a, b) => sorterFunction("accountName", a, b),
+    width: 150,
+    sorter: true,
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
       "accountName",
@@ -53,10 +64,12 @@ const getRelatedDetailColumns = (
     render: (text) => {
       return renderColumn("accountName", searchedColumn, searchText, text, false, "input", search)
     },
+  },
+  {
     title: "CATEGORY",
     dataIndex: "accountCategory",
-    width: 120,
-    sorter: (a, b) => sorterFunction("accountCategory", a, b),
+    width: 110,
+    sorter: true,
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
       "accountCategory",
@@ -74,8 +87,8 @@ const getRelatedDetailColumns = (
     key: "sor",
     title: "SOR",
     dataIndex: "sor",
-    width: 150,
-    sorter: (a, b) => sorterFunction("sor", a, b),
+    width: 70,
+    sorter: true,
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
       "sor",
@@ -93,8 +106,8 @@ const getRelatedDetailColumns = (
     key: "costCenter",
     title: "COST CENTER",
     dataIndex: "costCenter",
-    width: 150,
-    sorter: (a, b) => sorterFunction("costCenter", a, b),
+    width: 130,
+    sorter: true,
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
       "costCenter",
@@ -112,8 +125,8 @@ const getRelatedDetailColumns = (
     key: "meterReadingCode",
     title: "METER READING CODES",
     dataIndex: "meterReadingCode",
-    width: 200,
-    sorter: (a, b) => sorterFunction("meterReadingCode", a, b),
+    width: 170,
+    sorter: true,
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
       "meterReadingCode",
@@ -131,8 +144,8 @@ const getRelatedDetailColumns = (
     key: "customerManagement",
     title: "CUSTOMER MANAGEMENT",
     dataIndex: "customerManagement",
-    width: 200,
-    sorter: (a, b) => sorterFunction("customerManagement", a, b),
+    width: 180,
+    sorter: true,
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
       "customerManagement",
@@ -150,8 +163,8 @@ const getRelatedDetailColumns = (
     key: "classificationType",
     title: "CLASSIFICATION TYPE",
     dataIndex: "classificationType",
-    width: 180,
-    sorter: (a, b) => sorterFunction("classificationType", a, b),
+    width: 160,
+    sorter: true,
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
       "classificationType",
@@ -169,8 +182,8 @@ const getRelatedDetailColumns = (
     key: "accountSegment",
     title: "SEGMENT",
     dataIndex: "accountSegment",
-    width: 120,
-    sorter: (a, b) => sorterFunction("accountSegment", a, b),
+    width: 170,
+    sorter: true,
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
       "accountSegment",
@@ -188,8 +201,8 @@ const getRelatedDetailColumns = (
     key: "accountGroupType",
     title: "ACCOUNT GROUP TYPE",
     dataIndex: "accountGroupType",
-    width: 180,
-    sorter: (a, b) => sorterFunction("accountGroupType", a, b),
+    width: 140,
+    sorter: true,
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
       "accountGroupType",
@@ -207,8 +220,8 @@ const getRelatedDetailColumns = (
     key: "premiseAddress",
     title: "PREMISE ADDRESS",
     dataIndex: "premiseAddress",
-    width: 250,
-    sorter: (a, b) => sorterFunction("premiseAddress", a, b),
+    width: 120,
+    sorter: true,
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
       "premiseAddress",
@@ -227,7 +240,7 @@ const getRelatedDetailColumns = (
     title: "SUBDISTRICT",
     dataIndex: "subDistrict",
     width: 120,
-    sorter: (a, b) => sorterFunction("subDistrict", a, b),
+    sorter: true,
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
       "subDistrict",
@@ -245,8 +258,8 @@ const getRelatedDetailColumns = (
     key: "district",
     title: "DISTRICT",
     dataIndex: "district",
-    width: 120,
-    sorter: (a, b) => sorterFunction("district", a, b),
+    width: 100,
+    sorter: true,
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
       "district",
@@ -264,8 +277,8 @@ const getRelatedDetailColumns = (
     key: "city",
     title: "CITY",
     dataIndex: "city",
-    width: 120,
-    sorter: (a, b) => sorterFunction("district", a, b),
+    width: 100,
+    sorter: true,
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
       "district",
@@ -283,8 +296,8 @@ const getRelatedDetailColumns = (
     key: "country",
     title: "COUNTRY",
     dataIndex: "country",
-    width: 120,
-    sorter: (a, b) => sorterFunction("country", a, b),
+    width: 100,
+    sorter: true,
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
       "country",
@@ -302,8 +315,8 @@ const getRelatedDetailColumns = (
     key: "longitude",
     title: "LONGITUDE",
     dataIndex: "longitude",
-    width: 120,
-    sorter: (a, b) => sorterFunction("longitude", a, b),
+    width: 140,
+    sorter: true,
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
       "longitude",
@@ -321,8 +334,8 @@ const getRelatedDetailColumns = (
     key: "latitude",
     title: "LATITUDE",
     dataIndex: "latitude",
-    width: 120,
-    sorter: (a, b) => sorterFunction("latitude", a, b),
+    width: 140,
+    sorter: true,
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
       "latitude",

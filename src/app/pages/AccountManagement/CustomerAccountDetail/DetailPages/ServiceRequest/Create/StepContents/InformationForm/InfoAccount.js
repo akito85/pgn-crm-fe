@@ -128,7 +128,7 @@ export default function InfoAccount(props) {
           rules={[
             {
               message: requiredMessage("Premise Address"),
-              required: true,
+              // required: true,
             },
           ]}
           className="no-margin-form"
@@ -143,7 +143,7 @@ export default function InfoAccount(props) {
           rules={[
             {
               message: requiredMessage("Subdistrict"),
-              required: true,
+              // required: true,
             },
           ]}
           className="no-margin-form"
@@ -159,7 +159,7 @@ export default function InfoAccount(props) {
           rules={[
             {
               message: requiredMessage("District"),
-              required: true,
+              // required: true,
             },
           ]}
           className="no-margin-form"
@@ -174,7 +174,7 @@ export default function InfoAccount(props) {
           rules={[
             {
               message: requiredMessage("City"),
-              required: true,
+              // required: true,
             },
           ]}
           className="no-margin-form"
@@ -189,7 +189,7 @@ export default function InfoAccount(props) {
           rules={[
             {
               message: requiredMessage("Country"),
-              required: true,
+              // required: true,
             },
           ]}
           className="no-margin-form"
@@ -204,7 +204,7 @@ export default function InfoAccount(props) {
           rules={[
             {
               message: requiredMessage("Latitude"),
-              required: true,
+              // required: true,
             },
           ]}
           className="no-margin-form"
@@ -219,7 +219,7 @@ export default function InfoAccount(props) {
           rules={[
             {
               message: requiredMessage("Longitude"),
-              required: true,
+              // required: true,
             },
           ]}
           className="no-margin-form"
