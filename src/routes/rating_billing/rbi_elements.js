@@ -51,6 +51,7 @@ import UpdateBillingInstallmentPage from "../../app/pages/RatingBillingInvoice/B
 import EarlyRepaymentBillingInstallmentPage from "../../app/pages/RatingBillingInvoice/BillingInstallment/EarlyRepaymentBillingInstallmentPage";
 import PrabillingDetail from "../../app/pages/RatingBillingInvoice/Prabilling/PrabillingDetail";
 import MonitoringCustomerPage from "../../app/pages/RatingBillingInvoice/MonitoringCustomer/MonitoringCustomerPage";
+
 import AccountDetailPage from "../../app/pages/RatingBillingInvoice/Prabilling/prabillCustomer/AccountDetailPage";
 import EFakturCodeView from "../../app/pages/RatingBillingInvoice/MasterData/EFakturCode/EFakturCodeView";
 import ContentManagementView from "../../app/pages/RatingBillingInvoice/MasterData/ContentManagement/ContentManagementView";
@@ -86,7 +87,7 @@ export const RBI_ELEMENTS = {
   BILLING_VIEW_PAGE: <BillingPage />,
   ACCOUNTING_CREATE_ELEMENT: <BillingCreateAccountingForm />,
 
-  // monitoring usage
+  // monitoring customer
   MONITORING_CUSTOMER_VIEW_ELEMENTS: <MonitoringCustomerPage />,
 
   // monitoring usage

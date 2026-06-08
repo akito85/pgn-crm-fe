@@ -1,184 +1,236 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Spin, Row, Col, Select, Tabs } from "antd";
+import {
+  DatabaseOutlined,
+  AuditOutlined,
+  TagOutlined,
+  AccountBookOutlined,
+  CheckOutlined,
+} from "@ant-design/icons";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import CardContainer from "../../../../components/CardContainer";
-import BaseContainer from "../../../../components/BaseContainer";
 import StatCard from "../../../../components/StatCard";
-import ComparisonCard from "../../../../components/ComparisonCard";
-import DetailStatsCard from "../../../../components/DetailStatsCard";
-import DonutChartCard from "../../../../components/DonutChartCard";
 import TableRBI from "../../../../components/TableRBI";
-import SVGIcon from "../../../../assets/Icon/index";
+import StatusComponent from "../../../../components/StatusComponent";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
 import {
-  getSummaryData,
-  getListBillingPeriod,
+  getParameters,
+  getHeaderSummary,
+  getMasterVsPraBilling,
+  getPraBillingVsRating,
+  getRatingVsBilling,
+  getBillingVsInvoice,
+  getBillingVsApproval,
+  getBillingVsAdjustment,
 } from "../../../../redux/slices/rating_billing_invoice/monitoringSlice";
 
 const { Option } = Select;
 
+const okCol = (title, dataIndex) => ({
+  title,
+  dataIndex,
+  key: dataIndex,
+  width: 130,
+  align: "center",
+  render: (text) => {
+    const val = text ?? "Ok";
+    return (
+      <div style={{ display: "flex", justifyContent: "center" }}>
+        <StatusComponent colour={val}>{val.toUpperCase()}</StatusComponent>
+      </div>
+    );
+  },
+});
+
+// Placeholder sentinel — diganti saat render dengan makeNoCol(currentPage, pageSize)
+const noCol = { key: "no" };
+
+const makeNoCol = (currentPage, pageSize) => ({
+  title: "NO",
+  key: "no",
+  width: 60,
+  align: "center",
+  render: (_, __, index) => (currentPage - 1) * pageSize + index + 1,
+});
+
+const accountNumberCol = {
+  title: "ACCOUNT NUMBER",
+  dataIndex: "accountNumber",
+  key: "accountNumber",
+  width: 160,
+};
+
+const stepTabItems = [
+  {
+    key: "1",
+    label: "Master Vs Pra-Billing",
+    columns: [
+      noCol,
+      accountNumberCol,
+      okCol("ACCOUNT", "account"),
+      okCol("SERVICE AGREEMENT", "serviceAgreement"),
+      okCol("USAGE", "usage"),
+      okCol("PROMO", "promo"),
+    ],
+  },
+  {
+    key: "2",
+    label: "Pra-Billing Vs Rating",
+    columns: [
+      noCol,
+      accountNumberCol,
+      okCol("USAGE", "usage"),
+      okCol("SERVICE AGREEMENT", "serviceAgreement"),
+      okCol("PRICE", "price"),
+      okCol("MIN CONTRACT", "minContract"),
+      okCol("MAX CONTRACT", "maxContract"),
+      okCol("PROMO", "promo"),
+    ],
+  },
+  {
+    key: "3",
+    label: "Rating Vs Billing",
+    columns: [
+      noCol,
+      accountNumberCol,
+      okCol("USAGE", "usage"),
+      okCol("AMOUNT", "amount"),
+    ],
+  },
+  {
+    key: "4",
+    label: "Billing Vs Invoice",
+    columns: [
+      noCol,
+      accountNumberCol,
+      okCol("INVOICE NUMBER", "invoiceNumber"),
+    ],
+  },
+  {
+    key: "5",
+    label: "Billing Vs Approve",
+    columns: [
+      noCol,
+      accountNumberCol,
+      okCol("APPROVAL STATUS", "approvalStatus"),
+    ],
+  },
+  {
+    key: "6",
+    label: "Billing Vs Late Charge",
+    columns: [
+      noCol,
+      accountNumberCol,
+      okCol("BILLING", "billing"),
+      okCol("LATE CHARGE", "lateCharge"),
+    ],
+  },
+  {
+    key: "7",
+    label: "Billing Vs Adjustment",
+    columns: [
+      noCol,
+      accountNumberCol,
+      okCol("BILLING", "billing"),
+      okCol("ADJUSTMENT", "adjustment"),
+    ],
+  },
+];
+
 const MonitoringCustomerPage = () => {
-  const { loading, summaryData, list_billing_period } = useSelector(
-    (state) => state.monitoring
-  );
+  const {
+    loading, loadingHeader,
+    loadingTab1, loadingTab2, loadingTab3, loadingTab4, loadingTab5, loadingTab7,
+    periods, headerSummary,
+    masterVsPraBilling, praBillingVsRating,
+    ratingVsBilling, billingVsInvoice, billingVsApproval, billingVsAdjustment,
+  } = useSelector((state) => state.monitoring);
 
   const dispatch = useDispatch();
 
-  const [filterPeriod, setFilterPeriod] = useState(340);
-
-  // Table columns definition for failed customers
-  const tableColumns = [
-    {
-      title: "ACCOUNT NUMBER",
-      dataIndex: "accountNumber",
-      key: "accountNumber",
-      width: 140,
-    },
-    {
-      title: "ACCOUNT NAME",
-      dataIndex: "accountName",
-      key: "accountName",
-      width: 150,
-    },
-    {
-      title: "CUSTOMER NUMBER",
-      dataIndex: "customerNumber",
-      key: "customerNumber",
-      width: 150,
-    },
-    {
-      title: "CUSTOMER NAME",
-      dataIndex: "customerName",
-      key: "customerName",
-      width: 150,
-    },
-    {
-      title: "CUSTOMER TYPE",
-      dataIndex: "customerType",
-      key: "customerType",
-      width: 130,
-    },
-    {
-      title: "SOR",
-      dataIndex: "sor",
-      key: "sor",
-      width: 100,
-    },
-    {
-      title: "COST CENTER",
-      dataIndex: "costCenter",
-      key: "costCenter",
-      width: 120,
-    },
-    {
-      title: "METER READING CODE",
-      dataIndex: "meterReadingCode",
-      key: "meterReadingCode",
-      width: 160,
-    },
-    {
-      title: "ACCOUNT SEGMENT",
-      dataIndex: "accountSegment",
-      key: "accountSegment",
-      width: 150,
-    },
-    {
-      title: "ACCOUNT GROUP TYPE",
-      dataIndex: "accountGroupType",
-      key: "accountGroupType",
-      width: 160,
-    },
-    {
-      title: "CATEGORY",
-      dataIndex: "category",
-      key: "category",
-      width: 120,
-    },
-    {
-      title: "CLASSIFICATION TYPE",
-      dataIndex: "classificationType",
-      key: "classificationType",
-      width: 160,
-    },
-    {
-      title: "ACCOUNT TYPE",
-      dataIndex: "accountType",
-      key: "accountType",
-      width: 130,
-    },
-    {
-      title: "STATUS",
-      dataIndex: "status",
-      key: "status",
-      width: 100,
-    },
-    {
-      title: "MESSAGE",
-      dataIndex: "message",
-      key: "message",
-      width: 200,
-    },
-  ];
-
-  // Table columns definition for priority list
-  const priorityListColumns = [
-    {
-      title: "NO",
-      dataIndex: "no",
-      key: "no",
-      width: 80,
-      align: "center",
-    },
-    {
-      title: "RANK",
-      dataIndex: "rank",
-      key: "rank",
-      width: 100,
-    },
-    {
-      title: "ACCOUNT NUMBER",
-      dataIndex: "accountNumber",
-      key: "accountNumber",
-      width: 200,
-    },
-    {
-      title: "COUNT",
-      dataIndex: "count",
-      key: "count",
-      width: 150,
-      align: "right",
-      isNumber: true,
-    },
-    {
-      title: "ACTION",
-      dataIndex: "action",
-      key: "action",
-      width: 100,
-      align: "center",
-      fixed: "right",
-      render: () => (
-        <div className="flex justify-center">
-          <SVGIcon name="iconDetail" style={{ cursor: "pointer" }} />
-        </div>
-      ),
-    },
-  ];
+  const [filterPeriod, setFilterPeriod] = useState(null);
+  const [activeTab, setActiveTab] = useState("1");
+  const [visitedTabs, setVisitedTabs] = useState(new Set(["1"]));
+  const [tab1Page, setTab1Page] = useState(0);
+  const tab1Size = 10;
+  const tab1Search = "";
+  const [tab2Page, setTab2Page] = useState(0);
+  const tab2Size = 10;
+  const tab2Search = "";
+  const [tab3Page, setTab3Page] = useState(0);
+  const tab3Size = 10;
+  const tab3Search = "";
+  const [tab4Page, setTab4Page] = useState(0);
+  const tab4Size = 10;
+  const tab4Search = "";
+  const [tab5Page, setTab5Page] = useState(0);
+  const tab5Size = 10;
+  const tab5Search = "";
+  const [tab7Page, setTab7Page] = useState(0);
+  const tab7Size = 10;
+  const tab7Search = "";
 
   useEffect(() => {
-    dispatch(getListBillingPeriod());
-    dispatch(getSummaryData());
-  }, [filterPeriod, dispatch]);
+    dispatch(getParameters());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (periods && periods.length > 0 && filterPeriod === null) {
+      setFilterPeriod(periods[0].value);
+    }
+  }, [periods, filterPeriod]);
+
+  useEffect(() => {
+    if (filterPeriod) {
+      dispatch(getHeaderSummary(filterPeriod));
+      setTab1Page(0);
+      dispatch(getMasterVsPraBilling({ period: filterPeriod, page: 0, size: tab1Size, search: tab1Search }));
+      setTab2Page(0);
+      setTab3Page(0);
+      setTab4Page(0);
+      setTab5Page(0);
+      setTab7Page(0);
+      setActiveTab("1");
+      setVisitedTabs(new Set(["1"]));
+    }
+  }, [filterPeriod, dispatch]); // tab1Size dan tab1Search adalah konstanta
+
+  const handleTabChange = (key) => {
+    setActiveTab(key);
+    if (!visitedTabs.has(key)) {
+      setVisitedTabs((prev) => new Set(prev).add(key));
+      if (key === "2") {
+        setTab2Page(0);
+        dispatch(getPraBillingVsRating({ period: filterPeriod, page: 0, size: tab2Size, search: tab2Search }));
+      } else if (key === "3") {
+        setTab3Page(0);
+        dispatch(getRatingVsBilling({ period: filterPeriod, page: 0, size: tab3Size, search: tab3Search }));
+      } else if (key === "4") {
+        setTab4Page(0);
+        dispatch(getBillingVsInvoice({ period: filterPeriod, page: 0, size: tab4Size, search: tab4Search }));
+      } else if (key === "5") {
+        setTab5Page(0);
+        dispatch(getBillingVsApproval({ period: filterPeriod, page: 0, size: tab5Size, search: tab5Search }));
+      } else if (key === "7") {
+        setTab7Page(0);
+        dispatch(getBillingVsAdjustment({ period: filterPeriod, page: 0, size: tab7Size, search: tab7Search }));
+      }
+      // key "6" (Billing Vs Late Charge) has no thunk — mark visited, no dispatch
+    }
+  };
 
   const routes = [
-    {
-      path: "",
-      breadcrumbName: "Rating & Billing",
-    },
-    {
-      path: RBI_ROUTES.MONITORING_CUSTOMER_VIEW,
-      breadcrumbName: "Monitoring Customer",
-    },
+    { path: "", breadcrumbName: "Rating & Billing" },
+    { path: RBI_ROUTES.MONITORING_CUSTOMER_VIEW, breadcrumbName: "Monitoring Customer" },
+  ];
+
+  const summaryCards = [
+    { title: "MASTER",      value: headerSummary.currMaster,     pct: headerSummary.pctMaster,      icon: <DatabaseOutlined /> },
+    { title: "PRA-BILLING", value: headerSummary.currPraBilling, pct: headerSummary.pctPraBilling,  icon: <AuditOutlined /> },
+    { title: "RATING",      value: headerSummary.currRating,     pct: headerSummary.pctRating,      icon: <TagOutlined /> },
+    { title: "BILLING",     value: headerSummary.currBilling,    pct: headerSummary.pctBilling,     icon: <AccountBookOutlined /> },
+    { title: "APPROVED",    value: headerSummary.currApproved,   pct: headerSummary.pctApproved,    icon: <CheckOutlined /> },
   ];
 
   return (
@@ -186,327 +238,145 @@ const MonitoringCustomerPage = () => {
       <Spin spinning={loading}>
         <BreadCrumb routes={routes} />
 
-        {/* Main Card Container: Monitoring Billing Process */}
         <CardContainer header="MONITORING BILLING PROCESS">
-          {/* Period Filter */}
           <div className="mb-3">
             <Select
               placeholder="Select Period"
               value={filterPeriod}
               onChange={(value) => setFilterPeriod(value)}
-              style={{ width: 200 }}
+              style={{ width: 200, fontSize: "12px" }}
               size="small"
               showSearch
               filterOption={(input, option) =>
-                option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                String(option.children).toLowerCase().includes(input.toLowerCase())
               }
             >
-              {list_billing_period.map((period) => (
-                <Option key={period.id} value={period.id}>
-                  {period.name}
+              {(periods || []).map((p) => (
+                <Option key={p.value} value={p.value}>
+                  {p.label}
                 </Option>
               ))}
             </Select>
           </div>
 
-          {/* Top Stats Cards - Total Success & Total Failed */}
-          <Row gutter={[12, 12]} className="mb-3">
-            <Col xs={24} sm={12}>
-              <StatCard
-                title="TOTAL SUCCESS RATING LIST"
-                value={summaryData.totalSuccessRating || 3000}
-                percentage={80}
-                isPositive={true}
-                type="success"
-              />
-            </Col>
-            <Col xs={24} sm={12}>
-              <StatCard
-                title="TOTAL FAILED RATING LIST"
-                value={summaryData.totalFailedRating || 7867}
-                percentage={35}
-                isPositive={true}
-                type="failed"
-              />
-            </Col>
-          </Row>
-
-          {/* Comparison Cards - PRA-BILLING VS RATING & RATING VS BILLING */}
-          <Row gutter={[12, 12]} className="mb-3">
-            <Col xs={24} lg={12}>
-              <ComparisonCard
-                title="PRA-BILLING VS RATING"
-                leftColumn={{
-                  title: "Pra-Billing",
-                  count: summaryData.praBillingCount || 8097,
-                  valueUsage: summaryData.praBillingValue || 26908,
-                }}
-                rightColumn={{
-                  title: "Rating",
-                  count: summaryData.ratingCount || 12908,
-                  valueUsage: summaryData.ratingValue || 11908,
-                }}
-              />
-            </Col>
-            <Col xs={24} lg={12}>
-              <ComparisonCard
-                title="RATING VS BILLING"
-                leftColumn={{
-                  title: "Rating",
-                  count: summaryData.ratingCount2 || 12908,
-                  valueUsage: summaryData.ratingValue2 || 11908,
-                }}
-                rightColumn={{
-                  title: "Billing",
-                  count: summaryData.billingCount || 60678,
-                  valueUsage: summaryData.billingValue || 120008,
-                }}
-              />
-            </Col>
-          </Row>
-
-          {/* Detail Stats Cards - 4 Sections */}
-          <Row gutter={[12, 12]}>
-            <Col xs={24} lg={12}>
-              <DetailStatsCard
-                title="TOTAL CUSTOMER NEED TO PROCESSED"
-                totalValue={summaryData.customerNeedProcessed || 312}
-                details={[
-                  { label: "Pra-Billing", value: 28 },
-                  { label: "Rating", value: 12 },
-                  { label: "Billing", value: 272 },
-                  { label: "", value: "" },
-                ]}
-              />
-            </Col>
-            <Col xs={24} lg={12}>
-              <DetailStatsCard
-                title="TOTAL CUSTOMER IN EACH STAGE NOT APPROVED YET"
-                totalValue={summaryData.customerNotApproved || 312}
-                details={[
-                  { label: "Master", value: 28 },
-                  { label: "Pra-Billing", value: 12 },
-                  { label: "Rating", value: 272 },
-                  { label: "Billing", value: 272 },
-                ]}
-              />
-            </Col>
-            <Col xs={24} lg={12}>
-              <DetailStatsCard
-                title="GAP PRA-BILLING VS MASTER"
-                totalValue={summaryData.gapPraBillingMaster || 3000}
-                percentage={80}
-                isPositive={false}
-                details={[
-                  { label: "Usage", value: 1800 },
-                  { label: "Price", value: 870 },
-                  { label: "Promo", value: 330 },
-                  { label: "", value: "" },
-                ]}
-              />
-            </Col>
-            <Col xs={24} lg={12}>
-              <DetailStatsCard
-                title="TOTAL ERROR PROCESS"
-                totalValue={summaryData.totalErrorProcess || 7867}
-                percentage={35}
-                isPositive={true}
-                details={[
-                  { label: "Master", value: 1578 },
-                  { label: "Pra-Billing", value: 2356 },
-                  { label: "Rating", value: 1879 },
-                  { label: "Billing", value: 2065 },
-                ]}
-              />
-            </Col>
-          </Row>
-
-          {/* Donut Charts - Comparison Charts */}
-          <Row gutter={[12, 12]} className="mt-3">
-            <Col xs={24} lg={8}>
-              <DonutChartCard
-                title="COMPARISON OF THE NUMBER OF SUCCESSFUL CUSTOMER"
-                data={[60, 40]}
-                labels={["Pra-billing, Rating, Billing, Approved", "Master"]}
-                colors={["#1C8CCC", "#FF8C42"]}
-              />
-            </Col>
-            <Col xs={24} lg={8}>
-              <DonutChartCard
-                title="COMPARISON OF MEASURE QUANTITIES"
-                data={[25, 35, 40]}
-                labels={["Billing", "Rating", "Master Usage"]}
-                colors={["#1C8CCC", "#FF8C42", "#4CAF51"]}
-              />
-            </Col>
-            <Col xs={24} lg={8}>
-              <DonutChartCard
-                title="COMPARISON OF DATA FOR EACH COMPONENT"
-                data={[35, 65]}
-                labels={["Pra-billing, Rating, Billing, Approved", "Master"]}
-                colors={["#1C8CCC", "#FF8C42"]}
-              />
-            </Col>
-          </Row>
-
-          {/* Table Section with Tabs */}
-          <div className="mt-3">
-            <BaseContainer
-              border={true}
-              header="LIST OF CUSTOMERS WHO FAILED IN RATING AND BILLING PROCESS"
-              type="tabs"
-              element={
-                <Tabs
-                  defaultActiveKey="1"
-                  size="small"
-                  items={[
-                    {
-                      key: "1",
-                      label: "Rating Failed",
-                      children: (
-                        <div className="pb-3">
-                          <TableRBI
-                            idTable="table-rating-failed"
-                            dataSource={[]}
-                            columns={tableColumns}
-                            pageSize={10}
-                            current={1}
-                            loading={false}
-                            totalData={0}
-                            tableScrolled={{ x: "max-content" }}
-                            usePagination={true}
-                            useSelect={true}
-                            showAdvanceSearch={true}
-                            showSearchBar={true}
-                          />
-                        </div>
-                      ),
-                    },
-                    {
-                      key: "2",
-                      label: "Billing Failed",
-                      children: (
-                        <div className="pb-3">
-                          <TableRBI
-                            idTable="table-billing-failed"
-                            dataSource={[]}
-                            columns={tableColumns}
-                            pageSize={10}
-                            current={1}
-                            loading={false}
-                            totalData={0}
-                            tableScrolled={{ x: "max-content" }}
-                            usePagination={true}
-                            useSelect={true}
-                            showAdvanceSearch={true}
-                            showSearchBar={true}
-                          />
-                        </div>
-                      ),
-                    },
-                  ]}
-                />
-              }
-            />
-          </div>
+          <Spin spinning={loadingHeader}>
+            <Row gutter={[12, 12]}>
+              {summaryCards.map((card) => (
+                <Col key={card.title} flex="1">
+                  <StatCard
+                    title={card.title}
+                    value={card.value}
+                    percentage={Math.abs(card.pct)}
+                    isPositive={card.pct >= 0}
+                    icon={card.icon}
+                  />
+                </Col>
+              ))}
+            </Row>
+          </Spin>
         </CardContainer>
 
-        {/* Priority List: Top 5 Anomalies */}
-        <CardContainer header="PRIORITY LIST: TOP 5 ANOMALIES">
+        <CardContainer header="STEP TO STEP DIFFERENCE BY VALUE">
           <Tabs
-            defaultActiveKey="1"
+            activeKey={activeTab}
+            onChange={handleTabChange}
             size="small"
-            animated={false}
-            items={[
-              {
-                key: "1",
-                label: "Pending Transactions",
+            items={stepTabItems.map((tab) => {
+              const isTab1 = tab.key === "1";
+              const isTab2 = tab.key === "2";
+              const isTab3 = tab.key === "3";
+              const isTab4 = tab.key === "4";
+              const isTab5 = tab.key === "5";
+              const isTab6 = tab.key === "6";
+              const isTab7 = tab.key === "7";
+
+              const dataSource =
+                isTab1 ? (masterVsPraBilling.content ?? []) :
+                isTab2 ? (praBillingVsRating.content ?? []) :
+                isTab3 ? (ratingVsBilling.content ?? []) :
+                isTab4 ? (billingVsInvoice.content ?? []) :
+                isTab5 ? (billingVsApproval.content ?? []) :
+                isTab7 ? (billingVsAdjustment.content ?? []) : [];
+
+              const totalData =
+                isTab1 ? (masterVsPraBilling.totalElements ?? 0) :
+                isTab2 ? (praBillingVsRating.totalElements ?? 0) :
+                isTab3 ? (ratingVsBilling.totalElements ?? 0) :
+                isTab4 ? (billingVsInvoice.totalElements ?? 0) :
+                isTab5 ? (billingVsApproval.totalElements ?? 0) :
+                isTab7 ? (billingVsAdjustment.totalElements ?? 0) : 0;
+
+              const tabLoading =
+                isTab1 ? loadingTab1 : isTab2 ? loadingTab2 :
+                isTab3 ? loadingTab3 : isTab4 ? loadingTab4 :
+                isTab5 ? loadingTab5 : isTab7 ? loadingTab7 : false;
+
+              const tabPageSize =
+                isTab1 ? tab1Size : isTab2 ? tab2Size :
+                isTab3 ? tab3Size : isTab4 ? tab4Size :
+                isTab5 ? tab5Size : isTab7 ? tab7Size : 10;
+
+              const tabCurrent =
+                isTab1 ? tab1Page + 1 : isTab2 ? tab2Page + 1 :
+                isTab3 ? tab3Page + 1 : isTab4 ? tab4Page + 1 :
+                isTab5 ? tab5Page + 1 : isTab7 ? tab7Page + 1 : 1;
+
+              const tabOnChange =
+                isTab1 ? (p) => { setTab1Page(p - 1); dispatch(getMasterVsPraBilling({ period: filterPeriod, page: p - 1, size: tab1Size, search: tab1Search })); } :
+                isTab2 ? (p) => { setTab2Page(p - 1); dispatch(getPraBillingVsRating({ period: filterPeriod, page: p - 1, size: tab2Size, search: tab2Search })); } :
+                isTab3 ? (p) => { setTab3Page(p - 1); dispatch(getRatingVsBilling({ period: filterPeriod, page: p - 1, size: tab3Size, search: tab3Search })); } :
+                isTab4 ? (p) => { setTab4Page(p - 1); dispatch(getBillingVsInvoice({ period: filterPeriod, page: p - 1, size: tab4Size, search: tab4Search })); } :
+                isTab5 ? (p) => { setTab5Page(p - 1); dispatch(getBillingVsApproval({ period: filterPeriod, page: p - 1, size: tab5Size, search: tab5Search })); } :
+                isTab6 ? () => {} :
+                isTab7 ? (p) => { setTab7Page(p - 1); dispatch(getBillingVsAdjustment({ period: filterPeriod, page: p - 1, size: tab7Size, search: tab7Search })); } :
+                undefined;
+
+              // Inject noCol dengan konteks pagination yang tepat
+              const columns = tab.columns.map((col) =>
+                col.key === "no" ? makeNoCol(tabCurrent, tabPageSize) : col
+              );
+
+              // Tab 6 (Billing Vs Late Charge) belum memiliki API — tampilkan placeholder
+              if (isTab6) {
+                return {
+                  key: tab.key,
+                  label: tab.label,
+                  children: (
+                    <div style={{ fontSize: "12px" }}>
+                      <div className="py-8 text-center" style={{ color: "#9E9E9E" }}>
+                        Data Billing Vs Late Charge belum tersedia.
+                      </div>
+                    </div>
+                  ),
+                };
+              }
+
+              return {
+                key: tab.key,
+                label: tab.label,
                 children: (
+                  <div style={{ fontSize: "12px" }}>
                   <div className="pb-3">
                     <TableRBI
-                      idTable="table-pending-transactions"
-                      dataSource={[]}
-                      columns={priorityListColumns}
-                      pageSize={5}
-                      current={1}
-                      loading={false}
-                      totalData={0}
+                      idTable={`table-step-${tab.key}`}
+                      dataSource={dataSource}
+                      columns={columns}
+                      pageSize={tabPageSize}
+                      current={tabCurrent}
+                      loading={tabLoading}
+                      totalData={totalData}
                       tableScrolled={{ x: "max-content" }}
-                      usePagination={false}
-                      useSelect={false}
+                      usePagination={true}
+                      useSelect={true}
                       showAdvanceSearch={false}
                       showSearchBar={false}
+                      onChange={tabOnChange}
                     />
                   </div>
-                ),
-              },
-              {
-                key: "2",
-                label: "Pending Approvals",
-                children: (
-                  <div className="pb-3">
-                    <TableRBI
-                      idTable="table-pending-approvals"
-                      dataSource={[]}
-                      columns={priorityListColumns}
-                      pageSize={5}
-                      current={1}
-                      loading={false}
-                      totalData={0}
-                      tableScrolled={{ x: "max-content" }}
-                      usePagination={false}
-                      useSelect={false}
-                      showAdvanceSearch={false}
-                      showSearchBar={false}
-                    />
                   </div>
                 ),
-              },
-              {
-                key: "3",
-                label: "Gap Rating vs Billing",
-                children: (
-                  <div className="pb-3">
-                    <TableRBI
-                      idTable="table-gap-rating-billing"
-                      dataSource={[]}
-                      columns={priorityListColumns}
-                      pageSize={5}
-                      current={1}
-                      loading={false}
-                      totalData={0}
-                      tableScrolled={{ x: "max-content" }}
-                      usePagination={false}
-                      useSelect={false}
-                      showAdvanceSearch={false}
-                      showSearchBar={false}
-                    />
-                  </div>
-                ),
-              },
-              {
-                key: "4",
-                label: "Gap Pra-Billing vs Master",
-                children: (
-                  <div className="pb-3">
-                    <TableRBI
-                      idTable="table-gap-prabilling-master"
-                      dataSource={[]}
-                      columns={priorityListColumns}
-                      pageSize={5}
-                      current={1}
-                      loading={false}
-                      totalData={0}
-                      tableScrolled={{ x: "max-content" }}
-                      usePagination={false}
-                      useSelect={false}
-                      showAdvanceSearch={false}
-                      showSearchBar={false}
-                    />
-                  </div>
-                ),
-              },
-            ]}
+              };
+            })}
           />
         </CardContainer>
       </Spin>
