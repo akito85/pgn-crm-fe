@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import {
   createSrPrerequisite,
   addCreateSrPrerequisite,
+  updateCreateSrPrerequisite,
+  saveEditedApiPrerequisite,
 } from "../../../../../../../../../../redux/slices/account_management/detailAccount/ServiceRequestSlice";
 import { Form, Select, Input, Spin, message } from "antd";
 import { UpOutlined, DownOutlined } from "@ant-design/icons";
@@ -77,7 +79,11 @@ const PreRequisiteCreateFrom = () => {
     accountId: accountIdFromState,
     returnPath,
     returnToStep,
+    editData,
+    editKey,
   } = location.state || {};
+
+  const isEditMode = !!editData;
 
   const accountId = accountIdFromState || account?.accountInformation?.accountId;
 
@@ -88,6 +94,29 @@ const PreRequisiteCreateFrom = () => {
   const [accountExpanded, setAccountExpanded] = useState(false);
   const [srExpanded, setSrExpanded] = useState(true);
   const [prereqExpanded, setPrereqExpanded] = useState(true);
+
+  useEffect(() => {
+    if (!isEditMode || !editData) return;
+    // prerequisiteType/prerequisiteId for local/API data; convert to string to match Select option values
+    const typeValue = (editData.prerequisiteType ?? editData.prerequisiteId)?.toString() ?? undefined;
+    // prerequisiteDesc for local, prerequisiteComments or description (from mapItems) for API
+    const descValue = editData.prerequisiteDesc ?? editData.prerequisiteComments ?? editData.description ?? "";
+    // prerequisiteName for both; fallback to display field "name" added by mapItems
+    const nameValue = editData.prerequisiteName ?? editData.name ?? "";
+    localForm.setFieldsValue({
+      "prerequesite-type": typeValue,
+      "prerequisite-name": nameValue,
+      "description": descValue !== "-" ? descValue : "",
+      "billing-cycle": editData.billingCycle,
+      "period": editData.period,
+      "currency": editData.currency,
+      "transaction-date": editData.transactionDate,
+      "invoice-date": editData.invoiceDate,
+      "terms-of-payment": editData.termOfPayment ? { left: editData.termOfPayment, right: editData.paymentDays } : undefined,
+    });
+    if (typeValue) setIsPos(typeValue === "2653");
+    if (descValue && descValue !== "-") setDescLength(descValue.length);
+  }, []);
 
   const accountSummary = account?.accountSummary || {};
   const srData = serviceRequestData || {};
@@ -166,26 +195,40 @@ const PreRequisiteCreateFrom = () => {
       };
 
       if (srId) {
-        // UPDATE flow: SR sudah ada, simpan langsung ke backend
-        await dispatch(
-          createSrPrerequisite({ accountId, srId, body: prerequisiteData }),
-        ).unwrap();
-        navigateBack();
+        if (isEditMode && editKey) {
+          // Edit mode in update flow: save locally only, do NOT call API
+          dispatch(saveEditedApiPrerequisite({
+            key: editKey,
+            ...prerequisiteData,
+            typeName: getPrerequisiteTypeLabel(prerequisiteData.prerequisiteType),
+            name: prerequisiteData.prerequisiteName || getPrerequisiteTypeLabel(prerequisiteData.prerequisiteType),
+            description: prerequisiteData.prerequisiteDesc || "-",
+          }));
+          navigateBack();
+        } else {
+          // Create new prerequisite in update flow: call API
+          await dispatch(
+            createSrPrerequisite({ accountId, srId, body: prerequisiteData }),
+          ).unwrap();
+          navigateBack();
+        }
       } else {
         // CREATE flow: SR belum ada, simpan ke Redux agar wizard membacanya saat remount
-        dispatch(
-          addCreateSrPrerequisite({
-            key: `local-${Date.now()}`,
-            ...prerequisiteData,
-            type: getPrerequisiteTypeLabel(prerequisiteData.prerequisiteId),
-            name: prerequisiteData.prerequisiteName || getPrerequisiteTypeLabel(prerequisiteData.prerequisiteId),
-            description: prerequisiteData.prerequisiteComments || "-",
-            status: "-",
-            dueDateLabel: "-",
-            completedDateLabel: "-",
-            assignedToLabel: "-",
-          }),
-        );
+        const displayData = {
+          ...prerequisiteData,
+          typeName: getPrerequisiteTypeLabel(prerequisiteData.prerequisiteType),
+          name: prerequisiteData.prerequisiteName || getPrerequisiteTypeLabel(prerequisiteData.prerequisiteType),
+          description: prerequisiteData.prerequisiteDesc || "-",
+          status: "-",
+          dueDateLabel: "-",
+          completedDateLabel: "-",
+          assignedToLabel: "-",
+        };
+        if (isEditMode && editKey) {
+          dispatch(updateCreateSrPrerequisite({ key: editKey, ...displayData }));
+        } else {
+          dispatch(addCreateSrPrerequisite({ key: `local-${Date.now()}`, ...displayData }));
+        }
         navigateBack();
       }
     } catch (err) {
