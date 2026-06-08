@@ -198,8 +198,9 @@ const CreateUpdateCustomerServiceRequest = ({ formType = "create" }) => {
   const [modalBack, setModalBack] = useState(false);
 
   const [modalError, setModalError] = useState(false);
-  const [drResetSignal, setDrResetSignal] = useState(0);
   const [bodyError, setBodyError] = useState({});
+  const [dataRequirementsDataSource, setDataRequirementsDataSource] = useState([]);
+  const [deletedDataRequirements, setDeletedDataRequirements] = useState([]);
 
   const [customerType, setCustomerType] = useState(0);
   const [identificationDdlValue, setIdentificationDdlValue] = useState([]);
@@ -322,17 +323,18 @@ const CreateUpdateCustomerServiceRequest = ({ formType = "create" }) => {
     }));
   }, [dispatch, isUpdate, id, idAccount]);
 
-  // Map API data requirements into the shape expected by InfoDataRequirement.
-  // Does not require list_srDataRequirementTypes to be loaded first — type string
-  // is always available from the API response and typeId resolves when types are ready.
-  const initialDataRequirements = useMemo(() => {
-    if (!isUpdate || !list_srDataRequirements.length) return [];
-    return list_srDataRequirements.map((dr, index) => {
+  // Populate dataRequirementsDataSource when list_srDataRequirements is loaded (update mode).
+  // When the detail endpoint later embeds dataRequirements, replace this effect's body only.
+  useEffect(() => {
+    if (!isUpdate || !list_srDataRequirements.length) return;
+    const mapped = list_srDataRequirements.map((dr, index) => {
       const typeEntry = list_srDataRequirementTypes.find(
         (t) => (t.name || t.glbTypeValName) === dr.type
       );
       return {
         key: dr.id || `dr-${index}`,
+        id: dr.id,
+        dataType: "draft",
         no: index + 1,
         type: dr.type,
         typeId: typeEntry ? String(typeEntry.glbTypeValId || typeEntry.id || '') : null,
@@ -341,7 +343,9 @@ const CreateUpdateCustomerServiceRequest = ({ formType = "create" }) => {
         valueId: null,
       };
     });
-  }, [isUpdate, list_srDataRequirements, list_srDataRequirementTypes]);
+    setDataRequirementsDataSource(mapped);
+    setDeletedDataRequirements([]);
+  }, [isUpdate, list_srDataRequirements, list_srDataRequirementTypes]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Populate form when update detail is loaded
   useEffect(() => {
@@ -411,28 +415,6 @@ const CreateUpdateCustomerServiceRequest = ({ formType = "create" }) => {
     list_srChannels,
     list_srSources,
   ]);
-
-  // Populate attachments from loaded detail in UPDATE mode (Gap 3)
-  useEffect(() => {
-    if (!isUpdate) return;
-    const detail = serviceRequestDetail || serviceRequestDetailDraft;
-    if (detail?.attachments?.length) {
-      setAttachmentDataSource(
-        detail.attachments.map((att) => ({ ...att, key: att.id }))
-      );
-    }
-  }, [isUpdate, serviceRequestDetail, serviceRequestDetailDraft]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Populate attachments from loaded detail in UPDATE mode (Gap 3)
-  useEffect(() => {
-    if (!isUpdate) return;
-    const detail = serviceRequestDetail || serviceRequestDetailDraft;
-    if (detail?.attachments?.length) {
-      setAttachmentDataSource(
-        detail.attachments.map((att) => ({ ...att, key: att.id }))
-      );
-    }
-  }, [isUpdate, serviceRequestDetail, serviceRequestDetailDraft]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Populate attachments from loaded detail in UPDATE mode (Gap 3)
   useEffect(() => {
@@ -582,8 +564,9 @@ const CreateUpdateCustomerServiceRequest = ({ formType = "create" }) => {
           account={data_accountDetail}
           customer={data_customerDetail}
           dropdowns={dropdowns}
-          initialDataRequirements={initialDataRequirements}
-          resetSignal={drResetSignal}
+          data={dataRequirementsDataSource}
+          updateData={setDataRequirementsDataSource}
+          setDeleted={setDeletedDataRequirements}
         />
       ),
       disabled: false
@@ -726,11 +709,19 @@ const CreateUpdateCustomerServiceRequest = ({ formType = "create" }) => {
       source: values.requestSource ? parseInt(values.requestSource) : null,
       action,
       validationType,
-      dataRequirements: (values.srFormDataRequirements || []).map((dr) => ({
-        requirementType: dr.typeId ? parseInt(dr.typeId) : null,
-        requirementValue: dr.value || null,
-        requirementDesc: null
-      })),
+      dataRequirements: [
+        ...dataRequirementsDataSource.map((dr) => ({
+          ...(dr.id && { id: dr.id }),
+          requirementType: dr.typeId ? parseInt(dr.typeId) : null,
+          requirementValue: dr.value || null,
+        })),
+        ...deletedDataRequirements.map((dr) => ({
+          id: dr.id,
+          requirementType: dr.typeId ? parseInt(dr.typeId) : null,
+          requirementValue: dr.value || null,
+          isDeleted: true,
+        })),
+      ],
       prerequisites: (create_sr?.prerequisites || []).map((pr) => ({
         prerequisiteType: pr.prerequisiteType,
         prerequisiteName: pr.prerequisiteName,
@@ -943,10 +934,28 @@ const CreateUpdateCustomerServiceRequest = ({ formType = "create" }) => {
         );
       }
 
-      // Signal InfoDataRequirement to re-sync from initialDataRequirements
-      setDrResetSignal(s => s + 1);
+      const mappedDr = list_srDataRequirements.map((dr, index) => {
+        const typeEntry = list_srDataRequirementTypes.find(
+          (t) => (t.name || t.glbTypeValName) === dr.type
+        );
+        return {
+          key: dr.id || `dr-${index}`,
+          id: dr.id,
+          dataType: "draft",
+          no: index + 1,
+          type: dr.type,
+          typeId: typeEntry ? String(typeEntry.glbTypeValId || typeEntry.id || '') : null,
+          typeValue: typeEntry?.glbValue || null,
+          value: dr.value,
+          valueId: null,
+        };
+      });
+      setDataRequirementsDataSource(mappedDr);
+      setDeletedDataRequirements([]);
     } else {
       setAttachmentDataSource([]);
+      setDataRequirementsDataSource([]);
+      setDeletedDataRequirements([]);
       formCreate.setFieldsValue({
         typeName: null,
         categoryName: null,

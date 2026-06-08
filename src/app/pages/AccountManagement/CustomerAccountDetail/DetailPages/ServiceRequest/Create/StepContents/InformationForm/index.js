@@ -1,16 +1,16 @@
 import InfoServiceRequest from "./InfoServiceRequest";
 import InfoDataRequirement from "./InfoDataRequirement";
 
-export default function InformationForm({ form, account, customer, dropdowns, initialDataRequirements, resetSignal }) {
+export default function InformationForm({ form, account, customer, dropdowns, data, updateData, setDeleted }) {
   return (
     <>
-      <InfoServiceRequest form={form} account={account} customer={customer} dropdowns={dropdowns}/>
+      <InfoServiceRequest form={form} account={account} customer={customer} dropdowns={dropdowns} />
       <InfoDataRequirement
-        form={form}
         dropdowns={dropdowns}
         accountId={account?.accountInformation?.accountId}
-        initialDataRequirements={initialDataRequirements}
-        resetSignal={resetSignal}
+        data={data}
+        updateData={updateData}
+        setDeleted={setDeleted}
       />
     </>
   );

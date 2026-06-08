@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { PlusCircleOutlined } from "@ant-design/icons";
 import { Button, Form, Select, Tooltip } from "antd";
@@ -15,10 +15,10 @@ import { getSrDataRequirementValues } from "../../../../../../../../../redux/sli
 
 export default function InfoDataRequirement({
   dropdowns,
-  form,
   accountId,
-  initialDataRequirements = [],
-  resetSignal = 0,
+  data = [],
+  updateData = () => {},
+  setDeleted = () => {},
 }) {
   const dispatch = useDispatch();
   const { detail_srDataRequirementValues, loading_srDataRequirementValues } = useSelector(
@@ -26,29 +26,10 @@ export default function InfoDataRequirement({
   );
 
   const [isDataRequirement, setIsDataRequirement] = useState(false);
-  const [dataRequirement, setDataRequirement] = useState([]);
   const [editingRecord, setEditingRecord] = useState(null);
   const [selectedTypeId, setSelectedTypeId] = useState(null);
   const [selectedTypeValue, setSelectedTypeValue] = useState(null);
   const [modalForm] = Form.useForm();
-
-  const initDoneRef = useRef(false);
-
-  // Sync local table state from prop once initial data arrives (update mode).
-  // Prop-based approach avoids relying on Form.useWatch for an unregistered field.
-  useEffect(() => {
-    if (initDoneRef.current || !initialDataRequirements.length) return;
-    initDoneRef.current = true;
-    setDataRequirement(initialDataRequirements);
-    form.setFieldsValue({ srFormDataRequirements: initialDataRequirements });
-  }, [initialDataRequirements]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Re-sync when the user clicks Reset/Clear in the parent form.
-  useEffect(() => {
-    if (resetSignal === 0) return;
-    setDataRequirement(initialDataRequirements);
-    form.setFieldsValue({ srFormDataRequirements: initialDataRequirements });
-  }, [resetSignal]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Create safe accessor functions that handle both array and { data: [] } formats
   const getDropdownItems = (dropdownKey) => {
@@ -74,16 +55,11 @@ export default function InfoDataRequirement({
   const MAX_DATA_REQUIREMENTS = 111;
 
   const getNextNumber = () => {
-    // Business rule: Check if we've reached maximum allowed records
-    if (dataRequirement.length >= MAX_DATA_REQUIREMENTS) {
+    if (data.length >= MAX_DATA_REQUIREMENTS) {
       throw new Error(`Maximum of ${MAX_DATA_REQUIREMENTS} data requirements allowed`);
     }
-    
-    if (dataRequirement.length === 0) {
-      return 1;
-    }
-    
-    const maxNo = Math.max(...dataRequirement.map(item => item.no || 0));
+    if (data.length === 0) return 1;
+    const maxNo = Math.max(...data.map(item => item.no || 0));
     return maxNo + 1;
   }
 
@@ -164,19 +140,14 @@ export default function InfoDataRequirement({
   }
 
   const handleDelete = (record) => {
-    // Remove the record
-    const updatedData = dataRequirement.filter(item => item.key !== record.key);
-    
-    // Reassign numbers to all remaining records
-    const renumberedData = updatedData.map((item, index) => ({
-      ...item,
-      no: index + 1
-    }));
-    
-    setDataRequirement(renumberedData);
-    form.setFieldsValue({
-      srFormDataRequirements: renumberedData
-    });
+    updateData(prev =>
+      prev
+        .filter(item => item.key !== record.key)
+        .map((item, index) => ({ ...item, no: index + 1 }))
+    );
+    if (record.dataType === "draft" || record.dataType === "exist") {
+      setDeleted(prev => [...prev, { ...record, isDeleted: true }]);
+    }
   }
 
   const handleCancel = () => {
@@ -191,41 +162,40 @@ export default function InfoDataRequirement({
     const typeLabel = getDropdownOptions('serviceRequestDataRequirements')
       .find(opt => opt.value === selectedTypeId)?.label;
 
-    let updatedData;
-
     if (editingRecord) {
-      updatedData = dataRequirement.map((item) =>
-        item.key === editingRecord.key
-          ? {
-              ...item,
-              type: typeLabel,
-              typeId: selectedTypeId,
-              typeValue: selectedTypeValue,
-              value: valueRecord.label,
-              valueId: valueRecord.id,
-            }
-          : item
+      updateData(prev =>
+        prev.map(item =>
+          item.key === editingRecord.key
+            ? {
+                ...item, // preserves id, dataType, key
+                type: typeLabel,
+                typeId: selectedTypeId,
+                typeValue: selectedTypeValue,
+                value: valueRecord.label,
+                valueId: valueRecord.id,
+              }
+            : item
+        )
       );
     } else {
       try {
         const newRecord = {
           key: Date.now(),
           no: getNextNumber(),
+          dataType: "new",
+          id: null,
           type: typeLabel,
           typeId: selectedTypeId,
           typeValue: selectedTypeValue,
           value: valueRecord.label,
           valueId: valueRecord.id,
         };
-        updatedData = [...dataRequirement, newRecord];
+        updateData(prev => [...prev, newRecord]);
       } catch (error) {
         console.log(error.message);
         return;
       }
     }
-
-    setDataRequirement(updatedData);
-    form.setFieldsValue({ srFormDataRequirements: updatedData });
 
     modalForm.resetFields();
     setEditingRecord(null);
@@ -254,7 +224,7 @@ export default function InfoDataRequirement({
             usePagination={false}
             useSelect={true}
             tableScrolled={{ y: 400, x: "max-content" }}
-            dataMain={dataRequirement}
+            dataMain={data}
             columnMain={columnMain}
             showAdvanceSearch={false}
           />
