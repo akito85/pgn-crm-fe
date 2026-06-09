@@ -12,7 +12,7 @@ export default function InformationForm(props) {
   return (
     <>
       <InfoServiceRequest form={form} account={account} customer={customer} dropdowns={dropdowns}/>
-      <InfoDataRequirement form={form} dropdowns={dropdowns} accountId={account?.accountInformation?.accountId} />
+      <InfoDataRequirement form={form} dropdowns={dropdowns} />
     </>
   );
 }

@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo } from "react";
-import moment from "moment";
 import { useQuery } from "@tanstack/react-query";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -12,11 +11,9 @@ import StatusComponent from "../../../../components/StatusComponent";
 import NxTableInlineEdit from "../../../../components/Nx/NxTableInlineEdit";
 import BaseContainer from "../../../../components/BaseContainer";
 
-// Strip "at row N" suffix and translate BE format token → FE-facing format.
+// Strip "at row N" suffix from BE validation messages.
 const normalizeMessage = (msg) =>
-  msg
-    .replace(/\s+at row \d+\.?$/i, "")
-    .replace(/yyyy-mm-dd/gi, "DD MMM YYYY");
+  msg.replace(/\s+at row \d+\.?$/i, "");
 
 const ListUserFromUpload = ({ data, onChangeData = () => {} }) => {
   const dispatch = useDispatch();
@@ -74,9 +71,9 @@ const ListUserFromUpload = ({ data, onChangeData = () => {} }) => {
         inputType: "select",
         width: 140,
         selectOptions: dataAuthType,
-        render: (value) => {
+        render: (value, record) => {
           const match = dataAuthType.find((a) => a.value === value);
-          return match ? match.label : (value ?? "—");
+          return match ? match.label : (record?.authType ?? value ?? "—");
         },
       },
       {
@@ -102,9 +99,9 @@ const ListUserFromUpload = ({ data, onChangeData = () => {} }) => {
         inputType: "select",
         width: 130,
         selectOptions: dataUserType,
-        render: (value) => {
+        render: (value, record) => {
           const match = dataUserType.find((a) => a.value === value);
-          return match ? match.label : (value ?? "—");
+          return match ? match.label : (record?.userType ?? value ?? "—");
         },
       },
       {
@@ -114,9 +111,9 @@ const ListUserFromUpload = ({ data, onChangeData = () => {} }) => {
         inputType: "select",
         width: 130,
         selectOptions: dataUserLevel,
-        render: (value) => {
+        render: (value, record) => {
           const match = dataUserLevel.find((a) => a.value === value);
-          return match ? match.label : (value ?? "—");
+          return match ? match.label : (record?.userLevel ?? value ?? "—");
         },
       },
       {
@@ -148,9 +145,8 @@ const ListUserFromUpload = ({ data, onChangeData = () => {} }) => {
         editable: true,
         inputType: "text",
         width: 130,
-        placeholder: "DD MMM YYYY",
-        render: (value) =>
-          value ? moment(value, "DD MMM YYYY").format("YYYY-MM-DD") : "—",
+        placeholder: "yyyy-MM-dd",
+        render: (value) => value ?? "—",
       },
       {
         title: "END DATE",
@@ -158,9 +154,8 @@ const ListUserFromUpload = ({ data, onChangeData = () => {} }) => {
         editable: true,
         inputType: "text",
         width: 130,
-        placeholder: "DD MMM YYYY",
-        render: (value) =>
-          value ? moment(value, "DD MMM YYYY").format("YYYY-MM-DD") : "—",
+        placeholder: "yyyy-MM-dd",
+        render: (value) => value ?? "—",
       },
       {
         title: "START DATE GA",
@@ -168,9 +163,8 @@ const ListUserFromUpload = ({ data, onChangeData = () => {} }) => {
         editable: true,
         inputType: "text",
         width: 140,
-        placeholder: "DD MMM YYYY",
-        render: (value) =>
-          value ? moment(value, "DD MMM YYYY").format("YYYY-MM-DD") : "—",
+        placeholder: "yyyy-MM-dd",
+        render: (value) => value ?? "—",
       },
       {
         title: "END DATE GA",
@@ -178,9 +172,8 @@ const ListUserFromUpload = ({ data, onChangeData = () => {} }) => {
         editable: true,
         inputType: "text",
         width: 130,
-        placeholder: "DD MMM YYYY",
-        render: (value) =>
-          value ? moment(value, "DD MMM YYYY").format("YYYY-MM-DD") : "—",
+        placeholder: "yyyy-MM-dd",
+        render: (value) => value ?? "—",
       },
       {
         title: "STATUS",

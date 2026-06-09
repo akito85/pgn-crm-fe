@@ -13,14 +13,20 @@ const initialState = {
   loading_listSrApprovals: false,
   loading_approveSr: false,
   loading_rejectSr: false,
+  // Approval History
+  detail_srApprovalHistory: null,
+  loading_srApprovalHistory: false,
   // Detail / Create state
   data: [],
   detail_serviceRequest: null,
   detailDraft_serviceRequest: null,
   loading_detailDraftSr: false,
   loading_createUpdateSr: false,
+  loading_listSrApprovalHierarchy: false,
+  loading_detailSrApprovalHierarchy: false,
   loading_statusUpdateSr: false,
   list_srPrerequisites: [],
+  pagination_listSrPrerequisites: { totalPage: 0, totalElement: 0, currentPage: 0, pageSize: 10 },
   list_srWorkOrders: [],
   list_srActivities: [],
   list_srDataRequirements: [],
@@ -28,6 +34,7 @@ const initialState = {
   list_srAttachmentCategories: [],
   loading_listSrAttachmentCategories: false,
   list_srContacts: [],
+  pagination_listSrContacts: { totalPage: 0, totalElement: 0, currentPage: 0, pageSize: 10 },
   loading_listSrContacts: false,
   loading_listSrAttachments: false,
   // Dropdowns
@@ -50,6 +57,16 @@ const initialState = {
   list_srInstallments: [],
   list_srSchedules: [],
   list_srBillingItems: [],
+  // Action Logs
+  list_srActionLogs: [],
+  pagination_listSrActionLogs: { totalPage: 0, totalElement: 0, currentPage: 0, pageSize: 10 },
+  loading_listSrActionLogs: false,
+  // Create SR wizard state (persists across navigation to prereq create page)
+  create_sr: {
+    formData: null,
+    prerequisites: [],
+    attachments: [],
+  },
   // UI State
   loading: false,
   loading_detailSr: false,
@@ -57,12 +74,17 @@ const initialState = {
   loading_listSrWorkOrders: false,
   loading_listSrActivities: false,
   loading_listSrDataRequirements: false,
+  pagination_listSrDataRequirements: { totalPage: 0, totalElement: 0, currentPage: 0, pageSize: 10 },
   loading_srDataRequirementValues: false,
   error_srDataRequirementValues: null,
   loading_dropdowns: false,
   isFailed: false,
   isSuccess: false,
   message: "",
+  // Pre Requisite Template
+  loading_prerequisiteTemplate: false,
+  list_prerequisiteTemplate: [],
+  pagination_prerequisiteTemplate: { totalPage: 0, totalElement: 0, currentPage: 0, pageSize: 10 },
 };
 
 // =====================================================
@@ -74,7 +96,7 @@ export const getServiceRequests = createAsyncThunk(
   "GET_SERVICE_REQUESTS",
   async ({ idAccount, body, isLoadMore }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${idAccount}/servicerequests/list`;
+      const url = `/v1/dbs/api/account/${idAccount}/service-request`;
       const response = await accountManagementService.updateDataWithMethodPost(url, body);
       return { ...response.data, isLoadMore };
     } catch (error) {
@@ -88,7 +110,7 @@ export const getServiceRequestApprovals = createAsyncThunk(
   "GET_SERVICE_REQUEST_APPROVALS",
   async ({ idAccount, body, isLoadMore }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${idAccount}/servicerequests/list`;
+      const url = `/v1/dbs/api/account/${idAccount}/service-request`;
       const response = await accountManagementService.updateDataWithMethodPost(url, {
         ...body,
         listType: "approval",
@@ -129,28 +151,12 @@ export const approveOrRejectAllServiceRequest = createAsyncThunk(
   }
 );
 
-// Get Service Requests by Account
-export const getSrListByAccount = createAsyncThunk(
-  "GET_SR_LIST_BY_ACCOUNT",
-  async ({ accountId, page = 1, size = 10, sort, search }, thunkAPI) => {
-    try {
-      let url = `/v1/dbs/api/accounts/${accountId}/servicerequests/list?page=${page}&size=${size}`;
-      if (sort) url += `&sort=${sort}`;
-      if (search) url += `&search=${encodeURIComponent(search)}`;
-      const response = await accountManagementService.getAll(url);
-      return response.data;
-    } catch (error) {
-      return thunkAPI.rejectWithValue(error?.response);
-    }
-  }
-);
-
 // Get Service Request Detail by Account and ID
 export const getServiceRequest = createAsyncThunk(
   "GET_SERVICE_REQUEST",
   async ({ accountId, id }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/${id}`;
+      const url = `/v1/dbs/api/account/${accountId}/service-request/${id}`;
       const response = await accountManagementService.getDetail(url);
       return response.data;
     } catch (error) {
@@ -164,7 +170,7 @@ export const getServiceRequestDraft = createAsyncThunk(
   "GET_SERVICE_REQUEST_DRAFT",
   async ({ accountId, id }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/detail-draft/${id}`;
+      const url = `/v1/dbs/api/account/${accountId}/service-request/${id}/draft`;
       const response = await accountManagementService.getDetail(url);
       return response.data;
     } catch (error) {
@@ -173,29 +179,29 @@ export const getServiceRequestDraft = createAsyncThunk(
   }
 );
 
-// Create Service Request for Account
-export const createSrForAccount = createAsyncThunk(
-  "CREATE_SR_FOR_ACCOUNT",
-  async ({ accountId, body }, thunkAPI) => {
+// Get Service Request Action Logs
+export const getServiceRequestActionLogs = createAsyncThunk(
+  "GET_SERVICE_REQUEST_ACTION_LOGS",
+  async ({ serviceRequestId, body, isLoadMore }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests`;
-      const response = await accountManagementService.createData(url, body);
-      const successBody = {
-        title: "Successful",
-        description: "Service Request has been created.",
-      };
-      thunkAPI.dispatch(showModalSuccess(successBody));
-      return response.data;
+      const url = `/v1/dbs/api/service-request/${serviceRequestId}/action-log`;
+      const response = await accountManagementService.updateDataWithMethodPost(url, body);
+      return { ...response.data, isLoadMore };
     } catch (error) {
-      const message =
-        (error.response && error.response.data && error.response.data.message) ||
-        error.message ||
-        error.toString();
-      const errorBody = {
-        title: "Failed",
-        description: `Service Request was not created. ${message}. Please try again.`,
-      };
-      thunkAPI.dispatch(showModalError(errorBody));
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+// Get Service Request Data Requirements
+export const getServiceRequestDataRequirements = createAsyncThunk(
+  "GET_SERVICE_REQUEST_DATA_REQUIREMENTS",
+  async ({ serviceRequestId, body, isLoadMore }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/service-request/${serviceRequestId}/data-requirement`;
+      const response = await accountManagementService.updateDataWithMethodPost(url, body);
+      return { ...response.data, isLoadMore };
+    } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
   }
@@ -206,7 +212,7 @@ export const createServiceRequest = createAsyncThunk(
   "CREATE_SERVICE_REQUEST",
   async ({ accountId, body, attachments = [], action = "SUBMIT", successBodyExtra = {} }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/create`;
+      const url = `/v1/dbs/api/account/${accountId}/service-request/create`;
       const response = await accountManagementService.createData(url, body);
       const { id } = response.data;
 
@@ -321,50 +327,6 @@ export const updateServiceRequest = createAsyncThunk(
           : `Service Request was not submitted. ${message}. Please try again.`,
       };
       thunkAPI.dispatch(showModalError(errorBody));
-      return thunkAPI.rejectWithValue(error?.response);
-    }
-  }
-);
-
-// Delete Service Request for Account
-export const deleteSr = createAsyncThunk(
-  "DELETE_SR",
-  async ({ accountId, id }, thunkAPI) => {
-    try {
-      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/${id}`;
-      const response = await accountManagementService.deleteData(url);
-      const successBody = {
-        title: "Successful",
-        description: "Service Request has been deleted.",
-      };
-      thunkAPI.dispatch(showModalSuccess(successBody));
-      return response.data;
-    } catch (error) {
-      const message =
-        (error.response && error.response.data && error.response.data.message) ||
-        error.message ||
-        error.toString();
-      const errorBody = {
-        title: "Failed",
-        description: `Service Request was not deleted. ${message}. Please try again.`,
-      };
-      thunkAPI.dispatch(showModalError(errorBody));
-      return thunkAPI.rejectWithValue(error?.response);
-    }
-  }
-);
-
-// Get All Service Requests (Independent)
-export const getAllSr = createAsyncThunk(
-  "GET_ALL_SR",
-  async ({ page = 1, size = 10, search, sort }, thunkAPI) => {
-    try {
-      let url = `/v1/dbs/api/servicerequests/list?page=${page}&size=${size}`;
-      if (search) url += `&search=${encodeURIComponent(search)}`;
-      if (sort) url += `&sort=${sort}`;
-      const response = await accountManagementService.getAll(url);
-      return response.data;
-    } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
   }
@@ -603,13 +565,13 @@ export const getSrActivityStatuses = createAsyncThunk(
 // =====================================================
 
 // Get Prerequisites by Service Request
-export const getSrPrerequisites = createAsyncThunk(
-  "GET_SR_PREREQUISITES",
-  async ({ accountId, srId, page = 1, size = 10 }, thunkAPI) => {
+export const getServiceRequestPreRequisites = createAsyncThunk(
+  "GET_SERVICE_REQUEST_PREREQUISITES",
+  async ({ accountId, serviceRequestId, body, isLoadMore = false }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/${srId}/prerequisites/list?page=${page}&size=${size}`;
-      const response = await accountManagementService.getAll(url);
-      return response.data;
+      const url = `/v1/dbs/api/account/${accountId}/service-request/${serviceRequestId}/pre-requisite`;
+      const response = await accountManagementService.updateDataWithMethodPost(url, body);
+      return { ...response.data, isLoadMore };
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
@@ -721,11 +683,11 @@ export const getSrAttachments = createAsyncThunk(
 // Get Contacts by Service Request
 export const getSrContacts = createAsyncThunk(
   "GET_SR_CONTACTS",
-  async ({ accountId, srId }, thunkAPI) => {
+  async ({ accountId, srId, body, isLoadMore }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/${srId}/contacts`;
-      const response = await accountManagementService.getAll(url);
-      return response.data;
+      const url = `/v1/dbs/api/account/${accountId}/service-request/contact`;
+      const response = await accountManagementService.updateDataWithMethodPost(url, body);
+      return { ...response.data, isLoadMore };
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
@@ -803,11 +765,11 @@ export const getSrActivities = createAsyncThunk(
 // Get Data Requirements by Service Request
 export const getSrDataRequirements = createAsyncThunk(
   "GET_SR_DATA_REQUIREMENTS",
-  async ({ accountId, srId, page = 1, size = 10 }, thunkAPI) => {
+  async ({ accountId, serviceRequestId, body, isLoadMore = false }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/${srId}/datarequirements/list?page=${page}&size=${size}`;
-      const response = await accountManagementService.getAll(url);
-      return response.data;
+      const url = `/v1/dbs/api/account/${accountId}/service-request/${serviceRequestId}/data-requirement`;
+      const response = await accountManagementService.updateDataWithMethodPost(url, body);
+      return { ...response.data, isLoadMore };
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
@@ -904,13 +866,11 @@ export const getSrInstallmentSchedule = createAsyncThunk(
 
 export const updateSrStatus = createAsyncThunk(
   "UPDATE_SR_STATUS",
-  async ({ accountId, id, status, remark = "" }, thunkAPI) => {
+  async ({ accountId, id, status }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/${id}`;
-      const response = await accountManagementService.updateData(url, {
-        serviceRequestId: id,
-        requestStatus: status,
-        remark,
+      const url = `/v1/dbs/api/account/${accountId}/service-request/${id}/status`;
+      const response = await accountManagementService.patchData(url, {
+        status,
       });
       thunkAPI.dispatch(showModalSuccess({
         title: "Successful",
@@ -927,6 +887,34 @@ export const updateSrStatus = createAsyncThunk(
         title: "Failed",
         description: `Status update failed. ${message}`,
       }));
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+// Get Pre Requisite Template
+export const getSrPrerequisiteTemplate = createAsyncThunk(
+  "GET_SR_PREREQUISITE_TEMPLATE",
+  async ({ accountId, body, isLoadMore }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/prerequisite-templates`;
+      const response = await accountManagementService.updateDataWithMethodPost(url, body);
+      return { ...response.data, isLoadMore };
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+// Get Approval History for a Service Request
+export const getSrApprovalHistory = createAsyncThunk(
+  "GET_SR_APPROVAL_HISTORY",
+  async (id, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/service-request/approval-history/${id}`;
+      const response = await accountManagementService.getDetail(url);
+      return response.data;
+    } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);
     }
   }
@@ -960,6 +948,23 @@ const serviceRequestSlice = createSlice({
     },
     resetSrDetailDraft: (state) => {
       state.detailDraft_serviceRequest = null;
+    },
+    saveCreateSrFormData: (state, action) => {
+      state.create_sr.formData = action.payload;
+    },
+    addCreateSrPrerequisite: (state, action) => {
+      state.create_sr.prerequisites.push(action.payload);
+    },
+    removeCreateSrPrerequisite: (state, action) => {
+      state.create_sr.prerequisites = state.create_sr.prerequisites.filter(
+        (pr) => pr.key !== action.payload
+      );
+    },
+    saveCreateSrAttachments: (state, action) => {
+      state.create_sr.attachments = action.payload;
+    },
+    resetCreateSr: (state) => {
+      state.create_sr = { formData: null, prerequisites: [], attachments: [] };
     },
   },
   extraReducers: {
@@ -1007,32 +1012,39 @@ const serviceRequestSlice = createSlice({
       }
     },
 
-    [getSrListByAccount.pending]: (state) => {
-      state.loading = true;
-      state.isFailed = false;
-      state.isSuccess = false;
+    // =====================================================
+    // SERVICE REQUEST ACTION LOGS
+    // =====================================================
+    [getServiceRequestActionLogs.pending]: (state, action) => {
+      if (!action.meta.arg?.isLoadMore) state.loading_listSrActionLogs = true;
     },
-    [getSrListByAccount.fulfilled]: (state, action) => {
-      state.loading = false;
-      state.data = action.payload;
+    [getServiceRequestActionLogs.fulfilled]: (state, action) => {
+      state.loading_listSrActionLogs = false;
+      const { result, page, isLoadMore } = action.payload;
+      if (Array.isArray(result)) {
+        if (isLoadMore) {
+          const currentIds = new Set(state.list_srActionLogs.map((i) => i.id));
+          state.list_srActionLogs = [
+            ...state.list_srActionLogs,
+            ...result.filter((i) => !currentIds.has(i.id)),
+          ];
+        } else {
+          state.list_srActionLogs = result;
+        }
+      }
+      state.pagination_listSrActionLogs = {
+        totalPage: page?.totalPages || 0,
+        totalElement: page?.totalElements || 0,
+        currentPage: page?.number || 0,
+        pageSize: page?.size || 10,
+      };
     },
-    [getSrListByAccount.rejected]: (state, action) => {
-      state.loading = false;
-      state.isFailed = true;
-    },
-
-    [getAllSr.pending]: (state) => {
-      state.loading = true;
-      state.isFailed = false;
-      state.isSuccess = false;
-    },
-    [getAllSr.fulfilled]: (state, action) => {
-      state.loading = false;
-      state.data = action.payload;
-    },
-    [getAllSr.rejected]: (state, action) => {
-      state.loading = false;
-      state.isFailed = true;
+    [getServiceRequestActionLogs.rejected]: (state, action) => {
+      state.loading_listSrActionLogs = false;
+      if (!action.meta.arg?.isLoadMore) {
+        state.list_srActionLogs = [];
+        state.pagination_listSrActionLogs = { totalPage: 0, totalElement: 0, currentPage: 0, pageSize: 10 };
+      }
     },
 
     // =====================================================
@@ -1053,14 +1065,14 @@ const serviceRequestSlice = createSlice({
     },
 
     [getServiceRequestDraft.pending]: (state) => {
-      state.loading_detailSrDraftSr = true;
+      state.loading_detailDraftSr = true;
     },
     [getServiceRequestDraft.fulfilled]: (state, action) => {
-      state.loading_detailSrDraftSr = false;
+      state.loading_detailDraftSr = false;
       state.detailDraft_serviceRequest = action.payload;
     },
     [getServiceRequestDraft.rejected]: (state) => {
-      state.loading_detailSrDraftSr = false;
+      state.loading_detailDraftSr = false;
       state.detailDraft_serviceRequest = null;
     },
 
@@ -1081,27 +1093,15 @@ const serviceRequestSlice = createSlice({
     // =====================================================
     // SERVICE REQUEST CRUD
     // =====================================================
-    [createSrForAccount.pending]: (state) => {
-      state.loading = true;
-    },
-    [createSrForAccount.fulfilled]: (state, action) => {
-      state.loading = false;
-      state.isSuccess = true;
-    },
-    [createSrForAccount.rejected]: (state) => {
-      state.loading = false;
-      state.isFailed = true;
-    },
-
     [createServiceRequest.pending]: (state) => {
-      state.loading = true;
+      state.loading_createUpdateSr = true;
     },
     [createServiceRequest.fulfilled]: (state, action) => {
-      state.loading = false;
+      state.loading_createUpdateSr = false;
       state.isSuccess = true;
     },
     [createServiceRequest.rejected]: (state) => {
-      state.loading = false;
+      state.loading_createUpdateSr = false;
       state.isFailed = true;
     },
 
@@ -1142,18 +1142,6 @@ const serviceRequestSlice = createSlice({
       state.isFailed = true;
     },
 
-    [deleteSr.pending]: (state) => {
-      state.loading = true;
-    },
-    [deleteSr.fulfilled]: (state) => {
-      state.loading = false;
-      state.isSuccess = true;
-    },
-    [deleteSr.rejected]: (state) => {
-      state.loading = false;
-      state.isFailed = true;
-    },
-
     // =====================================================
     // DROPDOWNS
     // =====================================================
@@ -1188,17 +1176,27 @@ const serviceRequestSlice = createSlice({
       state.list_srSources = action.payload;
     },
 
+    [getSrApprovalHierarchies.pending]: (state) => {
+      state.loading_listSrApprovalHierarchy = true;
+    },
     [getSrApprovalHierarchies.fulfilled]: (state, action) => {
+      state.loading_listSrApprovalHierarchy = false;
       state.list_srApprovalHierarchy = action.payload;
+    },
+    [getSrApprovalHierarchies.rejected]: (state) => {
+      state.loading_listSrApprovalHierarchy = false;
     },
 
     [getSrApprovalHierarchy.pending]: (state) => {
+      state.loading_detailSrApprovalHierarchy = true;
       state.detail_srApprovalHierarchy = [];
     },
     [getSrApprovalHierarchy.fulfilled]: (state, action) => {
+      state.loading_detailSrApprovalHierarchy = false;
       state.detail_srApprovalHierarchy = action.payload;
     },
     [getSrApprovalHierarchy.rejected]: (state) => {
+      state.loading_detailSrApprovalHierarchy = false;
       state.detail_srApprovalHierarchy = [];
     },
 
@@ -1250,15 +1248,36 @@ const serviceRequestSlice = createSlice({
     // =====================================================
     // PREREQUISITES
     // =====================================================
-    [getSrPrerequisites.pending]: (state) => {
-      state.loading_listSrPrerequisites = true;
+    [getServiceRequestPreRequisites.pending]: (state, action) => {
+      if (!action.meta.arg?.isLoadMore) state.loading_listSrPrerequisites = true;
     },
-    [getSrPrerequisites.fulfilled]: (state, action) => {
+    [getServiceRequestPreRequisites.fulfilled]: (state, action) => {
       state.loading_listSrPrerequisites = false;
-      state.list_srPrerequisites = action.payload;
+      const { result, page, isLoadMore } = action.payload;
+      if (Array.isArray(result)) {
+        if (isLoadMore) {
+          const currentIds = new Set(state.list_srPrerequisites.map((i) => i.id));
+          state.list_srPrerequisites = [
+            ...state.list_srPrerequisites,
+            ...result.filter((i) => !currentIds.has(i.id)),
+          ];
+        } else {
+          state.list_srPrerequisites = result;
+        }
+      }
+      state.pagination_listSrPrerequisites = {
+        totalPage: page?.totalPages || 0,
+        totalElement: page?.totalElements || 0,
+        currentPage: page?.number || 0,
+        pageSize: page?.size || 10,
+      };
     },
-    [getSrPrerequisites.rejected]: (state) => {
+    [getServiceRequestPreRequisites.rejected]: (state, action) => {
       state.loading_listSrPrerequisites = false;
+      if (!action.meta.arg?.isLoadMore) {
+        state.list_srPrerequisites = [];
+        state.pagination_listSrPrerequisites = { totalPage: 0, totalElement: 0, currentPage: 0, pageSize: 10 };
+      }
     },
 
     [createSrPrerequisite.pending]: (state) => {
@@ -1291,16 +1310,36 @@ const serviceRequestSlice = createSlice({
     // =====================================================
     // CONTACTS
     // =====================================================
-    [getSrContacts.pending]: (state) => {
-      state.loading_listSrContacts = true;
+    [getSrContacts.pending]: (state, action) => {
+      if (!action.meta.arg?.isLoadMore) state.loading_listSrContacts = true;
     },
     [getSrContacts.fulfilled]: (state, action) => {
       state.loading_listSrContacts = false;
-      const raw = action.payload;
-      state.list_srContacts = Array.isArray(raw?.data) ? raw.data : (Array.isArray(raw) ? raw : []);
+      const { result, page, isLoadMore } = action.payload;
+      if (Array.isArray(result)) {
+        if (isLoadMore) {
+          const currentIds = new Set(state.list_srContacts.map((i) => i.id));
+          state.list_srContacts = [
+            ...state.list_srContacts,
+            ...result.filter((i) => !currentIds.has(i.id)),
+          ];
+        } else {
+          state.list_srContacts = result;
+        }
+      }
+      state.pagination_listSrContacts = {
+        totalPage: page?.totalPages || 0,
+        totalElement: page?.totalElements || 0,
+        currentPage: page?.number || 0,
+        pageSize: page?.size || 10,
+      };
     },
-    [getSrContacts.rejected]: (state) => {
+    [getSrContacts.rejected]: (state, action) => {
       state.loading_listSrContacts = false;
+      if (!action.meta.arg?.isLoadMore) {
+        state.list_srContacts = [];
+        state.pagination_listSrContacts = { totalPage: 0, totalElement: 0, currentPage: 0, pageSize: 10 };
+      }
     },
 
     // =====================================================
@@ -1334,15 +1373,36 @@ const serviceRequestSlice = createSlice({
     // =====================================================
     // DATA REQUIREMENTS
     // =====================================================
-    [getSrDataRequirements.pending]: (state) => {
-      state.loading_listSrDataRequirements = true;
+    [getSrDataRequirements.pending]: (state, action) => {
+      if (!action.meta.arg?.isLoadMore) state.loading_listSrDataRequirements = true;
     },
     [getSrDataRequirements.fulfilled]: (state, action) => {
       state.loading_listSrDataRequirements = false;
-      state.list_srDataRequirements = action.payload;
+      const { result, page, isLoadMore } = action.payload;
+      if (Array.isArray(result)) {
+        if (isLoadMore) {
+          const currentIds = new Set(state.list_srDataRequirements.map((i) => i.id));
+          state.list_srDataRequirements = [
+            ...state.list_srDataRequirements,
+            ...result.filter((i) => !currentIds.has(i.id)),
+          ];
+        } else {
+          state.list_srDataRequirements = result;
+        }
+      }
+      state.pagination_listSrDataRequirements = {
+        totalPage: page?.totalPages || 0,
+        totalElement: page?.totalElements || 0,
+        currentPage: page?.number || 0,
+        pageSize: page?.size || 10,
+      };
     },
-    [getSrDataRequirements.rejected]: (state) => {
+    [getSrDataRequirements.rejected]: (state, action) => {
       state.loading_listSrDataRequirements = false;
+      if (!action.meta.arg?.isLoadMore) {
+        state.list_srDataRequirements = [];
+        state.pagination_listSrDataRequirements = { totalPage: 0, totalElement: 0, currentPage: 0, pageSize: 10 };
+      }
     },
 
     // =====================================================
@@ -1421,6 +1481,53 @@ const serviceRequestSlice = createSlice({
       state.loading_approveSr = false;
       state.loading_rejectSr = false;
     },
+
+    // Pre Requisite Template
+    [getSrPrerequisiteTemplate.pending]: (state, action) => {
+      if (!action.meta.arg?.isLoadMore) state.loading_prerequisiteTemplate = true;
+    },
+    [getSrPrerequisiteTemplate.fulfilled]: (state, action) => {
+      state.loading_prerequisiteTemplate = false;
+      const { result, page, isLoadMore } = action.payload;
+      if (isLoadMore) {
+        const currentIds = new Set(state.list_prerequisiteTemplate.map((i) => i.id));
+        state.list_prerequisiteTemplate = [
+          ...state.list_prerequisiteTemplate,
+          ...result.filter((i) => !currentIds.has(i.id)),
+        ];
+      } else {
+        state.list_prerequisiteTemplate = result;
+      }
+      state.pagination_prerequisiteTemplate = {
+        totalPage: page?.totalPages || 0,
+        totalElement: page?.totalElements || 0,
+        currentPage: page?.number || 0,
+        pageSize: page?.size || 10,
+      };
+    },
+    [getSrPrerequisiteTemplate.rejected]: (state, action) => {
+      state.loading_prerequisiteTemplate = false;
+      if (!action.meta.arg?.isLoadMore) {
+        state.list_prerequisiteTemplate = [];
+        state.pagination_prerequisiteTemplate = { totalPage: 0, totalElement: 0, currentPage: 0, pageSize: 10 };
+      }
+    },
+    
+    // =====================================================
+    // SERVICE REQUEST APPROVAL HISTORY
+    // =====================================================
+    [getSrApprovalHistory.pending]: (state) => {
+      state.detail_srApprovalHistory = null;
+      state.loading_srApprovalHistory = true;
+    },
+    [getSrApprovalHistory.fulfilled]: (state, action) => {
+      state.detail_srApprovalHistory = action.payload;
+      state.loading_srApprovalHistory = false;
+    },
+    [getSrApprovalHistory.rejected]: (state) => {
+      state.loading_srApprovalHistory = false;
+      state.detail_srApprovalHistory = null;
+    },
   },
 });
 
@@ -1433,5 +1540,10 @@ export const {
   clearSrActivities,
   clearSrDataRequirements,
   resetSrDetailDraft,
+  saveCreateSrFormData,
+  addCreateSrPrerequisite,
+  removeCreateSrPrerequisite,
+  saveCreateSrAttachments,
+  resetCreateSr,
 } = serviceRequestSlice.actions;
 export default reducer;

@@ -52,7 +52,7 @@ import ProductDistributionForm from "../../app/pages/AccountManagement/CustomerA
 import PaymentRelationDetail from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/FinancialInformation/PaymentRelation/Details/PaymentRelationDetail"; 
 import CreateUpdatePaymentRelation from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/FinancialInformation/PaymentRelation/CreateUpdate/CreateUpdatePaymentRelation"
 
-import CreateCustomerServiceRequest from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/ServiceRequest/Create/CreateCustomerServiceRequest";
+import CreateUpdateCustomerServiceRequest from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/ServiceRequest/Create/CreateUpdateCustomerServiceRequest";
 import CustomerServiceRequestDetails from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/ServiceRequest/Details/CustomerServiceRequestDetails";
 import PreRequisiteCreateForm from "../../app/pages/AccountManagement/CustomerAccountDetail/DetailPages/ServiceRequest/Create/StepContents/PreRequisiteForm/Create";
 
@@ -110,8 +110,8 @@ export const ACCOUNT_MANAGEMENT_ELEMENTS = {
 
   // Service Request Detail
   VIEW_DETAIL_SERVICE_REQUEST_PAGE: <CustomerServiceRequestDetails />,
-  CREATE_SERVICE_REQUEST_PAGE: <CreateCustomerServiceRequest />,
-  // UPDATE_SERVICE_REQUEST_PAGE: <UpdateCustomerServiceRequest />,
+  CREATE_SERVICE_REQUEST_PAGE: <CreateUpdateCustomerServiceRequest formType={"create"} />,
+  UPDATE_SERVICE_REQUEST_PAGE: <CreateUpdateCustomerServiceRequest formType={"update"} />,
   CREATE_SERVICE_REQUEST_PREREQUISITE_PAGE: <PreRequisiteCreateForm />,
 
   // Payment Relation Detail

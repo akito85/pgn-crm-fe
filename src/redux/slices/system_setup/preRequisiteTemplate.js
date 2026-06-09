@@ -237,11 +237,11 @@ export const getCriteria = createAsyncThunk(
     }
 );
 
-export const getAccountGroupType = createAsyncThunk(
-    "GET_ACCOUNT_GROUP_TYPE",
+export const getAccountSegment = createAsyncThunk(
+    "GET_ACCOUNT_SEGMENT",
     async (_, thunkAPI) => {
         try {
-            const url = '/v1/dbs/api/pre-requisite-template/list-account-group-type';
+            const url = '/v1/dbs/api/pre-requisite-template/list-account-segment';
             const response = await accountManagementService.getDetail(url);
             return response.data;
         } catch (error) {
@@ -250,11 +250,11 @@ export const getAccountGroupType = createAsyncThunk(
     }
 );
 
-export const getAccountSegment = createAsyncThunk(
-    "GET_ACCOUNT_SEGMENT",
-    async (_, thunkAPI) => {
+export const getAccountGroupType = createAsyncThunk(
+    "GET_ACCOUNT_GROUP_TYPE",
+    async ({ id }, thunkAPI) => {
         try {
-            const url = '/v1/dbs/api/pre-requisite-template/list-account-segment';
+            const url = `/v1/dbs/api/pre-requisite-template/list-account-group-type/${id}`;
             const response = await accountManagementService.getDetail(url);
             return response.data;
         } catch (error) {

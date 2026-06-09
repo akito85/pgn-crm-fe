@@ -1,13 +1,17 @@
-import { Fragment, useState, useEffect, useRef, useCallback } from "react";
-import { useDispatch } from "react-redux";
+import { Fragment, useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 
-import { Button, Popconfirm, Tooltip } from "antd";
+import { Button, Checkbox, Popconfirm, Tooltip } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 
 import {
-  getSrPrerequisites,
+  getServiceRequestPreRequisites,
   deleteSrPrerequisite,
+  getSrPrerequisiteTemplate,
+  saveCreateSrFormData,
+  saveCreateSrAttachments,
+  removeCreateSrPrerequisite,
 } from "../../../../../../../../../redux/slices/account_management/detailAccount/ServiceRequestSlice";
 import ButtonComponent from "../../../../../../../../../components/ButtonComponent";
 import NxTable from "../../../../../../../../../components/Nx/NxTable";
@@ -23,25 +27,56 @@ export default function PreRequisiteForm({
   customer,
   dropdowns,
   currentStep,
+  attachments = [],
 }) {
   const dispatch = useDispatch();
+  const { create_sr } = useSelector((state) => state.serviceRequest);
   const [isOpen, setIsOpen] = useState(false);
   const [selectedPrerequisite, setSelectedPrerequisite] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
 
-  const srId = location?.state?.id;
+  const serviceRequestId = location?.state?.id;
   const accountId = account?.accountInformation?.accountId;
-  const isCreateFlow = !srId; // TRUE = SR baru, belum punya ID
+  const isCreateFlow = !serviceRequestId; // TRUE = SR baru, belum punya ID
 
   const PAGE_SIZE = 10;
-  // Remote data (UPDATE flow: srId ada)
+  // Remote data (UPDATE flow: serviceRequestId ada)
   const [prereqData, setPrereqData] = useState([]);
   const [prereqPage, setPrereqPage] = useState(1);
   const [prereqHasMore, setPrereqHasMore] = useState(false);
   const [prereqLoading, setPrereqLoading] = useState(false);
   const loadingRef = useRef(false);
   const newPrerequisiteProcessed = useRef(false);
+  const [page, setPage] = useState(0);
+  const [loadMoreSize] = useState(20);
+  const [sort, setSort] = useState("");
+  const [search, setSearch] = useState({});
+  const [filters, setFilters] = useState([]);
+  const [filterRules, setFilterRules] = useState([]);
+
+  const {
+    loading_prerequisiteTemplate,
+    list_prerequisiteTemplate,
+    pagination_prerequisiteTemplate,
+  } = useSelector((state) => state.serviceRequest);
+
+  useEffect(() => {
+    const body = {
+      srTypeId: form?.getFieldValue("type"),
+      srCategoryId: form?.getFieldValue("category"),
+      srSubCategoryId: form?.getFieldValue("subCategory"),
+      page: 0,
+      size: loadMoreSize,
+      sort,
+      filters,
+      filterRules,
+      searchs: search,
+    };
+    setPage(0);
+    const promise = dispatch(getSrPrerequisiteTemplate({ accountId, body, isLoadMore: false }));
+    return () => { promise.abort(); };
+  }, [sort, search, filters, filterRules]);
 
   // Local data (CREATE flow: belum ada srId, simpan di form field)
   const [localPrereqs, setLocalPrereqs] = useState(() =>
@@ -80,9 +115,9 @@ export default function PreRequisiteForm({
 
   const fetchPage = useCallback(
     async (page) => {
-      if (!accountId || !srId) return;
+      if (!accountId || !serviceRequestId) return;
       const result = await dispatch(
-        getSrPrerequisites({ accountId, srId, page, size: PAGE_SIZE }),
+        getServiceRequestPreRequisites({ accountId, serviceRequestId }),
       ).unwrap();
 
       const payload = result?.data ?? result;
@@ -92,11 +127,11 @@ export default function PreRequisiteForm({
 
       return { items: mapItems(content, page), hasMore };
     },
-    [dispatch, accountId, srId, mapItems],
+    [dispatch, accountId, serviceRequestId, mapItems],
   );
 
   const loadFirst = useCallback(() => {
-    if (!accountId || !srId) return;
+    if (!accountId || !serviceRequestId) return;
     setPrereqData([]);
     setPrereqPage(1);
     setPrereqHasMore(false);
@@ -109,44 +144,11 @@ export default function PreRequisiteForm({
       })
       .catch(() => {})
       .finally(() => setPrereqLoading(false));
-  }, [fetchPage, accountId, srId]);
+  }, [fetchPage, accountId, serviceRequestId]);
 
   useEffect(() => {
     loadFirst();
   }, [loadFirst]);
-
-  // Tangkap prerequisite baru dari Create page (CREATE flow)
-  // Ref guard untuk React StrictMode double-mount; window.history.replaceState
-  // untuk mencegah duplikat saat komponen unmount+remount (user pindah step lalu kembali)
-  useEffect(() => {
-    const newPrerequisite = location?.state?.newPrerequisite;
-    if (newPrerequisite && isCreateFlow && !newPrerequisiteProcessed.current) {
-      newPrerequisiteProcessed.current = true;
-
-      // Hapus newPrerequisite dari history state agar tidak diproses ulang saat remount
-      window.history.replaceState(
-        { ...window.history.state, usr: { ...location.state, newPrerequisite: undefined } },
-        "",
-      );
-
-      const mapped = {
-        ...newPrerequisite,
-        key: `local-${Date.now()}`,
-        type: getPrerequisiteLabel(newPrerequisite.prerequisiteId),
-        name: newPrerequisite.prerequisiteName || getPrerequisiteLabel(newPrerequisite.prerequisiteId),
-        description: newPrerequisite.prerequisiteComments || "-",
-        status: "-",
-        dueDateLabel: "-",
-        completedDateLabel: "-",
-        assignedToLabel: "-",
-      };
-      setLocalPrereqs((prev) => {
-        const updated = [...prev, mapped];
-        form?.setFieldsValue({ srFormPreRequisites: updated });
-        return updated;
-      });
-    }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleLoadMore = useCallback(() => {
     if (loadingRef.current || !prereqHasMore) return Promise.resolve();
@@ -167,32 +169,87 @@ export default function PreRequisiteForm({
   const handleDelete = useCallback(
     async (record) => {
       if (isCreateFlow) {
-        setLocalPrereqs((prev) => {
-          const updated = prev.filter((item) => item.key !== record.key);
-          form?.setFieldsValue({ srFormPreRequisites: updated });
-          return updated;
-        });
+        dispatch(removeCreateSrPrerequisite(record.key));
         return;
       }
       await dispatch(
-        deleteSrPrerequisite({ accountId, srId, id: record.id }),
+        deleteSrPrerequisite({ accountId, serviceRequestId, id: record.id }),
       );
       loadFirst();
     },
-    [dispatch, accountId, srId, isCreateFlow, form, loadFirst],
+    [dispatch, accountId, serviceRequestId, isCreateFlow, loadFirst],
+  );
+
+  // Track which template rows the user has checked
+  const [selectedTemplateKeys, setSelectedTemplateKeys] = useState(new Set());
+
+  // Inject `selected` flag into the template data so the table reflects check state
+  const templateDisplayData = useMemo(() => {
+    const items = list_prerequisiteTemplate || [];
+    return items.map((item) => {
+      const key = item.key ?? item.id ?? `tmpl-${item.prerequisiteId}`;
+      return { ...item, key, selected: selectedTemplateKeys.has(key) };
+    });
+  }, [list_prerequisiteTemplate, selectedTemplateKeys]);
+
+  const allSelected = templateDisplayData.length > 0 && templateDisplayData.every((item) => item.selected);
+  const someSelected = templateDisplayData.some((item) => item.selected) && !allSelected;
+
+  const handleSelectAll = useCallback(
+    (checked) => {
+      const nextKeys = checked ? new Set(templateDisplayData.map((item) => item.key)) : new Set();
+      setSelectedTemplateKeys(nextKeys);
+      const selected = checked ? templateDisplayData : [];
+      form?.setFieldsValue({ srFormSelectedPreRequisites: selected });
+    },
+    [templateDisplayData, form],
+  );
+
+  const handleSelectOne = useCallback(
+    (record, checked) => {
+      setSelectedTemplateKeys((prev) => {
+        const next = new Set(prev);
+        if (checked) next.add(record.key);
+        else next.delete(record.key);
+        const selected = templateDisplayData.filter((item) => next.has(item.key));
+        form?.setFieldsValue({ srFormSelectedPreRequisites: selected });
+        return next;
+      });
+    },
+    [templateDisplayData, form],
   );
 
   const columnMain = [
     {
+      title: (
+        <Checkbox
+          checked={allSelected}
+          indeterminate={someSelected}
+          onChange={(e) => handleSelectAll(e.target.checked)}
+        />
+      ),
+      dataIndex: "select",
+      key: "select",
+      width: 50,
+      align: "center",
+      render: (_, record) => (
+        <Checkbox
+          checked={record.selected || false}
+          onChange={(e) => handleSelectOne(record, e.target.checked)}
+        />
+      ),
+    },
+    {
       title: "NO",
       dataIndex: "no",
       key: "no",
+      align: "center",
       render: (_, __, index) => index + 1,
     },
     {
       title: "TYPE",
-      dataIndex: "type",
-      key: "type",
+      dataIndex: "typeName",
+      key: "typeName",
     },
     {
       title: "PREREQUISITE NAME",
@@ -207,26 +264,26 @@ export default function PreRequisiteForm({
       dataIndex: "description",
       key: "description",
     },
-    {
-      title: "STATUS",
-      dataIndex: "status",
-      key: "status",
-    },
-    {
-      title: "DUE DATE",
-      dataIndex: "dueDateLabel",
-      key: "dueDate",
-    },
-    {
-      title: "COMPLETED DATE",
-      dataIndex: "completedDateLabel",
-      key: "completedDate",
-    },
-    {
-      title: "ASSIGNED TO",
-      dataIndex: "assignedToLabel",
-      key: "assignedTo",
-    },
+    // {
+    //   title: "STATUS",
+    //   dataIndex: "status",
+    //   key: "status",
+    // },
+    // {
+    //   title: "DUE DATE",
+    //   dataIndex: "dueDateLabel",
+    //   key: "dueDate",
+    // },
+    // {
+    //   title: "COMPLETED DATE",
+    //   dataIndex: "completedDateLabel",
+    //   key: "completedDate",
+    // },
+    // {
+    //   title: "ASSIGNED TO",
+    //   dataIndex: "assignedToLabel",
+    //   key: "assignedTo",
+    // },
     {
       title: "ACTIONS",
       key: "actions",
@@ -271,10 +328,8 @@ export default function PreRequisiteForm({
         : currentFormData?.requestDate,
     };
 
-    // Simpan ke sessionStorage agar tidak hilang saat halaman remount
-    try {
-      sessionStorage.setItem("srWizardFormData", JSON.stringify(serializedData));
-    } catch (_) {}
+    dispatch(saveCreateSrFormData(serializedData));
+    dispatch(saveCreateSrAttachments(attachments));
 
     const basePath = location?.pathname?.includes("account-standard")
       ? "/account-management/account-standard"
@@ -285,8 +340,9 @@ export default function PreRequisiteForm({
         account,
         customer,
         serviceRequestData: serializedData,
-        srId,
+        srId: serviceRequestId,
         accountId,
+        type: location?.state?.type,
         fromWizard: true,
         returnPath: location?.pathname,
         returnToStep: currentStep ?? 2,
@@ -318,7 +374,7 @@ export default function PreRequisiteForm({
             onLoadMore={handleLoadMore}
             hasMore={isCreateFlow ? false : prereqHasMore}
             useSelect={true}
-            dataMain={isCreateFlow ? localPrereqs : prereqData}
+            dataSource={isCreateFlow ? (create_sr?.prerequisites ?? []) : prereqData}
             columnMain={columnMain}
             fontSize={"medium"}
             loading={isCreateFlow ? false : prereqLoading}

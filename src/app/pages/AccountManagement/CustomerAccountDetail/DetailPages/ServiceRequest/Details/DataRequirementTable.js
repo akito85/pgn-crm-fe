@@ -2,12 +2,12 @@ import { useState, useMemo, useRef, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import NxTable from "../../../../../../../components/Nx/NxTable";
 import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
-import { getServiceRequestPreRequisites } from "../../../../../../../redux/slices/account_management/detailAccount/ServiceRequestSlice";
-import { getPreRequisiteColumns } from "./getPreRequisiteColumns";
+import { getSrDataRequirements } from "../../../../../../../redux/slices/account_management/detailAccount/ServiceRequestSlice";
+import { getDataRequirementColumns } from "./getDataRequirementColumns";
 
-const CustomerServiceRequestPreRequisite = ({ id, idAccount }) => {
+const DataRequirementTable = ({ serviceRequestId, accountId }) => {
   const dispatch = useDispatch();
-  const { list_srPrerequisites, pagination_listSrPrerequisites, loading_listSrPrerequisites } =
+  const { list_srDataRequirements, pagination_listSrDataRequirements, loading_listSrDataRequirements } =
     useSelector((state) => state.serviceRequest);
 
   const searchInput = useRef(null);
@@ -20,8 +20,8 @@ const CustomerServiceRequestPreRequisite = ({ id, idAccount }) => {
   const [filters, setFilters] = useState([]);
   const [filterRules, setFilterRules] = useState([]);
 
-  const totalElement = pagination_listSrPrerequisites?.totalElement || 0;
-  const hasMore = list_srPrerequisites.length < totalElement;
+  const totalElement = pagination_listSrDataRequirements?.totalElement || 0;
+  const hasMore = list_srDataRequirements.length < totalElement;
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -42,30 +42,30 @@ const CustomerServiceRequestPreRequisite = ({ id, idAccount }) => {
 
   const handleLoadMore = async () => {
     const nextPage = page + 1;
-    if (nextPage <= (pagination_listSrPrerequisites?.totalPage || 0)) {
+    if (nextPage <= (pagination_listSrDataRequirements?.totalPage || 0)) {
       const body = { page: nextPage, size: loadMoreSize, sort, searchs: search, filters, filterRules };
-      await dispatch(getServiceRequestPreRequisites({ accountId: idAccount, serviceRequestId: id, body, isLoadMore: true })).unwrap();
+      await dispatch(getSrDataRequirements({ accountId, serviceRequestId, body, isLoadMore: true })).unwrap();
     }
     setPage(nextPage);
   };
 
   useEffect(() => {
-    if (!id) return;
+    if (!serviceRequestId) return;
     const body = { page: 0, size: loadMoreSize, sort, searchs: search, filters, filterRules };
     setPage(0);
-    dispatch(getServiceRequestPreRequisites({ accountId: idAccount, serviceRequestId: id, body, isLoadMore: false }));
-  }, [sort, search, filters, filterRules, id]);
+    dispatch(getSrDataRequirements({ accountId, serviceRequestId, body, isLoadMore: false }));
+  }, [sort, search, filters, filterRules, serviceRequestId]);
 
   const columns = useMemo(
-    () => getPreRequisiteColumns({ search, searchInput, searchedColumn, searchText, handleSearch }),
+    () => getDataRequirementColumns({ search, searchInput, searchedColumn, searchText, handleSearch }),
     [search, searchInput, searchText, searchedColumn]
   );
 
   return (
-    <NxBaseContainer border>
+    <NxBaseContainer header="DATA REQUIREMENT" border>
       <NxTable
-        idTable="sr-prerequisite-table"
-        dataSource={list_srPrerequisites}
+        idTable="data-requirement-table"
+        dataSource={list_srDataRequirements}
         totalData={totalElement}
         current={page}
         columns={columns}
@@ -75,7 +75,7 @@ const CustomerServiceRequestPreRequisite = ({ id, idAccount }) => {
         hasMore={hasMore}
         onLoadMore={handleLoadMore}
         loadMoreThreshold={20}
-        loading={loading_listSrPrerequisites}
+        loading={loading_listSrDataRequirements}
         fontSize="small"
         tablePadding="small"
         tableScrolled={{ x: "max-content", y: 300 }}
@@ -84,4 +84,4 @@ const CustomerServiceRequestPreRequisite = ({ id, idAccount }) => {
   );
 };
 
-export default CustomerServiceRequestPreRequisite;
+export default DataRequirementTable;

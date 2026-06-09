@@ -32,22 +32,6 @@ const columnCriteria = (
             render: (_, __, index) => index + 1,
         },
         {
-            key: "accountTypeName",
-            title: "Account Type",
-            dataIndex: "accountTypeName",
-            width: 150,
-            sorter: (a, b) => sorterFunction("accountTypeName", a, b),
-            ...getColumnSearchPropsUseFilteredValueFE(
-                searchCriteria,
-                "accountTypeName",
-                searchInputCriteria,
-                searchedColumnCriteria,
-                searchTextCriteria,
-                handleSearchCriteria,
-                true
-            )
-        },
-        {
             key: "accountSegmentName",
             title: "Account Segment",
             dataIndex: "accountSegmentName",
@@ -56,6 +40,22 @@ const columnCriteria = (
             ...getColumnSearchPropsUseFilteredValueFE(
                 searchCriteria,
                 "accountSegmentName",
+                searchInputCriteria,
+                searchedColumnCriteria,
+                searchTextCriteria,
+                handleSearchCriteria,
+                true
+            )
+        },
+        {
+            key: "accountTypeName",
+            title: "Account Type",
+            dataIndex: "accountTypeName",
+            width: 150,
+            sorter: (a, b) => sorterFunction("accountTypeName", a, b),
+            ...getColumnSearchPropsUseFilteredValueFE(
+                searchCriteria,
+                "accountTypeName",
                 searchInputCriteria,
                 searchedColumnCriteria,
                 searchTextCriteria,

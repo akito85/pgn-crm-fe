@@ -66,7 +66,8 @@ import {
   getSrPrerequisiteTypes,
   getSrAttachmentCategories,
   createServiceRequest,
-  updateServiceRequest
+  updateServiceRequest,
+  resetCreateSr,
 } from "../../../../../../../redux/slices/account_management/detailAccount/ServiceRequestSlice";
 import { validateCreateUpdate } from "../../../../../../../redux/slices/general_slice";
 import accountManagementService from "../../../../../../../redux/services/account_management/accountManagementService";
@@ -74,13 +75,18 @@ import moment from "moment";
 import NxBreadCrumb from "../../../../../../../components/Nx/NxBreadCrumb";
 import NxCardContainer from "../../../../../../../components/Nx/NxCardContainer";
 
-const CreateCustomerServiceRequest = (props) => {
+const findName = (list, id) => {
+  const items = Array.isArray(list) ? list : list?.data || [];
+  const item = items.find((i) => (i.glbTypeValId || i.id) === id);
+  return item?.name || item?.glbTypeValName || null;
+};
+
+const CreateUpdateCustomerServiceRequest = ({ formType = "create" }) => {
   const location = useLocation();
 
   // Restore step from location state if returning from prerequisite create
   const [current, setCurrent] = useState(location?.state?.returnToStep || 0);
-  const { type } = props;
-  const isUpdate = type === "update";
+  const isUpdate = formType === "update";
 
   const dispatch = useDispatch();
 
@@ -112,7 +118,12 @@ const CreateCustomerServiceRequest = (props) => {
     list_srAttachmentCategories,
     detail_serviceRequest: serviceRequestDetail,
     detailDraft_serviceRequest: serviceRequestDetailDraft,
-    loading_createUpdateSr
+    loading_createUpdateSr,
+    loading_detailSr,
+    loading_detailDraftSr,
+    loading_listSrApprovalHierarchy,
+    loading_detailSrApprovalHierarchy,
+    create_sr,
   } = useSelector((state) => state.serviceRequest);
 
   // Map state keys to the dropdowns structure expected by child components
@@ -178,7 +189,6 @@ const CreateCustomerServiceRequest = (props) => {
   const [data, setData] = useState({});
   const [dataSend, setDataSend] = useState({});
   const [modalSuccess, setModalSuccess] = useState(false);
-  const [loadingForm, setLoadingForm] = useState(false);
   const [modalConfirm, setModalConfirm] = useState(false);
   const [confirmationType, setConfirmationType] = useState("submit");
   const [dataConfirm, setDataConfirm] = useState({});
@@ -201,7 +211,13 @@ const CreateCustomerServiceRequest = (props) => {
   const [attachmentDataSource, setAttachmentDataSource] = useState([]);
   const [deletedAttachments, setDeletedAttachments] = useState([]);
 
-  const isLoading = loading || loadingForm || loadingAccount;
+  const isLoading =
+    loading ||
+    loadingAccount ||
+    loading_detailSr ||
+    loading_detailDraftSr ||
+    loading_listSrApprovalHierarchy ||
+    loading_detailSrApprovalHierarchy;
 
   const { InformationForm, ContactForm, PreRequisiteForm } = StepContents;
 
@@ -224,7 +240,7 @@ const CreateCustomerServiceRequest = (props) => {
     },
     {
       path: "",
-      breadcrumbName: "Create"
+      breadcrumbName: isUpdate ? "Update Service Request" : "Create Service Request"
     }
   ];
   // Fetch Account Standard/OneTime Detail
@@ -294,7 +310,16 @@ const CreateCustomerServiceRequest = (props) => {
 
   // Populate form when update detail is loaded
   useEffect(() => {
-    if (!isUpdate) return;
+    if (
+      !isUpdate ||
+      !list_srApprovalHierarchy.length ||
+      !list_srTypes.length ||
+      !list_srCategories.length ||
+      !list_srSubcategories.length ||
+      !list_srPriorities.length ||
+      !list_srChannels.length ||
+      !list_srSources.length
+    ) return;
 
     const status = serviceRequestDetail?.status || "";
     const statusApproval = serviceRequestDetail?.statusApproval || "";
@@ -310,26 +335,83 @@ const CreateCustomerServiceRequest = (props) => {
 
     if (!detail) return;
 
+    const typeId   = detail.requestType     || detail.type;
+    const catId    = detail.requestCategory || detail.category;
+    const subCatId = detail.requestSubCategory || detail.subCategory;
+
     formCreate.setFieldsValue({
-      type: detail.requestType || detail.type,
-      category: detail.requestCategory || detail.category,
-      subCategory: detail.requestSubCategory || detail.subCategory,
-      priority: detail.priority,
-      description: detail.description,
-      requestDate: detail.requestedDate ? moment(detail.requestedDate) : null,
+      type:                    typeId,
+      category:                catId,
+      subCategory:             subCatId,
+      priority:                detail.priority,
+      description:             detail.description,
+      requestDate:             detail.requestDate ? moment(detail.requestDate) : null,
       serviceRequestReference: detail.reference,
-      appHierId: detail.apphierId,
-      channel: detail.channel,
-      requestSource: detail.source
+      appHierId:               detail.apphierId,
+      channel:                 detail.channel,
+      requestSource:           detail.source,
+      typeName:                findName(list_srTypes,        typeId),
+      categoryName:            findName(list_srCategories,   catId),
+      subCategoryName:         findName(list_srSubcategories, subCatId),
+      priorityName:            findName(list_srPriorities,   detail.priority),
+      channelName:             findName(list_srChannels,     detail.channel),
+      requestSourceName:       findName(list_srSources,      detail.source),
     });
 
-    if (detail.apphierId) {
-      dispatch(getSrApprovalHierarchy(detail.apphierId));
+    const appHierOption = list_srApprovalHierarchy.find(
+      (option) => option.appHierId === detail.apphierId
+    );
+    if (appHierOption) {
+      handleSelectHierarchy(detail.apphierId, appHierOption.approvalName);
+    }
+  }, [ // eslint-disable-line react-hooks/exhaustive-deps
+    isUpdate,
+    serviceRequestDetail,
+    serviceRequestDetailDraft,
+    list_srApprovalHierarchy,
+    list_srTypes,
+    list_srCategories,
+    list_srSubcategories,
+    list_srPriorities,
+    list_srChannels,
+    list_srSources,
+  ]);
+
+  // Populate attachments from loaded detail in UPDATE mode (Gap 3)
+  useEffect(() => {
+    if (!isUpdate) return;
+    const detail = serviceRequestDetail || serviceRequestDetailDraft;
+    if (detail?.attachments?.length) {
+      setAttachmentDataSource(
+        detail.attachments.map((att) => ({ ...att, key: att.id }))
+      );
+    }
+  }, [isUpdate, serviceRequestDetail, serviceRequestDetailDraft]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Populate attachments from loaded detail in UPDATE mode (Gap 3)
+  useEffect(() => {
+    if (!isUpdate) return;
+    const detail = serviceRequestDetail || serviceRequestDetailDraft;
+    if (detail?.attachments?.length) {
+      setAttachmentDataSource(
+        detail.attachments.map((att) => ({ ...att, key: att.id }))
+      );
+    }
+  }, [isUpdate, serviceRequestDetail, serviceRequestDetailDraft]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Populate attachments from loaded detail in UPDATE mode (Gap 3)
+  useEffect(() => {
+    if (!isUpdate) return;
+    const detail = serviceRequestDetail || serviceRequestDetailDraft;
+    if (detail?.attachments?.length) {
+      setAttachmentDataSource(
+        detail.attachments.map((att) => ({ ...att, key: att.id }))
+      );
     }
   }, [isUpdate, serviceRequestDetail, serviceRequestDetailDraft]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSelectHierarchy = (value, label) => {
-    formCreate.setFieldsValue({ appHierId: value, appHierName: label });
+    formCreate.setFieldValue("appHierName", label);
     if (value) dispatch(getSrApprovalHierarchy(value));
   };
 
@@ -348,7 +430,6 @@ const CreateCustomerServiceRequest = (props) => {
       middleName: (temp[1] || "").toUpperCase(),
       lastName: (temp[2] || "").toUpperCase(),
       customerName: (e?.customerName || "").toUpperCase(),
-      description: e?.description
     });
     setFirstName((temp[0] || "").toUpperCase());
     setMiddleName((temp[1] || "").toUpperCase());
@@ -386,20 +467,17 @@ const CreateCustomerServiceRequest = (props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
 
-  // Restore wizard form data from sessionStorage when returning from prerequisite create page
+  // Restore wizard state from Redux when returning from prerequisite create page
   useEffect(() => {
     if (location?.state?.returnToStep !== undefined) {
-      try {
-        const saved = sessionStorage.getItem("srWizardFormData");
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          if (parsed.requestDate) {
-            parsed.requestDate = moment(parsed.requestDate);
-          }
-          formCreate.setFieldsValue(parsed);
-          sessionStorage.removeItem("srWizardFormData");
-        }
-      } catch (_) {}
+      if (create_sr?.formData) {
+        const { srFormPreRequisites, ...rest } = create_sr.formData;
+        if (rest.requestDate) rest.requestDate = moment(rest.requestDate);
+        formCreate.setFieldsValue(rest);
+      }
+      if (create_sr?.attachments?.length) {
+        setAttachmentDataSource(create_sr.attachments);
+      }
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -494,6 +572,7 @@ const CreateCustomerServiceRequest = (props) => {
           customer={data_customerDetail}
           dropdowns={dropdowns}
           currentStep={current}
+          attachments={attachmentDataSource}
         />
       ),
       disabled: false
@@ -510,6 +589,8 @@ const CreateCustomerServiceRequest = (props) => {
               options={list_srApprovalHierarchy}
               hierarchyDetails={detail_srApprovalHierarchy}
               handleSelectHierarchy={handleSelectHierarchy}
+              loading={loading_listSrApprovalHierarchy}
+              tableLoading={loading_detailSrApprovalHierarchy}
             />
           </NxBaseContainer>
         </NxCardContainer>
@@ -602,7 +683,7 @@ const CreateCustomerServiceRequest = (props) => {
         : null,
       priority: values.priority ? parseInt(values.priority) : null,
       description: values.description || null,
-      requestedDate: NxDate.formatForAPI(values.requestDate),
+      requestDate: NxDate.formatForAPI(values.requestDate),
       reference: values.serviceRequestReference || null,
       apphierId: values.appHierId ? parseInt(values.appHierId) : null,
       channel: values.channel ? parseInt(values.channel) : null,
@@ -618,22 +699,13 @@ const CreateCustomerServiceRequest = (props) => {
         requirementValue: dr.value || null,
         requirementDesc: null
       })),
-      prerequisites: (values.srFormPreRequisites || []).map((pr) => ({
-        prerequisiteId: pr.prerequisiteId,
-        prerequisiteName: pr.prerequisiteName,
-        prerequisiteComments: pr.prerequisiteComments || null,
-        ...(pr.prerequisiteStatus && {
-          prerequisiteStatus: pr.prerequisiteStatus
-        }),
-        ...(pr.prerequisiteValue && {
-          prerequisiteValue: pr.prerequisiteValue
-        }),
-        ...(pr.prerequisiteDueDate && {
-          prerequisiteDueDate: pr.prerequisiteDueDate
-        }),
-        ...(pr.prerequisiteAssignedTo && {
-          prerequisiteAssignedTo: pr.prerequisiteAssignedTo
-        })
+      prerequisites: [
+        ...(values.srFormPreRequisites || []),
+        ...(values.srFormSelectedPreRequisites || []),
+      ].map((pr) => ({
+        prerequisiteType: typeof pr.type === 'number' ? pr.type : (pr.prerequisiteId ?? null),
+        prerequisiteName: pr.name || pr.prerequisiteName || null,
+        prerequisiteDesc: pr.description || pr.prerequisiteComments || null,
       }))
     };
   };
@@ -658,7 +730,7 @@ const CreateCustomerServiceRequest = (props) => {
         body: payload,
         services: accountManagementService,
         endPoint: `/v1/dbs/api/accounts/${idAccount}/servicerequests/validate-step`,
-        type: "create"
+        type: formType
       })
     ).unwrap();
   };
@@ -699,8 +771,8 @@ const CreateCustomerServiceRequest = (props) => {
           validateCreateUpdate({
             body: payload,
             services: accountManagementService,
-            endPoint: `/v1/dbs/api/accounts/${idAccount}/servicerequests/validate-create`,
-            type: "create"
+            endPoint: `/v1/dbs/api/accounts/${idAccount}/servicerequests/validate-${formType}`,
+            type: formType
           })
         ).unwrap();
 
@@ -713,47 +785,52 @@ const CreateCustomerServiceRequest = (props) => {
     }
   };
 
-  const handleConfirmSubmit = async () => {
-    setModalConfirm(false);
-    setLoadingForm(true);
+  const handleConfirmSubmit = () => {
     const newAttachments = attachmentDataSource.filter(
       (a) => a.dataType === "new"
     );
-    try {
-      if (isUpdate && id) {
-        await dispatch(
-          updateServiceRequest({
-            accountId: idAccount,
-            id,
-            body: { ...dataSend, serviceRequestId: id },
-            attachments: newAttachments,
-            action: confirmationType.toUpperCase(),
-            successBodyExtra: { return: false }
-          })
-        ).unwrap();
-      } else {
-        await dispatch(
-          createServiceRequest({
-            accountId: idAccount,
-            body: dataSend,
-            attachments: newAttachments,
-            action: confirmationType.toUpperCase(),
-            successBodyExtra: { return: false }
-          })
-        ).unwrap();
-      }
-      navigate(ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD, {
-        state: {
-          idAccount,
-          idCustomer,
-          type: accountType,
-          section: "Service Request"
-        }
-      });
-    } catch (error) {
-      // thunk sudah dispatch showModalError
-    } finally {
-      setLoadingForm(false);
+
+    const onSuccess = () => {
+      setTimeout(() => {
+        dispatch(resetCreateSr());
+        navigate(ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD, {
+          state: {
+            idAccount,
+            idCustomer,
+            type: accountType,
+            section: "Service Request"
+          }
+        });
+      }, 2000);
+    };
+
+    if (isUpdate && id) {
+      dispatch(
+        updateServiceRequest({
+          accountId: idAccount,
+          id,
+          body: { ...dataSend, serviceRequestId: id },
+          attachments: newAttachments,
+          action: confirmationType.toUpperCase(),
+          successBodyExtra: { return: false }
+        })
+      )
+        .unwrap()
+        .then(onSuccess)
+        .catch(() => {});
+    } else {
+      dispatch(
+        createServiceRequest({
+          accountId: idAccount,
+          body: dataSend,
+          attachments: newAttachments,
+          action: confirmationType.toUpperCase(),
+          successBodyExtra: { return: false }
+        })
+      )
+        .unwrap()
+        .then(onSuccess)
+        .catch(() => {});
     }
   };
 
@@ -784,26 +861,64 @@ const CreateCustomerServiceRequest = (props) => {
         srFormLongitude: premiseAddress?.longitude || ""
       });
     }
+
+    if (isUpdate) {
+      const status = serviceRequestDetail?.status || "";
+      const statusApproval = serviceRequestDetail?.statusApproval || "";
+      const isActiveClear = status.toUpperCase() === "ACTIVE";
+      const isDraftApprovalClear = statusApproval.toUpperCase() === "DRAFT";
+      const isRejectApprovalClear = statusApproval.toUpperCase() === "REJECT";
+
+      const detail =
+        isActiveClear && (isDraftApprovalClear || isRejectApprovalClear)
+          ? serviceRequestDetailDraft
+          : serviceRequestDetail;
+
+      if (detail) {
+        if (detail.apphierId && list_srApprovalHierarchy.length) {
+          formCreate.setFieldsValue({ appHierId: detail.apphierId });
+          const appHierOption = list_srApprovalHierarchy.find(
+            (option) => option.appHierId === detail.apphierId
+          );
+          if (appHierOption) {
+            handleSelectHierarchy(detail.apphierId, appHierOption.approvalName);
+          }
+        }
+
+        // Restore name fields from loaded lists
+        formCreate.setFieldsValue({
+          typeName:          findName(list_srTypes,         detail.requestType        || detail.type),
+          categoryName:      findName(list_srCategories,    detail.requestCategory    || detail.category),
+          subCategoryName:   findName(list_srSubcategories, detail.requestSubCategory || detail.subCategory),
+          priorityName:      findName(list_srPriorities,    detail.priority),
+          channelName:       findName(list_srChannels,      detail.channel),
+          requestSourceName: findName(list_srSources,       detail.source),
+        });
+      }
+
+      if (detail?.attachments?.length) {
+        setAttachmentDataSource(
+          detail.attachments.map((att) => ({ ...att, key: att.id }))
+        );
+      }
+    } else {
+      setAttachmentDataSource([]);
+      formCreate.setFieldsValue({
+        typeName: null,
+        categoryName: null,
+        subCategoryName: null,
+        channelName: null,
+        priorityName: null,
+        requestSourceName: null,
+      });
+    }
   };
 
   return (
     <>
-      <Spin spinning={isLoading}>
-        <Form
-          id="accountForm"
-          form={formCreate}
-          layout={"vertical"}
-          preserve={true}
-          onFinish={() => {
-            if (current === steps.length - 1) {
-              handleOpenConfirmation("submit");
-            }
-          }}
-          scrollToFirstError={true}
-          className="flex flex-col gap-y-4"
-        >
-          <NxBreadCrumb routes={routes} />
-          <HeaderDetail
+      <div className="flex flex-col gap-y-4">
+        <NxBreadCrumb routes={routes} />
+        <HeaderDetail
             data_header={["CUSTOMER INFORMATION", "ACCOUNT INFORMATION"]}
             dispatch={dispatch}
             idAccount={idAccount}
@@ -811,67 +926,80 @@ const CreateCustomerServiceRequest = (props) => {
             type={accountType}
             collapsible={true}
           />
+          <Spin spinning={isLoading}>
+            <Form
+              id="accountForm"
+              form={formCreate}
+              layout={"vertical"}
+              preserve={true}
+              onFinish={() => {
+                if (current === steps.length - 1) {
+                  handleOpenConfirmation("submit");
+                }
+              }}
+              scrollToFirstError={true}
+              className="flex flex-col gap-y-4"
+            >
+              <NxFormStepper
+                steps={steps}
+                current={current}
+                onPrev={prev}
+                onNext={handleButtonNext}
+              />
 
-          <NxFormStepper
-            steps={steps}
-            current={current}
-            onPrev={prev}
-            onNext={handleButtonNext}
-          />
+              <div className="steps-content flex flex-col gap-y-4">{steps[current].content}</div>
 
-          <div className="steps-content flex flex-col gap-y-4">{steps[current].content}</div>
-
-          {/* Section Action Steps */}
-          <NxBaseContainer border>
-            <div className="flex justify-between">
-              <Button
-                type={"menu"}
-                onClick={() => {
-                  setModalBack(true);
-                }}
-              >
-                Cancel
-              </Button>
-              <div className="flex w-full justify-end gap-x-2">
-                <Button
-                  onClick={handleClear}
-                  type={"reject"}
-                  icon={<SVGIcon name="IconButtonClear" width={14} />}
-                >
-                  {isUpdate ? "Reset" : "Clear"}
-                </Button>
-                <Button
-                  onClick={() => handleOpenConfirmation("draft")}
-                  type={"secondary"}
-                >
-                  Save as Draft
-                </Button>
-                <Button onClick={prev} type={"menu"} disabled={current < 1}>
-                  Previous
-                </Button>
-                {current < steps.length - 1 && (
+              {/* Section Action Steps */}
+              <NxBaseContainer border>
+                <div className="flex justify-between">
                   <Button
-                    onClick={handleButtonNext}
-                    type={"submit"}
-                    disabled={steps[current].disabled}
+                    type={"menu"}
+                    onClick={() => {
+                      setModalBack(true);
+                    }}
                   >
-                    Next
+                    Cancel
                   </Button>
-                )}
-                {current === steps.length - 1 && (
-                  <Button
-                    onClick={() => handleOpenConfirmation("submit")}
-                    type={"submit"}
-                    loading={loadingForm}
-                  >
-                    Save & Submit
-                  </Button>
-                )}
-              </div>
-            </div>
-          </NxBaseContainer>
-        </Form>
-      </Spin>
+                  <div className="flex w-full justify-end gap-x-2">
+                    <Button
+                      onClick={handleClear}
+                      type={"reject"}
+                      icon={<SVGIcon name="IconButtonClear" width={14} />}
+                    >
+                      {isUpdate ? "Reset" : "Clear"}
+                    </Button>
+                    <Button
+                      onClick={() => handleOpenConfirmation("draft")}
+                      type={"secondary"}
+                    >
+                      Save as Draft
+                    </Button>
+                    <Button onClick={prev} type={"menu"} disabled={current < 1}>
+                      Previous
+                    </Button>
+                    {current < steps.length - 1 && (
+                      <Button
+                        onClick={handleButtonNext}
+                        type={"submit"}
+                        disabled={steps[current].disabled}
+                      >
+                        Next
+                      </Button>
+                    )}
+                    {current === steps.length - 1 && (
+                      <Button
+                        onClick={() => handleOpenConfirmation("submit")}
+                        type={"submit"}
+                      >
+                        Save & Submit
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </NxBaseContainer>
+            </Form>
+          </Spin>
+        </div>
 
       {/* Confirmation Modal */}
       <ConfirmationModal
@@ -882,15 +1010,21 @@ const CreateCustomerServiceRequest = (props) => {
         dropdowns={dropdowns}
         approvalTableData={detail_srApprovalHierarchy}
         attachmentsData={attachmentDataSource}
+        prerequisites={create_sr?.prerequisites || []}
         type={confirmationType}
-        loading={loadingForm}
+        loading={loading_createUpdateSr}
+        service={accountManagementService}
+        configApplication={configApp.ACCOUNT_SERVICE}
       />
 
       {/* Modal Back */}
       <ModalConfirm
         isOpen={modalBack}
         handleCancel={() => setModalBack(false)}
-        handleOk={() => navigate(-1)}
+        handleOk={() => {
+          dispatch(resetCreateSr());
+          navigate(-1);
+        }}
         width={400}
       >
         <div className="flex justify-center mt-5 gap-[20px]">
@@ -917,4 +1051,4 @@ const CreateCustomerServiceRequest = (props) => {
   );
 };
 
-export default CreateCustomerServiceRequest;
+export default CreateUpdateCustomerServiceRequest;
