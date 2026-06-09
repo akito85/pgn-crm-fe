@@ -14,6 +14,7 @@ import {
   resetDataRequirementTemplate,
 } from "../../../../../../../../../redux/slices/system_setup/dataRequirementTemplate";
 import { getSrDataRequirementValues } from "../../../../../../../../../redux/slices/account_management/detailAccount/ServiceRequestSlice";
+import { getDropdownItems as getItems } from "./srFormUtils";
 
 export default function InfoDataRequirement({ form, dropdowns, idAccount, isUpdate = false }) {
   const dispatch = useDispatch();
@@ -36,13 +37,7 @@ export default function InfoDataRequirement({ form, dropdowns, idAccount, isUpda
   const category = Form.useWatch("category", form);
   const subCategory = Form.useWatch("subCategory", form);
 
-  const getDropdownItems = (dropdownKey) => {
-    const dropdown = dropdowns?.[dropdownKey];
-    if (!dropdown) return [];
-    if (Array.isArray(dropdown)) return dropdown;
-    if (Array.isArray(dropdown?.data)) return dropdown.data;
-    return [];
-  };
+  const getDropdownItems = (dropdownKey) => getItems(dropdowns, dropdownKey);
 
   // Sync local table state with form data on mount (persistence across step navigation)
   useEffect(() => {

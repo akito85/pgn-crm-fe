@@ -17,6 +17,7 @@ import NxDate from "../../../../../../../../../components/Nx/NxDatePicker";
 import { requiredMessage } from "../../../../../../../../../utils";
 import { getServiceRequests } from "../../../../../../../../../redux/slices/account_management/detailAccount/ServiceRequestSlice";
 import { getSrRefColumns } from "./getSrRefColumns";
+import { getDropdownItems as getItems } from "./srFormUtils";
 
 export default function InfoServiceRequest({
   account,
@@ -140,26 +141,15 @@ export default function InfoServiceRequest({
       ),
     [search, searchInput, searchedColumn, searchText]
   );
-  const columns = useMemo(() => [...columnDefinitions], [columnDefinitions]);
+  const columns = columnDefinitions;
 
   const totalElement = pagination?.totalElement || 0;
   const hasMore = srRefs.length < totalElement;
 
-  // Create safe accessor functions that handle both array and { data: [] } formats
-  const getDropdownItems = (dropdownKey) => {
-    const dropdown = dropdowns?.[dropdownKey];
-    if (!dropdown) return [];
-    if (Array.isArray(dropdown)) return dropdown;
-    if (Array.isArray(dropdown?.data)) return dropdown.data;
-    return [];
-  };
+  const getDropdownItems = (dropdownKey) => getItems(dropdowns, dropdownKey);
 
   const isDropdownLoaded = (dropdownKey) => {
     return getDropdownItems(dropdownKey).length > 0;
-  };
-
-  const handleCancel = () => {
-    setIsOpen(false);
   };
 
   const handleClose = () => {
@@ -400,7 +390,7 @@ export default function InfoServiceRequest({
 
       <NxModal
         isOpen={isOpen}
-        handleCancel={handleCancel}
+        handleCancel={handleClose}
         title={"CHOOSE SERVICE REQUEST REFERENCE"}
         width={1100}
         footer={[

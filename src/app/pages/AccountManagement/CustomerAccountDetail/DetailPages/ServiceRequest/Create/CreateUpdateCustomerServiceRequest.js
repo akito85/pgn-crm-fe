@@ -23,27 +23,19 @@ import ConfirmationModal from "./ConfirmationModal/ConfirmationModal";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
 
 import {
-  getCustomerAttachment,
   getCustomerDetail,
   getGlobalCustomerType,
   getGlobalIdentificationType,
   getGlobalMartialStatus,
   getGlobalSex,
-  getListCategoryFile,
-  updateCustomer
 } from "../../../../../../../redux/slices/account_management/Customer/customerAccount";
-
-import { getDetailContact } from "../../../../../../../redux/slices/account_management/MasterData/contact_slice";
 
 import {
   getListDetailAccountContact,
   getDetailAccountContact
 } from "../../../../../../../redux/slices/account_management/detailAccount/accountContactSlice";
 
-import {
-  getListDetailAccountAddress,
-  getListChooseAddress
-} from "../../../../../../../redux/slices/account_management/detailAccount/accountAddressSlice";
+import { getListDetailAccountAddress } from "../../../../../../../redux/slices/account_management/detailAccount/accountAddressSlice";
 
 import {
   getAccountStandardDetail,
@@ -51,7 +43,6 @@ import {
 } from "../../../../../../../redux/slices/account_management/accountManagement";
 
 import {
-  getSrById,
   getServiceRequest,
   getServiceRequestDraft,
   getSrApprovalHierarchies,
@@ -92,12 +83,7 @@ const CreateUpdateCustomerServiceRequest = ({ formType = "create" }) => {
   const dispatch = useDispatch();
 
   const {
-    data_customerDetailAttachment,
     data_customerDetail,
-    data_globalCustomerType,
-    data_globalIdentificationType,
-    data_globalSex,
-    data_globalMartialStatus,
     loading
   } = useSelector((state) => state.customerAccount);
 
@@ -133,8 +119,7 @@ const CreateUpdateCustomerServiceRequest = ({ formType = "create" }) => {
     (serviceRequestDetail?.statusApproval || "").toUpperCase() === "DRAFT" ||
     (serviceRequestDetail?.statusApproval || "").toUpperCase() === "REJECT";
 
-  // Map state keys to the dropdowns structure expected by child components
-  const dropdowns = {
+  const dropdowns = useMemo(() => ({
     serviceRequestTypes: list_srTypes,
     serviceRequestCategories: list_srCategories,
     serviceRequestSubcategories: list_srSubcategories,
@@ -142,22 +127,10 @@ const CreateUpdateCustomerServiceRequest = ({ formType = "create" }) => {
     serviceRequestChannels: list_srChannels,
     serviceRequestSources: list_srSources,
     serviceRequestPrerequisites: list_srPrerequisiteTypes,
-    serviceRequestDataRequirements: list_srDataRequirementTypes
-  };
+    serviceRequestDataRequirements: list_srDataRequirementTypes,
+  }), [list_srTypes, list_srCategories, list_srSubcategories, list_srPriorities, list_srChannels, list_srSources, list_srPrerequisiteTypes, list_srDataRequirementTypes]);
 
-  const { data_detail } = useSelector((state) => state.accountContact); // Add this selector
-
-  const {
-    data: data_account_address,
-    data_country,
-    data_province,
-    data_city,
-    data_district,
-    data_subdistrict,
-    data_postalcode,
-    data_type,
-    data_business_purpose
-  } = useSelector((state) => state.accountAddress);
+  const { data: data_account_address } = useSelector((state) => state.accountAddress);
 
   const { idAccount, idCustomer, accountType, id } = useMemo(() => {
     // Prioritas 1: Ambil dari location.state (navigasi normal)
@@ -186,35 +159,21 @@ const CreateUpdateCustomerServiceRequest = ({ formType = "create" }) => {
 
   //declare
   const [formCreate] = Form.useForm();
-  // const id = location?.state?.id;
-  // const idAccount = location?.state?.idAccount;
-  // const idCustomer = location?.state?.idCustomer;
-  // const accountType = location?.state?.type; // "standard" or "onetime"
 
   //state
-  const [dataAttachment, setDataAttachment] = useState([]);
   const [data, setData] = useState({});
   const [dataSend, setDataSend] = useState({});
-  const [modalSuccess, setModalSuccess] = useState(false);
   const [modalConfirm, setModalConfirm] = useState(false);
   const [confirmationType, setConfirmationType] = useState("submit");
-  const [dataConfirm, setDataConfirm] = useState({});
-  const [btnConfirm, setBtnConfirm] = useState(false);
   const [modalBack, setModalBack] = useState(false);
 
   const [modalError, setModalError] = useState(false);
   const [bodyError, setBodyError] = useState({});
 
-  const [customerType, setCustomerType] = useState(0);
-  const [identificationDdlValue, setIdentificationDdlValue] = useState([]);
   const [firstName, setFirstName] = useState("");
   const [middleName, setMiddleName] = useState("");
   const [lastName, setLastName] = useState("");
 
-  // Service Request step state objects (following StandardForm pattern)
-  const [srObj, setSrObj] = useState({}); // Service Request information
-  const [contactsData, setContactsData] = useState([]); // Contacts table
-  const [prerequisitesData, setPrerequisitesData] = useState([]); // Prerequisites table
   const [attachmentDataSource, setAttachmentDataSource] = useState([]);
   const [deletedAttachments, setDeletedAttachments] = useState([]);
 
@@ -264,7 +223,6 @@ const CreateUpdateCustomerServiceRequest = ({ formType = "create" }) => {
   useEffect(() => {
     if (idCustomer) {
       dispatch(getCustomerDetail(idCustomer));
-      // dispatch(getDetailContact(idCustomer));
     }
   }, [dispatch, idCustomer]);
 
@@ -288,7 +246,6 @@ const CreateUpdateCustomerServiceRequest = ({ formType = "create" }) => {
         pageSize: 999
       })
     );
-    // dispatch(getSrById(idAccount));
   }, [dispatch, idAccount]);
 
   useEffect(() => {
@@ -428,20 +385,9 @@ const CreateUpdateCustomerServiceRequest = ({ formType = "create" }) => {
 
   useEffect(() => {
     if (data_customerDetail) {
-      setCustomerType(data_customerDetail?.customerTypeId);
       handleSetData(data_customerDetail);
     }
   }, [data_customerDetail]);
-
-  useEffect(() => {
-    if (customerType === 58) {
-      setIdentificationDdlValue(
-        data_globalIdentificationType?.filter((item) => item?.id !== 1123)
-      );
-    } else {
-      setIdentificationDdlValue(data_globalIdentificationType);
-    }
-  }, [customerType, data_globalIdentificationType]);
 
   useEffect(() => {
     formCreate.setFieldsValue({
@@ -503,11 +449,6 @@ const CreateUpdateCustomerServiceRequest = ({ formType = "create" }) => {
   }, [
     data_account_address,
     data_accountDetail,
-    data_detail,
-    data_district,
-    data_subdistrict,
-    data_city,
-    data_country
   ]);
 
   const handleChangeName = (e, type) => {
@@ -525,8 +466,6 @@ const CreateUpdateCustomerServiceRequest = ({ formType = "create" }) => {
         break;
     }
   };
-
-  // const urlLink = (itemId) => `/v1/dbs/api/account-info/download-attachment/${itemId}`
 
   const steps = [
     {
@@ -632,22 +571,7 @@ const CreateUpdateCustomerServiceRequest = ({ formType = "create" }) => {
     []
   ];
 
-  // Field yang divalidasi FE saat Save as Draft — approval tidak required untuk draft
-  const stepFieldMapDraft = [
-    [
-      "category",
-      "priority",
-      "requestSource",
-      "type",
-      "subCategory",
-      "channel",
-      "requestDate"
-    ],
-    [],
-    [],
-    [], // appHierId tidak wajib untuk draft
-    []
-  ];
+  const stepFieldMapDraft = stepFieldMap.map((fields, i) => (i === 3 ? [] : fields));
 
   const stepValidationTypes = [
     "DATA",
@@ -862,14 +786,9 @@ const CreateUpdateCustomerServiceRequest = ({ formType = "create" }) => {
     }
 
     if (isUpdate) {
-      const status = serviceRequestDetail?.status || "";
-      const statusApproval = serviceRequestDetail?.statusApproval || "";
-      const isActiveClear = status.toUpperCase() === "ACTIVE";
-      const isDraftApprovalClear = statusApproval.toUpperCase() === "DRAFT";
-      const isRejectApprovalClear = statusApproval.toUpperCase() === "REJECT";
-
+      const isActive = (serviceRequestDetail?.status || "").toUpperCase() === "ACTIVE";
       const detail =
-        isActiveClear && (isDraftApprovalClear || isRejectApprovalClear)
+        isActive && isDraft
           ? serviceRequestDetailDraft
           : serviceRequestDetail;
 
