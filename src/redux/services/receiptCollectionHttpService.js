@@ -302,25 +302,7 @@ const deleteDataWithBody = async (url, body) => {
   });
   return response?.data;
 };
-const uploadAttachment = async (url, body, onProgress) => {
-  try {
-    const response = await axios.post(configApp.PAYMENT_SERVICE + url, body, {
-      headers: {
-        ...tokenHeader(),
-        "Content-Type": "multipart/form-data",
-      },
-      onUploadProgress: (progressEvent) => {
-        const percentCompleted = Math.round(
-          (progressEvent.loaded * 100) / progressEvent.total,
-        );
-        if (typeof onProgress === "function") onProgress(percentCompleted);
-      },
-    });
-    return response?.data;
-  } catch (error) {
-    throw error;
-  }
-};
+
 
 const receiptCollectionHttpService = {
   getAll,
