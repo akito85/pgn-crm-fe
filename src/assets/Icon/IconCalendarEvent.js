@@ -5,6 +5,7 @@ const SVG = ({
   width = "100%",
   className = "",
   onClick = () => {},
+  color = "#4B465C",
   ...otherProps
 }) => (
   <svg
@@ -25,7 +26,7 @@ const SVG = ({
       width="18"
       height="16"
       rx="2"
-      stroke="#4B465C"
+      stroke={color}
       strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -34,7 +35,7 @@ const SVG = ({
     {/* Top left tab */}
     <path
       d="M7 2V6"
-      stroke="#4B465C"
+      stroke={color}
       strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -43,7 +44,7 @@ const SVG = ({
     {/* Top right tab */}
     <path
       d="M17 2V6"
-      stroke="#4B465C"
+      stroke={color}
       strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -52,7 +53,7 @@ const SVG = ({
     {/* Horizontal line under header */}
     <path
       d="M3 9H21"
-      stroke="#4B465C"
+      stroke={color}
       strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -63,7 +64,7 @@ const SVG = ({
       cx="7"
       cy="14"
       r="1"
-      fill="#4B465C"
+      fill={color}
     />
 
     {/* Date dot */}
@@ -71,7 +72,7 @@ const SVG = ({
       cx="12"
       cy="14"
       r="1"
-      fill="#4B465C"
+      fill={color}
     />
 
     {/* Date dot */}
@@ -79,7 +80,7 @@ const SVG = ({
       cx="17"
       cy="14"
       r="1"
-      fill="#4B465C"
+      fill={color}
     />
 
     {/* Date dot */}
@@ -87,7 +88,7 @@ const SVG = ({
       cx="7"
       cy="18"
       r="1"
-      fill="#4B465C"
+      fill={color}
     />
 
     {/* Date dot */}
@@ -95,7 +96,7 @@ const SVG = ({
       cx="12"
       cy="18"
       r="1"
-      fill="#4B465C"
+      fill={color}
     />
   </svg>
 );

@@ -55,9 +55,7 @@ const PrabillingPage = () => {
   const [searchText, setSearchText] = useState(
     filters[currentTabKey]?.searchText || "",
   );
-  const [selectedBillingPeriod, setSelectedBillingPeriod] = useState(
-    filters[currentTabKey]?.selectedBillingPeriod || null,
-  );
+  const [selectedBillingPeriod, setSelectedBillingPeriod] = useState(null);
 
   const [pageDetail, setPageDetail] = useState(false);
   const [activeRowKey, setActiveRowKey] = useState(null);
@@ -143,9 +141,7 @@ const PrabillingPage = () => {
       if (currentPeriod) {
         setSelectedBillingPeriod(currentPeriod.id);
       } else {
-        const latestPeriod =
-          list_period_summary[list_period_summary.length - 1];
-        setSelectedBillingPeriod(latestPeriod.id);
+        setSelectedBillingPeriod(list_period_summary[0].id);
       }
     }
   }, [list_period_summary, selectedBillingPeriod]);
@@ -397,9 +393,7 @@ const PrabillingPage = () => {
       if (currentPeriod) {
         setSelectedBillingPeriod(currentPeriod.id);
       } else {
-        const latestPeriod =
-          list_period_summary[list_period_summary.length - 1];
-        setSelectedBillingPeriod(latestPeriod.id);
+        setSelectedBillingPeriod(list_period_summary[0].id);
       }
     }
   };

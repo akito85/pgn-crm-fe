@@ -41,10 +41,15 @@ const initialState = {
     rePlanReasons: [],
     cancelReasons: [],
     loadingCancelReasons: false,
+    earlyRepaymentReasons: [],
     openItemDetail: null,
     loadingOpenItemDetail: false,
     paymentPlanDetail: null,
     loadingPaymentPlanDetail: false,
+    badDebtListSearch: [],
+    loadingBadDebtList: false,
+    scheduleListSearch: [],
+    loadingScheduleList: false,
 };
 
 export const getListCustomerRestructure = createAsyncThunk(
@@ -116,7 +121,7 @@ export const getAllRestructureListPaginate = createAsyncThunk(
         try {
             const searchParams = sanitizeSearchInput(search === undefined ? "" : search);
             const sortValue = sort === undefined || sort === "" ? "id~desc" : sort;
-            const url = `/v1/dbs/api/restructure/get-list?page=${page}&pageSize=${pageSize}&sort=${sortValue}&searchs=${searchParams}`;
+            const url = `/v1/dbs/api/restructure/get-list?page=${page}&size=${pageSize}&sort=${sortValue}&searchs=${searchParams}`;
             const response = await receiptCollectionHttpService.getAll(url);
             return response?.data;
         } catch (error) {
@@ -144,7 +149,7 @@ export const getListApprovalRestructure = createAsyncThunk(
     async ({ page, pageSize, search, isLoadMore }, thunkAPI) => {
         try {
             const searchObj = search ? JSON.parse(decodeURIComponent(search)) : {};
-            searchObj.statusApproval = "Pending";
+            searchObj.statusApproval = "Waiting Approval";
             const searchParams = encodeURIComponent(JSON.stringify(searchObj));
             const url = `/v1/dbs/api/restructure/get-list?page=${page}&size=${pageSize}&searchs=${searchParams}`;
             const response = await receiptCollectionHttpService.getAll(url);
@@ -159,7 +164,7 @@ export const getListApprovalRestructure = createAsyncThunk(
 
 export const getListApprovalEarlyRepayment = createAsyncThunk(
     "GET_LIST_APPROVAL_EARLY_REPAYMENT",
-    async ({ statusApproval = "Pending", isLoadMore = false } = {}, thunkAPI) => {
+    async ({ statusApproval = "Waiting Approval", isLoadMore = false } = {}, thunkAPI) => {
         try {
             const url = `/v1/dbs/api/early-repayment/get-list?statusApproval=${encodeURIComponent(statusApproval)}`;
             const response = await receiptCollectionHttpService.getAll(url);
@@ -456,6 +461,19 @@ export const getCancelReasons = createAsyncThunk(
     }
 );
 
+export const getEarlyRepaymentReasons = createAsyncThunk(
+    "GET_EARLY_REPAYMENT_REASONS",
+    async (_, thunkAPI) => {
+        try {
+            const url = "/v1/dbs/api/early-repayment/get-reasons";
+            const response = await receiptCollectionHttpService.getAll(url);
+            return response?.data || [];
+        } catch (error) {
+            return thunkAPI.rejectWithValue(error);
+        }
+    }
+);
+
 export const getContactsByAccount = createAsyncThunk(
     "GET_CONTACTS_BY_ACCOUNT",
     async (accountNumber, thunkAPI) => {
@@ -501,6 +519,38 @@ export const downloadListRestructure = createAsyncThunk(
             } else {
                 thunkAPI.dispatch(showModalError({ title: "Failed", description: `${message}` }));
             }
+            return thunkAPI.rejectWithValue(error);
+        }
+    }
+);
+
+export const getRestructureBadDebtList = createAsyncThunk(
+    "GET_RESTRUCTURE_BAD_DEBT_LIST",
+    async ({ id, search }, thunkAPI) => {
+        try {
+            const searchParams = sanitizeSearchInput(search === undefined ? "" : search);
+            const url = `/v1/dbs/api/restructure/${id}/bad-debt-list?searchs=${searchParams}`;
+            const response = await receiptCollectionHttpService.getAll(url);
+            return response?.data;
+        } catch (error) {
+            const message = error?.response?.data?.message || error?.message || error?.toString();
+            thunkAPI.dispatch(showModalError({ title: "Failed", description: `${message}` }));
+            return thunkAPI.rejectWithValue(error);
+        }
+    }
+);
+
+export const getRestructureScheduleList = createAsyncThunk(
+    "GET_RESTRUCTURE_SCHEDULE_LIST",
+    async ({ id, search }, thunkAPI) => {
+        try {
+            const searchParams = sanitizeSearchInput(search === undefined ? "" : search);
+            const url = `/v1/dbs/api/restructure/${id}/schedule-list?searchs=${searchParams}`;
+            const response = await receiptCollectionHttpService.getAll(url);
+            return response?.data;
+        } catch (error) {
+            const message = error?.response?.data?.message || error?.message || error?.toString();
+            thunkAPI.dispatch(showModalError({ title: "Failed", description: `${message}` }));
             return thunkAPI.rejectWithValue(error);
         }
     }
@@ -907,6 +957,10 @@ const restructureSlice = createSlice({
         [getCancelReasons.rejected]: (state) => {
             state.loadingCancelReasons = false;
         },
+        // Early Repayment Reasons
+        [getEarlyRepaymentReasons.fulfilled]: (state, action) => {
+            state.earlyRepaymentReasons = action.payload;
+        },
         // Contacts
         [getContactsByAccount.pending]: (state) => {
             state.loading = true;
@@ -950,6 +1004,26 @@ const restructureSlice = createSlice({
         },
         [getPaymentPlanDetail.rejected]: (state) => {
             state.loadingPaymentPlanDetail = false;
+        },
+        [getRestructureBadDebtList.pending]: (state) => {
+            state.loadingBadDebtList = true;
+        },
+        [getRestructureBadDebtList.fulfilled]: (state, action) => {
+            state.loadingBadDebtList = false;
+            state.badDebtListSearch = action.payload?.data || [];
+        },
+        [getRestructureBadDebtList.rejected]: (state) => {
+            state.loadingBadDebtList = false;
+        },
+        [getRestructureScheduleList.pending]: (state) => {
+            state.loadingScheduleList = true;
+        },
+        [getRestructureScheduleList.fulfilled]: (state, action) => {
+            state.loadingScheduleList = false;
+            state.scheduleListSearch = action.payload?.data || [];
+        },
+        [getRestructureScheduleList.rejected]: (state) => {
+            state.loadingScheduleList = false;
         },
     },
 });

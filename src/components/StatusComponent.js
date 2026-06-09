@@ -5,11 +5,9 @@ import {
   CloseCircleFilled,
   Loading3QuartersOutlined,
   ExclamationCircleFilled,
-  MinusCircleFilled,
   SyncOutlined,
   FileTextOutlined,
   StopOutlined,
-  HourglassOutlined,
 } from "@ant-design/icons";
 import React, { useMemo } from "react";
 
@@ -53,7 +51,7 @@ const StatusComponent = ({
         break;
 
       case "submitted":
-        bgColor = "bg-[#28C76F]";
+        bgColor = "bg-[#f57c00]";
         tColor = "text-white";
         break;
 
@@ -77,14 +75,14 @@ const StatusComponent = ({
         tColor = "text-white";
         break;
 
-      case "waiting_approval":
-      case "waiting_for_approval":
-        bgColor = "bg-[#f57c00]";
+      // ===== OK / NOT OK STATUSES =====
+      case "ok":
+        bgColor = "status-active";
         tColor = "text-white";
         break;
 
-      case "none":
-        bgColor = "bg-gray-400";
+      case "not ok":
+        bgColor = "bg-[#f57c00]";
         tColor = "text-white";
         break;
 
@@ -158,15 +156,16 @@ const StatusComponent = ({
         bgColor = "status-active";
         tColor = "text-white";
         break;
-      
+
       case "break":
         bgColor = "bg-[#0075BF]";
         tColor = "text-white";
         break;
 
       case "expire":
-        bgColor = "status-expire";
-        tColor = "text-red-700";
+      case "expired":
+        bgColor = "status-inactive";
+        tColor = "text-white";
         break;
 
       case "expire10":
@@ -251,7 +250,7 @@ const StatusComponent = ({
         bgColor = "bg-[#00CFE8]";
         tColor = "text-white";
         break;
-        
+
       case "early payoff":
         bgColor = "bg-[#0075BF]";
         tColor = "text-white";
@@ -304,6 +303,7 @@ const StatusComponent = ({
     return { bgcolor: bgColor, textColor: tColor };
   }, [colour]);
 
+  // eslint-disable-next-line no-unused-vars
   const renderIconStatus = () => {
     if (!colour || typeof colour !== "string") return null;
 
@@ -374,7 +374,9 @@ const StatusComponent = ({
   if (!children) return null;
 
   const sizeClasses =
-    size === "small" ? `px-2 py-0 text-xs ${margin ? "my-0.5" : ""}` : `px-3 py-0 ${margin ? "my-1" : ""}`;
+    size === "small"
+      ? `px-2 py-0 text-xs ${margin ? "my-0.5" : ""}`
+      : `px-3 py-0 ${margin ? "my-1" : ""}`;
 
   return (
     <div

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Tabs } from "antd";
+import { Tabs, Table } from "antd";
 import { PlusOutlined, MinusOutlined, InfoCircleFilled } from "@ant-design/icons";
 import moment from "moment";
 import DetailText from "../../../../../components/DetailText";
@@ -41,11 +41,11 @@ const ContentModalConfirmRePlan = ({
 
     const contactColumns = [
         { title: "NO", dataIndex: "key", width: 50, align: "center", render: (_, __, i) => i + 1 },
-        { 
-          title: "PRIMARY", 
-          dataIndex: "isPrimary", 
-          width: 120,
-          render: (val) => val ? <StatusComponent colour="primary">Primary</StatusComponent> : "-" 
+        {
+            title: "PRIMARY",
+            dataIndex: "isPrimary",
+            width: 120,
+            render: (val) => val ? <StatusComponent colour="primary">Primary</StatusComponent> : "-"
         },
         { title: "CONTACT NAME", dataIndex: "cpName", width: 250 },
         { title: "JOB", dataIndex: "job", width: 150 },
@@ -68,8 +68,8 @@ const ContentModalConfirmRePlan = ({
                     dataSource={record.details || []}
                     useSelect={false}
                     usePagination={false}
-                    showAdvanceSearch={false}
-                    showSearchBar={false}
+                    showAdvanceSearch={true}
+                    showSearchBar={true}
                 />
             </div>
         ),
@@ -108,20 +108,36 @@ const ContentModalConfirmRePlan = ({
             { title: "AMOUNT", dataIndex: "amount", align: "right", render: (val) => val?.toLocaleString() || "0" },
         ];
 
-        return Object.entries(grouped).map(([currency, items]) => (
-            <div key={currency} className="mb-4">
-                <SectionCard title={`CURRENCY ${currency}`}>
-                    <TableRBI
-                        idTable={`confirm-open-items-${currency}`}
-                        columns={columns}
-                        dataSource={items.map((it, idx) => ({ ...it, key: idx }))}
-                        usePagination={false}
-                        showAdvanceSearch={false}
-                        showSearchBar={false}
-                    />
-                </SectionCard>
-            </div>
-        ));
+        return Object.entries(grouped).map(([currency, items]) => {
+            const isIdr = currency === "IDR";
+            const total = items.reduce((sum, r) => sum + (parseFloat(String(r.amount).replace(/,/g, "")) || 0), 0);
+            return (
+                <div key={currency} className="mb-4">
+                    <SectionCard title={`CURRENCY ${currency}`}>
+                        <TableRBI
+                            idTable={`confirm-open-items-${currency}`}
+                            columns={columns}
+                            dataSource={items.map((it, idx) => ({ ...it, key: idx }))}
+                            usePagination={false}
+                            showAdvanceSearch={true}
+                            showSearchBar={true}
+                            summary={() => (
+                                <Table.Summary fixed>
+                                    <Table.Summary.Row className="font-bold text-[12px] bg-[#F5F5F5]">
+                                        <Table.Summary.Cell index={0} colSpan={4} className="text-center font-bold">
+                                            TOTAL
+                                        </Table.Summary.Cell>
+                                        <Table.Summary.Cell index={1} className="text-right font-bold pr-4">
+                                            {total.toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 })}
+                                        </Table.Summary.Cell>
+                                    </Table.Summary.Row>
+                                </Table.Summary>
+                            )}
+                        />
+                    </SectionCard>
+                </div>
+            );
+        });
     };
 
     const renderPaymentPlanDetail = () => {
@@ -134,33 +150,35 @@ const ContentModalConfirmRePlan = ({
 
         return Object.entries(installmentsByCurrency).map(([currency, items]) => {
             const targetTotal = openItemTotals[currency] || 0;
+            const isIdr = currency === "IDR";
             const columns = [
-                { title: "PERIOD", dataIndex: "periode", width: 100 },
-                { 
-                  title: "TOTAL AMOUNT", 
-                  dataIndex: "amount", 
-                  align: "right", 
-                  render: (val) => {
-                    const numeric = typeof val === "string" ? parseFloat(val.replace(/,/g, "")) : val;
-                    return numeric?.toLocaleString() || "0";
-                  } 
-                },
-                { title: "DUE DATE", dataIndex: "dueDate" },
+                { title: "PERIOD", dataIndex: "periode", width: "20%" },
                 {
-                  title: "BALANCE",
-                  dataIndex: "balance",
-                  align: "right",
-                  render: (_, __, index) => {
-                    const sumPaidUpToThisRow = items
-                      .slice(0, index + 1)
-                      .reduce((sum, r) => sum + (parseFloat(String(r.amount).replace(/,/g, "")) || 0), 0);
-                    const balance = Math.max(0, targetTotal - sumPaidUpToThisRow);
-                    return balance.toLocaleString(currency === "IDR" ? "id-ID" : "en-US", {
-                      maximumFractionDigits: 2,
-                    });
-                  }
+                    title: "TOTAL AMOUNT",
+                    dataIndex: "amount",
+                    width: "30%",
+                    align: "right",
+                    render: (val) => {
+                        const numeric = typeof val === "string" ? parseFloat(val.replace(/,/g, "")) : val;
+                        return numeric?.toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 }) || "0";
+                    }
+                },
+                { title: "DUE DATE", dataIndex: "dueDate", width: "20%", render: (val) => val || "-" },
+                {
+                    title: "BALANCE",
+                    dataIndex: "balance",
+                    width: "30%",
+                    align: "right",
+                    render: () => {
+                        const balance = 0;
+                        return balance.toLocaleString(currency === "IDR" ? "id-ID" : "en-US", {
+                            maximumFractionDigits: 2,
+                        });
+                    }
                 }
             ];
+
+            const currentSum = items.reduce((sum, r) => sum + (parseFloat(String(r.amount).replace(/,/g, "")) || 0), 0);
 
             return (
                 <div key={currency} className="mb-4">
@@ -170,8 +188,25 @@ const ContentModalConfirmRePlan = ({
                             columns={columns}
                             dataSource={items.map((it, idx) => ({ ...it, key: idx }))}
                             usePagination={false}
-                            showAdvanceSearch={false}
-                            showSearchBar={false}
+                            showAdvanceSearch={true}
+                            showSearchBar={true}
+                            style={{ width: "100%" }}
+                            summary={() => (
+                                <Table.Summary fixed>
+                                    <Table.Summary.Row className="font-bold text-[12px] bg-[#F5F5F5]">
+                                        <Table.Summary.Cell index={0} className="text-center font-bold">
+                                            TOTAL
+                                        </Table.Summary.Cell>
+                                        <Table.Summary.Cell index={1} className="text-right font-bold pr-4">
+                                            {currentSum.toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 })}
+                                        </Table.Summary.Cell>
+                                        <Table.Summary.Cell index={2} />
+                                        <Table.Summary.Cell index={3} className="text-right font-bold pr-4 text-gray-500">
+                                            {(0).toLocaleString(isIdr ? "id-ID" : "en-US", { maximumFractionDigits: 2 })}
+                                        </Table.Summary.Cell>
+                                    </Table.Summary.Row>
+                                </Table.Summary>
+                            )}
                         />
                     </SectionCard>
                 </div>
@@ -224,8 +259,8 @@ const ContentModalConfirmRePlan = ({
                             dataSource={contacts.map((c, i) => ({ ...c, key: i + 1 }))}
                             expandable={expandable}
                             usePagination={false}
-                            showAdvanceSearch={false}
-                            showSearchBar={false}
+                            showAdvanceSearch={true}
+                            showSearchBar={true}
                         />
                     </SectionCard>
 
@@ -286,10 +321,10 @@ const ContentModalConfirmRePlan = ({
                 return (
                     <div className="p-5 bg-[#f8f7fa] min-h-[400px] flex flex-col gap-4">
                         {mandatoryMissing.length > 0 && (
-                            <div 
-                                className="flex items-start gap-3 p-4 border" 
-                                style={{ 
-                                    backgroundColor: "#FFF3E6", 
+                            <div
+                                className="flex items-start gap-3 p-4 border"
+                                style={{
+                                    backgroundColor: "#FFF3E6",
                                     borderColor: "#FFE0B2",
                                     borderRadius: "8px",
                                     color: "#B36214"
@@ -311,8 +346,8 @@ const ContentModalConfirmRePlan = ({
                                 columns={attachmentColumns}
                                 dataSource={listDataAttachment}
                                 usePagination={false}
-                                showAdvanceSearch={false}
-                                showSearchBar={false}
+                                showAdvanceSearch={true}
+                                showSearchBar={true}
                             />
                         </SectionCard>
                     </div>
