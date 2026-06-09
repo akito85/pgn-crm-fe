@@ -51,7 +51,7 @@ const StatusComponent = ({
         break;
 
       case "submitted":
-        bgColor = "bg-[#1B76D2]";
+        bgColor = "bg-[#f57c00]";
         tColor = "text-white";
         break;
 
@@ -163,8 +163,9 @@ const StatusComponent = ({
         break;
 
       case "expire":
-        bgColor = "status-expire";
-        tColor = "text-red-700";
+      case "expired":
+        bgColor = "status-inactive";
+        tColor = "text-white";
         break;
 
       case "expire10":
