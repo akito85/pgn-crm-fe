@@ -258,40 +258,12 @@ export const createServiceRequest = createAsyncThunk(
   }
 );
 
-// Update Service Request for Account
-export const updateSrForAccount = createAsyncThunk(
-  "UPDATE_SR_FOR_ACCOUNT",
-  async ({ accountId, id, body }, thunkAPI) => {
-    try {
-      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/${id}`;
-      const response = await accountManagementService.updateData(url, body);
-      const successBody = {
-        title: "Successful",
-        description: "Service Request has been updated.",
-      };
-      thunkAPI.dispatch(showModalSuccess(successBody));
-      return response.data;
-    } catch (error) {
-      const message =
-        (error.response && error.response.data && error.response.data.message) ||
-        error.message ||
-        error.toString();
-      const errorBody = {
-        title: "Failed",
-        description: `Service Request was not updated. ${message}. Please try again.`,
-      };
-      thunkAPI.dispatch(showModalError(errorBody));
-      return thunkAPI.rejectWithValue(error?.response);
-    }
-  }
-);
-
 // Update Service Request with composite data (supports draft/submit via triggerJson)
 export const updateServiceRequest = createAsyncThunk(
   "UPDATE_SERVICE_REQUEST",
   async ({ accountId, id, body, attachments = [], action = "SUBMIT", successBodyExtra = {} }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/accounts/${accountId}/servicerequests/${id}`;
+      const url = `/v1/dbs/api/account/${accountId}/service-request/${id}`;
       const response = await accountManagementService.updateData(url, body);
 
       const uploadUrl = `/v1/dbs/api/service-request/upload-attachment`;
@@ -971,6 +943,9 @@ const serviceRequestSlice = createSlice({
       const id = action.payload.key ?? action.payload.id;
       state.edited_api_prerequisites[id] = action.payload;
     },
+    removeEditedApiPrerequisite: (state, action) => {
+      delete state.edited_api_prerequisites[action.payload];
+    },
     clearEditedApiPrerequisites: (state) => {
       state.edited_api_prerequisites = {};
     },
@@ -979,6 +954,7 @@ const serviceRequestSlice = createSlice({
     },
     resetCreateSr: (state) => {
       state.create_sr = { formData: null, prerequisites: [], attachments: [] };
+      state.edited_api_prerequisites = {};
     },
   },
   extraReducers: {
@@ -1116,19 +1092,6 @@ const serviceRequestSlice = createSlice({
     },
     [createServiceRequest.rejected]: (state) => {
       state.loading_createUpdateSr = false;
-      state.isFailed = true;
-    },
-
-    [updateSrForAccount.pending]: (state) => {
-      state.loading = true;
-    },
-    [updateSrForAccount.fulfilled]: (state, action) => {
-      state.loading = false;
-      state.isSuccess = true;
-      state.detail_serviceRequest = action.payload;
-    },
-    [updateSrForAccount.rejected]: (state) => {
-      state.loading = false;
       state.isFailed = true;
     },
 
@@ -1560,6 +1523,7 @@ export const {
   removeCreateSrPrerequisite,
   updateCreateSrPrerequisite,
   saveEditedApiPrerequisite,
+  removeEditedApiPrerequisite,
   clearEditedApiPrerequisites,
   saveCreateSrAttachments,
   resetCreateSr,

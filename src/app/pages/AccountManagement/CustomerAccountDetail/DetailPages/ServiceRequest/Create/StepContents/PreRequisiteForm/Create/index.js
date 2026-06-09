@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import {
-  createSrPrerequisite,
   addCreateSrPrerequisite,
   updateCreateSrPrerequisite,
   saveEditedApiPrerequisite,
@@ -177,7 +176,6 @@ const PreRequisiteCreateFrom = () => {
   const handleSave = async () => {
     try {
       const values = await localForm.validateFields();
-      setLoading(true);
 
       const prerequisiteData = {
         prerequisiteType: values["prerequesite-type"],
@@ -194,49 +192,41 @@ const PreRequisiteCreateFrom = () => {
         }),
       };
 
-      if (srId) {
-        if (isEditMode && editKey) {
-          // Edit mode in update flow: save locally only, do NOT call API
+      const displayData = {
+        ...prerequisiteData,
+        typeName: getPrerequisiteTypeLabel(prerequisiteData.prerequisiteType),
+        name: prerequisiteData.prerequisiteName || getPrerequisiteTypeLabel(prerequisiteData.prerequisiteType),
+        description: prerequisiteData.prerequisiteDesc || "-",
+        status: "-",
+        dueDateLabel: "-",
+        completedDateLabel: "-",
+        assignedToLabel: "-",
+      };
+
+      if (isEditMode && editKey) {
+        if (String(editKey).startsWith("local-")) {
+          // Locally staged item (create or update flow) — update in create_sr.prerequisites
+          dispatch(updateCreateSrPrerequisite({ key: editKey, ...displayData }));
+        } else {
+          // Existing BE item — store override locally, merged at payload-build time
           dispatch(saveEditedApiPrerequisite({
             key: editKey,
             ...prerequisiteData,
-            typeName: getPrerequisiteTypeLabel(prerequisiteData.prerequisiteType),
-            name: prerequisiteData.prerequisiteName || getPrerequisiteTypeLabel(prerequisiteData.prerequisiteType),
-            description: prerequisiteData.prerequisiteDesc || "-",
+            typeName: displayData.typeName,
+            name: displayData.name,
+            description: displayData.description,
           }));
-          navigateBack();
-        } else {
-          // Create new prerequisite in update flow: call API
-          await dispatch(
-            createSrPrerequisite({ accountId, srId, body: prerequisiteData }),
-          ).unwrap();
-          navigateBack();
         }
       } else {
-        // CREATE flow: SR belum ada, simpan ke Redux agar wizard membacanya saat remount
-        const displayData = {
-          ...prerequisiteData,
-          typeName: getPrerequisiteTypeLabel(prerequisiteData.prerequisiteType),
-          name: prerequisiteData.prerequisiteName || getPrerequisiteTypeLabel(prerequisiteData.prerequisiteType),
-          description: prerequisiteData.prerequisiteDesc || "-",
-          status: "-",
-          dueDateLabel: "-",
-          completedDateLabel: "-",
-          assignedToLabel: "-",
-        };
-        if (isEditMode && editKey) {
-          dispatch(updateCreateSrPrerequisite({ key: editKey, ...displayData }));
-        } else {
-          dispatch(addCreateSrPrerequisite({ key: `local-${Date.now()}`, ...displayData }));
-        }
-        navigateBack();
+        // New prerequisite — stage in Redux regardless of whether SR exists yet
+        dispatch(addCreateSrPrerequisite({ key: `local-${Date.now()}`, ...displayData }));
       }
+
+      navigateBack();
     } catch (err) {
       if (err?.errorFields) {
         message.error("Please fill in all required fields correctly");
       }
-    } finally {
-      setLoading(false);
     }
   };
 

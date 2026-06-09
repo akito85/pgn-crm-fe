@@ -126,6 +126,7 @@ const CreateUpdateCustomerServiceRequest = ({ formType = "create" }) => {
     loading_listSrApprovalHierarchy,
     loading_detailSrApprovalHierarchy,
     create_sr,
+    edited_api_prerequisites,
   } = useSelector((state) => state.serviceRequest);
 
   const isDraft =
@@ -460,7 +461,7 @@ const CreateUpdateCustomerServiceRequest = ({ formType = "create" }) => {
   useEffect(() => {
     if (location?.state?.returnToStep !== undefined) {
       if (create_sr?.formData) {
-        const { srFormPreRequisites, ...rest } = create_sr.formData;
+        const { srFormPreRequisites, srFormSelectedPreRequisites: _selectedPr, ...rest } = create_sr.formData;
         if (rest.requestDate) rest.requestDate = moment(rest.requestDate);
         formCreate.setFieldsValue(rest);
       }
@@ -665,7 +666,6 @@ const CreateUpdateCustomerServiceRequest = ({ formType = "create" }) => {
 
   const buildPayload = (action = "SUBMIT", validationType = null) => {
     const values = formCreate.getFieldsValue(true);
-    const isDraft = action === "DRAFT";
 
     return {
       requestType: values.type ? parseInt(values.type) : null,
@@ -681,23 +681,30 @@ const CreateUpdateCustomerServiceRequest = ({ formType = "create" }) => {
       channel: values.channel ? parseInt(values.channel) : null,
       source: values.requestSource ? parseInt(values.requestSource) : null,
       action,
-      isDraft,
       validationType,
-      stepNumber: validationType
-        ? stepValidationTypes.indexOf(validationType) + 1
-        : steps.length,
       dataRequirements: (values.srFormDataRequirements || []).map((dr) => ({
         requirementType: dr.typeId ? parseInt(dr.typeId) : null,
         requirementValue: dr.value || null,
         requirementDesc: null
       })),
-      prerequisites: [
-        ...(values.srFormPreRequisites || []),
+      preRequisites: [
+        // Existing BE prerequisites with any local edits merged in
+        ...(values.srFormPreRequisites || []).map((pr) => ({
+          ...pr,
+          ...(edited_api_prerequisites[pr.key] ?? {}),
+        })),
+        // Template items the user selected via checkbox
         ...(values.srFormSelectedPreRequisites || []),
+        // Newly staged prerequisites (both create and update flow)
+        ...(create_sr?.prerequisites || []),
       ].map((pr) => ({
-        prerequisiteType: typeof pr.type === 'number' ? pr.type : (pr.prerequisiteId ?? null),
-        prerequisiteName: pr.name || pr.prerequisiteName || null,
-        prerequisiteDesc: pr.description || pr.prerequisiteComments || null,
+        prerequisiteType: (() => {
+          const raw = pr.prerequisiteType ?? pr.prerequisiteId;
+          const parsed = parseInt(raw);
+          return Number.isFinite(parsed) ? parsed : null;
+        })(),
+        prerequisiteName: pr.prerequisiteName || pr.name || null,
+        prerequisiteDesc: pr.prerequisiteDesc || pr.description || pr.prerequisiteComments || null,
       }))
     };
   };

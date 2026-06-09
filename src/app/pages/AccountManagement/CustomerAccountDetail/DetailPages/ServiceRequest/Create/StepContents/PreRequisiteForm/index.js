@@ -9,6 +9,7 @@ import {
   saveCreateSrFormData,
   saveCreateSrAttachments,
   removeCreateSrPrerequisite,
+  removeEditedApiPrerequisite,
 } from "../../../../../../../../../redux/slices/account_management/detailAccount/ServiceRequestSlice";
 import NxTable from "../../../../../../../../../components/Nx/NxTable";
 import NxCardContainer from "../../../../../../../../../components/Nx/NxCardContainer";
@@ -38,16 +39,15 @@ export default function PreRequisiteForm({
 
   const serviceRequestId = location?.state?.id;
   const accountId = account?.accountInformation?.accountId;
-  const isCreateFlow = !serviceRequestId; // TRUE = SR baru, belum punya ID
 
   const [prereqData, setPrereqData] = useState([]);
 
   useEffect(() => {
-    if (isCreateFlow || !detail_serviceRequest) return;
+    if (!detail_serviceRequest) return;
     const items = mapItems(detail_serviceRequest?.preRequisites || [], 0);
     setPrereqData(items);
     form?.setFieldsValue({ srFormPreRequisites: items });
-  }, [detail_serviceRequest, isCreateFlow]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [detail_serviceRequest, mapItems]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const [page, setPage] = useState(0);
   const [loadMoreSize] = useState(20);
@@ -63,7 +63,7 @@ export default function PreRequisiteForm({
   } = useSelector((state) => state.serviceRequest);
 
   useEffect(() => {
-    if (!isCreateFlow) return;
+    if (!accountId) return;
     const body = {
       srTypeId: form?.getFieldValue("type"),
       srCategoryId: form?.getFieldValue("category"),
@@ -78,7 +78,7 @@ export default function PreRequisiteForm({
     setPage(0);
     const promise = dispatch(getSrPrerequisiteTemplate({ accountId, body, isLoadMore: false }));
     return () => { promise.abort(); };
-  }, [sort, search, filters, filterRules, isCreateFlow]);
+  }, [sort, search, filters, filterRules, accountId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const getPrerequisiteLabel = useCallback(
     (prerequisiteId) => {
@@ -112,7 +112,7 @@ export default function PreRequisiteForm({
 
   const handleDelete = useCallback(
     (record) => {
-      if (isCreateFlow) {
+      if (record._isCreated) {
         dispatch(removeCreateSrPrerequisite(record.key));
         return;
       }
@@ -121,8 +121,9 @@ export default function PreRequisiteForm({
         form?.setFieldsValue({ srFormPreRequisites: updated });
         return updated;
       });
+      dispatch(removeEditedApiPrerequisite(record.key));
     },
-    [dispatch, isCreateFlow, form],
+    [dispatch, form],
   );
 
   // Track which template rows the user has checked
@@ -137,11 +138,14 @@ export default function PreRequisiteForm({
     });
   }, [list_prerequisiteTemplate, selectedTemplateKeys]);
 
-  const combinedCreateFlowData = useMemo(() => {
-    if (!isCreateFlow) return [];
+  const tableDataSource = useMemo(() => {
     const created = (create_sr?.prerequisites ?? []).map((item) => ({ ...item, _isCreated: true }));
-    return [...templateDisplayData, ...created];
-  }, [isCreateFlow, templateDisplayData, create_sr?.prerequisites]);
+    const existing = prereqData.map((item) => ({
+      ...item,
+      ...(edited_api_prerequisites[item.key] ?? {}),
+    }));
+    return [...templateDisplayData, ...existing, ...created];
+  }, [templateDisplayData, prereqData, create_sr?.prerequisites, edited_api_prerequisites]);
 
   const allSelected = templateDisplayData.length > 0 && templateDisplayData.every((item) => item.selected);
   const someSelected = templateDisplayData.some((item) => item.selected) && !allSelected;
@@ -256,14 +260,12 @@ export default function PreRequisiteForm({
               <SVGIcon name="IconDetail" width={20} />
             </Button>
           </Tooltip>
-          {(!isCreateFlow || record._isCreated || record._isTemplate) && (
-            <Tooltip title="Edit">
-              <Button type="table-action" onClick={() => handleEditClick(record)}>
-                <SVGIcon name="IconEdit" width={20} />
-              </Button>
-            </Tooltip>
-          )}
-          {(!isCreateFlow || record._isCreated) && (
+          <Tooltip title="Edit">
+            <Button type="table-action" onClick={() => handleEditClick(record)}>
+              <SVGIcon name="IconEdit" width={20} />
+            </Button>
+          </Tooltip>
+          {!record._isTemplate && (
             <Popconfirm
               title="Are you sure you want to delete this prerequisite?"
               onConfirm={() => handleDelete(record)}
@@ -348,10 +350,7 @@ export default function PreRequisiteForm({
             useInfiniteScroll={false}
             hasMore={false}
             useSelect={true}
-            dataSource={isCreateFlow
-              ? combinedCreateFlowData
-              : prereqData.map((item) => ({ ...item, ...(edited_api_prerequisites[item.key] ?? {}) }))
-            }
+            dataSource={tableDataSource}
             columnMain={columnMain}
             fontSize={"medium"}
             loading={false}
