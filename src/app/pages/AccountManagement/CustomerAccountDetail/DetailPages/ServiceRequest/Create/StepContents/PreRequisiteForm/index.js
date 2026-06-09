@@ -42,13 +42,6 @@ export default function PreRequisiteForm({
 
   const [prereqData, setPrereqData] = useState([]);
 
-  useEffect(() => {
-    if (!detail_serviceRequest) return;
-    const items = mapItems(detail_serviceRequest?.preRequisites || [], 0);
-    setPrereqData(items);
-    form?.setFieldsValue({ srFormPreRequisites: items });
-  }, [detail_serviceRequest, mapItems]); // eslint-disable-line react-hooks/exhaustive-deps
-
   const [page, setPage] = useState(0);
   const [loadMoreSize] = useState(20);
   const [sort, setSort] = useState("");
@@ -109,6 +102,13 @@ export default function PreRequisiteForm({
       })),
     [getPrerequisiteLabel],
   );
+
+  useEffect(() => {
+    if (!detail_serviceRequest) return;
+    const items = mapItems(detail_serviceRequest?.preRequisites || [], 0);
+    setPrereqData(items);
+    form?.setFieldsValue({ srFormPreRequisites: items });
+  }, [detail_serviceRequest, mapItems]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleDelete = useCallback(
     (record) => {
