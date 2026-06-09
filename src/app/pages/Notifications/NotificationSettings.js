@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
-import { Select, InputNumber, Collapse, Button, message, Spin, Tag } from "antd";
+import { InputNumber, Collapse, Button, message, Spin, Tag } from "antd";
+import NxSelect from "../../../components/Nx/NxSelect";
 import {
   InfoCircleOutlined,
   CheckCircleOutlined,
@@ -330,7 +331,7 @@ const NotificationSettings = () => {
                   {displayTypeDescriptions[localSettings.displayType] || "Select how notifications appear"}
                 </div>
               </div>
-              <Select
+              <NxSelect
                 value={localSettings.displayType}
                 onChange={(value) => handleSettingChange("displayType", value)}
                 disabled={isTransitioning || isSaving}
@@ -447,11 +448,10 @@ const NotificationSettings = () => {
                   {getTypeEnabledStatus(type.typeCode) && (
                     <div className="flex flex-row justify-between items-center pl-7 pt-2 border-t border-gray-200">
                       <div className="text-sm text-gray-600">Display as:</div>
-                      <Select
+                      <NxSelect
                         value={getTypeDisplayTypeValue(type.typeCode)}
                         onChange={(value) => handleTypeDisplayTypeChange(type.typeCode, value)}
                         disabled={isTransitioning || isSaving}
-                        size="small"
                         style={{ width: 130 }}
                         options={displayTypeOptions.map(opt => ({
                           value: opt,
