@@ -20,10 +20,10 @@ export default function InfoDataRequirement({ form, dropdowns, idAccount, isUpda
   const dispatch = useDispatch();
   const { data_filter, loading_filter } = useSelector((state) => state.dataRequirementTemplate);
   const {
-  detail_srDataRequirementValues,
-  loading_srDataRequirementValues,
-  list_srDataRequirements,
-} = useSelector((state) => state.serviceRequest);
+    detail_srDataRequirementValues,
+    loading_srDataRequirementValues,
+    detail_serviceRequest,
+  } = useSelector((state) => state.serviceRequest);
 
   const [dataRequirement, setDataRequirement] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -50,11 +50,11 @@ export default function InfoDataRequirement({ form, dropdowns, idAccount, isUpda
   // In UPDATE mode: populate form from the existing SR's data requirements
   useEffect(() => {
     if (!isUpdate) return;
-    if (!list_srDataRequirements.length) return;
+    if (!detail_serviceRequest?.dataRequirements?.length) return;
     const existing = form.getFieldValue("srFormDataRequirements");
     if (existing?.length > 0) return;
 
-    const populated = list_srDataRequirements.map((item, index) => ({
+    const populated = detail_serviceRequest.dataRequirements.map((item, index) => ({
       key: item.id ?? index,
       no: index + 1,
       type: item.type,
@@ -63,7 +63,7 @@ export default function InfoDataRequirement({ form, dropdowns, idAccount, isUpda
     }));
     setDataRequirement(populated);
     form.setFieldsValue({ srFormDataRequirements: populated });
-  }, [isUpdate, list_srDataRequirements]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isUpdate, detail_serviceRequest]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Auto-fetch template when type, category, subCategory are all set
   useEffect(() => {
@@ -87,6 +87,7 @@ export default function InfoDataRequirement({ form, dropdowns, idAccount, isUpda
     if (isUpdate) return;
     const populated = data_filter.details.map((item, index) => ({
       key: item.id ?? index,
+      _isNew: true,
       no: index + 1,
       type: item.type,
       typeId: item.id,
@@ -127,6 +128,13 @@ export default function InfoDataRequirement({ form, dropdowns, idAccount, isUpda
       .map((item, index) => ({ ...item, no: index + 1 }));
     setDataRequirement(updatedData);
     form.setFieldsValue({ srFormDataRequirements: updatedData });
+
+    if (!record._isNew) {
+      const prev = form.getFieldValue("srFormDeletedDataRequirements") || [];
+      form.setFieldsValue({
+        srFormDeletedDataRequirements: [...prev, { id: record.key }],
+      });
+    }
   };
 
   const handleModalOpen = () => {
@@ -178,6 +186,7 @@ export default function InfoDataRequirement({ form, dropdowns, idAccount, isUpda
       const typeName = matched?.name || matched?.glbTypeValName || String(values.type);
       const newRecord = {
         key: Date.now(),
+        _isNew: true,
         no: (dataRequirement.length > 0 ? Math.max(...dataRequirement.map((i) => i.no)) : 0) + 1,
         type: typeName,
         typeId: values.type,

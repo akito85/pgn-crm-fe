@@ -122,6 +122,11 @@ export default function PreRequisiteForm({
         return updated;
       });
       dispatch(removeEditedApiPrerequisite(record.key));
+
+      const prev = form?.getFieldValue("srFormDeletedPreRequisites") || [];
+      form?.setFieldsValue({
+        srFormDeletedPreRequisites: [...prev, { id: record.key }],
+      });
     },
     [dispatch, form],
   );

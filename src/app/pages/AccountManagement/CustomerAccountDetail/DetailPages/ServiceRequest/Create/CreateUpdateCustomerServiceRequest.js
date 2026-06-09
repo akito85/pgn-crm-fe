@@ -56,7 +56,6 @@ import {
   getSrDataRequirementTypes,
   getSrPrerequisiteTypes,
   getSrAttachmentCategories,
-  getSrDataRequirements,
   createServiceRequest,
   updateServiceRequest,
   resetCreateSr,
@@ -103,7 +102,6 @@ const CreateUpdateCustomerServiceRequest = ({ formType = "create" }) => {
     list_srPrerequisiteTypes,
     list_srDataRequirementTypes,
     list_srAttachmentCategories,
-    list_srDataRequirements,
     detail_serviceRequest: serviceRequestDetail,
     detailDraft_serviceRequest: serviceRequestDetailDraft,
     loading_createUpdateSr,
@@ -264,16 +262,11 @@ const CreateUpdateCustomerServiceRequest = ({ formType = "create" }) => {
     dispatch(getSrApprovalHierarchies());
   }, [dispatch]);
 
-  // Load detail + detail-draft + data requirements when in update mode
+  // Load detail + detail-draft when in update mode
   useEffect(() => {
     if (isUpdate && id && idAccount) {
       dispatch(getServiceRequest({ accountId: idAccount, id }));
       dispatch(getServiceRequestDraft({ accountId: idAccount, id }));
-      dispatch(getSrDataRequirements({
-        accountId: idAccount,
-        serviceRequestId: id,
-        body: { page: 0, size: 100, sort: "", searchs: {}, filters: [], filterRules: [] },
-      }));
     }
   }, [dispatch, isUpdate, id, idAccount]);
 
@@ -606,11 +599,18 @@ const CreateUpdateCustomerServiceRequest = ({ formType = "create" }) => {
       source: values.requestSource ? parseInt(values.requestSource) : null,
       action,
       validationType,
-      dataRequirements: (values.srFormDataRequirements || []).map((dr) => ({
-        requirementType: dr.typeId ? parseInt(dr.typeId) : null,
-        requirementValue: dr.value || null,
-        requirementDesc: null
-      })),
+      dataRequirements: [
+        ...(values.srFormDataRequirements || []).map((dr) => ({
+          ...(dr.key && !dr._isNew ? { id: dr.key } : {}),
+          requirementType: dr.typeId ? parseInt(dr.typeId) : null,
+          requirementValue: dr.value || null,
+          requirementDesc: null,
+        })),
+        ...(values.srFormDeletedDataRequirements || []).map((dr) => ({
+          id: dr.id,
+          isDeleted: true,
+        })),
+      ],
       preRequisites: [
         // Existing BE prerequisites with any local edits merged in
         ...(values.srFormPreRequisites || []).map((pr) => ({
@@ -622,6 +622,7 @@ const CreateUpdateCustomerServiceRequest = ({ formType = "create" }) => {
         // Newly staged prerequisites (both create and update flow)
         ...(create_sr?.prerequisites || []),
       ].map((pr) => ({
+        ...(pr.id && !pr._isTemplate ? { id: pr.id } : {}),
         prerequisiteType: (() => {
           const raw = pr.prerequisiteType ?? pr.prerequisiteId;
           const parsed = parseInt(raw);
@@ -629,7 +630,12 @@ const CreateUpdateCustomerServiceRequest = ({ formType = "create" }) => {
         })(),
         prerequisiteName: pr.prerequisiteName || pr.name || null,
         prerequisiteDesc: pr.prerequisiteDesc || pr.description || pr.prerequisiteComments || null,
-      }))
+      })).concat(
+        (values.srFormDeletedPreRequisites || []).map((pr) => ({
+          id: pr.id,
+          isDeleted: true,
+        }))
+      )
     };
   };
 
@@ -713,6 +719,13 @@ const CreateUpdateCustomerServiceRequest = ({ formType = "create" }) => {
       (a) => a.dataType === "new"
     );
 
+    const body = {
+      ...dataSend,
+      ...(isUpdate && deletedAttachments.length > 0 && {
+        attachments: deletedAttachments.map((a) => ({ id: a.id, isDeleted: true })),
+      }),
+    };
+
     const onSuccess = () => {
       setTimeout(() => {
         dispatch(resetCreateSr());
@@ -732,7 +745,7 @@ const CreateUpdateCustomerServiceRequest = ({ formType = "create" }) => {
         updateServiceRequest({
           accountId: idAccount,
           id,
-          body: { ...dataSend, serviceRequestId: id },
+          body: { ...body, serviceRequestId: id },
           attachments: newAttachments,
           action: confirmationType.toUpperCase(),
           successBodyExtra: { return: false }
@@ -759,6 +772,10 @@ const CreateUpdateCustomerServiceRequest = ({ formType = "create" }) => {
 
   const handleClear = () => {
     formCreate.resetFields();
+    formCreate.setFieldsValue({
+      srFormDeletedDataRequirements: [],
+      srFormDeletedPreRequisites: [],
+    });
 
     if (data_accountDetail?.accountInformation) {
       const accountInfo = data_accountDetail.accountInformation;
@@ -821,8 +838,9 @@ const CreateUpdateCustomerServiceRequest = ({ formType = "create" }) => {
       }
 
       // Restore data requirements
-      if (list_srDataRequirements?.length) {
-        const restoredDr = list_srDataRequirements.map((item, index) => ({
+      const detailDr = serviceRequestDetail?.dataRequirements || [];
+      if (detailDr.length) {
+        const restoredDr = detailDr.map((item, index) => ({
           key: item.id ?? index,
           no: index + 1,
           type: item.type,
