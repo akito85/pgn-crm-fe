@@ -5,6 +5,7 @@ import { Form, Select, Button } from "antd";
 
 import InputComponent from "../../../../../../../../../components/InputComponent";
 import DateComponent from "../../../../../../../../../components/DateComponent";
+import SelectComponent from "../../../../../../../../../components/SelectComponent";
 
 import NxCardContainer from "../../../../../../../../../components/Nx/NxCardContainer";
 import NxBaseContainer from "../../../../../../../../../components/Nx/NxBaseContainer";
@@ -55,6 +56,13 @@ export default function InfoServiceRequest({
   const requestSource = Form.useWatch("requestSource", form);
   const requestDate = Form.useWatch("requestDate", form);
   const description = Form.useWatch("description", form);
+
+  const typeName        = Form.useWatch("typeName",        { form, preserve: true });
+  const categoryName    = Form.useWatch("categoryName",    { form, preserve: true });
+  const subCategoryName = Form.useWatch("subCategoryName", { form, preserve: true });
+  const channelName     = Form.useWatch("channelName",     { form, preserve: true });
+  const priorityName    = Form.useWatch("priorityName",    { form, preserve: true });
+  const requestSourceName = Form.useWatch("requestSourceName", { form, preserve: true });
 
   const onSort = (_, __, sortInfo) => {
     const dataSort = sortInfo.order
@@ -146,13 +154,6 @@ export default function InfoServiceRequest({
     return [];
   };
 
-  const getDropdownOptions = (dropdownKey) => {
-    return getDropdownItems(dropdownKey).map((item) => ({
-      value: item.glbTypeValId?.toString() || item.id?.toString(),
-      label: item.name || item.glbTypeValName
-    }));
-  };
-
   const isDropdownLoaded = (dropdownKey) => {
     return getDropdownItems(dropdownKey).length > 0;
   };
@@ -172,12 +173,12 @@ export default function InfoServiceRequest({
           <NxDetailText label="Service Request Reference">
             {serviceRequestReference}
           </NxDetailText>
-          <NxDetailText label="Type">{type}</NxDetailText>
-          <NxDetailText label="Category">{category}</NxDetailText>
-          <NxDetailText label="Sub Category">{subCategory}</NxDetailText>
-          <NxDetailText label="Channel">{channel}</NxDetailText>
-          <NxDetailText label="Priority">{priority}</NxDetailText>
-          <NxDetailText label="Request Source">{requestSource}</NxDetailText>
+          <NxDetailText label="Type">{typeName}</NxDetailText>
+          <NxDetailText label="Category">{categoryName}</NxDetailText>
+          <NxDetailText label="Sub Category">{subCategoryName}</NxDetailText>
+          <NxDetailText label="Channel">{channelName}</NxDetailText>
+          <NxDetailText label="Priority">{priorityName}</NxDetailText>
+          <NxDetailText label="Request Source">{requestSourceName}</NxDetailText>
           <NxDetailText label="Request Date">
             {NxDate.formatDate(requestDate, "DD MMM YYYY")}
           </NxDetailText>
@@ -234,11 +235,17 @@ export default function InfoServiceRequest({
               ]}
               className="no-margin-form"
             >
-              <Select
+              <SelectComponent
                 placeholder="Select Types"
                 loading={!isDropdownLoaded("serviceRequestTypes")}
-                options={getDropdownOptions("serviceRequestTypes")}
-              />
+                onChange={(_, option) => form.setFieldValue("typeName", option?.children ?? null)}
+              >
+                {getDropdownItems("serviceRequestTypes").map((item) => (
+                  <Select.Option key={item.glbTypeValId || item.id} value={item.glbTypeValId || item.id}>
+                    {item.name || item.glbTypeValName}
+                  </Select.Option>
+                ))}
+              </SelectComponent>
             </Form.Item>
             <Form.Item
               key="category"
@@ -252,11 +259,17 @@ export default function InfoServiceRequest({
               ]}
               className="no-margin-form"
             >
-              <Select
+              <SelectComponent
                 placeholder="Select Category"
                 loading={!isDropdownLoaded("serviceRequestCategories")}
-                options={getDropdownOptions("serviceRequestCategories")}
-              />
+                onChange={(_, option) => form.setFieldValue("categoryName", option?.children ?? null)}
+              >
+                {getDropdownItems("serviceRequestCategories").map((item) => (
+                  <Select.Option key={item.glbTypeValId || item.id} value={item.glbTypeValId || item.id}>
+                    {item.name || item.glbTypeValName}
+                  </Select.Option>
+                ))}
+              </SelectComponent>
             </Form.Item>
             <Form.Item
               key="subCategory"
@@ -270,11 +283,17 @@ export default function InfoServiceRequest({
               ]}
               className="no-margin-form"
             >
-              <Select
+              <SelectComponent
                 placeholder="Select Sub Category"
                 loading={!isDropdownLoaded("serviceRequestSubcategories")}
-                options={getDropdownOptions("serviceRequestSubcategories")}
-              />
+                onChange={(_, option) => form.setFieldValue("subCategoryName", option?.children ?? null)}
+              >
+                {getDropdownItems("serviceRequestSubcategories").map((item) => (
+                  <Select.Option key={item.glbTypeValId || item.id} value={item.glbTypeValId || item.id}>
+                    {item.name || item.glbTypeValName}
+                  </Select.Option>
+                ))}
+              </SelectComponent>
             </Form.Item>
             <Form.Item
               key="channel"
@@ -288,11 +307,17 @@ export default function InfoServiceRequest({
               ]}
               className="no-margin-form"
             >
-              <Select
+              <SelectComponent
                 placeholder="Select Channels"
                 loading={!isDropdownLoaded("serviceRequestChannels")}
-                options={getDropdownOptions("serviceRequestChannels")}
-              />
+                onChange={(_, option) => form.setFieldValue("channelName", option?.children ?? null)}
+              >
+                {getDropdownItems("serviceRequestChannels").map((item) => (
+                  <Select.Option key={item.glbTypeValId || item.id} value={item.glbTypeValId || item.id}>
+                    {item.name || item.glbTypeValName}
+                  </Select.Option>
+                ))}
+              </SelectComponent>
             </Form.Item>
             <Form.Item
               key="priority"
@@ -306,11 +331,17 @@ export default function InfoServiceRequest({
               ]}
               className="no-margin-form"
             >
-              <Select
+              <SelectComponent
                 placeholder="Select Priorities"
                 loading={!isDropdownLoaded("serviceRequestPriorities")}
-                options={getDropdownOptions("serviceRequestPriorities")}
-              />
+                onChange={(_, option) => form.setFieldValue("priorityName", option?.children ?? null)}
+              >
+                {getDropdownItems("serviceRequestPriorities").map((item) => (
+                  <Select.Option key={item.glbTypeValId || item.id} value={item.glbTypeValId || item.id}>
+                    {item.name || item.glbTypeValName}
+                  </Select.Option>
+                ))}
+              </SelectComponent>
             </Form.Item>
             <Form.Item
               key="requestSource"
@@ -324,11 +355,17 @@ export default function InfoServiceRequest({
               ]}
               className="no-margin-form"
             >
-              <Select
+              <SelectComponent
                 placeholder="Select Sources"
                 loading={!isDropdownLoaded("serviceRequestSources")}
-                options={getDropdownOptions("serviceRequestSources")}
-              />
+                onChange={(_, option) => form.setFieldValue("requestSourceName", option?.children ?? null)}
+              >
+                {getDropdownItems("serviceRequestSources").map((item) => (
+                  <Select.Option key={item.glbTypeValId || item.id} value={item.glbTypeValId || item.id}>
+                    {item.name || item.glbTypeValName}
+                  </Select.Option>
+                ))}
+              </SelectComponent>
             </Form.Item>
             <Form.Item
               key="requestDate"
