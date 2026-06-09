@@ -148,6 +148,7 @@ import serviceRequestReducer from "../slices/account_management/detailAccount/Se
 import paymentCycleReducer from "../slices/receipt_collection/paymentCycle";
 import paymentPeriodReducer from "../slices/receipt_collection/paymentPeriod";
 import exceptionReducer from "../slices/receipt_collection/exceptionSlice";
+import gasDepositPaymentReducer from "../slices/receipt_collection/gasDepositPayment";
 import billingItemCategoryReducer from "../slices/system_setup/master_data/billingItemCategory";
 import calendarReducer from "../slices/system_setup/master_data/calendar";
 import collectionTemplateReducer from "../slices/system_setup/master_data/collectionTemplate";
@@ -162,6 +163,7 @@ import auditTrailReducer from "../slices/user_management/audit_trail";
 import preRequisiteTemplateReducer from "../slices/system_setup/preRequisiteTemplate";
 import activityTemplateReducer from "../slices/system_setup/activityTemplate";
 import dataRequirementTemplateReducer from "../slices/system_setup/dataRequirementTemplate";
+import gasDepositRbiReducer from "../slices/rating_billing_invoice/gasDeposit";
 
 const reducer = combineReducers({
   jobManagement: jobManagementReducer,
@@ -285,6 +287,7 @@ const reducer = combineReducers({
   glAccount: glAccountReducer,
   contentManagement: contentManagementReducer,
   installment: installmentReducer,
+  gasDepositRbi: gasDepositRbiReducer,
 
   //receipt and collection
   receipt: receiptReducer,
@@ -318,6 +321,7 @@ const reducer = combineReducers({
   liborRate: liborRateReducer,
   paymentCycle: paymentCycleReducer,
   paymentPeriod: paymentPeriodReducer,
+  gasDepositPayment: gasDepositPaymentReducer,
   billingItemCategory: billingItemCategoryReducer,
   calendar: calendarReducer,
   collectionTemplate: collectionTemplateReducer,

@@ -1,79 +1,45 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import ratingBillingHttpService from "../../services/ratingBillingHttpService";
 import {
-  showModalSuccess,
-  setBodyError,
   showModalError,
+  setBodyError,
 } from "../general_slice";
 
 const initialState = {
   loading: false,
   error: null,
-
-  summaryData: {
-    pendingTransactions: 0,
-    pendingApprovals: 0,
-    gapRatingBilling: 0,
-    gapPraBillingMaster: 0,
+  periods: [],
+  headerSummary: {
+    currentPeriod: null,
+    previousPeriod: null,
+    currMaster: 0, prevMaster: 0, pctMaster: 0,
+    currPraBilling: 0, prevPraBilling: 0, pctPraBilling: 0,
+    currRating: 0, prevRating: 0, pctRating: 0,
+    currBilling: 0, prevBilling: 0, pctBilling: 0,
+    currApproved: 0, prevApproved: 0, pctApproved: 0,
   },
-
-  trendData: [],
-
-  list_billing_period: [],
-
-  priorityList: {
-    priorPendingTransactions: [],
-    priorApprovalBatches: [],
-    priorGapRatingBilling: [],
-    priorGapPrabillingMaster: [],
-  },
-
-  pendingTransactionsData: {
-    result: [],
-    page: {
-      totalElements: 0,
-      totalPages: 0,
-    },
-  },
-
-  pendingApprovalsData: {
-    result: [],
-    page: {
-      totalElements: 0,
-      totalPages: 0,
-    },
-  },
-
-  gapRatingBillingData: {
-    result: [],
-    page: {
-      totalElements: 0,
-      totalPages: 0,
-    },
-  },
-
-  gapPraBillingMasterData: {
-    result: [],
-    page: {
-      totalElements: 0,
-      totalPages: 0,
-    },
-  },
+  loadingHeader: false,
+  masterVsPraBilling: { content: [], totalElements: 0, totalPages: 0 },
+  loadingTab1: false,
+  praBillingVsRating: { content: [], totalElements: 0, totalPages: 0 },
+  loadingTab2: false,
+  ratingVsBilling: { content: [], totalElements: 0, totalPages: 0 },
+  loadingTab3: false,
+  billingVsInvoice: { content: [], totalElements: 0, totalPages: 0 },
+  loadingTab4: false,
+  billingVsApproval: { content: [], totalElements: 0, totalPages: 0 },
+  loadingTab5: false,
+  billingVsAdjustment: { content: [], totalElements: 0, totalPages: 0 },
+  loadingTab7: false,
 };
 
-export const getSummaryData = createAsyncThunk(
-  "GET_MONITORING_SUMMARY",
+export const getParameters = createAsyncThunk(
+  "GET_MONITORING_PARAMETERS",
   async (_, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/monitoringcustomer/summary`;
+      const url = `/v1/dbs/api/monitoringcustomer/parameters`;
       const response = await ratingBillingHttpService.getAll(url);
-
-      return {
-        pendingTransactions: response.data.summaryPendingTransaction,
-        pendingApprovals: response.data.summaryPendingApproval,
-        gapRatingBilling: response.data.summaryGapRatingBilling,
-        gapPraBillingMaster: response.data.summaryGapPrabillingMaster,
-      };
+      return response.data?.periods ?? [];
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -83,269 +49,43 @@ export const getSummaryData = createAsyncThunk(
       ) {
         thunkAPI.dispatch(setBodyError(error));
       } else {
-        const errorBody = {
-          title: "Failed",
-          description: `${message}`,
-        };
-        thunkAPI.dispatch(showModalError(errorBody));
+        thunkAPI.dispatch(showModalError({ title: "Failed", description: `${message}` }));
       }
       return thunkAPI.rejectWithValue(error.response?.data);
     }
   }
 );
 
-export const getTrendData = createAsyncThunk(
-  "GET_MONITORING_TREND",
+export const getHeaderSummary = createAsyncThunk(
+  "GET_MONITORING_HEADER_SUMMARY",
   async (period, thunkAPI) => {
     try {
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          resolve([
-            {
-              date: "2025-09-14",
-              pendingTransactions: 3,
-              pendingApprovals: 2,
-              gapRatingBilling: 5,
-              gapPraBillingMaster: 4,
-            },
-            {
-              date: "2025-09-15",
-              pendingTransactions: 5,
-              pendingApprovals: 3,
-              gapRatingBilling: 4,
-              gapPraBillingMaster: 6,
-            },
-            {
-              date: "2025-09-16",
-              pendingTransactions: 4,
-              pendingApprovals: 1,
-              gapRatingBilling: 6,
-              gapPraBillingMaster: 5,
-            },
-            {
-              date: "2025-09-17",
-              pendingTransactions: 6,
-              pendingApprovals: 4,
-              gapRatingBilling: 3,
-              gapPraBillingMaster: 7,
-            },
-            {
-              date: "2025-09-18",
-              pendingTransactions: 2,
-              pendingApprovals: 2,
-              gapRatingBilling: 5,
-              gapPraBillingMaster: 4,
-            },
-            {
-              date: "2025-09-19",
-              pendingTransactions: 5,
-              pendingApprovals: 5,
-              gapRatingBilling: 2,
-              gapPraBillingMaster: 3,
-            },
-            {
-              date: "2025-09-20",
-              pendingTransactions: 5,
-              pendingApprovals: 3,
-              gapRatingBilling: 4,
-              gapPraBillingMaster: 6,
-            },
-          ]);
-        }, 500);
-      });
-    } catch (error) {
-      const message =
-        error?.response?.data?.message || error?.message || error?.toString();
-      if (
-        error?.response?.data?.code === 500 ||
-        error?.response?.data?.code === 419
-      ) {
-        thunkAPI.dispatch(setBodyError(error));
-      } else {
-        const errorBody = {
-          title: "Failed",
-          description: `${message}`,
-        };
-        thunkAPI.dispatch(showModalError(errorBody));
-      }
-      return thunkAPI.rejectWithValue(error.response?.data);
-    }
-  }
-);
-
-export const getPriorityList = createAsyncThunk(
-  "GET_MONITORING_PRIORITY",
-  async (_, thunkAPI) => {
-    try {
-      const url = `/v1/dbs/api/monitoringcustomer/anomalies-top5`;
+      const url = `/v1/dbs/api/monitoringcustomer/header-summary?period=${period}`;
       const response = await ratingBillingHttpService.getAll(url);
-
-      return {
-        priorPendingTransactions: response.data.priorPendingTransactions || [],
-        priorApprovalBatches: response.data.priorApprovalBatches || [],
-        priorGapRatingBilling: response.data.priorGapRatingBilling || [],
-        priorGapPrabillingMaster: response.data.priorGapPrabillingMaster || [],
-      };
-    } catch (error) {
-      const message =
-        error?.response?.data?.message || error?.message || error?.toString();
-      if (
-        error?.response?.data?.code === 500 ||
-        error?.response?.data?.code === 419
-      ) {
-        thunkAPI.dispatch(setBodyError(error));
-      } else {
-        const errorBody = {
-          title: "Failed",
-          description: `${message}`,
-        };
-        thunkAPI.dispatch(showModalError(errorBody));
-      }
-      return thunkAPI.rejectWithValue(error.response?.data);
-    }
-  }
-);
-
-export const getListBillingPeriod = createAsyncThunk(
-  "GET_LIST_BILLING_PERIOD_MONITORING",
-  async (_, thunkAPI) => {
-    try {
-      const url = `/v1/dbs/api/rbi/calculation/billingperiod/1`;
-      const response = await ratingBillingHttpService.getDetail(url);
-      return response.data.data;
-    } catch (error) {
-      const message =
-        error?.response?.data?.message || error?.message || error?.toString();
-      if (
-        error?.response?.data?.code === 500 ||
-        error?.response?.data?.code === 419
-      ) {
-        thunkAPI.dispatch(setBodyError(error));
-      } else {
-        const errorBody = {
-          title: "Failed",
-          description: `${message}`,
-        };
-        thunkAPI.dispatch(showModalError(errorBody));
-      }
-      return thunkAPI.rejectWithValue(error.response?.data);
-    }
-  }
-);
-
-export const getPendingTransactions = createAsyncThunk(
-  "GET_PENDING_TRANSACTIONS",
-  async ({ period, search, page, pageSize, sort }, thunkAPI) => {
-    try {
-      const searchParams = search || "";
-      const sortParams = sort || "receivedAt~desc";
-      const url = `/v1/dbs/api/monitoringcustomer/list-pending-trans?period=${period}&sort=${sortParams}&size=${pageSize}&page=${page}&searchs=${searchParams}`;
-      const response = await ratingBillingHttpService.getPagination(url);
-
-      return {
-        result: response.data.content.map((item) => ({
-          id: item.id,
-          customerId: item.accountNum,
-          customerName: item.customerName || "-",
-          address: item.address || "-",
-          type: item.type || "-",
-          period: item.period,
-          volume: item.volumeM3,
-          receivedAt: item.receivedAt
-            ? new Date(item.receivedAt).toLocaleDateString("id-ID")
-            : "-",
-          status: item.status,
-        })),
-        page: {
-          totalElements:
-            response.data.totalElements || response.data.content.length,
-          totalPages: response.data.totalPages || 1,
-        },
-      };
-    } catch (error) {
-      const message =
-        error?.response?.data?.message || error?.message || error?.toString();
-      if (
-        error?.response?.data?.code === 500 ||
-        error?.response?.data?.code === 419
-      ) {
-        thunkAPI.dispatch(setBodyError(error));
-      } else {
-        const errorBody = {
-          title: "Failed",
-          description: `${message}`,
-        };
-        thunkAPI.dispatch(showModalError(errorBody));
-      }
-      return thunkAPI.rejectWithValue(error.response?.data);
-    }
-  }
-);
-
-export const updateInvestigationFlag = createAsyncThunk(
-  "UPDATE_INVESTIGATION_FLAG",
-  async (id, thunkAPI) => {
-    try {
-      const url = `/v1/dbs/api/monitoringcustomer/update-flag`;
-      const body = { id };
-      const response = await ratingBillingHttpService.createData(url, body);
-
-      const successBody = {
-        title: "Successful",
-        description:
-          response?.message || "Investigation flag updated successfully",
-        return: false,
-      };
-      thunkAPI.dispatch(showModalSuccess(successBody));
-
       return response.data;
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
-      if (error?.response?.data?.code === 419) {
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
         thunkAPI.dispatch(setBodyError(error));
       } else {
-        const errorBody = {
-          title: "Failed",
-          description: `Failed to update investigation flag. ${message}`,
-        };
-        thunkAPI.dispatch(showModalError(errorBody));
+        thunkAPI.dispatch(showModalError({ title: "Failed", description: `${message}` }));
       }
       return thunkAPI.rejectWithValue(error.response?.data);
     }
   }
 );
 
-export const getPendingApprovals = createAsyncThunk(
-  "GET_PENDING_APPROVALS",
-  async ({ search, page, pageSize, sort }, thunkAPI) => {
+export const getMasterVsPraBilling = createAsyncThunk(
+  "GET_MASTER_VS_PRABILLING",
+  async ({ period, page = 0, size = 10, search = "" }, thunkAPI) => {
     try {
-      const searchParams = search || "";
-      const sortParams = sort || "createdAt~desc";
-      const apiPage = page - 1;
-
-      const url = `/v1/dbs/api/monitoringcustomer/list-pending-approvals?sort=${sortParams}&size=${pageSize}&page=${apiPage}&searchs=${searchParams}`;
-      const response = await ratingBillingHttpService.getPagination(url);
-
-      return {
-        result: response.data.content.map((item) => ({
-          id: item.id,
-          batchId: `BATCH-${item.id}`,
-          billingPeriod: item.billingPeriod,
-          accountNumber: item.accountNum,
-          totalCustomers: null,
-          estimatedAmount: item.estimatedAmount,
-          createdBy: item.createdBy,
-          createdAt: item.createdAt
-            ? new Date(item.createdAt).toLocaleString("id-ID")
-            : "-",
-          status: item.status,
-        })),
-        page: {
-          totalElements: response.data.totalElements,
-          totalPages: response.data.totalPages,
-        },
-      };
+      const url = `/v1/dbs/api/monitoringcustomer/master-vs-prabilling?period=${period}&page=${page}&size=${size}${search ? `&search=${encodeURIComponent(search)}` : ""}`;
+      const response = await ratingBillingHttpService.getAll(url);
+      return response.data;
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -355,52 +95,20 @@ export const getPendingApprovals = createAsyncThunk(
       ) {
         thunkAPI.dispatch(setBodyError(error));
       } else {
-        const errorBody = {
-          title: "Failed",
-          description: `${message}`,
-        };
-        thunkAPI.dispatch(showModalError(errorBody));
+        thunkAPI.dispatch(showModalError({ title: "Failed", description: `${message}` }));
       }
       return thunkAPI.rejectWithValue(error.response?.data);
     }
   }
 );
 
-export const getGapRatingBilling = createAsyncThunk(
-  "GET_GAP_RATING_BILLING",
-  async ({ search, page, pageSize, sort }, thunkAPI) => {
+export const getPraBillingVsRating = createAsyncThunk(
+  "GET_PRABILLING_VS_RATING",
+  async ({ period, page = 0, size = 10, search = "" }, thunkAPI) => {
     try {
-      const searchParams = search || "";
-      const sortParams = sort || "detectedAt~desc";
-      const apiPage = page - 1;
-
-      const url = `/v1/dbs/api/monitoringcustomer/list-gap-rating-billing?sort=${sortParams}&size=${pageSize}&page=${apiPage}&searchs=${searchParams}`;
-      const response = await ratingBillingHttpService.getPagination(url);
-
-      return {
-        result: response.data.content.map((item) => ({
-          id: item.id,
-          accountNumber: item.accountNum,
-          customerName: item.customerName || "-",
-          billingPeriod: item.period,
-          ratingCode: item.ratingCode || "-",
-          ratingValue: item.valueRating,
-          billingCode: item.billingCode || "-",
-          billingValue: item.valueBilling,
-          gap: item.diff,
-          detectedAt: item.detectedAt
-            ? new Date(item.detectedAt).toLocaleString("id-ID")
-            : "-",
-          gapPercentage:
-            item.valueRating && item.valueBilling
-              ? ((item.diff / item.valueRating) * 100).toFixed(2)
-              : 0,
-        })),
-        page: {
-          totalElements: response.data.totalElements,
-          totalPages: response.data.totalPages,
-        },
-      };
+      const url = `/v1/dbs/api/monitoringcustomer/prabilling-vs-rating?period=${period}&page=${page}&size=${size}${search ? `&search=${encodeURIComponent(search)}` : ""}`;
+      const response = await ratingBillingHttpService.getAll(url);
+      return response.data;
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -410,205 +118,83 @@ export const getGapRatingBilling = createAsyncThunk(
       ) {
         thunkAPI.dispatch(setBodyError(error));
       } else {
-        const errorBody = {
-          title: "Failed",
-          description: `${message}`,
-        };
-        thunkAPI.dispatch(showModalError(errorBody));
+        thunkAPI.dispatch(showModalError({ title: "Failed", description: `${message}` }));
       }
       return thunkAPI.rejectWithValue(error.response?.data);
     }
   }
 );
 
-export const getGapPraBillingMaster = createAsyncThunk(
-  "GET_GAP_PRABIL_MASTER",
-  async (_, thunkAPI) => {
+export const getRatingVsBilling = createAsyncThunk(
+  "GET_RATING_VS_BILLING",
+  async ({ period, page = 0, size = 10, search = "" }, thunkAPI) => {
     try {
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          resolve({
-            result: [
-              {
-                id: 1,
-                customerId: "CUST003",
-                customerName: "PT DEF",
-                billingPeriod: "202509",
-                fieldMismatch: "Golongan Tarif",
-                praBillingValue: "I-2",
-                masterValue: "I-3",
-              },
-              {
-                id: 2,
-                customerId: "CUST011",
-                customerName: "PT Makmur",
-                billingPeriod: "202509",
-                fieldMismatch: "Status Pelanggan",
-                praBillingValue: "Aktif",
-                masterValue: "Non-Aktif",
-              },
-              {
-                id: 3,
-                customerId: "CUST012",
-                customerName: "CV Sukses",
-                billingPeriod: "202509",
-                fieldMismatch: "Jenis Pelanggan",
-                praBillingValue: "Komersial",
-                masterValue: "Industri",
-              },
-              {
-                id: 4,
-                customerId: "CUST013",
-                customerName: "Rumah Ibu Ani",
-                billingPeriod: "202509",
-                fieldMismatch: "Alamat",
-                praBillingValue: "Jl. Sudirman No. 10",
-                masterValue: "Jl. Sudirman No. 12",
-              },
-              {
-                id: 5,
-                customerId: "CUST014",
-                customerName: "PT Global",
-                billingPeriod: "202509",
-                fieldMismatch: "Golongan Tarif",
-                praBillingValue: "K-1",
-                masterValue: "K-2",
-              },
-              {
-                id: 6,
-                customerId: "CUST015",
-                customerName: "Toko Berkah",
-                billingPeriod: "202509",
-                fieldMismatch: "Area Pelayanan",
-                praBillingValue: "Jakarta Utara",
-                masterValue: "Jakarta Pusat",
-              },
-            ],
-            page: {
-              totalElements: 6,
-              totalPages: 1,
-            },
-          });
-        }, 500);
-      });
+      const url = `/v1/dbs/api/monitoringcustomer/rating-vs-billing?period=${period}&page=${page}&size=${size}${search ? `&search=${encodeURIComponent(search)}` : ""}`;
+      const response = await ratingBillingHttpService.getAll(url);
+      return response.data;
     } catch (error) {
-      const message =
-        error?.response?.data?.message || error?.message || error?.toString();
-      if (
-        error?.response?.data?.code === 500 ||
-        error?.response?.data?.code === 419
-      ) {
+      const message = error?.response?.data?.message || error?.message || error?.toString();
+      if (error?.response?.data?.code === 500 || error?.response?.data?.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
       } else {
-        const errorBody = {
-          title: "Failed",
-          description: `${message}`,
-        };
-        thunkAPI.dispatch(showModalError(errorBody));
+        thunkAPI.dispatch(showModalError({ title: "Failed", description: `${message}` }));
       }
       return thunkAPI.rejectWithValue(error.response?.data);
     }
   }
 );
 
-export const downloadPendingTransactions = createAsyncThunk(
-  "DOWNLOAD_PENDING_TRANSACTIONS",
-  async (_, thunkAPI) => {
+export const getBillingVsInvoice = createAsyncThunk(
+  "GET_BILLING_VS_INVOICE",
+  async ({ period, page = 0, size = 10, search = "" }, thunkAPI) => {
     try {
-      return null;
+      const url = `/v1/dbs/api/monitoringcustomer/billing-vs-invoice?period=${period}&page=${page}&size=${size}${search ? `&search=${encodeURIComponent(search)}` : ""}`;
+      const response = await ratingBillingHttpService.getAll(url);
+      return response.data;
     } catch (error) {
-      const message =
-        error?.response?.data?.message || error?.message || error?.toString();
-      const errorBody = {
-        title: "Failed",
-        description: `Download failed. ${message}`,
-      };
-      thunkAPI.dispatch(showModalError(errorBody));
-      return thunkAPI.rejectWithValue(error.response?.data);
-    }
-  }
-);
-
-export const downloadPendingApprovals = createAsyncThunk(
-  "DOWNLOAD_PENDING_APPROVALS",
-  async (_, thunkAPI) => {
-    try {
-      return null;
-    } catch (error) {
-      const message =
-        error?.response?.data?.message || error?.message || error?.toString();
-      const errorBody = {
-        title: "Failed",
-        description: `Download failed. ${message}`,
-      };
-      thunkAPI.dispatch(showModalError(errorBody));
-      return thunkAPI.rejectWithValue(error.response?.data);
-    }
-  }
-);
-
-export const downloadGapRatingBilling = createAsyncThunk(
-  "DOWNLOAD_GAP_RATING_BILLING",
-  async (_, thunkAPI) => {
-    try {
-      return null;
-    } catch (error) {
-      const message =
-        error?.response?.data?.message || error?.message || error?.toString();
-      const errorBody = {
-        title: "Failed",
-        description: `Download failed. ${message}`,
-      };
-      thunkAPI.dispatch(showModalError(errorBody));
-      return thunkAPI.rejectWithValue(error.response?.data);
-    }
-  }
-);
-
-export const downloadGapPraBillingMaster = createAsyncThunk(
-  "DOWNLOAD_GAP_PRABIL_MASTER",
-  async (_, thunkAPI) => {
-    try {
-      return null;
-    } catch (error) {
-      const message =
-        error?.response?.data?.message || error?.message || error?.toString();
-      const errorBody = {
-        title: "Failed",
-        description: `Download failed. ${message}`,
-      };
-      thunkAPI.dispatch(showModalError(errorBody));
-      return thunkAPI.rejectWithValue(error.response?.data);
-    }
-  }
-);
-
-export const asyncDataMart = createAsyncThunk(
-  "ASYNC_DATA_MART",
-  async (_, thunkAPI) => {
-    try {
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          const successBody = {
-            title: "Successful",
-            description: "Data Mart berhasil disinkronkan!",
-            return: false,
-          };
-          thunkAPI.dispatch(showModalSuccess(successBody));
-          resolve(null);
-        }, 2000);
-      });
-    } catch (error) {
-      const message =
-        error?.response?.data?.message || error?.message || error?.toString();
-      if (error?.response?.data?.code === 419) {
+      const message = error?.response?.data?.message || error?.message || error?.toString();
+      if (error?.response?.data?.code === 500 || error?.response?.data?.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
       } else {
-        const errorBody = {
-          title: "Failed",
-          description: `Async Data Mart failed. ${message}`,
-        };
-        thunkAPI.dispatch(showModalError(errorBody));
+        thunkAPI.dispatch(showModalError({ title: "Failed", description: `${message}` }));
+      }
+      return thunkAPI.rejectWithValue(error.response?.data);
+    }
+  }
+);
+
+export const getBillingVsApproval = createAsyncThunk(
+  "GET_BILLING_VS_APPROVAL",
+  async ({ period, page = 0, size = 10, search = "" }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/monitoringcustomer/billing-vs-approval?period=${period}&page=${page}&size=${size}${search ? `&search=${encodeURIComponent(search)}` : ""}`;
+      const response = await ratingBillingHttpService.getAll(url);
+      return response.data;
+    } catch (error) {
+      const message = error?.response?.data?.message || error?.message || error?.toString();
+      if (error?.response?.data?.code === 500 || error?.response?.data?.code === 419) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        thunkAPI.dispatch(showModalError({ title: "Failed", description: `${message}` }));
+      }
+      return thunkAPI.rejectWithValue(error.response?.data);
+    }
+  }
+);
+
+export const getBillingVsAdjustment = createAsyncThunk(
+  "GET_BILLING_VS_ADJUSTMENT",
+  async ({ period, page = 0, size = 10, search = "" }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/monitoringcustomer/billing-vs-adjustment?period=${period}&page=${page}&size=${size}${search ? `&search=${encodeURIComponent(search)}` : ""}`;
+      const response = await ratingBillingHttpService.getAll(url);
+      return response.data;
+    } catch (error) {
+      const message = error?.response?.data?.message || error?.message || error?.toString();
+      if (error?.response?.data?.code === 500 || error?.response?.data?.code === 419) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        thunkAPI.dispatch(showModalError({ title: "Failed", description: `${message}` }));
       }
       return thunkAPI.rejectWithValue(error.response?.data);
     }
@@ -619,182 +205,90 @@ const monitoringSlice = createSlice({
   name: "monitoring",
   initialState,
   reducers: {},
-  extraReducers: {
-    // Get List Billing Period
-    [getListBillingPeriod.pending]: (state) => {
-      state.loading = true;
-    },
-    [getListBillingPeriod.fulfilled]: (state, action) => {
-      state.loading = false;
-      state.list_billing_period = action.payload;
-    },
-    [getListBillingPeriod.rejected]: (state, action) => {
-      state.loading = false;
-      state.error = action.payload;
-    },
+  extraReducers: (builder) => {
+    // Get Parameters (period LOV)
+    builder
+      .addCase(getParameters.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(getParameters.fulfilled, (state, action) => {
+        state.loading = false;
+        state.periods = action.payload;
+      })
+      .addCase(getParameters.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
 
-    // Update Investigation Flag
-    [updateInvestigationFlag.pending]: (state) => {
-      state.loading = true;
-    },
-    [updateInvestigationFlag.fulfilled]: (state) => {
-      state.loading = false;
-    },
-    [updateInvestigationFlag.rejected]: (state, action) => {
-      state.loading = false;
-      state.error = action.payload;
-    },
+      // Get Header Summary
+      .addCase(getHeaderSummary.pending, (state) => {
+        state.loadingHeader = true;
+      })
+      .addCase(getHeaderSummary.fulfilled, (state, action) => {
+        state.loadingHeader = false;
+        if (action.payload) {
+          state.headerSummary = action.payload;
+        }
+      })
+      .addCase(getHeaderSummary.rejected, (state) => {
+        state.loadingHeader = false;
+      })
 
-    // Get Summary Data
-    [getSummaryData.pending]: (state) => {
-      state.loading = true;
-    },
-    [getSummaryData.fulfilled]: (state, action) => {
-      state.loading = false;
-      state.summaryData = action.payload;
-    },
-    [getSummaryData.rejected]: (state, action) => {
-      state.loading = false;
-      state.error = action.payload;
-    },
+      // Get Master vs Pra-Billing
+      .addCase(getMasterVsPraBilling.pending, (state) => {
+        state.loadingTab1 = true;
+      })
+      .addCase(getMasterVsPraBilling.fulfilled, (state, action) => {
+        state.loadingTab1 = false;
+        if (action.payload) state.masterVsPraBilling = action.payload;
+      })
+      .addCase(getMasterVsPraBilling.rejected, (state) => {
+        state.loadingTab1 = false;
+      })
 
-    // Get Trend Data
-    [getTrendData.pending]: (state) => {
-      state.loading = true;
-    },
-    [getTrendData.fulfilled]: (state, action) => {
-      state.loading = false;
-      state.trendData = action.payload;
-    },
-    [getTrendData.rejected]: (state, action) => {
-      state.loading = false;
-      state.error = action.payload;
-    },
+      // Get Pra-Billing vs Rating
+      .addCase(getPraBillingVsRating.pending, (state) => {
+        state.loadingTab2 = true;
+      })
+      .addCase(getPraBillingVsRating.fulfilled, (state, action) => {
+        state.loadingTab2 = false;
+        if (action.payload) state.praBillingVsRating = action.payload;
+      })
+      .addCase(getPraBillingVsRating.rejected, (state) => {
+        state.loadingTab2 = false;
+      })
 
-    // Get Priority List
-    [getPriorityList.pending]: (state) => {
-      state.loading = true;
-    },
-    [getPriorityList.fulfilled]: (state, action) => {
-      state.loading = false;
-      state.priorityList = action.payload;
-    },
-    [getPriorityList.rejected]: (state, action) => {
-      state.loading = false;
-      state.error = action.payload;
-    },
+      // Get Rating vs Billing
+      .addCase(getRatingVsBilling.pending, (state) => { state.loadingTab3 = true; })
+      .addCase(getRatingVsBilling.fulfilled, (state, action) => {
+        state.loadingTab3 = false;
+        if (action.payload) state.ratingVsBilling = action.payload;
+      })
+      .addCase(getRatingVsBilling.rejected, (state) => { state.loadingTab3 = false; })
 
-    // Get Pending Transactions
-    [getPendingTransactions.pending]: (state) => {
-      state.loading = true;
-    },
-    [getPendingTransactions.fulfilled]: (state, action) => {
-      state.loading = false;
-      state.pendingTransactionsData = action.payload;
-    },
-    [getPendingTransactions.rejected]: (state, action) => {
-      state.loading = false;
-      state.error = action.payload;
-    },
+      // Get Billing vs Invoice
+      .addCase(getBillingVsInvoice.pending, (state) => { state.loadingTab4 = true; })
+      .addCase(getBillingVsInvoice.fulfilled, (state, action) => {
+        state.loadingTab4 = false;
+        if (action.payload) state.billingVsInvoice = action.payload;
+      })
+      .addCase(getBillingVsInvoice.rejected, (state) => { state.loadingTab4 = false; })
 
-    // Get Pending Approvals
-    [getPendingApprovals.pending]: (state) => {
-      state.loading = true;
-    },
-    [getPendingApprovals.fulfilled]: (state, action) => {
-      state.loading = false;
-      state.pendingApprovalsData = action.payload;
-    },
-    [getPendingApprovals.rejected]: (state, action) => {
-      state.loading = false;
-      state.error = action.payload;
-    },
+      // Get Billing vs Approval
+      .addCase(getBillingVsApproval.pending, (state) => { state.loadingTab5 = true; })
+      .addCase(getBillingVsApproval.fulfilled, (state, action) => {
+        state.loadingTab5 = false;
+        if (action.payload) state.billingVsApproval = action.payload;
+      })
+      .addCase(getBillingVsApproval.rejected, (state) => { state.loadingTab5 = false; })
 
-    // Get Gap Rating Billing
-    [getGapRatingBilling.pending]: (state) => {
-      state.loading = true;
-    },
-    [getGapRatingBilling.fulfilled]: (state, action) => {
-      state.loading = false;
-      state.gapRatingBillingData = action.payload;
-    },
-    [getGapRatingBilling.rejected]: (state, action) => {
-      state.loading = false;
-      state.error = action.payload;
-    },
-
-    // Get Gap Pra-Billing Master
-    [getGapPraBillingMaster.pending]: (state) => {
-      state.loading = true;
-    },
-    [getGapPraBillingMaster.fulfilled]: (state, action) => {
-      state.loading = false;
-      state.gapPraBillingMasterData = action.payload;
-    },
-    [getGapPraBillingMaster.rejected]: (state, action) => {
-      state.loading = false;
-      state.error = action.payload;
-    },
-
-    // Download Pending Transactions
-    [downloadPendingTransactions.pending]: (state) => {
-      state.loading = true;
-    },
-    [downloadPendingTransactions.fulfilled]: (state) => {
-      state.loading = false;
-    },
-    [downloadPendingTransactions.rejected]: (state, action) => {
-      state.loading = false;
-      state.error = action.payload;
-    },
-
-    // Download Pending Approvals
-    [downloadPendingApprovals.pending]: (state) => {
-      state.loading = true;
-    },
-    [downloadPendingApprovals.fulfilled]: (state) => {
-      state.loading = false;
-    },
-    [downloadPendingApprovals.rejected]: (state, action) => {
-      state.loading = false;
-      state.error = action.payload;
-    },
-
-    // Download Gap Rating Billing
-    [downloadGapRatingBilling.pending]: (state) => {
-      state.loading = true;
-    },
-    [downloadGapRatingBilling.fulfilled]: (state) => {
-      state.loading = false;
-    },
-    [downloadGapRatingBilling.rejected]: (state, action) => {
-      state.loading = false;
-      state.error = action.payload;
-    },
-
-    // Download Gap Pra-Billing Master
-    [downloadGapPraBillingMaster.pending]: (state) => {
-      state.loading = true;
-    },
-    [downloadGapPraBillingMaster.fulfilled]: (state) => {
-      state.loading = false;
-    },
-    [downloadGapPraBillingMaster.rejected]: (state, action) => {
-      state.loading = false;
-      state.error = action.payload;
-    },
-
-    // Async Data Mart
-    [asyncDataMart.pending]: (state) => {
-      state.loading = true;
-    },
-    [asyncDataMart.fulfilled]: (state) => {
-      state.loading = false;
-    },
-    [asyncDataMart.rejected]: (state, action) => {
-      state.loading = false;
-      state.error = action.payload;
-    },
+      // Get Billing vs Adjustment
+      .addCase(getBillingVsAdjustment.pending, (state) => { state.loadingTab7 = true; })
+      .addCase(getBillingVsAdjustment.fulfilled, (state, action) => {
+        state.loadingTab7 = false;
+        if (action.payload) state.billingVsAdjustment = action.payload;
+      })
+      .addCase(getBillingVsAdjustment.rejected, (state) => { state.loadingTab7 = false; });
   },
 });
 

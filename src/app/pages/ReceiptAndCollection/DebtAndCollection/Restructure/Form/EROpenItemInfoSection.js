@@ -1,7 +1,9 @@
 import React from "react";
+import { Table } from "antd";
 import CardContainerNoBorder from "../../../../../../components/CardContainerNoBorder";
 import TableRBI from "../../../../../../components/TableRBI";
 import SubSectionCard from "../../../../../../components/SubSectionCard";
+import SectionCard from "../../../../../../components/SectionCard";
 
 const EROpenItemInfoSection = ({ openItems = [] }) => {
   // Derive unique currencies from open items
@@ -16,7 +18,7 @@ const EROpenItemInfoSection = ({ openItems = [] }) => {
           currencies.map((currency) => {
             const items = openItems.filter((i) => (i.currency || "IDR") === currency);
             const isIdr = currency === "IDR";
-            const currentSum = items.reduce(
+            const totalAmount = items.reduce(
               (sum, r) => sum + (parseFloat(String(r.amount).replace(/,/g, "")) || 0),
               0
             );
@@ -31,7 +33,7 @@ const EROpenItemInfoSection = ({ openItems = [] }) => {
               },
               { title: "INVOICE NO", dataIndex: "invoiceNo" },
               { title: "INVOICE PERIOD", dataIndex: "invoicePeriod" },
-              { title: "BILLING TYPE", dataIndex: "allocation" }, // Using allocation as billing type for mock
+              { title: "BILLING ITEM", dataIndex: "billingItem" },
               {
                 title: "AMOUNT",
                 dataIndex: "amount",
@@ -47,25 +49,30 @@ const EROpenItemInfoSection = ({ openItems = [] }) => {
 
             return (
               <div key={currency} className="mb-4">
-                <div className="text-[14px] font-semibold text-[#0075BF] mb-2 uppercase">
-                  CURRENCY {currency}
-                </div>
-                <TableRBI
-                  idTable={`er-open-item-${currency}`}
-                  dataSource={items}
-                  columns={columns}
-                  usePagination={false}
-                  showAdvanceSearch={true}
-                  showSearchBar={true}
-                />
-                <div className="flex bg-[#F5F5F5] border border-t-0 p-2 font-bold text-[12px]">
-                  <div className="flex-[4] text-center">Total</div>
-                  <div className="flex-1 text-right pr-[15px]">
-                    {currentSum.toLocaleString(isIdr ? "id-ID" : "en-US", {
-                      maximumFractionDigits: 2,
-                    })}
-                  </div>
-                </div>
+                <SectionCard title={`CURRENCY ${currency}`}>
+                  <TableRBI
+                    idTable={`er-open-item-${currency}`}
+                    dataSource={items}
+                    columns={columns}
+                    usePagination={false}
+                    showAdvanceSearch={true}
+                    showSearchBar={true}
+                    summary={() => (
+                      <Table.Summary fixed>
+                        <Table.Summary.Row className="font-bold text-[12px] bg-[#F5F5F5]">
+                          <Table.Summary.Cell index={0} colSpan={4} className="text-center font-bold">
+                            Total
+                          </Table.Summary.Cell>
+                          <Table.Summary.Cell index={1} className="text-right font-bold pr-4">
+                            {totalAmount.toLocaleString(isIdr ? "id-ID" : "en-US", {
+                              maximumFractionDigits: 2,
+                            })}
+                          </Table.Summary.Cell>
+                        </Table.Summary.Row>
+                      </Table.Summary>
+                    )}
+                  />
+                </SectionCard>
               </div>
             );
           })

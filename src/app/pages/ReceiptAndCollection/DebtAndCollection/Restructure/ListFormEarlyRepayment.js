@@ -68,6 +68,7 @@ const ListFormEarlyRepayment = (props) => {
     const [appHierDataDetail, setAppHierDataDetail] = useState([]);
     const [isModalSubmit, setIsModalSubmit] = useState(false);
     const [formValues, setFormValues] = useState({});
+    const [isUploading, setIsUploading] = useState(false);
 
     // Validation states for step 0
     const [isPlanDetailValid, setIsPlanDetailValid] = useState(true);
@@ -127,7 +128,7 @@ const ListFormEarlyRepayment = (props) => {
     useEffect(() => {
         if (data_detail && data_detail.restructure) {
             const res = data_detail.restructure;
-            
+
             // Pre-populate account and installment fields
             form.setFieldsValue({
                 accountNumber: res.accountNumber,
@@ -142,13 +143,14 @@ const ListFormEarlyRepayment = (props) => {
                 accountType: res.accountType,
                 classificationType: res.classificationType,
                 accountStatus: res.accountStatus,
-                
+
                 type: res.type,
                 tenor: res.tenor,
                 startPeriod: res.startPeriod ? moment(res.startPeriod).format("MMMM YYYY") : "",
                 source: res.source || "Manual",
                 requestDate: res.createdDate ? moment(res.createdDate).format("DD MMMM YYYY") : moment().format("DD MMMM YYYY"),
                 remark: res.description,
+                restructureNumber: res.restructureNumber || res.id,
             });
 
             // Populate contacts
@@ -205,10 +207,16 @@ const ListFormEarlyRepayment = (props) => {
             // Validation 1: Mandatory Fields for Step 0
             form.validateFields([
                 "accountNumber",
+                "restructureNumber",
                 "type",
                 "tenor",
                 "startPeriod",
-                "description"
+                "source",
+                "requestDate",
+                "earlyRepaymentDate",
+                "reason",
+                "termOfPaymentValue",
+                "earlyRepaymentReason"
             ]).then(() => {
                 // Validation 2: Contact Information cannot be empty
                 if (contacts.length === 0) {
@@ -263,7 +271,12 @@ const ListFormEarlyRepayment = (props) => {
         earlyRepaymentDate: values.earlyRepaymentDate
             ? moment(values.earlyRepaymentDate).format("YYYY-MM-DD")
             : null,
-        earlyRepaymentReason: values.earlyRepaymentReason,
+        earlyRepaymentReason: values.reason,
+        remark: values.earlyRepaymentReason,
+        termOfPaymentType: values.termOfPaymentType,
+        termOfPaymentValue: values.termOfPaymentValue
+            ? moment(values.termOfPaymentValue).format("YYYY-MM-DD")
+            : null,
         installmentDetailIds: selectedInstallmentDetailIds,
         appHierId: selectedHierarchy,
         attachmentIds: listDataAttachment.map((a) => a.id).filter(Boolean),
@@ -277,12 +290,19 @@ const ListFormEarlyRepayment = (props) => {
             ? await dispatch(updateEarlyRepayment({ id, body }))
             : await dispatch(saveEarlyRepayment({ body }));
         if (action.meta.requestStatus === "fulfilled") {
-            const repaymentId = action.payload?.data?.repaymentId || id;
+            const repaymentId = action.payload?.repaymentId || action.payload?.data?.repaymentId || id;
             const newAttachments = listDataAttachment.filter(item => item.dataType !== "exist");
             if (newAttachments.length > 0 && repaymentId) {
-                await uploadAttachments(newAttachments, repaymentId, "EARLY_REPAYMENT_RESTRUCTURE",
-                    (body) => receiptCollectionHttpService.uploadImage(`/v1/dbs/api/attachment/upload/v1`, body)
-                );
+                try {
+                    setIsUploading(true);
+                    await uploadAttachments(newAttachments, repaymentId, "EARLY_REPAYMENT_RESTRUCTURE",
+                        (body) => receiptCollectionHttpService.uploadImage(`/v1/dbs/api/attachment/upload/v1`, body)
+                    );
+                } catch (err) {
+                    console.error("Async draft upload failed", err);
+                } finally {
+                    setIsUploading(false);
+                }
             }
             message.success("Draft berhasil disimpan!");
             navigate(DEBT_AND_COLLECTION_ROUTES.VIEW_RESTRUCTURE);
@@ -306,14 +326,21 @@ const ListFormEarlyRepayment = (props) => {
             ? await dispatch(updateEarlyRepayment({ id, body }))
             : await dispatch(saveEarlyRepayment({ body }));
         if (action.meta.requestStatus === "fulfilled") {
-            const repaymentId = action.payload?.data?.repaymentId || id;
+            const repaymentId = action.payload?.repaymentId || action.payload?.data?.repaymentId || id;
             const newAttachments = listDataAttachment.filter(item => item.dataType !== "exist");
             if (newAttachments.length > 0 && repaymentId) {
-                await uploadAttachments(newAttachments, repaymentId, "EARLY_REPAYMENT_RESTRUCTURE",
-                    (body) => receiptCollectionHttpService.uploadImage(`/v1/dbs/api/attachment/upload/v1`, body)
-                );
+                try {
+                    setIsUploading(true);
+                    await uploadAttachments(newAttachments, repaymentId, "EARLY_REPAYMENT_RESTRUCTURE",
+                        (body) => receiptCollectionHttpService.uploadImage(`/v1/dbs/api/attachment/upload/v1`, body)
+                    );
+                } catch (err) {
+                    console.error("Async submit upload failed", err);
+                } finally {
+                    setIsUploading(false);
+                }
             }
-            message.success("Early Repayment berhasil disubmit!");
+            message.success("Early Payoff berhasil disubmit!");
             navigate(DEBT_AND_COLLECTION_ROUTES.VIEW_RESTRUCTURE);
         }
     };
@@ -321,8 +348,8 @@ const ListFormEarlyRepayment = (props) => {
     const routes = [
         { path: "", breadcrumbName: "Payment & Collection" },
         { path: "", breadcrumbName: "Debt & Collection" },
-        { path: DEBT_AND_COLLECTION_ROUTES.VIEW_RESTRUCTURE, breadcrumbName: "Early Repayment" },
-        { path: "", breadcrumbName: type === "create" ? "Create Early Repayment" : "Update Early Repayment" },
+        { path: DEBT_AND_COLLECTION_ROUTES.VIEW_RESTRUCTURE, breadcrumbName: "Early Payoff" },
+        { path: "", breadcrumbName: type === "create" ? "Create Early Payoff" : "Update Early Payoff" },
     ];
 
     const handlePlanDetailValidation = useCallback((isValid) => {
@@ -340,12 +367,12 @@ const ListFormEarlyRepayment = (props) => {
     return (
         <>
             <BreadCrumb routes={routes} />
-            <Spin spinning={loading}>
+            <Spin spinning={loading || isUploading}>
                 <FormStepper steps={steps} current={current} onPrev={prev} onNext={next} />
-                
-                <Form 
-                    layout="vertical" 
-                    form={form} 
+
+                <Form
+                    layout="vertical"
+                    form={form}
                     id="formRequest"
                     onFinish={handleSubmit}
                 >
@@ -393,6 +420,7 @@ const ListFormEarlyRepayment = (props) => {
                                     service={receiptCollectionHttpService}
                                     configApplication={configApp.PAYMENT_SERVICE}
                                     typeRBI={"data"}
+                                    mandatory={true}
                                 />
                             </SubSectionCard>
                         </BaseContainer>
@@ -404,11 +432,11 @@ const ListFormEarlyRepayment = (props) => {
                         onPrev={prev}
                         onNext={next}
                         onCancel={onBack}
-                        onClear={() => { 
-                            form.resetFields(); 
+                        onClear={() => {
+                            form.resetFields();
                             setCurrent(0);
-                            setSelectedHierarchy(null); 
-                            setListDataAttachment([]); 
+                            setSelectedHierarchy(null);
+                            setListDataAttachment([]);
                         }}
                         onSaveDraft={handleSaveDraft}
                         onSubmit={() => form.submit()}

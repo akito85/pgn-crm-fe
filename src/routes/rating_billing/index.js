@@ -66,6 +66,7 @@ export const rating_billing = [
     element: RBI_ELEMENTS.MONITORING_CUSTOMER_VIEW_ELEMENTS,
   },
 
+
   // monitoring usage
   {
     path: RBI_ROUTES.MONITORING_USAGE_VIEW,
@@ -376,5 +377,23 @@ export const rating_billing = [
   {
     path: RBI_ROUTES.CONTENT_MANAGEMENT_DETAIL,
     element: RBI_ELEMENTS.CONTENT_MANAGEMENT_DETAIL,
+  },
+
+  // Gas Deposit
+  {
+    path: RBI_ROUTES.GAS_DEPOSIT_VIEW,
+    element: RBI_ELEMENTS.GAS_DEPOSIT_VIEW_ELEMENT,
+  },
+  {
+    path: RBI_ROUTES.GAS_DEPOSIT_CREATE,
+    element: RBI_ELEMENTS.GAS_DEPOSIT_CREATE_ELEMENT,
+  },
+  {
+    path: RBI_ROUTES.GAS_DEPOSIT_UPDATE,
+    element: RBI_ELEMENTS.GAS_DEPOSIT_UPDATE_ELEMENT,
+  },
+  {
+    path: RBI_ROUTES.GAS_DEPOSIT_EXPIRED_CREATE,
+    element: RBI_ELEMENTS.GAS_DEPOSIT_EXPIRED_CREATE_ELEMENT,
   },
 ];

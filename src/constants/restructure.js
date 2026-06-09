@@ -73,9 +73,23 @@ export const CUSTOMER_STATUS = {
 // ─── Status Types ────────────────────────────────────────────────────────────
 export const STATUS_TYPES = {
   DRAFT: "DRAFT",
+  SUBMITTED: "SUBMITTED",
+  ACTIVE: "ACTIVE",
+  CLOSED: "CLOSED",
+  CANCELED: "CANCELED",
+  BROKEN: "BROKEN",
+  TERMINATED: "TERMINATED",
+  EARLY_PAY_OFF: "EARLY PAY OFF",
   REJECTED: "REJECTED",
   PENDING: "PENDING",
   APPROVED: "APPROVED",
+};
+
+export const STATUS_APPROVAL = {
+  DRAFT: "DRAFT",
+  WAITING_APPROVAL: "WAITING APPROVAL",
+  APPROVED: "APPROVED",
+  REJECTED: "REJECTED",
 };
 
 // ─── Sort Order ──────────────────────────────────────────────────────────────
