@@ -37,6 +37,7 @@ const EditableCell = ({
   regex,
   required,
   disableDate,
+  dateFormat,
   onCellClicked,
   onInput,
   maxLength,
@@ -145,7 +146,7 @@ const EditableCell = ({
       case "date":
         return (
           <DatePicker
-            format={"YYYY-MM-DD"}
+            format={dateFormat || "YYYY-MM-DD"}
             disabledDate={handleDisableDate}
             style={{ width: "100%" }}
           />
@@ -644,6 +645,7 @@ const DynamicTableInline = ({
                     regex: regex,
                     required: col.required,
                     disableDate,
+                    dateFormat: col.dateFormat,
                     form: form,
                     onInput: col.onInput,
                     maxLength: col.maxLength,
