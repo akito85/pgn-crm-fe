@@ -1,19 +1,15 @@
-import { Fragment, useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { Fragment, useState, useEffect, useCallback, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 
 import { Button, Checkbox, Popconfirm, Tooltip } from "antd";
-import { PlusOutlined } from "@ant-design/icons";
 
 import {
-  getServiceRequestPreRequisites,
-  deleteSrPrerequisite,
   getSrPrerequisiteTemplate,
   saveCreateSrFormData,
   saveCreateSrAttachments,
   removeCreateSrPrerequisite,
 } from "../../../../../../../../../redux/slices/account_management/detailAccount/ServiceRequestSlice";
-import ButtonComponent from "../../../../../../../../../components/ButtonComponent";
 import NxTable from "../../../../../../../../../components/Nx/NxTable";
 import NxCardContainer from "../../../../../../../../../components/Nx/NxCardContainer";
 import NxBaseContainer from "../../../../../../../../../components/Nx/NxBaseContainer";
@@ -30,7 +26,11 @@ export default function PreRequisiteForm({
   attachments = [],
 }) {
   const dispatch = useDispatch();
-  const { create_sr, edited_api_prerequisites = {} } = useSelector((state) => state.serviceRequest);
+  const {
+    create_sr,
+    edited_api_prerequisites = {},
+    detail_serviceRequest,
+  } = useSelector((state) => state.serviceRequest);
   const [isOpen, setIsOpen] = useState(false);
   const [selectedPrerequisite, setSelectedPrerequisite] = useState(null);
   const navigate = useNavigate();
@@ -40,14 +40,15 @@ export default function PreRequisiteForm({
   const accountId = account?.accountInformation?.accountId;
   const isCreateFlow = !serviceRequestId; // TRUE = SR baru, belum punya ID
 
-  const PAGE_SIZE = 10;
-  // Remote data (UPDATE flow: serviceRequestId ada)
   const [prereqData, setPrereqData] = useState([]);
-  const [prereqPage, setPrereqPage] = useState(1);
-  const [prereqHasMore, setPrereqHasMore] = useState(false);
-  const [prereqLoading, setPrereqLoading] = useState(false);
-  const loadingRef = useRef(false);
-  const newPrerequisiteProcessed = useRef(false);
+
+  useEffect(() => {
+    if (isCreateFlow || !detail_serviceRequest) return;
+    const items = mapItems(detail_serviceRequest?.preRequisites || [], 0);
+    setPrereqData(items);
+    form?.setFieldsValue({ srFormPreRequisites: items });
+  }, [detail_serviceRequest, isCreateFlow]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const [page, setPage] = useState(0);
   const [loadMoreSize] = useState(20);
   const [sort, setSort] = useState("");
@@ -79,11 +80,6 @@ export default function PreRequisiteForm({
     return () => { promise.abort(); };
   }, [sort, search, filters, filterRules, isCreateFlow]);
 
-  // Local data (CREATE flow: belum ada srId, simpan di form field)
-  const [localPrereqs, setLocalPrereqs] = useState(() =>
-    form?.getFieldValue("srFormPreRequisites") || []
-  );
-
   const getPrerequisiteLabel = useCallback(
     (prerequisiteId) => {
       const source = dropdowns?.serviceRequestPrerequisites;
@@ -114,71 +110,19 @@ export default function PreRequisiteForm({
     [getPrerequisiteLabel],
   );
 
-  const fetchPage = useCallback(
-    async (page) => {
-      if (!accountId || !serviceRequestId) return;
-      const result = await dispatch(
-        getServiceRequestPreRequisites({ accountId, serviceRequestId }),
-      ).unwrap();
-
-      const payload = result?.data ?? result;
-      const content = payload?.content ?? payload?.result ?? [];
-      const totalElements = payload?.totalElements ?? payload?.page?.totalElements ?? 0;
-      const hasMore = page * PAGE_SIZE < totalElements;
-
-      return { items: mapItems(content, page), hasMore };
-    },
-    [dispatch, accountId, serviceRequestId, mapItems],
-  );
-
-  const loadFirst = useCallback(() => {
-    if (!accountId || !serviceRequestId) return;
-    setPrereqData([]);
-    setPrereqPage(1);
-    setPrereqHasMore(false);
-    setPrereqLoading(true);
-    loadingRef.current = false;
-    fetchPage(1)
-      .then(({ items, hasMore }) => {
-        setPrereqData(items);
-        setPrereqHasMore(hasMore);
-      })
-      .catch(() => {})
-      .finally(() => setPrereqLoading(false));
-  }, [fetchPage, accountId, serviceRequestId]);
-
-  useEffect(() => {
-    loadFirst();
-  }, [loadFirst]);
-
-  const handleLoadMore = useCallback(() => {
-    if (loadingRef.current || !prereqHasMore) return Promise.resolve();
-    loadingRef.current = true;
-    const nextPage = prereqPage + 1;
-    return fetchPage(nextPage)
-      .then(({ items, hasMore }) => {
-        setPrereqData((prev) => [...prev, ...items]);
-        setPrereqPage(nextPage);
-        setPrereqHasMore(hasMore);
-      })
-      .catch(() => {})
-      .finally(() => {
-        loadingRef.current = false;
-      });
-  }, [prereqPage, prereqHasMore, fetchPage]);
-
   const handleDelete = useCallback(
-    async (record) => {
+    (record) => {
       if (isCreateFlow) {
         dispatch(removeCreateSrPrerequisite(record.key));
         return;
       }
-      await dispatch(
-        deleteSrPrerequisite({ accountId, serviceRequestId, id: record.id }),
-      );
-      loadFirst();
+      setPrereqData((prev) => {
+        const updated = prev.filter((item) => item.key !== record.key);
+        form?.setFieldsValue({ srFormPreRequisites: updated });
+        return updated;
+      });
     },
-    [dispatch, accountId, serviceRequestId, isCreateFlow, loadFirst],
+    [dispatch, isCreateFlow, form],
   );
 
   // Track which template rows the user has checked
@@ -401,9 +345,8 @@ export default function PreRequisiteForm({
           <NxTable
             idTable="prerequisite-table"
             usePagination={false}
-            useInfiniteScroll={!isCreateFlow}
-            onLoadMore={handleLoadMore}
-            hasMore={isCreateFlow ? false : prereqHasMore}
+            useInfiniteScroll={false}
+            hasMore={false}
             useSelect={true}
             dataSource={isCreateFlow
               ? combinedCreateFlowData
@@ -411,7 +354,7 @@ export default function PreRequisiteForm({
             }
             columnMain={columnMain}
             fontSize={"medium"}
-            loading={isCreateFlow ? false : prereqLoading}
+            loading={false}
             tableScrolled={{ x: "max-content", y: 400 }}
             border="true"
           />

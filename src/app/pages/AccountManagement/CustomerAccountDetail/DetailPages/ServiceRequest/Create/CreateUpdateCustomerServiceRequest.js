@@ -1016,7 +1016,11 @@ const CreateUpdateCustomerServiceRequest = ({ formType = "create" }) => {
         dropdowns={dropdowns}
         approvalTableData={detail_srApprovalHierarchy}
         attachmentsData={attachmentDataSource}
-        prerequisites={create_sr?.prerequisites || []}
+        prerequisites={
+          isUpdate
+            ? (formCreate.getFieldValue("srFormPreRequisites") || [])
+            : (create_sr?.prerequisites || [])
+        }
         type={confirmationType}
         loading={loading_createUpdateSr}
         service={accountManagementService}
