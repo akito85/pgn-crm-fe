@@ -27,7 +27,6 @@ import {
 import { ModalConfirm } from "../../../../components/Modal/ModalPopUp";
 import SVGIcon from "../../../../assets/Icon/index";
 import moment from "moment";
-import { dateFormatting } from "../../../../utils";
 const { Dragger } = Upload;
 
 const EmployeeUpload = () => {
@@ -70,8 +69,8 @@ const EmployeeUpload = () => {
             phone: item?.phone,
             empType: item?.empTypeId,
             empTypeId: item?.empTypeId,
-            startDate: item?.startDate ? moment(item.startDate).format("DD MMM YYYY") : null,
-            endDate: item?.endDate ? moment(item.endDate).format("DD MMM YYYY") : null,
+            startDate: item?.startDate ? moment(item.startDate).format("YYYY-MM-DD") : null,
+            endDate: item?.endDate ? moment(item.endDate).format("YYYY-MM-DD") : null,
             description: item?.description,
             status: item?.status,
             message: item?.message ?? [],
@@ -103,6 +102,14 @@ const EmployeeUpload = () => {
     };
   }, [dispatch]);
 
+  // auto-reset upload state when all rows are deleted from the list
+  useEffect(() => {
+    if (showListUpload && dataEmployeeList.length === 0) {
+      dispatch(setClearDataUpload());
+      setShowListUpload(false);
+      setFileList([]);
+    }
+  }, [dataEmployeeList, showListUpload, dispatch]);
 
   // handle change file
   const handleFileChange = ({ fileList }) => {
@@ -176,8 +183,8 @@ const EmployeeUpload = () => {
           ...item,
           empType: item?.empType?.toString(),
           empTypeId: typeof item?.empType === 'string' ? item?.empTypeId?.toString() : item?.empType?.toString(),
-          startDate: item?.startDate ? moment(item.startDate, "DD MMM YYYY").format(dateFormatting?.dateCapital) : null,
-          endDate: item?.endDate ? moment(item.endDate, "DD MMM YYYY").format(dateFormatting?.dateCapital) : null,
+          startDate: item?.startDate ?? null,
+          endDate: item?.endDate ?? null,
         }
       });
       const assignmentEmployeeListItem = dataAssignmentEmployeeList?.map(({ status: _status, ...item }) => {
@@ -185,8 +192,8 @@ const EmployeeUpload = () => {
           ...item,
           jobId: item?.jobId?.toString(),
           positionId: item?.positionId.toString(),
-          startDate: item?.startDate ? moment(item.startDate).format(dateFormatting?.dateCapital) : null,
-          endDate: item?.endDate ? moment(item.endDate).format(dateFormatting?.dateCapital) : null,
+          startDate: item?.startDate ? moment(item.startDate).format("YYYY-MM-DD") : null,
+          endDate: item?.endDate ? moment(item.endDate).format("YYYY-MM-DD") : null,
         }
       });
       const body = {
