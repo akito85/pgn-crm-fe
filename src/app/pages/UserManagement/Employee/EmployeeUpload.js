@@ -69,8 +69,8 @@ const EmployeeUpload = () => {
             phone: item?.phone,
             empType: item?.empTypeId,
             empTypeId: item?.empTypeId,
-            startDate: item?.startDate ? moment(item.startDate).format("YYYY-MM-DD") : null,
-            endDate: item?.endDate ? moment(item.endDate).format("YYYY-MM-DD") : null,
+            startDate: item?.startDate ?? null,
+            endDate: item?.endDate ?? null,
             description: item?.description,
             status: item?.status,
             message: item?.message ?? [],
@@ -81,11 +81,11 @@ const EmployeeUpload = () => {
         dataConverter?.uploadAssignmentDTO?.map((item) => {
           return {
             empNumber: item?.empNumber,
-            endDate: item?.endDate ? moment(item.endDate).clone() : null,
+            endDate: item?.endDate ? moment(item.endDate, "DD MMM YYYY") : null,
             isMain: item?.isMain,
             jobId: item?.jobId,
             positionId: item?.positionId,
-            startDate: item?.startDate ? moment(item.startDate).clone() : null,
+            startDate: item?.startDate ? moment(item.startDate, "DD MMM YYYY") : null,
           };
         })
       );
@@ -130,7 +130,6 @@ const EmployeeUpload = () => {
       return false;
     },
     onChange: handleFileChange,
-    disabled: showListUpload
   };
 
   // handle remove file
@@ -192,8 +191,8 @@ const EmployeeUpload = () => {
           ...item,
           jobId: item?.jobId?.toString(),
           positionId: item?.positionId.toString(),
-          startDate: item?.startDate ? moment(item.startDate).format("YYYY-MM-DD") : null,
-          endDate: item?.endDate ? moment(item.endDate).format("YYYY-MM-DD") : null,
+          startDate: item?.startDate ? moment(item.startDate).format("DD MMM YYYY") : null,
+          endDate: item?.endDate ? moment(item.endDate).format("DD MMM YYYY") : null,
         }
       });
       const body = {
