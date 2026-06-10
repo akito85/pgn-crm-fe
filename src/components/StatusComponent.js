@@ -51,7 +51,7 @@ const StatusComponent = ({
         break;
 
       case "submitted":
-        bgColor = "bg-[#f57c00]";
+        bgColor = "bg-[#1976D2]";
         tColor = "text-white";
         break;
 
