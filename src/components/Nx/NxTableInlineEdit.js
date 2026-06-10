@@ -1,7 +1,11 @@
 import React, { useState, useCallback, useEffect, useRef, useMemo } from "react";
-import { Table, Input, InputNumber, Select, Empty } from "antd";
+import { Table, Input, InputNumber, Select, DatePicker, Empty } from "antd";
+import moment from "moment";
 
 const { Option } = Select;
+
+// Canonical upload date format — display + parse are always English "dd MMM yyyy".
+const NX_DATE_FORMAT = "DD MMM YYYY";
 
 // ── Shared visual constants (identical to NxTable) ────────────────────────────
 const HEADER_BG   = "#2C6FAD";
@@ -280,9 +284,11 @@ const onActionCell        = () => ({ style: actionColCellStyle });
  *
  * Column definition extras:
  *   editable      {boolean}  — enable inline editing for this column
- *   inputType     {string}   — 'text' | 'number' | 'select' (default: 'text')
+ *   inputType     {string}   — 'text' | 'number' | 'select' | 'date' (default: 'text')
+ *                              'date' stores/reads a canonical "DD MMM YYYY" string
  *   placeholder   {string}   — placeholder text
  *   selectOptions {Array}    — [{ value, label }] for inputType 'select'
+ *   searchable    {boolean}  — enable type-to-search on a select (default: false)
  *   min           {number}   — min for inputType 'number'
  *   max           {number}   — max for inputType 'number'
  *   precision     {number}   — decimal precision for inputType 'number'
@@ -446,11 +452,35 @@ const NxTableInlineEdit = ({
                   placeholder={col.placeholder || `Select ${col.title}`}
                   onChange={(v) => handleEditChange(col.dataIndex, v)}
                   style={{ width: "100%", height: "34px", fontFamily: FONT_FAMILY }}
+                  showSearch={!!col.searchable}
+                  filterOption={col.searchable
+                    ? (input, option) =>
+                        String(option?.children ?? "").toLowerCase().includes(input.toLowerCase())
+                    : undefined
+                  }
                 >
                   {(col.selectOptions || []).map((opt) => (
                     <Option key={opt.value} value={opt.value}>{opt.label}</Option>
                   ))}
                 </Select>
+              </div>
+            );
+          }
+
+          if (col.inputType === "date") {
+            const parsed = value ? moment(value, NX_DATE_FORMAT, true) : null;
+            return (
+              <div style={{ padding: "4px 0" }}>
+                <DatePicker
+                  value={parsed && parsed.isValid() ? parsed : null}
+                  format={NX_DATE_FORMAT}
+                  placeholder={col.placeholder || NX_DATE_FORMAT}
+                  allowClear
+                  onChange={(d) =>
+                    handleEditChange(col.dataIndex, d ? d.format(NX_DATE_FORMAT) : null)
+                  }
+                  style={{ width: "100%", height: "34px", fontFamily: FONT_FAMILY }}
+                />
               </div>
             );
           }

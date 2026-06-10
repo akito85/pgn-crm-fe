@@ -3,6 +3,11 @@ import { Link, NavLink } from "react-router-dom";
 import { PlusOutlined, WarningOutlined } from "@ant-design/icons";
 import { useDispatch, useSelector } from "react-redux";
 import { Checkbox, Tooltip } from "antd";
+import IconViewList from "../../../../../../assets/Icon/Nx/IconViewList";
+import IconEditNx from "../../../../../../assets/Icon/Nx/IconEdit";
+import IconDeleteMenu from "../../../../../../assets/Icon/Nx/IconDeleteMenu";
+import IconActive from "../../../../../../assets/icons/nx/IconActive";
+import IconInactive from "../../../../../../assets/icons/nx/IconInactive";
 import Highlighter from "react-highlight-words";
 import moment from "moment";
 
@@ -42,7 +47,7 @@ const columns = (
   return [
     {
       title: "NO",
-      width: 60,
+      width: 90,
       align: "center",
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
@@ -696,15 +701,14 @@ const TaxImplicationRuleTable = ({ id, isRuleActive, access }) => {
             </ButtonComponent>
           ) : (
             <Tooltip title="Detail">
-              <div className="pt-1">
-                <SVGIcon name="IconDetail" width={24} />
-              </div>
+              <IconViewList width={20} />
             </Tooltip>
           );
         return (
           <Link
             to={ACCOUNT_MANAGEMENT_ROUTES.DETAIL_TAX_IMPLICATION_RULE}
             state={{ id: record?.id, lateChargeId: id }}
+            className="inline-flex items-center text-[#1976D2] hover:text-[#1976D2] transition-colors duration-200"
           >
             {renderAction}
           </Link>
@@ -755,19 +759,15 @@ const TaxImplicationRuleTable = ({ id, isRuleActive, access }) => {
                     id: record?.id,
                     taxImplicationId: id,
                   }}
+                  className="inline-flex items-center text-[#1976D2] hover:text-[#1976D2] transition-colors duration-200"
                 >
-                  <div className="pt-1">
-                    <SVGIcon name="IconEdit" width={24} />
-                  </div>
+                  <IconEditNx width={20} />
                 </Link>
               ) : (
-                <div className={"cursor-not-allowed pt-1"}>
-                  <SVGIcon
-                    name="IconEdit"
-                    width={24}
-                    color={"#C0BEC6"}
-                    className={"cursor-not-allowed"}
-                  />
+                <div className={"inline-flex items-center cursor-not-allowed text-gray-300"}>
+                  <span className="pointer-events-none">
+                    <IconEditNx width={20} />
+                  </span>
                 </div>
               )}
             </Tooltip>
@@ -816,23 +816,18 @@ const TaxImplicationRuleTable = ({ id, isRuleActive, access }) => {
             <Tooltip
               title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}
             >
-              <div className="pt-1">
-                <Checkbox
-                  onClick={
-                    record.status === "ACTIVE" &&
-                    record.approvalStatus !== "WAITING_APPROVAL"
-                      ? () => handleOpenModalInactivate(record)
-                      : undefined
-                  }
-                  checked={record?.status === "INACTIVE"}
-                  disabled={
-                    !(
-                      record.status === "ACTIVE" &&
-                      record.approvalStatus !== "WAITING_APPROVAL"
-                    )
-                  }
-                />
-              </div>
+              {record.status === "ACTIVE" && record.approvalStatus !== "WAITING_APPROVAL"
+                ? <span className="inline-flex items-center text-[#D32F2F] hover:text-[#D32F2F] transition-colors duration-200 cursor-pointer" onClick={() => handleOpenModalInactivate(record)}>
+                    <IconInactive width={20} />
+                  </span>
+                : record.status === "INACTIVE"
+                  ? <span className="inline-flex items-center text-green-600 hover:text-green-600 transition-colors duration-200 cursor-pointer" onClick={() => handleOpenModalInactivate(record)}>
+                      <IconActive width={20} />
+                    </span>
+                  : <span className="inline-flex items-center text-gray-300 cursor-not-allowed">
+                      <IconInactive width={20} />
+                    </span>
+              }
             </Tooltip>
           );
         return renderAction;
@@ -842,35 +837,17 @@ const TaxImplicationRuleTable = ({ id, isRuleActive, access }) => {
       action: "Delete",
       type: "table",
       render: (record, data) => {
+        const canDelete = record.approvalStatus === "DRAFT" && record.status === "DRAFT";
         return (
           <Tooltip title="Delete">
-            <div
-              className={`pt-1 ${
-                record.approvalStatus === "DRAFT" && record.status === "DRAFT"
-                  ? ""
-                  : "cursor-not-allowed"
-              }`}
-            >
-              <SVGIcon
-                name="IconDelete"
-                className={
-                  record.approvalStatus === "DRAFT" && record.status === "DRAFT"
-                    ? ""
-                    : " disabled cursor-not-allowed"
-                }
-                width={24}
-                color={
-                  record.approvalStatus === "DRAFT" && record.status === "DRAFT"
-                    ? "#FF2E2E"
-                    : "#8d91a0"
-                }
-                onClick={
-                  record.approvalStatus === "DRAFT" && record.status === "DRAFT"
-                    ? () => openModalDeleteRule(record?.id)
-                    : undefined
-                }
-              />
-            </div>
+            {canDelete
+              ? <span className="inline-flex items-center text-[#D32F2F] hover:text-[#D32F2F] transition-colors duration-200 cursor-pointer" onClick={() => openModalDeleteRule(record?.id)}>
+                  <IconDeleteMenu width={20} />
+                </span>
+              : <span className="inline-flex items-center text-gray-300 cursor-not-allowed">
+                  <IconDeleteMenu width={20} />
+                </span>
+            }
           </Tooltip>
         );
       },

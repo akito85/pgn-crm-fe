@@ -24,16 +24,16 @@ export const RenderContentActions = ({
           placement="bottomRight"
           showArrow={false}
           overlayInnerStyle={{ border: "1px solid #C8CDD4" }}
-          className="text-black hover:text-[#1976D2] transition-colors duration-300"
+          className="text-[#1976D2] transition-colors duration-300"
           content={
-            <div className="flex flex-col">
+            <div className="flex flex-col py-1">
               {itemRender
                 ?.filter((item) => item?.action !== sliceColumn?.toLowerCase())
                 ?.sort((a, b) => (a?.action || "").localeCompare(b?.action || ""))
                 ?.map((item, index) => {
                   if (permissions?.includes(item?.action)) {
                     return (
-                      <div key={item.action} onClick={() => setOpen(false)}>
+                      <div key={item.action} className="inline-flex items-center px-3 py-1.5 text-black" onClick={() => setOpen(false)}>
                         {item?.render(record, totalLength, index)}
                       </div>
                     );
@@ -45,7 +45,7 @@ export const RenderContentActions = ({
           }
         >
           <div
-            className="flex items-center"
+            className="inline-flex items-center cursor-pointer"
             onClick={(e) => {
               if (stopClickPropagation) e.stopPropagation();
             }}
@@ -53,7 +53,7 @@ export const RenderContentActions = ({
             <IconThreeDots />
           </div>
         </Popover>
-        <div>
+        <div className="inline-flex items-center">
           {itemRender
             ?.filter((item) => item?.action === sliceColumn?.toLowerCase())
             ?.map((item, index) => {
@@ -74,7 +74,11 @@ export const RenderContentActions = ({
       <div className="w-full flex justify-center gap-2.5 items-center">
         {itemRender?.map((item, index) => {
           if (permissions?.includes(item?.action)) {
-            return item?.render(record, totalLength, index);
+            return (
+              <span key={item.action} className="inline-flex items-center">
+                {item?.render(record, totalLength, index)}
+              </span>
+            );
           } else {
             return null;
           }
@@ -137,10 +141,12 @@ export const useColumnActionPermission = (
           title: "ACTION",
           dataIndex: "action",
           fixed: "right",
-          width: 150,
+          width: 111,
           render: () => (
-            <div style={{ width: "100%", height: 14, overflow: "hidden", borderRadius: 20 }}>
-              <Skeleton.Button active size="small" shape="round" block />
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <div style={{ width: "100%", transform: "scaleY(0.55)", transformOrigin: "center" }}>
+                <Skeleton.Button active size="small" shape="round" block />
+              </div>
             </div>
           ),
         },
@@ -155,7 +161,7 @@ export const useColumnActionPermission = (
         title: "ACTION",
         dataIndex: "action",
         fixed: "right",
-        width: 150,
+        width: 90,
         render: (text, record, index) => (
           <RenderContentActions
             text={text}

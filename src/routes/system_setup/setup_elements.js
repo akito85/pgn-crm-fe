@@ -48,6 +48,12 @@ import CollectionTemplateForm from "../../app/pages/SystemSetup/MasterData/Colle
 import PreRequisiteTemplate from "../../app/pages/SystemSetup/PreRequisiteTemplate/PreRequisiteTemplate";
 import PreRequisiteTemplateDetail from "../../app/pages/SystemSetup/PreRequisiteTemplate/Details/PreRequisiteTemplateDetail";
 import CreateUpdatePreRequisiteTemplate from "../../app/pages/SystemSetup/PreRequisiteTemplate/CreateUpdate/CreateUpdatePreRequisiteTemplate";
+import ActivityTemplate from "../../app/pages/SystemSetup/ActivityTemplate/ActivityTemplate";
+import ActivityTemplateDetail from "../../app/pages/SystemSetup/ActivityTemplate/Details/ActivityTemplateDetail";
+import CreateUpdateActivityTemplate from "../../app/pages/SystemSetup/ActivityTemplate/CreateUpdate/CreateUpdateActivityTemplate";
+import DataRequirementTemplateView from "../../app/pages/SystemSetup/DataRequirementTemplate/DataRequirementTemplateView";
+import DataRequirementTemplateDetail from "../../app/pages/SystemSetup/DataRequirementTemplate/DataRequirementTemplateDetail";
+import DataRequirementTemplateForm from "../../app/pages/SystemSetup/DataRequirementTemplate/DataRequirementTemplateForm";
 
 export const SYSTEM_SETUP_ELEMENTS = {
   // menu
@@ -161,5 +167,20 @@ export const SYSTEM_SETUP_ELEMENTS = {
   ),
   UPDATE_PRE_REQUISITE_TEMPLATE_PAGE: (
     <CreateUpdatePreRequisiteTemplate type="update" />
+  ),
+
+  // Activity Template
+  VIEW_ACTIVITY_TEMPLATE_PAGE: <ActivityTemplate />,
+  DETAIL_ACTIVITY_TEMPLATE_PAGE: <ActivityTemplateDetail />,
+  CREATE_ACTIVITY_TEMPLATE_PAGE: <CreateUpdateActivityTemplate type="create" />,
+  UPDATE_ACTIVITY_TEMPLATE_PAGE: <CreateUpdateActivityTemplate type="update" />,
+  // Data Requirement Template
+  VIEW_DATA_REQUIREMENT_TEMPLATE_PAGE: <DataRequirementTemplateView />,
+  DETAIL_DATA_REQUIREMENT_TEMPLATE_PAGE: <DataRequirementTemplateDetail />,
+  CREATE_DATA_REQUIREMENT_TEMPLATE_PAGE: (
+    <DataRequirementTemplateForm type="create" />
+  ),
+  UPDATE_DATA_REQUIREMENT_TEMPLATE_PAGE: (
+    <DataRequirementTemplateForm type="update" />
   ),
 };

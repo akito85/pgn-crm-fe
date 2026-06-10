@@ -97,6 +97,10 @@ import ExceptionForm from "../../app/pages/ReceiptAndCollection/Exception/Except
 
 import CollectionActivitiesView from "../../app/pages/ReceiptAndCollection/MasterData/CollectionActivities/CollectionActivitiesView";
 import CollectionActivitiesForm from "../../app/pages/ReceiptAndCollection/MasterData/CollectionActivities/CollectionActivitiesForm";
+import PayGasDepositePage from "../../app/pages/ReceiptAndCollection/GasDeposite/PayGasDepositePage";
+import PayGasDepositeCreatePage from "../../app/pages/ReceiptAndCollection/GasDeposite/PayGasDepositeCreatePage";
+import PayGasDepositeExpiredApprovalPage from "../../app/pages/ReceiptAndCollection/GasDeposite/PayGasDepositeExpiredApprovalPage";
+import PayGasDepositeExpiredCreatePage from "../../app/pages/ReceiptAndCollection/GasDeposite/PayGasDepositeExpiredCreatePage";
 
 
 
@@ -272,4 +276,11 @@ export const RECEIPT_AND_COLLECTION_ELEMENTS = {
   VIEW_EXCEPTION: <ViewException />,
   CREATE_EXCEPTION: <ExceptionForm type={"create"} />,
   UPDATE_EXCEPTION: <ExceptionForm type={"update"} />,
+
+  // Gas Deposite
+  GAS_DEPOSITE_VIEW: <PayGasDepositePage />,
+  GAS_DEPOSITE_CREATE: <PayGasDepositeCreatePage />,
+  GAS_DEPOSITE_UPDATE: <PayGasDepositeCreatePage />,
+  GAS_DEPOSITE_EXPIRED_CREATE: <PayGasDepositeExpiredCreatePage />,
+  GAS_DEPOSITE_EXPIRED_APPROVAL: <PayGasDepositeExpiredApprovalPage />
 };

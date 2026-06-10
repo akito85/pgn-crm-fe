@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useRef } from "react";
 import {
   Table,
   Input,
@@ -296,6 +296,7 @@ const DynamicTableInlineBillingCycle = ({
 
   const [data, setData] = useState([]);
   const [editingKey, setEditingKey] = useState("");
+  const containerRef = useRef(null);
   const [storedDate, setStoredData] = useState(false);
   const [isInsert, setIsInsert] = useState(false);
   const [visiblePassword, setVisiblePassword] = useState({});
@@ -505,6 +506,23 @@ const DynamicTableInlineBillingCycle = ({
       setPage(parseInt(newRow["key"]?.[0]) + 1);
     }
     setEditingKey(newRow.key);
+    // scroll to newly added row (after render)
+    setTimeout(() => {
+      try {
+        const root = containerRef.current || document;
+        const row = root.querySelector(`tr[data-row-key="${newRow.key}"]`);
+        if (row && row.scrollIntoView) {
+          row.scrollIntoView({ behavior: "smooth", block: "center" });
+          return;
+        }
+        const tableBody = root.querySelector('.ant-table-body');
+        if (tableBody) {
+          tableBody.scrollTop = tableBody.scrollHeight;
+        }
+      } catch (e) {
+        // ignore
+      }
+    }, 150);
   };
 
   const deleteRow = (key) => {
@@ -540,7 +558,7 @@ const DynamicTableInlineBillingCycle = ({
       action: "Create",
       render: (
         <ButtonComponent
-          onClick={storedDate === false && addRow}
+          onClick={storedDate === false ? addRow : undefined}
           type={"submit"}
           border={false}
           icon={<PlusOutlined style={{ fontSize: "24px" }} />}
@@ -905,7 +923,7 @@ const DynamicTableInlineBillingCycle = ({
 
   return useContainer === true ? (
     <BaseContainer header={header} subHeader={subHeader}>
-      <div className={"w-full flex flex-col gap-4"}>
+      <div className={"w-full flex flex-col gap-4"} ref={containerRef}>
         <div className={"w-full flex justify-end"}>
           {showCreateButton && <Toolbar items={itemGrantAccess} />}
         </div>
@@ -982,7 +1000,7 @@ const DynamicTableInlineBillingCycle = ({
                 };
               })
             )}
-            pagination={{
+            pagination={usePagination ? {
               position: ["topRight"],
               current: current,
               pageSize: pageSize,
@@ -992,7 +1010,7 @@ const DynamicTableInlineBillingCycle = ({
               showSizeChanger: true,
               showTotal: (total, range) =>
                 `Showing ${range[0]} to ${range[1]} of ${total} records`,
-            }}
+            } : false}
             rowClassName={(record) => (isEditing(record) ? "editable-row" : "")}
             components={{
               body: {

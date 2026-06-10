@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { PlusCircleOutlined } from "@ant-design/icons";
 import { Spin } from "antd";
@@ -11,9 +11,9 @@ import ModalRunJob from "./ModalRunJob";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import {
-  getAllJobExecutionPaginate,
-  startExecution,
-} from "../../../../redux/slices/job_management/jobExecutionSlice";
+  useExecutionsList,
+  useStartExecution,
+} from "../../../../hooks/jobManagement/useJobExecutions";
 import { nxApplyFixedColumns } from "../../../../utils/Nx/nxApplyFixedColumns";
 import ViewListIcon from "../../../../assets/Icon/Nx/IconViewList";
 
@@ -31,10 +31,30 @@ const formatDate = (val) => {
   return `${date} ${hh}:${mm}:${ss}`;
 };
 
+// A stalled run is surfaced by the backend as FAILED with an EXECUTION_STALLED
+// error code in the structured errorMessage envelope (not a distinct status).
+const parseErrorCode = (errorMessage) => {
+  if (!errorMessage || typeof errorMessage !== "string" || !errorMessage.startsWith("{")) return null;
+  try { return JSON.parse(errorMessage)?.code ?? null; } catch { return null; }
+};
+const isStalled = (record) =>
+  record?.status === "FAILED" && parseErrorCode(record?.errorMessage) === "EXECUTION_STALLED";
+
 const UserJobExecutionPage = () => {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { data, loading, actionLoading } = useSelector((state) => state.jobExecution);
+
+  const [page, setPage] = useState(1);
+
+  // TanStack Query data layer (replaces jobExecutionSlice thunks). The hook's
+  // refetchInterval handles live polling while a run is non-terminal.
+  const { data, isLoading: loading, refetch } = useExecutionsList({
+    search: "",
+    page,
+    pageSize: PAGE_SIZE,
+    sort: "",
+  });
+  const startMutation = useStartExecution();
+  const actionLoading = startMutation.isPending;
 
   const rawToken = useSelector((state) => state.auth?.token);
   const userId = useMemo(() => {
@@ -42,28 +62,9 @@ const UserJobExecutionPage = () => {
     catch { return null; }
   }, [rawToken]);
 
-  const [page, setPage] = useState(1);
   const [accumulatedData, setAccumulatedData] = useState([]);
   const [fixedColumns, setFixedColumns] = useState({ left: [], right: ["actions"] });
   const [selectJobModalOpen, setSelectJobModalOpen] = useState(false);
-  const [refreshToken, setRefreshToken] = useState(0);
-
-  const handleFetch = useCallback(() => {
-    dispatch(getAllJobExecutionPaginate({ search: "", page, pageSize: PAGE_SIZE, sort: "" }));
-  }, [dispatch, page, refreshToken]);
-
-  useEffect(() => { handleFetch(); }, [handleFetch]);
-
-  const NON_TERMINAL = useMemo(() => new Set(["PENDING","SCHEDULED","PROCESSING","ON_HOLD","SUSPENDED"]), []);
-
-  useEffect(() => {
-    const anyRunning = accumulatedData.some((r) => r && NON_TERMINAL.has(r.status));
-    if (!anyRunning) return;
-    const id = setInterval(() => {
-      dispatch(getAllJobExecutionPaginate({ search: "", page: 1, pageSize: PAGE_SIZE, sort: "" }));
-    }, 5000);
-    return () => clearInterval(id);
-  }, [accumulatedData, dispatch, NON_TERMINAL]);
 
   useEffect(() => {
     if (!data?.content) return;
@@ -80,14 +81,14 @@ const UserJobExecutionPage = () => {
   const handleRefresh = () => {
     setPage(1);
     setAccumulatedData([]);
-    setRefreshToken((n) => n + 1);
+    refetch();
   };
 
   const afterAction = useCallback(() => {
     setPage(1);
     setAccumulatedData([]);
-    setRefreshToken((n) => n + 1);
-  }, []);
+    refetch();
+  }, [refetch]);
 
   const actionColumn = useMemo(() => ({
     title: "ACTIONS",
@@ -118,15 +119,17 @@ const UserJobExecutionPage = () => {
     { title: "PARAMETER", dataIndex: "inputPayload", key: "inputPayload", align: "left", width: 300, ellipsis: true, render: (v) => v || "—" },
     {
       title: "STATUS", dataIndex: "status", key: "status", align: "center", width: 160,
-      render: (val) => {
+      render: (val, record) => {
         if (!val) return "—";
-        const text = val.charAt(0).toUpperCase() + val.slice(1).toLowerCase();
+        const stalled = isStalled(record);
+        const text = stalled ? "Stalled" : (val.charAt(0).toUpperCase() + val.slice(1).toLowerCase());
         const map = { succeeded:"completed", failed:"failed", cancelled:"cancelled",
                       deleted:"inactive", pending:"pending", scheduled:"scheduled",
                       processing:"processing", on_hold:"hold", suspended:"suspended" };
+        const colour = stalled ? "stalled" : (map[val.toLowerCase()] || val.toLowerCase());
         return (
           <div style={{ display:"flex", justifyContent:"center", alignItems:"center", height:"22px", overflow:"hidden" }}>
-            <StatusComponent colour={map[val.toLowerCase()] || val.toLowerCase()} size="small">
+            <StatusComponent colour={colour} size="small">
               {text.replace("_"," ")}
             </StatusComponent>
           </div>
@@ -192,8 +195,8 @@ const UserJobExecutionPage = () => {
         loading={actionLoading}
         onClose={() => setSelectJobModalOpen(false)}
         onSubmit={(values) => {
-          dispatch(startExecution(values)).then((res) => {
-            if (!res.error) { setSelectJobModalOpen(false); afterAction(); }
+          startMutation.mutate(values, {
+            onSuccess: () => { setSelectJobModalOpen(false); afterAction(); },
           });
         }}
       />

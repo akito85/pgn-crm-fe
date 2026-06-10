@@ -109,4 +109,16 @@ export const SYSTEM_SETUP_ROUTES = {
   DETAIL_PRE_REQUISITE_TEMPLATE: "/system-setup/pre-requisite-template/view",
   CREATE_PRE_REQUISITE_TEMPLATE: "/system-setup/pre-requisite-template/create",
   UPDATE_PRE_REQUISITE_TEMPLATE: "/system-setup/pre-requisite-template/update",
+
+  // Activity Template
+  VIEW_ACTIVITY_TEMPLATE: "/system-setup/activity-template",
+  DETAIL_ACTIVITY_TEMPLATE: "/system-setup/activity-template/view",
+  CREATE_ACTIVITY_TEMPLATE: "/system-setup/activity-template/create",
+  UPDATE_ACTIVITY_TEMPLATE: "/system-setup/activity-template/update",
+
+  // Data Requirement Template
+  VIEW_DATA_REQUIREMENT_TEMPLATE: "/system-setup/data-requirement-template",
+  DETAIL_DATA_REQUIREMENT_TEMPLATE: "/system-setup/data-requirement-template/view/:id",
+  CREATE_DATA_REQUIREMENT_TEMPLATE: "/system-setup/data-requirement-template/create",
+  UPDATE_DATA_REQUIREMENT_TEMPLATE: "/system-setup/data-requirement-template/update/:id",
 };

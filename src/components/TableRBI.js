@@ -494,16 +494,23 @@ const TableRBI = ({
     }
 
     // Collect remaining visible columns into normal/right based on their fixed prop
+    const autoRightFixed = [];
     for (const col of visibleMap.values()) {
-      const isRightFixed =
-        (Array.isArray(fixedColumns.right) &&
-          fixedColumns.right.includes(col.key)) ||
-        col.fixed === "right";
+      const isExplicitRightFixed =
+        Array.isArray(fixedColumns.right) &&
+        fixedColumns.right.includes(col.key);
 
-      if (isRightFixed) {
+      if (isExplicitRightFixed) {
         // skip here; right will be ordered explicitly below
         continue;
       }
+
+      if (col.fixed === "right") {
+        // keep right-fixed columns declared directly in column config
+        autoRightFixed.push(col);
+        continue;
+      }
+
       normal.push(col);
     }
 
@@ -517,6 +524,10 @@ const TableRBI = ({
         }
       });
     }
+
+    // Append right-fixed columns defined by `col.fixed = "right"` that are not
+    // listed in fixedColumns.right.
+    rightFixed.push(...autoRightFixed);
 
     const finalCols = [
       ...leftFixed.map((c) => processColumn(c, "left")),

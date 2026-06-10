@@ -59,7 +59,7 @@ const DelegationDetail = () => {
   useEffect(() => {
     if (record) {
       setListDataAttachment(
-        (detail_Delegation?.mattachmentLists || []).map((item) => ({
+        (detail_Delegation?.mAttachmentLists || []).map((item) => ({
           ...item,
           createdDate: item.createdBy
             ? moment(item.createdDate).format("DD MMM YYYY")
@@ -101,7 +101,7 @@ const DelegationDetail = () => {
         dispatch(getDelegationDetail(record));
       })
       .catch((error) => {
-        if (Math.floor((error.status || 0) / 100) === 5) {
+        if (Math.floor((error.response?.status || 0) / 100) === 5) {
           setBodyError({ message: error.message });
           setModalErrorServer(true);
         }

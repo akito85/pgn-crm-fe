@@ -5,11 +5,9 @@ import {
   CloseCircleFilled,
   Loading3QuartersOutlined,
   ExclamationCircleFilled,
-  MinusCircleFilled,
   SyncOutlined,
   FileTextOutlined,
   StopOutlined,
-  HourglassOutlined,
 } from "@ant-design/icons";
 import React, { useMemo } from "react";
 
@@ -53,7 +51,7 @@ const StatusComponent = ({
         break;
 
       case "submitted":
-        bgColor = "bg-[#1B76D2]";
+        bgColor = "bg-[#f57c00]";
         tColor = "text-white";
         break;
 
@@ -77,14 +75,14 @@ const StatusComponent = ({
         tColor = "text-white";
         break;
 
-      case "waiting_approval":
-      case "waiting_for_approval":
-        bgColor = "bg-[#f57c00]";
+      // ===== OK / NOT OK STATUSES =====
+      case "ok":
+        bgColor = "status-active";
         tColor = "text-white";
         break;
 
-      case "none":
-        bgColor = "bg-gray-400";
+      case "not ok":
+        bgColor = "bg-[#f57c00]";
         tColor = "text-white";
         break;
 
@@ -110,6 +108,12 @@ const StatusComponent = ({
       case "CANCELLED":
       case "canceled":
         bgColor = "bg-[#f57c00]";
+        tColor = "text-white";
+        break;
+
+      // Transient failure being auto-recovered by the reaper (distinct from hard FAILED).
+      case "stalled":
+        bgColor = "bg-[#E8833A]";
         tColor = "text-white";
         break;
 
@@ -159,8 +163,9 @@ const StatusComponent = ({
         break;
 
       case "expire":
-        bgColor = "status-expire";
-        tColor = "text-red-700";
+      case "expired":
+        bgColor = "status-inactive";
+        tColor = "text-white";
         break;
 
       case "expire10":
@@ -298,6 +303,7 @@ const StatusComponent = ({
     return { bgcolor: bgColor, textColor: tColor };
   }, [colour]);
 
+  // eslint-disable-next-line no-unused-vars
   const renderIconStatus = () => {
     if (!colour || typeof colour !== "string") return null;
 

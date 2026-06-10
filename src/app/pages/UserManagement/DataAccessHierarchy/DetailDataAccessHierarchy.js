@@ -229,10 +229,13 @@ const DetailDataAccessHierarchy = () => {
                   >
                     Download Excel
                   </ButtonComponent>
+                  {/* Download PDF disabled: /v1/dbs/api/dah/download-pdf/{id} endpoint does not exist yet */}
                   <ButtonComponent
                     type={"submit"}
                     border={false}
+                    disabled={true}
                     onClick={() => downloadDetailHierarchy("pdf")}
+                    title="Feature not available"
                   >
                     Download PDF
                   </ButtonComponent>

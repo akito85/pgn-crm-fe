@@ -139,4 +139,10 @@ export const RBI_ROUTES = {
   GLACCOUNT_CREATE: "/system-setup/gl-account/create",
   GLACCOUNT_UPDATE: "/system-setup/gl-account/update",
   GLACCOUNT_DETAIL: "/system-setup/gl-account/view",
+
+  // Gas Deposit
+  GAS_DEPOSIT_VIEW: "/rating-billing/gas-deposit",
+  GAS_DEPOSIT_CREATE: "/rating-billing/gas-deposit/create",
+  GAS_DEPOSIT_UPDATE: "/rating-billing/gas-deposit/update",
+  GAS_DEPOSIT_EXPIRED_CREATE: "/rating-billing/gas-deposit/create-expired",
 };

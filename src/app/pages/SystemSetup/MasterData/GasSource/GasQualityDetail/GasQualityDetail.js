@@ -200,7 +200,7 @@ const GasQualityDetail = ({ id, uomName, dataDetail, actionList}) => {
   const columnsTable = [
     {
       title: "NO",
-      width: 50,
+      width: 90,
       dataIndex: "no",
       align: "center",
       render: (text, object, index) => (page - 1) * pageSize + index + 1,

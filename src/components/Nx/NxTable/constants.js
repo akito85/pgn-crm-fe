@@ -24,3 +24,9 @@ export const SCROLL_MIN_PX       = 80;   // minimum usable scroll area for fixed
 
 // ── Prefs persistence ────────────────────────────────────────────────────────
 export const PREFS_VERSION = 1;
+
+// ── Pinned columns ────────────────────────────────────────────────────────────
+export const NO_COL_KEY           = 'no';
+export const NO_COL_WIDTH         = 90;
+export const ACTION_COL_KEY       = 'action';
+export const ACTION_COL_MIN_WIDTH = 111;

@@ -10,6 +10,8 @@ import { Button, Input, Pagination, Select, Table } from "antd";
 import { debounce } from 'lodash';
 import ColumnSettings from "../ColumnSettings/ColumnSettings";
 import NxAdvanceSearch from "./NxAdvanceSearch";
+import { computeEffectiveWidths } from './NxTable/hooks/useColumnLayout';
+import { NO_COL_KEY, NO_COL_WIDTH, ACTION_COL_KEY, ACTION_COL_MIN_WIDTH } from './NxTable/constants';
 
 const { Option } = Select;
 
@@ -84,7 +86,7 @@ const SearchBar = React.memo(({ placeholder = "Search content here ....", onSear
 
 // Resizable Title Component
 const ResizableTitle = (props) => {
-  const { onResize, width, ...restProps } = props;
+  const { onResize, width, noResize, minWidth, ...restProps } = props;
   const isResizingRef = React.useRef(false);
 
   // NOTE: useRef must be called before any conditional return (Rules of Hooks).
@@ -115,63 +117,65 @@ const ResizableTitle = (props) => {
       onDragEnd={restProps.onDragEnd}
     >
       {restProps.children}
-      <div
-        style={{
-          position: "absolute",
-          right: 0,
-          top: 0,
-          bottom: 0,
-          width: "10px",
-          cursor: "col-resize",
-          userSelect: "none",
-          zIndex: 1,
-        }}
-        onClick={(e) => {
-          e.stopPropagation();
-          e.preventDefault();
-        }}
-        onMouseDown={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          isResizingRef.current = false;
-          const startX = e.pageX;
-          const startWidth = width;
-          let hasMoved = false;
+      {!noResize && (
+        <div
+          style={{
+            position: "absolute",
+            right: 0,
+            top: 0,
+            bottom: 0,
+            width: "10px",
+            cursor: "col-resize",
+            userSelect: "none",
+            zIndex: 1,
+          }}
+          onClick={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+          }}
+          onMouseDown={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            isResizingRef.current = false;
+            const startX = e.pageX;
+            const startWidth = width;
+            let hasMoved = false;
 
-          const handleMouseMove = (e) => {
-            hasMoved = true;
-            const newWidth = startWidth + (e.pageX - startX);
-            if (newWidth > 50) {
-              onResize(newWidth);
-            }
-          };
+            const handleMouseMove = (e) => {
+              hasMoved = true;
+              const newWidth = startWidth + (e.pageX - startX);
+              if (newWidth > (minWidth ?? 50)) {
+                onResize(newWidth);
+              }
+            };
 
-          const handleMouseUp = () => {
-            document.removeEventListener("mousemove", handleMouseMove);
-            document.removeEventListener("mouseup", handleMouseUp);
-            document.body.style.cursor = "default";
-            document.body.style.userSelect = "auto";
+            const handleMouseUp = () => {
+              document.removeEventListener("mousemove", handleMouseMove);
+              document.removeEventListener("mouseup", handleMouseUp);
+              document.body.style.cursor = "default";
+              document.body.style.userSelect = "auto";
 
-            if (hasMoved) {
-              isResizingRef.current = true;
-              setTimeout(() => {
-                isResizingRef.current = false;
-              }, 100);
-            }
-          };
+              if (hasMoved) {
+                isResizingRef.current = true;
+                setTimeout(() => {
+                  isResizingRef.current = false;
+                }, 100);
+              }
+            };
 
-          document.addEventListener("mousemove", handleMouseMove);
-          document.addEventListener("mouseup", handleMouseUp);
-          document.body.style.cursor = "col-resize";
-          document.body.style.userSelect = "none";
-        }}
-        onMouseOver={(e) => {
-          e.currentTarget.style.borderRight = "2px solid #1890ff";
-        }}
-        onMouseOut={(e) => {
-          e.currentTarget.style.borderRight = "none";
-        }}
-      />
+            document.addEventListener("mousemove", handleMouseMove);
+            document.addEventListener("mouseup", handleMouseUp);
+            document.body.style.cursor = "col-resize";
+            document.body.style.userSelect = "none";
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.borderRight = "2px solid #1890ff";
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.borderRight = "none";
+          }}
+        />
+      )}
     </th>
   );
 };
@@ -316,6 +320,8 @@ const NxTable = ({
   // fetchFailed: set to true when the data fetch errored so the table can show
   //              an actionable empty state instead of the generic Ant Design one.
   fetchFailed = false,
+  // emptyText: custom message shown in the table body when data is empty and fetchFailed is false.
+  emptyText,
   // onInitialLoad: called once on mount when dataSource is empty and not loading,
   //                giving the parent a chance to trigger the first fetch if it
   //                hasn't been called yet (e.g. RTK Query with skip=true).
@@ -531,6 +537,10 @@ const NxTable = ({
   const [draggedColumnKey, setDraggedColumnKey] = useState(null);
   const [columnOrder, setColumnOrder] = useState(() => initColumnOrder);
   const [searchValue, setSearchValue] = useState('');
+  // Declared here (before displayedColumns useMemo) to avoid TDZ — the memo
+  // references containerWidth in its dependency array.
+  const containerRef = React.useRef(null);
+  const [containerWidth, setContainerWidth] = React.useState(0);
 
   // ── Persist column preferences on every relevant state change ─────────────
   // Debounced 400 ms inside writePrefs so rapid resize events don't thrash
@@ -956,7 +966,7 @@ const NxTable = ({
 
   // Fungsi rekursif untuk memproses kolom dengan children
   const processColumn = useCallback(
-    (col, fixedPos = null) => {
+    (col, fixedPos = null, effectiveWidthMap = null) => {
       const colKey = col.key || col.dataIndex || col.title;
 
       // Jika kolom punya children, proses children secara rekursif
@@ -964,7 +974,7 @@ const NxTable = ({
         return {
           ...col,
           key: colKey,
-          children: col.children.map((childCol) => processColumn(childCol, fixedPos)),
+          children: col.children.map((childCol) => processColumn(childCol, fixedPos, effectiveWidthMap)),
         };
       }
 
@@ -977,11 +987,20 @@ const NxTable = ({
       }
 
       const isDraggable = !fixedPos && !col.fixed;
+      const isNoCol     = colKey === NO_COL_KEY;
+      const isActionCol = colKey === ACTION_COL_KEY;
+
+      // Use distributed effective width when available; otherwise fall back to
+      // stored user resize → column definition → default.
+      const width = effectiveWidthMap?.[colKey]
+        ?? columnWidths[colKey]
+        ?? col.width
+        ?? 150;
 
       const newCol = {
         ...col,
         key: colKey,
-        width: columnWidths[colKey] || col.width || 150,
+        width,
         align: col.align || textAlign,
         ellipsis: {
           showTitle: true,
@@ -999,8 +1018,10 @@ const NxTable = ({
           }
 
           return {
-            width: columnWidths[colKey] || col.width || 150,
-            onResize: handleResize(colKey),
+            width,
+            onResize:  isNoCol ? undefined : handleResize(colKey),
+            noResize:  isNoCol,
+            minWidth:  isActionCol ? ACTION_COL_MIN_WIDTH : undefined,
             style: baseStyle,
             draggable: isDraggable,
             onDragStart: isDraggable
@@ -1161,10 +1182,18 @@ const NxTable = ({
       }
     }
 
+    const allVisibleCols = [...leftFixed, ...normal, ...rightFixed];
+    const effectiveWidthMap = computeEffectiveWidths(
+      allVisibleCols,
+      columnWidths,
+      containerWidth,
+      tableScrolled?.x ?? 0,
+    );
+
     const finalCols = [
-      ...leftFixed.map((c) => processColumn(c, "left")),
-      ...normal.map((c) => processColumn(c, undefined)),
-      ...rightFixed.map((c) => processColumn(c, "right")),
+      ...leftFixed.map((c) => processColumn(c, "left",    effectiveWidthMap)),
+      ...normal.map((c)    => processColumn(c, undefined, effectiveWidthMap)),
+      ...rightFixed.map((c) => processColumn(c, "right",  effectiveWidthMap)),
     ];
 
     return finalCols;
@@ -1177,6 +1206,9 @@ const NxTable = ({
     processColumn,
     searchValue,
     highlightText,
+    columnWidths,
+    containerWidth,
+    tableScrolled,
   ]);
 
   const handleAdvanceSearch = useCallback((searchData) => {
@@ -1278,10 +1310,9 @@ const NxTable = ({
   );
 
   // ── Container width measurement ───────────────────────────────────────────
-  // Track the actual rendered width of the table wrapper so the fixed-column
-  // warning can compare real pixel widths, not assumed/prop values.
-  const containerRef = React.useRef(null);
-  const [containerWidth, setContainerWidth] = React.useState(0);
+  // containerRef and containerWidth are declared near the other state declarations
+  // (above displayedColumns useMemo) to avoid a TDZ error. This effect wires up
+  // the ResizeObserver that keeps containerWidth in sync with the rendered width.
   React.useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
@@ -2031,7 +2062,7 @@ const NxTable = ({
                 )}
               </div>
             )
-          } : undefined}
+          } : emptyText ? { emptyText } : undefined}
         />
 
         {showFooter && (useInfiniteScroll ? (

@@ -60,7 +60,7 @@ const SelectComponent = ({
         optionFilterProp="children"
         filterOption={filterOption !== undefined ? filterOption : defaultFilterOption}
         labelInValue={labelInValue}
-        value={value ? value : undefined}
+        value={value ?? undefined}
         style={style}
         className={className}
         placeholder={placeholder}

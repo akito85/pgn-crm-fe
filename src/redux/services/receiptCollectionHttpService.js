@@ -302,6 +302,8 @@ const deleteDataWithBody = async (url, body) => {
   });
   return response?.data;
 };
+
+
 const receiptCollectionHttpService = {
   getAll,
   inactiveWithApproval,
@@ -318,6 +320,7 @@ const receiptCollectionHttpService = {
   updateDataTransaction,
   updateDataPost,
   uploadBulk,
+  uploadAttachment,
   deleteData,
   deleteDataWithBody,
   downloadXlsx,
