@@ -402,7 +402,13 @@ export const createSaPriceRuleColumns = (renderValue) => [
     dataIndex: "min",
     width: 120,
     isNumber: true,
-    render: (text) => renderColumn("min", false, null, text, false, "input", {}, "usage"),
+    render: (val) => {
+      if (val === null || val === undefined || val === 0 || val === "0") {
+        return "0";
+      }
+      if (isNaN(val)) return val;
+      return parseFloat(val).toLocaleString();
+    },
   },
   {
     key: "max",
@@ -411,9 +417,10 @@ export const createSaPriceRuleColumns = (renderValue) => [
     width: 120,
     isNumber: true,
     render: (val) => {
-      if (!val) return "";
+      if (val === null || val === undefined || val === 0 || val === "0") {
+        return "Unlimited";
+      }
       if (isNaN(val)) return val;
-      if (val === "0" || parseFloat(val) === 0) return "Unlimited";
       return parseFloat(val).toLocaleString();
     },
   },
