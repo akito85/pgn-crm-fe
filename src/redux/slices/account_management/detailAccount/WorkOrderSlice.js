@@ -407,7 +407,7 @@ export const getWoCategories         = makeDropdownThunk("GET_WO_CATEGORIES",   
 export const getWoTypes               = makeDropdownThunk("GET_WO_TYPES",               "/v1/dbs/api/dropdowns/workorders/types");
 export const getWoPriorities          = makeDropdownThunk("GET_WO_PRIORITIES",          "/v1/dbs/api/dropdowns/workorders/priorities");
 export const getWoGroups              = makeDropdownThunk("GET_WO_GROUPS",              "/v1/dbs/api/dropdowns/workorders/groups");
-export const getWoActivityStatuses    = makeDropdownThunk("GET_WO_ACTIVITY_STATUSES",   "/v1/dbs/api/dropdowns/activities/statuses");
+export const getWoActivityStatuses    = makeDropdownThunk("GET_WO_ACTIVITY_STATUSES",   "/v1/dbs/api/workorders/activities/statuses");
 export const getWoPicPositions        = makeDropdownThunk("GET_WO_PIC_POSITIONS",       "/v1/dbs/api/workorders/pic-positions");
 export const getWoApprovalHierarchies = makeDropdownThunk("GET_WO_APPROVAL_HIERARCHIES","/v1/dbs/api/workorders/approval-hierarchies");
 
