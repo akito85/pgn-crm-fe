@@ -1,8 +1,9 @@
 import React from "react";
-import { Alert, Checkbox, Form, Select, Spin, Tooltip } from "antd";
+import { Alert, Form, Select, Spin, Tooltip } from "antd";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import {
+  DownloadOutlined,
   InfoCircleOutlined,
   PlusOutlined,
   UploadOutlined,
@@ -22,6 +23,10 @@ import {
 } from "../../../../../redux/slices/account_management/MasterData/location_slice";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
 import SVGIcon from "../../../../../assets/Icon/index";
+import IconViewList from "../../../../../assets/Icon/Nx/IconViewList";
+import IconEditNx from "../../../../../assets/Icon/Nx/IconEdit";
+import IconActive from "../../../../../assets/icons/nx/IconActive";
+import IconInactive from "../../../../../assets/icons/nx/IconInactive";
 import { useRef } from "react";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import CardComponent from "../../../../../components/Card/CardComponent";
@@ -221,7 +226,7 @@ const ViewLocations = () => {
       {
         key: "no",
         title: "NO",
-        width: 60,
+        width: 90,
         align: "center",
         dataIndex: "no",
         render: (text, object, index) => (page - 1) * pageSize + index + 1,
@@ -783,7 +788,7 @@ const ViewLocations = () => {
         <ButtonComponent
           type={"submit"}
           border={false}
-          icon={<SVGIcon name="IconButtonDownload" width={24} />}
+          icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
           onClick={() => {
             handleDownload();
           }}
@@ -829,13 +834,9 @@ const ViewLocations = () => {
       render: (record, data) => {
         return (
           <Tooltip title="Detail">
-            <div
-              onClick={() => {
-                handleDetail(record, selectedLocationType);
-              }}
-            >
-              <SVGIcon name="IconDetail" width={24} />
-            </div>
+            <span className="inline-flex items-center text-[#1976D2] hover:text-[#1976D2] transition-colors duration-200 cursor-pointer" onClick={() => handleDetail(record, selectedLocationType)}>
+              <IconViewList width={20} />
+            </span>
           </Tooltip>
         );
       },
@@ -844,32 +845,18 @@ const ViewLocations = () => {
       action: "Update",
       type: "table",
       render: (record, data) => {
+        const disabled = record?.status === "INACTIVE";
         return (
           <Tooltip title="Update">
-            {record?.status === "INACTIVE" ? (
-              <Link>
-                <div className={"cursor-not-allowed"}>
-                  <SVGIcon
-                    name="IconEdit"
-                    width={24}
-                    color={"#C0BEC6"}
-                    className={"cursor-not-allowed"}
-                  />
-                </div>
-              </Link>
-            ) : (
+            <div className={`inline-flex items-center ${disabled ? "cursor-not-allowed text-gray-300" : ""}`}>
               <Link
-                to={ACCOUNT_MANAGEMENT_ROUTES.UPDATE_LOCATIONS}
-                state={{
-                  id: record?.locationId,
-                  currentLocation: selectedLocationType,
-                }}
+                to={!disabled ? ACCOUNT_MANAGEMENT_ROUTES.UPDATE_LOCATIONS : undefined}
+                state={!disabled ? { id: record?.locationId, currentLocation: selectedLocationType } : undefined}
+                className={`inline-flex items-center transition-colors duration-200 ${disabled ? "text-gray-300 pointer-events-none" : "text-[#1976D2] hover:text-[#1976D2]"}`}
               >
-                <div>
-                  <SVGIcon name="IconEdit" width={24} />
-                </div>
+                <IconEditNx width={20} />
               </Link>
-            )}
+            </div>
           </Tooltip>
         );
       },
@@ -878,18 +865,18 @@ const ViewLocations = () => {
       action: "Activate",
       type: "table",
       render: (record, data) => {
+        const isActive = record?.status?.toUpperCase() === "ACTIVE";
+        const handleToggle = () => { handleActiveOrInactive(record); };
         return (
-          <Tooltip
-            title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}
-          >
-            <div>
-              <Checkbox
-                onClick={() => {
-                  handleActiveOrInactive(record);
-                }}
-                checked={record?.status === "ACTIVE" ? false : true}
-              />
-            </div>
+          <Tooltip title={isActive ? "Inactivate" : "Activate"}>
+            {isActive
+              ? <span className="inline-flex items-center text-[#D32F2F] hover:text-[#D32F2F] transition-colors duration-200 cursor-pointer" onClick={handleToggle}>
+                  <IconInactive width={20} />
+                </span>
+              : <span className="inline-flex items-center text-green-600 hover:text-green-600 transition-colors duration-200 cursor-pointer" onClick={handleToggle}>
+                  <IconActive width={20} />
+                </span>
+            }
           </Tooltip>
         );
       },

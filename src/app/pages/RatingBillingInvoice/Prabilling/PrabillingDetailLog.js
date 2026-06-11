@@ -27,7 +27,7 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
 
   const [fixedColumns, setFixedColumns] = useState(() => ({
     left: ["no"],
-    right: ["status"],
+    right: [],
   }));
 
   // Initial fetch
@@ -144,36 +144,6 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
             searchText, text || "", false, "input", search),
       },
       {
-        key: "status",
-        title: "STATUS",
-        dataIndex: "status",
-        width: 120,
-        align: "center",
-        sorter: true,
-        filteredValue: [search?.status] || null,
-        ...getColumnSearchPropsUseFilteredValue(
-          search, "status", searchInput, searchedColumn,
-          searchText, handleSearch, true
-        ),
-        render: (status) => {
-          const statusUpper = status ? status.toUpperCase() : "INFO";
-          const statusConfig = {
-            SUCCESS: { text: "Success", type: "status" },
-            ERROR: { text: "Failed", type: "status" },
-            FAILED: { text: "Failed", type: "status" },
-            WARNING: { text: "In Progress", type: "status" },
-            PROCESSING: { text: "In Progress", type: "status" },
-            IN_PROGRESS: { text: "In Progress", type: "status" },
-            INFO: { text: "Open", type: "status" },
-          };
-          const config = statusConfig[statusUpper] || { text: "Unknown", type: "status" };
-          return renderColumn(
-            "status", hasValue(search["status"]),
-            searchText, config.text, false, "status", search
-          );
-        },
-      },
-      {
         key: "message",
         title: "MESSAGE",
         dataIndex: "message",
@@ -204,7 +174,7 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
         render: (text) => {
           const formattedDate = text
             ? moment(text).format("DD MMM YYYY HH:mm:ss")
-            : "-";
+            : "";
           return renderDateColumn(
             "createdDtm", hasValue(search["createdDtm"]),
             searchText, formattedDate, "datetime", search

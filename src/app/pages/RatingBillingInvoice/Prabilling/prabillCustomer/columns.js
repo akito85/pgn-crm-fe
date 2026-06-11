@@ -1,5 +1,5 @@
-import { Tag } from "antd";
 import moment from "moment";
+import { renderColumn } from "../../../../../utils";
 
 // ============= NEW: SA COLUMNS =============
 export const createSAColumns = (renderValue) => [
@@ -14,24 +14,24 @@ export const createSAColumns = (renderValue) => [
     key: "saNumber",
     title: "SA NUMBER",
     dataIndex: "saNumber",
-    width: 180,
-    isClassification: true,
+    width: 140,
+    isNumber: true,
     render: renderValue,
   },
   {
     key: "saReferenceNumber",
     title: "SA REFERENCE NUMBER",
     dataIndex: "saReferenceNumber",
-    width: 200,
-    isClassification: true,
+    width: 140,
+    isNumber: true,
     render: renderValue,
   },
   {
     key: "saDate",
     title: "SA DATE",
     dataIndex: "saDate",
-    width: 180,
-    isClassification: true,
+    width: 140,
+    isNumber: true,
     render: (text) => {
       return text ? moment(text).format("DD MMM YYYY HH:mm:ss") : "";
     },
@@ -40,15 +40,17 @@ export const createSAColumns = (renderValue) => [
     key: "commitmentDate",
     title: "COMMITMENT DATE",
     dataIndex: "commitmentDate",
-    width: 180,
-    isClassification: true,
-    render: renderValue,
+    width: 140,
+    isNumber: true,
+    render: (text) => {
+      return text ? moment(text).format("DD MMM YYYY HH:mm:ss") : "";
+    },
   },
   {
     key: "invoiceTemplate",
     title: "INVOICE TEMPLATE",
     dataIndex: "invoiceTemplate",
-    width: 200,
+    width: 140,
     isClassification: true,
     render: renderValue,
   },
@@ -96,7 +98,7 @@ export const createSAColumns = (renderValue) => [
     key: "productName",
     title: "PRODUCT NAME",
     dataIndex: "productName",
-    width: 300,
+    width: 150,
     isClassification: true,
     render: renderValue,
   },
@@ -148,7 +150,7 @@ export const createUsageColumns = (renderValue) => [
     title: "MEAS DATE",
     dataIndex: "measDate",
     width: 120,
-    isClassification: true,
+    isNumber: true,
     render: renderValue,
   },
   {
@@ -156,7 +158,7 @@ export const createUsageColumns = (renderValue) => [
     title: "ASSET SERIAL",
     dataIndex: "assetSerialNum",
     width: 130,
-    isClassification: true,
+    isNumber: true,
     render: renderValue,
   },
   {
@@ -181,7 +183,7 @@ export const createUsageColumns = (renderValue) => [
     dataIndex: "temperature",
     width: 120,
     isNumber: true,
-    render: renderValue,
+     render: (text) => renderColumn("temperature", false, null, text, false, "input", {}, "temperatur"),
   },
   {
     key: "pressure",
@@ -189,7 +191,7 @@ export const createUsageColumns = (renderValue) => [
     dataIndex: "pressure",
     width: 120,
     isNumber: true,
-    render: renderValue,
+     render: (text) => renderColumn("pressure", false, null, text, false, "input", {}, "tekanan"),
   },
   {
     key: "correctionFactor",
@@ -213,7 +215,7 @@ export const createUsageColumns = (renderValue) => [
     dataIndex: "beginStand",
     width: 130,
     isNumber: true,
-    render: renderValue,
+    render: (text) => renderColumn("beginStand", false, null, text, false, "input", {}, "usage"),
   },
   {
     key: "endStand",
@@ -221,7 +223,7 @@ export const createUsageColumns = (renderValue) => [
     dataIndex: "endStand",
     width: 130,
     isNumber: true,
-    render: renderValue,
+    render: (text) => renderColumn("endStand", false, null, text, false, "input", {}, "usage"),
   },
   {
     key: "engMeasured",
@@ -229,10 +231,7 @@ export const createUsageColumns = (renderValue) => [
     dataIndex: "engMeasured",
     width: 150,
     isNumber: true,
-    render: (val) =>
-      val
-        ? parseFloat(val).toLocaleString("en-US", { maximumFractionDigits: 4 })
-        : "",
+    render: (text) => renderColumn("engMeasured", false, null, text, false, "input", {}, "energi"),
   },
   {
     key: "ghv",
@@ -240,7 +239,7 @@ export const createUsageColumns = (renderValue) => [
     dataIndex: "ghv",
     width: 120,
     isNumber: true,
-    render: renderValue,
+    render: (text) => renderColumn("ghv", false, null, text, false, "input", {}, "ghv"),
   },
   {
     key: "description",
@@ -263,7 +262,7 @@ export const createUsageColumns = (renderValue) => [
     dataIndex: "volMeasured27",
     width: 150,
     isNumber: true,
-    render: (val) => (val ? parseFloat(val).toLocaleString() : ""),
+    render: (text) => renderColumn("volMeasured27", false, null, text, false, "input", {}, "usage"),
   },
   {
     key: "volMeasured60",
@@ -271,7 +270,7 @@ export const createUsageColumns = (renderValue) => [
     dataIndex: "volMeasured60",
     width: 150,
     isNumber: true,
-    render: (val) => (val ? parseFloat(val).toLocaleString() : ""),
+    render: (text) => renderColumn("volMeasured60", false, null, text, false, "input", {}, "usage"),
   },
   {
     key: "volMscf",
@@ -279,7 +278,7 @@ export const createUsageColumns = (renderValue) => [
     dataIndex: "volMscf",
     width: 150,
     isNumber: true,
-    render: (val) => (val ? parseFloat(val).toLocaleString() : ""),
+    render: (text) => renderColumn("volMscf", false, null, text, false, "input", {}, "volume"),
   },
   {
     key: "costCenter",
@@ -303,10 +302,7 @@ export const createUsageColumns = (renderValue) => [
     dataIndex: "energy",
     width: 150,
     isNumber: true,
-    render: (val) =>
-      val
-        ? parseFloat(val).toLocaleString("en-US", { maximumFractionDigits: 4 })
-        : "",
+    render: (text) => renderColumn("energy", false, null, text, false, "input", {}, "energi"),
   },
   {
     key: "uncorrectedValue",
@@ -406,7 +402,13 @@ export const createSaPriceRuleColumns = (renderValue) => [
     dataIndex: "min",
     width: 120,
     isNumber: true,
-    render: (val) => (val ? parseFloat(val).toLocaleString() : ""),
+    render: (val) => {
+      if (val === null || val === undefined || val === 0 || val === "0") {
+        return "0";
+      }
+      if (isNaN(val)) return val;
+      return parseFloat(val).toLocaleString();
+    },
   },
   {
     key: "max",
@@ -415,9 +417,10 @@ export const createSaPriceRuleColumns = (renderValue) => [
     width: 120,
     isNumber: true,
     render: (val) => {
-      if (!val) return "";
+      if (val === null || val === undefined || val === 0 || val === "0") {
+        return "Unlimited";
+      }
       if (isNaN(val)) return val;
-      if (val === "0" || parseFloat(val) === 0) return "Unlimited";
       return parseFloat(val).toLocaleString();
     },
   },
@@ -443,10 +446,7 @@ export const createSaPriceRuleColumns = (renderValue) => [
     dataIndex: "value",
     width: 150,
     isNumber: true,
-    render: (val) =>
-      val
-        ? parseFloat(val).toLocaleString("en-US", { maximumFractionDigits: 4 })
-        : "",
+    render: (text) => renderColumn("value", false, null, text, false, "input", {}, "energi"),
   },
   {
     key: "uom",
@@ -715,9 +715,9 @@ export const createBillingItemColumns = (renderValue) => [
     render: renderValue,
   },
   {
-    key: "currencyId",
-    title: "CURRENCY ID",
-    dataIndex: "currencyId",
+    key: "currencyCode",
+    title: "CURRENCY",
+    dataIndex: "currencyCode",
     width: 120,
     isClassification: true,
     render: renderValue,
@@ -771,13 +771,7 @@ export const createSaPrcRuleDetColumns = (renderValue) => [
     width: 180,
     isNumber: true,
     align: "right",
-    render: (val) =>
-      val
-        ? parseFloat(val).toLocaleString("en-US", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          })
-        : "",
+    render: (text) => renderColumn("priceValue", false, null, text, false, "input", {}, "currency-idr"),
   },
   {
     key: "lateChargeVal",
@@ -786,12 +780,6 @@ export const createSaPrcRuleDetColumns = (renderValue) => [
     width: 200,
     isNumber: true,
     align: "right",
-    render: (val) =>
-      val
-        ? parseFloat(val).toLocaleString("en-US", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          })
-        : "-",
+    render: (text) => renderColumn("lateChargeVal", false, null, text, false, "input", {}, "currency-idr"),
   },
 ];

@@ -33,6 +33,7 @@ import CardContainer from "../../../../../../components/CardContainer";
 const BillingCycleView = ({ type }) => {
   const searchInput = useRef(null);
   const dispatch = useDispatch();
+  const initialPageSize = 100;
   const loadMoreSize = 20;
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
@@ -142,7 +143,7 @@ const BillingCycleView = ({ type }) => {
       getBillingCycleList({
         search: encodeURIComponent(JSON.stringify(search)),
         page: 1,
-        pageSize: loadMoreSize,
+        pageSize: initialPageSize,
         sort,
         isLoadMore: false,
       }),
@@ -226,7 +227,7 @@ const BillingCycleView = ({ type }) => {
           getBillingCycleList({
             search: encodeURIComponent(JSON.stringify(search)),
             page: 1,
-            pageSize: loadMoreSize,
+            pageSize: initialPageSize,
             sort,
             isLoadMore: false,
           }),
@@ -280,7 +281,7 @@ const BillingCycleView = ({ type }) => {
       getBillingCycleList({
         search: encodeURIComponent(JSON.stringify(search)),
         page: 1,
-        pageSize: loadMoreSize,
+        pageSize: initialPageSize,
         sort,
         isLoadMore: false,
       }),
@@ -332,9 +333,7 @@ const BillingCycleView = ({ type }) => {
             }}
           >
             <Tooltip title="Detail">
-              <div className="pt-1">
-                <SVGIcon name="IconDetail" width={24} />
-              </div>
+              <SVGIcon name="IconDetail" width={20} />
             </Tooltip>
           </Link>
         );
@@ -355,7 +354,7 @@ const BillingCycleView = ({ type }) => {
                 <SVGIcon
                   name="IconEdit"
                   color={isEditable ? "#0075bf" : "#8D91A0"}
-                  width={24}
+                  width={20}
                 />
               }
               type={"action"}
@@ -363,10 +362,9 @@ const BillingCycleView = ({ type }) => {
               disabled={!isEditable}
             >
               <span
-                className={`ml-3 ${isEditable ? "text-black " : "text-[#8D91A0]"
+                className={`ml-2 ${isEditable ? "text-black " : "text-[#8D91A0]"
                   }`}
               >
-                {" "}
                 Update
               </span>
             </ButtonComponent>
@@ -375,7 +373,7 @@ const BillingCycleView = ({ type }) => {
               <div className="pt-1">
                 <SVGIcon
                   name="IconEdit"
-                  width={24}
+                  width={20}
                   color={!isEditable ? "#8D91A0" : "#ACC424"}
                   className={!isEditable ? "cursor-not-allowed" : undefined}
                 />
@@ -430,7 +428,7 @@ const BillingCycleView = ({ type }) => {
               disabled={!isActivateOrInactivate}
               onClick={() => handleInactive(record)}
             >
-              <span className="text-black ml-1">
+              <span className="text-black ml-2">
                 {record.status !== "ACTIVE" ? "Activate" : "Inactivate"}
               </span>
             </ButtonComponent>
@@ -460,13 +458,13 @@ const BillingCycleView = ({ type }) => {
           data > 3 ? (
             <ButtonComponent
               icon={
-                <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
+                <SVGIcon name="IconLogHistory" color={"#0075bf"} width={20} />
               }
               type={"action"}
               border={false}
               onClick={() => handleApprovalHistory(record.billingCycleId)}
             >
-              <span className={"text-black ml-0"}>Approval History</span>
+              <span className={"text-black ml-2"}>Approval History</span>
             </ButtonComponent>
           ) : (
             <Tooltip title="Approval History">
@@ -474,7 +472,7 @@ const BillingCycleView = ({ type }) => {
                 <SVGIcon
                   name="IconLogHistory"
                   color={"#0075bf"}
-                  width={24}
+                  width={20}
                   onClick={() => handleApprovalHistory(record.billingCycleId)}
                 />
               </div>

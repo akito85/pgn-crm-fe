@@ -98,4 +98,27 @@ export const SYSTEM_SETUP_ROUTES = {
   DETAIL_CALENDAR: "/system-setup/calendar/view",
   CREATE_CALENDAR: "/system-setup/calendar/create",
   UPDATE_CALENDAR: "/system-setup/calendar/update",
+
+  // Collection Template
+  VIEW_COLLECTION_TEMPLATE: "/system-setup/template-collection",
+  CREATE_COLLECTION_TEMPLATE: "/system-setup/template-collection/create",
+  UPDATE_COLLECTION_TEMPLATE: "/system-setup/template-collection/update",
+  DETAIL_COLLECTION_TEMPLATE: "/system-setup/template-collection/view",
+  // Pre Requisite Template
+  VIEW_PRE_REQUISITE_TEMPLATE: "/system-setup/pre-requisite-template",
+  DETAIL_PRE_REQUISITE_TEMPLATE: "/system-setup/pre-requisite-template/view",
+  CREATE_PRE_REQUISITE_TEMPLATE: "/system-setup/pre-requisite-template/create",
+  UPDATE_PRE_REQUISITE_TEMPLATE: "/system-setup/pre-requisite-template/update",
+
+  // Activity Template
+  VIEW_ACTIVITY_TEMPLATE: "/system-setup/activity-template",
+  DETAIL_ACTIVITY_TEMPLATE: "/system-setup/activity-template/view",
+  CREATE_ACTIVITY_TEMPLATE: "/system-setup/activity-template/create",
+  UPDATE_ACTIVITY_TEMPLATE: "/system-setup/activity-template/update",
+
+  // Data Requirement Template
+  VIEW_DATA_REQUIREMENT_TEMPLATE: "/system-setup/data-requirement-template",
+  DETAIL_DATA_REQUIREMENT_TEMPLATE: "/system-setup/data-requirement-template/view/:id",
+  CREATE_DATA_REQUIREMENT_TEMPLATE: "/system-setup/data-requirement-template/create",
+  UPDATE_DATA_REQUIREMENT_TEMPLATE: "/system-setup/data-requirement-template/update/:id",
 };

@@ -29,16 +29,30 @@ const InputComponent = ({
   onPressEnter = () => {},
   ...restProps
 }) => {
+  const hasDisplayValue = value !== undefined && value !== null && value !== "";
+
   const style = {
     borderRadius: "6px",
     boxShadow: "0 1px 2px 0 rgb(0 0 0 / 0.05)",
     padding: "4px 12px",
+    ...(disabled && hasDisplayValue
+      ? {
+        color: "#000000",
+        WebkitTextFillColor: "#000000",
+      }
+      : {}),
   };
 
   const styleTextarea = {
     borderRadius: "6px",
     boxShadow: "0 1px 2px 0 rgb(0 0 0 / 0.05)",
     padding: "0px",
+    ...(disabled && hasDisplayValue
+      ? {
+        color: "#000000",
+        WebkitTextFillColor: "#000000",
+      }
+      : {}),
   };
 
   const styleNumeric = {
@@ -53,7 +67,8 @@ const InputComponent = ({
     borderRadius: "6px",
     boxShadow: "0 1px 2px 0 rgb(0 0 0 / 0.05)",
     backgroundColor: "#f5f5f5",
-    color: "rgba(0,0,0,.25)",
+    color: hasDisplayValue ? "#000000" : "rgba(0,0,0,.25)",
+    WebkitTextFillColor: hasDisplayValue ? "#000000" : "rgba(0,0,0,.25)",
     padding: "4px 12px",
     border: "1px solid  #d9d9d9",
     height: "32px",

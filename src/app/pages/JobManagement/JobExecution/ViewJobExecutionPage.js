@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Spin, Tag, Tabs } from "antd";
-import { DownloadOutlined } from "@ant-design/icons";
+import { Spin, Tag, Tabs, Alert } from "antd";
+import { DownloadOutlined, WarningOutlined, InfoCircleOutlined, CloseCircleOutlined } from "@ant-design/icons";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
@@ -11,9 +10,9 @@ import ButtonComponent from "../../../../components/ButtonComponent";
 import { JOB_MGMT_ROUTES } from "../../../../routes/job_management/job_routes";
 import { useGetJobByIdQuery } from "../../../../redux/slices/job_management/jobApiSlice";
 import {
-  getJobExecutionById,
-  getJobExecutionLogs,
-} from "../../../../redux/slices/job_management/jobExecutionSlice";
+  useExecutionDetail,
+  useExecutionLogs,
+} from "../../../../hooks/jobManagement/useJobExecutions";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -53,21 +52,112 @@ const KvItem = ({ label, value }) => (
   </div>
 );
 
+// ─── Error Display ────────────────────────────────────────────────────────────
+
+const ERROR_DISPLAY_MAP = {
+  HANDLER_NOT_FOUND:           { message: "Job handler not registered on worker. Contact admin.", severity: "error" },
+  INPUT_PARSE_ERROR:           { message: "Invalid input payload format. Check JSON syntax.", severity: "error" },
+  MISSING_REQUIRED_PARAMETER:  { message: (d) => `Missing required parameter: ${d?.parameter ?? "unknown"}`, severity: "error" },
+  INVALID_PARAMETER_VALUE:     { message: (d) => `Invalid value for parameter: ${d?.parameter ?? "unknown"}`, severity: "error" },
+  SCRIPT_NOT_FOUND:            { message: (d) => `Script file not found on worker: ${d?.scriptPath ?? "unknown"}`, severity: "error" },
+  PROCEDURE_NOT_FOUND:         { message: (d) => `Stored procedure not found: ${d?.schema ?? ""}.${d?.procedure ?? ""}`, severity: "error" },
+  PROCEDURE_INVALID:           { message: "Stored procedure is invalid or uncompiled.", severity: "error" },
+  DATABASE_ERROR:              { message: "Database error during execution.", severity: "error" },
+  PROCESS_EXECUTION_FAILED:    { message: (d) => `Process failed with exit code: ${d?.exitCode ?? "unknown"}`, severity: "error" },
+  TIMEOUT:                     { message: (d) => `Execution timed out after ${d?.timeoutSeconds ?? "?"}s`, severity: "warning" },
+  EXECUTION_CONTEXT_NOT_FOUND: { message: "Execution record not found.", severity: "error" },
+  EXECUTION_CANCELLED:         { message: "Execution was cancelled.", severity: "info" },
+  EXECUTION_STALLED:           { message: "Run stalled (worker heartbeat lost) — recovered automatically and retried.", severity: "warning" },
+  UNKNOWN_ERROR:               { message: "Unexpected error occurred.", severity: "error" },
+};
+
+const SEVERITY_ICON = {
+  error:   <CloseCircleOutlined style={{ color: "#ff4d4f" }} />,
+  warning: <WarningOutlined style={{ color: "#faad14" }} />,
+  info:    <InfoCircleOutlined style={{ color: "#1890ff" }} />,
+};
+
+const parseErrorMessage = (errorMessage) => {
+  if (!errorMessage) return null;
+  if (errorMessage.startsWith("{")) {
+    try {
+      return { structured: true, ...JSON.parse(errorMessage) };
+    } catch {
+      // fall through to plain text
+    }
+  }
+  return { structured: false, raw: errorMessage };
+};
+
+const ExecutionErrorDisplay = ({ errorMessage }) => {
+  const parsed = parseErrorMessage(errorMessage);
+  if (!parsed) return null;
+
+  if (!parsed.structured) {
+    return (
+      <Alert
+        type="error"
+        showIcon
+        message="Execution Error"
+        description={
+          <pre style={{ fontSize: 12, whiteSpace: "pre-wrap", margin: 0 }}>{parsed.raw}</pre>
+        }
+        style={{ marginTop: 8 }}
+      />
+    );
+  }
+
+  const mapping = ERROR_DISPLAY_MAP[parsed.code] ?? { message: parsed.message, severity: "error" };
+  const displayMessage = typeof mapping.message === "function"
+    ? mapping.message(parsed.details)
+    : mapping.message;
+  const severity = mapping.severity ?? "error";
+
+  return (
+    <div style={{ marginTop: 8 }}>
+      <Alert
+        type={severity}
+        showIcon
+        icon={SEVERITY_ICON[severity]}
+        message={
+          <span style={{ fontWeight: 600 }}>
+            {parsed.code} &nbsp;
+            <span style={{ fontSize: 11, fontWeight: 400, color: "#888" }}>
+              {parsed.timestamp ? `at ${parsed.timestamp}` : ""}
+            </span>
+          </span>
+        }
+        description={
+          <div>
+            <div style={{ marginBottom: 4 }}>{displayMessage}</div>
+            {parsed.details && Object.keys(parsed.details).length > 0 && (
+              <pre style={{
+                fontSize: 11, background: "#f5f5f5", padding: "6px 10px",
+                borderRadius: 4, marginTop: 6, whiteSpace: "pre-wrap", wordBreak: "break-all"
+              }}>
+                {JSON.stringify(parsed.details, null, 2)}
+              </pre>
+            )}
+          </div>
+        }
+      />
+    </div>
+  );
+};
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 const ViewJobExecutionPage = () => {
-  const dispatch  = useDispatch();
   const navigate  = useNavigate();
   const location  = useLocation();
   const executionId = location.state?.id;
 
-  const { detail, detailLoading, logs, logsLoading } = useSelector((s) => s.jobExecution);
   const [activeTab, setActiveTab]     = useState("info");
-  const [logsFetched, setLogsFetched] = useState(false);
+  const [logsEnabled, setLogsEnabled] = useState(false);
 
-  useEffect(() => {
-    if (executionId) dispatch(getJobExecutionById(executionId));
-  }, [dispatch, executionId]);
+  const { data: detail, isLoading: detailLoading } = useExecutionDetail(executionId);
+  // Logs are fetched lazily — only once the user opens the Log tab.
+  const { data: logs, isFetching: logsLoading } = useExecutionLogs(executionId, logsEnabled);
 
   // Fetch job definition only once we have jobId from the execution detail
   const jobId = detail?.jobId;
@@ -75,10 +165,7 @@ const ViewJobExecutionPage = () => {
 
   const handleTabChange = (key) => {
     setActiveTab(key);
-    if (key === "log" && !logsFetched) {
-      dispatch(getJobExecutionLogs(executionId));
-      setLogsFetched(true);
-    }
+    if (key === "log") setLogsEnabled(true);
   };
 
   const breadcrumbRoutes = [
@@ -262,6 +349,9 @@ const ViewJobExecutionPage = () => {
           </ButtonComponent>
         }
       >
+        {detail.errorMessage && (
+          <ExecutionErrorDisplay errorMessage={detail.errorMessage} />
+        )}
         <Tabs activeKey={activeTab} onChange={handleTabChange} items={tabItems} />
       </NxCardContainer>
 

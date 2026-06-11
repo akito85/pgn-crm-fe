@@ -143,6 +143,8 @@ const NxTable = ({
     initFixedColumns,
     initColumnWidths,
     initColumnOrder,
+    containerWidth,
+    scrollX: tableScrolled?.x ?? 0,
   });
 
   // ── Auto height + container width ─────────────────────────────────────────

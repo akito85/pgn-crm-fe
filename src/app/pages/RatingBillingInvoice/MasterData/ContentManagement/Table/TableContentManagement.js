@@ -2,6 +2,7 @@ import moment from "moment";
 import {
   hasValue,
   renderColumn,
+  renderDateColumn,
 } from "../../../../../../utils";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
 
@@ -12,7 +13,7 @@ export const columnsContentManagement = (
   searchInput,
   searchedColumn,
   searchText,
-  handleSearch = () => {}
+  handleSearch = () => { }
 ) => {
   return [
     {
@@ -144,41 +145,37 @@ export const columnsContentManagement = (
     },
     {
       title: "START DATE",
-      dataIndex: "startDate",
       sorter: true,
-      width: 150,
-      render: (text) => {
-        if (!text || text === null || text === undefined || text === "") {
-          return <span>-</span>;
-        }
-        try {
-          // Parse ISO string and format to DD/MM/YYYY
-          const formattedDate = moment(text).format("DD/MM/YYYY");
-          return <span>{formattedDate}</span>;
-        } catch (error) {
-          console.error("Error rendering startDate:", error);
-          return <span>-</span>;
-        }
-      },
+      align: "center",
+      dataIndex: "startDate",
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "startDate",
+        searchInput,
+        hasValue(search['startDate']),
+        searchText,
+        handleSearch,
+        true,
+        "date"
+      ),
+      render: (text) => renderDateColumn('startDate', hasValue(search['startDate']), searchText, text, 'date', search)
     },
     {
       title: "END DATE",
-      dataIndex: "endDate",
       sorter: true,
-      width: 150,
-      render: (text) => {
-        if (!text || text === null || text === undefined || text === "") {
-          return <span>-</span>;
-        }
-        try {
-          // Parse ISO string and format to DD/MM/YYYY
-          const formattedDate = moment(text).format("DD/MM/YYYY");
-          return <span>{formattedDate}</span>;
-        } catch (error) {
-          console.error("Error rendering endDate:", error);
-          return <span>-</span>;
-        }
-      },
+      align: "center",
+      dataIndex: "endDate",
+      ...getColumnSearchPropsUseFilteredValue(
+        search,
+        "endDate",
+        searchInput,
+        hasValue(search['endDate']),
+        searchText,
+        handleSearch,
+        true,
+        "date"
+      ),
+      render: (text) => renderDateColumn('endDate', hasValue(search['endDate']), searchText, text, 'date', search)
     },
     {
       title: "DESCRIPTION",

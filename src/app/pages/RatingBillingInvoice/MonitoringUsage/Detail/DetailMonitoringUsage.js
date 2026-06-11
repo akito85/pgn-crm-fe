@@ -72,6 +72,7 @@ const DetailMonitoringUsage = () => {
   const [listDataAttachment, setListDataAttachment] = useState([]);
   const [flag, setFlag] = useState(1);
   const [openConfirmation, setOpenConfirmation] = useState(false);
+  const [isDownloadingFailed, setIsDownloadingFailed] = useState(false);
   const [body, setBody] = useState({});
   const [fixedColumns, setFixedColumns] = useState(() => ({
     left: ["no"],
@@ -371,6 +372,7 @@ const DetailMonitoringUsage = () => {
   };
 
   const handleDownloadFailed = () => {
+    setIsDownloadingFailed(true);
     dispatch(getDownloadFailed(location?.state?.id))
       .unwrap()
       .then((response) => {
@@ -378,7 +380,8 @@ const DetailMonitoringUsage = () => {
       })
       .catch((error) => {
         console.error("Download failed", error);
-      });
+      })
+      .finally(() => setIsDownloadingFailed(false));
   };
 
   // breadcrumbs routes
@@ -517,7 +520,7 @@ const DetailMonitoringUsage = () => {
                     <DetailText label="Upload Date">
                       {detail_batch?.batchInformation?.uploadDate}
                     </DetailText>
-                    <DetailText label="Total Usage">
+                    <DetailText label="Total Data">
                       {detail_batch?.batchInformation?.totalUsage}
                     </DetailText>
                     <DetailText label="Total Succeed">
@@ -543,6 +546,8 @@ const DetailMonitoringUsage = () => {
                       <Button
                         type="link"
                         onClick={handleDownloadFailed}
+                        loading={isDownloadingFailed}
+                        disabled={isDownloadingFailed}
                         style={{
                           color: "#0075BF",
                           fontSize: "13px",
@@ -554,7 +559,7 @@ const DetailMonitoringUsage = () => {
                         }}
                       >
                         <DownloadOutlined style={{ fontSize: "16px" }} />
-                        Download Failed Data
+                        {isDownloadingFailed ? "Downloading..." : "Download Failed Data"}
                       </Button>
                     </div>
                   )}

@@ -78,7 +78,7 @@ const DetailStatsCard = ({
         >
           {details.map((detail, index) => {
             const isLeftColumn = index % 2 === 0;
-            const isNotLastRow = index < details.length - 2;
+            const isNotLastRow = Math.floor(index / 2) < Math.floor((details.length - 1) / 2);
 
             return (
               <div

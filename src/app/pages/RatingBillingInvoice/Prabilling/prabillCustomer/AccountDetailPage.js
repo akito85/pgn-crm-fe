@@ -35,7 +35,7 @@ import PrabillSaPricingSection from "./ServiceAgreement/PrabillSaPricingSection"
 import PrabillSaTosSection from "./ServiceAgreement/PrabillSaTosSection";
 
 const renderValue = (val) => {
-  if (val === null || val === undefined || val === "") return "-";
+  if (val === null || val === undefined || val === "") return " ";
   return String(val);
 };
 
@@ -49,7 +49,7 @@ const TAB_CONFIGS = [
     key: "0",
     label: "Service Agreement",
     dataKey: "saData",
-    scrollX: 2800,
+    scrollX: 1500,
     action: "getCustomerSaData",
   },
   {
@@ -66,20 +66,20 @@ const TAB_CONFIGS = [
     scrollX: 1000,
     action: "getCustomerTaxData",
   },
-  {
-    key: "3",
-    label: "Billing Bucket",
-    dataKey: "billingBucketData",
-    scrollX: 900,
-    action: "getCustomerBillingBucketData",
-  },
-  {
-    key: "4",
-    label: "Billing Item",
-    dataKey: "billingItemData",
-    scrollX: 1500,
-    action: "getCustomerBillingItemData",
-  },
+  // {
+  //   key: "3",
+  //   label: "Billing Bucket",
+  //   dataKey: "billingBucketData",
+  //   scrollX: 900,
+  //   action: "getCustomerBillingBucketData",
+  // },
+  // {
+  //   key: "4",
+  //   label: "Billing Item",
+  //   dataKey: "billingItemData",
+  //   scrollX: 1500,
+  //   action: "getCustomerBillingItemData",
+  // },
 ];
 
 const AccountDetailPage = () => {
@@ -102,7 +102,7 @@ const AccountDetailPage = () => {
   const [saDetailTab, setSaDetailTab] = useState("Detail");
   const saDetailRef = useRef(null);
 
-  const { customerNumber, billPeriod, inSor, accNumber, saNumber } =
+  const { customerNumber, billPeriod, inSor, accNumber, saNumber, id } =
     location.state || {};
   const { customer_account_detail, loading_customer_detail } = useSelector(
     (state) => state.rbi_prabilling
@@ -128,9 +128,10 @@ const AccountDetailPage = () => {
   const routes = [
     { path: "", breadcrumbName: "Rating Billing" },
     { path: RBI_ROUTES.PRABILLING_VIEW, breadcrumbName: "Prabilling" },
-    { path: RBI_ROUTES.PRABILLING_DETAIL, breadcrumbName: "Detail Prabilling" },
+    { path: RBI_ROUTES.PRABILLING_DETAIL, breadcrumbName: "Detail Prabilling", state: { id } },
     { path: "", breadcrumbName: "Customer Detail" },
   ];
+
 
   // Load ALL data on mount - eager loading
   useEffect(() => {

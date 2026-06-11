@@ -562,7 +562,7 @@ const TableTaxImplicationRuleFormula = ({
     const temp = [
       {
         title: "NO",
-        width: 60,
+        width: 90,
         dataIndex: "no",
         align: "center",
         render: (text, object, index) => (page - 1) * pageSize + index + 1,

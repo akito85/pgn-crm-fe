@@ -27,8 +27,6 @@ import { useEffect } from "react";
 import ListUserFromUpload from "./ListUserFromUpload";
 import { ModalConfirm } from "../../../../components/Modal/ModalPopUp";
 import SVGIcon from "../../../../assets/Icon/index";
-import moment from "moment";
-import { dateFormatting } from "../../../../utils";
 const { Dragger } = Upload;
 
 const UploadUser = () => {
@@ -55,34 +53,22 @@ const UploadUser = () => {
             key: (index + 1).toString(),
             userName: item?.userName,
             authType: item?.authType,
-            authTypeId: parseInt(item?.authTypeId),
+            authTypeId: item?.authTypeValue,
             employeeName: item?.employeeName,
-            employee: item?.employee === "" ? null : parseInt(item?.employee),
+            employee: (n => Number.isFinite(n) ? n : null)(parseInt(item?.employee)),
             userType: item?.userType,
-            userTypeId: parseInt(item?.userTypeId),
+            userTypeId: item?.userTypeValue,
             userLevel: item?.userLevel,
-            userLevelId: item?.userLevelId,
+            userLevelId: item?.userLevelValue,
             email: item?.email,
             phone: item?.phoneNumber,
             groupAccess: item?.groupAccess,
             groupAccessId: parseInt(item?.groupAccessId),
             status: item?.status,
-            startDate:
-              item?.startDate === "" || null
-                ? moment()
-                : moment(item?.startDate).clone(),
-            endDate:
-              item?.endDate === "" || null
-                ? moment()
-                : moment(item?.endDate).clone(),
-            startDateGa:
-              item?.startDate === "" || null
-                ? moment()
-                : moment(item?.startDateGa).clone(),
-            endDateGa:
-              item?.endDate === "" || null
-                ? moment()
-                : moment(item?.endDateGa).clone(),
+            startDate: item?.startDate ?? null,
+            endDate: item?.endDate ?? null,
+            startDateGa: item?.startDateGa ?? null,
+            endDateGa: item?.endDateGa ?? null,
             message: item?.message,
           };
         })
@@ -99,10 +85,18 @@ const UploadUser = () => {
     };
   }, [dispatch]);
 
+  // auto-reset upload state when all rows are deleted from the list
+  useEffect(() => {
+    if (showListUpload && dataTable.length === 0) {
+      dispatch(setClearData());
+      setShowListUpload(false);
+      setFileList([]);
+    }
+  }, [dataTable, showListUpload, dispatch]);
+
   // handle change file
   const handleFileChange = ({ fileList }) => {
     setFileList(fileList);
-    handleUpload();
   };
 
   // props dragger
@@ -115,10 +109,10 @@ const UploadUser = () => {
     maxCount: 1,
     beforeUpload: async (file) => {
       setFileName(file);
+      handleUpload(file);
       return false;
     },
-    onChange: handleFileChange,
-    disabled: showListUpload,
+    onChange: ({ fileList }) => handleFileChange({ fileList }),
   };
 
   // routes bread crumb
@@ -147,18 +141,20 @@ const UploadUser = () => {
   };
 
   // handle upload
-  const handleUpload = async () => {
+  const handleUpload = async (fileToUpload) => {
+    const uploadFile = fileToUpload || fileName;
+    if (!uploadFile) return;
     try {
       setFileProgress(0);
       const body = {
-        image: fileName,
+        image: uploadFile,
         onProgress: (progress) => setFileProgress(progress),
       };
       await dispatch(uploadUser(body)).unwrap();
     } catch (error) {
       setFileList((prevFileList) =>
         prevFileList.map((file) => {
-          if (file.name === fileName.name) {
+          if (file.name === uploadFile.name) {
             return { ...file, status: "error" };
           }
           return file;
@@ -187,13 +183,12 @@ const UploadUser = () => {
           return {
             userName: item?.userName?.toString(),
             authType: item?.authType?.toString(),
-            authTypeId: item?.authTypeId?.toString(),
-            employeeName: item?.employeeName?.toString(),
+            authTypeValue: item?.authTypeId?.toString(),
             employee: item?.employee === null ? "" : item?.employee?.toString(),
             userType: item?.userType?.toString(),
-            userTypeId: item?.userTypeId?.toString(),
+            userTypeValue: item?.userTypeId?.toString(),
             userLevel: item?.userLevel?.toString(),
-            userLevelId: item?.userLevelId?.toString(),
+            userLevelValue: item?.userLevelId?.toString(),
             email: item?.email?.toString(),
             phoneNumber: item?.phone?.toString(),
             groupAccess:
@@ -204,18 +199,10 @@ const UploadUser = () => {
               typeof item?.groupAccess === "string"
                 ? item?.groupAccessId?.toString()
                 : item?.groupAccess?.toString(),
-            endDate: moment(item?.endDate).isValid()
-              ? moment(item?.endDate).format(dateFormatting.dateFormal)
-              : moment(),
-            startDate: moment(item?.startDate).isValid()
-              ? moment(item?.startDate).format(dateFormatting.dateFormal)
-              : moment(),
-            endDateGa: moment(item?.endDateGa).isValid()
-              ? moment(item?.endDateGa).format(dateFormatting.dateFormal)
-              : moment(),
-            startDateGa: moment(item?.endDateGa).isValid()
-              ? moment(item?.startDateGa).format(dateFormatting.dateFormal)
-              : moment(),
+            endDate: item?.endDate ?? null,
+            startDate: item?.startDate ?? null,
+            endDateGa: item?.endDateGa ?? null,
+            startDateGa: item?.startDateGa ?? null,
           };
         });
         await dispatch(finalUploadUser(body)).unwrap();

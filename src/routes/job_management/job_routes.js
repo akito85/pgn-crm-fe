@@ -10,4 +10,6 @@ export const JOB_MGMT_ROUTES = {
   UPDATE_JOB_GROUP:   "/job-scheduler-management/job-group-list/update",
   VIEW_JOB_EXECUTION: "/job-scheduler-management/job-execution-list",
   VIEW_JOB_EXECUTION_DETAIL: "/job-scheduler-management/job-execution-list/view",
+  VIEW_JOB_SCHEDULE:        "/job-scheduler-management/job-scheduler-list",
+  VIEW_JOB_SCHEDULE_DETAIL: "/job-scheduler-management/job-scheduler-list/view",
 };

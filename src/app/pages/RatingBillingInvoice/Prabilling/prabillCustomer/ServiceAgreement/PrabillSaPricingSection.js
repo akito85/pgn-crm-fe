@@ -33,7 +33,13 @@ export const columnsPrabillPricingRule = (page = 1, pageSize = 10) => [
     sorter: true,
     align: "right",
     width: 150,
-    render: (val) => (val ? parseFloat(val).toLocaleString() : ""),
+    render: (val) => {
+      if (val === null || val === undefined || val === 0 || val === "0") {
+        return "0";
+      }
+      if (isNaN(val)) return val; 
+      return parseFloat(val).toLocaleString();
+    },
   },
   {
     title: "MAX",
@@ -43,9 +49,10 @@ export const columnsPrabillPricingRule = (page = 1, pageSize = 10) => [
     align: "right",
     width: 150,
     render: (val) => {
-      if (!val) return "";
+      if (val === null || val === undefined || val === 0 || val === "0") {
+        return "Unlimited";
+      }
       if (isNaN(val)) return val;
-      if (val === "0" || parseFloat(val) === 0) return "Unlimited";
       return parseFloat(val).toLocaleString();
     },
   },
@@ -144,6 +151,7 @@ const PrabillSaPricingSection = ({ prabillSaId }) => {
   // Sort Table
   const onSortApi = (_, __, sorter) => {
     if (sorter?.field === "min" || sorter?.field === "max") {
+      // when user sorts by MIN or MAX, fallback to sorting by lineNumber
       const dataSort =
         sorter.order !== undefined
           ? `lineNumber~${sorter.order === "ascend" ? "asc" : "desc"}`
@@ -194,7 +202,7 @@ const PrabillSaPricingSection = ({ prabillSaId }) => {
               Price Code
             </p>
             <DetailText label="Price Code">
-              {priceDet?.fullPriceCode || "-"}
+              {priceDet?.fullPriceCode || ""}
             </DetailText>
           </div>
 
@@ -203,7 +211,7 @@ const PrabillSaPricingSection = ({ prabillSaId }) => {
               Price Adjustment
             </p>
             <DetailText label="Price Adjustment">
-              {priceDet?.pricingAdjustment || "-"}
+              {priceDet?.pricingAdjustment || ""}
             </DetailText>
           </div>
 
@@ -212,7 +220,7 @@ const PrabillSaPricingSection = ({ prabillSaId }) => {
               Pricing Rule
             </p>
             <DetailText label="Pricing Rule">
-              {priceDet?.priceCode || "-"}
+              {priceDet?.priceCode || ""}
             </DetailText>
           </div>
         </div>

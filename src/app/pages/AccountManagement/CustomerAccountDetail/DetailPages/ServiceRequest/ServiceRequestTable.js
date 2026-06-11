@@ -20,12 +20,15 @@ import { nxGetAccountActions } from "../../../../../../components/Nx/NxGetAccoun
  * @param {number}   props.idAccount         - Account ID
  * @param {number}   props.idCustomer        - Customer ID
  * @param {Function} [props.handleApproval]  - Triggers the approval action
+ * @param {Function} [props.handleApprovalHistoryModal] - Opens the approval history modal
  * @param {number}   [props.refreshSignal=0] - Increment to trigger a page-1 refresh from the parent
  */
 const ServiceRequestTable = ({
   idAccount = 0,
   idCustomer = 0,
+  accountType = "standard",
   handleApproval = () => {},
+  handleApprovalHistoryModal = () => {},
   refreshSignal = 0,
 }) => {
   const dispatch = useDispatch();
@@ -36,7 +39,7 @@ const ServiceRequestTable = ({
   );
 
   // --- Derived values ---
-  const currentData = useMemo(() => {
+  const dataSource = useMemo(() => {
     if (!Array.isArray(list_serviceRequest)) return [];
     return list_serviceRequest.map((item, index) => ({
       ...item,
@@ -45,7 +48,7 @@ const ServiceRequestTable = ({
   }, [list_serviceRequest]);
 
   const totalElement = pagination_listSr?.totalElement || 0;
-  const hasMore = currentData.length < totalElement;
+  const hasMore = dataSource.length < totalElement;
 
   // --- State ---
   const searchInput = useRef(null);
@@ -145,21 +148,22 @@ const ServiceRequestTable = ({
     },
     handleUpdate: (record) => {
       navigate(ACCOUNT_MANAGEMENT_ROUTES.UPDATE_SERVICE_REQUEST, {
-        state: { id: record?.id, idAccount, idCustomer, type: "update" },
+        state: { id: record?.id, idAccount, idCustomer, type: accountType },
       });
     },
     handleApproval,
+    handleApprovalHistory: ({ id }) => handleApprovalHistoryModal(true, id),
     handleDownload,
   });
 
   const actionCols = useColumnActionPermission(
-    ["View", "Update"],
+    ["View", "Update", "History"],
     itemActions,
     "View",
     "table"
   ).map((col) => ({
     ...col,
-    width: 70,
+    width: 100,
     align: "center",
   }));
 
@@ -185,10 +189,10 @@ const ServiceRequestTable = ({
       <Toolbar items={itemActions} type="detail" />
       <NxTable
         idTable="service-request-table"
-        dataSource={currentData}
+        dataSource={dataSource}
         totalData={totalElement}
         current={page}
-        tableScrolled={{ y: 400, x: "max-content" }}
+        tableScrolled={{ x: dataSource.length ? "max-content" : 2700 }}
         onSort={onSort}
         columns={columns}
         usePagination={false}

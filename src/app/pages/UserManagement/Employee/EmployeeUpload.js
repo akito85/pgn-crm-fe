@@ -27,7 +27,6 @@ import {
 import { ModalConfirm } from "../../../../components/Modal/ModalPopUp";
 import SVGIcon from "../../../../assets/Icon/index";
 import moment from "moment";
-import { dateFormatting } from "../../../../utils";
 const { Dragger } = Upload;
 
 const EmployeeUpload = () => {
@@ -60,19 +59,21 @@ const EmployeeUpload = () => {
         })
       );
       setDataEmployeeList(
-        dataConverter?.uploadEmployeeDTO?.map((item) => {
+        dataConverter?.uploadEmployeeDTO?.map((item, index) => {
           return {
+            key: index + 1,
             empNumber: item?.empNumber,
             firstName: item?.firstName,
             lastName: item?.lastName,
             email: item?.email,
             phone: item?.phone,
-            empType: item?.empType,
+            empType: item?.empTypeId,
             empTypeId: item?.empTypeId,
-            startDate: moment(item?.startDate).clone(),
-            endDate: moment(item?.endDate).clone(),
+            startDate: item?.startDate ?? null,
+            endDate: item?.endDate ?? null,
             description: item?.description,
             status: item?.status,
+            message: item?.message ?? [],
           };
         })
       );
@@ -80,18 +81,17 @@ const EmployeeUpload = () => {
         dataConverter?.uploadAssignmentDTO?.map((item) => {
           return {
             empNumber: item?.empNumber,
-            endDate: moment(item?.endDate).clone(),
+            endDate: item?.endDate ? moment(item.endDate, "DD MMM YYYY") : null,
             isMain: item?.isMain,
             jobId: item?.jobId,
             positionId: item?.positionId,
-            startDate: moment(item?.startDate).clone(),
-            status: item?.status,
+            startDate: item?.startDate ? moment(item.startDate, "DD MMM YYYY") : null,
           };
         })
       );
     } else {
       setFirstStep(true);
-      setClearDataUpload()
+      dispatch(setClearDataUpload());
     }
   }, [showListUpload, data_list_upload, firstStep, location]);
 
@@ -102,11 +102,18 @@ const EmployeeUpload = () => {
     };
   }, [dispatch]);
 
+  // auto-reset upload state when all rows are deleted from the list
+  useEffect(() => {
+    if (showListUpload && dataEmployeeList.length === 0) {
+      dispatch(setClearDataUpload());
+      setShowListUpload(false);
+      setFileList([]);
+    }
+  }, [dataEmployeeList, showListUpload, dispatch]);
 
   // handle change file
   const handleFileChange = ({ fileList }) => {
     setFileList(fileList);
-    handleUpload();
   };
 
   // props dragger
@@ -119,10 +126,10 @@ const EmployeeUpload = () => {
     maxCount: 1,
     beforeUpload: async (file) => {
       setFileName(file);
+      handleUpload(file);
       return false;
     },
     onChange: handleFileChange,
-    disabled: showListUpload
   };
 
   // handle remove file
@@ -134,11 +141,13 @@ const EmployeeUpload = () => {
     });
   };
 
-  // handle upload 
-  const handleUpload = async () => {
+  // handle upload
+  const handleUpload = async (fileToUpload) => {
+    const uploadFile = fileToUpload || fileName;
+    if (!uploadFile) return;
     try {
       setFileProgress(0)
-      const body = { image: fileName, onProgress: (progress) => setFileProgress(progress) };
+      const body = { image: uploadFile, onProgress: (progress) => setFileProgress(progress) };
       await dispatch(uploadEmployee(body)).unwrap();
 
     } catch (error) {
@@ -173,17 +182,17 @@ const EmployeeUpload = () => {
           ...item,
           empType: item?.empType?.toString(),
           empTypeId: typeof item?.empType === 'string' ? item?.empTypeId?.toString() : item?.empType?.toString(),
-          startDate: moment(item?.startDate).format(dateFormatting?.dateCapital),
-          endDate: moment(item?.endDate).format(dateFormatting?.dateCapital),
+          startDate: item?.startDate ?? null,
+          endDate: item?.endDate ?? null,
         }
       });
-      const assignmentEmployeeListItem = dataAssignmentEmployeeList?.map((item) => {
+      const assignmentEmployeeListItem = dataAssignmentEmployeeList?.map(({ status: _status, ...item }) => {
         return {
           ...item,
           jobId: item?.jobId?.toString(),
           positionId: item?.positionId.toString(),
-          startDate: moment(item?.startDate).format(dateFormatting?.dateCapital),
-          endDate: moment(item?.endDate).format(dateFormatting?.dateCapital),
+          startDate: item?.startDate ? moment(item.startDate).format("DD MMM YYYY") : null,
+          endDate: item?.endDate ? moment(item.endDate).format("DD MMM YYYY") : null,
         }
       });
       const body = {
@@ -377,6 +386,8 @@ const EmployeeUpload = () => {
             </p>
           </div>
         </ModalConfirm>
+
+
       </Spin>
     </>
   );

@@ -218,9 +218,9 @@ export const tasklistSlice = createApi({
           const config = { headers, withCredentials: true };
 
           const body = {
-            action,
-            remarks,
-            actionBy,
+            ACTION: action,
+            REMARKS: remarks,
+            ACTION_BY: actionBy,
           };
 
           const result = await axios.post(url, body, config);
@@ -257,10 +257,10 @@ export const tasklistSlice = createApi({
           const config = { headers, withCredentials: true };
 
           const body = {
-            taskIds,
-            action,
-            remarks,
-            actionBy,
+            TASK_IDS: taskIds,
+            ACTION: action,
+            REMARKS: remarks,
+            ACTION_BY: actionBy,
           };
 
           const result = await axios.post(url, body, config);

@@ -24,6 +24,7 @@ const initialState = {
   data_promoDiscountDetailDraft: [],
   data_listAttachment: [],
   loading: false,
+  loading_createUpdatePromo: false,
   isFailed: false,
   isSuccess: false,
   message: "",
@@ -882,7 +883,7 @@ export const getAccountGroupList = createAsyncThunk(
       const response = await productPromoHttpService.getAll(url);
       return response.data.map((item) => {
         return {
-          value: item.id,
+          value: item.Id,
           label: item.text,
         };
       });
@@ -1691,6 +1692,26 @@ const promoSlice = createSlice({
     [getTieringList.rejected]: (state, action) => {
       state.loading = false;
       state.data_tiering = action.payload;
+    },
+
+    [createPromo.pending]: (state) => {
+      state.loading_createUpdatePromo = true;
+    },
+    [createPromo.fulfilled]: (state) => {
+      state.loading_createUpdatePromo = false;
+    },
+    [createPromo.rejected]: (state) => {
+      state.loading_createUpdatePromo = false;
+    },
+
+    [updatePromo.pending]: (state) => {
+      state.loading_createUpdatePromo = true;
+    },
+    [updatePromo.fulfilled]: (state) => {
+      state.loading_createUpdatePromo = false;
+    },
+    [updatePromo.rejected]: (state) => {
+      state.loading_createUpdatePromo = false;
     },
   },
 });

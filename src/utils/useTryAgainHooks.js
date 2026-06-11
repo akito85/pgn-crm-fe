@@ -27,10 +27,11 @@ export const useTryAgainHooks = (handleTryAgain) => {
     const handleCancelTryAgain = () => {
         dispatch(clearBodyMessage());
         setModalError(false);
-        if (errorMessage(bodyError)?.toLowerCase() === 'network error' || bodyError?.action === 'CHECK_GRANTED_ACCESS' || bodyError?.action === 'GET_PROFILE') {
+        if (errorMessage(bodyError)?.toLowerCase() === 'network error' || bodyError?.action === 'CHECK_GRANTED_ACCESS') {
             dispatch(getProfile())
             dispatch(checkGrantedAccess(location?.pathname))
-
+        } else if (bodyError?.action === 'GET_PROFILE') {
+            dispatch(getProfile())
         }
     }
 

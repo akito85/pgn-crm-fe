@@ -108,7 +108,7 @@ const ListDetailWarranty = ({ id: propId, isEmbedded = false }) => {
   const transactionReleaseItems = useFilteredMutations(dataMutation, "Release");
   const transactionRefundItems = useFilteredMutations(dataMutation, "Refund");
 
-  const approvalName = dataListAppHierId?.find(x => x.appHierId === data_detail?.appHierId)?.approvalName || data_detail?.approvalName || "-";
+  const approvalName = dataListAppHierId?.find(x => x.appHierId === data_detail?.appHierId)?.approvalName || data_detail?.approvalName || "";
 
   const getCommonTabs = (dataList, fallbackData, hierarchyId) => {
     return [
@@ -415,11 +415,11 @@ const ListDetailWarranty = ({ id: propId, isEmbedded = false }) => {
 
       <LogHistoryInfo
         data={{
-          recordId: data_detail?.recordId || data_detail?.id || "-",
+          recordId: data_detail?.recordId || data_detail?.id || "",
           createdDate: data_detail?.createdDate ? moment(data_detail?.createdDate).format("DD MMM YYYY HH:mm:ss") : "-",
-          createdBy: data_detail?.createdBy || "-",
+          createdBy: data_detail?.createdBy || "",
           updatedDate: data_detail?.updatedDate ? moment(data_detail?.updatedDate).format("DD MMM YYYY HH:mm:ss") : "-",
-          updatedBy: data_detail?.updatedBy || "-"
+          updatedBy: data_detail?.updatedBy || ""
         }} 
       />
 
@@ -439,7 +439,7 @@ const ListDetailWarranty = ({ id: propId, isEmbedded = false }) => {
         header={approvalAction === "APPROVE" ? "Approve" : "Reject"}
         approveOrReject={approvalAction === "APPROVE" ? "approve" : "reject"}
         menu="Payment Guarantee"
-        named={data_detail?.customerName || "-"}
+        named={data_detail?.customerName || ""}
         customMessage={
           (isRefund || isHold || isRelease)
             ? `Are you sure want to ${approvalAction === "APPROVE" ? "approve" : "reject"} ${isRefund ? "Refund" : isHold ? "Hold" : "Release"} Guarantee?`

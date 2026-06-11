@@ -43,8 +43,11 @@ const GLAccountView = () => {
   // Declaration
   const dispatch = useDispatch();
   const searchInput = useRef(null);
+  const isLoadMoreInFlight = useRef(false);
+  const lastRequestedPage = useRef(1);
 
   // State
+  const initialPageSize = 100;
   const loadMoreSize = 20;
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -90,11 +93,13 @@ const GLAccountView = () => {
 
   // Use Effect - Fetch data
   useEffect(() => {
+    isLoadMoreInFlight.current = false;
+    lastRequestedPage.current = 1;
     dispatch(
       getAllGLAccountPaginate({
         search: encodeURIComponent(JSON.stringify(search)),
         page: 1,
-        pageSize: loadMoreSize,
+        pageSize: initialPageSize,
         sort,
         isLoadMore: false,
       }),
@@ -162,10 +167,15 @@ const GLAccountView = () => {
   };
 
   const handleLoadMore = useCallback(async () => {
+    if (isLoadMoreInFlight.current) return;
     if (gl_account_list.length >= (gl_account_pagination?.totalElements || 0))
       return;
+
     const nextPage = Math.floor(gl_account_list.length / loadMoreSize) + 1;
-    await dispatch(
+    if (nextPage <= lastRequestedPage.current) return;
+
+    isLoadMoreInFlight.current = true;
+    const action = await dispatch(
       getAllGLAccountPaginate({
         search: encodeURIComponent(JSON.stringify(search)),
         page: nextPage,
@@ -174,14 +184,22 @@ const GLAccountView = () => {
         isLoadMore: true,
       }),
     );
+
+    if (getAllGLAccountPaginate.fulfilled.match(action)) {
+      lastRequestedPage.current = nextPage;
+    }
+
+    isLoadMoreInFlight.current = false;
   }, [dispatch, gl_account_list.length, gl_account_pagination, search, sort]);
 
   const handleRefresh = useCallback(() => {
+    isLoadMoreInFlight.current = false;
+    lastRequestedPage.current = 1;
     dispatch(
       getAllGLAccountPaginate({
         search: encodeURIComponent(JSON.stringify(search)),
         page: 1,
-        pageSize: loadMoreSize,
+        pageSize: initialPageSize,
         sort,
         isLoadMore: false,
       }),
@@ -227,6 +245,8 @@ const GLAccountView = () => {
       .then(() => {
         handleClear();
         handleCancel();
+        isLoadMoreInFlight.current = false;
+        lastRequestedPage.current = 1;
         dispatch(
           getAllGLAccountPaginate({
             search: encodeURIComponent(JSON.stringify(search)),
@@ -428,7 +448,7 @@ const GLAccountView = () => {
         const rowApprovalStatus = normalizeStatus(record.approvalStatus);
         const canInactivate =
           rowStatus === "ACTIVE" &&
-          ["APPROVED", "DRAFT", "REJECTED", "WAITING APPROVAL"].includes(
+          ["ACTIVE", "APPROVED", "DRAFT", "REJECTED", "WAITING APPROVAL"].includes(
             rowApprovalStatus,
           );
         const canActivate =

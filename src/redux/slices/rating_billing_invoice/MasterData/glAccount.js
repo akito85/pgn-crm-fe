@@ -642,7 +642,13 @@ const glAccountSlice = createSlice({
         const newResult = action.payload?.result || [];
         const isLoadMore = action.payload?.isLoadMore;
         if (isLoadMore) {
-          state.gl_account_list = [...state.gl_account_list, ...newResult];
+          const existingIds = new Set(
+            (state.gl_account_list || []).map((item) => item.glAccountId),
+          );
+          const uniqueNewData = newResult.filter(
+            (item) => !existingIds.has(item.glAccountId),
+          );
+          state.gl_account_list = [...state.gl_account_list, ...uniqueNewData];
         } else {
           state.gl_account_list = newResult;
         }

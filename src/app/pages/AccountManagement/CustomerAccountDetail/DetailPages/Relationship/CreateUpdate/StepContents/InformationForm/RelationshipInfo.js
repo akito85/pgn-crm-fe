@@ -8,10 +8,16 @@ import {
   getRelationshipCategories,
   getRelationshipTypes,
 } from "../../../../../../../../../redux/slices/account_management/detailAccount/relationshipSlice";
+import {
+  getStandaloneRelationshipTypes,
+  getStandaloneRelationshipCategories,
+} from "../../../../../../../../../redux/slices/relationship/standaloneRelationshipSlice";
 import { requiredMessage } from "../../../../../../../../../utils";
 import ModalChooseRelated from "./ModalChooseRelated";
 import NxDetailText from "../../../../../../../../../components/Nx/NxDetailText";
 import NxDate from "../../../../../../../../../components/Nx/NxDatePicker";
+import ModalChooseSubjectAccount from "../../../../../../../relationship/Modal/ModalChooseSubjectAccount";
+import ModalChooseSubjectCustomer from "../../../../../../../relationship/Modal/ModalChooseSubjectCustomer";
 import moment from "moment";
 
 /**
@@ -23,6 +29,7 @@ import moment from "moment";
  * @param {boolean}  [props.formView=true]             - true = editable form, false = read-only view.
  * @param {boolean}  [props.isDraft=false]             - Whether the record is a draft.
  * @param {boolean}  [props.isUpdate=false]            - Whether the form is in update mode.
+ * @param {boolean}  [props.isStandalone=false]        - When true, shows subject account/customer choosers.
  */
 const RelationshipInfo = ({
   form,
@@ -30,6 +37,7 @@ const RelationshipInfo = ({
   formView = true,
   isDraft = false,
   isUpdate = false,
+  isStandalone = false,
 }) => {
   // --- Hooks ---
   const dispatch = useDispatch();
@@ -39,6 +47,8 @@ const RelationshipInfo = ({
 
   // --- State ---
   const [modalChoose, setModalChoose] = useState(false);
+  const [modalChooseAccount, setModalChooseAccount] = useState(false);
+  const [modalChooseCustomer, setModalChooseCustomer] = useState(false);
 
   // --- Form state ---
   const relationshipType = Form.useWatch("relationshipType", { form });
@@ -50,22 +60,96 @@ const RelationshipInfo = ({
   const startDate = Form.useWatch("startDate", { form });
   const endDate = Form.useWatch("endDate", { form });
   const description = Form.useWatch("description", { form });
+  // Subject chooser watched values (used only when isStandalone)
+  const subjectAccountName = Form.useWatch("subjectAccountName", { form, preserve: true });
+  const subjectCustomerName = Form.useWatch("subjectCustomerName", { form, preserve: true });
+  const subjectAccountId = Form.useWatch("subjectAccountId", { form, preserve: true });
 
   // --- Redux ---
   const { list_relationshipType, list_relationshipCategory, loading_listRelationshipType, loading_listRelationshipCategory } =
-    useSelector((state) => state.relationship);
+    useSelector((state) => isStandalone ? state.standaloneRelationship : state.relationship);
 
   // --- Effects ---
   useEffect(() => {
-    if (accountId && formView) {
+    if (!formView) return;
+    if (isStandalone) {
+      // Types/categories load without accountId for standalone
+      dispatch(getStandaloneRelationshipTypes());
+      dispatch(getStandaloneRelationshipCategories());
+    } else if (accountId) {
       dispatch(getRelationshipTypes({ accountId }));
       dispatch(getRelationshipCategories({ accountId }));
     }
-  }, [dispatch, accountId]);
+  }, [dispatch, accountId, isStandalone, formView]);
+
+  // Effective accountId for ModalChooseRelated: standalone uses subjectAccountId from form
+  const effectiveAccountId = isStandalone ? subjectAccountId : accountId;
+  const effectiveCustomerId = isStandalone ? null : customerId;
 
   if (formView)
     return (
       <>
+        {/* Subject chooser fields — standalone only */}
+        {isStandalone && (
+          <>
+            {/* Hidden fields to store subject IDs */}
+            <Form.Item name="subjectAccountId" hidden><InputComponent /></Form.Item>
+            <Form.Item name="subjectCustomerId" hidden><InputComponent /></Form.Item>
+
+            <div className="w-full grid grid-cols-2 gap-4 mb-4">
+              {/* Subject Account */}
+              <Form.Item
+                label="Account"
+                required
+                className="no-margin-form"
+              >
+                <div className="flex gap-x-1">
+                  <Form.Item
+                    name="subjectAccountName"
+                    rules={[{ message: requiredMessage("Account"), required: true }]}
+                    noStyle
+                  >
+                    <InputComponent disabled value={subjectAccountName || ""} />
+                  </Form.Item>
+                  <Button
+                    type="submit"
+                    onClick={() => setModalChooseAccount(true)}
+                    disabled={!formView}
+                    className="w-[160px]"
+                  >
+                    Choose Account
+                  </Button>
+                </div>
+              </Form.Item>
+
+              {/* Subject Customer */}
+              <Form.Item
+                label="Customer"
+                required
+                className="no-margin-form"
+              >
+                <div className="flex gap-x-1">
+                  <Form.Item
+                    name="subjectCustomerName"
+                    rules={[{ message: requiredMessage("Customer"), required: true }]}
+                    noStyle
+                  >
+                    <InputComponent disabled value={subjectCustomerName || ""} />
+                  </Form.Item>
+                  <Button
+                    type="submit"
+                    onClick={() => setModalChooseCustomer(true)}
+                    disabled={!formView}
+                    className="w-[170px]"
+                  >
+                    Choose Customer
+                  </Button>
+                </div>
+              </Form.Item>
+            </div>
+          </>
+        )}
+
         <div className="w-full grid grid-cols-3 gap-4">
           {/* Row 1 - Col 1: Relationship Type */}
           <Form.Item
@@ -143,7 +227,7 @@ const RelationshipInfo = ({
               <Button
                 type="submit"
                 onClick={() => setModalChoose(true)}
-                disabled={(!isDraft && isUpdate) || !relationshipType || !relationshipCategory}
+                disabled={(!isDraft && isUpdate) || !relationshipType || !relationshipCategory || (isStandalone && !effectiveAccountId)}
                 className="w-[120px]"
               >
                 Select
@@ -216,30 +300,36 @@ const RelationshipInfo = ({
         {/* Modal Choose Related */}
         <ModalChooseRelated
           isOpen={modalChoose}
-          accountId={accountId}
+          accountId={effectiveAccountId}
           relationshipType={relationshipType}
           relationshipCategory={relationshipCategory}
           relationshipTypeName={relationshipTypeName}
+          isStandalone={isStandalone}
           handleCancel={() => setModalChoose(false)}
           handleSelect={(selected) => {
-            // Handle different data structure based on source
-            const isCustomer = selected.source === "CUSTOMER";
+            const normalizedRelationType = relationshipTypeName
+              ? relationshipTypeName.trim().toUpperCase().replace(/\s+/g, "_")
+              : null;
 
-            const relatedName = isCustomer ? selected.customerName : selected.accountName;
-            const relatedNumber = isCustomer ? selected.customerNumber : selected.accountNumber;
-            const formAccountId = isCustomer ? customerId : accountId;
-            const relatedId = isCustomer ? selected.customerId : selected.accountId;
+            const isAccountType =
+              normalizedRelationType &&
+              ["CHILD_OF", "PARENT_OF"].includes(normalizedRelationType);
+
+            const relatedNameVal = isAccountType ? selected.accountName : selected.customerName;
+            const relatedNumberVal = isAccountType ? selected.accountNumber : selected.customerNumber;
+            const formAccountId = isAccountType ? effectiveAccountId : effectiveCustomerId;
+            const relatedId = isAccountType ? selected.accountId : selected.customerId;
 
             form.setFieldsValue({
               formAccountId,
-              relatedName,
-              relatedNumber,
+              relatedName: relatedNameVal,
+              relatedNumber: relatedNumberVal,
               relatedId,
             });
 
             // Pass allAccount data to parent for display in RelatedDetailCard
             let relatedDetail;
-            if (isCustomer && selected.relatedDetail)
+            if (!isAccountType && selected.relatedDetail)
               relatedDetail = [...selected.relatedDetail];
             else
               relatedDetail = [selected];
@@ -247,11 +337,49 @@ const RelationshipInfo = ({
             setRelatedDetails(relatedDetail);
           }}
         />
+
+        {/* Subject chooser modals — standalone only */}
+        {isStandalone && (
+          <>
+            <ModalChooseSubjectAccount
+              isOpen={modalChooseAccount}
+              handleCancel={() => setModalChooseAccount(false)}
+              handleSelect={(record) => {
+                form.setFieldsValue({
+                  subjectAccountId: record.accountId || record.id,
+                  subjectAccountName: record.accountName,
+                  // Reset relationship-dependent fields when account changes
+                  relationshipType: undefined,
+                  relationshipCategory: undefined,
+                  relatedName: undefined,
+                  relatedNumber: undefined,
+                });
+                setRelatedDetails([]);
+              }}
+            />
+            <ModalChooseSubjectCustomer
+              isOpen={modalChooseCustomer}
+              handleCancel={() => setModalChooseCustomer(false)}
+              handleSelect={(record) => {
+                form.setFieldsValue({
+                  subjectCustomerId: record.customerId || record.id,
+                  subjectCustomerName: record.customerName,
+                });
+              }}
+            />
+          </>
+        )}
       </>
     );
   else
     return (
       <div className="flex flex-col gap-y-4">
+        {isStandalone && (
+          <div className="grid grid-cols-3 gap-4">
+            <NxDetailText label="Account">{subjectAccountName}</NxDetailText>
+            <NxDetailText label="Customer">{subjectCustomerName}</NxDetailText>
+          </div>
+        )}
         <div className="grid grid-cols-3 gap-4">
           <NxDetailText label="Relationship Type">{relationshipTypeName}</NxDetailText>
           <NxDetailText label="Relationship Category">{relationshipCategoryName}</NxDetailText>

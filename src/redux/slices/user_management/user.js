@@ -7,7 +7,6 @@ const initialState = {
   data: null,
   data_status: null,
   data_detail: null,
-  data_employee: null,
   data_user_level: null,
   data_group_access: null,
   data_auth_type: null,
@@ -16,13 +15,17 @@ const initialState = {
   loading: false,
   data_employee_id: [],
   data_list_upload: null,
+  data_generate_link: null,
+  data_download: null,
+  data_template: null,
+  data_final_upload: null,
 };
 
 export const getListUser = createAsyncThunk(
   "GET_LIST_USER",
   async (_, thunkAPI) => {
     try {
-      const url = "/v1/dbs/api/mu/get-all";
+      const url = "/v1/dbs/api/mu/view-paging";
       const response = await userHttpService.getAll(url);
       return response.data;
     } catch (error) {
@@ -54,7 +57,7 @@ export const getDetailUser = createAsyncThunk(
   }
 );
 export const getDetailUpdateUser = createAsyncThunk(
-  "GET_DETAIL_USER",
+  "GET_DETAIL_UPDATE_USER",
   async (id, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/mu/view-update/${id}`;
@@ -79,7 +82,7 @@ export const createUser = createAsyncThunk(
       const url = "/v1/dbs/api/mu/create-user";
       const response = await userHttpService.createData(url, body);
       const successMessage = {
-        title: "Successfull",
+        title: "Successful",
         description: response?.message,
       };
       thunkAPI.dispatch(showModalSuccess(successMessage));
@@ -103,7 +106,7 @@ export const updateUser = createAsyncThunk(
       const url = "/v1/dbs/api/mu/update-user";
       const response = await userHttpService.updateData(url, data);
       const successMessage = {
-        title: "Successfull",
+        title: "Successful",
         description: "Your data has been updated",
       };
       thunkAPI.dispatch(showModalSuccess(successMessage));
@@ -130,7 +133,7 @@ export const inactiveUser = createAsyncThunk(
       const url = "/v1/dbs/api/mu/active-inactivate";
       const data = await userHttpService.activationWithRemark(url, body);
       const successMessage = {
-        title: "Successfull",
+        title: "Successful",
         description: `Your data has been ${status}`,
         return: false,
       };
@@ -229,7 +232,7 @@ export const uploadUser = createAsyncThunk(
     } catch (e) {
       thunkAPI.dispatch(
         validateError({
-          error: errorBody(errorCode(e), "updated", errorMessage(e)),
+          error: errorBody(errorCode(e), "uploaded", errorMessage(e)),
           action: "UPLOAD_USER",
           back: false,
         })
@@ -258,25 +261,6 @@ export const getDetailGroupAccess = createAsyncThunk(
   }
 );
 
-export const getAllEmployees = createAsyncThunk(
-  "GET_ALL_EMPLOYEE",
-  async (id, thunkAPI) => {
-    try {
-      const url = `/v1/dbs/api/mu/get-all-employee/${id}`;
-      const data = await userHttpService.getAll(url);
-      return data;
-    } catch (error) {
-      thunkAPI.dispatch(
-        validateError({
-          error: error,
-          action: "GET_ALL_EMPLOYEE",
-          back: false,
-        })
-      );
-      return thunkAPI.rejectWithValue([]);
-    }
-  }
-);
 export const getAllGroupAccess = createAsyncThunk(
   "GET_ALL_GROUP_ACCES",
   async (id, thunkAPI) => {
@@ -361,8 +345,9 @@ export const finalUploadUser = createAsyncThunk(
       const url = "/v1/dbs/api/mu/upload/step2";
       const data = await userHttpService.createData(url, body);
       const successMessage = {
-        title: "Successfull",
-        description: "Your data has been created",
+        title: "Successful",
+        description: "Your file has been uploaded",
+        return: true,
       };
       thunkAPI.dispatch(showModalSuccess(successMessage));
       return data?.data;
@@ -424,7 +409,7 @@ export const changeAuthType = createAsyncThunk(
       const url = `/v1/dbs/api/mu/change-auth-type`;
       const response = await userHttpService.createData(url, body);
       const successMessage = {
-        title: "Successfull",
+        title: "Successful",
         description: "Your data has been updated",
       };
       thunkAPI.dispatch(showModalSuccess(successMessage));
@@ -463,7 +448,7 @@ export const getUserPositionTo = createAsyncThunk(
         })
       );
       return thunkAPI.rejectWithValue(
-        error.response.data.code === 419 ? null : error.response.data
+        error?.response?.data?.code === 419 ? null : error?.response?.data
       );
     }
   }
@@ -476,7 +461,7 @@ export const forwardTaskUser = createAsyncThunk(
       const url = `/v1/dbs/api/forward-task/forward`;
       const data = await userHttpService.createData(url, body);
       const successBody = {
-        title: "Successfull",
+        title: "Successful",
         description: `Your data has been forwarded`,
       };
       thunkAPI.dispatch(showModalSuccess(successBody));
@@ -489,7 +474,7 @@ export const forwardTaskUser = createAsyncThunk(
           back: false,
         })
       );
-      return thunkAPI.rejectWithValue(error.response.data);
+      return thunkAPI.rejectWithValue(error?.response?.data);
     }
   }
 );
@@ -504,8 +489,7 @@ const userSlice = createSlice({
   },
   extraReducers: {
     // get user reducer
-    [getListUser.pending]: (state, action) => {
-      state.data = action.payload;
+    [getListUser.pending]: (state) => {
       state.loading = true;
     },
     [getListUser.fulfilled]: (state, action) => {
@@ -519,8 +503,7 @@ const userSlice = createSlice({
     },
 
     // detail user reducers
-    [getDetailUser.pending]: (state, action) => {
-      state.data_user = action.payload;
+    [getDetailUser.pending]: (state) => {
       state.loading = true;
       state.isFailed = false;
     },
@@ -535,8 +518,7 @@ const userSlice = createSlice({
       state.isFailed = true;
     },
     // create user reducer
-    [createUser.pending]: (state, action) => {
-      state.data_status = action.payload;
+    [createUser.pending]: (state) => {
       state.loading = true;
     },
     [createUser.fulfilled]: (state, action) => {
@@ -548,8 +530,7 @@ const userSlice = createSlice({
       state.loading = false;
     },
     // update user reducer
-    [updateUser.pending]: (state, action) => {
-      state.data_status = action.payload;
+    [updateUser.pending]: (state) => {
       state.loading = true;
     },
     [updateUser.fulfilled]: (state, action) => {
@@ -586,8 +567,7 @@ const userSlice = createSlice({
       state.isFailed = true;
     },
     // get all user paginate
-    [getAllUserPaginate.pending]: (state, action) => {
-      state.data = action.payload;
+    [getAllUserPaginate.pending]: (state) => {
       state.data_employee_id = [];
       state.loading = true;
     },
@@ -600,9 +580,8 @@ const userSlice = createSlice({
       state.loading = false;
     },
     // upload user
-    [uploadUser.pending]: (state, action) => {
-      state.data_list_upload = action.payload;
-      // state.loading = true;
+    [uploadUser.pending]: (state) => {
+      state.loading = true;
     },
     [uploadUser.fulfilled]: (state, action) => {
       state.data_list_upload = action.payload;
@@ -613,8 +592,7 @@ const userSlice = createSlice({
       state.loading = false;
     },
     // detail group access
-    [getDetailGroupAccess.pending]: (state, action) => {
-      state.data_detail = action.payload;
+    [getDetailGroupAccess.pending]: (state) => {
       state.loading = true;
     },
     [getDetailGroupAccess.fulfilled]: (state, action) => {
@@ -626,8 +604,7 @@ const userSlice = createSlice({
       state.loading = false;
     },
     // get all group access
-    [getAllGroupAccess.pending]: (state, action) => {
-      state.data_group_access = action.payload;
+    [getAllGroupAccess.pending]: (state) => {
       state.loading = true;
     },
     [getAllGroupAccess.fulfilled]: (state, action) => {
@@ -638,22 +615,8 @@ const userSlice = createSlice({
       state.data_group_access = action.payload;
       state.loading = false;
     },
-    // get all employee
-    [getAllEmployees.pending]: (state, action) => {
-      state.data_employee = action.payload;
-      state.loading = true;
-    },
-    [getAllEmployees.fulfilled]: (state, action) => {
-      state.data_employee = action.payload;
-      state.loading = false;
-    },
-    [getAllEmployees.rejected]: (state, action) => {
-      state.data_employee = action.payload;
-      state.loading = false;
-    },
     // get all user level
-    [getAllUserLevel.pending]: (state, action) => {
-      state.data_user_level = action.payload;
+    [getAllUserLevel.pending]: (state) => {
       state.loading = true;
     },
     [getAllUserLevel.fulfilled]: (state, action) => {
@@ -665,8 +628,7 @@ const userSlice = createSlice({
       state.loading = false;
     },
     // get all auth type
-    [getAllAuthType.pending]: (state, action) => {
-      state.data_auth_type = action.payload;
+    [getAllAuthType.pending]: (state) => {
       state.loading = true;
     },
     [getAllAuthType.fulfilled]: (state, action) => {
@@ -678,8 +640,7 @@ const userSlice = createSlice({
       state.loading = false;
     },
     // get all user type
-    [getAllUserType.pending]: (state, action) => {
-      state.data_user_type = action.payload;
+    [getAllUserType.pending]: (state) => {
       state.loading = true;
     },
     [getAllUserType.fulfilled]: (state, action) => {
@@ -691,12 +652,11 @@ const userSlice = createSlice({
       state.loading = false;
     },
     // generate link password
-    [generatePasswordLink.pending]: (state, action) => {
-      state.data = action.payload;
+    [generatePasswordLink.pending]: (state) => {
       state.loading = true;
     },
     [generatePasswordLink.fulfilled]: (state, action) => {
-      state.data = action.payload;
+      state.data_generate_link = action.payload;
       state.isSuccess = true;
       state.loading = false;
     },
@@ -704,24 +664,22 @@ const userSlice = createSlice({
       state.loading = false;
     },
     // downlaod template
-    [downloadTemplate.pending]: (state, action) => {
-      state.data = action.payload;
+    [downloadTemplate.pending]: (state) => {
       state.loading = true;
     },
     [downloadTemplate.fulfilled]: (state, action) => {
-      state.data = action.payload;
+      state.data_template = action.payload;
       state.loading = false;
     },
     [downloadTemplate.rejected]: (state) => {
       state.loading = false;
     },
     // final upload user
-    [finalUploadUser.pending]: (state, action) => {
-      state.data = action.payload;
+    [finalUploadUser.pending]: (state) => {
       state.loading = true;
     },
     [finalUploadUser.fulfilled]: (state, action) => {
-      state.data = action.payload;
+      state.data_final_upload = action.payload;
       state.loading = false;
     },
     [finalUploadUser.rejected]: (state) => {

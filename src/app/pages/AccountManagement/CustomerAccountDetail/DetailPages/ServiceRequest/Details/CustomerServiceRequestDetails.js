@@ -1,21 +1,10 @@
 import { useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { Spin } from "antd";
-import {
-  CloseOutlined,
-  PauseCircleOutlined,
-  PlayCircleOutlined,
-  LockOutlined,
-  CheckCircleOutlined,
-  LeftOutlined,
-} from "@ant-design/icons";
+import { Button, Spin } from "antd";
 
-import BreadCrumb from "../../../../../../../components/BreadCrumb";
-import ButtonComponent from "../../../../../../../components/ButtonComponent";
 import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
 import NxCardContainer from "../../../../../../../components/Nx/NxCardContainer";
-import NxTable from "../../../../../../../components/Nx/NxTable";
 import NxDetailText from "../../../../../../../components/Nx/NxDetailText";
 import NxDate from "../../../../../../../components/Nx/NxDatePicker";
 
@@ -27,18 +16,9 @@ import {
 
 import HeaderDetail from "../../../HeaderDetail";
 import CustomerServiceRequestDetailTabs from "./CustomerServiceRequestDetailTabs";
-
-// ── Action Log columns ────────────────────────────────────────────────────────
-const LOG_COLUMNS = [
-  { title: "NO", width: 60, align: "center", render: (_, __, i) => i + 1 },
-  {
-    title: "DATE", dataIndex: "createdDate", width: 180, sorter: true, filter: true,
-    render: (v) => NxDate.formatDate(v, "DD MMM YYYY HH:mm:ss"),
-  },
-  { title: "USERNAME", dataIndex: "createdBy",  width: 150, sorter: true, filter: true },
-  { title: "ACTION",   dataIndex: "remark",     width: 250, sorter: true, filter: true },
-  { title: "REMARK",   dataIndex: "newValue",   sorter: true, filter: true, render: (v) => v || "-" },
-];
+import SVGIcon from "../../../../../../../assets/Icon/index";
+import NxBreadCrumb from "../../../../../../../components/Nx/NxBreadCrumb";
+import ActionLogTable from "./ActionLogTable";
 
 const CustomerServiceRequestDetails = ({ type = "standard" }) => {
   const dispatch = useDispatch();
@@ -56,6 +36,7 @@ const CustomerServiceRequestDetails = ({ type = "standard" }) => {
 
   const isLoading = loadingAccountDetail || loading_detailSr;
   const srStatus = (detail_serviceRequest?.status || "").toUpperCase();
+  const srPreviousStatus = (detail_serviceRequest?.previousStatus || "").toUpperCase();
 
   useEffect(() => {
     if (id && idAccount) {
@@ -101,28 +82,30 @@ const CustomerServiceRequestDetails = ({ type = "standard" }) => {
 
   // Button config per status: ordered list of actions + which one is primary
   const STATUS_ACTIONS = {
-    OPEN:        { buttons: ["CANCELLED", "ON_HOLD", "CLOSED", "RESOLVED", "IN_PROGRESS"], primary: "IN_PROGRESS" },
-    IN_PROGRESS: { buttons: ["CANCELLED", "ON_HOLD", "CLOSED", "RESOLVED"],               primary: "RESOLVED"    },
-    ON_HOLD:     { buttons: ["CANCELLED", "IN_PROGRESS"],                                  primary: "IN_PROGRESS" },
-    RESOLVED:    { buttons: ["CANCELLED", "IN_PROGRESS", "CLOSED"],                        primary: "CLOSED"      },
+    OPEN: { buttons: ["CANCELLED", "ON_HOLD", "CLOSED", "RESOLVED", "IN_PROGRESS"], primary: "IN_PROGRESS" },
+    IN_PROGRESS: { buttons: ["CANCELLED", "ON_HOLD", "CLOSED", "RESOLVED"], primary: "RESOLVED" },
+    "ON_HOLD,OPEN": { buttons: ["CANCELLED", "OPEN"], primary: "OPEN" },
+    "ON_HOLD,ON_PROGRESS": { buttons: ["CANCELLED", "IN_PROGRESS"], primary: "IN_PROGRESS" },
+    RESOLVED: { buttons: ["CANCELLED", "IN_PROGRESS", "CLOSED"], primary: "CLOSED" },
   };
 
   const BUTTON_DEF = {
-    CANCELLED:   { label: "Cancel Request",      icon: <CloseOutlined /> },
-    ON_HOLD:     { label: "Mark as On Hold",      icon: <PauseCircleOutlined /> },
-    CLOSED:      { label: "Mark as Closed",       icon: <LockOutlined /> },
-    RESOLVED:    { label: "Mark as Resolved",     icon: <CheckCircleOutlined /> },
-    IN_PROGRESS: { label: "Mark as In Progress",  icon: <PlayCircleOutlined /> },
+    OPEN:        "Mark as Open",
+    CANCELLED:   "Cancel Request",
+    ON_HOLD:     "Mark as On Hold",
+    CLOSED:      "Mark as Closed",
+    RESOLVED:    "Mark as Resolved",
+    IN_PROGRESS: "Mark as In Progress",
   };
 
-  const currentActions = STATUS_ACTIONS[srStatus] || { buttons: [], primary: null };
+  const currentActions = STATUS_ACTIONS[[srStatus, srPreviousStatus].filter(Boolean).join(",")] || { buttons: [], primary: null };
 
   return (
     <>
       <Spin spinning={isLoading} className="w-full top-20">
-        <BreadCrumb routes={routes} />
+        <div className="flex flex-col gap-4">
+          <NxBreadCrumb routes={routes} />
 
-        <div className="my-5 flex flex-col gap-4">
           {/* Customer & Account Info */}
           <HeaderDetail
             data_header={["CUSTOMER INFORMATION", "ACCOUNT INFORMATION"]}
@@ -140,80 +123,63 @@ const CustomerServiceRequestDetails = ({ type = "standard" }) => {
             idCustomer={idCustomer}
             accountType={accountType}
             data_accountDetail={data_accountDetail}
-            detail_serviceRequest={detail_serviceRequest}
+            data_detail={detail_serviceRequest}
           />
 
           {/* Action Log */}
-          <NxCardContainer header="ACTION LOG">
-            <NxTable
-              idTable="action-log-table"
-              dataSource={(Array.isArray(detail_serviceRequest?.actionLog) ? detail_serviceRequest.actionLog : [])
-                .map((item, i) => ({ ...item, key: item.id || i }))}
-              columns={LOG_COLUMNS}
-              usePagination={false}
-              useInfiniteScroll={true}
-              hasMore={false}
-              showAdvanceSearch={false}
-              showSearchBar={false}
-              fontSize="small"
-              tablePadding="small"
-              tableScrolled={{ x: "max-content", y: 300 }}
-            />
-          </NxCardContainer>
+          <ActionLogTable serviceRequestId={id} />
 
           {/* History Log Information */}
           <NxCardContainer header="HISTORY LOG INFORMATION">
-            <div className="w-full grid grid-cols-5 gap-4">
-              <NxDetailText label="Record ID">
-                {detail_serviceRequest?.historyLog?.recordId || detail_serviceRequest?.id || "-"}
-              </NxDetailText>
-              <NxDetailText label="Created Date">
-                {NxDate.formatDate(detail_serviceRequest?.historyLog?.createdDate || detail_serviceRequest?.createdDate, "DD MMM YYYY HH:mm:ss")}
-              </NxDetailText>
-              <NxDetailText label="Created By">
-                {detail_serviceRequest?.historyLog?.createdBy || detail_serviceRequest?.createdBy || "-"}
-              </NxDetailText>
-              <NxDetailText label="Updated Date">
-                {NxDate.formatDate(detail_serviceRequest?.historyLog?.updatedDate || detail_serviceRequest?.updatedDate, "DD MMM YYYY HH:mm:ss")}
-              </NxDetailText>
-              <NxDetailText label="Updated By">
-                {detail_serviceRequest?.historyLog?.updatedBy || detail_serviceRequest?.updatedBy || "-"}
-              </NxDetailText>
-            </div>
-          </NxCardContainer>
-        </div>
-
-        {/* Footer */}
-        <NxBaseContainer border className="mb-5">
-          <div className="flex items-center justify-between gap-3 flex-wrap">
-            <ButtonComponent
-              onClick={() => navigate(-1)}
-              icon={<LeftOutlined />}
-            >
-              Back
-            </ButtonComponent>
-
-            {currentActions.buttons.length > 0 && (
-              <div className="flex items-center gap-3 flex-wrap">
-                {currentActions.buttons.map((key) => {
-                  const def = BUTTON_DEF[key];
-                  const isPrimary = key === currentActions.primary;
-                  return (
-                    <ButtonComponent
-                      key={key}
-                      loading={loading_statusUpdateSr}
-                      onClick={() => handleStatusUpdate(key)}
-                      icon={def.icon}
-                      isPrimary={isPrimary}
-                    >
-                      {def.label}
-                    </ButtonComponent>
-                  );
-                })}
+            <NxBaseContainer border>
+              <div className="w-full grid grid-cols-5 gap-4">
+                <NxDetailText label="Record ID">
+                  {detail_serviceRequest?.historyLog?.recordId || detail_serviceRequest?.id || "-"}
+                </NxDetailText>
+                <NxDetailText label="Created Date">
+                  {NxDate.formatDate(detail_serviceRequest?.historyLog?.createdDate || detail_serviceRequest?.createdDate, "DD MMM YYYY HH:mm:ss")}
+                </NxDetailText>
+                <NxDetailText label="Created By">
+                  {detail_serviceRequest?.historyLog?.createdBy || detail_serviceRequest?.createdBy || "-"}
+                </NxDetailText>
+                <NxDetailText label="Updated Date">
+                  {NxDate.formatDate(detail_serviceRequest?.historyLog?.updatedDate || detail_serviceRequest?.updatedDate, "DD MMM YYYY HH:mm:ss")}
+                </NxDetailText>
+                <NxDetailText label="Updated By">
+                  {detail_serviceRequest?.historyLog?.updatedBy || detail_serviceRequest?.updatedBy || "-"}
+                </NxDetailText>
               </div>
-            )}
-          </div>
-        </NxBaseContainer>
+            </NxBaseContainer>
+          </NxCardContainer>
+
+          <NxBaseContainer border className="mb-5">
+            <div className="flex items-center justify-between gap-3 flex-wrap">
+              <Button type={"menu"} icon={<SVGIcon name="IconChevronLeft" width={14} />} onClick={() => navigate(-1)}>
+                Back
+              </Button>
+
+              {currentActions.buttons.length > 0 && (
+                <div className="flex items-center gap-3 flex-wrap">
+                  {currentActions.buttons.map((key) => {
+                    const def = BUTTON_DEF[key];
+                    const isPrimary = key === currentActions.primary;
+
+                    return (
+                      <Button
+                        key={key}
+                        loading={loading_statusUpdateSr}
+                        onClick={() => handleStatusUpdate(key)}
+                        type={isPrimary ? "submit" : "menu"}
+                      >
+                        {def}
+                      </Button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </NxBaseContainer>
+        </div>
       </Spin>
     </>
   );

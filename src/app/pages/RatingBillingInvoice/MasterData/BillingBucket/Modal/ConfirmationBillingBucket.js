@@ -22,6 +22,7 @@ const ConfirmationBillingBucket = ({
   handleCancel = () => {},
   handleConfirm = () => {},
   dataOption = [],
+  isLoading = false,
 }) => {
   // State
   const [valuePage, setValuePage] = useState("Billing Bucket");
@@ -166,13 +167,15 @@ const ConfirmationBillingBucket = ({
       handleConfirm={handleConfirm}
       footer={
         <div className={"w-full flex justify-end gap-2"}>
-          <ButtonComponent type={"default"} onClick={handleCancel}>
+          <ButtonComponent type={"default"} onClick={handleCancel} disabled={isLoading}>
             Cancel
           </ButtonComponent>
           <ButtonComponent
             type={"submit"}
             border={false}
             onClick={handleConfirm}
+            isLoading={isLoading}
+            disabled={isLoading}
           >
             Confirm
           </ButtonComponent>

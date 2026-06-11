@@ -1,5 +1,5 @@
 import React from 'react';
-import { Alert, Checkbox, Form, Spin, Tooltip } from 'antd';
+import { Alert, Form, Spin, Tooltip } from 'antd';
 import BreadCrumb from '../../../../../components/BreadCrumb';
 import ButtonComponent from '../../../../../components/ButtonComponent';
 import { DownloadOutlined, InfoCircleOutlined, PlusOutlined } from '@ant-design/icons';
@@ -14,6 +14,10 @@ import { useEffect } from 'react';
 import { activationContact, downloadContact, getContactPaginate, getDetailContact } from '../../../../../redux/slices/account_management/MasterData/contact_slice';
 import { getColumnSearchPropsPaging, getColumnSearchPropsUseFilteredValueFE } from '../../../../../utils/getColumnSearchProps';
 import SVGIcon from "../../../../../assets/Icon/index";
+import IconViewList from "../../../../../assets/Icon/Nx/IconViewList";
+import IconEditNx from "../../../../../assets/Icon/Nx/IconEdit";
+import IconActive from "../../../../../assets/icons/nx/IconActive";
+import IconInactive from "../../../../../assets/icons/nx/IconInactive";
 import ModalCustom from '../../../../../components/Modal/ModalCustom';
 import { dateFormatting, formMessageRequired, hasValue, renderColumn } from '../../../../../utils';
 import InputComponent from '../../../../../components/InputComponent';
@@ -33,7 +37,7 @@ const expandedRowRender = (record) => {
         {
             title: "NO",
             align: "center",
-            width: 60,
+            width: 90,
             render: (text, object, index) => index + 1,
         },
         {
@@ -218,7 +222,7 @@ const ViewContact = () => {
         return [
             {
                 title: "NO",
-                width: 60,
+                width: 90,
                 align: "center",
                 render: (text, object, index) => (page - 1) * pageSize + index + 1,
             },
@@ -443,15 +447,9 @@ const ViewContact = () => {
             render: (record, data) => {
                 return (
                     <Tooltip title="Detail">
-                        <Link>
-                            <div
-                                onClick={() => {
-                                    handleDetail(record)
-                                }}
-                            >
-                                <SVGIcon name="IconDetail" width={24} />
-                            </div>
-                        </Link>
+                        <span className="inline-flex items-center text-[#1976D2] hover:text-[#1976D2] transition-colors duration-200 cursor-pointer" onClick={() => handleDetail(record)}>
+                            <IconViewList width={20} />
+                        </span>
                     </Tooltip>
                 )
             }
@@ -461,25 +459,18 @@ const ViewContact = () => {
             action: "Update",
             type: "table",
             render: (record, data) => {
+                const disabled = record?.status === "INACTIVE";
                 return (
                     <Tooltip title="Update">
-                        {record?.status === "INACTIVE" ?
-                            <Link>
-                                <div
-                                    className={"cursor-not-allowed"}>
-                                    <SVGIcon name="IconEdit" width={24} color={"#C0BEC6"} className={"cursor-not-allowed"} />
-                                </div>
-                            </Link>
-                            :
+                        <div className={`inline-flex items-center ${disabled ? "cursor-not-allowed text-gray-300" : ""}`}>
                             <Link
-                                to={ACCOUNT_MANAGEMENT_ROUTES?.UPDATE_CONTACT}
-                                state={{ id: record?.contactId }}
+                                to={!disabled ? ACCOUNT_MANAGEMENT_ROUTES?.UPDATE_CONTACT : undefined}
+                                state={!disabled ? { id: record?.contactId } : undefined}
+                                className={`inline-flex items-center transition-colors duration-200 ${disabled ? "text-gray-300 pointer-events-none" : "text-[#1976D2] hover:text-[#1976D2]"}`}
                             >
-                                <div>
-                                    <SVGIcon name="IconEdit" width={24} />
-                                </div>
+                                <IconEditNx width={20} />
                             </Link>
-                        }
+                        </div>
                     </Tooltip>
                 )
             }
@@ -489,20 +480,18 @@ const ViewContact = () => {
             action: "Activate",
             type: "table",
             render: (record, data) => {
+                const isActive = record?.status?.toUpperCase() === "ACTIVE";
+                const handleToggle = () => { handleActiveOrInactive(record); };
                 return (
-                    <Tooltip
-                        title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}
-                    >
-                        <Link>
-                            <div>
-                                <Checkbox
-                                    onClick={() => {
-                                        handleActiveOrInactive(record)
-                                    }}
-                                    checked={record?.status === "ACTIVE" ? false : true}
-                                />
-                            </div>
-                        </Link>
+                    <Tooltip title={isActive ? "Inactivate" : "Activate"}>
+                        {isActive
+                            ? <span className="inline-flex items-center text-[#D32F2F] hover:text-[#D32F2F] transition-colors duration-200 cursor-pointer" onClick={handleToggle}>
+                                <IconInactive width={20} />
+                              </span>
+                            : <span className="inline-flex items-center text-green-600 hover:text-green-600 transition-colors duration-200 cursor-pointer" onClick={handleToggle}>
+                                <IconActive width={20} />
+                              </span>
+                        }
                     </Tooltip>
                 )
             }

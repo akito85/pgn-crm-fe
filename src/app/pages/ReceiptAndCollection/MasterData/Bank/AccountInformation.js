@@ -60,7 +60,6 @@ const AccountInformation = ({ type, bankId }) => {
     dataListAppHierDetail,
     loading,
     data_modal,
-    data_list_gl,
     dataGLAccount,
     dataGLType,
     data_va_category,

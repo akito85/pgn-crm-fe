@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
 import {
-  Checkbox,
   Form,
   Spin,
   Tooltip,
@@ -25,6 +24,10 @@ import { useRef } from "react";
 import PositionDetail from "./PositionDetail";
 import TablePagination from "../../../../../components/TablePagination";
 import SVGIcon from "../../../../../assets/Icon/index";
+import IconViewList from "../../../../../assets/Icon/Nx/IconViewList";
+import IconEditNx from "../../../../../assets/Icon/Nx/IconEdit";
+import IconActive from "../../../../../assets/icons/nx/IconActive";
+import IconInactive from "../../../../../assets/icons/nx/IconInactive";
 import { renderColumn } from "../../../../../utils";
 import Toolbar from "../../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../../components/ColumnActionPermission";
@@ -121,7 +124,7 @@ const PositionPage = () => {
   const columns = [
     {
       title: "NO",
-      width: 60,
+      width: 90,
       align: "center",
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
@@ -288,14 +291,9 @@ const PositionPage = () => {
       render: (record, data_length) => {
         return (
           <Tooltip title="Detail">
-            <div
-              onClick={() => {
-                handleDetail(record?.positionId);
-                setTypeModal("detail");
-              }}
-            >
-              <SVGIcon name="IconDetail" width={24} />
-            </div>
+            <span className="inline-flex items-center text-[#1976D2] hover:text-[#1976D2] transition-colors duration-200 cursor-pointer" onClick={() => { handleDetail(record?.positionId); setTypeModal("detail"); }}>
+              <IconViewList width={20} />
+            </span>
           </Tooltip>
         )
       }
@@ -304,18 +302,16 @@ const PositionPage = () => {
       action: 'Update',
       type: 'table',
       render: (record, data_length) => {
+        const disabled = record?.status?.toLowerCase() === "inactive";
         return (
           <Tooltip title="Update">
-            <div className={`${record?.status?.toLowerCase() === "inactive" && 'cursor-not-allowed'}`}>
+            <div className={`inline-flex items-center ${disabled ? "cursor-not-allowed text-gray-300" : ""}`}>
               <Link
-                to={record?.status?.toLowerCase() !== "inactive" && SYSTEM_SETUP_ROUTES.UPDATE_MASTER_POSITION}
-                state={record?.status?.toLowerCase() !== "inactive" && { id: record?.positionId }}
+                to={!disabled ? SYSTEM_SETUP_ROUTES.UPDATE_MASTER_POSITION : undefined}
+                state={!disabled ? { id: record?.positionId } : undefined}
+                className={`inline-flex items-center transition-colors duration-200 ${disabled ? "text-gray-300 pointer-events-none" : "text-[#1976D2] hover:text-[#1976D2]"}`}
               >
-                <SVGIcon
-                  name="IconEdit"
-                  width={24}
-                  className={`${record?.status?.toLowerCase() === "inactive" && 'cursor-not-allowed'}`}
-                  color={record?.status?.toLowerCase() === 'inactive' ? "#8D91A0" : "#ACC424"} />
+                <IconEditNx width={20} />
               </Link>
             </div>
           </Tooltip>
@@ -326,19 +322,24 @@ const PositionPage = () => {
       action: 'Activate',
       type: 'table',
       render: (record, data_length) => {
+        const isActive = record?.status?.toUpperCase() === "ACTIVE";
+        const handleToggle = () => {
+          setOpenDelete(true);
+          setPositionId(record?.positionId);
+          setTypeModal("confirmation");
+          setStatusData(record?.status);
+          setRecord(record);
+        };
         return (
-          <Tooltip title={record.status}>
-            <div
-              onClick={() => {
-                setOpenDelete(true);
-                setPositionId(record?.positionId);
-                setTypeModal("confirmation");
-                setStatusData(record?.status);
-                setRecord(record);
-              }}
-            >
-              <Checkbox checked={record.status !== "ACTIVE"} />
-            </div>
+          <Tooltip title={isActive ? "Inactivate" : "Activate"}>
+            {isActive
+              ? <span className="inline-flex items-center text-[#D32F2F] hover:text-[#D32F2F] transition-colors duration-200 cursor-pointer" onClick={handleToggle}>
+                  <IconInactive width={20} />
+                </span>
+              : <span className="inline-flex items-center text-green-600 hover:text-green-600 transition-colors duration-200 cursor-pointer" onClick={handleToggle}>
+                  <IconActive width={20} />
+                </span>
+            }
           </Tooltip>
         )
       }

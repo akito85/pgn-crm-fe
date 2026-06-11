@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import HeaderDetail from "../../../HeaderDetail";
 import NxBreadCrumb from "../../../../../../../components/Nx/NxBreadCrumb";
 import { ACCOUNT_MANAGEMENT_ROUTES } from "../../../../../../../routes/account_management/customer_account_routes";
+import { RELATIONSHIP_ROUTES } from "../../../../../../../routes/relationship/relationship_routes";
 import NxApprovalInput from "../../../../../../../components/Nx/NxApprovalInput";
 import NxAttachmentInput from "../../../../../../../components/Nx/NxAttachmentInput";
 import RelationshipInfo from "./StepContents/InformationForm/RelationshipInfo";
@@ -17,6 +18,15 @@ import {
   getRelationship,
   updateRelationship
 } from "../../../../../../../redux/slices/account_management/detailAccount/relationshipSlice";
+import {
+  getStandaloneRelationshipApprovalHierarchies,
+  getStandaloneRelationshipApprovalHierarchy,
+  getStandaloneRelationshipAttachmentCategories,
+  getStandaloneRelationship,
+  getStandaloneRelationshipDraft,
+  createStandaloneRelationship,
+  updateStandaloneRelationship,
+} from "../../../../../../../redux/slices/relationship/standaloneRelationshipSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { Button, Form, Spin } from "antd";
 import { showModalError, validateCreateUpdate } from "../../../../../../../redux/slices/general_slice";
@@ -40,6 +50,7 @@ import { nxRemoveKeys } from "../../../../../../../components/Nx/NxRemoveKeys";
 const CreateUpdateRelationship = ({
   accountType = "standard",
   formType = "create",
+  isStandalone = false,
 }) => {
   // --- Hooks ---
   const dispatch = useDispatch();
@@ -47,6 +58,7 @@ const CreateUpdateRelationship = ({
   const navigate = useNavigate();
   const containerRef = useRef(null);
   const [form] = Form.useForm();
+  const sliceKey = isStandalone ? "standaloneRelationship" : "relationship";
   const {
     list_relationshipAttachmentCategory,
     list_relationshipApprovalHierarchy,
@@ -59,7 +71,7 @@ const CreateUpdateRelationship = ({
     loading_detailRelationshipApprovalHierarchy,
     loading_listRelationshipApprovalHierarchy,
     loading_detailDraftRelationship,
-  } = useSelector((state) => state.relationship);
+  } = useSelector((state) => state[sliceKey]);
 
   // --- State ---
   const [current, setCurrent] = useState(0);
@@ -102,7 +114,16 @@ const CreateUpdateRelationship = ({
 
   const attachments = detail.attachments;
 
-  const formFields = [
+  const formFields = isStandalone ? [
+    // Step 0: Relationship Information (standalone has subject choosers too)
+    ["subjectAccountName", "subjectCustomerName", "relationshipType", "relationshipCategory", "relatedName", "relatedNumber", "startDate"],
+    // Step 1: Account Information (no field validation)
+    [],
+    // Step 2: Approval
+    ["appHierId"],
+    // Step 3: Attachment
+    [],
+  ] : [
     [
       "relationshipType",
       "relationshipCategory",
@@ -125,8 +146,10 @@ const CreateUpdateRelationship = ({
    * @param {string} approvalName
    */
   const handleSelectHierarchy = (appHierId, approvalName) => {
-    if (accountId && appHierId)
-      dispatch(getRelationshipApprovalHierarchy(appHierId));
+    if (appHierId) {
+      if (isStandalone) dispatch(getStandaloneRelationshipApprovalHierarchy(appHierId));
+      else if (accountId) dispatch(getRelationshipApprovalHierarchy(appHierId));
+    }
     form.setFieldValue("appHierName", approvalName);
   };
 
@@ -186,7 +209,7 @@ const CreateUpdateRelationship = ({
     if (show) {
       try {
         if (submitType === "submit") {
-          if (current === 2) {
+          if (current === lastStepIndex) {
             if (attachmentIsRequired && !attachmentDataSource.length) {
               const errorBody = {
                 title: "Failed",
@@ -226,10 +249,14 @@ const CreateUpdateRelationship = ({
               }
             };
 
+            const confirmValidateEndPoint = isStandalone
+              ? `/v1/dbs/api/relationships/validate-step`
+              : `/v1/dbs/api/accounts/${accountId}/relationships/validate-step`;
+
             await dispatch(validateCreateUpdate({
               body,
               services: accountManagementService,
-              endPoint: `/v1/dbs/api/accounts/${accountId}/relationships/validate-step`,
+              endPoint: confirmValidateEndPoint,
               type: formType,
             })).unwrap();
           }
@@ -266,10 +293,14 @@ const CreateUpdateRelationship = ({
         appHierId,
       };
 
+      const validateFormEndPoint = isStandalone
+        ? `/v1/dbs/api/relationships/validate-step`
+        : `/v1/dbs/api/accounts/${accountId}/relationships/validate-${formType}`;
+
       dispatch(validateCreateUpdate({
         body,
         services: accountManagementService,
-        endPoint: `/v1/dbs/api/accounts/${accountId}/relationships/validate-${formType}`,
+        endPoint: validateFormEndPoint,
         type: formType,
       }))
         .unwrap()
@@ -289,9 +320,11 @@ const CreateUpdateRelationship = ({
    * `POST /v1/dbs/api/accounts/${accountId}/relationships/validate-step`
    * before advancing to the next step.
    */
+  const lastStepIndex = isStandalone ? 3 : 2;
+
   const next = async () => {
     try {
-      if (current === 2) {
+      if (current === lastStepIndex) {
         if (attachmentIsRequired && !attachmentDataSource.length) {
           const errorBody = {
             title: "Failed",
@@ -331,10 +364,14 @@ const CreateUpdateRelationship = ({
           }
         };
 
+        const validateEndPoint = isStandalone
+          ? `/v1/dbs/api/relationships/validate-step`
+          : `/v1/dbs/api/accounts/${accountId}/relationships/validate-step`;
+
         await dispatch(validateCreateUpdate({
           body,
           services: accountManagementService,
-          endPoint: `/v1/dbs/api/accounts/${accountId}/relationships/validate-step`,
+          endPoint: validateEndPoint,
           type: formType,
         })).unwrap();
       }
@@ -408,6 +445,28 @@ const CreateUpdateRelationship = ({
       attachments,
     };
 
+    if (isStandalone) {
+      const standaloneUploadUrl = (refId) => `/v1/dbs/api/relationships/upload-attachment?refId=${refId}`;
+      try {
+        if (isCreate) {
+          await dispatch(createStandaloneRelationship({
+            payload: { ...payload, subjectAccountId: form.getFieldValue("subjectAccountId") },
+            getUploadUrl: standaloneUploadUrl,
+            newAttachments,
+          })).unwrap();
+        } else {
+          await dispatch(updateStandaloneRelationship({
+            id,
+            payload: { ...payload, subjectAccountId: form.getFieldValue("subjectAccountId") },
+            getUploadUrl: standaloneUploadUrl,
+            newAttachments,
+          })).unwrap();
+        }
+      } catch { return; }
+      setTimeout(() => navigate(RELATIONSHIP_ROUTES.VIEW_RELATIONSHIP), 2000);
+      return;
+    }
+
     const targetRoute = isStandard
       ? ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_STANDARD
       : ACCOUNT_MANAGEMENT_ROUTES.VIEW_DETAIL_ACCOUNT_ONETIME;
@@ -436,7 +495,10 @@ const CreateUpdateRelationship = ({
     }, 2000);
   };
 
-  const routes = [
+  const routes = isStandalone ? [
+    { path: RELATIONSHIP_ROUTES.VIEW_RELATIONSHIP, breadcrumbName: "Relationship" },
+    { path: "", breadcrumbName: isCreate ? "Create Relationship" : "Update Relationship" },
+  ] : [
     {
       path: "",
       breadcrumbName: "Account",
@@ -475,7 +537,71 @@ const CreateUpdateRelationship = ({
     },
   ];
 
-  const steps = [
+  const approvalCard = {
+    title: "Approval",
+    cards: [{
+      header: "Approval",
+      content: (
+        <NxApprovalInput
+          form={form}
+          options={list_relationshipApprovalHierarchy}
+          hierarchyDetails={detail_relationshipApprovalHierarchy || []}
+          handleSelectHierarchy={handleSelectHierarchy}
+          loading={loading_detailRelationshipApprovalHierarchy}
+          key="relationship-tab-approval"
+        />
+      )
+    }]
+  };
+
+  const attachmentCard = {
+    title: "Attachment",
+    cards: [{
+      header: "Attachment",
+      content: (
+        <NxAttachmentInput
+          data={attachmentDataSource}
+          updateData={setAttachmentDataSource}
+          setDeleted={setDeletedAttachments}
+          getAPICategory={isStandalone ? getStandaloneRelationshipAttachmentCategories : getRelationshipAttachmentCategories}
+          categoryData={list_relationshipAttachmentCategory}
+          service={accountManagementService}
+          configApplication={configApp.ACCOUNT_SERVICE}
+          mandatory={attachmentIsRequired}
+          key="relationship-tab-attachment"
+        />
+      )
+    }]
+  };
+
+  const steps = isStandalone ? [
+    {
+      title: "Relationship Information",
+      cards: [{
+        header: "Relationship Information",
+        content: (
+          <RelationshipInfo
+            form={form}
+            key="relationship-tab-0"
+            setRelatedDetails={setRelatedDetails}
+            isDraft={isDraft}
+            isUpdate={isUpdate}
+            isStandalone={true}
+          />
+        )
+      }],
+      disabled: false,
+    },
+    {
+      title: "Account Information",
+      cards: [{
+        header: "Account Information",
+        content: <RelatedDetailCard relatedDetails={relatedDetails} />,
+      }],
+    },
+    approvalCard,
+    attachmentCard,
+  ] : [
     {
       title: "Relationship Information",
       cards: [
@@ -484,7 +610,7 @@ const CreateUpdateRelationship = ({
           content: (
             <RelationshipInfo
               form={form}
-              key={`relationship-tab-0`}
+              key="relationship-tab-0"
               setRelatedDetails={setRelatedDetails}
               isDraft={isDraft}
               isUpdate={isUpdate}
@@ -493,70 +619,42 @@ const CreateUpdateRelationship = ({
         },
         {
           header: "Related Detail",
-          content: (
-            <RelatedDetailCard
-              relatedDetails={relatedDetails}
-            />
-          ),
+          content: <RelatedDetailCard relatedDetails={relatedDetails} />,
           hidden: !relatedDetails.length
         }
       ],
       disabled: false,
     },
-    {
-      title: "Approval",
-      cards: [
-        {
-          header: "Approval",
-          content: (
-            <NxApprovalInput
-            form={form}
-              options={list_relationshipApprovalHierarchy}
-              hierarchyDetails={detail_relationshipApprovalHierarchy || []}
-              handleSelectHierarchy={handleSelectHierarchy}
-              loading={loading_detailRelationshipApprovalHierarchy}
-              key={`relationship-tab-1`}
-            />
-          )
-        }
-      ]
-    },
-    {
-      title: "Attachment",
-      cards: [
-        {
-          header: "Attachment",
-          content: (
-            <NxAttachmentInput
-            data={attachmentDataSource}
-            updateData={setAttachmentDataSource}
-            setDeleted={setDeletedAttachments}
-            getAPICategory={getRelationshipAttachmentCategories}
-            categoryData={list_relationshipAttachmentCategory}
-            service={accountManagementService}
-            configApplication={configApp.ACCOUNT_SERVICE}
-              mandatory={attachmentIsRequired}
-              key={`relationship-tab-2`}
-              />
-          )
-        }
-      ]
-    },
+    approvalCard,
+    attachmentCard,
   ];
 
   // --- Effects ---
-  // Fetch approval hierarchy options
+  // Fetch approval hierarchy options and attachment categories
   useEffect(() => {
-    dispatch(getRelationshipApprovalHierarchies());
+    if (isStandalone) {
+      dispatch(getStandaloneRelationshipApprovalHierarchies());
+      dispatch(getStandaloneRelationshipAttachmentCategories());
+    } else {
+      dispatch(getRelationshipApprovalHierarchies());
+    }
   }, []);
 
   // Fetch relationship record or draft
   useEffect(() => {
-    if (isUpdate && id && accountId) {
-      if (isActive && (isDraftApproval || isRejectedApproval))
-        dispatch(getRelationshipDraft({ accountId, idRelationship: id }));
-      else
-        dispatch(getRelationship({ accountId, idRelationship: id }));
+    if (isUpdate && id) {
+      if (isStandalone) {
+        const subjectAccountId = location.state?.idAccount;
+        if (isActive && (isDraftApproval || isRejectedApproval))
+          dispatch(getStandaloneRelationshipDraft({ id, subjectAccountId }));
+        else
+          dispatch(getStandaloneRelationship({ id, subjectAccountId }));
+      } else if (accountId) {
+        if (isActive && (isDraftApproval || isRejectedApproval))
+          dispatch(getRelationshipDraft({ accountId, idRelationship: id }));
+        else
+          dispatch(getRelationship({ accountId, idRelationship: id }));
+      }
     }
   }, [isUpdate, id, accountId, isActive, isDraftApproval, isRejectedApproval]);
 
@@ -621,12 +719,15 @@ const CreateUpdateRelationship = ({
       <div>
         <div className="flex flex-col gap-y-4">
           <NxBreadCrumb routes={routes} />
-          <HeaderDetail
-            data_header={["CUSTOMER INFORMATION", "ACCOUNT INFORMATION"]}
-            idAccount={accountId}
-            idCustomer={customerId}
-            type={accountType}
-          />
+          {!isStandalone && (
+            <HeaderDetail
+              data_header={["CUSTOMER INFORMATION", "ACCOUNT INFORMATION"]}
+              idAccount={accountId}
+              idCustomer={customerId}
+              type={accountType}
+              collapsible
+            />
+          )}
           <Spin spinning={loading}>
             <Form
               id="relationshipForm"

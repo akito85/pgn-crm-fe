@@ -29,6 +29,23 @@ export const getJobGroupManagementColumns = (accessGroupsMap = {}) => [
     align: "left",
   },
   {
+    title: "TYPE",
+    dataIndex: "groupType",
+    key: "groupType",
+    align: "center",
+    width: 120,
+    render: (val) => {
+      const chained = val === "CHAINED";
+      return (
+        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "22px", overflow: "hidden" }}>
+          <StatusComponent colour={chained ? "processing" : "inactive"} size="small">
+            {chained ? "Chained" : "Unrelated"}
+          </StatusComponent>
+        </div>
+      );
+    },
+  },
+  {
     title: "ACCESS GROUP",
     dataIndex: "accessGroup",
     key: "accessGroup",

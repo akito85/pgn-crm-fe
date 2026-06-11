@@ -6,19 +6,19 @@ const DetailDeduction = ({ data_detail }) => {
   return (
       <GridLayout cols={3} gap={4}>
         <DetailText label={"Deduction Period"}>
-          {data_detail?.deductionPeriod || "-"}
+          {data_detail?.deductionPeriod || ""}
         </DetailText>
 
         <DetailText label={"Type"}>
-          {data_detail?.type || "-"}
+          {data_detail?.type || ""}
         </DetailText>
 
         <DetailText label={"Deduction Date"}>
-          {data_detail?.deductionDate || "-"}
+          {data_detail?.deductionDate || ""}
         </DetailText>
 
         <DetailText label={"Description"}>
-          {data_detail?.description || "-"}
+          {data_detail?.description || ""}
         </DetailText>
       </GridLayout>
   );

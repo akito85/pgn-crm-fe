@@ -24,7 +24,7 @@ export const columnsSaDetail = (
     render: (text, object, index) => (page - 1) * pageSize + index + 1,
   },
   {
-    title: "ATTRIBUTE NAME",
+    title: "NAME",
     dataIndex: "attributeName",
     key: "attributeName",
     sorter: true,
@@ -41,6 +41,32 @@ export const columnsSaDetail = (
       renderColumn(
         "attributeName",
         hasValue(search["attributeName"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+    {
+    title: "VALUE",
+    dataIndex: "value",
+    key: "value",
+    sorter: true,
+    width: 150,
+    align: "right",
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "value",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch
+    ),
+    render: (text) =>
+      renderColumn(
+        "value",
+        hasValue(search["value"]),
         searchText,
         text,
         false,
@@ -70,58 +96,6 @@ export const columnsSaDetail = (
         searchText,
         text,
         false,
-        "input",
-        search
-      ),
-  },
-  {
-    title: "VALUE",
-    dataIndex: "value",
-    key: "value",
-    sorter: true,
-    width: 150,
-    align: "right",
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "value",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "value",
-        hasValue(search["value"]),
-        searchText,
-        text,
-        false,
-        "input",
-        search
-      ),
-  },
-  {
-    title: "DESCRIPTION",
-    dataIndex: "description",
-    key: "description",
-    sorter: true,
-    width: 200,
-    ellipsis: { showTitle: false },
-    ...getColumnSearchPropsUseFilteredValue(
-      search,
-      "description",
-      searchInput,
-      searchedColumn,
-      searchText,
-      handleSearch
-    ),
-    render: (text) =>
-      renderColumn(
-        "description",
-        hasValue(search["description"]),
-        searchText,
-        text,
-        true,
         "input",
         search
       ),

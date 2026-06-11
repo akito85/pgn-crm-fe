@@ -94,12 +94,15 @@ export const columnsSaPriceRule = (
       handleSearch
     ),
     render: (text) => {
-      const displayText = text
-        ? Number(text).toLocaleString("en-US", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          })
-        : "";
+      let displayText = "";
+      if (text === 0 || text === "0" || text === null || text === undefined) {
+        displayText = "0";
+      } else {
+        displayText = Number(text).toLocaleString("en-US", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        });
+      }
       return renderColumn(
         "min",
         hasValue(search["min"]),
@@ -136,7 +139,6 @@ export const columnsSaPriceRule = (
           maximumFractionDigits: 2,
         });
       }
-      
       return renderColumn(
         "max",
         hasValue(search["max"]),
@@ -354,7 +356,7 @@ const SaPricingSection = ({ prabillSaId, saNumber }) => {
               Price Code
             </p>
             <DetailText label="Price Code">
-              {firstPriceDetail?.priceCode || "-"}
+              {firstPriceDetail?.priceCode || ""}
             </DetailText>
           </div>
 
@@ -363,7 +365,7 @@ const SaPricingSection = ({ prabillSaId, saNumber }) => {
               Price Adjustment
             </p>
             <DetailText label="Price Adjustment">
-              {firstPriceDetail?.priceCodeAdjustment || "-"}
+              {firstPriceDetail?.priceCodeAdjustment || ""}
             </DetailText>
           </div>
 
@@ -372,7 +374,7 @@ const SaPricingSection = ({ prabillSaId, saNumber }) => {
               Full Price Code
             </p>
             <DetailText label="Full Price Code">
-              {firstPriceDetail?.fullPriceCode || "-"}
+              {firstPriceDetail?.fullPriceCode || ""}
             </DetailText>
           </div>
         </div>

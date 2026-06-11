@@ -199,6 +199,28 @@ const uploadImage = async (url, data) => {
     throw error;
   }
 };
+
+const uploadAttachment = async (url, data, onProgress) => {
+  try {
+    const response = await axios.post(configApp.PAYMENT_SERVICE + url, data, {
+      headers: {
+        ...tokenHeader(),
+        "Content-Type": "multipart/form-data",
+      },
+      onUploadProgress: (progressEvent) => {
+        if (onProgress) {
+          const percentCompleted = Math.round(
+            (progressEvent.loaded * 100) / progressEvent.total
+          );
+          onProgress(percentCompleted);
+        }
+      },
+    });
+    return response?.data;
+  } catch (error) {
+    throw error;
+  }
+};
 const uploadBulk = async (url, data, onProgress) => {
   try {
     const response = await axios.post(configApp.PAYMENT_SERVICE + url, data, {
@@ -272,6 +294,16 @@ const deleteData = async (url) => {
     throw error;
   }
 };
+
+const deleteDataWithBody = async (url, body) => {
+  const response = await axios.delete(configApp.RATING_BILLING_SERVICE + url, {
+    headers: tokenHeader(),
+    data: body,
+  });
+  return response?.data;
+};
+
+
 const receiptCollectionHttpService = {
   getAll,
   inactiveWithApproval,
@@ -282,12 +314,15 @@ const receiptCollectionHttpService = {
   getDetailByIdBody,
   activationWithRemark,
   uploadImage,
+  uploadAttachment,
   activationWithRemarkPost,
   updateData,
   updateDataTransaction,
   updateDataPost,
   uploadBulk,
+  uploadAttachment,
   deleteData,
+  deleteDataWithBody,
   downloadXlsx,
 };
 

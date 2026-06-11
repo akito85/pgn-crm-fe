@@ -95,7 +95,7 @@ const DetailGlobalType = () => {
     {
       title: "NO",
       align: "center",
-      width: 60,
+      width: 90,
       render: (text, object, index) =>
         (currentTable - 1) * pageTable + index + 1,
     },

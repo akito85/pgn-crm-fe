@@ -566,7 +566,7 @@ export const inactiveBank = createAsyncThunk(
         body
       );
       const successMessage = {
-        title: "Successfull",
+        title: "Successful",
         description: "Your data has been submitted.",
         return: false,
       };
@@ -600,7 +600,7 @@ export const inactiveBankAccount = createAsyncThunk(
       const response =
         await receiptCollectionHttpService.activationWithRemarkPost(url, body);
       const successMessage = {
-        title: "Successfull",
+        title: "Successful",
         description: "Your data has been submitted.",
         return: false,
       };
@@ -801,22 +801,11 @@ export const getAllContactPaginate = createAsyncThunk(
       const response = await accountManagementService.getPagination(url);
       return response;
     } catch (error) {
-      if (
-        error?.response?.data?.code === 500 ||
-        error?.response?.data?.code === 419
-      ) {
-        const errorBody = {
-          title: "Failed",
-          description: `Terdapat kesalahan saat mencoba untuk mendapatkan data kontak.`,
-        };
-        thunkAPI.dispatch(showModalError(errorBody));
-      } else {
-        const errorBody = {
-          title: "Failed",
-          description: `Terdapat kesalahan saat mencoba untuk mendapatkan data kontak.`,
-        };
-        thunkAPI.dispatch(showModalError(errorBody));
-      }
+      const errorBody = {
+        title: "Failed",
+        description: error?.response?.data?.message || error?.message || error?.toString(),
+      };
+      thunkAPI.dispatch(showModalError(errorBody));
       return thunkAPI.rejectWithValue(error.response);
     }
   }
@@ -863,7 +852,7 @@ export const approveOrRejectInactiveBank = createAsyncThunk(
         await receiptCollectionHttpService.activationWithRemarkPost(url, body);
       const message = response?.message;
       const successMessage = {
-        title: "Successfull",
+        title: "Successful",
         description: `${message}`,
         return: true,
       };
