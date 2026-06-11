@@ -507,6 +507,7 @@ const ListFormPartner = (props) => {
             <CardContainer header={"ATTACHMENT INFORMATION"}>
               <AttachmentComponent
                 type={type}
+                mandatory
                 data={listDataAttachment}
                 updateData={setListDataAttachment}
                 typeSelector="partner"

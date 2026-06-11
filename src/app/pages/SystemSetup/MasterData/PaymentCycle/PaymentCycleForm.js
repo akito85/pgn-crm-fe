@@ -536,6 +536,7 @@ const PaymentCycleForm = ({ type }) => {
                             <CardContainer header="ATTACHMENT INFORMATION">
                                 <AttachmentComponent
                                     type="create"
+                                    mandatory
                                     data={files}
                                     updateData={setFiles}
                                     typeSelector="paymentCycle"
