@@ -162,7 +162,7 @@ const FunctionalTableCriteriaTOS = ({
   // Data Select Criteria
   const budget = (data_budget || []).map((item) => {
     return {
-      value: item.Id,
+      value: item.id,
       label: item.text,
     };
   });
@@ -180,7 +180,7 @@ const FunctionalTableCriteriaTOS = ({
   });
   const industrialSector = (data_industrial_sector || []).map((item) => {
     return {
-      value: item.Id,
+      value: item.id,
       label: item.text,
     };
   });
@@ -198,43 +198,43 @@ const FunctionalTableCriteriaTOS = ({
   });
   const accountCategory = (data_account_Category || []).map((item) => {
     return {
-      value: item.Id,
+      value: item.id,
       label: item.text,
     };
   });
   const serviceType = (data_service_type || []).map((item) => {
     return {
-      value: item.Id,
+      value: item.id,
       label: item.text,
     };
   });
   const accountGroup = (data_account_group || []).map((item) => {
     return {
-      value: item.Id,
+      value: item.id,
       label: item.text,
     };
   });
   const sor = (data_sor || []).map((item) => {
     return {
-      value: item.Id,
+      value: item.id,
       label: item.name,
     };
   });
   const costCenter = (data_cost_center || []).map((item) => {
     return {
-      value: item.Id,
+      value: item.id,
       label: item.name,
     };
   });
   const gsizes = (data_Gsizes || []).map((item) => {
     return {
-      value: item.Id,
+      value: item.id,
       label: item.text,
     };
   });
   const customerSegment = (data_customerSegment || []).map((item) => {
     return {
-      value: item.Id,
+      value: item.id,
       label: item.text,
     };
   });
@@ -247,7 +247,7 @@ const FunctionalTableCriteriaTOS = ({
 
   const customer = (data_customer || []).map((item) => {
     return {
-      value: item.Id,
+      value: item.id,
       label: item.name,
     };
   });

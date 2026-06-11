@@ -450,7 +450,13 @@ const AccountInformation = ({ type, bankId }) => {
 
   const handleSubmitForm = (formValue) => {
     let errorBody = {};
-    if (listDataCategoryInfo.length === 0) {
+    if (type === "create" && !id) {
+      errorBody = {
+        title: "Failed",
+        description: "Bank ID tidak ditemukan. Silahkan akses halaman ini melalui menu Bank Detail.",
+      };
+      dispatch(showModalError(errorBody));
+    } else if (listDataCategoryInfo.length === 0) {
       errorBody = {
         title: "Failed",
         description: "Category Information wajib diisi. Silahkan menambahkan minimal 1 data.",
