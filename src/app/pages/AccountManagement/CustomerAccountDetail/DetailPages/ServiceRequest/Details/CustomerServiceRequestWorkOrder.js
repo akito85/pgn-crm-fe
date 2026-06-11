@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Button, Tooltip } from "antd";
+import { Button, Spin, Tooltip } from "antd";
 import NxTable from "../../../../../../../components/Nx/NxTable";
 import NxDate from "../../../../../../../components/Nx/NxDatePicker";
 import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
@@ -13,6 +13,11 @@ import {
   getWoApprovalHistory,
 } from "../../../../../../../redux/slices/account_management/detailAccount/WorkOrderSlice";
 import useWoNavigation from "../../../../shared/WorkOrder/hooks/useWoNavigation";
+import { nxGetAccountActions } from "../../../../../../../components/Nx/NxGetAccountActions";
+import { useColumnActionPermission } from "../../../../../../../components/ColumnActionPermission";
+import Toolbar from "../../../../../../../components/Toolbar";
+import NotFound from "../../../../../../NotFound";
+import useWoGrantedAccess from "../../../../shared/WorkOrder/hooks/useWoGrantedAccess";
 
 const COLUMNS = [
   { title: "NO", width: 60, align: "center", render: (_, __, i) => i + 1 },
@@ -24,7 +29,7 @@ const COLUMNS = [
   { title: "COMPLETION PLAN DATE", dataIndex: "planEndDate",     width: 180, sorter: true, filter: true, render: (v) => v ? NxDate.formatDate(v, "DD MMM YYYY") : "-" },
   { title: "COMPLETION REMARK",    dataIndex: "description",     width: 220, sorter: true, filter: true, render: (v) => v || "-" },
   {
-    title: "STATUS", dataIndex: "status", width: 120, sorter: false, filter: false,
+    title: "STATUS", dataIndex: "status", width: 120, sorter: false, filter: false,fixed: "right",
     render: (v) => v ? (
       <div className="flex justify-center">
         <StatusComponent colour={(v || "").toLowerCase()} margin={false} size="small">
@@ -34,7 +39,7 @@ const COLUMNS = [
     ) : "-",
   },
   {
-    title: "APPROVAL STATUS", dataIndex: "approvalStatus", width: 120, sorter: false, filter: false,
+    title: "APPROVAL STATUS", dataIndex: "approvalStatus", width: 120, sorter: false, filter: false,fixed: "right",
     render: (v) => v ? (
       <div className="flex justify-center">
         <StatusComponent colour={(v || "").toLowerCase()} margin={false} size="small">
@@ -55,6 +60,10 @@ const CustomerServiceRequestWorkOrder = ({
   onSort = () => {},
 }) => {
   const dispatch = useDispatch();
+  const { isAccessChecked, isGranted } = useWoGrantedAccess({
+    entryPoint: "sr-under-account",
+    accountType,
+  });
   const [showApprovalModal, setShowApprovalModal] = useState(false);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [page, setPage] = useState(1);
@@ -112,64 +121,59 @@ const CustomerServiceRequestWorkOrder = ({
 
   const hasMore = list_workOrders.length < (pagination_listWo.totalElement || 0);
 
-  const columnsWithAction = [
-    ...COLUMNS,
-    {
-      title: "ACTION",
-      align: "center",
-      width: 160,
-      fixed: "right",
-      render: (_, record) => (
-        <div className="flex justify-center gap-1">
-          <Tooltip title="View">
-            <Button type="table-action" onClick={() => goToView(record.id)}>
-              <SVGIcon name="IconDetail" width={20} />
-            </Button>
-          </Tooltip>
-          <Tooltip title="Edit">
-            <Button type="table-action" onClick={() => goToUpdate(record.id)}>
-              <SVGIcon name="IconEdit" width={20} />
-            </Button>
-          </Tooltip>
-          <Tooltip title="Approval History">
-            <Button
-              type="table-action"
-              onClick={() => {
-                dispatch(getWoApprovalHistory(record.id));
-                setShowHistoryModal(true);
-              }}
-            >
-              <SVGIcon name="IconLogHistory" width={20} />
-            </Button>
-          </Tooltip>
-        </div>
-      ),
+  const itemActions = nxGetAccountActions({
+    handleCreate: () => {
+      goToCreate();
     },
-  ];
+    handleView: (record) => {
+      goToView(record.id)
+    },
+    handleUpdate: (record) => {
+      goToUpdate(record.id)
+    },
+    handleApprovalHistory: (record) => {
+      dispatch(getWoApprovalHistory(record.id));
+      setShowHistoryModal(true);
+    },
+    handleApproval: () => setShowApprovalModal(true),
+
+  });
+
+  const actionCols = useColumnActionPermission(
+    ["View","Update","History"],
+    itemActions,
+    "View",
+    "table"
+  ).map((col) => ({
+    ...col,
+    width: 100,
+    align: "center",
+  }))
+
+  const columnsWithAction = useMemo(
+    () => [...COLUMNS, ...actionCols],
+    [COLUMNS, actionCols]
+  )
+
+  
+
+  if (!isAccessChecked) {
+    return (
+      <div className="w-full flex justify-center py-10">
+        <Spin tip="Checking access..." />
+      </div>
+    );
+  }
+
+  if (!isGranted) {
+    return <NotFound type="unauthorized" />;
+  }
 
   return (
     <>
       <NxBaseContainer border>
         {/* Toolbar */}
-        <div className="flex justify-end gap-2 mb-3">
-          <Button type="menu" icon={<SVGIcon name="IconButtonDownload" width={14} />}>
-            Download List
-          </Button>
-          <Button
-            type="secondary"
-            onClick={() => setShowApprovalModal(true)}
-            icon={<SVGIcon name="IconButtonApproval" width={14} />}
-          >
-            Approval
-          </Button>
-          <Button
-            type="submit"
-            onClick={() => goToCreate()}
-            icon={<SVGIcon name="IconButtonCreate" width={14} />}
-          >
-            Create
-          </Button>
-        </div>
+        <Toolbar items={itemActions} type="detail" />
 
         <NxTable
           idTable="sr-workorder-table"
