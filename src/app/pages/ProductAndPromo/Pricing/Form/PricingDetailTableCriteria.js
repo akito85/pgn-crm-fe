@@ -178,7 +178,7 @@ const PricingDetailTableCriteria = ({
   });
   const industrialSector = (data_industrial_sector || []).map((item) => {
     return {
-      value: item.Id,
+      value: item.id,
       label: item.text,
     };
   });
@@ -196,19 +196,19 @@ const PricingDetailTableCriteria = ({
   });
   const accountCategory = (data_account_Category || []).map((item) => {
     return {
-      value: item.Id,
+      value: item.id,
       label: item.text,
     };
   });
   const serviceType = (data_service_type || []).map((item) => {
     return {
-      value: item.Id,
+      value: item.id,
       label: item.text,
     };
   });
   const accountGroup = (data_account_group || []).map((item) => {
     return {
-      value: item.Id,
+      value: item.id,
       label: item.text,
     };
   });
@@ -226,20 +226,20 @@ const PricingDetailTableCriteria = ({
   });
   const gsizes = (data_Gsizes || []).map((item) => {
     return {
-      value: item.Id,
+      value: item.id,
       label: item.text,
     };
   });
   const customerSegment = (data_customer_segment || []).map((item) => {
     return {
-      value: item.Id,
+      value: item.id,
       label: item.text,
     };
   });
 
   const customer = (data_customer || []).map((item) => {
     return {
-      value: item.Id,
+      value: item.id,
       label: item.name,
     };
   });
