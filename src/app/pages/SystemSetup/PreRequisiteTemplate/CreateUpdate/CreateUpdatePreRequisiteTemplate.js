@@ -1,4 +1,4 @@
-import { Button, Empty, Form, Select, Tooltip } from "antd"
+import { Button, Empty, Form, Select, Spin, Tooltip } from "antd"
 import { useState, useEffect, useMemo, useCallback } from "react"
 import dayjs from "dayjs"
 import NxBaseContainer from "../../../../../components/Nx/NxBaseContainer"
@@ -65,13 +65,19 @@ const CreateUpdatePreRequisiteTemplate = ({ type = "create" }) => {
         dispatch(getSrCategory());
         dispatch(getSrSubCategory());
         dispatch(getCriteria());
-        dispatch(getAccountGroupType());
         dispatch(getAccountSegment());
+        // dispatch(getAccountGroupType());
         dispatch(getPreRequisiteType());
         if (type === "update" && recordId) {
             dispatch(getDetailPreRequisiteTemplate(recordId));
         }
     }, [dispatch, type, recordId]);
+
+    const handleGetAccountGroupType = useCallback((accountSegmentId) => {
+        modalForm.setFieldsValue({ accountType: undefined });
+        if (!accountSegmentId) return;
+        dispatch(getAccountGroupType({ id: accountSegmentId }));
+    }, [dispatch, modalForm]);
 
     useEffect(() => {
         if (type !== "update" || !detail_prt?.id) return;
@@ -283,16 +289,16 @@ const CreateUpdatePreRequisiteTemplate = ({ type = "create" }) => {
             render: (_, __, index) => index + 1,
         },
         {
-            key: "accountType",
-            title: "ACCOUNT TYPE",
-            dataIndex: "accountType",
-            render: (value) => getNameByValue(list_account_group_type, value),
-        },
-        {
             key: "accountSegment",
             title: "ACCOUNT SEGMENT",
             dataIndex: "accountSegment",
             render: (value) => getNameByValue(list_account_segment, value),
+        },
+        {
+            key: "accountType",
+            title: "ACCOUNT TYPE",
+            dataIndex: "accountType",
+            render: (value) => getNameByValue(list_account_group_type, value),
         },
         {
             key: "startDate",
@@ -418,13 +424,23 @@ const CreateUpdatePreRequisiteTemplate = ({ type = "create" }) => {
     }, [form]);
 
     const handleSelectCriteria = (value) => {
-        const updated = [...new Set([...criteriaValues, value])];
+        let updated = [...new Set([...criteriaValues, value])];
+        const selected = list_criteria.find((item) => item.id === value);
+        if (selected?.value === "ACCOUNT_GROUP_TYPE") {
+            const segmentItem = list_criteria.find((item) => item.value === "ACCOUNT_SEGMENT");
+            if (segmentItem) updated = [...new Set([...updated, segmentItem.id])];
+        }
         setCriteriaValues(updated);
         form.setFieldsValue({ criteria: updated });
     };
 
     const handleDeselectCriteria = (value) => {
-        const updated = criteriaValues.filter((item) => item !== value);
+        let updated = criteriaValues.filter((item) => item !== value);
+        const deselected = list_criteria.find((item) => item.id === value);
+        if (deselected?.value === "ACCOUNT_SEGMENT") {
+            const groupTypeItem = list_criteria.find((item) => item.value === "ACCOUNT_GROUP_TYPE");
+            if (groupTypeItem) updated = updated.filter((item) => item !== groupTypeItem.id);
+        }
         setCriteriaValues(updated);
         setCriteriaDataRows([]);
         form.setFieldsValue({ criteria: updated });
@@ -782,27 +798,29 @@ const CreateUpdatePreRequisiteTemplate = ({ type = "create" }) => {
                     >
                         <div className="grid grid-cols-2 gap-4">
                             <Form.Item
-                                name="accountType"
-                                label="Account Type"
-                                required
-                                rules={[{ required: true, message: "Account Type is required" }]}
-                                className="no-margin-form"
-                            >
-                                <SelectComponent>
-                                    {(list_account_group_type || []).map((data, index) => (
-                                        <Select.Option key={index} value={data.id}>{data.name}</Select.Option>
-                                    ))}
-                                </SelectComponent>
-                            </Form.Item>
-                            <Form.Item
                                 name="accountSegment"
                                 label="Account Segment"
                                 required
                                 rules={[{ required: true, message: "Account Segment is required" }]}
                                 className="no-margin-form"
                             >
-                                <SelectComponent>
+                                <SelectComponent onChange={handleGetAccountGroupType} allowClear>
                                     {(list_account_segment || []).map((data, index) => (
+                                        <Select.Option key={index} value={data.id}>{data.name}</Select.Option>
+                                    ))}
+                                </SelectComponent>
+                            </Form.Item>
+                            <Form.Item
+                                name="accountType"
+                                label="Account Type"
+                                required
+                                rules={[{ required: true, message: "Account Type is required" }]}
+                                className="no-margin-form"
+                            >
+                                <SelectComponent
+                                    notFoundContent={loading_account_group_type ? <Spin size="small" /> : undefined}
+                                >
+                                    {(list_account_group_type || []).map((data, index) => (
                                         <Select.Option key={index} value={data.id}>{data.name}</Select.Option>
                                     ))}
                                 </SelectComponent>

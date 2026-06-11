@@ -1,49 +1,69 @@
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { PlusCircleOutlined } from "@ant-design/icons";
 import { Button, Form, Select, Tooltip } from "antd";
 
 import SVGIcon from "../../../../../../../../../assets/Icon";
-
 import NxCardContainer from "../../../../../../../../../components/Nx/NxCardContainer";
 import NxBaseContainer from "../../../../../../../../../components/Nx/NxBaseContainer";
 import NxTable from "../../../../../../../../../components/Nx/NxTable";
 import NxModal from "../../../../../../../../../components/Nx/NxModal";
 
 import { requiredMessage } from "../../../../../../../../../utils";
-import { getSrDataRequirementValues } from "../../../../../../../../../redux/slices/account_management/detailAccount/ServiceRequestSlice";
+import {
+  getDataRequirementTemplateByFilter,
+  resetDataRequirementTemplate,
+} from "../../../../../../../../../redux/slices/system_setup/dataRequirementTemplate";
 
-export default function InfoDataRequirement({
-  dropdowns,
-  form,
-  accountId
-}) {
+export default function InfoDataRequirement({ form, dropdowns }) {
   const dispatch = useDispatch();
-  const { detail_srDataRequirementValues, loading_srDataRequirementValues } = useSelector(
-    (state) => state.serviceRequest
-  );
+  const { data_filter, loading_filter } = useSelector((state) => state.dataRequirementTemplate);
 
-  const [isDataRequirement, setIsDataRequirement] = useState(false);
   const [dataRequirement, setDataRequirement] = useState([]);
-  const [editingRecord, setEditingRecord] = useState(null);
-  const [selectedTypeId, setSelectedTypeId] = useState(null);
-  const [selectedTypeValue, setSelectedTypeValue] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalForm] = Form.useForm();
 
-  // Sync local table state with form data on mount (for persistence across step navigation)
+  const type = Form.useWatch("type", form);
+  const category = Form.useWatch("category", form);
+  const subCategory = Form.useWatch("subCategory", form);
+
+  // Sync local table state with form data on mount (persistence across step navigation)
   useEffect(() => {
-    const formData = form.getFieldValue('srFormDataRequirements');
+    const formData = form.getFieldValue("srFormDataRequirements");
     if (formData && formData.length > 0) {
-      // Ensure all records have proper no values
-      const dataWithNumbers = formData.map((item, index) => ({
-        ...item,
-        no: index + 1
-      }));
-      setDataRequirement(dataWithNumbers);
+      setDataRequirement(formData.map((item, index) => ({ ...item, no: index + 1 })));
     }
   }, [form]);
 
-  // Create safe accessor functions that handle both array and { data: [] } formats
+  // Auto-fetch template when type, category, subCategory are all set
+  useEffect(() => {
+    if (type && category && subCategory) {
+      dispatch(
+        getDataRequirementTemplateByFilter({
+          sourceType: "Service Request",
+          type,
+          category,
+          subCategory,
+        })
+      );
+    } else {
+      dispatch(resetDataRequirementTemplate());
+    }
+  }, [type, category, subCategory]);
+
+  // Auto-populate table when template data arrives
+  useEffect(() => {
+    if (data_filter?.details) {
+      const populated = data_filter.details.map((item, index) => ({
+        key: item.id ?? index,
+        no: index + 1,
+        type: item.type,
+        typeId: item.id,
+      }));
+      setDataRequirement(populated);
+      form.setFieldsValue({ srFormDataRequirements: populated });
+    }
+  }, [data_filter]);
+
   const getDropdownItems = (dropdownKey) => {
     const dropdown = dropdowns?.[dropdownKey];
     if (!dropdown) return [];
@@ -52,300 +72,143 @@ export default function InfoDataRequirement({
     return [];
   };
 
-  const getDropdownOptions = (dropdownKey) => {
-    return getDropdownItems(dropdownKey).map(item => ({
-      value: item.glbTypeValId?.toString() || item.id?.toString(),
-      label: item.name || item.glbTypeValName
-    }));
+  const handleDelete = (record) => {
+    const updatedData = dataRequirement
+      .filter((item) => item.key !== record.key)
+      .map((item, index) => ({ ...item, no: index + 1 }));
+    setDataRequirement(updatedData);
+    form.setFieldsValue({ srFormDataRequirements: updatedData });
   };
 
-  const isDropdownLoaded = (dropdownKey) => {
-    return getDropdownItems(dropdownKey).length > 0;
+  const handleModalOpen = () => {
+    modalForm.resetFields();
+    setIsModalOpen(true);
   };
 
-  // A limiter for sercurity purpose
-  const MAX_DATA_REQUIREMENTS = 111;
+  const handleModalCancel = () => {
+    modalForm.resetFields();
+    setIsModalOpen(false);
+  };
 
-  const getNextNumber = () => {
-    // Business rule: Check if we've reached maximum allowed records
-    if (dataRequirement.length >= MAX_DATA_REQUIREMENTS) {
-      throw new Error(`Maximum of ${MAX_DATA_REQUIREMENTS} data requirements allowed`);
-    }
-    
-    if (dataRequirement.length === 0) {
-      return 1;
-    }
-    
-    const maxNo = Math.max(...dataRequirement.map(item => item.no || 0));
-    return maxNo + 1;
-  }
+  const handleModalAdd = () => {
+    modalForm.validateFields().then((values) => {
+      const typeItem = getDropdownItems("serviceRequestDataRequirements").find(
+        (item) =>
+          (item.glbTypeValId?.toString() || item.id?.toString()) === values.type
+      );
+      const newRecord = {
+        key: Date.now(),
+        no: (dataRequirement.length > 0 ? Math.max(...dataRequirement.map((i) => i.no)) : 0) + 1,
+        type: typeItem?.name || typeItem?.glbTypeValName || values.type,
+        typeId: values.type,
+      };
+      const updatedData = [...dataRequirement, newRecord];
+      setDataRequirement(updatedData);
+      form.setFieldsValue({ srFormDataRequirements: updatedData });
+      modalForm.resetFields();
+      setIsModalOpen(false);
+    });
+  };
 
-  const columnMain = [
+  const columns = [
     {
-      title: 'No',
-      dataIndex: 'no',
-      key: 'no',
-      align: 'center',
-      width: 8
+      title: "No",
+      dataIndex: "no",
+      key: "no",
+      align: "center",
+      width: 8,
     },
     {
-      title: 'Type',
-      dataIndex: 'type',
-      key: 'type',
-      width: 30
-    },
-    {
-      title: 'Value',
-      dataIndex: 'value',
-      key: 'value',
+      title: "Type",
+      dataIndex: "type",
+      key: "type",
     },
     {
       title: "ACTION",
       align: "center",
       width: 15,
       fixed: "right",
-      render: (v, r, i) => {
-        return (
-          <div className="flex w-full justify-center gap-4">
-            <Tooltip title="Edit">
-              <div className="pt-1 cursor-pointer">
-                <SVGIcon
-                  name="IconEdit"
-                  color={"#0075bf"}
-                  width={20}
-                  onClick={() => handleEdit(r)}
-                />
-              </div>
-            </Tooltip>
-            <Tooltip title="Delete">
-              <div className="pt-1 cursor-pointer">
-                <SVGIcon
-                  name="IconDelete"
-                  color={"#BE3036"}
-                  width={20}
-                  onClick={() => handleDelete(r)}
-                />
-              </div>
-            </Tooltip>
+      render: (_, record) => (
+        <Tooltip title="Delete">
+          <div className="pt-1 cursor-pointer flex justify-center">
+            <SVGIcon
+              name="IconDelete"
+              color={"#BE3036"}
+              width={20}
+              onClick={() => handleDelete(record)}
+            />
           </div>
-        );
-      },
+        </Tooltip>
+      ),
     },
-  ]
+  ];
 
-  const handleTypeChange = (typeId, option) => {
-    const typeValue = option?.typeValue;
-    setSelectedTypeId(typeId);
-    setSelectedTypeValue(typeValue);
-    modalForm.setFieldsValue({ srFormDataRequirementValue: undefined });
-    if (typeId && accountId && typeValue && !detail_srDataRequirementValues[typeValue]) {
-      dispatch(getSrDataRequirementValues({ typeValue, accountId }));
-    }
-  };
-
-  const handleEdit = (record) => {
-    setSelectedTypeId(record.typeId);
-    setSelectedTypeValue(record.typeValue);
-    if (record.typeValue && accountId && !detail_srDataRequirementValues[record.typeValue]) {
-      dispatch(getSrDataRequirementValues({ typeValue: record.typeValue, accountId }));
-    }
-    modalForm.setFieldsValue({
-      srFormDataRequirementType: record.typeId,
-    });
-    setEditingRecord(record);
-    setIsDataRequirement(true);
-  }
-
-  const handleDelete = (record) => {
-    // Remove the record
-    const updatedData = dataRequirement.filter(item => item.key !== record.key);
-    
-    // Reassign numbers to all remaining records
-    const renumberedData = updatedData.map((item, index) => ({
-      ...item,
-      no: index + 1
-    }));
-    
-    setDataRequirement(renumberedData);
-    form.setFieldsValue({
-      srFormDataRequirements: renumberedData
-    });
-  }
-
-  const handleCancel = () => {
-    modalForm.resetFields();
-    setEditingRecord(null);
-    setSelectedTypeId(null);
-    setSelectedTypeValue(null);
-    setIsDataRequirement(false);
-  }
-
-  const handleSelectValue = (valueRecord) => {
-    const typeLabel = getDropdownOptions('serviceRequestDataRequirements')
-      .find(opt => opt.value === selectedTypeId)?.label;
-
-    let updatedData;
-
-    if (editingRecord) {
-      updatedData = dataRequirement.map((item) =>
-        item.key === editingRecord.key
-          ? {
-              ...item,
-              type: typeLabel,
-              typeId: selectedTypeId,
-              typeValue: selectedTypeValue,
-              value: valueRecord.label,
-              valueId: valueRecord.id,
-            }
-          : item
-      );
-    } else {
-      try {
-        const newRecord = {
-          key: Date.now(),
-          no: getNextNumber(),
-          type: typeLabel,
-          typeId: selectedTypeId,
-          typeValue: selectedTypeValue,
-          value: valueRecord.label,
-          valueId: valueRecord.id,
-        };
-        updatedData = [...dataRequirement, newRecord];
-      } catch (error) {
-        console.log(error.message);
-        return;
-      }
-    }
-
-    setDataRequirement(updatedData);
-    form.setFieldsValue({ srFormDataRequirements: updatedData });
-
-    modalForm.resetFields();
-    setEditingRecord(null);
-    setSelectedTypeId(null);
-    setSelectedTypeValue(null);
-    setIsDataRequirement(false);
-  }
-
-  return(
+  return (
     <>
       <NxCardContainer header={"DATA REQUIREMENT"}>
         <NxBaseContainer border>
-          <div className="w-full flex justify-end items-center gap-4">
+          <div className="w-full flex justify-end items-center">
             <Button
               icon={<SVGIcon name="IconButtonCreate" width={14} />}
               type={"submit"}
               border={false}
-              onClick={() => {setIsDataRequirement(true)}}
+              onClick={handleModalOpen}
             >
-              Choose
+              Add
             </Button>
           </div>
 
           <NxTable
             idTable={"DataRequirement"}
             usePagination={false}
-            useSelect={true}
+            useSelect={false}
             tableScrolled={{ y: 400, x: "max-content" }}
-            dataMain={dataRequirement}
-            columnMain={columnMain}
+            dataSource={dataRequirement}
+            columns={columns}
             showAdvanceSearch={false}
+            loading={loading_filter}
           />
         </NxBaseContainer>
       </NxCardContainer>
 
       <NxModal
-        isOpen={isDataRequirement}
-        handleCancel={handleCancel}
-        handleOk={handleCancel}
-        title={"CHOOSE DATA REQUIREMENT"}
-        width={900}
+        isOpen={isModalOpen}
+        handleCancel={handleModalCancel}
+        title={"ADD DATA REQUIREMENT"}
+        width={600}
         footer={
-          <div className="w-full flex justify-end gap-5">
-            <Button key="back" onClick={handleCancel}>
-              Back
+          <div className="flex justify-end gap-2">
+            <Button type="menu" onClick={handleModalCancel}>
+              Cancel
+            </Button>
+            <Button type="submit" onClick={handleModalAdd}>
+              Add
             </Button>
           </div>
         }
       >
         <div className="p-4">
           <NxBaseContainer border>
-            <Form
-              form={modalForm}
-              layout="vertical"
-            >
+            <Form form={modalForm} layout="vertical">
               <Form.Item
-                key="srFormDataRequirementType"
-                name="srFormDataRequirementType"
+                name="type"
                 label="Type"
-                rules={[
-                  {
-                    message: requiredMessage("Type"),
-                    required: true,
-                  },
-                ]}
                 className="no-margin-form"
+                rules={[{ required: true, message: requiredMessage("Type") }]}
               >
                 <Select
                   placeholder="Select Data Requirement Type"
-                  loading={!isDropdownLoaded('serviceRequestDataRequirements')}
-                  options={getDropdownItems('serviceRequestDataRequirements').map(item => ({
+                  loading={getDropdownItems("serviceRequestDataRequirements").length === 0}
+                  options={getDropdownItems("serviceRequestDataRequirements").map((item) => ({
                     value: item.glbTypeValId?.toString() || item.id?.toString(),
-                    label: item.name || item.glbValue,
-                    typeValue: item.glbValue,
+                    label: item.name || item.glbTypeValName,
                   }))}
-                  onChange={handleTypeChange}
                 />
               </Form.Item>
             </Form>
-
-            <NxTable
-              idTable={"DataRequirementValues"}
-              className="mt-4"
-              usePagination={false}
-              tableScrolled={{ y: 400, x: "max-content" }}
-              useSelect={false}
-              loading={loading_srDataRequirementValues}
-              dataMain={(detail_srDataRequirementValues[selectedTypeValue] || []).map((item, idx) => ({
-                ...item,
-                key: item.id,
-                no: idx + 1,
-              }))}
-              columnMain={[
-                {
-                  title: 'NO',
-                  dataIndex: 'no',
-                  key: 'no',
-                  align: 'center',
-                  width: 8,
-                },
-                {
-                  title: 'VALUE',
-                  dataIndex: 'label',
-                  key: 'label',
-                },
-                {
-                  title: 'ACTION',
-                  align: 'center',
-                  width: 15,
-                  fixed: 'right',
-                  render: (v, r) => (
-                    <Tooltip title="Add">
-                      <div className="flex justify-center cursor-pointer">
-                        <PlusCircleOutlined
-                          style={{ color: '#0075bf', fontSize: 22 }}
-                          onClick={() => handleSelectValue(r)}
-                        />
-                      </div>
-                    </Tooltip>
-                  ),
-                },
-              ]}
-              showAdvanceSearch={true}
-            />
           </NxBaseContainer>
         </div>
       </NxModal>
     </>
-  )
+  );
 }
