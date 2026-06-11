@@ -137,6 +137,15 @@ const PaymentRelationTable = ({
   };
 
   /**
+   * @param {{ filters: any[]; filterRules: any[] } | null} searchData
+   */
+  const handleAdvancedSearch = (searchData) => {
+    setFilters(searchData?.filters || []);
+    setFilterRules(searchData?.filterRules || []);
+    setPage(0);
+  };
+
+  /**
    * Dispatches a download action for the current filtered/sorted view.
    */
   const handleDownload = () => {
@@ -271,6 +280,7 @@ const PaymentRelationTable = ({
         onLoadMore={handleLoadMore}
         loadMoreThreshold={20}
         loading={loading}
+        onAdvanceSearch={handleAdvancedSearch}
       />
     </div>
   );
