@@ -9,20 +9,33 @@ import NxCardContainer from "../../../../../../components/Nx/NxCardContainer";
 import NxBaseContainer from "../../../../../../components/Nx/NxBaseContainer";
 import NotFound from "../../../../../NotFound";
 import { getGrantedAccessAccount } from "../../../../../../redux/slices/account_management/accountManagement";
+import { getSrApprovalHistory } from "../../../../../../redux/slices/account_management/detailAccount/ServiceRequestSlice";
+import NxHistoryModal from "../../../../../../components/Nx/NxHistoryModal";
 
 const ServiceRequest = ({ idAccount, idCustomer, type }) => {
   const dispatch = useDispatch();
   const location = useLocation();
 
   const { access_account } = useSelector((state) => state.accountManagement);
+  const { detail_srApprovalHistory } = useSelector((state) => state.serviceRequest);
 
   const [isAccessChecked, setIsAccessChecked] = useState(false);
   const [refreshSignal, setRefreshSignal] = useState(0);
   const [showApprovalModal, setShowApprovalModal] = useState(false);
+  const [showApprovalHistoryModal, setShowApprovalHistoryModal] = useState(false);
 
   const isAccessGranted = access_account?.isGranted === true;
 
   const triggerRefresh = () => setRefreshSignal((prev) => prev + 1);
+
+  const handleApprovalHistoryModal = (show, srId = 0) => {
+    if (show) {
+      dispatch(getSrApprovalHistory(srId));
+      setShowApprovalHistoryModal(true);
+    } else {
+      setShowApprovalHistoryModal(false);
+    }
+  };
 
   useEffect(() => {
     setIsAccessChecked(false);
@@ -55,7 +68,9 @@ const ServiceRequest = ({ idAccount, idCustomer, type }) => {
           <ServiceRequestTable
             idAccount={idAccount}
             idCustomer={idCustomer}
+            accountType={type}
             handleApproval={setShowApprovalModal}
+            handleApprovalHistoryModal={handleApprovalHistoryModal}
             refreshSignal={refreshSignal}
           />
         </NxBaseContainer>
@@ -65,6 +80,14 @@ const ServiceRequest = ({ idAccount, idCustomer, type }) => {
         isOpen={showApprovalModal}
         handleCancel={() => setShowApprovalModal(false)}
         afterFinish={triggerRefresh}
+      />
+      {/* Approval History Modal */}
+      <NxHistoryModal
+        isOpen={showApprovalHistoryModal}
+        handleClose={() => handleApprovalHistoryModal(false)}
+        header={"Approval History"}
+        dataApprover={detail_srApprovalHistory?.dataApprover}
+        dataHistory={detail_srApprovalHistory?.dataHistory}
       />
     </>
   );

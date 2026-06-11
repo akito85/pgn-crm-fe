@@ -27,8 +27,6 @@ import { useEffect } from "react";
 import ListUserFromUpload from "./ListUserFromUpload";
 import { ModalConfirm } from "../../../../components/Modal/ModalPopUp";
 import SVGIcon from "../../../../assets/Icon/index";
-import moment from "moment";
-import { dateFormatting } from "../../../../utils";
 const { Dragger } = Upload;
 
 const UploadUser = () => {
@@ -67,10 +65,10 @@ const UploadUser = () => {
             groupAccess: item?.groupAccess,
             groupAccessId: parseInt(item?.groupAccessId),
             status: item?.status,
-            startDate: item?.startDate ? moment(item.startDate).format("DD MMM YYYY") : null,
-            endDate: item?.endDate ? moment(item.endDate).format("DD MMM YYYY") : null,
-            startDateGa: item?.startDateGa ? moment(item.startDateGa).format("DD MMM YYYY") : null,
-            endDateGa: item?.endDateGa ? moment(item.endDateGa).format("DD MMM YYYY") : null,
+            startDate: item?.startDate ?? null,
+            endDate: item?.endDate ?? null,
+            startDateGa: item?.startDateGa ?? null,
+            endDateGa: item?.endDateGa ?? null,
             message: item?.message,
           };
         })
@@ -86,6 +84,15 @@ const UploadUser = () => {
       dispatch(setClearData());
     };
   }, [dispatch]);
+
+  // auto-reset upload state when all rows are deleted from the list
+  useEffect(() => {
+    if (showListUpload && dataTable.length === 0) {
+      dispatch(setClearData());
+      setShowListUpload(false);
+      setFileList([]);
+    }
+  }, [dataTable, showListUpload, dispatch]);
 
   // handle change file
   const handleFileChange = ({ fileList }) => {
@@ -106,7 +113,6 @@ const UploadUser = () => {
       return false;
     },
     onChange: ({ fileList }) => handleFileChange({ fileList }),
-    disabled: showListUpload,
   };
 
   // routes bread crumb
@@ -193,10 +199,10 @@ const UploadUser = () => {
               typeof item?.groupAccess === "string"
                 ? item?.groupAccessId?.toString()
                 : item?.groupAccess?.toString(),
-            endDate: item?.endDate ? moment(item.endDate, "DD MMM YYYY").format(dateFormatting.dateCapital) : null,
-            startDate: item?.startDate ? moment(item.startDate, "DD MMM YYYY").format(dateFormatting.dateCapital) : null,
-            endDateGa: item?.endDateGa ? moment(item.endDateGa, "DD MMM YYYY").format(dateFormatting.dateCapital) : null,
-            startDateGa: item?.startDateGa ? moment(item.startDateGa, "DD MMM YYYY").format(dateFormatting.dateCapital) : null,
+            endDate: item?.endDate ?? null,
+            startDate: item?.startDate ?? null,
+            endDateGa: item?.endDateGa ?? null,
+            startDateGa: item?.startDateGa ?? null,
           };
         });
         await dispatch(finalUploadUser(body)).unwrap();
