@@ -477,11 +477,11 @@ export const getAllTabColumns = (
     ),
     render: (status) => {
       const statusConfig = {
-        0: { text: "Open", color: "#1890ff" },
-        1: { text: "In Progress", color: "#faad14" },
-        2: { text: "Success", color: "#52c41a" },
-        3: { text: "Failed", color: "#f5222d" },
-        5: { text: "Open", color: "#1890ff" },
+        0: { text: "Open" },
+        1: { text: "In Progress" },
+        2: { text: "Success" },
+        3: { text: "Failed" },
+        5: { text: "Open" },
       };
       const config = statusConfig[status] || {
         text: "Unknown",

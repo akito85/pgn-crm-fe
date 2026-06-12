@@ -118,6 +118,9 @@ const EditableCell = ({
             optionFilterProp="children"
             labelInValue
             disabled={dependDataIndex ? !dataDepend : false}
+            onChange={(value) =>
+              handleEditDataRecord(value, key, dataIndex)
+            }
             filterOption={(input, option) =>
               (option?.children ?? "")
                 .toLowerCase()
@@ -170,15 +173,11 @@ const EditableCell = ({
   return (
     <td {...restProps}>
       {editing ? (
-        <Form.Item
+           <Form.Item
           name={dataIndex}
           style={{
             margin: 0,
           }}
-          valuePropName={"value"}
-          getValueFromEvent={(value) =>
-            handleEditDataRecord(value, key, dataIndex)
-          }
           rules={
             inputType !== "endDate"
               ? rules()
@@ -260,79 +259,79 @@ const FunctionalTableCriteriaPayment = ({
   // Data Select Criteria
   const budget = (data_budget || []).map((item) => {
     return {
-      value: item.Id,
+      value: item.id,
       label: item.text,
     };
   });
   const province = (data_province || []).map((item) => {
     return {
-      value: item.Id,
+      value: item.id,
       label: item.text,
     };
   });
   const city = (data_city || []).map((item) => {
     return {
-      value: item.Id,
+      value: item.id,
       label: item.text,
     };
   });
   const industrialSector = (data_industrial_sector || []).map((item) => {
     return {
-      value: item.Id,
+      value: item.id,
       label: item.text,
     };
   });
   const district = (data_district || []).map((item) => {
     return {
-      value: item.Id,
+      value: item.id,
       label: item.text,
     };
   });
   const subDistrict = (data_sub_district || []).map((item) => {
     return {
-      value: item.Id,
+      value: item.id,
       label: item.text,
     };
   });
   const accountCategory = (data_account_Category || []).map((item) => {
     return {
-      value: item.Id,
+      value: item.id,
       label: item.text,
     };
   });
   const serviceType = (data_service_type || []).map((item) => {
     return {
-      value: item.Id,
+      value: item.id,
       label: item.text,
     };
   });
   const accountGroup = (data_account_group || []).map((item) => {
     return {
-      value: item.Id,
+      value: item.id,
       label: item.text,
     };
   });
   const sor = (data_sor || []).map((item) => {
     return {
-      value: item.Id,
-      label: item.name,
+      value: item.id,
+      label: item.text,
     };
   });
   const costCenter = (data_cost_center || []).map((item) => {
     return {
-      value: item.Id,
-      label: item.name,
+      value: item.id,
+      label: item.text,
     };
   });
   const gsizes = (data_Gsizes || []).map((item) => {
     return {
-      value: item.Id,
+      value: item.id,
       label: item.text,
     };
   });
   const customerSegment = (data_customerSegment || []).map((item) => {
     return {
-      value: item.Id,
+      value: item.id,
       label: item.text,
     };
   });
