@@ -568,7 +568,7 @@ export const downloadPaymentRelation = createAsyncThunk(
   async ({ body, id }, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/payment-relation/export-excel/${id}`;
-      const response = await accountManagementService.downloadFile(url, body);
+      const response = await accountManagementService.downloadDataAdvanced(url, body);
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);

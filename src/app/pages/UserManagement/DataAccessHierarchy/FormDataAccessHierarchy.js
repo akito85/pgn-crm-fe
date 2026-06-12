@@ -50,7 +50,7 @@ const { Option } = Select;
 const FormDataAccessHierarchy = (props) => {
   const { type } = props;
   const { cost_center_data, data_detail, loading } = useSelector(
-    (state) => state.data_access
+    (state) => state.dataAccess
   );
   const { bodyError } = useSelector((state) => state?.general);
   const navigate = useNavigate();
