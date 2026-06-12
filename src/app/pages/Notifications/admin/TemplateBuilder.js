@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router";
-import { useDispatch, useSelector } from "react-redux";
 import {
   Button,
   Switch,
@@ -31,52 +30,27 @@ import NxSelect from "../../../../components/Nx/NxSelect";
 import NxInput, { NxTextArea } from "../../../../components/Nx/NxInput";
 import { CHANNELS, toOptions, sourceLabel } from "./catalogConstants";
 import {
-  fetchEvents,
-  fetchCategoryFields,
-  fetchTemplate,
-  validateTemplate,
-  previewTemplate,
-  saveTemplate,
-  clearCurrentTemplate,
-  selectEvents,
-  selectEventsLoading,
-  selectCategoryFields,
-  selectCategoryFieldsLoading,
-  selectCurrentTemplate,
-  selectCurrentTemplateLoading,
-  selectValidation,
-  selectValidating,
-  selectPreview,
-  selectPreviewing,
-  selectSaving,
-} from "../../../../redux/slices/notificationAdmin";
+  useEvents,
+  useCategoryFields,
+  useTemplate,
+  useSaveTemplate,
+  useValidateTemplate,
+  usePreviewTemplate,
+} from "../../../../hooks/notifications/useNotificationAdmin";
 
 const { Panel } = Collapse;
 
 // mode: "create" | "update". On update the template id is passed via route
 // state (location.state.id) — never in the URL — mirroring UserForm.
 const TemplateBuilder = ({ mode = "create" }) => {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
   const isEdit = mode === "update";
   const id = location?.state?.id;
 
-  const events = useSelector(selectEvents);
-  const eventsLoading = useSelector(selectEventsLoading);
-  const categoryFields = useSelector(selectCategoryFields);
-  const categoryFieldsLoading = useSelector(selectCategoryFieldsLoading);
-  const currentTemplate = useSelector(selectCurrentTemplate);
-  const currentTemplateLoading = useSelector(selectCurrentTemplateLoading);
-  const validation = useSelector(selectValidation);
-  const validating = useSelector(selectValidating);
-  const preview = useSelector(selectPreview);
-  const previewing = useSelector(selectPreviewing);
-  const saving = useSelector(selectSaving);
+  const { data: events = [], isLoading: eventsLoading } = useEvents();
+  const { data: currentTemplate, isLoading: currentTemplateLoading } = useTemplate(isEdit ? id : undefined);
 
-  const bodyRef = useRef(null);
-
-  // Template form state
   const [form, setForm] = useState({
     templateCode: "",
     templateName: "",
@@ -88,24 +62,27 @@ const TemplateBuilder = ({ mode = "create" }) => {
     isDefault: false,
   });
 
-  // Selected fields (content variables + layout), ordered
-  // each: { fieldKey, displayLabel, resolverType, resolverRef, isVisible, kind }
+  const { data: categoryFields = [], isLoading: categoryFieldsLoading } = useCategoryFields(form.eventCode);
+
+  const saveMutation = useSaveTemplate();
+  const validateMutation = useValidateTemplate();
+  const previewMutation = usePreviewTemplate();
+
+  const [validation, setValidation] = useState(null);
+  const [preview, setPreview] = useState(null);
+
+  const bodyRef = useRef(null);
+
   const [selected, setSelected] = useState([]);
 
   const setField = (key, value) => setForm((p) => ({ ...p, [key]: value }));
 
   useEffect(() => {
-    // Update reached without an id in route state (e.g. direct URL hit / refresh):
-    // there is nothing to load, so bounce back to the list.
     if (isEdit && !id) {
       navigate("/notifications/templates", { replace: true });
-      return;
     }
-    dispatch(fetchEvents());
-    if (isEdit) dispatch(fetchTemplate(id));
-    return () => dispatch(clearCurrentTemplate());
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch, id]);
+  }, []);
 
   // Hydrate the form when editing an existing template
   useEffect(() => {
@@ -121,7 +98,6 @@ const TemplateBuilder = ({ mode = "create" }) => {
       bodyTemplate: t.bodyTemplate || "",
       isDefault: !!t.isDefault,
     });
-    if (t.eventCode) dispatch(fetchCategoryFields(t.eventCode));
 
     const vars = currentTemplate.contentVariables || [];
     const layout = currentTemplate.layout || [];
@@ -149,7 +125,6 @@ const TemplateBuilder = ({ mode = "create" }) => {
 
   const onPickEvent = (eventCode) => {
     setField("eventCode", eventCode);
-    if (eventCode) dispatch(fetchCategoryFields(eventCode));
   };
 
   const selectedKeys = useMemo(() => new Set(selected.map((s) => s.fieldKey)), [selected]);
@@ -185,7 +160,6 @@ const TemplateBuilder = ({ mode = "create" }) => {
   const updateSelected = (fieldKey, patch) =>
     setSelected((p) => p.map((s) => (s.fieldKey === fieldKey ? { ...s, ...patch } : s)));
 
-  // Insert a ${token} at the body editor caret
   const insertToken = (fieldKey) => {
     const token = "${" + fieldKey + "}";
     const el = bodyRef.current?.resizableTextArea?.textArea;
@@ -236,7 +210,8 @@ const TemplateBuilder = ({ mode = "create" }) => {
       return;
     }
     try {
-      const res = await dispatch(validateTemplate(buildRequest())).unwrap();
+      const res = await validateMutation.mutateAsync(buildRequest());
+      setValidation(res);
       if (res?.valid) message.success("Template is valid");
     } catch (e) {
       message.error(typeof e === "string" ? e : "Validation failed");
@@ -248,7 +223,12 @@ const TemplateBuilder = ({ mode = "create" }) => {
       message.info("Save the template first to preview it");
       return;
     }
-    dispatch(previewTemplate({ id }));
+    try {
+      const res = await previewMutation.mutateAsync({ id });
+      setPreview(res);
+    } catch (e) {
+      message.error(e?.message || "Failed to preview template");
+    }
   };
 
   const handleSave = async () => {
@@ -257,13 +237,14 @@ const TemplateBuilder = ({ mode = "create" }) => {
       return;
     }
     try {
-      await dispatch(saveTemplate(buildRequest())).unwrap();
+      await saveMutation.mutateAsync(buildRequest());
       message.success("Template saved");
       navigate("/notifications/templates");
     } catch (e) {
-      // validation rejection carries a ValidationResult — surfaced in the banner
-      if (e?.errorCode) {
-        message.error(`${e.errorCode}: ${e.offendingValue || ""}`);
+      const validationResult = e?.response?.data;
+      if (validationResult?.errorCode) {
+        setValidation(validationResult);
+        message.error(`${validationResult.errorCode}: ${validationResult.offendingValue || ""}`);
       } else {
         message.error(e?.message || "Failed to save template");
       }
@@ -511,16 +492,16 @@ const TemplateBuilder = ({ mode = "create" }) => {
           Back
         </Button>
         <div className="flex gap-3">
-          <Button icon={<CheckCircleOutlined />} loading={validating} onClick={handleValidate}>
+          <Button icon={<CheckCircleOutlined />} loading={validateMutation.isPending} onClick={handleValidate}>
             Validate
           </Button>
-          <Button icon={<EyeOutlined />} loading={previewing} onClick={handlePreview}>
+          <Button icon={<EyeOutlined />} loading={previewMutation.isPending} onClick={handlePreview}>
             Preview
           </Button>
           <Button
             type="primary"
             icon={<SaveOutlined />}
-            loading={saving}
+            loading={saveMutation.isPending}
             disabled={!requiredOk}
             onClick={handleSave}
             style={{ backgroundColor: requiredOk ? "#0075bf" : undefined, borderColor: requiredOk ? "#0075bf" : undefined }}

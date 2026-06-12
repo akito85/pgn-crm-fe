@@ -1,25 +1,14 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import notificationApi from "../../services/notificationApi";
 
-/**
- * TanStack Query hooks for the Notification admin console (templates + field
- * catalogue).
- *
- * Replaces the Redux createAsyncThunk data layer (notificationAdmin slice) for
- * the list screens: caching, request dedupe, and automatic refetch on mutation
- * via query invalidation — mirroring the Job Scheduler hooks
- * (hooks/jobManagement/useJobSchedules). The thunks remain in place for the
- * template builder; only the list screens read through these hooks.
- *
- * All requests go through notificationApi, which already attaches the
- * notification auth header.
- */
-
 export const notificationAdminKeys = {
   all: ["notificationAdmin"],
   templates: (filter) => ["notificationAdmin", "templates", filter],
   catalog: (module) => ["notificationAdmin", "catalog", module],
   resolvers: ["notificationAdmin", "resolvers"],
+  events: ["notificationAdmin", "events"],
+  categoryFields: (eventCode) => ["notificationAdmin", "categoryFields", eventCode],
+  template: (id) => ["notificationAdmin", "template", id],
 };
 
 // ─── Templates ────────────────────────────────────────────────────────────────
@@ -77,6 +66,65 @@ export function useResolvers() {
       const data = await notificationApi.listResolvers();
       return Array.isArray(data) ? data : [];
     },
-    staleTime: 5 * 60 * 1000, // whitelist changes rarely; cache for 5 min
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+// ─── Events ─────────────────────────────────────────────────────────────────
+
+export function useEvents() {
+  return useQuery({
+    queryKey: notificationAdminKeys.events,
+    queryFn: async () => {
+      const data = await notificationApi.listEvents();
+      return Array.isArray(data) ? data : [];
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+// ─── Category fields (per event) ────────────────────────────────────────────
+
+export function useCategoryFields(eventCode) {
+  return useQuery({
+    queryKey: notificationAdminKeys.categoryFields(eventCode),
+    queryFn: async () => {
+      const data = await notificationApi.getCategoryFields(eventCode);
+      return Array.isArray(data) ? data : [];
+    },
+    enabled: !!eventCode,
+    placeholderData: (prev) => prev,
+  });
+}
+
+// ─── Single template (builder) ───────────────────────────────────────────────
+
+export function useTemplate(id) {
+  return useQuery({
+    queryKey: notificationAdminKeys.template(id),
+    queryFn: () => notificationApi.getTemplate(id),
+    enabled: id != null,
+  });
+}
+
+// ─── Template mutations ──────────────────────────────────────────────────────
+
+export function useSaveTemplate() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (request) => notificationApi.saveTemplate(request),
+    onSuccess: () => qc.invalidateQueries({ queryKey: notificationAdminKeys.all }),
+  });
+}
+
+export function useValidateTemplate() {
+  return useMutation({
+    mutationFn: (request) => notificationApi.validateTemplate(request),
+  });
+}
+
+export function usePreviewTemplate() {
+  return useMutation({
+    mutationFn: ({ id, entityId }) => notificationApi.previewTemplate(id, entityId ?? null),
   });
 }

@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
-import { useDispatch, useSelector } from "react-redux";
 import { InputNumber, Button, Spin, message, Tag } from "antd";
 import { SettingOutlined, ArrowLeftOutlined } from "@ant-design/icons";
 
@@ -9,31 +8,22 @@ import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
 import NxSwitch from "../../../../components/Nx/NxSwitch";
 import NxSelect from "../../../../components/Nx/NxSelect";
-import notificationApi from "../../../../services/notificationApi";
 import {
-  fetchGlobalSettings,
-  selectGlobalSettings,
-  selectSettingsLoading,
-} from "../../../../redux/slices/notifications";
+  useGlobalNotificationSettings,
+  useUpdateGlobalNotificationSettings,
+} from "../../../../hooks/notifications/useNotificationSettings";
 
 /**
  * Admin editor for the system-wide notification defaults
  * (M_NOTIFICATION_GLOBAL_SETTINGS). Group-access gated — not whitelisted.
- * Reads via the notifications slice, writes through the global-settings endpoint.
  */
 const GlobalNotificationSettings = () => {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const globalSettings = useSelector(selectGlobalSettings);
-  const isLoading = useSelector(selectSettingsLoading);
+  const { data: globalSettings, isLoading } = useGlobalNotificationSettings();
+  const updateMutation = useUpdateGlobalNotificationSettings();
 
   const [local, setLocal] = useState(null);
-  const [saving, setSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
-
-  useEffect(() => {
-    dispatch(fetchGlobalSettings());
-  }, [dispatch]);
 
   useEffect(() => {
     if (globalSettings) {
@@ -54,16 +44,12 @@ const GlobalNotificationSettings = () => {
   };
 
   const handleSave = async () => {
-    setSaving(true);
     try {
-      await notificationApi.updateGlobalSettings(local);
+      await updateMutation.mutateAsync(local);
       message.success("Global settings saved");
       setHasChanges(false);
-      dispatch(fetchGlobalSettings());
     } catch (e) {
       message.error(e?.message || "Failed to save global settings");
-    } finally {
-      setSaving(false);
     }
   };
 
@@ -109,7 +95,7 @@ const GlobalNotificationSettings = () => {
               size="lg"
               checked={local.defaultSoundEnabled}
               onChange={(checked) => change("defaultSoundEnabled", checked)}
-              disabled={saving}
+              disabled={updateMutation.isPending}
             />
           </div>
 
@@ -122,7 +108,7 @@ const GlobalNotificationSettings = () => {
               size="lg"
               checked={local.defaultDesktopNotificationsEnabled}
               onChange={(checked) => change("defaultDesktopNotificationsEnabled", checked)}
-              disabled={saving}
+              disabled={updateMutation.isPending}
             />
           </div>
 
@@ -134,7 +120,7 @@ const GlobalNotificationSettings = () => {
             <NxSelect
               value={local.defaultDisplayType}
               onChange={(v) => change("defaultDisplayType", v)}
-              disabled={saving}
+              disabled={updateMutation.isPending}
               style={{ width: 160 }}
               options={displayTypeOptions.map((t) => ({
                 value: t,
@@ -153,7 +139,7 @@ const GlobalNotificationSettings = () => {
               max={500}
               value={local.defaultMaxNotifications}
               onChange={(v) => change("defaultMaxNotifications", v)}
-              disabled={saving}
+              disabled={updateMutation.isPending}
               style={{ width: 100 }}
             />
           </div>
@@ -168,7 +154,7 @@ const GlobalNotificationSettings = () => {
           {hasChanges && <Tag color="warning" className="self-center">Unsaved changes</Tag>}
           <Button
             type="primary"
-            loading={saving}
+            loading={updateMutation.isPending}
             disabled={!hasChanges}
             onClick={handleSave}
             style={{
