@@ -26,7 +26,7 @@ import jsPDF from "jspdf";
 import { useTryAgainHooks } from "../../../../utils/useTryAgainHooks";
 const { Option } = Select;
 const DetailDataAccessHierarchy = () => {
-  const { data_detail, loading, data } = useSelector((state) => state.data_access);
+  const { data_detail, loading, data } = useSelector((state) => state.dataAccess);
   const { bodyError } = useSelector(state => state?.general);
   const dispatch = useDispatch();
   const location = useLocation();
