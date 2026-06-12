@@ -1,12 +1,9 @@
-import React, { useEffect, useState, useRef, useMemo } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { Spin } from "antd";
+import React from "react";
 import moment from "moment";
 import CollapsibleContainer from "../../../../components/CollapsibleContainer";
 import DetailText from "../../../../components/DetailText";
 
 const PrabillingDetailInformation = ({ data, tabHeader }) => {
-  const { loading } = useSelector((state) => state.rbi_prabilling);
 
   const prabillData = data?.prabillInitPopulate || {};
   const detailsData = data?.details || [];
@@ -22,8 +19,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
   };
 
   return (
-    <Spin spinning={loading}>
-      <div className="flex flex-col gap-1">
+    <div className="flex flex-col gap-1">
         {/* Prabilling Information - CollapsibleContainer */}
         <CollapsibleContainer header={"Prabilling Information"} border className="mt-4">
           <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[repeat(5,auto)] gap-x-8 gap-y-2 sm:gap-y-1">
@@ -89,8 +85,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
             </DetailText>
           </div>
         </CollapsibleContainer>
-      </div>
-    </Spin>
+    </div>
   );
 };
 
