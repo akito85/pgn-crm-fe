@@ -33,6 +33,54 @@ export const getEMeteraiColumns = ({
       render: (text) => <span>{text}</span>,
     },
     {
+      key: "npwp",
+      title: "NPWP",
+      dataIndex: "npwp",
+      width: 180,
+      render: (text) => text || "-",
+    },
+    {
+      key: "invoiceFileName",
+      title: "Invoice File Name",
+      dataIndex: "invoiceFileName",
+      width: 200,
+      ellipsis: true,
+      render: (text) => text || "-",
+    },
+    {
+      key: "taxAddress",
+      title: "Tax Address",
+      dataIndex: "taxAddress",
+      width: 200,
+      ellipsis: true,
+      render: (text) => text || "-",
+    },
+    {
+      key: "nitku",
+      title: "NITKU",
+      dataIndex: "nitku",
+      width: 140,
+      render: (text) => text || "-",
+    },
+    {
+      key: "wpStatus",
+      title: "WP Status",
+      dataIndex: "wpStatus",
+      width: 140,
+      isClassification: true,
+      render: (status) => {
+        if (!status) return "-";
+        const displayStatus = status.replace(/_/g, " ");
+        return (
+          <div className="flex justify-center">
+            <StatusComponent colour={status.toLowerCase()}>
+              {displayStatus}
+            </StatusComponent>
+          </div>
+        );
+      },
+    },
+    {
       key: "customer",
       title: "Customer",
       dataIndex: "customerName",
