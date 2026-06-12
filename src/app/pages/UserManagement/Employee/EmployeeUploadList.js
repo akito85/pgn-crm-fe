@@ -1,13 +1,10 @@
-import moment from "moment";
 import { useCallback, useMemo } from "react";
 import StatusComponent from "../../../../components/StatusComponent";
 import NxTableInlineEdit from "../../../../components/Nx/NxTableInlineEdit";
 
-// Strip "at row N" suffix and translate BE format token → FE-facing format.
+// Strip "at row N" suffix from BE validation messages.
 const normalizeMessage = (msg) =>
-  msg
-    .replace(/\s+at row \d+\.?$/i, "")
-    .replace(/yyyy-mm-dd/gi, "DD MMM YYYY");
+  msg.replace(/\s+at row \d+\.?$/i, "");
 
 const EmployeeUploadList = ({
   dataEmp,
@@ -79,21 +76,19 @@ const EmployeeUploadList = ({
         title: "START DATE",
         dataIndex: "startDate",
         editable: true,
-        inputType: "text",
+        inputType: "date",
         width: 130,
         placeholder: "DD MMM YYYY",
-        render: (value) =>
-          value ? moment(value, "DD MMM YYYY").format("YYYY-MM-DD") : "—",
+        render: (value) => value || "—",
       },
       {
         title: "END DATE",
         dataIndex: "endDate",
         editable: true,
-        inputType: "text",
+        inputType: "date",
         width: 130,
         placeholder: "DD MMM YYYY",
-        render: (value) =>
-          value ? moment(value, "DD MMM YYYY").format("YYYY-MM-DD") : "—",
+        render: (value) => value || "—",
       },
       {
         title: "DESCRIPTION",
