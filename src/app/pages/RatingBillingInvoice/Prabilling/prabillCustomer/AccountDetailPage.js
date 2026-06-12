@@ -16,6 +16,7 @@ import {
   getCustomerSaData,
   getCustomerUsageData,
   getCustomerTaxData,
+  getCustomerPromoData,
   getCustomerBillingBucketData,
   getCustomerBillingItemData,
   resetCustomerDetail,
@@ -24,6 +25,7 @@ import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
 import {
   createUsageColumns,
   createTaxColumns,
+  createPromoColumns,
   createBillingBucketColumns,
   createBillingItemColumns,
   createSAColumns,
@@ -66,15 +68,22 @@ const TAB_CONFIGS = [
     scrollX: 1000,
     action: "getCustomerTaxData",
   },
+  {
+    key: "3",
+    label: "Promo",
+    dataKey: "promoData",
+    scrollX: 1500,
+    action: "getCustomerPromoData",
+  },
   // {
-  //   key: "3",
+  //   key: "4",
   //   label: "Billing Bucket",
   //   dataKey: "billingBucketData",
   //   scrollX: 900,
   //   action: "getCustomerBillingBucketData",
   // },
   // {
-  //   key: "4",
+  //   key: "5",
   //   label: "Billing Item",
   //   dataKey: "billingItemData",
   //   scrollX: 1500,
@@ -93,6 +102,7 @@ const AccountDetailPage = () => {
     2: { current: 1, pageSize: 10 },
     3: { current: 1, pageSize: 10 },
     4: { current: 1, pageSize: 10 },
+    5: { current: 1, pageSize: 10 },
   });
 
   // State untuk SA Detail
@@ -117,6 +127,9 @@ const AccountDetailPage = () => {
   );
   const [fixedColumnsTax, setFixedColumnsTax] = useState(() =>
     createFixedColumnsState()
+  );
+  const [fixedColumnsPromo, setFixedColumnsPromo] = useState(() =>
+    createFixedColumnsState(["no"])
   );
   const [fixedColumnsBillingBucket, setFixedColumnsBillingBucket] = useState(
     () => createFixedColumnsState()
@@ -152,6 +165,17 @@ const AccountDetailPage = () => {
     dispatch(getCustomerTaxData(baseParams));
     dispatch(getCustomerBillingBucketData(baseParams));
     dispatch(getCustomerBillingItemData(baseParams));
+    dispatch(
+      getCustomerPromoData({
+        customerNumber,
+        accountNumber: accNumber,
+        sor: inSor,
+        saNumber,
+        billPeriod,
+        page: 0,
+        size: 10,
+      })
+    );
     dispatch(
       getCustomerSaData({
         customerNumber,
@@ -212,6 +236,19 @@ const AccountDetailPage = () => {
         case "getCustomerTaxData":
           dispatch(getCustomerTaxData(params));
           break;
+        case "getCustomerPromoData":
+          dispatch(
+            getCustomerPromoData({
+              customerNumber,
+              accountNumber: accNumber,
+              sor: inSor,
+              saNumber,
+              billPeriod,
+              page: page - 1,
+              size: pageSize,
+            })
+          );
+          break;
         case "getCustomerBillingBucketData":
           dispatch(getCustomerBillingBucketData(params));
           break;
@@ -260,6 +297,8 @@ const AccountDetailPage = () => {
   const usagePage = customer_account_detail?.usageData?.page || {};
   const taxData = customer_account_detail?.taxData?.result || [];
   const taxPage = customer_account_detail?.taxData?.page || {};
+  const promoData = customer_account_detail?.promoData?.result || [];
+  const promoPage = customer_account_detail?.promoData?.page || {};
   const billingBucketData = customer_account_detail?.billingBucketData?.result || [];
   const billingBucketPage = customer_account_detail?.billingBucketData?.page || {};
   const billingItemData = customer_account_detail?.billingItemData?.result || [];
@@ -277,6 +316,7 @@ const AccountDetailPage = () => {
   const saColumnsBase = useMemo(() => createSAColumns(renderValue), []);
   const usageColumns = useMemo(() => createUsageColumns(renderValue), []);
   const taxColumns = useMemo(() => createTaxColumns(renderValue), []);
+  const promoColumns = useMemo(() => createPromoColumns(renderValue), []);
   const billingBucketColumns = useMemo(() => createBillingBucketColumns(renderValue), []);
   const billingItemColumns = useMemo(() => createBillingItemColumns(renderValue), []);
 
@@ -320,6 +360,10 @@ const AccountDetailPage = () => {
       () => applyFixedColumns(taxColumns, fixedColumnsTax),
       [taxColumns, fixedColumnsTax]
     ),
+    promo: useMemo(
+      () => applyFixedColumns(promoColumns, fixedColumnsPromo),
+      [promoColumns, fixedColumnsPromo]
+    ),
     billingBucket: useMemo(
       () => applyFixedColumns(billingBucketColumns, fixedColumnsBillingBucket),
       [billingBucketColumns, fixedColumnsBillingBucket]
@@ -342,6 +386,10 @@ const AccountDetailPage = () => {
     tax: useMemo(
       () => taxColumns.map((col) => ({ key: col.key, title: col.title })),
       [taxColumns]
+    ),
+    promo: useMemo(
+      () => promoColumns.map((col) => ({ key: col.key, title: col.title })),
+      [promoColumns]
     ),
     billingBucket: useMemo(
       () => billingBucketColumns.map((col) => ({ key: col.key, title: col.title })),
@@ -382,6 +430,15 @@ const AccountDetailPage = () => {
       loading: loading_customer_detail.tax,
     },
     3: {
+      data: promoData,
+      columns: processedColumns.promo,
+      defs: columnDefs.promo,
+      fixed: fixedColumnsPromo,
+      setFixed: setFixedColumnsPromo,
+      page: promoPage,
+      loading: loading_customer_detail.promo,
+    },
+    4: {
       data: billingBucketData,
       columns: processedColumns.billingBucket,
       defs: columnDefs.billingBucket,
@@ -390,7 +447,7 @@ const AccountDetailPage = () => {
       page: billingBucketPage,
       loading: loading_customer_detail.billingBucket,
     },
-    4: {
+    5: {
       data: billingItemData,
       columns: processedColumns.billingItem,
       defs: columnDefs.billingItem,
