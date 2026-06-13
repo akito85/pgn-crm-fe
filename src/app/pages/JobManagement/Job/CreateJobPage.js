@@ -50,10 +50,41 @@ const MODULE_OPTIONS = [
 
 const INITIAL_NOTIFICATIONS = {
   showInDrawer: false,
+  showToast: false,
   showAlert: false,
+  showInline: false,
   sendViaEmail: false,
   sendViaSMS: false,
   sendViaWhatsApp: false,
+};
+
+// Map the FE notification toggles to the backend NotificationConfigDto shape
+// (inApp.{standard,toast,popup,inline} + flat email/sms/whatsapp booleans).
+const settingsToNotificationConfig = (s = INITIAL_NOTIFICATIONS) => ({
+  inApp: {
+    standard: !!s.showInDrawer,
+    toast: !!s.showToast,
+    popup: !!s.showAlert,
+    inline: !!s.showInline,
+  },
+  email: !!s.sendViaEmail,
+  sms: !!s.sendViaSMS,
+  whatsapp: !!s.sendViaWhatsApp,
+});
+
+// Inverse: hydrate the FE toggles from a persisted NotificationConfigDto.
+const notificationConfigToSettings = (cfg) => {
+  if (!cfg) return null;
+  const inApp = cfg.inApp || {};
+  return {
+    showInDrawer: !!inApp.standard,
+    showToast: !!inApp.toast,
+    showAlert: !!inApp.popup,
+    showInline: !!inApp.inline,
+    sendViaEmail: !!cfg.email,
+    sendViaSMS: !!cfg.sms,
+    sendViaWhatsApp: !!cfg.whatsapp,
+  };
 };
 
 const PARAMETER_COLUMNS = [
@@ -215,9 +246,12 @@ const CreateJobPage = () => {
       setParameters(currentJob.parameters.map((p, i) => ({ ...p, key: p.key ?? i + 1 })));
     }
 
-    // Restore notification toggles
-    if (currentJob.notificationSettings) {
-      setNotificationSettings(currentJob.notificationSettings);
+    // Restore notification toggles — prefer the persisted NotificationConfigDto,
+    // falling back to the legacy notificationSettings shape if present.
+    const restored = notificationConfigToSettings(currentJob.notificationConfig)
+      || currentJob.notificationSettings;
+    if (restored) {
+      setNotificationSettings(restored);
     }
   }, [currentJob, isEditMode, dispatch]);
 
@@ -283,6 +317,8 @@ const CreateJobPage = () => {
         maxRetry: values.maxRetry || 0,
         parameters: parameters.filter(p => p.name || p.code),
         notificationSettings,
+        // Backend contract: NotificationConfigDto (inApp.{standard,toast,popup,inline} + channels).
+        notificationConfig: settingsToNotificationConfig(notificationSettings),
       };
 
       if (isEditMode) {
@@ -598,7 +634,9 @@ const CreateJobPage = () => {
             <section className="flex flex-col gap-3 p-4 rounded-lg outline outline-1 outline-offset-[-1px] outline-[#c8cdd4]">
               <h3 className="text-primary text-sm font-normal uppercase">In-App Notifications</h3>
               <NotificationRow label="In App Message" checked={notificationSettings.showInDrawer} onChange={updateNotification('showInDrawer')} />
+              <NotificationRow label="Show as Toast"               checked={notificationSettings.showToast}    onChange={updateNotification('showToast')} />
               <NotificationRow label="Show as Alert"               checked={notificationSettings.showAlert}    onChange={updateNotification('showAlert')} />
+              <NotificationRow label="Show Inline"                 checked={notificationSettings.showInline}   onChange={updateNotification('showInline')} />
             </section>
 
             <section className="flex flex-col gap-3 p-4 rounded-lg outline outline-1 outline-offset-[-1px] outline-[#c8cdd4]">
