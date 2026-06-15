@@ -54,6 +54,7 @@ const Employee = () => {
   const [pageSize, setPageSize] = useState(30);
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
+  const [searchText, setSearchText] = useState("");
   const [advancedSearch, setAdvancedSearch] = useState(null);
   const [fixedColumns, setFixedColumns] = useState({ left: [], right: [] });
 
@@ -117,6 +118,7 @@ const Employee = () => {
             pageSize,
             sort,
             search: reqSearch,
+            searchText,
           })
         ).unwrap();
         if (signal?.aborted) return;
@@ -135,7 +137,7 @@ const Employee = () => {
         if (!signal?.aborted) setIsLoading(false);
       }
     },
-    [search, advancedSearch, sort, pageSize, dispatch, buildSearch]
+    [search, searchText, advancedSearch, sort, pageSize, dispatch, buildSearch]
   );
 
   // Initial load and reload on filter / sort / pageSize change.
@@ -151,7 +153,7 @@ const Employee = () => {
       signal.aborted = true;
       isFetchingRef.current = false;
     };
-  }, [search, advancedSearch, sort, pageSize]); // intentionally exclude fetchPage to avoid loop
+  }, [search, searchText, advancedSearch, sort, pageSize]); // intentionally exclude fetchPage to avoid loop
 
   const handleChange = (_, pageSizeChange) => {
     setPageSize(pageSizeChange);
@@ -173,6 +175,10 @@ const Employee = () => {
   const onAdvanceSearch = (searchData) => {
     setAdvancedSearch(searchData);
   };
+
+  const handleSearchBar = useCallback((value) => {
+    setSearchText(value || "");
+  }, []);
 
   const handleCancelTerminate = () => {
     form.resetFields();
@@ -212,8 +218,8 @@ const Employee = () => {
 
   const handleDownload = useCallback(() => {
     const reqSearch = buildSearch(search, advancedSearch);
-    dispatch(downloadEmployee({ search: reqSearch, page: 0, pageSize, sort }));
-  }, [search, advancedSearch, pageSize, sort, dispatch, buildSearch]);
+    dispatch(downloadEmployee({ search: reqSearch, searchText, page: 0, pageSize, sort }));
+  }, [search, searchText, advancedSearch, pageSize, sort, dispatch, buildSearch]);
 
   const handleRetry = () => {
     try {
@@ -267,6 +273,7 @@ const Employee = () => {
             onSizeChanger={handleChange}
             onSort={onSort}
             onAdvanceSearch={onAdvanceSearch}
+            onSearch={handleSearchBar}
             onRefresh={handleRefresh}
             fixedColumns={fixedColumns}
             setFixedColumns={setFixedColumns}

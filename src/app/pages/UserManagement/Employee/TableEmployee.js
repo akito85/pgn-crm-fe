@@ -184,6 +184,7 @@ export const TableEmployee = ({
   onSizeChanger,
   onSort,
   onAdvanceSearch,
+  onSearch,
   onRefresh,
   columnDefinitions,
   fixedColumns,
@@ -218,6 +219,7 @@ export const TableEmployee = ({
       onSizeChanger={onSizeChanger}
       onSort={onSort}
       onAdvanceSearch={onAdvanceSearch}
+      onSearch={onSearch}
       onRefresh={onRefresh}
       columnDefinitions={columnDefinitions}
       fixedColumns={fixedColumns}
