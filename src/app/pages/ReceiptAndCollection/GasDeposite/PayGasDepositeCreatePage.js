@@ -824,14 +824,14 @@ const extractRequestErrorMessage = (error, fallbackMessage) => (
   };
 
   const resolveDailyRate = (allValues, formattedRateDate) => {
-    if (!allValues.currency || !allValues.rateType || !formattedRateDate) {
+    if (!allValues.currency || !allValues.billingCurrency || !allValues.rateType || !formattedRateDate) {
       form.setFieldsValue({ rate: undefined, eqvBalance: undefined });
       return;
     }
     const currencyName = (currencyDDL?.data || []).find((item) => item.id === allValues.currency)?.name;
     const billingCurrencyName = (currencyDDL?.data || []).find((item) => item.id === allValues.billingCurrency)?.name;
     const rateTypeCode = (rateTypeDDL?.data || []).find((item) => item.id === allValues.rateType)?.name;
-    if (currencyName && rateTypeCode) {
+    if (currencyName && billingCurrencyName && rateTypeCode) {
       dispatch(getPayGasDepositDailyRate({
         fromCurrencyName: currencyName,
         toCurrencyName: billingCurrencyName,

@@ -1,6 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import ratingBillingHttpService from "../../services/ratingBillingHttpService";
-import productPromoHttpService from "../../services/productPromoHttpService";
 import {
   showModalError,
   setBodyError,
@@ -675,16 +674,16 @@ export const getUomOptions = createAsyncThunk(
   "GET_GAS_DEPOSIT_UOM_OPTIONS",
   async (_, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/maintain-pricing/list-uom`;
-      const response = await productPromoHttpService.getAll(url);
-      const rawData = response?.data?.data || response?.data || [];
-      return Array.isArray(rawData) 
+      const url = "/v1/dbs/api/gas-deposit/uom-options";
+      const response = await ratingBillingHttpService.getAll(url);
+      const rawData = response?.data || [];
+      return Array.isArray(rawData)
         ? rawData
             .filter(item => {
-              const val = (item.name || item.text || "").toUpperCase();
+              const val = (item.label || "").toUpperCase();
               return val === "MMBTU" || val === "M3";
             })
-            .map(item => ({ label: item.name || item.text, value: item.name || item.text })) 
+            .map(item => ({ label: item.label, value: item.value }))
         : [];
     } catch (error) {
       const message =
