@@ -40,7 +40,7 @@ import { useTryAgainHooks } from "../../../../utils/useTryAgainHooks";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../utils/getColumnSearchProps";
 const DataAccessHierarchyView = () => {
   const dispatch = useDispatch();
-  const { data, loading } = useSelector((state) => state.data_access);
+  const { data, loading } = useSelector((state) => state.dataAccess);
   const { bodyError } = useSelector(state => state?.general);
 
 

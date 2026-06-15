@@ -577,8 +577,8 @@ export const downloadInvoiceRelation = createAsyncThunk(
   "DOWNLOAD_INVOICE_RELATION",
   async ({ id, body }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/invoice-relation/download/${id}`;
-      const response = await accountManagementService.downloadFile(url, body);
+      const url = `/v1/dbs/api/invoice-relation/export-excel/${id}`;
+      const response = await accountManagementService.downloadDataAdvanced(url, body);
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response);

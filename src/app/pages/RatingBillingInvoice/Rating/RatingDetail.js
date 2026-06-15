@@ -39,7 +39,6 @@ const RatingDetail = ({
     {
       key: "Promo",
       label: "Promo",
-      disabled: true,
     },
     {
       key: "Periodic",

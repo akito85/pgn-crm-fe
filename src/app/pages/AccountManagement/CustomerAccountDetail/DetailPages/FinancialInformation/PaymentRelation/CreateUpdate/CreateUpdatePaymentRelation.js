@@ -71,11 +71,11 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
   const status = location.state?.status || detail_paymentRelation.status || "DRAFT";
   const statusApproval = location.state?.statusApproval || detail_paymentRelation.statusApproval || "DRAFT";
 
-  const isDraft = status === "DRAFT";
-  const isActive = status === "ACTIVE";
+  const isDraft = status?.toUpperCase() === "DRAFT";
+  const isActive = status?.toUpperCase() === "ACTIVE";
 
-  const isDraftApproval = statusApproval === "DRAFT";
-  const isRejectedApproval = statusApproval === "REJECTED";
+  const isDraftApproval = statusApproval?.toUpperCase() === "DRAFT";
+  const isRejectedApproval = statusApproval?.toUpperCase() === "REJECTED";
 
   //state
   const [attachmentDataSource, setAttachmentDataSource] = useState([]);
@@ -112,18 +112,19 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
   }, [isUpdate, id, accountId, isActive, isDraftApproval, isRejectedApproval]);
 
   useEffect(() => {
-    if (isUpdate && list_prApprovalHierarchy.length) {
-      const {
-        accountId,
-        priority,
-        startDate,
-        endDate,
-        description,
-        appHierId,
-        accountNumber,
-        accountName
-      } = detail;
+    if (!isUpdate) return;
+    const {
+      accountId,
+      priority,
+      startDate,
+      endDate,
+      description,
+      appHierId,
+      accountNumber,
+      accountName
+    } = detail;
 
+    if (accountId || accountNumber || priority) {
       form.setFieldsValue({
         accountId,
         accountName,
@@ -134,14 +135,17 @@ const CreateUpdatePaymentRelation = ({ formType = "create", accountType = "stand
         description,
         appHierId
       });
-
-      const appHierOption = list_prApprovalHierarchy.find(
-        (option) => option.appHierId === appHierId
-      );
-
-      if (appHierOption)
-        handleSelectHierarchy(appHierId, appHierOption.approvalName);
     }
+  }, [detail]);
+
+  useEffect(() => {
+    if (!isUpdate || !list_prApprovalHierarchy.length) return;
+    const { appHierId } = detail;
+    const appHierOption = list_prApprovalHierarchy.find(
+      (option) => option.appHierId === appHierId
+    );
+    if (appHierOption)
+      handleSelectHierarchy(appHierId, appHierOption.approvalName);
   }, [detail, list_prApprovalHierarchy]);
 
   useEffect(() => {

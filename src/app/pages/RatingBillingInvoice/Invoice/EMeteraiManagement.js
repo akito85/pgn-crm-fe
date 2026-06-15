@@ -1,12 +1,13 @@
 // EMeteraiManagement.js
 import React, { useState, useEffect, useCallback } from "react";
-import { message, Dropdown } from "antd";
+import { message } from "antd";
 import { useDispatch, useSelector } from "react-redux";
-import { DownOutlined, CheckOutlined, PlusOutlined } from "@ant-design/icons";
+import { CheckOutlined, PlusOutlined } from "@ant-design/icons";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import CardContainer from "../../../../components/CardContainer";
 import TableRBI from "../../../../components/TableRBI";
 import ButtonComponent from "../../../../components/ButtonComponent";
+import Toolbar from "../../../../components/Toolbar";
 import ModalHistory from "../../../../components/Modal/ModalHistory";
 import { INVOICE_ROUTES } from "../../../../routes/invoice/invoice_routes";
 import StampingRequestModal from "./_components/StampingRequestModal";
@@ -296,6 +297,33 @@ const EMeteraiManagement = () => {
 
   // const transformedData = getTransformedData();
 
+  const itemGrantAccess = [
+    {
+      action: "Request",
+      render: (
+        <ButtonComponent
+          icon={<PlusOutlined style={{ color: "#ffff" }} />}
+          type="primary"
+          onClick={handleBulkRequest}
+        >
+          Request Approval
+        </ButtonComponent>
+      ),
+    },
+    {
+      action: "Approval",
+      render: (
+        <ButtonComponent
+          icon={<CheckOutlined style={{ color: "#ffff" }} />}
+          type="primary"
+          onClick={handleBulkApproval}
+        >
+          Bulk Approve
+        </ButtonComponent>
+      ),
+    },
+  ];
+
   // Get columns with handlers
   const columnDefinitions = getEMeteraiColumns({
     onDetails: handleDetails,
@@ -314,35 +342,7 @@ const EMeteraiManagement = () => {
           <div className="flex -my-4 justify-between items-center">
             <p className="mt-[15px]">E-Meterai Management</p>
             <div className="flex gap-2">
-              <Dropdown
-                menu={{
-                  items: [
-                    {
-                      key: "request",
-                      label: "Request Approval",
-                      icon: <PlusOutlined style={{ color: "#52c41a" }} />,
-                      onClick: handleBulkRequest,
-                    },
-                    {
-                      type: "divider",
-                    },
-                    {
-                      key: "approval",
-                      label: "Approval",
-                      icon: <CheckOutlined style={{ color: "#1890ff" }} />,
-                      onClick: handleBulkApproval,
-                    },
-                  ],
-                }}
-                trigger={["click"]}
-              >
-                <ButtonComponent
-                  type="primary"
-                  icon={<DownOutlined width={20} />}
-                >
-                  Approval Configuration
-                </ButtonComponent>
-              </Dropdown>
+              <Toolbar items={itemGrantAccess} />
             </div>
           </div>
         }

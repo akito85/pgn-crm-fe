@@ -32,11 +32,11 @@ const UsageSection = ({ ratingCode, calculationCode, accountNumber, billPeriod }
         page,
         pageSize,
         sort,
-        billPeriod, 
-        accountNumber, 
+        billPeriod,
+        accountNumber,
       })
     );
-  }, [dispatch, ratingCode, search, page, pageSize, sort]);
+  }, [dispatch, ratingCode, search, page, pageSize, sort, billPeriod, accountNumber]);
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
