@@ -71,6 +71,18 @@ const toFrontend = (job) => {
     updatedBy:     job.updatedBy,
     updatedAt:     job.updatedAt,
     accessGroupId: job.accessGroupId,
+    // Parsed NotificationConfigDto, so the edit form can hydrate every in-app
+    // flag (standard/toast/popup/inline) faithfully via notificationConfigToSettings.
+    notificationConfig: (() => {
+      if (!job.notificationConfig) return null;
+      try {
+        return typeof job.notificationConfig === 'string'
+          ? JSON.parse(job.notificationConfig)
+          : job.notificationConfig;
+      } catch (e) {
+        return null;
+      }
+    })(),
     notificationSettings: (() => {
       if (!job.notificationConfig) return null;
       try {
@@ -86,7 +98,9 @@ const toFrontend = (job) => {
           : { standard: nc.inApp === true, toast: false, popup: false, inline: false };
         return {
           showInDrawer:    inApp.standard ?? false,
+          showToast:       inApp.toast    ?? false,
           showAlert:       inApp.popup    ?? false,
+          showInline:      inApp.inline   ?? false,
           sendViaEmail:    nc.email       ?? false,
           sendViaSMS:      nc.sms         ?? false,
           sendViaWhatsApp: nc.whatsapp    ?? false,
@@ -140,9 +154,9 @@ const toBackendCreate = (v) => {
       ? {
           inApp: {
             standard: v.notificationSettings.showInDrawer ?? false,
-            toast:    false,
+            toast:    v.notificationSettings.showToast    ?? false,
             popup:    v.notificationSettings.showAlert    ?? false,
-            inline:   false,
+            inline:   v.notificationSettings.showInline   ?? false,
           },
           email:    v.notificationSettings.sendViaEmail    ?? false,
           sms:      v.notificationSettings.sendViaSMS      ?? false,
@@ -192,9 +206,9 @@ const toBackendUpdate = (v) => {
       ? {
           inApp: {
             standard: v.notificationSettings.showInDrawer ?? false,
-            toast:    false,
+            toast:    v.notificationSettings.showToast    ?? false,
             popup:    v.notificationSettings.showAlert    ?? false,
-            inline:   false,
+            inline:   v.notificationSettings.showInline   ?? false,
           },
           email:    v.notificationSettings.sendViaEmail    ?? false,
           sms:      v.notificationSettings.sendViaSMS      ?? false,

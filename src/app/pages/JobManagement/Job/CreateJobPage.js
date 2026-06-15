@@ -99,6 +99,14 @@ const PARAMETER_COLUMNS = [
       { value: 'Boolean', label: 'Boolean' },
     ],
   },
+  {
+    title: 'Direction', dataIndex: 'direction', editable: true, inputType: 'select', width: 120,
+    selectOptions: [
+      { value: 'IN',     label: 'IN' },
+      { value: 'OUT',    label: 'OUT' },
+      { value: 'IN/OUT', label: 'IN/OUT' },
+    ],
+  },
   { title: 'Length',      dataIndex: 'length',      editable: true, inputType: 'number', placeholder: 'Length',      width: 110, min: 0 },
   { title: 'Description', dataIndex: 'description', editable: true, inputType: 'text',   placeholder: 'Description' },
   {
@@ -126,15 +134,26 @@ const mapOracleTypeToParamType = (dataType) => {
   return 'String';
 };
 
-const mapSpParamToParameter = (spParam, index) => ({
-  key: index + 1,
-  name: spParam.name,
-  code: spParam.name.toUpperCase().replace(/[^A-Z0-9_]/g, '_'),
-  type: mapOracleTypeToParamType(spParam.dataType),
-  length: null,
-  description: spParam.direction?.oracleValue ?? spParam.direction ?? '',
-  required: !spParam.hasDefault,
-});
+// Oracle ALL_ARGUMENTS.IN_OUT is 'IN', 'OUT' or 'IN/OUT'. Normalise to upper case.
+const directionOf = (spParam) =>
+  String(spParam?.direction?.oracleValue ?? spParam?.direction ?? 'IN').toUpperCase();
+
+const mapSpParamToParameter = (spParam, index) => {
+  const direction = directionOf(spParam);
+  return {
+    key: index + 1,
+    name: spParam.name,
+    code: spParam.name.toUpperCase().replace(/[^A-Z0-9_]/g, '_'),
+    type: mapOracleTypeToParamType(spParam.dataType),
+    length: null,
+    // OUT params are produced by the procedure, never supplied by the caller, so
+    // they are not required inputs and must not appear in the run-time input form.
+    // IN / IN/OUT require a value unless the proc declares a default.
+    direction,
+    required: direction !== 'OUT' && !spParam.hasDefault,
+    description: '',
+  };
+};
 
 const SP_PARAM_COLUMNS = [
   { title: 'Parameter', dataIndex: 'name',       editable: false, width: 200 },
@@ -305,7 +324,7 @@ const CreateJobPage = () => {
 
   const handleAddParameter = () => {
     const newKey = parameters.length > 0 ? Math.max(...parameters.map(p => p.key)) + 1 : 1;
-    setParameters(prev => [...prev, { key: newKey, name: '', code: '', type: '', length: null, description: '', required: false }]);
+    setParameters(prev => [...prev, { key: newKey, name: '', code: '', type: '', direction: 'IN', length: null, description: '', required: false }]);
   };
 
   const onFinish = async (values) => {
@@ -352,9 +371,9 @@ const CreateJobPage = () => {
   const handleLoadSample = () => {
     form.setFieldsValue(SAMPLE_JOB);
     setParameters([
-      { key: 1, name: 'Start Date', code: 'START_DATE', type: 'Date',   length: 10, description: 'Report start date (YYYY-MM-DD)', required: false },
-      { key: 2, name: 'End Date',   code: 'END_DATE',   type: 'Date',   length: 10, description: 'Report end date (YYYY-MM-DD)',   required: false },
-      { key: 3, name: 'Region',     code: 'REGION',     type: 'String', length: 50, description: 'Target region code',            required: false },
+      { key: 1, name: 'Start Date', code: 'START_DATE', type: 'Date',   direction: 'IN', length: 10, description: 'Report start date (YYYY-MM-DD)', required: false },
+      { key: 2, name: 'End Date',   code: 'END_DATE',   type: 'Date',   direction: 'IN', length: 10, description: 'Report end date (YYYY-MM-DD)',   required: false },
+      { key: 3, name: 'Region',     code: 'REGION',     type: 'String', direction: 'IN', length: 50, description: 'Target region code',            required: false },
     ]);
   };
 
