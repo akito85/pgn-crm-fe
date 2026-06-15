@@ -306,6 +306,7 @@ const EquipmentPage = ({ idAccount, idCustomer }) => {
 
     return list_equipment.map(item => ({
       ...item,
+      status: item?.status ?? "ACTIVE",
       statusApproval: item?.statusApproval ?? "DRAFT",
     }));
   }, [list_equipment]);
