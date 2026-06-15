@@ -194,12 +194,7 @@ const Employee = () => {
     await dispatch(terminateEmployee(bodyData))
       .unwrap()
       .then(() => {
-        const signal = { aborted: false };
-        pageRef.current = 0;
-        setAllData([]);
-        setHasMore(false);
-        setIsLoading(true);
-        fetchPage(0, true, signal);
+        handleRefresh();
       })
       .catch((e) => {
         if (hasValue(e?.data) && e?.data?.data?.length > 0) {
@@ -210,22 +205,25 @@ const Employee = () => {
       });
   };
 
+  const handleRefresh = useCallback(() => {
+    const signal = { aborted: false };
+    pageRef.current = 0;
+    setAllData([]);
+    setHasMore(false);
+    setIsLoading(true);
+    fetchPage(0, true, signal);
+  }, [fetchPage]);
+
   const handleRetry = () => {
     try {
       handleCancelTryAgain();
       if (bodyError?.action === "GET_ALL_EMPLOYEE_PAGINATE") {
-        const signal = { aborted: false };
-        pageRef.current = 0;
-        setAllData([]);
-        setHasMore(false);
-        setIsLoading(true);
-        fetchPage(0, true, signal);
+        handleRefresh();
       } else {
         dispatch(terminateEmployee(body));
       }
     } catch {
-      const signal = { aborted: false };
-      fetchPage(0, true, signal);
+      handleRefresh();
     }
   };
 
@@ -357,6 +355,7 @@ const Employee = () => {
             onSizeChanger={handleChange}
             onSort={onSort}
             onAdvanceSearch={onAdvanceSearch}
+            onRefresh={handleRefresh}
             fixedColumns={fixedColumns}
             setFixedColumns={setFixedColumns}
             useInfiniteScroll={true}
