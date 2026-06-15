@@ -3,6 +3,7 @@ import { Tooltip } from "antd";
 import NxTable from "../../../../components/Nx/NxTable";
 import StatusComponent from "../../../../components/StatusComponent";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
+import NxDate from "../../../../components/Nx/NxDatePicker";
 
 export const columnsEmployee = [
   {
@@ -111,6 +112,7 @@ export const columnsEmployee = [
     align: "center",
     width: 130,
     sorter: true,
+    render: (startDate) => NxDate.formatDate(startDate, "DD MMM YYYY"),
   },
   {
     title: "END DATE",
@@ -119,6 +121,7 @@ export const columnsEmployee = [
     align: "center",
     width: 130,
     sorter: true,
+    render: (endDate) => NxDate.formatDate(endDate, "DD MMM YYYY"),
   },
   {
     title: "DESCRIPTION",
