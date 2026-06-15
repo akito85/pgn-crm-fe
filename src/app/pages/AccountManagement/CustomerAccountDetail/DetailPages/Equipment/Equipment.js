@@ -12,6 +12,7 @@ import EquipmentForm from "./Form/EquipmentForm";
 import {
   getDetailEquipment,
   getListEqupment,
+  getListEquipmentNew,
   createEqupment,
   deleteEquipment,
 } from "../../../../../../redux/slices/account_management/detailAccount/equpmentSlice";
@@ -285,6 +286,8 @@ const EquipmentPage = ({ idAccount, idCustomer }) => {
   const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
+  const [filters, setFilters] = useState([]);
+  const [filterRules, setFilterRules] = useState([]);
 
   const [modalDetail, setModalDetail] = useState(false);
   const [modalCreateUpdate, setModalCreateUpdate] = useState(false);
@@ -319,18 +322,9 @@ const EquipmentPage = ({ idAccount, idCustomer }) => {
   }, [dispatch])
 
   useEffect(() => {
-    const reqSearch = encodeURIComponent(JSON.stringify(search));
-    dispatch(
-      getListEqupment({
-        id: idAccount,
-        search: reqSearch,
-        sort,
-        page,
-        pageSize: loadMoreSize,
-        isLoadMore: false,
-      })
-    );
-  }, [search, sort]);
+    const body = { page, size: loadMoreSize, sort, searchs: search, filters, filterRules };
+    dispatch(getListEquipmentNew({ id: idAccount, body, isLoadMore: false }));
+  }, [search, sort, filters, filterRules]);
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -350,22 +344,19 @@ const EquipmentPage = ({ idAccount, idCustomer }) => {
   const handleLoadMore = async () => {
     const nextPage = page + 1;
     const totalPages = currentPagination?.totalPages || 0;
-    const reqSearch = encodeURIComponent(JSON.stringify(search));
 
     if (nextPage <= totalPages) {
-      await dispatch(
-        getListEqupment({
-          id: idAccount,
-          search: reqSearch,
-          sort,
-          page: nextPage,
-          pageSize: loadMoreSize,
-          isLoadMore: true,
-        })
-      );
+      const body = { page: nextPage, size: loadMoreSize, sort, searchs: search, filters, filterRules };
+      await dispatch(getListEquipmentNew({ id: idAccount, body, isLoadMore: true }));
       setPage(nextPage);
     }
   }
+
+  const handleAdvancedSearch = (searchData) => {
+    setFilters(searchData?.filters || []);
+    setFilterRules(searchData?.filterRules || []);
+    setPage(1);
+  };
 
   const onSort = (_, __, sort) => {
     const dataSort =
@@ -381,17 +372,9 @@ const EquipmentPage = ({ idAccount, idCustomer }) => {
     .then(() => {
       form.resetFields();
       setOpenConfirmation(false);
-      const reqSearch = encodeURIComponent(JSON.stringify(search));
-      dispatch(
-        getListEqupment({
-          id: idAccount,
-          search: reqSearch,
-          sort,
-          page,
-          pageSize: loadMoreSize,
-        })
-      );
-    })  
+      const reqBody = { page, size: loadMoreSize, sort, searchs: search, filters, filterRules };
+      dispatch(getListEquipmentNew({ id: idAccount, body: reqBody, isLoadMore: false }));
+    })
     .catch((err) => {
       console.log(err)
       return;
@@ -415,17 +398,9 @@ const EquipmentPage = ({ idAccount, idCustomer }) => {
     .then(() => {
       form.resetFields();
       setOpenConfirmation(false);
-      const reqSearch = encodeURIComponent(JSON.stringify(search));
-      dispatch(
-        getListEqupment({
-          id: idAccount,
-          search: reqSearch,
-          sort,
-          page,
-          pageSize: loadMoreSize,
-        })
-      );
-    })  
+      const reqBody = { page, size: loadMoreSize, sort, searchs: search, filters, filterRules };
+      dispatch(getListEquipmentNew({ id: idAccount, body: reqBody, isLoadMore: false }));
+    })
     .catch((err) => {
       console.log(err)
       return;
@@ -575,10 +550,13 @@ const EquipmentPage = ({ idAccount, idCustomer }) => {
   }, [allColumns, fixedColumns]);
 
   const columnDefinitions = useMemo(() => {
-    return allColumns.map((col) => ({
-      key: col.key || col.dataIndex || col.title,
-      title: col.title,
-    }))
+    return allColumns
+      .filter((col) => col.dataIndex && col.dataIndex !== "no" && col.dataIndex !== "action")
+      .map((col) => ({
+        key: col.key || col.dataIndex || col.title,
+        title: col.title,
+        dataIndex: col.dataIndex,
+      }));
   }, [allColumns]);
 
   return (
@@ -599,9 +577,10 @@ const EquipmentPage = ({ idAccount, idCustomer }) => {
               columns={processedColumns}
               usePagination={false}
               useInfiniteScroll={true}
-              hashMore={hashMore}
+              hasMore={hashMore}
               onLoadMore={handleLoadMore}
               loadMoreThreshold={20}
+              onAdvanceSearch={handleAdvancedSearch}
               fixedColumns={fixedColumns}
               setFixedColumns={setFixedColumns}
               columnDefinitions={columnDefinitions}
