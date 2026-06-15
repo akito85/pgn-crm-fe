@@ -184,6 +184,7 @@ export const TableEmployee = ({
   onSizeChanger,
   onSort,
   onAdvanceSearch,
+  onRefresh,
   columnDefinitions,
   fixedColumns,
   setFixedColumns,
@@ -217,16 +218,16 @@ export const TableEmployee = ({
       onSizeChanger={onSizeChanger}
       onSort={onSort}
       onAdvanceSearch={onAdvanceSearch}
+      onRefresh={onRefresh}
       columnDefinitions={columnDefinitions}
       fixedColumns={fixedColumns}
       setFixedColumns={setFixedColumns}
       useInfiniteScroll={useInfiniteScroll}
       onLoadMore={onLoadMore}
       hasMore={hasMore}
-      showExport={true}
       showAdvanceSearch={true}
       showSearchBar={true}
-      showRefresh={false}
+      showRefresh={true}
       tableScrolled={{ x: 2500, y: 600 }}
       {...rest}
     />
