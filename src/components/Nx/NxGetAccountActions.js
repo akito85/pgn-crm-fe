@@ -1,6 +1,7 @@
 import { Button, Checkbox, Tooltip } from "antd";
 import SVGIcon from "../../assets/Icon/index";
 import { Fragment } from "react";
+import { UploadOutlined } from "@ant-design/icons";
 
 const nxGetAccountActions = ({
   handleCreate = () => {},
@@ -15,7 +16,10 @@ const nxGetAccountActions = ({
   handleExpire = () => {},
   handleBulkRecalculate = () => {},
   handleBulkExpire = () => {},
-  handleDelete = () => {}
+  handleDelete = () => {},
+  handleUpload = () => {},
+  handleForwardTask = () => {},
+  handleTerminate = () => {}
 }) => [
   {
     action: "Download",
@@ -77,6 +81,19 @@ const nxGetAccountActions = ({
         Expire
       </Button>
     )
+  },
+  {
+    action: "Upload",
+    render: (
+      <Button
+        icon={<UploadOutlined style={{ fontSize: "14px" }} />}
+        type={"submit"}
+        border={false}
+        onClick={handleUpload}
+      >
+        Upload
+      </Button>
+    ),
   },
   {
     action: "View",
@@ -300,7 +317,7 @@ const nxGetAccountActions = ({
             type={"action"}
             disabled={disabled}
           >
-            <span className={"text-black ml-3"}>Recalculate</span>
+            Recalculate
           </Button>
         ) : (
           <Tooltip title="Recalculate" key={`table-action-${index}`}>
@@ -337,7 +354,7 @@ const nxGetAccountActions = ({
             type={"action"}
             disabled={disabled}
           >
-            <span className={"text-black ml-3"}>Recalculate</span>
+            Expire
           </Button>
         ) : (
           <Tooltip title="Expire" key={`table-action-${index}`}>
@@ -353,6 +370,80 @@ const nxGetAccountActions = ({
 
       return <Fragment key={`table-action-${index}`}>{content}</Fragment>;
     }
+  },
+  {
+    action: "forward",
+    type: "table",
+    render: (record, actionLength, index) => {
+      const disabled = record?.status !== "ACTIVE";
+
+      const content =
+        actionLength > 3 ? (
+          <Button
+            icon={
+              <SVGIcon
+                name="IconForwardTask"
+                width={20}
+              />
+            }
+            border={false}
+            onClick={() => handleForwardTask(record)}
+            type={"action"}
+            disabled={disabled}
+          >
+            Forward Task
+          </Button>
+        ) : (
+          <Tooltip title="Forward Task" key={`table-action-${index}`}>
+            <Button
+              onClick={() => handleForwardTask(record)}
+              type="table-action"
+              disabled={disabled}
+            >
+              <SVGIcon name="IconForwardTask" width={20} />
+            </Button>
+          </Tooltip>
+        );
+
+        return <Fragment key={`table-action-${index}`}>{content}</Fragment>; 
+    },
+  },
+  {
+    action: "terminate",
+    type: "table",
+    render: (record, actionLength, index) => {
+      const disabled = record?.status !== "ACTIVE";
+
+      const content =
+        actionLength > 3 ? (
+          <Button
+            icon={
+              <SVGIcon
+                name="IconTerminate"
+                width={20}
+              />
+            }
+            border={false}
+            onClick={() => handleTerminate(record)}
+            type={"action"}
+            disabled={disabled}
+          >
+            Terminate
+          </Button>
+        ) : (
+          <Tooltip title="Terminate" key={`table-action-${index}`}>
+            <Button
+              onClick={() => handleTerminate(record)}
+              type="table-action"
+              disabled={disabled}
+            >
+              <SVGIcon name="IconTerminate" width={20} />
+            </Button>
+          </Tooltip>
+        );
+
+      return <Fragment key={`table-action-${index}`}>{content}</Fragment>; 
+    },
   },
 ];
 
