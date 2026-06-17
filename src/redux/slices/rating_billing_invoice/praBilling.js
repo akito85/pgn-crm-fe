@@ -36,6 +36,7 @@ const initialState = {
     saData: { result: [], page: {} },
     usageData: { result: [], page: {} },
     taxData: { result: [], page: {} },
+    promoData: { result: [], page: {} },
     pricingData: { result: [], page: {} },
     saTosDet: { result: [], page: {} },
     tosSubDet: { result: [], page: {} },
@@ -48,6 +49,7 @@ const initialState = {
     sa: false,
     usage: false,
     tax: false,
+    promo: false,
     pricing: false,
     saTos: false,
     tosSub: false,
@@ -1335,6 +1337,48 @@ export const getCustomerBillingItemData = createAsyncThunk(
   },
 );
 
+export const getCustomerPromoData = createAsyncThunk(
+  "GET_CUSTOMER_PROMO_DATA",
+  async (params, thunkAPI) => {
+    try {
+      const {
+        customerNumber,
+        accountNumber,
+        sor,
+        saNumber,
+        billPeriod,
+        page = 0,
+        size = 10,
+      } = params;
+
+      let url = `/v1/dbs/api/prabill/promo-summary?page=${page}&size=${size}&customerNumber=${encodeURIComponent(
+        customerNumber,
+      )}&accountNumber=${encodeURIComponent(
+        accountNumber,
+      )}&sor=${encodeURIComponent(sor)}&saNumber=${encodeURIComponent(
+        saNumber,
+      )}&billPeriod=${encodeURIComponent(billPeriod)}`;
+
+      const response = await ratingBillingHttpService.getAll(url);
+      const apiData = response.data?.data || response.data;
+
+      return {
+        result: apiData?.result || [],
+        page: apiData?.page || {
+          size: 10,
+          totalElements: 0,
+          totalPages: 0,
+          number: 0,
+        },
+      };
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      return thunkAPI.rejectWithValue(message);
+    }
+  },
+);
+
 export const getCustomerSaPrcRuleDetData = createAsyncThunk(
   "GET_CUSTOMER_SA_PRC_RULE_DET_DATA",
   async (params, thunkAPI) => {
@@ -1919,6 +1963,17 @@ const prabillingSlice = createSlice({
     [getCustomerTaxData.rejected]: (state) => {
       state.loading_customer_detail.tax = false;
       state.customer_account_detail.taxData = { result: [], page: {} };
+    },
+    [getCustomerPromoData.pending]: (state) => {
+      state.loading_customer_detail.promo = true;
+    },
+    [getCustomerPromoData.fulfilled]: (state, action) => {
+      state.loading_customer_detail.promo = false;
+      state.customer_account_detail.promoData = action.payload;
+    },
+    [getCustomerPromoData.rejected]: (state) => {
+      state.loading_customer_detail.promo = false;
+      state.customer_account_detail.promoData = { result: [], page: {} };
     },
     [getCustomerBillingBucketData.pending]: (state) => {
       state.loading_customer_detail.billingBucket = true;

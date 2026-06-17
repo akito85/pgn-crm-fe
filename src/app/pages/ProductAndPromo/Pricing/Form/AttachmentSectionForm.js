@@ -258,8 +258,8 @@ const AttachmentSectionForm = ({
   useEffect(() => {
     if (dataListCategory && dataListCategory.length > 0) {
       const tempCategory = dataListCategory.map((category) => ({
-        id: category.glbTypeValId,
-        text: category.name,
+        id: category.Id ?? category.glbTypeValId,
+        text: category.text ?? category.name,
       }));
       setCategoryOptions(tempCategory);
     }
