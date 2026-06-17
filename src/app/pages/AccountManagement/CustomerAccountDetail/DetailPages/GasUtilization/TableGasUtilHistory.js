@@ -104,6 +104,8 @@ const TableGasUtilHistory = ({idAccount, idCustomer, access}) => {
   const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
+  const [filters, setFilters] = useState([]);
+  const [filterRules, setFilterRules] = useState([]);
   const [modalDetail, setModalDetail] = useState(false);
   const [dataDetail, setDataDetail] = useState({});
   const [openModalDelete, setOpenModalDelete] = useState(false);
@@ -127,13 +129,16 @@ const TableGasUtilHistory = ({idAccount, idCustomer, access}) => {
   const hasMore = currentData.length < (currentPagination?.totalElements || 0);
 
   useEffect(() => {
-    const reqSearch = encodeURIComponent(JSON.stringify(search));
-    dispatch(
-      getListGasUtilizationHistoryNew({
-        id:idAccount, search: reqSearch, sort, page, pageSize: loadMoreSize, isLoadMore: false
-      })
-    );
-  }, [search, sort]);
+    const body = {
+      page,
+      size: loadMoreSize,
+      sort,
+      searchs: search,
+      filters,
+      filterRules,
+    };
+    dispatch(getListGasUtilizationHistoryNew({ id: idAccount, body, isLoadMore: false }));
+  }, [search, sort, filters, filterRules]);
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -162,21 +167,28 @@ const TableGasUtilHistory = ({idAccount, idCustomer, access}) => {
   const handleLoadMore = async () => {
     const nextPage = page + 1;
     const totalPages = pagination_gasUtilizationHistory?.totalPages || 0;
-    const reqSearch = encodeURIComponent(JSON.stringify(search));
 
     if (nextPage <= totalPages) {
-      await dispatch(
-        getListGasUtilizationHistoryNew({
-          id:idAccount,
-          search: reqSearch,
-          sort,
-          page: nextPage,
-          pageSize: loadMoreSize,
-          isLoadMore: true
-        })
-      );
+      const body = {
+        page: nextPage,
+        size: loadMoreSize,
+        sort,
+        searchs: search,
+        filters,
+        filterRules,
+      };
+      await dispatch(getListGasUtilizationHistoryNew({ id: idAccount, body, isLoadMore: true }));
     }
     setPage(nextPage);
+  };
+
+  /**
+   * @param {{ filters: any[]; filterRules: any[] } | null} searchData
+   */
+  const handleAdvancedSearch = (searchData) => {
+    setFilters(searchData?.filters || []);
+    setFilterRules(searchData?.filterRules || []);
+    setPage(1);
   };
 
   const onSort = (_, __, sort) => {
@@ -205,12 +217,15 @@ const TableGasUtilHistory = ({idAccount, idCustomer, access}) => {
     dispatch(deleteGasUtilization({ id: idSelected }))
     .unwrap()
     .then((data) => {
-      const reqSearch = encodeURIComponent(JSON.stringify(search));
-      dispatch(
-        getListGasUtilizationHistoryNew({
-          id:idAccount, search: reqSearch, sort, page: 1, pageSize: loadMoreSize, isLoadMore: false
-        })
-      );
+      const body = {
+        page: 1,
+        size: loadMoreSize,
+        sort,
+        searchs: search,
+        filters,
+        filterRules,
+      };
+      dispatch(getListGasUtilizationHistoryNew({ id: idAccount, body, isLoadMore: false }));
       setPage(1);
     })
     .catch((err) => {
@@ -255,10 +270,13 @@ const TableGasUtilHistory = ({idAccount, idCustomer, access}) => {
   }, [allColumns, fixedColumns]);
 
   const columnDefinitions = useMemo(() => {
-    return allColumns.map((col) => ({
-      key: col.key || col.dataIndex || col.title,
-      title: col.title,
-    }));
+    return allColumns
+      .filter((col) => col.dataIndex && col.dataIndex !== "no" && col.dataIndex !== "action")
+      .map((col) => ({
+        key: col.key || col.dataIndex || col.title,
+        title: col.title,
+        dataIndex: col.dataIndex,
+      }));
   }, [allColumns]);
 
   return (
@@ -277,6 +295,7 @@ const TableGasUtilHistory = ({idAccount, idCustomer, access}) => {
           hasMore={hasMore}
           onLoadMore={handleLoadMore}
           loadMoreThreshold={20}
+          onAdvanceSearch={handleAdvancedSearch}
           fixedColumns={fixedColumns}
           setFixedColumns={setFixedColumns}
           columnDefinitions={columnDefinitions}
