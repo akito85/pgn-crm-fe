@@ -311,12 +311,27 @@ const CreateJobPage = () => {
 
   const onFinish = async (values) => {
     try {
+      // The visible SP table is bound to the Oracle-fetched spParams, while the editable
+      // `parameters` state is what actually gets persisted. If the auto-populate effect has not run
+      // (e.g. a fast submit), fall back to deriving the list directly from spParams so a procedure
+      // that declares parameters is never saved without them.
+      let submitParameters = parameters.filter(p => p.name || p.code);
+      if (values.executeType === 'STORED_PROCEDURE' && selectedProcedure) {
+        if (parametersLoading) {
+          message.error('Parameters are still loading for this procedure. Please wait and try again.');
+          return;
+        }
+        if (spParams.length > 0 && submitParameters.length === 0) {
+          submitParameters = spParams.map(mapSpParamToParameter);
+        }
+      }
+
       // Combine form values with parameters and notification settings
       const payload = {
         ...values,
         timeout:  values.timeout  || 0,
         maxRetry: values.maxRetry || 0,
-        parameters: parameters.filter(p => p.name || p.code),
+        parameters: submitParameters,
         notificationSettings,
         // Backend contract: NotificationConfigDto (inApp.{standard,toast,popup,inline} + channels).
         notificationConfig: settingsToNotificationConfig(notificationSettings),
