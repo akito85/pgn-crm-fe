@@ -123,6 +123,24 @@ export const getAllRMSHistoryPaginate = createAsyncThunk(
   }
 );
 
+export const getAllRMSHistoryPaginateNew = createAsyncThunk(
+  "GET_ALL_RMSHistory_PAGINATE_NEW",
+  async ({ id, body, isLoadMore }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/account-detail/source-distribution/view-paging/raw-material/${id}`;
+      const response = await accountManagementService.updateDataWithMethodPost(url, body, {
+        headers: { "Accept": "application/json, text/plain, */*" }
+      });
+      return { ...response.data, isLoadMore };
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({ error, action: "GET_ALL_RMSHistory_PAGINATE_NEW", back: false })
+      );
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
 export const getDetailRMSHistory = createAsyncThunk(
   "GET_DETAIL_RMSHistory",
   async (id, thunkAPI) => {
@@ -216,6 +234,46 @@ const rawMaterialSourceSlice = createSlice({
     [updateRMS.rejected]: (state, action) => {
       state.data = action.payload;
       state.loading = false;
+    },
+
+    // get all Raw Material Source paginate (POST)
+    [getAllRMSHistoryPaginateNew.pending]: (state, action) => {
+      if (!action.meta.arg?.isLoadMore) {
+        state.loading = true;
+      }
+    },
+    [getAllRMSHistoryPaginateNew.fulfilled]: (state, action) => {
+      state.loading = false;
+      const { result, page, isLoadMore } = action.payload;
+      if (Array.isArray(result)) {
+        if (isLoadMore) {
+          const currentIds = new Set(state.list_rawMaterialSourceHistory.map((item) => item.id));
+          state.list_rawMaterialSourceHistory = [
+            ...state.list_rawMaterialSourceHistory,
+            ...result.filter((item) => !currentIds.has(item.id)),
+          ];
+        } else {
+          state.list_rawMaterialSourceHistory = result;
+        }
+      }
+      state.pagination_rawMaterialSourceHistory = {
+        totalPages: page?.totalPages || 0,
+        totalElements: page?.totalElements || 0,
+        currentPage: page?.currentPage || 0,
+        pageSize: page?.pageSize || 10,
+      };
+    },
+    [getAllRMSHistoryPaginateNew.rejected]: (state, action) => {
+      state.loading = false;
+      if (!action.meta.arg?.isLoadMore) {
+        state.list_rawMaterialSourceHistory = [];
+        state.pagination_rawMaterialSourceHistory = {
+          totalPages: 0,
+          totalElements: 0,
+          currentPage: 0,
+          pageSize: 10,
+        };
+      }
     },
 
     //get all Raw Material Source paginate

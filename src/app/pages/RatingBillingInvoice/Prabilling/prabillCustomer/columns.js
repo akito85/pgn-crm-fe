@@ -402,7 +402,13 @@ export const createSaPriceRuleColumns = (renderValue) => [
     dataIndex: "min",
     width: 120,
     isNumber: true,
-    render: (text) => renderColumn("min", false, null, text, false, "input", {}, "usage"),
+    render: (val) => {
+      if (val === null || val === undefined || val === 0 || val === "0") {
+        return "0";
+      }
+      if (isNaN(val)) return val;
+      return parseFloat(val).toLocaleString();
+    },
   },
   {
     key: "max",
@@ -411,9 +417,10 @@ export const createSaPriceRuleColumns = (renderValue) => [
     width: 120,
     isNumber: true,
     render: (val) => {
-      if (!val) return "";
+      if (val === null || val === undefined || val === 0 || val === "0") {
+        return "Unlimited";
+      }
       if (isNaN(val)) return val;
-      if (val === "0" || parseFloat(val) === 0) return "Unlimited";
       return parseFloat(val).toLocaleString();
     },
   },
@@ -774,5 +781,96 @@ export const createSaPrcRuleDetColumns = (renderValue) => [
     isNumber: true,
     align: "right",
     render: (text) => renderColumn("lateChargeVal", false, null, text, false, "input", {}, "currency-idr"),
+  },
+];
+
+// ============= PROMO COLUMNS =============
+export const createPromoColumns = (renderValue) => [
+  {
+    key: "no",
+    title: "NO",
+    width: 60,
+    align: "center",
+    render: (text, object, index) => index + 1,
+  },
+  {
+    key: "promoName",
+    title: "PROMO NAME",
+    dataIndex: "promoName",
+    width: 180,
+    isClassification: true,
+    render: renderValue,
+  },
+  {
+    key: "promoType",
+    title: "PROMO TYPE",
+    dataIndex: "promoType",
+    width: 170,
+    isClassification: true,
+    render: renderValue,
+  },
+  {
+    key: "promotionType",
+    title: "PROMOTION TYPE",
+    dataIndex: "promotionType",
+    width: 140,
+    isClassification: true,
+    render: renderValue,
+  },
+  {
+    key: "startDate",
+    title: "START DATE",
+    dataIndex: "startDate",
+    width: 130,
+    isClassification: true,
+    render: renderValue,
+  },
+  {
+    key: "endDate",
+    title: "END DATE",
+    dataIndex: "endDate",
+    width: 130,
+    isClassification: true,
+    render: renderValue,
+  },
+  {
+    key: "adjustmentType",
+    title: "ADJUSTMENT TYPE",
+    dataIndex: "adjustmentType",
+    width: 150,
+    isClassification: true,
+    render: (val) => renderValue(val ?? "-"),
+  },
+  {
+    key: "adjustmentValue",
+    title: "ADJUSTMENT VALUE",
+    dataIndex: "adjustmentValue",
+    width: 150,
+    isNumber: true,
+    render: (val) => renderValue(val ?? "-"),
+  },
+  {
+    key: "conditionName",
+    title: "CONDITION NAME",
+    dataIndex: "conditionName",
+    width: 160,
+    isClassification: true,
+    render: (val) => renderValue(val ?? "-"),
+  },
+  {
+    key: "saNumber",
+    title: "SA NUMBER",
+    dataIndex: "saNumber",
+    width: 180,
+    isNumber: true,
+    render: renderValue,
+  },
+  {
+    key: "billPeriod",
+    title: "BILL PERIOD",
+    dataIndex: "billPeriod",
+    width: 120,
+    isClassification: true,
+    render: renderValue,
   },
 ];

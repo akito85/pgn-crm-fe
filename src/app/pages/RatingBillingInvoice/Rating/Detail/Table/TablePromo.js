@@ -19,14 +19,14 @@ export const columnsPromo = (
   },
   {
     key: "name",
-    title: "NAME",
-    dataIndex: "name",
+    title: "PROMO NAME",
+    dataIndex: "promoName",
     width: 200,
     sorter: true,
     isClassification: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "name",
+      "promoName",
       searchInput,
       searchedColumn,
       searchText,
@@ -36,8 +36,8 @@ export const columnsPromo = (
     ),
     render: (text) =>
       renderColumn(
-        "name",
-        hasValue(search["name"]),
+        "promoName",
+        hasValue(search["promoName"]),
         searchText,
         text,
         false,
@@ -47,14 +47,14 @@ export const columnsPromo = (
   },
   {
     key: "type",
-    title: "TYPE",
-    dataIndex: "type",
+    title: "PROMO TYPE",
+    dataIndex: "promoType",
     width: 150,
     sorter: true,
     isClassification: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
-      "type",
+      "promoType",
       searchInput,
       searchedColumn,
       searchText,
@@ -64,8 +64,36 @@ export const columnsPromo = (
     ),
     render: (text) =>
       renderColumn(
-        "type",
-        hasValue(search["type"]),
+        "promoType",
+        hasValue(search["promoType"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    key: "description",
+    title: "DESCRIPTION",
+    dataIndex: "description",
+    width: 250,
+    sorter: true,
+    isClassification: true,
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "description",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+      "input"
+    ),
+    render: (text) =>
+      renderColumn(
+        "description",
+        hasValue(search["description"]),
         searchText,
         text,
         false,

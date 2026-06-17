@@ -1,25 +1,20 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Alert, Form, Tooltip } from "antd";
-import { Link, NavLink } from "react-router-dom";
+import { Alert, Form } from "antd";
+import { Link, useNavigate } from "react-router-dom";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
+import Toolbar from "../../../../components/Toolbar";
+import { nxGetAccountActions } from "../../../../components/Nx/NxGetAccountActions";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getAllEmployeePaginate,
   terminateEmployee,
+  downloadEmployee,
 } from "../../../../redux/slices/user_management/employee";
 import { TableEmployee, columnsEmployee } from "./TableEmployee";
 import { USER_ROUTES } from "../../../../routes/user_management/user_routes";
-import ViewListIcon from "../../../../assets/Icon/Nx/IconViewList";
-import IconEditNx from "../../../../assets/Icon/Nx/IconEdit";
-import IconForwardTask from "../../../../assets/Icon/Nx/IconForwardTask";
-import IconTerminate from "../../../../assets/Icon/Nx/IconTerminate";
-import {
-  ExclamationCircleOutlined,
-  PlusOutlined,
-  UploadOutlined,
-} from "@ant-design/icons";
+import { ExclamationCircleOutlined } from "@ant-design/icons";
 import ModalCustom from "../../../../components/Modal/ModalCustom";
 import InputComponent from "../../../../components/InputComponent";
 import DateComponent from "../../../../components/DateComponent";
@@ -40,6 +35,7 @@ const OPERATOR_SELECTOR_MAP = {
 };
 
 const Employee = () => {
+  const navigate = useNavigate();
   const { data_status } = useSelector((state) => state.employee);
   const { bodyError } = useSelector((state) => state?.general);
   const rawToken = useSelector((state) => state.auth?.token);
@@ -58,6 +54,7 @@ const Employee = () => {
   const [pageSize, setPageSize] = useState(30);
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
+  const [searchText, setSearchText] = useState("");
   const [advancedSearch, setAdvancedSearch] = useState(null);
   const [fixedColumns, setFixedColumns] = useState({ left: [], right: [] });
 
@@ -121,6 +118,7 @@ const Employee = () => {
             pageSize,
             sort,
             search: reqSearch,
+            searchText,
           })
         ).unwrap();
         if (signal?.aborted) return;
@@ -139,7 +137,7 @@ const Employee = () => {
         if (!signal?.aborted) setIsLoading(false);
       }
     },
-    [search, advancedSearch, sort, pageSize, dispatch, buildSearch]
+    [search, searchText, advancedSearch, sort, pageSize, dispatch, buildSearch]
   );
 
   // Initial load and reload on filter / sort / pageSize change.
@@ -155,7 +153,7 @@ const Employee = () => {
       signal.aborted = true;
       isFetchingRef.current = false;
     };
-  }, [search, advancedSearch, sort, pageSize]); // intentionally exclude fetchPage to avoid loop
+  }, [search, searchText, advancedSearch, sort, pageSize]); // intentionally exclude fetchPage to avoid loop
 
   const handleChange = (_, pageSizeChange) => {
     setPageSize(pageSizeChange);
@@ -178,6 +176,10 @@ const Employee = () => {
     setAdvancedSearch(searchData);
   };
 
+  const handleSearchBar = useCallback((value) => {
+    setSearchText(value || "");
+  }, []);
+
   const handleCancelTerminate = () => {
     form.resetFields();
     setModalTerm(false);
@@ -194,12 +196,7 @@ const Employee = () => {
     await dispatch(terminateEmployee(bodyData))
       .unwrap()
       .then(() => {
-        const signal = { aborted: false };
-        pageRef.current = 0;
-        setAllData([]);
-        setHasMore(false);
-        setIsLoading(true);
-        fetchPage(0, true, signal);
+        handleRefresh();
       })
       .catch((e) => {
         if (hasValue(e?.data) && e?.data?.data?.length > 0) {
@@ -210,22 +207,30 @@ const Employee = () => {
       });
   };
 
+  const handleRefresh = useCallback(() => {
+    const signal = { aborted: false };
+    pageRef.current = 0;
+    setAllData([]);
+    setHasMore(false);
+    setIsLoading(true);
+    fetchPage(0, true, signal);
+  }, [fetchPage]);
+
+  const handleDownload = useCallback(() => {
+    const reqSearch = buildSearch(search, advancedSearch);
+    dispatch(downloadEmployee({ search: reqSearch, searchText, page: 0, pageSize, sort }));
+  }, [search, searchText, advancedSearch, pageSize, sort, dispatch, buildSearch]);
+
   const handleRetry = () => {
     try {
       handleCancelTryAgain();
       if (bodyError?.action === "GET_ALL_EMPLOYEE_PAGINATE") {
-        const signal = { aborted: false };
-        pageRef.current = 0;
-        setAllData([]);
-        setHasMore(false);
-        setIsLoading(true);
-        fetchPage(0, true, signal);
+        handleRefresh();
       } else {
         dispatch(terminateEmployee(body));
       }
     } catch {
-      const signal = { aborted: false };
-      fetchPage(0, true, signal);
+      handleRefresh();
     }
   };
 
@@ -236,117 +241,28 @@ const Employee = () => {
     { path: "", breadcrumbName: "Employee" },
   ];
 
-  const itemActions = useMemo(() => [
-    // Toolbar actions (no type: "table")
-    {
-      action: "Upload",
-      render: (
-        <NavLink to={USER_ROUTES.UPLOAD_EMPLOYEE}>
-          <ButtonComponent
-            icon={<UploadOutlined style={{ fontSize: "20px" }} />}
-            type="submit"
-          >
-            Upload
-          </ButtonComponent>
-        </NavLink>
-      ),
-    },
-    {
-      action: "Create",
-      render: (
-        <NavLink to={USER_ROUTES.CREATE_EMPLOYEE}>
-          <ButtonComponent icon={<PlusOutlined />} type="submit">
-            Create Employee
-          </ButtonComponent>
-        </NavLink>
-      ),
-    },
-
-    // Table column actions (type: "table" — permission-gated by useColumnActionPermission)
-    {
-      action: "View",
-      type: "table",
-      render: (record) => (
-        <Link
-          to={USER_ROUTES.DETAIL_EMPLOYEE}
-          state={{ id: record?.employeeCode }}
-          className="flex items-center justify-center"
-          style={{ color: "#1976D2" }}
-        >
-          <ViewListIcon />
-        </Link>
-      ),
-    },
-    {
-      action: "Update",
-      type: "table",
-      render: (record) => {
-        const disabled = record?.status !== "ACTIVE";
-        return (
-          <Tooltip title="Update">
-            <div className={`inline-flex items-center ${disabled ? "cursor-not-allowed text-gray-300" : ""}`}>
-              <Link
-                to={!disabled ? USER_ROUTES.UPDATE_EMPLOYEE : undefined}
-                state={!disabled ? { id: record?.employeeCode } : undefined}
-                className={`inline-flex items-center transition-colors duration-200 ${disabled ? "text-gray-300 pointer-events-none" : "text-[#1976D2] hover:text-[#1976D2]"}`}
-              >
-                <IconEditNx width={20} />
-              </Link>
-            </div>
-          </Tooltip>
-        );
-      },
-    },
-    {
-      action: "forward",
-      type: "table",
-      render: (record) => {
-        const disabled = record?.status !== "ACTIVE";
-        return (
-          <Tooltip title="Forward Task">
-            <div className={`inline-flex items-center ${disabled ? "cursor-not-allowed text-gray-300" : ""}`}>
-              <Link
-                to={!disabled ? USER_ROUTES.FORWARD_TASK : undefined}
-                state={!disabled ? { id: record?.employeeCode } : undefined}
-                className={`inline-flex items-center transition-colors duration-200 ${disabled ? "text-gray-300 pointer-events-none" : "text-[#1976D2] hover:text-[#1976D2]"}`}
-              >
-                <IconForwardTask width={20} />
-              </Link>
-            </div>
-          </Tooltip>
-        );
-      },
-    },
-    {
-      action: "terminate",
-      type: "table",
-      render: (record) => {
-        const active = record?.status === "ACTIVE";
-        return (
-          <Tooltip title="Terminate">
-            <span
-              className={`inline-flex items-center transition-colors duration-200 ${active ? "text-[#BE3036] hover:text-[#BE3036] cursor-pointer" : "text-gray-300 cursor-not-allowed"}`}
-              onClick={() => {
-                if (active) {
-                  setEmpId(record?.employeeId);
-                  setModalTerm(true);
-                }
-              }}
-            >
-              <IconTerminate width={20} />
-            </span>
-          </Tooltip>
-        );
-      },
-    },
-  ], []);
+  const itemActions = useMemo(() => nxGetAccountActions({
+    handleCreate: () => navigate(USER_ROUTES.CREATE_EMPLOYEE),
+    handleView: (record) =>
+      navigate(USER_ROUTES.DETAIL_EMPLOYEE, { state: { id: record?.employeeCode } }),
+    handleUpdate: (record) =>
+      navigate(USER_ROUTES.UPDATE_EMPLOYEE, { state: { id: record?.employeeCode } }),
+    handleDownload,
+    handleUpload: () => navigate(USER_ROUTES.UPLOAD_EMPLOYEE),
+    handleForwardTask: () => navigate(USER_ROUTES.FORWARD_TASK),
+    handleTerminate: (record) => {
+      setEmpId(record?.employeeId);
+      setModalTerm(true);
+    }
+  }), [navigate, handleDownload]);
 
   return (
     <>
       <BreadCrumb routes={routes} />
 
-      <NxCardContainer header="EMPLOYEE LIST" className="mt-4" actions={itemActions}>
-        <div className="w-full">
+      <NxCardContainer header="EMPLOYEE LIST" className="mt-4">
+        <div className="flex flex-col gap-y-4">
+          <Toolbar items={itemActions} type="page" />
           <TableEmployee
             dataSource={allData}
             loading={isLoading}
@@ -357,6 +273,8 @@ const Employee = () => {
             onSizeChanger={handleChange}
             onSort={onSort}
             onAdvanceSearch={onAdvanceSearch}
+            onSearch={handleSearchBar}
+            onRefresh={handleRefresh}
             fixedColumns={fixedColumns}
             setFixedColumns={setFixedColumns}
             useInfiniteScroll={true}

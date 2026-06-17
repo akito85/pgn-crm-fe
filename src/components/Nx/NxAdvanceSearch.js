@@ -47,6 +47,33 @@ const NxAdvanceSearch = ({
   // Only show columns that have a dataIndex (filterable entity fields)
   const filterableColumns = columns.filter((col) => col.dataIndex);
 
+  const isNumericOperator = (op) => op === "Greater than" || op === "Less than";
+
+  const renderValueInput = (value, operator, onChange) => {
+    if (operator === "Is empty" || operator === "Is not empty") return null;
+    if (isNumericOperator(operator)) {
+      return (
+        <Input
+          placeholder="Input Number"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          type="number"
+          size="large"
+          style={{ borderRadius: 8 }}
+        />
+      );
+    }
+    return (
+      <TextArea
+        placeholder="Input Value or Formula"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        size="large"
+        style={{ borderRadius: 8 }}
+      />
+    );
+  };
+
   // Add new filter to main group
   const addFilter = () => {
     const newFilter = {
@@ -245,15 +272,11 @@ const NxAdvanceSearch = ({
             {/* First Filter Value Input */}
             {filters[0]?.operator !== "Is empty" && filters[0]?.operator !== "Is not empty" && (
               <div className="mb-4">
-                <TextArea
-                  placeholder="Input Value or Formula"
-                  value={filters[0]?.value}
-                  onChange={(e) =>
-                    updateFilter(filters[0].id, "value", e.target.value)
-                  }
-                  size="large"
-                  style={{ borderRadius: 8 }}
-                />
+                {renderValueInput(
+                  filters[0]?.value,
+                  filters[0]?.operator,
+                  (val) => updateFilter(filters[0].id, "value", val)
+                )}
               </div>
             )}
             {/* Additional Filters in Main Group */}
@@ -316,15 +339,11 @@ const NxAdvanceSearch = ({
                 </div>
 
                 {filter.operator !== "Is empty" && filter.operator !== "Is not empty" && (
-                  <TextArea
-                    placeholder="Input Value or Formula"
-                    value={filter.value}
-                    onChange={(e) =>
-                      updateFilter(filter.id, "value", e.target.value)
-                    }
-                    size="large"
-                    style={{ borderRadius: 8 }}
-                  />
+                  renderValueInput(
+                    filter.value,
+                    filter.operator,
+                    (val) => updateFilter(filter.id, "value", val)
+                  )
                 )}
               </div>
             ))}
@@ -439,20 +458,11 @@ const NxAdvanceSearch = ({
                     </div>
 
                     {filter.operator !== "Is empty" && filter.operator !== "Is not empty" && (
-                      <TextArea
-                        placeholder="Input Value or Formula"
-                        value={filter.value}
-                        onChange={(e) =>
-                          updateRuleFilter(
-                            rule.id,
-                            filter.id,
-                            "value",
-                            e.target.value
-                          )
-                        }
-                        size="large"
-                        style={{ borderRadius: 8 }}
-                      />
+                      renderValueInput(
+                        filter.value,
+                        filter.operator,
+                        (val) => updateRuleFilter(rule.id, filter.id, "value", val)
+                      )
                     )}
                   </div>
                 ))}

@@ -16,7 +16,7 @@ import {
 } from "../../../../../../../components/Modal/ModalPopUp";
 import {
   deleteRMS,
-  getAllRMSHistoryPaginate,
+  getAllRMSHistoryPaginateNew,
   getCurrentRaw,
   getDetailRMSHistory,
 } from "../../../../../../../redux/slices/account_management/detailAccount/RawMaterialDistributionSlice";
@@ -143,6 +143,8 @@ const RawMaterialSourceHistory = ({ id, idCustomer, setActiveKey }) => {
   const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
+  const [filters, setFilters] = useState([]);
+  const [filterRules, setFilterRules] = useState([]);
 
   const [effectiveData, setEffectiveData] = useState();
   const [modalDetail, setModalDetail] = useState(false);
@@ -175,17 +177,9 @@ const RawMaterialSourceHistory = ({ id, idCustomer, setActiveKey }) => {
   }, [dispatch])
 
   useEffect(() => {
-    dispatch(
-      getAllRMSHistoryPaginate({
-        id: id,
-        search: encodeURIComponent(JSON?.stringify(search)),
-        page,
-        pageSize: loadMoreSize,
-        sort,
-        isLoadMore: false,
-      })
-    );
-  }, [dispatch, id, search, page, loadMoreSize, sort]);
+    const body = { page, size: loadMoreSize, sort, searchs: search, filters, filterRules };
+    dispatch(getAllRMSHistoryPaginateNew({ id, body, isLoadMore: false }));
+  }, [id, search, sort, filters, filterRules]);
 
   // Function Search Column
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -215,22 +209,19 @@ const RawMaterialSourceHistory = ({ id, idCustomer, setActiveKey }) => {
   const handleLoadMore = async () => {
     const nextPage = page + 1;
     const totalPages = pagination_rawMaterialSourceHistory?.totalPages || 0;
-    const reqSearch = encodeURIComponent(JSON?.stringify(search));
 
     if (nextPage <= totalPages) {
-      await dispatch(
-        getAllRMSHistoryPaginate({
-          id: id,
-          search: reqSearch,
-          page: nextPage,
-          pageSize: loadMoreSize,
-          sort,
-          isLoadMore: true,
-        })
-      );
+      const body = { page: nextPage, size: loadMoreSize, sort, searchs: search, filters, filterRules };
+      await dispatch(getAllRMSHistoryPaginateNew({ id, body, isLoadMore: true }));
       setPage(nextPage);
     }
-  }
+  };
+
+  const handleAdvancedSearch = (searchData) => {
+    setFilters(searchData?.filters || []);
+    setFilterRules(searchData?.filterRules || []);
+    setPage(1);
+  };
 
   // Function Sort Table
   const onSort = (_, __, sort) => {
@@ -275,16 +266,11 @@ const RawMaterialSourceHistory = ({ id, idCustomer, setActiveKey }) => {
         setPage(1);
         dispatch(getCurrentRaw(id));
         setActiveKey?.("current");
-        dispatch(
-          getAllRMSHistoryPaginate({
-            id: id,
-            search: encodeURIComponent(JSON?.stringify(search)),
-            page: 1,
-            pageSize: loadMoreSize,
-            sort,
-            isLoadMore: false,
-          })
-        );
+        dispatch(getAllRMSHistoryPaginateNew({
+          id,
+          body: { page: 1, size: loadMoreSize, sort, searchs: search, filters, filterRules },
+          isLoadMore: false,
+        }));
       })
       .catch((error) => {
         if (Math.floor((error.response.data.code || 0) / 100) === 5) {
@@ -349,10 +335,13 @@ const RawMaterialSourceHistory = ({ id, idCustomer, setActiveKey }) => {
   }, [allColumns, fixedColumns]);
 
   const columnDefinitions = useMemo(() => {
-    return allColumns.map((col) => ({
-      key: col.key || col.dataIndex || col.title,
-      title: col.title,
-    }));
+    return allColumns
+      .filter((col) => col.dataIndex && col.dataIndex !== "no" && col.dataIndex !== "action")
+      .map((col) => ({
+        key: col.key || col.dataIndex || col.title,
+        title: col.title,
+        dataIndex: col.dataIndex,
+      }));
   }, [allColumns]);
 
   return (
@@ -371,6 +360,7 @@ const RawMaterialSourceHistory = ({ id, idCustomer, setActiveKey }) => {
           hasMore={hashMore}
           onLoadMore={handleLoadMore}
           loadMoreThreshold={20}
+          onAdvanceSearch={handleAdvancedSearch}
           fixedColumns={fixedColumns}
           setFixedColumns={setFixedColumns}
           columnDefinitions={columnDefinitions}

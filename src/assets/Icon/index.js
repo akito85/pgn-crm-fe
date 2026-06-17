@@ -81,6 +81,7 @@ import IconRestructureActive from "./IconRestructureActive";
 import IconOutstandingBalance from "./IconOutstandingBalance";
 import IconActiveReceivable from "./IconActiveReceivable";
 import { FileOutlined } from "@ant-design/icons";
+import IconForwardTask from "./Nx/IconForwardTask";
 
 const Icon = (props) => {
   const { color = "#000000" } = props;
@@ -253,6 +254,8 @@ const Icon = (props) => {
       return <IconOutstandingBalance {...iconProps} />;
     case "IconActiveReceivable":
       return <IconActiveReceivable {...iconProps} />;
+    case "IconForwardTask":
+      return <IconForwardTask {...props} />
     default:
       return;
   }
