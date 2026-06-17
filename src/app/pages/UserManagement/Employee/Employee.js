@@ -58,6 +58,11 @@ const Employee = () => {
   const [advancedSearch, setAdvancedSearch] = useState(null);
   const [fixedColumns, setFixedColumns] = useState({ left: [], right: [] });
 
+  // Column-level filter state
+  const searchInput = useRef(null);
+  const [searchedColumn, setSearchedColumn] = useState("");
+  const [columnSearchText, setColumnSearchText] = useState("");
+
   // Local data state — avoids the stale Redux data / spinner flash
   const [allData, setAllData] = useState([]);
   const [totalElements, setTotalElements] = useState(0);
@@ -180,6 +185,21 @@ const Employee = () => {
     setSearchText(value || "");
   }, []);
 
+  const handleColumnSearch = useCallback((selectedKeys, confirm, dataIndex) => {
+    confirm();
+    setColumnSearchText(selectedKeys[0] || "");
+    setSearchedColumn(dataIndex);
+    setSearch((prev) => {
+      const next = { ...prev };
+      if (selectedKeys[0]) {
+        next[dataIndex] = selectedKeys[0];
+      } else {
+        delete next[dataIndex];
+      }
+      return next;
+    });
+  }, []);
+
   const handleCancelTerminate = () => {
     form.resetFields();
     setModalTerm(false);
@@ -283,6 +303,11 @@ const Employee = () => {
             itemActions={itemActions}
             columnDefinitions={columnsEmployee}
             userId={userId}
+            search={search}
+            searchInput={searchInput}
+            searchedColumn={searchedColumn}
+            columnSearchText={columnSearchText}
+            handleColumnSearch={handleColumnSearch}
           />
         </div>
       </NxCardContainer>

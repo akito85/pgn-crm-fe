@@ -1,18 +1,38 @@
-import { useMemo } from "react";
 import { Tooltip } from "antd";
-import NxTable from "../../../../components/Nx/NxTable";
-import StatusComponent from "../../../../components/StatusComponent";
-import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
 import NxDate from "../../../../components/Nx/NxDatePicker";
-import { getEmployeeColumns } from "./getEmployeeColumns";
+import StatusComponent from "../../../../components/StatusComponent";
+import { getColumnSearchPropsUseFilteredValue } from "../../../../utils/getColumnSearchProps";
 
-export const columnsEmployee = [
+const EMPLOYEE_STATUS_OPTIONS = [
+  { label: "Active", value: "ACTIVE" },
+  { label: "Inactive", value: "INACTIVE" },
+  { label: "Terminated", value: "TERMINATED" },
+];
+
+/**
+ * Returns column definitions for the Employee list table.
+ *
+ * @param {Object}          params
+ * @param {Object}          params.search          - Active filter values keyed by column dataIndex.
+ * @param {React.RefObject} params.searchInput     - Ref to the search input (for auto-focus).
+ * @param {string}          params.searchedColumn  - dataIndex of the currently searched column.
+ * @param {string}          params.searchText      - Current search text value.
+ * @param {Function}        params.handleSearch    - Callback: (selectedKeys, confirm, dataIndex) => void
+ * @returns {Array<Object>}
+ */
+export const getEmployeeColumns = ({
+  search,
+  searchInput,
+  searchedColumn,
+  searchText,
+  handleSearch,
+}) => [
   {
     title: "NO",
     align: "center",
     width: 60,
     key: "no",
-    render: (text, object, index) => index + 1,
+    render: (_, __, index) => index + 1,
     fixed: "left",
   },
   {
@@ -22,6 +42,9 @@ export const columnsEmployee = [
     align: "left",
     width: 150,
     sorter: true,
+    ...getColumnSearchPropsUseFilteredValue(
+      search, "empNumber", searchInput, searchedColumn, searchText, handleSearch
+    ),
   },
   {
     title: "FIRST NAME",
@@ -30,6 +53,9 @@ export const columnsEmployee = [
     align: "left",
     width: 150,
     sorter: true,
+    ...getColumnSearchPropsUseFilteredValue(
+      search, "firstName", searchInput, searchedColumn, searchText, handleSearch
+    ),
   },
   {
     title: "LAST NAME",
@@ -38,6 +64,9 @@ export const columnsEmployee = [
     align: "left",
     width: 150,
     sorter: true,
+    ...getColumnSearchPropsUseFilteredValue(
+      search, "lastName", searchInput, searchedColumn, searchText, handleSearch
+    ),
   },
   {
     title: "EMPLOYEE TYPE",
@@ -46,6 +75,9 @@ export const columnsEmployee = [
     align: "center",
     width: 150,
     sorter: true,
+    ...getColumnSearchPropsUseFilteredValue(
+      search, "empType", searchInput, searchedColumn, searchText, handleSearch
+    ),
   },
   {
     title: "MOBILE PHONE",
@@ -54,6 +86,9 @@ export const columnsEmployee = [
     align: "right",
     width: 150,
     sorter: true,
+    ...getColumnSearchPropsUseFilteredValue(
+      search, "phone", searchInput, searchedColumn, searchText, handleSearch
+    ),
   },
   {
     title: "EMAIL",
@@ -63,14 +98,16 @@ export const columnsEmployee = [
     width: 200,
     sorter: true,
     ellipsis: { showTitle: false },
+    ...getColumnSearchPropsUseFilteredValue(
+      search, "email", searchInput, searchedColumn, searchText, handleSearch,
+      true  // excludeRender — we provide our own render below
+    ),
     render: (text) =>
       text ? (
         <Tooltip placement="topLeft" title={text}>
           {text}
         </Tooltip>
-      ) : (
-        ""
-      ),
+      ) : "",
   },
   {
     title: "JOB",
@@ -80,14 +117,16 @@ export const columnsEmployee = [
     width: 150,
     sorter: true,
     ellipsis: { showTitle: false },
+    ...getColumnSearchPropsUseFilteredValue(
+      search, "jobName", searchInput, searchedColumn, searchText, handleSearch,
+      true
+    ),
     render: (text) =>
       text ? (
         <Tooltip placement="topLeft" title={text}>
           {text}
         </Tooltip>
-      ) : (
-        ""
-      ),
+      ) : "",
   },
   {
     title: "POSITION",
@@ -97,14 +136,16 @@ export const columnsEmployee = [
     width: 180,
     sorter: true,
     ellipsis: { showTitle: false },
+    ...getColumnSearchPropsUseFilteredValue(
+      search, "positionName", searchInput, searchedColumn, searchText, handleSearch,
+      true
+    ),
     render: (text) =>
       text ? (
         <Tooltip placement="topLeft" title={text}>
           {text}
         </Tooltip>
-      ) : (
-        ""
-      ),
+      ) : "",
   },
   {
     title: "START DATE",
@@ -113,6 +154,10 @@ export const columnsEmployee = [
     align: "center",
     width: 130,
     sorter: true,
+    ...getColumnSearchPropsUseFilteredValue(
+      search, "startDate", searchInput, searchedColumn, searchText, handleSearch,
+      true, "dateFormal"
+    ),
     render: (startDate) => NxDate.formatDate(startDate, "DD MMM YYYY"),
   },
   {
@@ -122,6 +167,10 @@ export const columnsEmployee = [
     align: "center",
     width: 130,
     sorter: true,
+    ...getColumnSearchPropsUseFilteredValue(
+      search, "endDate", searchInput, searchedColumn, searchText, handleSearch,
+      true, "dateFormal"
+    ),
     render: (endDate) => NxDate.formatDate(endDate, "DD MMM YYYY"),
   },
   {
@@ -131,14 +180,16 @@ export const columnsEmployee = [
     width: 220,
     sorter: true,
     ellipsis: { showTitle: false },
+    ...getColumnSearchPropsUseFilteredValue(
+      search, "description", searchInput, searchedColumn, searchText, handleSearch,
+      true
+    ),
     render: (text) =>
       text ? (
         <Tooltip placement="topLeft" title={text}>
           {text}
         </Tooltip>
-      ) : (
-        ""
-      ),
+      ) : "",
   },
   {
     title: "STATUS",
@@ -148,6 +199,10 @@ export const columnsEmployee = [
     width: 120,
     sorter: true,
     fixed: "right",
+    ...getColumnSearchPropsUseFilteredValue(
+      search, "status", searchInput, searchedColumn, searchText, handleSearch,
+      true, "select", EMPLOYEE_STATUS_OPTIONS
+    ),
     render: (index) => {
       const text = index
         ? index.charAt(0).toUpperCase() + index.slice(1).toLowerCase()
@@ -172,84 +227,3 @@ export const columnsEmployee = [
     },
   },
 ];
-
-export const TableEmployee = ({
-  idTable = "employee-table",
-  userId,
-  dataSource,
-  loading,
-  totalData,
-  current,
-  pageSize,
-  onChange,
-  onSizeChanger,
-  onSort,
-  onAdvanceSearch,
-  onSearch,
-  onRefresh,
-  columnDefinitions,
-  fixedColumns,
-  setFixedColumns,
-  useInfiniteScroll = false,
-  onLoadMore = () => {},
-  hasMore = false,
-  itemActions = [],
-  search = {},
-  searchInput,
-  searchedColumn = "",
-  columnSearchText = "",
-  handleColumnSearch = () => {},
-  ...rest
-}) => {
-  const actionColumns = useColumnActionPermission(
-    ["View", "Update", "forward", "terminate"],
-    itemActions
-  );
-
-  const baseColumns = useMemo(
-    () =>
-      getEmployeeColumns({
-        search,
-        searchInput,
-        searchedColumn,
-        searchText: columnSearchText,
-        handleSearch: handleColumnSearch,
-      }),
-    [search, searchInput, searchedColumn, columnSearchText, handleColumnSearch]
-  );
-
-  const allColumns = useMemo(
-    () => [...baseColumns, ...actionColumns],
-    [baseColumns, actionColumns]
-  );
-
-  return (
-    <NxTable
-      idTable={idTable}
-      userId={userId}
-      dataSource={dataSource}
-      columns={allColumns}
-      loading={loading}
-      totalData={totalData}
-      current={current}
-      pageSize={pageSize}
-      onChange={onChange}
-      onSizeChanger={onSizeChanger}
-      onSort={onSort}
-      onAdvanceSearch={onAdvanceSearch}
-      onSearch={onSearch}
-      onRefresh={onRefresh}
-      columnDefinitions={columnDefinitions}
-      fixedColumns={fixedColumns}
-      setFixedColumns={setFixedColumns}
-      useInfiniteScroll={useInfiniteScroll}
-      onLoadMore={onLoadMore}
-      hasMore={hasMore}
-      showAdvanceSearch={true}
-      showSearchBar={true}
-      showRefresh={true}
-      tableScrolled={{ x: 2500, y: 600 }}
-      {...rest}
-    />
-  );
-};
