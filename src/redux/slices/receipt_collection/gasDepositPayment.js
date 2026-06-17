@@ -282,8 +282,7 @@ export const getPayGasDepositDailyRate = createAsyncThunk(
       const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
       const rateDateFormatted = `${String(dayNum).padStart(2, "0")} ${months[monthNum - 1]} ${yyyy}`;
 
-      const filterObj = { fromCurrencyName, rateType, rateDate: rateDateFormatted };
-      if (toCurrencyName) filterObj.toCurrencyName = toCurrencyName;
+      const filterObj = { fromCurrencyName, toCurrencyName, rateType, rateDate: rateDateFormatted };
 
       const search = encodeURIComponent(JSON.stringify(filterObj));
       const url = `/v1/dbs/api/daily-rate/list-daily-rate?page=1&size=10&sort=rateDate~desc&searchs=${search}`;

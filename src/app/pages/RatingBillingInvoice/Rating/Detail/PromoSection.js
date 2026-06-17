@@ -25,11 +25,10 @@ const PromoSection = ({ ratingCode, calculationCode }) => {
   }));
 
   useEffect(() => {
-    // Dispatch dengan ratingCodeId sebagai id
     dispatch(
       getAllPromoServiceAgreementPaginate({
         id: ratingCode,
-        search: search,
+        search: encodeURIComponent(JSON.stringify(search)),
         page,
         pageSize,
         sort,
