@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router";
-import { useDispatch, useSelector } from "react-redux";
-import { Select, InputNumber, Collapse, Button, message, Spin, Tag } from "antd";
+import { InputNumber, Collapse, Button, message, Spin, Tag } from "antd";
+import NxSelect from "../../../components/Nx/NxSelect";
 import {
   InfoCircleOutlined,
   CheckCircleOutlined,
@@ -18,21 +18,13 @@ import NxPanel from "../../../components/Nx/NxPanel";
 import NxSwitch from "../../../components/Nx/NxSwitch";
 
 import {
-  fetchUserSettings,
-  fetchGlobalSettings,
-  updateUserSettingsApi,
-  selectSettings,
-  selectGlobalSettings,
-  selectSettingsLoading,
-  selectSettingsError,
-  selectAvailableModules,
-  selectAvailableTypes,
-  selectDisplayTypeOptions,
-} from "../../../redux/slices/notifications";
+  useNotificationUserSettings,
+  useUpdateNotificationUserSettings,
+  useGlobalNotificationSettings,
+} from "../../../hooks/notifications/useNotificationSettings";
 
 const { Panel } = Collapse;
 
-// Icon mapping for notification types
 const iconMap = {
   InfoCircleOutlined: <InfoCircleOutlined />,
   CheckCircleOutlined: <CheckCircleOutlined />,
@@ -41,7 +33,6 @@ const iconMap = {
   AuditOutlined: <AuditOutlined />,
 };
 
-// Display type descriptions
 const displayTypeDescriptions = {
   standard: "Notification list in drawer/panel - Shows in notification drawer, persists until dismissed",
   toast: "Small popup at corner of screen - Auto-dismisses after 4-5 seconds, stacks (max 3)",
@@ -50,20 +41,19 @@ const displayTypeDescriptions = {
 };
 
 const NotificationSettings = () => {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Redux state
-  const settings = useSelector(selectSettings);
-  const globalSettings = useSelector(selectGlobalSettings);
-  const isLoading = useSelector(selectSettingsLoading);
-  const settingsError = useSelector(selectSettingsError);
-  const availableModules = useSelector(selectAvailableModules);
-  const availableTypes = useSelector(selectAvailableTypes);
-  const displayTypeOptions = useSelector(selectDisplayTypeOptions);
+  const { data: settings, isLoading: settingsLoading, error: settingsError } = useNotificationUserSettings();
+  const { data: globalSettings, isLoading: globalLoading } = useGlobalNotificationSettings();
+  const updateMutation = useUpdateNotificationUserSettings();
 
-  // Local state for form
+  const isLoading = settingsLoading || globalLoading;
+
+  const availableModules = globalSettings?.availableModules ?? [];
+  const availableTypes = globalSettings?.availableTypes ?? [];
+  const displayTypeOptions = globalSettings?.displayTypeOptions ?? ["standard", "toast", "popup", "inline"];
+
   const [localSettings, setLocalSettings] = useState({
     soundEnabled: true,
     desktopNotificationsEnabled: false,
@@ -73,34 +63,22 @@ const NotificationSettings = () => {
     typePreferences: {},
   });
 
-  // UI state
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [transitionClass, setTransitionClass] = useState("");
-  const [isSaving, setIsSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
 
-  // Page enter animation
   useEffect(() => {
     const fromHistory = location.state?.from === "history";
     setTransitionClass(fromHistory ? "page-transition-enter-from-right" : "page-transition-enter-from-left");
   }, [location]);
 
-  // Fetch settings on mount
-  useEffect(() => {
-    dispatch(fetchUserSettings());
-    dispatch(fetchGlobalSettings());
-  }, [dispatch]);
-
-  // Sync local state with Redux when settings load
   useEffect(() => {
     if (settings) {
-      // Initialize module preferences with all modules enabled by default
       const defaultModulePrefs = {};
       availableModules.forEach(mod => {
         defaultModulePrefs[mod.moduleCode] = true;
       });
 
-      // Initialize type preferences with all types enabled by default
       const defaultTypePrefs = {};
       availableTypes.forEach(type => {
         defaultTypePrefs[type.typeCode] = true;
@@ -122,112 +100,77 @@ const NotificationSettings = () => {
     }
   }, [settings, availableModules, availableTypes]);
 
-  // Handle setting changes
   const handleSettingChange = (key, value) => {
-    setLocalSettings(prev => ({
-      ...prev,
-      [key]: value,
-    }));
+    setLocalSettings(prev => ({ ...prev, [key]: value }));
     setHasChanges(true);
   };
 
-  // Handle module preference change
   const handleModulePreferenceChange = (moduleCode, enabled) => {
     setLocalSettings(prev => ({
       ...prev,
-      modulePreferences: {
-        ...prev.modulePreferences,
-        [moduleCode]: enabled,
-      },
+      modulePreferences: { ...prev.modulePreferences, [moduleCode]: enabled },
     }));
     setHasChanges(true);
   };
 
-  // Handle type preference change (enabled/disabled)
   const handleTypePreferenceChange = (typeCode, enabled) => {
     setLocalSettings(prev => {
       const currentPref = prev.typePreferences[typeCode];
-
-      // If current preference is an object (enhanced format), update enabled field
-      if (typeof currentPref === 'object' && currentPref !== null) {
+      if (typeof currentPref === "object" && currentPref !== null) {
         return {
           ...prev,
           typePreferences: {
             ...prev.typePreferences,
-            [typeCode]: {
-              ...currentPref,
-              enabled: enabled,
-            },
+            [typeCode]: { ...currentPref, enabled },
           },
         };
       }
-
-      // Otherwise, set as boolean (simple format)
       return {
         ...prev,
-        typePreferences: {
-          ...prev.typePreferences,
-          [typeCode]: enabled,
-        },
+        typePreferences: { ...prev.typePreferences, [typeCode]: enabled },
       };
     });
     setHasChanges(true);
   };
 
-  // Handle type display type change
   const handleTypeDisplayTypeChange = (typeCode, displayType) => {
     setLocalSettings(prev => {
       const currentPref = prev.typePreferences[typeCode];
-
-      // Convert to object format if it's currently boolean
-      const newPref = typeof currentPref === 'object' && currentPref !== null
+      const newPref = typeof currentPref === "object" && currentPref !== null
         ? { ...currentPref, displayType }
         : { enabled: !!currentPref, displayType };
-
       return {
         ...prev,
-        typePreferences: {
-          ...prev.typePreferences,
-          [typeCode]: newPref,
-        },
+        typePreferences: { ...prev.typePreferences, [typeCode]: newPref },
       };
     });
     setHasChanges(true);
   };
 
-  // Helper: Get enabled status for a type
   const getTypeEnabledStatus = (typeCode) => {
     const pref = localSettings.typePreferences[typeCode];
-    if (typeof pref === 'object' && pref !== null) {
-      return pref.enabled ?? true;
-    }
+    if (typeof pref === "object" && pref !== null) return pref.enabled ?? true;
     return pref ?? true;
   };
 
-  // Helper: Get display type value for a type
   const getTypeDisplayTypeValue = (typeCode) => {
     const pref = localSettings.typePreferences[typeCode];
-    if (typeof pref === 'object' && pref !== null) {
-      return pref.displayType || localSettings.displayType || 'standard';
+    if (typeof pref === "object" && pref !== null) {
+      return pref.displayType || localSettings.displayType || "standard";
     }
-    return localSettings.displayType || 'standard';
+    return localSettings.displayType || "standard";
   };
 
-  // Save settings
   const handleSave = async () => {
-    setIsSaving(true);
     try {
-      await dispatch(updateUserSettingsApi(localSettings)).unwrap();
+      await updateMutation.mutateAsync(localSettings);
       message.success("Settings saved successfully");
       setHasChanges(false);
     } catch (error) {
-      message.error(error.message || "Failed to save settings");
-    } finally {
-      setIsSaving(false);
+      message.error(error?.message || "Failed to save settings");
     }
   };
 
-  // Reset to defaults
   const handleResetToDefaults = () => {
     const defaultModulePrefs = {};
     availableModules.forEach(mod => {
@@ -240,27 +183,24 @@ const NotificationSettings = () => {
     });
 
     setLocalSettings({
-      soundEnabled: globalSettings.defaultSoundEnabled ?? true,
-      desktopNotificationsEnabled: globalSettings.defaultDesktopNotificationsEnabled ?? false,
-      maxNotifications: globalSettings.defaultMaxNotifications ?? 50,
-      displayType: globalSettings.defaultDisplayType ?? "standard",
+      soundEnabled: globalSettings?.defaultSoundEnabled ?? true,
+      desktopNotificationsEnabled: globalSettings?.defaultDesktopNotificationsEnabled ?? false,
+      maxNotifications: globalSettings?.defaultMaxNotifications ?? 50,
+      displayType: globalSettings?.defaultDisplayType ?? "standard",
       modulePreferences: defaultModulePrefs,
       typePreferences: defaultTypePrefs,
     });
     setHasChanges(true);
   };
 
-  // Navigate back
   const handleBackClick = () => {
     setIsTransitioning(true);
     setTransitionClass("page-transition-exit-to-left");
-
     setTimeout(() => {
       navigate("/notifications/view", { state: { from: "settings" } });
     }, 310);
   };
 
-  // Render icon from string name
   const renderIcon = (iconName, color) => {
     const IconComponent = iconMap[iconName];
     if (IconComponent) {
@@ -269,32 +209,27 @@ const NotificationSettings = () => {
     return <BellOutlined style={{ color, fontSize: "18px", marginRight: "8px" }} />;
   };
 
+  const isSaving = updateMutation.isPending;
+
   if (isLoading && !localSettings.displayType) {
     return (
-      <>
-        <div className="flex items-center justify-center h-64">
-          <Spin size="large" tip="Loading settings..." />
-        </div>
-      </>
+      <div className="flex items-center justify-center h-64">
+        <Spin size="large" tip="Loading settings..." />
+      </div>
     );
   }
 
   return (
     <>
       <div className={transitionClass}>
-        {/* General Settings */}
-        <NxPanel
-          title="Notification Settings"
-          icon={<SettingOutlined />}
-        >
+        <NxPanel title="Notification Settings" icon={<SettingOutlined />}>
           {settingsError && (
             <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md text-red-700">
-              {settingsError}
+              {settingsError?.message || "Failed to load settings"}
             </div>
           )}
 
           <div className="space-y-6">
-            {/* Sound Toggle */}
             <div className="flex flex-row justify-between items-center py-2 border-b border-gray-100">
               <div>
                 <div className="font-medium text-gray-800">Sound Notifications</div>
@@ -308,7 +243,6 @@ const NotificationSettings = () => {
               />
             </div>
 
-            {/* Desktop Notifications Toggle */}
             <div className="flex flex-row justify-between items-center py-2 border-b border-gray-100">
               <div>
                 <div className="font-medium text-gray-800">Desktop Notifications</div>
@@ -322,7 +256,6 @@ const NotificationSettings = () => {
               />
             </div>
 
-            {/* Display Type */}
             <div className="flex flex-row justify-between items-center py-2 border-b border-gray-100">
               <div className="flex-1 mr-4">
                 <div className="font-medium text-gray-800">Display Type</div>
@@ -330,7 +263,7 @@ const NotificationSettings = () => {
                   {displayTypeDescriptions[localSettings.displayType] || "Select how notifications appear"}
                 </div>
               </div>
-              <Select
+              <NxSelect
                 value={localSettings.displayType}
                 onChange={(value) => handleSettingChange("displayType", value)}
                 disabled={isTransitioning || isSaving}
@@ -342,7 +275,6 @@ const NotificationSettings = () => {
               />
             </div>
 
-            {/* Max Notifications */}
             <div className="flex flex-row justify-between items-center py-2">
               <div>
                 <div className="font-medium text-gray-800">Max Notifications</div>
@@ -360,13 +292,11 @@ const NotificationSettings = () => {
           </div>
         </NxPanel>
 
-        {/* Module and Type Preferences */}
         <Collapse
           defaultActiveKey={["modules", "types"]}
           className="mt-4 bg-white rounded-lg shadow-sm"
           expandIconPosition="end"
         >
-          {/* Module Preferences */}
           <Panel
             header={
               <div className="flex items-center">
@@ -405,7 +335,6 @@ const NotificationSettings = () => {
             </div>
           </Panel>
 
-          {/* Type Preferences */}
           <Panel
             header={
               <div className="flex items-center">
@@ -424,7 +353,6 @@ const NotificationSettings = () => {
                   key={type.typeCode}
                   className="flex flex-col py-2 px-3 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors"
                 >
-                  {/* Type Header with Enable Toggle */}
                   <div className="flex flex-row justify-between items-center mb-2">
                     <div className="flex items-center flex-1">
                       {renderIcon(type.icon, type.color)}
@@ -443,15 +371,13 @@ const NotificationSettings = () => {
                     />
                   </div>
 
-                  {/* Display Type Selector (only visible when enabled) */}
                   {getTypeEnabledStatus(type.typeCode) && (
                     <div className="flex flex-row justify-between items-center pl-7 pt-2 border-t border-gray-200">
                       <div className="text-sm text-gray-600">Display as:</div>
-                      <Select
+                      <NxSelect
                         value={getTypeDisplayTypeValue(type.typeCode)}
                         onChange={(value) => handleTypeDisplayTypeChange(type.typeCode, value)}
                         disabled={isTransitioning || isSaving}
-                        size="small"
                         style={{ width: 130 }}
                         options={displayTypeOptions.map(opt => ({
                           value: opt,
@@ -469,7 +395,6 @@ const NotificationSettings = () => {
           </Panel>
         </Collapse>
 
-        {/* Action Buttons */}
         <div className="flex flex-row gap-3 mt-6 mb-5">
           <Button
             type="primary"
