@@ -26,6 +26,7 @@ import ViewListIcon from "../../../../assets/Icon/Nx/IconViewList";
 import IconEditMenu from "../../../../assets/Icon/Nx/IconEditMenu";
 import IconDeleteMenu from "../../../../assets/Icon/Nx/IconDeleteMenu";
 import ModalRunGroup from "./ModalRunGroup";
+import { Lock } from "lucide-react";
 
 const PAGE_SIZE = 20;
 
@@ -408,7 +409,9 @@ const JobGroupPage = () => {
           emptyText={
             !loading && tableDataWithJobs.length === 0 ? (
               <div style={{ padding: "32px 0", textAlign: "center" }}>
-                <div style={{ fontSize: "28px", marginBottom: "8px" }}>🔒</div>
+                <div style={{ marginBottom: "8px", display: "flex", justifyContent: "center" }}>
+                  <Lock size={28} strokeWidth={1.75} color="#9CA3AF" />
+                </div>
                 <div style={{ fontSize: "14px", fontWeight: 500, color: "#374151", marginBottom: "6px" }}>
                   No job groups available
                 </div>
