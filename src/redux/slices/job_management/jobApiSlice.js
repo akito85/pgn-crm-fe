@@ -55,7 +55,9 @@ const toFrontend = (job) => {
     updatedDate:   job.updatedAt,     // alias used by table columns
     module:        job.moduleName,    // alias used by table columns
     accessGroup:   job.accessGroupName ?? (job.accessGroupId ? String(job.accessGroupId) : null),
-    parent:        job.parentJobId   ? String(job.parentJobId)   : null,
+    // Parent = the job group (RunnableGroup batch/chain) this job belongs to, derived
+    // server-side. Falls back to null when the job is not used in any group.
+    parent:        job.parentGroupName ?? null,
     retryPolicy:   job.retryPolicy,
     module:        job.moduleName,
     defaultInput:  job.defaultInput,
@@ -71,6 +73,18 @@ const toFrontend = (job) => {
     updatedBy:     job.updatedBy,
     updatedAt:     job.updatedAt,
     accessGroupId: job.accessGroupId,
+    // Parsed NotificationConfigDto, so the edit form can hydrate every in-app
+    // flag (standard/toast/popup/inline) faithfully via notificationConfigToSettings.
+    notificationConfig: (() => {
+      if (!job.notificationConfig) return null;
+      try {
+        return typeof job.notificationConfig === 'string'
+          ? JSON.parse(job.notificationConfig)
+          : job.notificationConfig;
+      } catch (e) {
+        return null;
+      }
+    })(),
     notificationSettings: (() => {
       if (!job.notificationConfig) return null;
       try {
@@ -86,7 +100,9 @@ const toFrontend = (job) => {
           : { standard: nc.inApp === true, toast: false, popup: false, inline: false };
         return {
           showInDrawer:    inApp.standard ?? false,
+          showToast:       inApp.toast    ?? false,
           showAlert:       inApp.popup    ?? false,
+          showInline:      inApp.inline   ?? false,
           sendViaEmail:    nc.email       ?? false,
           sendViaSMS:      nc.sms         ?? false,
           sendViaWhatsApp: nc.whatsapp    ?? false,
@@ -140,9 +156,9 @@ const toBackendCreate = (v) => {
       ? {
           inApp: {
             standard: v.notificationSettings.showInDrawer ?? false,
-            toast:    false,
+            toast:    v.notificationSettings.showToast    ?? false,
             popup:    v.notificationSettings.showAlert    ?? false,
-            inline:   false,
+            inline:   v.notificationSettings.showInline   ?? false,
           },
           email:    v.notificationSettings.sendViaEmail    ?? false,
           sms:      v.notificationSettings.sendViaSMS      ?? false,
@@ -192,9 +208,9 @@ const toBackendUpdate = (v) => {
       ? {
           inApp: {
             standard: v.notificationSettings.showInDrawer ?? false,
-            toast:    false,
+            toast:    v.notificationSettings.showToast    ?? false,
             popup:    v.notificationSettings.showAlert    ?? false,
-            inline:   false,
+            inline:   v.notificationSettings.showInline   ?? false,
           },
           email:    v.notificationSettings.sendViaEmail    ?? false,
           sms:      v.notificationSettings.sendViaSMS      ?? false,

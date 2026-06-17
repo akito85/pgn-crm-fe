@@ -163,11 +163,19 @@ const ViewJobPage = () => {
             <h3 className="text-primary text-sm font-normal uppercase">In-App Notifications</h3>
             <div className="flex items-center justify-between py-2 border-0 border-b border-dashed border-[#c8cdd4]">
               <span className="text-Semantic-Text-light-text-primary font-medium leading-[18px] tracking-tight">In App Message</span>
-              <NxSwitch size="md" checked={job.notificationSettings?.showInDrawer ?? false} disabled />
+              <NxSwitch size="md" checked={job.notificationConfig?.inApp?.standard ?? job.notificationSettings?.showInDrawer ?? false} disabled />
+            </div>
+            <div className="flex items-center justify-between py-2 border-0 border-b border-dashed border-[#c8cdd4]">
+              <span className="text-Semantic-Text-light-text-primary font-medium leading-[18px] tracking-tight">Show as Toast</span>
+              <NxSwitch size="md" checked={job.notificationConfig?.inApp?.toast ?? job.notificationSettings?.showToast ?? false} disabled />
             </div>
             <div className="flex items-center justify-between py-2 border-0 border-b border-dashed border-[#c8cdd4]">
               <span className="text-Semantic-Text-light-text-primary font-medium leading-[18px] tracking-tight">Show as Alert</span>
-              <NxSwitch size="md" checked={job.notificationSettings?.showAlert ?? false} disabled />
+              <NxSwitch size="md" checked={job.notificationConfig?.inApp?.popup ?? job.notificationSettings?.showAlert ?? false} disabled />
+            </div>
+            <div className="flex items-center justify-between py-2 border-0 border-b border-dashed border-[#c8cdd4]">
+              <span className="text-Semantic-Text-light-text-primary font-medium leading-[18px] tracking-tight">Show Inline</span>
+              <NxSwitch size="md" checked={job.notificationConfig?.inApp?.inline ?? job.notificationSettings?.showInline ?? false} disabled />
             </div>
           </section>
 
@@ -176,15 +184,15 @@ const ViewJobPage = () => {
             <h3 className="text-primary text-sm font-normal uppercase">External Notifications</h3>
             <div className="flex items-center justify-between py-2 border-0 border-b border-dashed border-[#c8cdd4]">
               <span className="text-Semantic-Text-light-text-primary font-medium leading-[18px] tracking-tight">Send via Email</span>
-              <NxSwitch size="md" checked={job.notificationSettings?.sendViaEmail ?? false} disabled />
+              <NxSwitch size="md" checked={job.notificationConfig?.email ?? job.notificationSettings?.sendViaEmail ?? false} disabled />
             </div>
             <div className="flex items-center justify-between py-2 border-0 border-b border-dashed border-[#c8cdd4]">
               <span className="text-Semantic-Text-light-text-primary font-medium leading-[18px] tracking-tight">Send via SMS</span>
-              <NxSwitch size="md" checked={job.notificationSettings?.sendViaSMS ?? false} disabled />
+              <NxSwitch size="md" checked={job.notificationConfig?.sms ?? job.notificationSettings?.sendViaSMS ?? false} disabled />
             </div>
             <div className="flex items-center justify-between py-2">
               <span className="text-Semantic-Text-light-text-primary font-medium leading-[18px] tracking-tight">Send via WhatsApp</span>
-              <NxSwitch size="md" checked={job.notificationSettings?.sendViaWhatsApp ?? false} disabled />
+              <NxSwitch size="md" checked={job.notificationConfig?.whatsapp ?? job.notificationSettings?.sendViaWhatsApp ?? false} disabled />
             </div>
           </section>
         </div>

@@ -310,57 +310,40 @@ const DataAccessHierarchyView = () => {
       action: 'Activate',
       type: 'table',
       render: (record, data_length) => {
+        const isDraft = record?.status === "DRAFT";
+        const statusLabel = record?.status === "ACTIVE" ? "Active" : record?.status === "INACTIVE" ? "Inactive" : "Activate Draft";
+        const handleClick = () => {
+          isDraft && setOpenModal(true);
+          setDahId(record.dahId);
+          form.setFieldsValue({
+            startDate:
+              record.startDate === null
+                ? moment()
+                : moment(record.startDate).clone("YYYY-MM-DD"),
+            endDate:
+              record.endDate === null
+                ? null
+                : moment(record.endDate).clone("YYYY-MM-DD "),
+          });
+          setModalType("activation");
+        };
         return (
           <>
             {data_length > 3 ?
               <ButtonComponent
-                onClick={() => {
-                  record?.status === "DRAFT" &&
-                    setOpenModal(true);
-                  setDahId(record.dahId);
-                  form.setFieldsValue({
-                    startDate:
-                      record.startDate === null
-                        ? moment()
-                        : moment(record.startDate).clone("YYYY-MM-DD"),
-                    endDate:
-                      record.endDate === null
-                        ? null
-                        : moment(record.endDate).clone("YYYY-MM-DD "),
-                  });
-                  setModalType("activation");
-
-                }}
+                onClick={handleClick}
                 border={false}
-                disabled={record?.status === "ACTIVE" || record?.status === "INACTIVE"}
-
+                disabled={!isDraft}
               >
-                <Checkbox
-                  checked={record?.status === "INACTIVE"}
-                />
+                <Checkbox checked={record?.status === "ACTIVE"} />
 
-                <span className={"text-black"}>{record?.status?.toLowerCase() === 'active' ? 'Inactivate Draft' : 'Activate Draft'}</span>
+                <span className={"text-black"}>{statusLabel}</span>
               </ButtonComponent>
               :
-              <Tooltip title={record?.status === 'ACTIVE' ? 'Inactivate' : 'Activate'}>
-                <div className={record?.status !== "ACTIVE" ? 'cursor-not-allowed' : 'cursor-pointer'}
-                  onClick={() => {
-                    record?.status === "DRAFT" &&
-                      setOpenModal(true);
-                    setDahId(record.dahId);
-                    form.setFieldsValue({
-                      startDate:
-                        record.startDate === null
-                          ? moment()
-                          : moment(record.startDate).clone("YYYY-MM-DD"),
-                      endDate:
-                        record.endDate === null
-                          ? null
-                          : moment(record.endDate).clone("YYYY-MM-DD "),
-                    });
-                    setModalType("activation")
-                  }}>
-                  <Checkbox checked={record.status === "INACTIVE"} className={record?.status !== "DRAFT" ? 'cursor-not-allowed' : 'cursor-pointer'} disabled={record?.status === "ACTIVE" || record?.status === "INACTIVE"} />
+              <Tooltip title={statusLabel}>
+                <div className={isDraft ? 'cursor-pointer' : 'cursor-not-allowed'}
+                  onClick={handleClick}>
+                  <Checkbox checked={record?.status === "ACTIVE"} className={isDraft ? 'cursor-pointer' : 'cursor-not-allowed'} disabled={!isDraft} />
                 </div>
               </Tooltip>
             }
@@ -373,23 +356,25 @@ const DataAccessHierarchyView = () => {
       action: 'Update',
       type: 'table',
       render: (record, data_length) => {
+        const isInactive = record?.status === "INACTIVE";
+        const icon = data_length > 3 ?
+          <ButtonComponent
+            icon={<SVGIcon name="IconEdit" color={isInactive ? "#8D91A0" : "#0075bf"} width={24} className={isInactive ? "cursor-not-allowed" : ""} />}
+            border={false}
+            disabled={isInactive}>
+            <span className={isInactive ? "text-[#8D91A0]" : "text-black"}> Update</span>
+          </ButtonComponent>
+          :
+          <SVGIcon name="IconEdit" color={isInactive ? "#C0BEC6" : "#ACC424"} width={24} className={isInactive ? "cursor-not-allowed" : ""} />;
         return (
           <Tooltip title="Update">
-            <NavLink
-              to={record?.status !== "INACTIVE" && USER_ROUTES.UPDATE_DATA_ACCESS}
-              state={record?.status !== "INACTIVE" && { id: record?.dahId }}
-              className={record?.status === "INACTIVE" && "cursor-not-allowed"}>
-              {data_length > 3 ?
-                <ButtonComponent
-                  icon={<SVGIcon name="IconEdit" color={record?.status === "INACTIVE" ? "#8D91A0" : "#0075bf"} width={24} className={record?.status === "INACTIVE" && "cursor-not-allowed"} />}
-                  border={false}
-                  disabled={record?.status === "INACTIVE"}>
-                  <span className={record?.status?.toLowerCase() === 'inactive' ? "text-[#8D91A0]" : "text-black"}> Update</span>
-                </ButtonComponent>
-                :
-                <SVGIcon name="IconEdit" color={record?.status === "INACTIVE" ? "#C0BEC6" : "#ACC424"} width={24} className={record?.status === "INACTIVE" && "cursor-not-allowed"} />
-              }
-            </NavLink>
+            {isInactive ?
+              <div className="cursor-not-allowed">{icon}</div>
+              :
+              <NavLink to={USER_ROUTES.UPDATE_DATA_ACCESS} state={{ id: record?.dahId }}>
+                {icon}
+              </NavLink>
+            }
           </Tooltip>
         )
       }

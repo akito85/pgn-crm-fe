@@ -65,6 +65,14 @@ export const notificationTokenHeader = () => {
         headers["X-Position-Id"] = String(positionId);
       }
 
+      // Include user roles so the notification service can enforce admin-only
+      // actions (e.g. updating global settings). Without this header the BE sees
+      // an empty role list and rejects the save with 403.
+      const roles = extractUserRoles(token);
+      if (roles.length) {
+        headers["X-User-Roles"] = roles.join(",");
+      }
+
       // Also include Authorization header for JWT
       if (token?.accessToken || token?.token) {
         headers["Authorization"] = `Bearer ${token.accessToken || token.token}`;
@@ -116,6 +124,42 @@ export const notificationTokenHeader = () => {
     return {};
   }
 };
+
+/**
+ * Build the role list the notification service expects in the X-User-Roles header.
+ *
+ * The platform token carries no explicit roles array; "Super User" is the
+ * application-wide elevated level, so it maps to the backend's recognised
+ * SUPER_ADMIN role. Any explicit role fields a future token might carry
+ * (roles / authorities / role) are passed through as-is.
+ *
+ * NotificationSettingsService.hasAdminRole() accepts ADMIN, ROLE_ADMIN,
+ * ADMINISTRATOR, or SUPER_ADMIN (case-insensitive). Without this header the
+ * backend sees an empty role list and rejects an admin save (e.g. global
+ * settings) with HTTP 403.
+ *
+ * @param {object} token - Parsed token object
+ * @returns {string[]} - De-duplicated list of role names
+ */
+function extractUserRoles(token) {
+  const roles = new Set();
+  if (!token || typeof token !== "object") return [];
+
+  // Pass through explicit role fields if the token ever carries them.
+  const explicit = token.roles || token.authorities || token.role;
+  if (Array.isArray(explicit)) {
+    explicit.forEach((r) => r && roles.add(String(r).trim()));
+  } else if (typeof explicit === "string" && explicit.trim()) {
+    explicit.split(",").forEach((r) => r.trim() && roles.add(r.trim()));
+  }
+
+  // Map the platform's elevated level to a backend-recognised admin role.
+  if (String(token.userLevel || "").trim().toLowerCase() === "super user") {
+    roles.add("SUPER_ADMIN");
+  }
+
+  return [...roles];
+}
 
 /**
  * Helper function to extract user ID from JWT token

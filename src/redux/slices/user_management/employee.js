@@ -26,12 +26,13 @@ const initialState = {
 
 export const getAllEmployeePaginate = createAsyncThunk(
   "GET_ALL_EMPLOYEE_PAGINATE",
-  async ({ search, page, pageSize, sort }, thunkAPI) => {
+  async ({ search, searchText, page, pageSize, sort }, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      const url = `/v1/dbs/api/employees/viewPaging?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
+      const searchQuery = searchText ? `&search=${encodeURIComponent(searchText)}` : "";
+      const url = `/v1/dbs/api/employees/viewPaging?searchs=${searchParams}${searchQuery}&page=${page}&size=${pageSize}&sort=${sortParams}`;
       const response = await userHttpService.getAll(url);
       return response.data;
     } catch (error) {
@@ -49,12 +50,13 @@ export const getAllEmployeePaginate = createAsyncThunk(
 
 export const downloadEmployee = createAsyncThunk(
   "DOWNLOAD_ACTION",
-  async ({ search, page, pageSize, sort }, thunkAPI) => {
+  async ({ search, searchText, page, pageSize, sort }, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      const url = `/v1/dbs/api/employees/download-filter?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
+      const searchQuery = searchText ? `&search=${encodeURIComponent(searchText)}` : "";
+      const url = `/v1/dbs/api/employees/download-filter?searchs=${searchParams}${searchQuery}&page=${page}&size=${pageSize}&sort=${sortParams}`;
       const response = await userHttpService.downloadData(url);
       return response.data;
     } catch (response) {

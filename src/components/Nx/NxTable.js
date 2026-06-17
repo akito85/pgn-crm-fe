@@ -1,5 +1,6 @@
 // NxTable.js (with resizable columns + grouped columns support + customHeaderLeft + showExport control)
 import React, { useMemo, useState, useCallback } from "react";
+import Highlighter from "react-highlight-words";
 import {
   DownloadOutlined,
   FilterOutlined,
@@ -295,6 +296,7 @@ const NxTable = ({
   fixedColumns = { left: [], right: [] },
   setFixedColumns = () => { },
   onAdvanceSearch = () => { },
+  onSearch: onSearchProp,
   onRow,
   rowClassName,
   customHeaderLeft,
@@ -590,48 +592,10 @@ const NxTable = ({
     return qi === q.length;
   }, []);
 
-  // Highlight function: exact substring match gets yellow, fuzzy characters get underline.
-  const highlightText = useCallback((text, search) => {
-    if (!search || text === null || text === undefined) return text;
-    const str = String(text);
-    const lower = str.toLowerCase();
-    const sq = search.toLowerCase();
 
-    // Prefer exact substring highlighting
-    const idx = lower.indexOf(sq);
-    if (idx !== -1) {
-      return (
-        <>
-          {str.slice(0, idx)}
-          <span style={{ backgroundColor: '#fde047', padding: '1px 2px', borderRadius: '2px', fontWeight: 600 }}>
-            {str.slice(idx, idx + sq.length)}
-          </span>
-          {str.slice(idx + sq.length)}
-        </>
-      );
-    }
-
-    // Fuzzy: highlight individual matched characters
-    const chars = [];
-    let qi = 0;
-    for (let i = 0; i < str.length; i++) {
-      if (qi < sq.length && str[i].toLowerCase() === sq[qi]) {
-        chars.push(
-          <span key={i} style={{ color: '#1976D2', fontWeight: 700, textDecoration: 'underline' }}>
-            {str[i]}
-          </span>
-        );
-        qi++;
-      } else {
-        chars.push(str[i]);
-      }
-    }
-    return <>{chars}</>;
-  }, []);
-
-  // Filter data based on search value — supports exact substring AND fuzzy match
+  // Filter data based on search value — skipped when onSearchProp is set (server handles it).
   const filteredDataSource = useMemo(() => {
-    if (!searchValue) return resolvedDataSourceWithKeys;
+    if (!searchValue || onSearchProp) return resolvedDataSourceWithKeys;
 
     return resolvedDataSourceWithKeys.filter(row => {
       return resolvedColumns.some(col => {
@@ -641,7 +605,7 @@ const NxTable = ({
         return str.includes(sq) || fuzzyMatch(str, sq);
       });
     });
-  }, [resolvedDataSourceWithKeys, resolvedColumns, searchValue, fuzzyMatch]);
+  }, [resolvedDataSourceWithKeys, resolvedColumns, searchValue, fuzzyMatch, onSearchProp]);
 
   // Fungsi helper untuk mengumpulkan semua keys dari kolom (termasuk children)
   const getAllColumnKeys = useCallback((cols) => {
@@ -1129,7 +1093,16 @@ const NxTable = ({
         render: (text, record, index) => {
           const renderedValue = originalRender ? originalRender(text, record, index) : text;
           if (typeof renderedValue === 'string' && searchValue) {
-            return highlightText(renderedValue, searchValue);
+            return (
+              <Highlighter
+                highlightTag="span"
+                highlightStyle={{ backgroundColor: '#ffc069', padding: 0, color: 'inherit', textDecoration: 'none' }}
+                searchWords={[searchValue]}
+                autoEscape
+                textToHighlight={renderedValue}
+                style={{ verticalAlign: 'baseline' }}
+              />
+            );
           }
           return renderedValue;
         }
@@ -1205,7 +1178,6 @@ const NxTable = ({
     columnOrder,
     processColumn,
     searchValue,
-    highlightText,
     columnWidths,
     containerWidth,
     tableScrolled,
@@ -1957,7 +1929,7 @@ const NxTable = ({
                   {/* SearchBar owns its own DOM input state — no focus loss on parent re-render */}
                   <SearchBar
                     placeholder="Search content here ...."
-                    onSearch={(val) => setSearchValue(val)}
+                    onSearch={(val) => { setSearchValue(val); onSearchProp?.(val); }}
                   />
                 </div>
               )}

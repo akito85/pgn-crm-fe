@@ -12,6 +12,9 @@ const NxBaseContainer = ({
   headerBackgroundVisible = false,
   minHeight = null,
   actions = [],
+  // Optional extra classes for the body wrapper (e.g. "pt-3" to add space after
+  // the header). Defaults to "" so existing callers are unaffected.
+  bodyClassName = "",
 }) => {
   const toolbarActions = actions.filter((a) => a.type !== "table");
 
@@ -57,7 +60,7 @@ const NxBaseContainer = ({
         </div>
       )}
       <div
-        className={`flex ${flexDirection === "column" ? "flex-col" : flexDirection === "row" ? "flex-row" : ""} flex-col gap-4 ${(padding && !header) ? "p-4" : padding ? "px-4 pb-4" : ""}`}
+        className={`flex ${flexDirection === "column" ? "flex-col" : flexDirection === "row" ? "flex-row" : ""} flex-col gap-4 ${(padding && !header) ? "p-4" : padding ? "px-4 pb-4" : ""} ${bodyClassName}`}
       >
         {children}
       </div>
