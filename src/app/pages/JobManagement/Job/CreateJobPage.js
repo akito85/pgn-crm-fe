@@ -12,7 +12,6 @@ import NxTableInlineEdit from "../../../../components/Nx/NxTableInlineEdit";
 import NxTableBase from "../../../../components/Nx/NxTableBase";
 import { JOB_MGMT_ROUTES } from "../../../../routes/job_management/job_routes";
 import { fetchSchemas, fetchProcedures, fetchProcedureParameters, clearProcedures, clearParameters } from "../../../../redux/slices/job_management/oracleMetadataSlice";
-import { fetchTaskQueues } from "../../../../redux/slices/job_management/taskQueueSlice";
 import { fetchHandlers } from "../../../../redux/slices/job_management/handlerRegistrySlice";
 import { getAllGroupAccessPaginate } from "../../../../redux/slices/system_setup/group_access";
 import { useGetJobByIdQuery, useCreateJobMutation, useUpdateJobMutation } from "../../../../redux/slices/job_management/jobApiSlice";
@@ -23,29 +22,16 @@ const { Option } = Select;
 
 const INITIAL_PARAMETERS = [];
 
-/** Sample payload for quick CRUD API testing. Values must match the Select options in this form. */
-const SAMPLE_JOB = {
-  name:        "Daily Revenue Report",
-  code:        "DAILY_REV_RPT",
-  type:        "SCHEDULE",
-  description: "Generates a daily revenue summary report for all active billing accounts. Used for CRUD API testing.",
-  executeType: "SCRIPT",
-  handler:     "com.nxs.jobrunr.handler.DailyRevenueReportHandler",
-  taskQueueId: null,
-  timeout:     3600,
-  maxRetry:    3,
-  retryPolicy: { backoffMultiplier: 2 },
-  module:      "reporting",
-  accessGroupId: null,
-};
-
+// Module options mirror the logical groupings (sub-packages) of
+// Energy-AccountManagement-Milestone-1; used here only as a logical grouping label.
 const MODULE_OPTIONS = [
-  { value: 'payment',      label: 'Payment' },
-  { value: 'billing',      label: 'Billing' },
-  { value: 'collection',   label: 'Collection' },
-  { value: 'reporting',    label: 'Reporting' },
-  { value: 'notification', label: 'Notification' },
   { value: 'account',      label: 'Account' },
+  { value: 'master',       label: 'Master Data' },
+  { value: 'detail',       label: 'Detail' },
+  { value: 'relationship', label: 'Relationship' },
+  { value: 'attachment',   label: 'Attachment' },
+  { value: 'gtaccount',    label: 'GT Account' },
+  { value: 'integration',  label: 'Integration' },
 ];
 
 const INITIAL_NOTIFICATIONS = {
@@ -211,8 +197,6 @@ const CreateJobPage = () => {
   const executeType = Form.useWatch("executeType", form);
   const { schemas, schemasLoading, procedures, proceduresLoading, parameters: spParametersMap, parametersLoading } =
     useSelector((state) => state.oracleMetadata);
-  const { queues: taskQueues, loading: taskQueuesLoading } =
-    useSelector((state) => state.taskQueue);
   const { handlers: registeredHandlers, loading: handlersLoading } =
     useSelector((state) => state.handlerRegistry);
   const { data: groupAccessData, loading: groupAccessLoading } = useSelector((state) => state.groupAccess);
@@ -224,7 +208,6 @@ const CreateJobPage = () => {
   const shouldAutoPopulateParamsRef = useRef(false);
 
   useEffect(() => {
-    dispatch(fetchTaskQueues());
     dispatch(getAllGroupAccessPaginate({ search: '', page: 0, pageSize: 200 }));
     dispatch(fetchHandlers());
   }, [dispatch]);
@@ -240,7 +223,6 @@ const CreateJobPage = () => {
       description: currentJob.description,
       executeType: currentJob.executeType,
       handler:     currentJob.handler,
-      taskQueueId: currentJob.taskQueueId,
       timeout:     currentJob.timeout,
       maxRetry:    currentJob.maxRetry,
       retryPolicy: { backoffMultiplier: currentJob.retryPolicy?.backoffMultiplier },
@@ -368,15 +350,6 @@ const CreateJobPage = () => {
     dispatch(clearParameters());
   };
 
-  const handleLoadSample = () => {
-    form.setFieldsValue(SAMPLE_JOB);
-    setParameters([
-      { key: 1, name: 'Start Date', code: 'START_DATE', type: 'Date',   direction: 'IN', length: 10, description: 'Report start date (YYYY-MM-DD)', required: false },
-      { key: 2, name: 'End Date',   code: 'END_DATE',   type: 'Date',   direction: 'IN', length: 10, description: 'Report end date (YYYY-MM-DD)',   required: false },
-      { key: 3, name: 'Region',     code: 'REGION',     type: 'String', direction: 'IN', length: 50, description: 'Target region code',            required: false },
-    ]);
-  };
-
   return (
     <>
       <BreadCrumb routes={breadcrumbRoutes} />
@@ -384,15 +357,6 @@ const CreateJobPage = () => {
 
         <NxCardContainer
           header={isEditMode ? "UPDATE JOB" : "JOB CONFIGURATION"}
-          actionElement={!isEditMode && (
-            <ButtonComponent
-              border={false}
-              className="!bg-[#0288d1] !text-white !border-transparent text-xs"
-              onClick={handleLoadSample}
-            >
-              Load Sample
-            </ButtonComponent>
-          )}
         >
 
           {/* METADATA */}
@@ -413,9 +377,15 @@ const CreateJobPage = () => {
                 <Input placeholder="e.g. GEN_INV" maxLength={50} style={inputStyle} />
               </Form.Item>
 
-              <Form.Item label="Type" name="type" {...formItemProps} rules={[
-                { required: true, message: "Please select type" },
-              ]}>
+              <Form.Item
+                label="Type"
+                name="type"
+                tooltip="Classifies the job (Batch / Scheduled / Queue / Workflow). It is independent of how you run it — you can choose Scheduled and still trigger an immediate, once, interval, or cron run at execution time."
+                {...formItemProps}
+                rules={[
+                  { required: true, message: "Please select type" },
+                ]}
+              >
                 <Select placeholder="Select type" style={fieldStyle}>
                   <Option value="BATCH">Batch</Option>
                   <Option value="SCHEDULE">Scheduled</Option>
@@ -483,20 +453,6 @@ const CreateJobPage = () => {
                     disabled={handlersLoading}
                   />
                 )}
-              </Form.Item>
-
-              <Form.Item
-                label="Task Queue"
-                name="taskQueueId"
-                tooltip="Physical queue routing requires JobRunr Pro. Currently all jobs use the default shared queue."
-                {...formItemProps}
-              >
-                <Input
-                  value="Default"
-                  disabled
-                  style={{ ...fieldStyle, color: "#666", background: "#fafafa", cursor: "not-allowed" }}
-                  suffix={<span style={{ fontSize: 11, color: "#aaa" }}>JobRunr OSS</span>}
-                />
               </Form.Item>
 
               {executeType === "STORED_PROCEDURE" && (<>
@@ -652,7 +608,7 @@ const CreateJobPage = () => {
           <div className="flex flex-col gap-4">
             <section className="flex flex-col gap-3 p-4 rounded-lg outline outline-1 outline-offset-[-1px] outline-[#c8cdd4]">
               <h3 className="text-primary text-sm font-normal uppercase">In-App Notifications</h3>
-              <NotificationRow label="In App Message" checked={notificationSettings.showInDrawer} onChange={updateNotification('showInDrawer')} />
+              <NotificationRow label="Show in Dropdown" checked={notificationSettings.showInDrawer} onChange={updateNotification('showInDrawer')} />
               <NotificationRow label="Show as Toast"               checked={notificationSettings.showToast}    onChange={updateNotification('showToast')} />
               <NotificationRow label="Show as Alert"               checked={notificationSettings.showAlert}    onChange={updateNotification('showAlert')} />
               <NotificationRow label="Show Inline"                 checked={notificationSettings.showInline}   onChange={updateNotification('showInline')} />

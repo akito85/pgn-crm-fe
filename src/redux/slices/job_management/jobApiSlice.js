@@ -55,7 +55,9 @@ const toFrontend = (job) => {
     updatedDate:   job.updatedAt,     // alias used by table columns
     module:        job.moduleName,    // alias used by table columns
     accessGroup:   job.accessGroupName ?? (job.accessGroupId ? String(job.accessGroupId) : null),
-    parent:        job.parentJobId   ? String(job.parentJobId)   : null,
+    // Parent = the job group (RunnableGroup batch/chain) this job belongs to, derived
+    // server-side. Falls back to null when the job is not used in any group.
+    parent:        job.parentGroupName ?? null,
     retryPolicy:   job.retryPolicy,
     module:        job.moduleName,
     defaultInput:  job.defaultInput,
