@@ -53,6 +53,24 @@ export const getListEqupment = createAsyncThunk(
   }
 );
 
+export const getListEquipmentNew = createAsyncThunk(
+  "GET_LIST_EQUIPMENT_NEW",
+  async ({ id, body, isLoadMore }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/account-detail/equipment/view-paging/${id}`;
+      const response = await accountManagementService.updateDataWithMethodPost(url, body, {
+        headers: { "Accept": "application/json, text/plain, */*" }
+      });
+      return { ...response.data, isLoadMore };
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({ error, action: "GET_LIST_EQUIPMENT_NEW", back: false })
+      );
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
 // Get Detail Equipment
 export const getDetailEquipment = createAsyncThunk(
   "GET_DETAIL_EQUIPMENT",
@@ -335,6 +353,46 @@ const accountEquipmentSlice = createSlice({
   name: "accountEquipment",
   initialState,
   extraReducers: {
+    // Get Pagination Equipment (POST)
+    [getListEquipmentNew.pending]: (state, action) => {
+      if (!action.meta.arg?.isLoadMore) {
+        state.loading = true;
+      }
+    },
+    [getListEquipmentNew.rejected]: (state, action) => {
+      state.loading = false;
+      if (!action.meta.arg?.isLoadMore) {
+        state.list_equipment = [];
+        state.pagination_equipment = {
+          totalPages: 0,
+          totalElements: 0,
+          currentPage: 0,
+          pageSize: 10,
+        };
+      }
+    },
+    [getListEquipmentNew.fulfilled]: (state, action) => {
+      state.loading = false;
+      const { result, page, isLoadMore } = action.payload;
+      if (Array.isArray(result)) {
+        if (isLoadMore) {
+          const currentIds = new Set(state.list_equipment.map((item) => item.id));
+          state.list_equipment = [
+            ...state.list_equipment,
+            ...result.filter((item) => !currentIds.has(item.id)),
+          ];
+        } else {
+          state.list_equipment = result;
+        }
+      }
+      state.pagination_equipment = {
+        totalPages: page?.totalPages || 0,
+        totalElements: page?.totalElements || 0,
+        currentPage: page?.number || 0,
+        pageSize: page?.size || 10,
+      };
+    },
+
     // Get Pagination Equipment
     [getListEqupment.pending]: (state, action) => {
       if (!action.meta.arg?.isLoadMore) {

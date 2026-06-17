@@ -12,7 +12,7 @@ import {
   ModalError,
 } from "../../../../../../../components/Modal/ModalPopUp";
 import ProductDistributionDetail from "./ProductDistributionDetail";
-import { deletePD, getAllPDHistoryPaginate, getCurrentPB, getDetailPDHistory } from "../../../../../../../redux/slices/account_management/detailAccount/ProductDistributionSlice";
+import { deletePD, getAllPDHistoryPaginateNew, getCurrentPB, getDetailPDHistory } from "../../../../../../../redux/slices/account_management/detailAccount/ProductDistributionSlice";
 import NxTable from "../../../../../../../components/Nx/NxTable";
 import NxBaseContainer from "../../../../../../../components/Nx/NxBaseContainer";
 import { useColumnActionPermission } from "../../../../../../../components/ColumnActionPermission";
@@ -134,6 +134,8 @@ const ProductDistributionHistory = ({ id, idCustomer, setActiveKey }) => {
   const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
+  const [filters, setFilters] = useState([]);
+  const [filterRules, setFilterRules] = useState([]);
 
   const [effectiveData, setEffectiveData] = useState();
   const [modalDetail, setModalDetail] = useState(false);
@@ -167,16 +169,9 @@ const ProductDistributionHistory = ({ id, idCustomer, setActiveKey }) => {
   }, [dispatch])
 
   useEffect(() => {
-    dispatch(
-      getAllPDHistoryPaginate({
-        id: id,
-        search: encodeURIComponent(JSON?.stringify(search)),
-        page,
-        pageSize: loadMoreSize,
-        sort,
-      })
-    );
-  }, [dispatch, id, search, page, loadMoreSize, sort]);
+    const body = { page, size: loadMoreSize, sort, searchs: search, filters, filterRules };
+    dispatch(getAllPDHistoryPaginateNew({ id, body, isLoadMore: false }));
+  }, [id, search, sort, filters, filterRules]);
 
   // Function Search Column
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -206,21 +201,18 @@ const ProductDistributionHistory = ({ id, idCustomer, setActiveKey }) => {
   const handleLoadMore = async () => {
     const nextPage = page + 1;
     const totalPages = pagination_productDistributionHistory?.totalPages || 0;
-    const reqSearch = encodeURIComponent(JSON?.stringify(search));
 
     if (nextPage <= totalPages) {
-      await dispatch(
-        getAllPDHistoryPaginate({
-          id: id,
-          search: reqSearch,
-          page: nextPage,
-          pageSize: loadMoreSize,
-          sort,
-          isLoadMore: true
-        })
-      );
+      const body = { page: nextPage, size: loadMoreSize, sort, searchs: search, filters, filterRules };
+      await dispatch(getAllPDHistoryPaginateNew({ id, body, isLoadMore: true }));
     }
     setPage(nextPage);
+  };
+
+  const handleAdvancedSearch = (searchData) => {
+    setFilters(searchData?.filters || []);
+    setFilterRules(searchData?.filterRules || []);
+    setPage(1);
   };
 
   // Function Sort Table
@@ -273,16 +265,11 @@ const ProductDistributionHistory = ({ id, idCustomer, setActiveKey }) => {
         setPage(1);
         dispatch(getCurrentPB(id));
         setActiveKey?.("current");
-        dispatch(
-          getAllPDHistoryPaginate({
-            id: id,
-            search: encodeURIComponent(JSON?.stringify(search)),
-            page: 1,
-            pageSize: loadMoreSize,
-            sort,
-            isLoadMore: false,
-          })
-        );
+        dispatch(getAllPDHistoryPaginateNew({
+          id,
+          body: { page: 1, size: loadMoreSize, sort, searchs: search, filters, filterRules },
+          isLoadMore: false,
+        }));
       })
       .catch((error) => {
         if (Math.floor((error.response.data.code || 0) / 100) === 5) {
@@ -347,10 +334,13 @@ const ProductDistributionHistory = ({ id, idCustomer, setActiveKey }) => {
   }, [allColumns, fixedColumns]);
 
   const columnDefinitions = useMemo(() => {
-    return allColumns.map((col) => ({
-      key: col.key || col.dataIndex || col.title,
-      title: col.title,
-    }));
+    return allColumns
+      .filter((col) => col.dataIndex && col.dataIndex !== "no" && col.dataIndex !== "action")
+      .map((col) => ({
+        key: col.key || col.dataIndex || col.title,
+        title: col.title,
+        dataIndex: col.dataIndex,
+      }));
   }, [allColumns]);
   
   return (
@@ -369,6 +359,7 @@ const ProductDistributionHistory = ({ id, idCustomer, setActiveKey }) => {
           hasMore={hashMore}
           onLoadMore={handleLoadMore}
           loadMoreThreshold={20}
+          onAdvanceSearch={handleAdvancedSearch}
           fixedColumns={fixedColumns}
           setFixedColumns={setFixedColumns}
           columnDefinitions={columnDefinitions}
