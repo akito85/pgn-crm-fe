@@ -77,7 +77,7 @@ const DetailDataAccessHierarchy = () => {
       });
       data?.forEach((node) => {
         const { costCenter, parent } = node;
-        if (parent !== null || parent === "" || parent === undefined) {
+        if (parent !== null && parent !== "" && parent !== undefined) {
           nodes[parent]?.children?.push(nodes[costCenter]);
         }
       });
