@@ -46,14 +46,12 @@ export const getListGasUtilizationHistory = createAsyncThunk(
 
 export const getListGasUtilizationHistoryNew = createAsyncThunk(
   "GET_LIST_GAS_UTILIZATION",
-  async ({ id, page, pageSize, search, sort, isLoadMore }, thunkAPI) => {
+  async ({ id, body, isLoadMore }, thunkAPI) => {
     try {
-      const searchParams = search === undefined ? "" : search;
-      const sortParams =
-        sort === undefined || sort === "" ? "effectiveDate~desc" : sort;
-      
-        const url = `/v1/dbs/api/account-detail/gas-utilization/view-paging/${id}?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
-      const response = await accountManagementService.getPagination(url);
+      const url = `/v1/dbs/api/account-detail/gas-utilization/view-paging/${id}`;
+      const response = await accountManagementService.updateDataWithMethodPost(url, body, {
+        headers: { "Accept": "application/json, text/plain, */*" }
+      });
       return {
         ...response.data,
         isLoadMore

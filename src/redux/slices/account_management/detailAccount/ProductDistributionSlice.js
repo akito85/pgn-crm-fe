@@ -101,6 +101,24 @@ export const getAllPDHistoryPaginate = createAsyncThunk(
   }
 );
 
+export const getAllPDHistoryPaginateNew = createAsyncThunk(
+  "GET_ALL_PDHistory_PAGINATE_NEW",
+  async ({ id, body, isLoadMore }, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/account-detail/source-distribution/view-paging/product-distribution/${id}`;
+      const response = await accountManagementService.updateDataWithMethodPost(url, body, {
+        headers: { "Accept": "application/json, text/plain, */*" }
+      });
+      return { ...response.data, isLoadMore };
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({ error, action: "GET_ALL_PDHistory_PAGINATE_NEW", back: false })
+      );
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
 export const getCurrentPB = createAsyncThunk(
   "GET_CURRENT_PRODUCT_DISTRIBUTION",
   async (id, thunkAPI) => {
@@ -213,6 +231,46 @@ const productDistributionSlice = createSlice({
     [updatePD.rejected]: (state, action) => {
       state.data = action.payload;
       state.loading = false;
+    },
+
+    // get all Product Distribution paginate (POST)
+    [getAllPDHistoryPaginateNew.pending]: (state, action) => {
+      if (!action.meta.arg?.isLoadMore) {
+        state.loading = true;
+      }
+    },
+    [getAllPDHistoryPaginateNew.fulfilled]: (state, action) => {
+      state.loading = false;
+      const { result, page, isLoadMore } = action.payload;
+      if (Array.isArray(result)) {
+        if (isLoadMore) {
+          const currentIds = new Set(state.list_productDistributionHistory.map((item) => item.id));
+          state.list_productDistributionHistory = [
+            ...state.list_productDistributionHistory,
+            ...result.filter((item) => !currentIds.has(item.id)),
+          ];
+        } else {
+          state.list_productDistributionHistory = result;
+        }
+        state.pagination_productDistributionHistory = {
+          totalPages: page?.totalPages || 0,
+          totalElements: page?.totalElements || 0,
+          currentPage: page?.currentPage || 0,
+          pageSize: page?.pageSize || 10,
+        };
+      }
+    },
+    [getAllPDHistoryPaginateNew.rejected]: (state, action) => {
+      state.loading = false;
+      if (!action.meta.arg?.isLoadMore) {
+        state.list_productDistributionHistory = [];
+        state.pagination_productDistributionHistory = {
+          totalPages: 0,
+          totalElements: 0,
+          currentPage: 0,
+          pageSize: 10,
+        };
+      }
     },
 
     //get all Product Distribution paginate
