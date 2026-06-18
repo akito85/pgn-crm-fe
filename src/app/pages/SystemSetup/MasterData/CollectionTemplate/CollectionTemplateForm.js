@@ -65,6 +65,7 @@ const CollectionTemplateForm = ({ type }) => {
   const [deletedAttachmentIds, setDeletedAttachmentIds] = useState([]);
   const [listDataActivities, setListDataActivities] = useState([]);
   const [listDataCriteria, setListDataCriteria] = useState([]);
+  const [criteriaValues, setCriteriaValues] = useState([]);
   const [selectedHierarchy, setSelectedHierarchy] = useState();
   const [startDate, setStartDate] = useState();
   const [endDate, setEndDate] = useState();
@@ -214,6 +215,13 @@ const CollectionTemplateForm = ({ type }) => {
         type: "exist",
       }));
       setListDataCriteria(criteria);
+
+      // Restore criteria multi-select values
+      const savedCriteriaValues = (data_detail?.criteria || []).map(
+        (item) => item.criteriaId ?? item.criteria ?? item,
+      );
+      setCriteriaValues(savedCriteriaValues);
+      form.setFieldsValue({ criteria: savedCriteriaValues });
 
       // Map attachments from data_detail.attachments
       const attachments = (data_detail?.attachments || []).map(
@@ -474,6 +482,7 @@ const CollectionTemplateForm = ({ type }) => {
       setBodyData({});
       setListDataActivities([]);
       setListDataCriteria([]);
+      setCriteriaValues([]);
       setStoredDataActivities(false);
       setStoredDataCriteria(false);
       setStartDate(undefined);
@@ -540,6 +549,8 @@ const CollectionTemplateForm = ({ type }) => {
               setStoredDataActivities={setStoredDataActivities}
               storedDataCriteria={storedDataCriteria}
               setStoredDataCriteria={setStoredDataCriteria}
+              criteriaValues={criteriaValues}
+              setCriteriaValues={setCriteriaValues}
               startDate={startDate}
               endDate={endDate}
               handleStartDate={handleStartDate}

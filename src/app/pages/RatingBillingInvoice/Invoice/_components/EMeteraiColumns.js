@@ -9,6 +9,30 @@ import {
 import StatusComponent from "../../../../../components/StatusComponent";
 import SVGIcon from "../../../../../assets/Icon/index";
 
+const renderText = (text) => text || "-";
+
+const renderStatus = (status) => {
+  if (!status) return "-";
+  const displayStatus = String(status).replace(/_/g, " ");
+
+  return (
+    <div className="flex justify-center">
+      <StatusComponent colour={String(status).toLowerCase()}>
+        {displayStatus}
+      </StatusComponent>
+    </div>
+  );
+};
+
+const renderAmount = (value) => {
+  if (value === null || value === undefined || value === "") return "-";
+  const numericValue = Number(value);
+
+  if (Number.isNaN(numericValue)) return value;
+
+  return `Rp${numericValue.toLocaleString("id-ID")}`;
+};
+
 export const getEMeteraiColumns = ({
   onDetails,
   onProcessStamping,
@@ -26,270 +50,220 @@ export const getEMeteraiColumns = ({
     },
     {
       key: "invoiceNumber",
-      title: "Invoice Number",
+      title: "INVOICE NUMBER",
       dataIndex: "invoiceNumber",
       width: 180,
       sorter: true,
-      render: (text) => <span>{text}</span>,
+      render: renderText,
+    },
+    {
+      key: "customerNumber",
+      title: "CUSTOMER NUMBER",
+      dataIndex: "customerNumber",
+      width: 150,
+      sorter: true,
+      render: renderText,
+    },
+    {
+      key: "customerName",
+      title: "CUSTOMER NAME",
+      dataIndex: "customerName",
+      width: 220,
+      ellipsis: true,
+      sorter: true,
+      render: renderText,
+    },
+    {
+      key: "accountNumber",
+      title: "ACCOUNT NUMBER",
+      dataIndex: "accountNumber",
+      width: 150,
+      sorter: true,
+      render: renderText,
+    },
+    {
+      key: "accountName",
+      title: "ACCOUNT NAME",
+      dataIndex: "accountName",
+      width: 200,
+      ellipsis: true,
+      sorter: true,
+      render: renderText,
+    },
+    {
+      key: "sor",
+      title: "SOR",
+      dataIndex: "sor",
+      width: 180,
+      ellipsis: true,
+      render: renderText,
+    },
+    {
+      key: "costCenterName",
+      title: "COST CENTER",
+      dataIndex: "costCenterName",
+      width: 160,
+      ellipsis: true,
+      render: renderText,
+    },
+    {
+      key: "accountSegment",
+      title: "ACCOUNT SEGMENT",
+      dataIndex: "accountSegment",
+      width: 160,
+      ellipsis: true,
+      render: renderText,
+    },
+    {
+      key: "accountGroupType",
+      title: "ACCOUNT GROUP TYPE",
+      dataIndex: "accountGroupType",
+      width: 170,
+      ellipsis: true,
+      render: renderText,
+    },
+    {
+      key: "meterReadingCode",
+      title: "METER READING CODE",
+      dataIndex: "meterReadingCode",
+      width: 170,
+      ellipsis: true,
+      render: renderText,
+    },
+    {
+      key: "accountType",
+      title: "ACCOUNT TYPE",
+      dataIndex: "accountType",
+      width: 150,
+      render: renderText,
+    },
+    {
+      key: "accountStatus",
+      title: "ACCOUNT STATUS",
+      dataIndex: "accountStatus",
+      width: 150,
+      render: renderText,
+    },
+    {
+      key: "customerManagement",
+      title: "CUSTOMER MANAGEMENT",
+      dataIndex: "customerManagement",
+      width: 190,
+      ellipsis: true,
+      render: renderText,
+    },
+    {
+      key: "corporateCustomer",
+      title: "CORPORATE CUSTOMER",
+      dataIndex: "corporateCustomer",
+      width: 180,
+      ellipsis: true,
+      render: renderText,
+    },
+    {
+      key: "billDate",
+      title: "BILL DATE",
+      dataIndex: "billDate",
+      width: 120,
+      isClassification: true,
+      sorter: true,
+      render: renderText,
+    },
+    {
+      key: "totalAmountEqvIdr",
+      title: "AMOUNT",
+      dataIndex: "totalAmountEqvIdr",
+      width: 150,
+      align: "right",
+      sorter: true,
+      render: (value, record) => renderAmount(value ?? record?.amount),
     },
     {
       key: "npwp",
       title: "NPWP",
       dataIndex: "npwp",
-      width: 180,
-      render: (text) => text || "-",
+      width: 160,
+      render: renderText,
     },
     {
       key: "invoiceFileName",
-      title: "Invoice File Name",
+      title: "INVOICE FILE NAME",
       dataIndex: "invoiceFileName",
-      width: 200,
+      width: 260,
       ellipsis: true,
-      render: (text) => text || "-",
+      render: renderText,
+    },
+    {
+      key: "invoiceDate",
+      title: "INVOICE DATE",
+      dataIndex: "invoiceDate",
+      width: 130,
+      isClassification: true,
+      sorter: true,
+      render: renderText,
     },
     {
       key: "taxAddress",
-      title: "Tax Address",
+      title: "TAX ADDRESS",
       dataIndex: "taxAddress",
       width: 200,
       ellipsis: true,
-      render: (text) => text || "-",
+      render: renderText,
     },
     {
       key: "nitku",
       title: "NITKU",
       dataIndex: "nitku",
       width: 140,
-      render: (text) => text || "-",
+      render: renderText,
     },
     {
-      key: "wpStatus",
-      title: "WP Status",
-      dataIndex: "wpStatus",
-      width: 140,
-      isClassification: true,
-      render: (status) => {
-        if (!status) return "-";
-        const displayStatus = status.replace(/_/g, " ");
-        return (
-          <div className="flex justify-center">
-            <StatusComponent colour={status.toLowerCase()}>
-              {displayStatus}
-            </StatusComponent>
-          </div>
-        );
-      },
-    },
-    {
-      key: "customer",
-      title: "Customer",
-      dataIndex: "customerName",
-      width: 220,
-      ellipsis: true,
-      sorter: true,
-    },
-    {
-      key: "customerNumber",
-      title: "Customer Number",
-      dataIndex: "customerNumber",
-      width: 150,
-      sorter: true,
-    },
-    {
-      key: "accountNumber",
-      title: "Account Number",
-      dataIndex: "accountNumber",
-      width: 150,
-      sorter: true,
-    },
-    {
-      key: "accountName",
-      title: "Account Name",
-      dataIndex: "accountName",
-      width: 200,
-      ellipsis: true,
-      sorter: true,
-    },
-    {
-      key: "billPeriod",
-      title: "Bill Period",
-      dataIndex: "billPeriod",
+      key: "kopur",
+      title: "KOPUR",
+      dataIndex: "kopur",
       width: 120,
-      isClassification: true,
-      sorter: true,
-      render: (text) => text || "-",
+      render: renderText,
     },
     {
-      key: "invoiceDate",
-      title: "Invoice Date",
-      dataIndex: "invoiceDate",
-      width: 120,
-      isClassification: true,
-      sorter: true,
-      render: (text) => text || "-",
+      key: "identificationType",
+      title: "IDENTIFICATION TYPE",
+      dataIndex: "identityType",
+      width: 170,
+      render: renderText,
     },
     {
-      key: "sor",
-      title: "SOR",
-      dataIndex: "sor",
-      width: 250,
-      ellipsis: true,
-      render: (text) => text || "-",
-    },
-    {
-      key: "costCenterName",
-      title: "Cost Center",
-      dataIndex: "costCenterName",
-      width: 200,
-      ellipsis: true,
-      render: (text) => text || "-",
+      key: "identificationNumber",
+      title: "IDENTIFICATION NUMBER",
+      dataIndex: "identityNumber",
+      width: 190,
+      render: renderText,
     },
     {
       key: "stampStatus",
-      title: "Stamp Status",
+      title: "STAMPING STATUS",
       dataIndex: "stampStatus",
       width: 160,
       isClassification: true,
       sorter: true,
-      render: (status) => {
-        if (!status) return "-";
-        const displayStatus = status.replace(/_/g, " ");
-        return (
-          <div className="flex justify-center">
-            <StatusComponent colour={status.toLowerCase()}>
-              {displayStatus}
-            </StatusComponent>
-          </div>
-        );
-      },
+      render: renderStatus,
     },
     {
-      key: "stampType",
-      title: "Stamp Type",
-      dataIndex: "stampType",
+      key: "wpStatus",
+      title: "WP STATUS",
+      dataIndex: "wpStatus",
       width: 140,
       isClassification: true,
-      render: (type) => {
-        if (!type) return "-";
-        const displayType = type.replace(/_/g, " ");
-        return displayType;
-      },
-    },
-    {
-      key: "stampRequestDate",
-      title: "Stamp Request Date",
-      dataIndex: "stampRequestDate",
-      width: 170,
-      isClassification: true,
-      render: (text) => text || "-",
-    },
-    {
-      key: "stampCompletionDate",
-      title: "Stamp Completion Date",
-      dataIndex: "stampCompletionDate",
-      width: 180,
-      isClassification: true,
-      render: (text) => text || "-",
-    },
-    {
-      key: "stampRemark",
-      title: "Stamp Remark",
-      dataIndex: "stampRemark",
-      width: 200,
-      ellipsis: true,
-      render: (text) => text || "-",
-    },
-    {
-      key: "signStatus",
-      title: "Sign Status",
-      dataIndex: "signStatus",
-      width: 150,
-      isClassification: true,
-      sorter: true,
-      render: (status) => {
-        if (!status) return "-";
-        const displayStatus = status.replace(/_/g, " ");
-        return (
-          <div className="flex justify-center">
-            <StatusComponent colour={status.toLowerCase()}>
-              {displayStatus}
-            </StatusComponent>
-          </div>
-        );
-      },
-    },
-    {
-      key: "signType",
-      title: "Sign Type",
-      dataIndex: "signType",
-      width: 120,
-      isClassification: true,
-      render: (type) => {
-        if (!type || type === "NONE") return "-";
-        const displayType = type.replace(/_/g, " ");
-        return displayType;
-      },
-    },
-    {
-      key: "signRequestDate",
-      title: "Sign Request Date",
-      dataIndex: "signRequestDate",
-      width: 170,
-      isClassification: true,
-      render: (text) => text || "-",
-    },
-    {
-      key: "signCompletionDate",
-      title: "Sign Completion Date",
-      dataIndex: "signCompletionDate",
-      width: 180,
-      isClassification: true,
-      render: (text) => text || "-",
-    },
-    {
-      key: "signRemark",
-      title: "Sign Remark",
-      dataIndex: "signRemark",
-      width: 200,
-      ellipsis: true,
-      render: (text) => text || "-",
+      render: renderStatus,
     },
     {
       key: "statusApproval",
-      title: "Approval Status",
+      title: "APPROVAL STATUS",
       dataIndex: "statusApproval",
       width: 160,
       isClassification: true,
       sorter: true,
-      render: (status) => {
-        if (!status) return "-";
-        const displayStatus = status.replace(/_/g, " ");
-        return (
-          <div className="flex justify-center">
-            <StatusComponent colour={status.toLowerCase()}>
-              {displayStatus}
-            </StatusComponent>
-          </div>
-        );
-      },
-    },
-    {
-      key: "createdBy",
-      title: "Created By",
-      dataIndex: "createdBy",
-      width: 140,
-      isClassification: true,
-      sorter: true,
-      render: (text) => text || "-",
-    },
-    {
-      key: "createdDate",
-      title: "Created Date",
-      dataIndex: "createdDate",
-      width: 170,
-      isClassification: true,
-      sorter: true,
-      render: (text) => text || "-",
+      render: (status, record) =>
+        renderStatus(status ?? record?.approvalStatus),
     },
     {
       key: "actions",
