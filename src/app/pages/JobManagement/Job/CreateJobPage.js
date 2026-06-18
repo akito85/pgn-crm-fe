@@ -12,7 +12,6 @@ import NxTableInlineEdit from "../../../../components/Nx/NxTableInlineEdit";
 import NxTableBase from "../../../../components/Nx/NxTableBase";
 import { JOB_MGMT_ROUTES } from "../../../../routes/job_management/job_routes";
 import { fetchSchemas, fetchProcedures, fetchProcedureParameters, clearProcedures, clearParameters } from "../../../../redux/slices/job_management/oracleMetadataSlice";
-import { fetchTaskQueues } from "../../../../redux/slices/job_management/taskQueueSlice";
 import { fetchHandlers } from "../../../../redux/slices/job_management/handlerRegistrySlice";
 import { getAllGroupAccessPaginate } from "../../../../redux/slices/system_setup/group_access";
 import { useGetJobByIdQuery, useCreateJobMutation, useUpdateJobMutation } from "../../../../redux/slices/job_management/jobApiSlice";
@@ -23,37 +22,55 @@ const { Option } = Select;
 
 const INITIAL_PARAMETERS = [];
 
-/** Sample payload for quick CRUD API testing. Values must match the Select options in this form. */
-const SAMPLE_JOB = {
-  name:        "Daily Revenue Report",
-  code:        "DAILY_REV_RPT",
-  type:        "SCHEDULE",
-  description: "Generates a daily revenue summary report for all active billing accounts. Used for CRUD API testing.",
-  executeType: "SCRIPT",
-  handler:     "com.nxs.jobrunr.handler.DailyRevenueReportHandler",
-  taskQueueId: null,
-  timeout:     3600,
-  maxRetry:    3,
-  retryPolicy: { backoffMultiplier: 2 },
-  module:      "reporting",
-  accessGroupId: null,
-};
-
+// Module options mirror the logical groupings (sub-packages) of
+// Energy-AccountManagement-Milestone-1; used here only as a logical grouping label.
 const MODULE_OPTIONS = [
-  { value: 'payment',      label: 'Payment' },
-  { value: 'billing',      label: 'Billing' },
-  { value: 'collection',   label: 'Collection' },
-  { value: 'reporting',    label: 'Reporting' },
-  { value: 'notification', label: 'Notification' },
   { value: 'account',      label: 'Account' },
+  { value: 'master',       label: 'Master Data' },
+  { value: 'detail',       label: 'Detail' },
+  { value: 'relationship', label: 'Relationship' },
+  { value: 'attachment',   label: 'Attachment' },
+  { value: 'gtaccount',    label: 'GT Account' },
+  { value: 'integration',  label: 'Integration' },
 ];
 
 const INITIAL_NOTIFICATIONS = {
   showInDrawer: false,
+  showToast: false,
   showAlert: false,
+  showInline: false,
   sendViaEmail: false,
   sendViaSMS: false,
   sendViaWhatsApp: false,
+};
+
+// Map the FE notification toggles to the backend NotificationConfigDto shape
+// (inApp.{standard,toast,popup,inline} + flat email/sms/whatsapp booleans).
+const settingsToNotificationConfig = (s = INITIAL_NOTIFICATIONS) => ({
+  inApp: {
+    standard: !!s.showInDrawer,
+    toast: !!s.showToast,
+    popup: !!s.showAlert,
+    inline: !!s.showInline,
+  },
+  email: !!s.sendViaEmail,
+  sms: !!s.sendViaSMS,
+  whatsapp: !!s.sendViaWhatsApp,
+});
+
+// Inverse: hydrate the FE toggles from a persisted NotificationConfigDto.
+const notificationConfigToSettings = (cfg) => {
+  if (!cfg) return null;
+  const inApp = cfg.inApp || {};
+  return {
+    showInDrawer: !!inApp.standard,
+    showToast: !!inApp.toast,
+    showAlert: !!inApp.popup,
+    showInline: !!inApp.inline,
+    sendViaEmail: !!cfg.email,
+    sendViaSMS: !!cfg.sms,
+    sendViaWhatsApp: !!cfg.whatsapp,
+  };
 };
 
 const PARAMETER_COLUMNS = [
@@ -66,6 +83,14 @@ const PARAMETER_COLUMNS = [
       { value: 'Number',  label: 'Number' },
       { value: 'Date',    label: 'Date' },
       { value: 'Boolean', label: 'Boolean' },
+    ],
+  },
+  {
+    title: 'Direction', dataIndex: 'direction', editable: true, inputType: 'select', width: 120,
+    selectOptions: [
+      { value: 'IN',     label: 'IN' },
+      { value: 'OUT',    label: 'OUT' },
+      { value: 'IN/OUT', label: 'IN/OUT' },
     ],
   },
   { title: 'Length',      dataIndex: 'length',      editable: true, inputType: 'number', placeholder: 'Length',      width: 110, min: 0 },
@@ -95,15 +120,26 @@ const mapOracleTypeToParamType = (dataType) => {
   return 'String';
 };
 
-const mapSpParamToParameter = (spParam, index) => ({
-  key: index + 1,
-  name: spParam.name,
-  code: spParam.name.toUpperCase().replace(/[^A-Z0-9_]/g, '_'),
-  type: mapOracleTypeToParamType(spParam.dataType),
-  length: null,
-  description: spParam.direction?.oracleValue ?? spParam.direction ?? '',
-  required: !spParam.hasDefault,
-});
+// Oracle ALL_ARGUMENTS.IN_OUT is 'IN', 'OUT' or 'IN/OUT'. Normalise to upper case.
+const directionOf = (spParam) =>
+  String(spParam?.direction?.oracleValue ?? spParam?.direction ?? 'IN').toUpperCase();
+
+const mapSpParamToParameter = (spParam, index) => {
+  const direction = directionOf(spParam);
+  return {
+    key: index + 1,
+    name: spParam.name,
+    code: spParam.name.toUpperCase().replace(/[^A-Z0-9_]/g, '_'),
+    type: mapOracleTypeToParamType(spParam.dataType),
+    length: null,
+    // OUT params are produced by the procedure, never supplied by the caller, so
+    // they are not required inputs and must not appear in the run-time input form.
+    // IN / IN/OUT require a value unless the proc declares a default.
+    direction,
+    required: direction !== 'OUT' && !spParam.hasDefault,
+    description: '',
+  };
+};
 
 const SP_PARAM_COLUMNS = [
   { title: 'Parameter', dataIndex: 'name',       editable: false, width: 200 },
@@ -161,8 +197,6 @@ const CreateJobPage = () => {
   const executeType = Form.useWatch("executeType", form);
   const { schemas, schemasLoading, procedures, proceduresLoading, parameters: spParametersMap, parametersLoading } =
     useSelector((state) => state.oracleMetadata);
-  const { queues: taskQueues, loading: taskQueuesLoading } =
-    useSelector((state) => state.taskQueue);
   const { handlers: registeredHandlers, loading: handlersLoading } =
     useSelector((state) => state.handlerRegistry);
   const { data: groupAccessData, loading: groupAccessLoading } = useSelector((state) => state.groupAccess);
@@ -174,7 +208,6 @@ const CreateJobPage = () => {
   const shouldAutoPopulateParamsRef = useRef(false);
 
   useEffect(() => {
-    dispatch(fetchTaskQueues());
     dispatch(getAllGroupAccessPaginate({ search: '', page: 0, pageSize: 200 }));
     dispatch(fetchHandlers());
   }, [dispatch]);
@@ -190,7 +223,6 @@ const CreateJobPage = () => {
       description: currentJob.description,
       executeType: currentJob.executeType,
       handler:     currentJob.handler,
-      taskQueueId: currentJob.taskQueueId,
       timeout:     currentJob.timeout,
       maxRetry:    currentJob.maxRetry,
       retryPolicy: { backoffMultiplier: currentJob.retryPolicy?.backoffMultiplier },
@@ -215,9 +247,12 @@ const CreateJobPage = () => {
       setParameters(currentJob.parameters.map((p, i) => ({ ...p, key: p.key ?? i + 1 })));
     }
 
-    // Restore notification toggles
-    if (currentJob.notificationSettings) {
-      setNotificationSettings(currentJob.notificationSettings);
+    // Restore notification toggles — prefer the persisted NotificationConfigDto,
+    // falling back to the legacy notificationSettings shape if present.
+    const restored = notificationConfigToSettings(currentJob.notificationConfig)
+      || currentJob.notificationSettings;
+    if (restored) {
+      setNotificationSettings(restored);
     }
   }, [currentJob, isEditMode, dispatch]);
 
@@ -271,18 +306,35 @@ const CreateJobPage = () => {
 
   const handleAddParameter = () => {
     const newKey = parameters.length > 0 ? Math.max(...parameters.map(p => p.key)) + 1 : 1;
-    setParameters(prev => [...prev, { key: newKey, name: '', code: '', type: '', length: null, description: '', required: false }]);
+    setParameters(prev => [...prev, { key: newKey, name: '', code: '', type: '', direction: 'IN', length: null, description: '', required: false }]);
   };
 
   const onFinish = async (values) => {
     try {
+      // The visible SP table is bound to the Oracle-fetched spParams, while the editable
+      // `parameters` state is what actually gets persisted. If the auto-populate effect has not run
+      // (e.g. a fast submit), fall back to deriving the list directly from spParams so a procedure
+      // that declares parameters is never saved without them.
+      let submitParameters = parameters.filter(p => p.name || p.code);
+      if (values.executeType === 'STORED_PROCEDURE' && selectedProcedure) {
+        if (parametersLoading) {
+          message.error('Parameters are still loading for this procedure. Please wait and try again.');
+          return;
+        }
+        if (spParams.length > 0 && submitParameters.length === 0) {
+          submitParameters = spParams.map(mapSpParamToParameter);
+        }
+      }
+
       // Combine form values with parameters and notification settings
       const payload = {
         ...values,
         timeout:  values.timeout  || 0,
         maxRetry: values.maxRetry || 0,
-        parameters: parameters.filter(p => p.name || p.code),
+        parameters: submitParameters,
         notificationSettings,
+        // Backend contract: NotificationConfigDto (inApp.{standard,toast,popup,inline} + channels).
+        notificationConfig: settingsToNotificationConfig(notificationSettings),
       };
 
       if (isEditMode) {
@@ -313,15 +365,6 @@ const CreateJobPage = () => {
     dispatch(clearParameters());
   };
 
-  const handleLoadSample = () => {
-    form.setFieldsValue(SAMPLE_JOB);
-    setParameters([
-      { key: 1, name: 'Start Date', code: 'START_DATE', type: 'Date',   length: 10, description: 'Report start date (YYYY-MM-DD)', required: false },
-      { key: 2, name: 'End Date',   code: 'END_DATE',   type: 'Date',   length: 10, description: 'Report end date (YYYY-MM-DD)',   required: false },
-      { key: 3, name: 'Region',     code: 'REGION',     type: 'String', length: 50, description: 'Target region code',            required: false },
-    ]);
-  };
-
   return (
     <>
       <BreadCrumb routes={breadcrumbRoutes} />
@@ -329,15 +372,6 @@ const CreateJobPage = () => {
 
         <NxCardContainer
           header={isEditMode ? "UPDATE JOB" : "JOB CONFIGURATION"}
-          actionElement={!isEditMode && (
-            <ButtonComponent
-              border={false}
-              className="!bg-[#0288d1] !text-white !border-transparent text-xs"
-              onClick={handleLoadSample}
-            >
-              Load Sample
-            </ButtonComponent>
-          )}
         >
 
           {/* METADATA */}
@@ -358,9 +392,15 @@ const CreateJobPage = () => {
                 <Input placeholder="e.g. GEN_INV" maxLength={50} style={inputStyle} />
               </Form.Item>
 
-              <Form.Item label="Type" name="type" {...formItemProps} rules={[
-                { required: true, message: "Please select type" },
-              ]}>
+              <Form.Item
+                label="Type"
+                name="type"
+                tooltip="Classifies the job (Batch / Scheduled / Queue / Workflow). It is independent of how you run it — you can choose Scheduled and still trigger an immediate, once, interval, or cron run at execution time."
+                {...formItemProps}
+                rules={[
+                  { required: true, message: "Please select type" },
+                ]}
+              >
                 <Select placeholder="Select type" style={fieldStyle}>
                   <Option value="BATCH">Batch</Option>
                   <Option value="SCHEDULE">Scheduled</Option>
@@ -428,20 +468,6 @@ const CreateJobPage = () => {
                     disabled={handlersLoading}
                   />
                 )}
-              </Form.Item>
-
-              <Form.Item
-                label="Task Queue"
-                name="taskQueueId"
-                tooltip="Physical queue routing requires JobRunr Pro. Currently all jobs use the default shared queue."
-                {...formItemProps}
-              >
-                <Input
-                  value="Default"
-                  disabled
-                  style={{ ...fieldStyle, color: "#666", background: "#fafafa", cursor: "not-allowed" }}
-                  suffix={<span style={{ fontSize: 11, color: "#aaa" }}>JobRunr OSS</span>}
-                />
               </Form.Item>
 
               {executeType === "STORED_PROCEDURE" && (<>
@@ -597,8 +623,10 @@ const CreateJobPage = () => {
           <div className="flex flex-col gap-4">
             <section className="flex flex-col gap-3 p-4 rounded-lg outline outline-1 outline-offset-[-1px] outline-[#c8cdd4]">
               <h3 className="text-primary text-sm font-normal uppercase">In-App Notifications</h3>
-              <NotificationRow label="In App Message" checked={notificationSettings.showInDrawer} onChange={updateNotification('showInDrawer')} />
+              <NotificationRow label="Show in Dropdown" checked={notificationSettings.showInDrawer} onChange={updateNotification('showInDrawer')} />
+              <NotificationRow label="Show as Toast"               checked={notificationSettings.showToast}    onChange={updateNotification('showToast')} />
               <NotificationRow label="Show as Alert"               checked={notificationSettings.showAlert}    onChange={updateNotification('showAlert')} />
+              <NotificationRow label="Show Inline"                 checked={notificationSettings.showInline}   onChange={updateNotification('showInline')} />
             </section>
 
             <section className="flex flex-col gap-3 p-4 rounded-lg outline outline-1 outline-offset-[-1px] outline-[#c8cdd4]">
