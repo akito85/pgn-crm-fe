@@ -116,14 +116,15 @@ const Employee = () => {
       isFetchingRef.current = true;
       setIsLoading(true);
       try {
-        const reqSearch = buildSearch(search, advancedSearch);
         const result = await dispatch(
           getAllEmployeePaginate({
             page: page + 1, // employee API is 1-based
             pageSize,
             sort,
-            search: reqSearch,
+            search,
             searchText,
+            filters: advancedSearch?.filters ?? [],
+            filterRules: advancedSearch?.filterRules ?? [],
           })
         ).unwrap();
         if (signal?.aborted) return;
@@ -142,7 +143,7 @@ const Employee = () => {
         if (!signal?.aborted) setIsLoading(false);
       }
     },
-    [search, searchText, advancedSearch, sort, pageSize, dispatch, buildSearch]
+    [search, searchText, advancedSearch, sort, pageSize, dispatch]
   );
 
   // Initial load and reload on filter / sort / pageSize change.
