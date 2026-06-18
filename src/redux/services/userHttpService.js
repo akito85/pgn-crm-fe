@@ -77,11 +77,11 @@ const getDetailByIdBody = async (url, id, customBaseUrl = null) => {
   }
 };
 
-const downloadData = async (url, customBaseUrl = null) => {
+const downloadData = async (url, body, customBaseUrl = null) => {
   try {
     const baseUrl = customBaseUrl || configApp.USER_MANAGEMENT_SERVICE;
-    
-    const response = await axios.get(baseUrl + url, {
+
+    const response = await axios.post(baseUrl + url, body, {
       headers: buildHeaders(baseUrl),
       responseType: "blob",
     });
@@ -98,7 +98,7 @@ const downloadData = async (url, customBaseUrl = null) => {
         FileSaver.saveAs(blob, filename);
       }
     } else if (errorCode(response) === 204) {
-      throw response
+      throw response;
     }
     return response;
   } catch (error) {

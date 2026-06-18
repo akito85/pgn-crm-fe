@@ -24,16 +24,6 @@ import { dateFormatting, formMessageRequired, hasValue } from "../../../../utils
 import { clearBodyMessage, hideModalError } from "../../../../redux/slices/general_slice";
 import moment from "moment";
 
-const OPERATOR_SELECTOR_MAP = {
-  "Contains": "LIKE",
-  "Equal to": "EQUALS",
-  "Not equal to": "NOT_EQUALS",
-  "Greater than": "GREATER_THAN",
-  "Less than": "LESS_THAN",
-  "Is empty": "IS_NULL",
-  "Is not empty": "IS_NOT_NULL",
-};
-
 const Employee = () => {
   const navigate = useNavigate();
   const { data_status } = useSelector((state) => state.employee);
@@ -82,28 +72,6 @@ const Employee = () => {
   const pageRef = useRef(0); // 0-based internal; API receives page + 1 (employee API is 1-based)
   const isFetchingRef = useRef(false);
   const hasMoreRef = useRef(false);
-
-  // Build combined search string from basic + advanced search
-  const buildSearch = useCallback((basicSearch, advSearch) => {
-    let combined = { ...basicSearch };
-    const applyFilter = (f) => {
-      if (!f.column) return;
-      const selector = OPERATOR_SELECTOR_MAP[f.operator] || "LIKE";
-      const isNullOp = selector === "IS_NULL" || selector === "IS_NOT_NULL";
-      if (isNullOp) {
-        combined[f.column] = `~${selector}`;
-      } else if (f.value) {
-        combined[f.column] = `${f.value}~${selector}`;
-      }
-    };
-    if (advSearch?.filters) {
-      advSearch.filters.forEach(applyFilter);
-    }
-    if (advSearch?.filterRules) {
-      advSearch.filterRules.forEach((rule) => rule.filters.forEach(applyFilter));
-    }
-    return encodeURIComponent(JSON.stringify(combined));
-  }, []);
 
   // Fetch a single page and append (replace=true) or append to allData.
   // The signal object lets the caller cancel a stale fetch without disrupting
@@ -238,9 +206,16 @@ const Employee = () => {
   }, [fetchPage]);
 
   const handleDownload = useCallback(() => {
-    const reqSearch = buildSearch(search, advancedSearch);
-    dispatch(downloadEmployee({ search: reqSearch, searchText, page: 0, pageSize, sort }));
-  }, [search, searchText, advancedSearch, pageSize, sort, dispatch, buildSearch]);
+    dispatch(downloadEmployee({
+      page: 0,
+      pageSize,
+      sort,
+      search,
+      searchText,
+      filters: advancedSearch?.filters ?? [],
+      filterRules: advancedSearch?.filterRules ?? [],
+    }));
+  }, [search, searchText, advancedSearch, pageSize, sort, dispatch]);
 
   const handleRetry = () => {
     try {
