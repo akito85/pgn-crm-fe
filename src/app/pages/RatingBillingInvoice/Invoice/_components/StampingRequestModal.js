@@ -8,7 +8,6 @@ import {
   Divider,
   message,
   Upload,
-  Alert,
   Steps,
   Input,
   Select,
@@ -74,8 +73,6 @@ const StampingRequestModal = ({
       setRemark("");
       setSelectedApproval(null);
       setApprovalDetail([]);
-      // Fetch approval hierarchy list
-      dispatch(getApprovalHierarchyList());
     }
   }, [visible, dispatch]);
 
@@ -215,7 +212,8 @@ const StampingRequestModal = ({
             stampingMethod === "manual"
               ? fileList.map((file) => file.originFileObj || file)
               : null,
-          remark: stampingMethod === "manual" ? remark : "Test stamp",
+          remark:
+            stampingMethod === "manual" ? remark : "E-Meterai stamping request",
           apphierId: stampingMethod === "manual" ? selectedApproval : null,
           submittedAt: new Date().toISOString(),
         };
@@ -226,7 +224,7 @@ const StampingRequestModal = ({
         await new Promise((resolve) => setTimeout(resolve, 1500));
         message.success(
           stampingMethod === "e-stamping"
-            ? "E-Stamping request submitted successfully!"
+            ? "E-Stamping process submitted successfully!"
             : "Physical stamp request with approval submitted successfully!"
         );
         onClose();
@@ -261,6 +259,10 @@ const StampingRequestModal = ({
     setRemark("");
     setSelectedApproval(null);
     setApprovalDetail([]);
+
+    if (newMethod === "manual") {
+      dispatch(getApprovalHierarchyList());
+    }
   };
 
   const columnsApproval = [
