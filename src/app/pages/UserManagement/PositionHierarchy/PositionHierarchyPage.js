@@ -55,6 +55,14 @@ const PositionHierarchyPage = () => {
   const [advancedSearch, setAdvancedSearch] = useState(null);
   const [fixedColumns, setFixedColumns] = useState({ left: [], right: [] });
 
+  // Column-level filter state
+  const searchInput = useRef(null);
+  const [searchedColumn, setSearchedColumn] = useState("");
+  const [columnSearchText, setColumnSearchText] = useState("");
+
+  // Download button loading
+  const [downloading, setDownloading] = useState(false);
+
   // Local infinite-scroll data state
   const [allData, setAllData] = useState([]);
   const [totalElements, setTotalElements] = useState(0);
@@ -74,7 +82,13 @@ const PositionHierarchyPage = () => {
   const hasMoreRef = useRef(false);
 
   const buildSearch = useCallback((basicSearch, advSearch) => {
-    let combined = { ...basicSearch };
+    let combined = {};
+    // Per-column filters. status needs EQUALS (LIKE would match INACTIVE for "ACTIVE");
+    // startDate/endDate are auto-routed to BETWEEN by the backend selector resolver.
+    Object.entries(basicSearch || {}).forEach(([key, value]) => {
+      if (value === undefined || value === null || value === "") return;
+      combined[key] = key === "status" ? `${value}~EQUALS` : value;
+    });
     const applyFilter = (f) => {
       if (!f.column) return;
       const selector = OPERATOR_SELECTOR_MAP[f.operator] || "LIKE";
@@ -165,6 +179,21 @@ const PositionHierarchyPage = () => {
     setAdvancedSearch(searchData);
   };
 
+  const handleColumnSearch = useCallback((selectedKeys, confirm, dataIndex) => {
+    confirm();
+    setColumnSearchText(selectedKeys[0] || "");
+    setSearchedColumn(dataIndex);
+    setSearch((prev) => {
+      const next = { ...prev };
+      if (selectedKeys[0]) {
+        next[dataIndex] = selectedKeys[0];
+      } else {
+        delete next[dataIndex];
+      }
+      return next;
+    });
+  }, []);
+
   // Modal handlers
   const handleCancel = () => {
     setOpenModal(false);
@@ -215,15 +244,22 @@ const PositionHierarchyPage = () => {
     }
   };
 
-  const handleDownload = useCallback(() => {
-    dispatch(
-      downloadPositionHierarchy({
-        search: buildSearch(search, advancedSearch),
-        page: pageRef.current + 1,
-        pageSize,
-        sort,
-      })
-    );
+  const handleDownload = useCallback(async () => {
+    setDownloading(true);
+    try {
+      await dispatch(
+        downloadPositionHierarchy({
+          search: buildSearch(search, advancedSearch),
+          page: pageRef.current + 1,
+          pageSize,
+          sort,
+        })
+      ).unwrap();
+    } catch {
+      // error surfaced via validateError in the thunk
+    } finally {
+      setDownloading(false);
+    }
   }, [dispatch, search, advancedSearch, pageSize, sort, buildSearch]);
 
   const handleRetry = () => {
@@ -254,6 +290,7 @@ const PositionHierarchyPage = () => {
           <ButtonComponent
             onClick={handleDownload}
             type="submit"
+            loading={downloading}
             icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
           >
             Download List
@@ -343,7 +380,7 @@ const PositionHierarchyPage = () => {
         ),
       },
     ],
-    [handleDownload] // eslint-disable-line react-hooks/exhaustive-deps
+    [handleDownload, downloading] // eslint-disable-line react-hooks/exhaustive-deps
   );
 
   const renderContentModal = (type) => {
@@ -427,6 +464,7 @@ const PositionHierarchyPage = () => {
             onSizeChanger={handleChange}
             onSort={onSort}
             onAdvanceSearch={onAdvanceSearch}
+            onRefresh={reload}
             fixedColumns={fixedColumns}
             setFixedColumns={setFixedColumns}
             useInfiniteScroll={true}
@@ -435,6 +473,11 @@ const PositionHierarchyPage = () => {
             itemActions={itemActions}
             columnDefinitions={columnsPositionHierarchy}
             userId={userId}
+            search={search}
+            searchInput={searchInput}
+            searchedColumn={searchedColumn}
+            columnSearchText={columnSearchText}
+            handleColumnSearch={handleColumnSearch}
           />
         </div>
       </NxCardContainer>
