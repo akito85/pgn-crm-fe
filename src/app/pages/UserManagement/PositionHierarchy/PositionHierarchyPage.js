@@ -64,6 +64,9 @@ const PositionHierarchyPage = () => {
   // Download button loading
   const [downloading, setDownloading] = useState(false);
 
+  // Activate/Duplicate modal submit loading
+  const [submitting, setSubmitting] = useState(false);
+
   // Local infinite-scroll data state
   const [allData, setAllData] = useState([]);
   const [totalElements, setTotalElements] = useState(0);
@@ -222,25 +225,31 @@ const PositionHierarchyPage = () => {
   };
 
   const handleActivation = async (formValue) => {
+    const payload = { ...formValue, hierId: recordSelected?.hierId, saveAs: "ACTIVE" };
+    setBody(payload);
+    setSubmitting(true);
     try {
-      const payload = { ...formValue, hierId: recordSelected?.hierId, saveAs: "ACTIVE" };
-      setBody(payload);
-      handleCancel();
       await dispatch(activationPositionHierarchy(payload)).unwrap();
-      reload();
     } catch {
+      // error surfaced via validateError in the thunk
+    } finally {
+      setSubmitting(false);
+      handleCancel();
       reload();
     }
   };
 
   const handleDuplicate = async (formValue) => {
+    const payload = { ...formValue, hierId: recordSelected?.hierId };
+    setBody(payload);
+    setSubmitting(true);
     try {
-      const payload = { ...formValue, hierId: recordSelected?.hierId };
-      setBody(payload);
-      handleCancel();
       await dispatch(duplicatePositionHierarchy(payload)).unwrap();
-      reload();
     } catch {
+      // error surfaced via validateError in the thunk
+    } finally {
+      setSubmitting(false);
+      handleCancel();
       reload();
     }
   };
@@ -335,7 +344,7 @@ const PositionHierarchyPage = () => {
                 </ButtonComponent>
               </Form.Item>
               <Form.Item>
-                <ButtonComponent type="submit" htmlType="submit" border={false}>
+                <ButtonComponent type="submit" htmlType="submit" border={false} loading={submitting}>
                   Confirm
                 </ButtonComponent>
               </Form.Item>
@@ -356,7 +365,7 @@ const PositionHierarchyPage = () => {
             </ButtonComponent>
           </Form.Item>
           <Form.Item>
-            <ButtonComponent type="submit" htmlType="submit" border={false}>
+            <ButtonComponent type="submit" htmlType="submit" border={false} loading={submitting}>
               Save
             </ButtonComponent>
           </Form.Item>
