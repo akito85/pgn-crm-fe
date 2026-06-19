@@ -71,6 +71,30 @@ const downloadData = async (url) => {
   }
 };
 
+const downloadDataPost = async (url, body) => {
+  try {
+    const response = await axios.post(configApp.MASTER_MANAGEMENT + url, body, {
+      headers: tokenHeader(),
+      responseType: "blob",
+    });
+    if (hasValue(response.headers?.get("content-disposition"))) {
+      const filename = response.headers
+        .get("content-disposition")
+        .split(";")
+        .find((n) => n.includes("filename="))
+        .replace("filename=", "")
+        .trim();
+      const blob = await response?.data;
+      FileSaver.saveAs(blob, filename);
+    } else if (errorCode(response) === 204) {
+      throw response
+    }
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
 const createData = async (url, body) => {
   try {
     const response = await axios.post(configApp.MASTER_MANAGEMENT + url, body, {
@@ -161,6 +185,7 @@ const productPromoHttpService = {
   getPagination,
   getDetail,
   downloadData,
+  downloadDataPost,
   createData,
   updateData,
   deleteData,
