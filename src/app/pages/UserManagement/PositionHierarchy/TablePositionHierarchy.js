@@ -4,6 +4,7 @@ import NxTable from "../../../../components/Nx/NxTable";
 import StatusComponent from "../../../../components/StatusComponent";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
 import { getPositionHierarchyColumns } from "./getPositionHierarchyColumns";
+import { POSITION_HIERARCHY_PERMISSION_LIST } from "./positionHierarchyActions";
 
 export const columnsPositionHierarchy = [
   {
@@ -124,7 +125,7 @@ export const TablePositionHierarchy = ({
   ...rest
 }) => {
   const actionColumns = useColumnActionPermission(
-    ["View", "Activate", "Update", "duplicate"],
+    POSITION_HIERARCHY_PERMISSION_LIST,
     itemActions
   );
 

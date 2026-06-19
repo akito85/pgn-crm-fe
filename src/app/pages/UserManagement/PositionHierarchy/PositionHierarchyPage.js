@@ -1,11 +1,12 @@
-import { Alert, DatePicker, Form, Tooltip } from "antd";
+import { Alert, DatePicker, Form } from "antd";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { NavLink } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import ModalCustom from "../../../../components/Modal/ModalCustom";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
+import Toolbar from "../../../../components/Toolbar";
 import { USER_ROUTES } from "../../../../routes/user_management/user_routes";
 import {
   activationPositionHierarchy,
@@ -13,16 +14,15 @@ import {
   duplicatePositionHierarchy,
   getPositionHierarchyPaginate,
 } from "../../../../redux/slices/user_management/position_hirarchy";
-import ViewListIcon from "../../../../assets/Icon/Nx/IconViewList";
-import IconEditNx from "../../../../assets/Icon/Nx/IconEdit";
-import IconCopy from "../../../../assets/Icon/Nx/IconCopy";
-import IconActive from "../../../../assets/icons/nx/IconActive";
-import IconInactive from "../../../../assets/icons/nx/IconInactive";
 import InputComponent from "../../../../components/InputComponent";
 import { dateFormatting } from "../../../../utils";
 import { useTryAgainHooks } from "../../../../utils/useTryAgainHooks";
 import { TablePositionHierarchy, columnsPositionHierarchy } from "./TablePositionHierarchy";
-import { DownloadOutlined, PlusOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
+import {
+  buildPositionHierarchyToolbarActions,
+  buildPositionHierarchyTableActions,
+} from "./positionHierarchyActions";
+import { ExclamationCircleOutlined } from "@ant-design/icons";
 import moment from "moment";
 
 const OPERATOR_SELECTOR_MAP = {
@@ -37,6 +37,7 @@ const OPERATOR_SELECTOR_MAP = {
 
 const PositionHierarchyPage = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { bodyError } = useSelector((state) => state?.general);
   const rawToken = useSelector((state) => state.auth?.token);
   const userId = useMemo(() => {
@@ -281,106 +282,22 @@ const PositionHierarchyPage = () => {
     { path: USER_ROUTES.VIEW_POSITION, breadcrumbName: "Position Hierarchy List" },
   ];
 
-  const itemActions = useMemo(
-    () => [
-      // Toolbar actions
-      {
-        action: "Download",
-        render: (
-          <ButtonComponent
-            onClick={handleDownload}
-            type="submit"
-            loading={downloading}
-            icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
-          >
-            Download List
-          </ButtonComponent>
-        ),
-      },
-      {
-        action: "Create",
-        render: (
-          <NavLink to={USER_ROUTES.CREATE_POSITION}>
-            <ButtonComponent
-              type="submit"
-              icon={<PlusOutlined style={{ fontSize: "24px" }} />}
-            >
-              Create New Position Hierarchy
-            </ButtonComponent>
-          </NavLink>
-        ),
-      },
+  const toolbarActions = useMemo(
+    () => buildPositionHierarchyToolbarActions({ handleDownload, downloading }),
+    [handleDownload, downloading]
+  );
 
-      // Table column actions
-      {
-        action: "View",
-        type: "table",
-        render: (record) => (
-          <NavLink
-            to={USER_ROUTES.DETAIL_POSITION}
-            state={{ id: record?.hierId }}
-            className="flex items-center justify-center"
-            style={{ color: "#1976D2" }}
-          >
-            <ViewListIcon />
-          </NavLink>
-        ),
-      },
-      {
-        action: "Activate",
-        type: "table",
-        render: (record) => {
-          const isDraft = record?.status === "DRAFT";
-          return (
-            <Tooltip title={isDraft ? "Activate" : "Inactivate"}>
-              {isDraft
-                ? <span className="inline-flex items-center text-green-600 hover:text-green-600 transition-colors duration-200 cursor-pointer" onClick={() => handleOpenModal(record, "activation")}>
-                    <IconActive width={20} />
-                  </span>
-                : <span className="inline-flex items-center text-gray-300 cursor-not-allowed">
-                    <IconInactive width={20} />
-                  </span>
-              }
-            </Tooltip>
-          );
-        },
-      },
-      {
-        action: "Update",
-        type: "table",
-        render: (record) => {
-          const disabled = record?.status === "INACTIVE";
-          return (
-            <Tooltip title="Update">
-              <div className={`inline-flex items-center ${disabled ? "cursor-not-allowed text-gray-300" : ""}`}>
-                <NavLink
-                  to={!disabled ? USER_ROUTES.UPDATE_POSITION : undefined}
-                  state={!disabled ? { id: record?.hierId } : undefined}
-                  className={`inline-flex items-center transition-colors duration-200 ${disabled ? "text-gray-300 pointer-events-none" : "text-[#1976D2] hover:text-[#1976D2]"}`}
-                >
-                  <IconEditNx width={20} />
-                </NavLink>
-              </div>
-            </Tooltip>
-          );
-        },
-      },
-      {
-        action: "duplicate",
-        type: "table",
-        render: (record) => (
-          <Tooltip title="Duplicate">
-            <span
-              className="inline-flex items-center text-[#1976D2] hover:text-[#1976D2] transition-colors duration-200 cursor-pointer"
-              onClick={() => handleOpenModal(record, "duplicate")}
-            >
-              <IconCopy width={20} />
-            </span>
-          </Tooltip>
-        ),
-      },
-    ],
-    [handleDownload, downloading] // eslint-disable-line react-hooks/exhaustive-deps
+  const tableActions = useMemo(
+    () =>
+      buildPositionHierarchyTableActions({
+        handleView: (record) =>
+          navigate(USER_ROUTES.DETAIL_POSITION, { state: { id: record?.hierId } }),
+        handleUpdate: (record) =>
+          navigate(USER_ROUTES.UPDATE_POSITION, { state: { id: record?.hierId } }),
+        handleActivate: (record) => handleOpenModal(record, "activation"),
+        handleDuplicate: (record) => handleOpenModal(record, "duplicate"),
+      }),
+    [navigate] // eslint-disable-line react-hooks/exhaustive-deps
   );
 
   const renderContentModal = (type) => {
@@ -452,8 +369,9 @@ const PositionHierarchyPage = () => {
     <>
       <BreadCrumb routes={routes} />
 
-      <NxCardContainer header="POSITION HIERARCHY LIST" className="mt-4" actions={itemActions}>
-        <div className="w-full">
+      <NxCardContainer header="POSITION HIERARCHY LIST" className="mt-4">
+        <div className="flex flex-col gap-y-4">
+          <Toolbar items={toolbarActions} type="page" />
           <TablePositionHierarchy
             dataSource={allData}
             loading={isLoading}
@@ -470,7 +388,7 @@ const PositionHierarchyPage = () => {
             useInfiniteScroll={true}
             onLoadMore={onLoadMore}
             hasMore={hasMore}
-            itemActions={itemActions}
+            itemActions={tableActions}
             columnDefinitions={columnsPositionHierarchy}
             userId={userId}
             search={search}
