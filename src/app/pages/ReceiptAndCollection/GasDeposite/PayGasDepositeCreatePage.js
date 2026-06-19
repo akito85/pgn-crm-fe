@@ -510,20 +510,6 @@ const extractRequestErrorMessage = (error, fallbackMessage) => (
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data_daily_rate]);
 
-  useEffect(() => {
-    const { fromCurrency, toCurrency, rateType, rateDate } = requestBodyConvertedRate;
-
-    if (!fromCurrency || !toCurrency || !rateType || !rateDate) {
-      return;
-    }
-
-    if (fromCurrency === toCurrency) {
-      return;
-    }
-
-    dispatch(getConvertedCurrency(requestBodyConvertedRate));
-  }, [dispatch, requestBodyConvertedRate]);
-
   // Auto-calculate Balance from sum of mutation amounts, then recalculate EQV Balance
   useEffect(() => {
     const total = mutationRows.reduce((sum, row) => sum + parseNumericValue(row.amount), 0);
@@ -534,12 +520,12 @@ const extractRequestErrorMessage = (error, fallbackMessage) => (
     if (allValues.currency && allValues.currency === allValues.billingCurrency) {
       form.setFieldsValue({
         rate: formatDecimal(1),
-        eqvBalance: formatDecimal(total),
+        eqvBalance: total > 0 ? formatDecimal(total) : undefined,
       });
     } else {
       const currentRate = parseNumericValue(allValues.rate);
       if (currentRate > 0) {
-        form.setFieldsValue({ eqvBalance: formatDecimal(total * currentRate) });
+        form.setFieldsValue({ eqvBalance: total > 0 ? formatDecimal(total * currentRate) : undefined });
       }
     }
   }, [form, mutationRows]);
@@ -552,7 +538,7 @@ const extractRequestErrorMessage = (error, fallbackMessage) => (
     if (isSameCurrency) {
       form.setFieldsValue({
         rate: formatDecimal(1),
-        eqvBalance: formatDecimal(balanceValue),
+        eqvBalance: balanceValue > 0 ? formatDecimal(balanceValue) : undefined,
       });
       return;
     }
@@ -568,7 +554,7 @@ const extractRequestErrorMessage = (error, fallbackMessage) => (
 
     form.setFieldsValue({
       rate: formatDecimal(convertedRate),
-      eqvBalance: formatDecimal(balanceValue * convertedRate),
+      eqvBalance: balanceValue > 0 ? formatDecimal(balanceValue * convertedRate) : undefined,
     });
   }, [data_converted_currency, form]);
 
@@ -812,7 +798,10 @@ const extractRequestErrorMessage = (error, fallbackMessage) => (
   };
 
   const applyDailyRate = (matched) => {
-    if (!matched) return;
+    if (!matched) {
+      form.setFieldsValue({ rate: undefined, eqvBalance: undefined });
+      return;
+    }
     const rawReal = Number(matched.convertedRateReal);
     const rawStr = Number(matched.convertedRate);
     const convertedRate = (!Number.isNaN(rawReal) && rawReal > 0) ? rawReal : rawStr;
@@ -823,15 +812,24 @@ const extractRequestErrorMessage = (error, fallbackMessage) => (
     });
   };
 
+  const setSameCurrencyRate = (balance) => {
+    form.setFieldsValue({
+      rate: formatDecimal(1),
+      eqvBalance: formatDecimal(parseNumericValue(balance)),
+    });
+  };
+
   const resolveDailyRate = (allValues, formattedRateDate) => {
     if (!allValues.currency || !allValues.billingCurrency || !allValues.rateType || !formattedRateDate) {
       form.setFieldsValue({ rate: undefined, eqvBalance: undefined });
       return;
     }
+
     const currencyName = (currencyDDL?.data || []).find((item) => item.id === allValues.currency)?.name;
     const billingCurrencyName = (currencyDDL?.data || []).find((item) => item.id === allValues.billingCurrency)?.name;
     const rateTypeCode = (rateTypeDDL?.data || []).find((item) => item.id === allValues.rateType)?.name;
     if (currencyName && billingCurrencyName && rateTypeCode) {
+      form.setFieldsValue({ rate: undefined, eqvBalance: undefined });
       dispatch(getPayGasDepositDailyRate({
         fromCurrencyName: currencyName,
         toCurrencyName: billingCurrencyName,
@@ -840,30 +838,21 @@ const extractRequestErrorMessage = (error, fallbackMessage) => (
       }))
         .unwrap()
         .then((matched) => applyDailyRate(matched))
-        .catch(() => {});
+        .catch(() => form.setFieldsValue({ rate: undefined, eqvBalance: undefined }));
     }
   };
 
   const resolveConvertedCurrency = (allValues, formattedRateDate) => {
     if (!allValues.currency || !allValues.billingCurrency) {
-      setRequestBodyConvertedRate({});
-      return;
-    }
-    if (allValues.currency === allValues.billingCurrency) {
-      form.setFieldsValue({
-        rate: formatDecimal(1),
-        eqvBalance: formatDecimal(parseNumericValue(allValues.balance)),
-      });
-      setRequestBodyConvertedRate({});
       return;
     }
     if (allValues.rateType && formattedRateDate) {
-      setRequestBodyConvertedRate({
+      dispatch(getConvertedCurrency({
         fromCurrency: allValues.currency,
         toCurrency: allValues.billingCurrency,
         rateType: allValues.rateType,
         rateDate: formattedRateDate,
-      });
+      }));
     }
   };
 

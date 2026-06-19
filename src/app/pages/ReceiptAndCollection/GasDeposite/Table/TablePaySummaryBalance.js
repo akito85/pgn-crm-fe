@@ -1,15 +1,3 @@
-/**
- * TablePaySummaryBalance.js
- *
- * Column definitions for the Payment Gas Deposit — "Summary Balance" tab.
- * Backend source: GET /v1/dbs/api/pay-gas-deposit/summary-balance (VW_RBI_GASDEP_SUM_BALANCE)
- *
- * Columns align with the Payment domain ER diagram:
- *   Account info + T_PAY_GASDEP_STG_MUTATION / T_PAY_GASDEP_LEDGER fields:
- *   documentNumber, bank, category, mutationType (EARN/REDEEM/EXPIRE), mutationDate,
- *   amount, eqvAmount, rateType, rateDate, rate, earnPercentage, billingPeriod,
- *   expiredBalance, eqvExpiredBalance, status, statusApproval, mutationStatus, mutationApprovalStatus
- */
 import React from "react";
 import moment from "moment";
 import { hasValue, renderColumn } from "../../../../../utils";

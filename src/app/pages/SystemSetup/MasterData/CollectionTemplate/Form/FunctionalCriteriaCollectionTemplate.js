@@ -2,13 +2,26 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import moment from "moment";
 import { Form, Select, Space, Table, Tooltip } from "antd";
+import { columnsTableCriteriaBillingBucket } from "../../../../RatingBillingInvoice/MasterData/BillingBucket/Table/TableCriteriaBillingBucket";
 import SVGIcon from "../../../../../../assets/Icon/index";
 import ButtonComponent from "../../../../../../components/ButtonComponent";
 import DateComponent from "../../../../../../components/DateComponent";
 import InputComponent from "../../../../../../components/InputComponent";
 import {
   getCustomerSegment,
+  getAccountCategory,
   getAccountGroup,
+  getBudget,
+  getCity,
+  getCostCenter,
+  getDistrict,
+  getGsizes,
+  getIndustrialSector,
+  getProvince,
+  getServiceType,
+  getSor,
+  getSubDistrict,
+  getCustomer,
 } from "../../../../../../redux/slices/rating_billing_invoice/MasterData/billingBucket";
 import { hasValue } from "../../../../../../utils";
 
@@ -56,11 +69,7 @@ const EditableCell = ({
       : null;
     if (headerStart && current.isBefore(headerStart, "day")) return true;
     if (headerEnd && current.isAfter(headerEnd, "day")) return true;
-    if (
-      dataIndex === "endDate" &&
-      rowStart &&
-      current.isBefore(rowStart, "day")
-    )
+    if (dataIndex === "endDate" && rowStart && current.isBefore(rowStart, "day"))
       return true;
     return false;
   };
@@ -175,6 +184,7 @@ const EditableCell = ({
 const FunctionalCriteriaCollectionTemplate = ({
   type,
   data = [],
+  dataCriteria = [],
   updateData = () => {},
   storedData = false,
   setStoredData = () => {},
@@ -184,31 +194,48 @@ const FunctionalCriteriaCollectionTemplate = ({
   statusApproval,
 }) => {
   const dispatch = useDispatch();
-  const { data_customer_segment, data_account_group } = useSelector(
-    (state) => state.billing_bucket,
-  );
+  const {
+    data_budget,
+    data_province,
+    data_city,
+    data_industrial_sector,
+    data_district,
+    data_sub_district,
+    data_account_Category,
+    data_service_type,
+    data_account_group,
+    data_sor,
+    data_cost_center,
+    data_Gsizes,
+    data_customer_segment,
+    data_customer,
+  } = useSelector((state) => state.billing_bucket);
 
   const [formTable] = Form.useForm();
+  const searchInput = useRef(null);
   const [editingKey, setEditingKey] = useState("");
   const [statusAction, setStatusAction] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalData, setTotalData] = useState(0);
   const [editDataRecord, setEditDataRecord] = useState({});
+  const [searchedColumn, setSearchedColumn] = useState("");
+  const [searchText, setSearchText] = useState("");
 
   const isEditing = (record) => record.key === editingKey;
 
-  const customerSegmentOptions = (
-    Array.isArray(data_customer_segment) ? data_customer_segment : []
-  ).map((item) => ({ value: item.id, label: item.text }));
-
-  const accountGroupOptions = (
-    Array.isArray(data_account_group) ? data_account_group : []
-  ).map((item) => ({ value: item.id, label: item.name }));
-
   useEffect(() => {
     if (type !== "detail") {
+      dispatch(getBudget());
+      dispatch(getProvince());
+      dispatch(getIndustrialSector());
+      dispatch(getAccountCategory());
+      dispatch(getServiceType());
+      dispatch(getSor());
+      dispatch(getCostCenter());
+      dispatch(getGsizes());
       dispatch(getCustomerSegment());
+      dispatch(getCustomer());
     }
   }, [dispatch, type]);
 
@@ -216,18 +243,79 @@ const FunctionalCriteriaCollectionTemplate = ({
     setTotalData(data.length);
   }, [data]);
 
+  const budget = (Array.isArray(data_budget) ? data_budget : []).map((item) => ({ value: item.id, label: item.text }));
+  const province = (Array.isArray(data_province) ? data_province : []).map((item) => ({ value: item.value, label: item.name }));
+  const city = (Array.isArray(data_city) ? data_city : []).map((item) => ({ value: item.value, label: item.name }));
+  const industrialSector = (Array.isArray(data_industrial_sector) ? data_industrial_sector : []).map((item) => ({ value: item.id, label: item.text }));
+  const district = (Array.isArray(data_district) ? data_district : []).map((item) => ({ value: item.value, label: item.name }));
+  const subDistrict = (Array.isArray(data_sub_district) ? data_sub_district : []).map((item) => ({ value: item.value, label: item.name }));
+  const accountCategory = (Array.isArray(data_account_Category) ? data_account_Category : []).map((item) => ({ value: item.id, label: item.text }));
+  const serviceType = (Array.isArray(data_service_type) ? data_service_type : []).map((item) => ({ value: item.id, label: item.text }));
+  const accountGroup = (Array.isArray(data_account_group) ? data_account_group : []).map((item) => ({ value: item.id, label: item.name }));
+  const sor = (Array.isArray(data_sor) ? data_sor : []).map((item) => ({ value: item.id, label: item.name }));
+  const costCenter = (Array.isArray(data_cost_center) ? data_cost_center : []).map((item) => ({ value: item.id, label: item.name }));
+  const gsizes = (Array.isArray(data_Gsizes) ? data_Gsizes : []).map((item) => ({ value: item.id, label: item.text }));
+  const customerSegment = (Array.isArray(data_customer_segment) ? data_customer_segment : []).map((item) => ({ value: item.id, label: item.text }));
+  const customer = (Array.isArray(data_customer) ? data_customer : []).map((item) => ({ value: item.id, label: item.name }));
+
+  const listOption = {
+    budget,
+    province,
+    city,
+    district,
+    subDistrict,
+    industrialSector,
+    accountCategory,
+    accountGroup,
+    serviceType,
+    sor,
+    costCenter,
+    gsizes,
+    customerSegment,
+    customer,
+  };
+
   const handleEditDataRecord = (value, key, index) => {
     const keyName = key + index;
     setEditDataRecord((prev) => ({ ...prev, [keyName]: value }));
-    if (index === "customerSegment") {
-      dispatch(getAccountGroup(value?.value));
-      formTable.resetFields(["accountGroupType"]);
+    if (index === "province") {
+      dispatch(getCity(value?.value));
+      formTable.resetFields(["city", "district", "subDistrict"]);
       setEditDataRecord((prev) => ({
         ...prev,
-        [key + "accountGroupType"]: undefined,
+        [key + "city"]: undefined,
+        [key + "district"]: undefined,
+        [key + "subDistrict"]: undefined,
       }));
     }
+    if (index === "city") {
+      dispatch(getDistrict(value?.value));
+      formTable.resetFields(["district", "subDistrict"]);
+      setEditDataRecord((prev) => ({
+        ...prev,
+        [key + "district"]: undefined,
+        [key + "subDistrict"]: undefined,
+      }));
+    }
+    if (index === "district") {
+      dispatch(getSubDistrict(value?.value));
+      formTable.resetFields(["subDistrict"]);
+      setEditDataRecord((prev) => ({ ...prev, [key + "subDistrict"]: undefined }));
+    }
+    if (index === "customerSegment") {
+      dispatch(getAccountGroup(value?.value));
+      formTable.resetFields(["accountGroup"]);
+      setEditDataRecord((prev) => ({ ...prev, [key + "accountGroup"]: undefined }));
+    }
     return value;
+  };
+
+  const handleSearch = (selectedKeys, confirm, dataIndex) => {
+    confirm();
+    setSearchText(selectedKeys[0]);
+    const tempSearchColumn = selectedKeys[0] ? dataIndex : "";
+    if (searchedColumn !== tempSearchColumn) setPage(1);
+    setSearchedColumn(tempSearchColumn);
   };
 
   const edit = (record) => {
@@ -241,23 +329,19 @@ const FunctionalCriteriaCollectionTemplate = ({
     const { key, ...extraProps } = record || {};
     for (const attr in extraProps) {
       if (Object.hasOwnProperty.call(extraProps, attr)) {
-        setEditDataRecord((prev) => ({
-          ...prev,
-          [`${key}${attr}`]: extraProps[attr],
-        }));
+        setEditDataRecord((prev) => ({ ...prev, [`${key}${attr}`]: extraProps[attr] }));
       }
     }
     setEditingKey(record.key);
-    if (record?.customerSegment?.value) {
-      dispatch(getAccountGroup(record.customerSegment.value));
-    }
+    if (record?.province?.value) dispatch(getCity(record.province.value));
+    if (record?.city?.value) dispatch(getDistrict(record.city.value));
+    if (record?.district?.value) dispatch(getSubDistrict(record.district.value));
+    if (record?.customerSegment?.value) dispatch(getAccountGroup(record.customerSegment.value));
   };
 
   const cancel = (record) => {
     setEditingKey("");
-    if (statusAction === "add") {
-      deleteRow(record);
-    }
+    if (statusAction === "add") deleteRow(record);
     setStatusAction("");
     setStoredData(false);
     formTable.resetFields();
@@ -334,145 +418,119 @@ const FunctionalCriteriaCollectionTemplate = ({
     setPageSize(pageSizeChange);
   };
 
-  const columns = [
-    {
-      title: "NO",
-      width: 60,
-      dataIndex: "no",
-      align: "center",
-      render: (_, __, index) => (page - 1) * pageSize + index + 1,
-    },
-    {
-      title: "CUSTOMER SEGMENT",
-      dataIndex: "customerSegment",
-      width: 200,
-      inputType: "select",
-      required: true,
-      render: (val) => {
-        if (!val) return "-";
-        return val?.label || val;
+  const columns = () => {
+    const temp = [
+      {
+        title: "NO",
+        width: 60,
+        dataIndex: "no",
+        align: "center",
+        render: (_, __, index) => (page - 1) * pageSize + index + 1,
       },
-    },
-    {
-      title: "ACCOUNT GROUP TYPE",
-      dataIndex: "accountGroupType",
-      width: 200,
-      inputType: "select",
-      required: true,
-      dependDataIndex: "customerSegment",
-      render: (val) => {
-        if (!val) return "-";
-        return val?.label || val;
+      ...columnsTableCriteriaBillingBucket(
+        listOption,
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+      ),
+      {
+        title: "ACTION",
+        dataIndex: "operation",
+        width: 160,
+        fixed: "right",
+        align: "center",
+        render: (_, record) => {
+          const editable = isEditing(record);
+          const isDelete =
+            (status === "DRAFT" && statusApproval === "DRAFT") ||
+            record.type !== "exist";
+          return (
+            <Space className="my-3 gap-2">
+              {editable ? (
+                <>
+                  <ButtonComponent onClick={() => cancel(record)} type="default">
+                    Cancel
+                  </ButtonComponent>
+                  <ButtonComponent onClick={() => save(record.key)} type="submit">
+                    Save
+                  </ButtonComponent>
+                </>
+              ) : (
+                <div className="flex w-full justify-center gap-4">
+                  <Tooltip title="Edit">
+                    <div>
+                      <SVGIcon
+                        name="IconEdit"
+                        color={editingKey ? "#8D91A0" : "#ACC424"}
+                        className={editingKey ? "cursor-not-allowed" : ""}
+                        width={24}
+                        onClick={!editingKey ? () => edit(record) : undefined}
+                      />
+                    </div>
+                  </Tooltip>
+                  <Tooltip title="Delete">
+                    <div>
+                      <SVGIcon
+                        name="IconDelete"
+                        color={isDelete && !editingKey ? "#D90000" : "#8D91A0"}
+                        width={24}
+                        className={
+                          isDelete && !editingKey
+                            ? undefined
+                            : "disabled cursor-not-allowed"
+                        }
+                        onClick={
+                          isDelete && !editingKey
+                            ? () => deleteRow(record)
+                            : undefined
+                        }
+                      />
+                    </div>
+                  </Tooltip>
+                </div>
+              )}
+            </Space>
+          );
+        },
       },
-    },
-    {
-      title: "START DATE",
-      dataIndex: "startDate",
-      width: 140,
-      inputType: "startDate",
-      render: (val) => (val ? moment(val).format("DD MMM YYYY") : "-"),
-    },
-    {
-      title: "END DATE",
-      dataIndex: "endDate",
-      width: 140,
-      inputType: "endDate",
-      render: (val) => (val ? moment(val).format("DD MMM YYYY") : "-"),
-    },
-    {
-      title: "DESCRIPTION",
-      dataIndex: "description",
-      width: 200,
-      inputType: "text",
-      render: (val) => val || "-",
-    },
-    {
-      title: "ACTION",
-      dataIndex: "operation",
-      width: 160,
-      fixed: "right",
-      align: "center",
-      render: (_, record) => {
-        const editable = isEditing(record);
-        const isDelete =
-          (status === "DRAFT" && statusApproval === "DRAFT") ||
-          record.type !== "exist";
-        return (
-          <Space className="my-3 gap-2">
-            {editable ? (
-              <>
-                <ButtonComponent onClick={() => cancel(record)} type="default">
-                  Cancel
-                </ButtonComponent>
-                <ButtonComponent onClick={() => save(record.key)} type="submit">
-                  Save
-                </ButtonComponent>
-              </>
-            ) : (
-              <div className="flex w-full justify-center gap-4">
-                <Tooltip title="Edit">
-                  <div>
-                    <SVGIcon
-                      name="IconEdit"
-                      color={editingKey ? "#8D91A0" : "#ACC424"}
-                      className={editingKey ? "cursor-not-allowed" : ""}
-                      width={24}
-                      onClick={!editingKey ? () => edit(record) : undefined}
-                    />
-                  </div>
-                </Tooltip>
-                <Tooltip title="Delete">
-                  <div>
-                    <SVGIcon
-                      name="IconDelete"
-                      color={isDelete && !editingKey ? "#D90000" : "#8D91A0"}
-                      width={24}
-                      className={
-                        isDelete && !editingKey
-                          ? undefined
-                          : "disabled cursor-not-allowed"
-                      }
-                      onClick={
-                        isDelete && !editingKey
-                          ? () => deleteRow(record)
-                          : undefined
-                      }
-                    />
-                  </div>
-                </Tooltip>
-              </div>
-            )}
-          </Space>
-        );
-      },
-    },
-  ];
+    ];
 
-  const listOption = {
-    customerSegment: customerSegmentOptions,
-    accountGroupType: accountGroupOptions,
+    const filterCol =
+      type !== "detail" ? temp : temp.filter((col) => col.title !== "ACTION");
+
+    return filterCol.filter((col) =>
+      col.title !== "NO" &&
+      col.title !== "ACTION" &&
+      col.title !== "START DATE" &&
+      col.title !== "END DATE"
+        ? dataCriteria.includes(col.indexValue)
+        : true,
+    );
   };
 
-  const mergedColumns = columns
-    .filter((col) => (type === "detail" ? col.dataIndex !== "operation" : true))
-    .map((col) => ({
-      ...col,
-      onCell: (record) => ({
-        record,
-        inputType: col.inputType,
-        dataIndex: col.dataIndex,
-        title: col.title,
-        editing: isEditing(record),
-        options: listOption[col.dataIndex],
-        required: col.required,
-        dependDataIndex: col.dependDataIndex,
-        dataEditRecord: editDataRecord,
-        handleEditDataRecord,
-        formTable,
-        validateStartDate: validStartDate,
-        validateEndDate: validEndDate,
-      }),
-    }));
+  const mergedColumns = columns().map((col) => ({
+    ...col,
+    onCell: (record) => ({
+      record,
+      inputType: col.inputType,
+      dataIndex: col.dataIndex,
+      title: col.title,
+      editing: isEditing(record),
+      options: col.option,
+      required: col.required,
+      dependDataIndex: col.dependDataIndex,
+      dataEditRecord: editDataRecord,
+      handleEditDataRecord,
+      formTable,
+      validateStartDate: validStartDate,
+      validateEndDate: validEndDate,
+    }),
+  }));
+
+  if (!dataCriteria || dataCriteria.length === 0 || dataCriteria[0] === 24) {
+    return null;
+  }
 
   return (
     <div className="flex flex-col w-full gap-4">

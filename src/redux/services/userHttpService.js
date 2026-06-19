@@ -106,10 +106,39 @@ const downloadData = async (url, body, customBaseUrl = null) => {
   }
 };
 
+const getDownloadData = async (url, customBaseUrl = null) => {
+  try {
+    const baseUrl = customBaseUrl || configApp.USER_MANAGEMENT_SERVICE;
+
+    const response = await axios.get(baseUrl + url, {
+      headers: buildHeaders(baseUrl),
+      responseType: "blob",
+    });
+    const contentDisposition = response.headers?.["content-disposition"];
+    if (hasValue(contentDisposition)) {
+      const filename = contentDisposition
+        .split(";")
+        .find((n) => n.includes("filename="))
+        ?.replace("filename=", "")
+        .trim();
+
+      const blob = await response?.data;
+      if (filename) {
+        FileSaver.saveAs(blob, filename);
+      }
+    } else if (errorCode(response) === 204) {
+      throw response;
+    }
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
 const createData = async (url, body, customBaseUrl = null) => {
   try {
     const baseUrl = customBaseUrl || configApp.USER_MANAGEMENT_SERVICE;
-    
+
     const response = await axios.post(
       baseUrl + url,
       body,
@@ -288,6 +317,7 @@ const userHttpService = {
   getPagination,
   getDetail,
   downloadData,
+  getDownloadData,
   createData,
   updateData,
   deleteData,

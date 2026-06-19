@@ -213,7 +213,7 @@ export const downloadPositionHierarchy = createAsyncThunk(
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
       const url = `/v1/dbs/api/positionhierarchy/download-filter?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
-      const response = await userHttpService.downloadData(url);
+      const response = await userHttpService.getDownloadData(url);
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(
