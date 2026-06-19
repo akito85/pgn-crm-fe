@@ -24,16 +24,6 @@ import { dateFormatting, formMessageRequired, hasValue } from "../../../../utils
 import { clearBodyMessage, hideModalError } from "../../../../redux/slices/general_slice";
 import moment from "moment";
 
-const OPERATOR_SELECTOR_MAP = {
-  "Contains": "LIKE",
-  "Equal to": "EQUALS",
-  "Not equal to": "NOT_EQUALS",
-  "Greater than": "GREATER_THAN",
-  "Less than": "LESS_THAN",
-  "Is empty": "IS_NULL",
-  "Is not empty": "IS_NOT_NULL",
-};
-
 const Employee = () => {
   const navigate = useNavigate();
   const { data_status } = useSelector((state) => state.employee);
@@ -58,6 +48,11 @@ const Employee = () => {
   const [advancedSearch, setAdvancedSearch] = useState(null);
   const [fixedColumns, setFixedColumns] = useState({ left: [], right: [] });
 
+  // Column-level filter state
+  const searchInput = useRef(null);
+  const [searchedColumn, setSearchedColumn] = useState("");
+  const [columnSearchText, setColumnSearchText] = useState("");
+
   // Local data state — avoids the stale Redux data / spinner flash
   const [allData, setAllData] = useState([]);
   const [totalElements, setTotalElements] = useState(0);
@@ -78,28 +73,6 @@ const Employee = () => {
   const isFetchingRef = useRef(false);
   const hasMoreRef = useRef(false);
 
-  // Build combined search string from basic + advanced search
-  const buildSearch = useCallback((basicSearch, advSearch) => {
-    let combined = { ...basicSearch };
-    const applyFilter = (f) => {
-      if (!f.column) return;
-      const selector = OPERATOR_SELECTOR_MAP[f.operator] || "LIKE";
-      const isNullOp = selector === "IS_NULL" || selector === "IS_NOT_NULL";
-      if (isNullOp) {
-        combined[f.column] = `~${selector}`;
-      } else if (f.value) {
-        combined[f.column] = `${f.value}~${selector}`;
-      }
-    };
-    if (advSearch?.filters) {
-      advSearch.filters.forEach(applyFilter);
-    }
-    if (advSearch?.filterRules) {
-      advSearch.filterRules.forEach((rule) => rule.filters.forEach(applyFilter));
-    }
-    return encodeURIComponent(JSON.stringify(combined));
-  }, []);
-
   // Fetch a single page and append (replace=true) or append to allData.
   // The signal object lets the caller cancel a stale fetch without disrupting
   // isFetchingRef, so the guard stays coherent across StrictMode double-mounts
@@ -111,14 +84,15 @@ const Employee = () => {
       isFetchingRef.current = true;
       setIsLoading(true);
       try {
-        const reqSearch = buildSearch(search, advancedSearch);
         const result = await dispatch(
           getAllEmployeePaginate({
             page: page + 1, // employee API is 1-based
             pageSize,
             sort,
-            search: reqSearch,
+            search,
             searchText,
+            filters: advancedSearch?.filters ?? [],
+            filterRules: advancedSearch?.filterRules ?? [],
           })
         ).unwrap();
         if (signal?.aborted) return;
@@ -137,7 +111,7 @@ const Employee = () => {
         if (!signal?.aborted) setIsLoading(false);
       }
     },
-    [search, searchText, advancedSearch, sort, pageSize, dispatch, buildSearch]
+    [search, searchText, advancedSearch, sort, pageSize, dispatch]
   );
 
   // Initial load and reload on filter / sort / pageSize change.
@@ -180,6 +154,21 @@ const Employee = () => {
     setSearchText(value || "");
   }, []);
 
+  const handleColumnSearch = useCallback((selectedKeys, confirm, dataIndex) => {
+    confirm();
+    setColumnSearchText(selectedKeys[0] || "");
+    setSearchedColumn(dataIndex);
+    setSearch((prev) => {
+      const next = { ...prev };
+      if (selectedKeys[0]) {
+        next[dataIndex] = selectedKeys[0];
+      } else {
+        delete next[dataIndex];
+      }
+      return next;
+    });
+  }, []);
+
   const handleCancelTerminate = () => {
     form.resetFields();
     setModalTerm(false);
@@ -217,9 +206,16 @@ const Employee = () => {
   }, [fetchPage]);
 
   const handleDownload = useCallback(() => {
-    const reqSearch = buildSearch(search, advancedSearch);
-    dispatch(downloadEmployee({ search: reqSearch, searchText, page: 0, pageSize, sort }));
-  }, [search, searchText, advancedSearch, pageSize, sort, dispatch, buildSearch]);
+    dispatch(downloadEmployee({
+      page: 0,
+      pageSize,
+      sort,
+      search,
+      searchText,
+      filters: advancedSearch?.filters ?? [],
+      filterRules: advancedSearch?.filterRules ?? [],
+    }));
+  }, [search, searchText, advancedSearch, pageSize, sort, dispatch]);
 
   const handleRetry = () => {
     try {
@@ -283,6 +279,11 @@ const Employee = () => {
             itemActions={itemActions}
             columnDefinitions={columnsEmployee}
             userId={userId}
+            search={search}
+            searchInput={searchInput}
+            searchedColumn={searchedColumn}
+            columnSearchText={columnSearchText}
+            handleColumnSearch={handleColumnSearch}
           />
         </div>
       </NxCardContainer>

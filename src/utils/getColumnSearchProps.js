@@ -470,13 +470,13 @@ export const getColumnSearchPropsUseFilteredValue = (
       }
     },
     render: (text) =>
-      searchedColumn === dataIndex ? (
+      search[dataIndex] ? (
         <Highlighter
           highlightStyle={{
             backgroundColor: "#ffc069",
             padding: 0,
           }}
-          searchWords={[searchText]}
+          searchWords={[search[dataIndex]]}
           autoEscape
           textToHighlight={text ? text.toString() : ""}
         />
@@ -484,7 +484,7 @@ export const getColumnSearchPropsUseFilteredValue = (
         text || ""
       ),
   };
-  
+
   if (excludeRender) {
     delete obj.render;
   }
