@@ -40,17 +40,20 @@ const initialState = {
   endDateHistoryList: [],
   priceAdjustListById: [],
   message: "",
+  list_pricing: [],
+  pagination_pricing: { totalPage: 0, totalElement: 0 },
+  loading_listPricing: false,
 };
 
 export const getAllPricingPaginate = createAsyncThunk(
   "GET_ALL_PRICING_PAGINATE",
-  async ({ page, pageSize, sort, search }, thunkAPI) => {
+  async ({ page, pageSize, sort, search, filters = [], filterRules = [], isLoadMore = false }, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/maintain-pricing/list-pricing?page=${page}&size=${pageSize}&sort=${
         sort || "createdDate~desc"
-      }&searchs=${search}`;
+      }&searchs=${search}&filters=${encodeURIComponent(JSON.stringify(filters))}&filterRules=${encodeURIComponent(JSON.stringify(filterRules))}`;
       const response = await productPromoHttpService.getPagination(url);
-      return response.data;
+      return { ...response.data, isLoadMore };
     } catch (error) {
       if (error.response.data.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
@@ -751,12 +754,12 @@ export const approvalInactivePricing = createAsyncThunk(
 
 export const downloadPricing = createAsyncThunk(
   "DOWNLOAD_PRICING",
-  async ({ search, page, pageSize, sort }, thunkAPI) => {
+  async ({ search, page, pageSize, sort, filters = [], filterRules = [] }, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      const url = `/v1/dbs/api/maintain-pricing/download-filter?page=${page}&size=${pageSize}&searchs=${searchParams}&sort=${sortParams}`;
+      const url = `/v1/dbs/api/maintain-pricing/download-filter?page=${page}&size=${pageSize}&searchs=${searchParams}&sort=${sortParams}&filters=${encodeURIComponent(JSON.stringify(filters))}&filterRules=${encodeURIComponent(JSON.stringify(filterRules))}`;
       const response = await productPromoHttpService.downloadData(url);
       return response.data;
     } catch (error) {
@@ -810,14 +813,30 @@ const pricingSlice = createSlice({
     [getAllPricingPaginate.pending]: (state, action) => {
       state.loadingPricing = true;
       state.dataPricing = action.payload;
+      if (!action.meta.arg?.isLoadMore) {
+        state.loading_listPricing = true;
+        state.list_pricing = [];
+      }
     },
     [getAllPricingPaginate.fulfilled]: (state, action) => {
       state.dataPricing = action.payload;
       state.loadingPricing = false;
+      state.loading_listPricing = false;
+      const { result, page, isLoadMore } = action.payload || {};
+      if (Array.isArray(result)) {
+        state.list_pricing = isLoadMore
+          ? [...state.list_pricing, ...result]
+          : result;
+      }
+      state.pagination_pricing = {
+        totalPage: page?.totalPages || 0,
+        totalElement: page?.totalElements || 0,
+      };
     },
     [getAllPricingPaginate.rejected]: (state, action) => {
       state.dataPricing = action.payload;
       state.loadingPricing = false;
+      state.loading_listPricing = false;
     },
     /** Get Detail Pricing General */
     [getDetailPricingGeneral.pending]: (state, action) => {

@@ -14,6 +14,9 @@ const initialState = {
   dataDetailDraftPricingAdjustGeneral: {},
   dataStatus: {},
   loadingPricingAdjust: false,
+  list_pricingAdjust: [],
+  pagination_pricingAdjust: { totalPage: 0, totalElement: 0 },
+  loading_listPricingAdjust: false,
   dataListAppHierId: [],
   dataListAppHierDetail: [],
   dataApprovalHistory: {},
@@ -63,16 +66,14 @@ export const getGrantedAccessPriceAdjust = createAsyncThunk(
 
 export const getAllPricingAdjustPaginate = createAsyncThunk(
   "GET_ALL_PRICING_ADJUST_PAGINATE",
-  async ({ page, pageSize, sort, search }, thunkAPI) => {
+  async ({ page, pageSize, sort, search, filters = [], filterRules = [], isLoadMore = false }, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/price-adjustment/list-pricing-adjustment?page=${page}&size=${pageSize}&sort=${
         sort || "createdDate~desc"
-      }&searchs=${search}`;
+      }&searchs=${search}&filters=${encodeURIComponent(JSON.stringify(filters))}&filterRules=${encodeURIComponent(JSON.stringify(filterRules))}`;
       const response = await productPromoHttpService.getPagination(url);
-      // console.log(response, " = response");
-      return response.data;
+      return { ...response.data, isLoadMore };
     } catch (error) {
-      // console.log(error, " = error slice");
       if (error.response.data.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
       }
@@ -204,12 +205,12 @@ export const getApprovalHistory = createAsyncThunk(
 
 export const downloadPriceAdjust = createAsyncThunk(
   "DOWNLOAD_PRICE_ADJUST",
-  async ({ search, page, pageSize, sort }, thunkAPI) => {
+  async ({ search, page, pageSize, sort, filters = [], filterRules = [] }, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      const url = `/v1/dbs/api/price-adjustment/download-filter?page=${page}&size=${pageSize}&searchs=${searchParams}&sort=${sortParams}`;
+      const url = `/v1/dbs/api/price-adjustment/download-filter?page=${page}&size=${pageSize}&searchs=${searchParams}&sort=${sortParams}&filters=${encodeURIComponent(JSON.stringify(filters))}&filterRules=${encodeURIComponent(JSON.stringify(filterRules))}`;
       const response = await productPromoHttpService.downloadData(url);
       return response.data;
     } catch (error) {
@@ -771,18 +772,34 @@ const pricingAdjustSlice = createSlice({
   name: "pricingAdjust",
   initialState,
   extraReducers: {
-    /** Get Pricing List Paginate */
+    /** Get Pricing Adjust List Paginate */
     [getAllPricingAdjustPaginate.pending]: (state, action) => {
       state.loadingPricingAdjust = true;
       state.dataPricingAdjust = action.payload;
+      if (!action.meta.arg?.isLoadMore) {
+        state.loading_listPricingAdjust = true;
+        state.list_pricingAdjust = [];
+      }
     },
     [getAllPricingAdjustPaginate.fulfilled]: (state, action) => {
       state.dataPricingAdjust = action.payload;
       state.loadingPricingAdjust = false;
+      state.loading_listPricingAdjust = false;
+      const { result, page, isLoadMore } = action.payload || {};
+      if (Array.isArray(result)) {
+        state.list_pricingAdjust = isLoadMore
+          ? [...state.list_pricingAdjust, ...result]
+          : result;
+      }
+      state.pagination_pricingAdjust = {
+        totalPage: page?.totalPages || 0,
+        totalElement: page?.totalElements || 0,
+      };
     },
     [getAllPricingAdjustPaginate.rejected]: (state, action) => {
       state.dataPricingAdjust = action.payload;
       state.loadingPricingAdjust = false;
+      state.loading_listPricingAdjust = false;
     },
     /** Get Detail Pricing General */
     [getDetailPricingAdjustGeneral.pending]: (state, action) => {
