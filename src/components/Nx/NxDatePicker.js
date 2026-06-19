@@ -454,7 +454,7 @@ const NxDate = ({
 // ─── Static utility methods (unchanged) ───────────────────────────────────────
 
 NxDate.formatDate = (dateInput, formatString = "DD MMM YYYY HH:mm:ss") => {
-  if (!dateInput) return "-";
+  if (!dateInput) return "";
   try {
     let date;
     if (dateInput && typeof dateInput === "object" && dateInput._isAMomentObject) {
@@ -464,9 +464,9 @@ NxDate.formatDate = (dateInput, formatString = "DD MMM YYYY HH:mm:ss") => {
     } else if (typeof dateInput === "string") {
       date = new Date(dateInput);
     } else {
-      return "-";
+      return "";
     }
-    if (isNaN(date.getTime())) return "-";
+    if (isNaN(date.getTime())) return "";
     const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
     const day     = String(date.getDate()).padStart(2,"0");
     const month   = months[date.getMonth()];
@@ -477,7 +477,7 @@ NxDate.formatDate = (dateInput, formatString = "DD MMM YYYY HH:mm:ss") => {
     if (formatString === "DD MMM YYYY")       return `${day} ${month} ${year}`;
     if (formatString === "DD MMM YYYY HH:mm") return `${day} ${month} ${year} ${hours}:${minutes}`;
     return `${day} ${month} ${year} ${hours}:${minutes}:${seconds}`;
-  } catch { return "-"; }
+  } catch { return ""; }
 };
 
 NxDate.formatForAPI = (dateInput, includeTime = true) => {

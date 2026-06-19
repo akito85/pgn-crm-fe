@@ -3,6 +3,7 @@ import React, { useMemo, useState, useCallback, startTransition } from 'react';
 import { Table } from 'antd';
 import { Button } from 'antd';
 import { ReloadOutlined } from '@ant-design/icons';
+import Highlighter from 'react-highlight-words';
 import './NxTable.css';
 
 import useColumnPreferences   from './hooks/useColumnPreferences';
@@ -55,6 +56,7 @@ const NxTable = ({
   fixedColumns = { left: [], right: [] },
   setFixedColumns = () => {},
   onAdvanceSearch = () => {},
+  onSearch: onSearchProp,
   onRow,
   rowClassName,
   customHeaderLeft,
@@ -203,8 +205,12 @@ const NxTable = ({
   // Fix 4.6: stable callback — SearchBar (React.memo) does not re-render on parent changes.
   // Fix 5.1: startTransition marks the re-render as non-urgent, keeping browser responsive
   //          during the O(n*c) filter computation at 100k rows.
+  const onSearchPropRef = React.useRef(onSearchProp);
+  React.useEffect(() => { onSearchPropRef.current = onSearchProp; }, [onSearchProp]);
+
   const handleSearch = useCallback((val) => {
     startTransition(() => setSearchValue(val));
+    onSearchPropRef.current?.(val);
   }, []);
 
   // Fix 7.1 / 5.2: searchRef lets render functions read the current search value
@@ -224,38 +230,9 @@ const NxTable = ({
     return qi === q.length;
   }, []);
 
-  const highlightText = useCallback((text, search) => {
-    if (!search || text === null || text === undefined) return text;
-    const str = String(text);
-    const lower = str.toLowerCase();
-    const sq = search.toLowerCase();
-    const idx = lower.indexOf(sq);
-    if (idx !== -1) {
-      return (
-        <>
-          {str.slice(0, idx)}
-          <span style={{ backgroundColor: '#fde047', padding: '1px 2px', borderRadius: '2px', fontWeight: 600 }}>
-            {str.slice(idx, idx + sq.length)}
-          </span>
-          {str.slice(idx + sq.length)}
-        </>
-      );
-    }
-    const chars = [];
-    let qi = 0;
-    for (let i = 0; i < str.length; i++) {
-      if (qi < sq.length && str[i].toLowerCase() === sq[qi]) {
-        chars.push(<span key={i} style={{ color: '#1976D2', fontWeight: 700, textDecoration: 'underline' }}>{str[i]}</span>);
-        qi++;
-      } else {
-        chars.push(str[i]);
-      }
-    }
-    return <>{chars}</>;
-  }, []);
 
   // Fix 7.1 / 5.2: stable column render functions — searchValue changes do NOT
-  // rebuild the column array. highlightText reads from searchRef.current.
+  // rebuild the column array. render reads searchRef.current for highlighting.
   const displayedColumnsWithSearch = useMemo(() => {
     if (!searchValue) return displayedColumns;
     const processColumnForSearch = (col) => {
@@ -266,7 +243,14 @@ const NxTable = ({
         render: (text, record, index) => {
           const renderedValue = originalRender ? originalRender(text, record, index) : text;
           if (typeof renderedValue === 'string') {
-            return highlightText(renderedValue, searchRef.current);
+            return (
+              <Highlighter
+                highlightStyle={{ backgroundColor: '#ffc069', padding: 0 }}
+                searchWords={[searchRef.current]}
+                autoEscape
+                textToHighlight={renderedValue}
+              />
+            );
           }
           return renderedValue;
         },
@@ -277,13 +261,14 @@ const NxTable = ({
       return newCol;
     };
     return displayedColumns.map(processColumnForSearch);
-  }, [displayedColumns, searchValue, highlightText]);
+  }, [displayedColumns, searchValue]);
   // Note: searchValue in deps ensures memo rebuilds when search is cleared (returns displayedColumns).
   // The render function itself reads searchRef.current, so it remains accurate without rebuilding.
 
   // ── Client-side search filter ──────────────────────────────────────────────
+  // Skip when onSearchProp is provided — the parent handles server-side filtering.
   const filteredDataSource = useMemo(() => {
-    if (!searchValue) return resolvedDataSourceWithKeys;
+    if (!searchValue || onSearchProp) return resolvedDataSourceWithKeys;
     return resolvedDataSourceWithKeys.filter((row) =>
       resolvedColumns.some((col) => {
         const value = row[col.dataIndex || col.key];
@@ -292,16 +277,15 @@ const NxTable = ({
         return str.includes(sq) || fuzzyMatch(str, sq);
       })
     );
-  }, [resolvedDataSourceWithKeys, resolvedColumns, searchValue, fuzzyMatch]);
+  }, [resolvedDataSourceWithKeys, resolvedColumns, searchValue, fuzzyMatch, onSearchProp]);
 
   // ── Infinite scroll ───────────────────────────────────────────────────────
-  // Disabled while fuzzy search is active: the search bar is a client-side
-  // quick filter for already-loaded data. Fewer visible rows make Phase B's
-  // scroll threshold fire immediately, causing an infinite load loop.
-  // When search is cleared the hook re-enables and Phase A resumes from fill.
-  // For searching across all server data, users should use Advanced Search.
+  // Disabled while fuzzy (client-side) search is active: fewer visible rows make
+  // Phase B's scroll threshold fire immediately, causing an infinite load loop.
+  // When onSearchProp is provided the parent handles server-side filtering, so
+  // infinite scroll must stay enabled regardless of the local searchValue.
   const { isLoadingMore } = useInfiniteScroll({
-    useInfiniteScroll: useInfiniteScrollProp && !searchValue,
+    useInfiniteScroll: useInfiniteScrollProp && (!searchValue || !!onSearchProp),
     safeId,
     containerRef,
     hasMore,

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Form, Input, Select, message, Button } from "antd";
 import { useNavigate, useLocation } from "react-router-dom";
-import { PlusOutlined } from "@ant-design/icons";
+import { PlusOutlined, InfoCircleOutlined } from "@ant-design/icons";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
@@ -402,6 +402,15 @@ const CreateJobGroupPage = () => {
                 />
               </Form.Item>
 
+            </div>
+
+            <div className="flex items-start gap-2 px-4 py-3 mt-1 rounded-lg bg-[#f0f7ff] border border-solid border-[#c8e0fa] text-[#1565C0] text-sm">
+              <InfoCircleOutlined style={{ marginTop: 3 }} />
+              <span>
+                Notifications are configured on each member job (turn on In-App when creating
+                or editing the job). A job group has no separate notification setting — when the
+                group runs, every member job emits its own notification to the user who ran it.
+              </span>
             </div>
           </NxBaseContainer>
 

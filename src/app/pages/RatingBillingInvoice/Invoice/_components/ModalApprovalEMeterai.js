@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Form, Select } from "antd";
 import InputComponent from "../../../../../components/InputComponent";
@@ -21,8 +21,6 @@ const ModalApprovalEMeterai = ({ isOpen, handleClose, onSuccess }) => {
     loading_modal,
   } = useSelector((state) => state.emeterai);
 
-  const containerRef = useRef(null);
-  const searchInput = useRef(null);
   const [form] = Form.useForm();
   const dispatch = useDispatch();
 
@@ -30,7 +28,7 @@ const ModalApprovalEMeterai = ({ isOpen, handleClose, onSuccess }) => {
   const [pageSize, setPageSize] = useState(10);
   const [remark, setRemark] = useState("");
   const [action, setAction] = useState("");
-  const [filterType, setFilterType] = useState("emeterai");
+  const [filterType, setFilterType] = useState("meterai");
 
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [dataTableSelect, setDataTableSelect] = useState([]);
@@ -82,7 +80,7 @@ const ModalApprovalEMeterai = ({ isOpen, handleClose, onSuccess }) => {
     setDataTableSelect([]);
     setRemark("");
     setAction("");
-    setFilterType("emeterai");
+    setFilterType("meterai");
     form.resetFields();
   };
 
@@ -419,7 +417,6 @@ const ModalApprovalEMeterai = ({ isOpen, handleClose, onSuccess }) => {
               style={{ width: 300 }}
               className="filter-type-select"
             >
-              <Select.Option value="emeterai">E-Meterai (Digital)</Select.Option>
               <Select.Option value="esign">E-Sign (Digital)</Select.Option>
               <Select.Option value="meterai">Manual Meterai (Physical Stamp)</Select.Option>
               <Select.Option value="sign">Manual Sign (Wet Ink Signature)</Select.Option>

@@ -505,38 +505,26 @@ export const requestApprovalStampSign = createAsyncThunk(
 export const createStampingRequest = createAsyncThunk(
   "CREATE_STAMPING_REQUEST",
   async (
-    {
-      invoiceNumber,
-      jenisDoc = "invoice",
-      visLLX = "10",
-      visLLY = "10",
-      visURX = "500",
-      visURY = "700",
-      pageStamp = "1",
-      jenisIdentitas,
-      noIdentitas,
-      namaIdentitas,
-      kopur = "1",
-      remark,
-    },
+    { invoiceNumbers, apphierId, remark = "E-Meterai stamping request" },
     thunkAPI,
   ) => {
     try {
+      // Ensure invoiceNumbers is an array
+      const invoiceNumbersArray = Array.isArray(invoiceNumbers)
+        ? invoiceNumbers
+        : [invoiceNumbers];
+
       const body = {
-        jenisDoc,
-        visLLX,
-        visLLY,
-        visURX,
-        visURY,
-        pageStamp,
-        jenisIdentitas,
-        noIdentitas,
-        namaIdentitas,
-        kopur,
-        remark,
+        type: "emeterai",
+        invoiceNumbers: invoiceNumbersArray,
+        remark: remark || "E-Meterai stamping request",
       };
 
-      const url = `/v1/dbs/api/rbi/invoice/stampsign/${invoiceNumber}/stamp/emeterai`;
+      if (apphierId) {
+        body.apphierId = String(apphierId);
+      }
+
+      const url = `/v1/dbs/api/rbi/invoice/stampsign/stamp/emeterai`;
 
       const response = await ratingBillingHttpService.createData(url, body);
 
@@ -544,7 +532,7 @@ export const createStampingRequest = createAsyncThunk(
         title: "Successful",
         description:
           response?.message ||
-          "E-Meterai stamping request has been submitted successfully",
+          "E-Meterai stamping process has been submitted successfully",
         return: false,
       };
       thunkAPI.dispatch(showModalSuccess(successMessage));
@@ -564,7 +552,65 @@ export const createStampingRequest = createAsyncThunk(
 
       const errorBody = {
         title: "Failed",
-        description: `E-Meterai stamping request failed. ${message}. Please try again.`,
+        description: `E-Meterai stamping process failed. ${message}. Please try again.`,
+      };
+      thunkAPI.dispatch(showModalError(errorBody));
+
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  },
+);
+
+export const createSigningRequest = createAsyncThunk(
+  "CREATE_SIGNING_REQUEST",
+  async (
+    { invoiceNumbers, apphierId, remark = "E-Sign request" },
+    thunkAPI,
+  ) => {
+    try {
+      const invoiceNumbersArray = Array.isArray(invoiceNumbers)
+        ? invoiceNumbers
+        : [invoiceNumbers];
+
+      const body = {
+        type: "esign",
+        invoiceNumbers: invoiceNumbersArray,
+        remark: remark || "E-Sign request",
+      };
+
+      if (apphierId) {
+        body.apphierId = String(apphierId);
+      }
+
+      const url = `/v1/dbs/api/rbi/invoice/stampsign/sign/esign`;
+
+      const response = await ratingBillingHttpService.createData(url, body);
+
+      const successMessage = {
+        title: "Successful",
+        description:
+          response?.message ||
+          "E-Sign process has been submitted successfully",
+        return: false,
+      };
+      thunkAPI.dispatch(showModalSuccess(successMessage));
+
+      return response;
+    } catch (error) {
+      console.error("❌ POST E-Sign Error:");
+      console.error(
+        "Error Message:",
+        error?.response?.data?.message || error.message,
+      );
+      console.error("Error Code:", error?.response?.data?.code);
+      console.error("=".repeat(80));
+
+      const message =
+        error?.response?.data?.message || error.message || error.toString();
+
+      const errorBody = {
+        title: "Failed",
+        description: `E-Sign process failed. ${message}. Please try again.`,
       };
       thunkAPI.dispatch(showModalError(errorBody));
 
@@ -861,6 +907,23 @@ const emeteraiSlice = createSlice({
       state.isFailed = true;
       state.message =
         action.payload?.data?.message || "Failed to upload manual signing";
+    },
+
+    [createSigningRequest.pending]: (state) => {
+      state.signingLoading = true;
+      state.isFailed = false;
+    },
+    [createSigningRequest.fulfilled]: (state, action) => {
+      state.signingLoading = false;
+      state.isSuccess = true;
+      state.message =
+        action.payload?.message || "E-Sign process submitted successfully";
+    },
+    [createSigningRequest.rejected]: (state, action) => {
+      state.signingLoading = false;
+      state.isFailed = true;
+      state.message =
+        action.payload?.data?.message || "Failed to submit E-Sign process";
     },
 
     // Approval-related reducers

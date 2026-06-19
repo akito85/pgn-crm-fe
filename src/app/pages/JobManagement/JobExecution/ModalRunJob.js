@@ -18,10 +18,11 @@ import ScheduleConfigFields, { FieldLabel, inputStyle } from "./ScheduleConfigFi
 
 const MODAL_PAGE_SIZE = 10;
 
-// Job groups schedule the workflow START — Periodically is excluded (a short
-// interval could overlap a still-running group/chain). Applies to every group
-// type, so the matrix is fixed regardless of UNRELATED/CHAINED.
-const GROUP_TRIGGERS = ["IMMEDIATE", "ONCE", "SPECIFIC_DAYS"];
+// Job groups schedule the workflow START. Periodically is allowed (the recurring
+// job-group requirement, e.g. every 5 minutes), but operators must choose an
+// interval longer than a run can take — a short interval can overlap a still-
+// running group/chain. Applies to every group type (UNRELATED/CHAINED).
+const GROUP_TRIGGERS = ["IMMEDIATE", "ONCE", "PERIODICALLY", "SPECIFIC_DAYS"];
 
 const TABS = [
   { key: "job",   label: "Job" },
@@ -115,10 +116,18 @@ const TabBar = ({ active, onChange, disabled }) => (
 
 // ─── Small helpers ────────────────────────────────────────────────────────────
 
+// OUT params are produced by the procedure, never supplied by the caller, so they
+// must never be sent in the run-time input payload.
+const isInputParam = (p) => String(p?.direction ?? "IN").toUpperCase() !== "OUT";
+
+// Input-only parameters a job exposes for run-time entry (drops OUT params).
+const inputParamsOf = (job) => (job?.parameters ?? []).filter(isInputParam);
+
 const buildInputPayload = (paramValues, parameters) => {
   if (!parameters || parameters.length === 0) return undefined;
   const payload = {};
   parameters.forEach((p) => {
+    if (!isInputParam(p)) return;
     const val = paramValues?.[p.code];
     if (val !== undefined && val !== null && val !== "") payload[p.code] = val;
   });
@@ -329,10 +338,10 @@ const ModalRunJob = ({ open, loading, onClose, onSubmit, onGroupSubmitted }) => 
           setTriggerType={setJobTrigger}
           loading={busy}
         />
-        {selectedJob?.parameters?.length > 0 ? (
+        {inputParamsOf(selectedJob).length > 0 ? (
           <NxBaseContainer header="Parameters" border={true} padding={true}>
             <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12 }}>
-              {selectedJob.parameters.map((param) => (
+              {inputParamsOf(selectedJob).map((param) => (
                 <Form.Item key={param.code} name={["params", param.code]}
                   label={<FieldLabel required={param.required}>{param.name}</FieldLabel>}
                   rules={(param.required ?? false) ? [{ required:true, message:`${param.name} is required` }] : []}

@@ -40,6 +40,7 @@ const ProcessSigningModal = ({
   invoiceData,
   onSubmit,
   loading: externalLoading = false,
+  requiresApprovalForDigital = false,
 }) => {
   const dispatch = useDispatch();
   const { downloadLoading, data_approval_hierarchy, data_apphier_detail } =
@@ -77,10 +78,11 @@ const ProcessSigningModal = ({
       setRemark("");
       setSelectedApproval(null);
       setApprovalDetail([]);
-      // Fetch approval hierarchy list
-      dispatch(getApprovalHierarchyList());
+      if (requiresApprovalForDigital) {
+        dispatch(getApprovalHierarchyList());
+      }
     }
-  }, [visible, dispatch]);
+  }, [visible, dispatch, requiresApprovalForDigital]);
 
   useEffect(() => {
     if (data_apphier_detail && Array.isArray(data_apphier_detail)) {
@@ -150,8 +152,17 @@ const ProcessSigningModal = ({
 
   const handleNext = () => {
     if (signingMethod === "digital") {
-      // Direct submit for digital signing
-      handleSubmit();
+      if (!requiresApprovalForDigital) {
+        handleSubmit();
+      } else if (currentStep === 0) {
+        setCurrentStep(2);
+      } else if (currentStep === 2) {
+        if (!selectedApproval) {
+          message.error("Please select approval hierarchy!");
+          return;
+        }
+        setCurrentStep(3);
+      }
     } else {
       // For manual, validate step before going to next
       if (currentStep === 0) {
@@ -180,6 +191,11 @@ const ProcessSigningModal = ({
   };
 
   const handleBack = () => {
+    if (signingMethod === "digital" && requiresApprovalForDigital) {
+      setCurrentStep(currentStep === 3 ? 2 : 0);
+      return;
+    }
+
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
     }
@@ -191,6 +207,10 @@ const ProcessSigningModal = ({
   };
 
   const handleSubmit = async () => {
+    const requiresApproval =
+      signingMethod === "manual" ||
+      (signingMethod === "digital" && requiresApprovalForDigital);
+
     if (signingMethod === "manual") {
       if (fileList.length === 0) {
         message.error("Please upload the signed invoice file!");
@@ -200,10 +220,11 @@ const ProcessSigningModal = ({
         message.error("Please provide a remark!");
         return;
       }
-      if (!selectedApproval) {
-        message.error("Please select approval hierarchy!");
-        return;
-      }
+    }
+
+    if (requiresApproval && !selectedApproval) {
+      message.error("Please select approval hierarchy!");
+      return;
     }
 
     try {
@@ -218,8 +239,8 @@ const ProcessSigningModal = ({
             signingMethod === "manual"
               ? fileList[0].originFileObj || fileList[0]
               : null,
-          remark: remark,
-          apphierId: signingMethod === "manual" ? selectedApproval : null,
+          remark: signingMethod === "manual" ? remark : "E-Sign request",
+          apphierId: requiresApproval ? selectedApproval : null,
           submittedAt: new Date().toISOString(),
         };
 
@@ -267,6 +288,10 @@ const ProcessSigningModal = ({
     setRemark("");
     setSelectedApproval(null);
     setApprovalDetail([]);
+
+    if (newMethod === "manual" || requiresApprovalForDigital) {
+      dispatch(getApprovalHierarchyList());
+    }
   };
 
   const columnsApproval = [
@@ -728,7 +753,7 @@ const ProcessSigningModal = ({
     </>
   );
 
-  // Render Step 4: Confirmation (Manual Only)
+  // Render Step 4: Confirmation
   const renderStep4 = () => {
     const selectedApprovalName = data_approval_hierarchy?.find(
       (a) => a.appHierId === selectedApproval
@@ -748,18 +773,20 @@ const ProcessSigningModal = ({
             Please review your submission
           </h3>
 
-          <div style={{ marginBottom: "24px" }}>
-            <p
-              style={{
-                fontSize: "14px",
-                color: "#8c8c8c",
-                marginBottom: "8px",
-              }}
-            >
-              Remark
-            </p>
-            <p style={{ fontSize: "15px", color: "#262626" }}>{remark}</p>
-          </div>
+          {signingMethod === "manual" && (
+            <div style={{ marginBottom: "24px" }}>
+              <p
+                style={{
+                  fontSize: "14px",
+                  color: "#8c8c8c",
+                  marginBottom: "8px",
+                }}
+              >
+                Remark
+              </p>
+              <p style={{ fontSize: "15px", color: "#262626" }}>{remark}</p>
+            </div>
+          )}
 
           <div style={{ marginBottom: "24px" }}>
             <p
@@ -846,35 +873,64 @@ const ProcessSigningModal = ({
             </div>
           </div>
 
-          <div>
-            <p
-              style={{
-                fontSize: "14px",
-                color: "#8c8c8c",
-                marginBottom: "12px",
-              }}
-            >
-              File
-            </p>
-            <div
-              style={{
-                background: "#f5f5f5",
-                border: "1px solid #d9d9d9",
-                borderRadius: "6px",
-                padding: "16px",
-              }}
-            >
-              {fileList.length > 0 && (
-                <span style={{ fontSize: "14px", color: "#262626" }}>
-                  {fileList[0].name} ({(fileList[0].size / 1024).toFixed(2)}{" "}
-                  KB)
-                </span>
-              )}
+          {signingMethod === "manual" && (
+            <div>
+              <p
+                style={{
+                  fontSize: "14px",
+                  color: "#8c8c8c",
+                  marginBottom: "12px",
+                }}
+              >
+                File
+              </p>
+              <div
+                style={{
+                  background: "#f5f5f5",
+                  border: "1px solid #d9d9d9",
+                  borderRadius: "6px",
+                  padding: "16px",
+                }}
+              >
+                {fileList.length > 0 && (
+                  <span style={{ fontSize: "14px", color: "#262626" }}>
+                    {fileList[0].name} ({(fileList[0].size / 1024).toFixed(2)}{" "}
+                    KB)
+                  </span>
+                )}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </>
     );
+  };
+
+  const showApprovalFlow =
+    signingMethod === "manual" ||
+    (signingMethod === "digital" && requiresApprovalForDigital);
+
+  const displayedStepIndex =
+    signingMethod === "digital" && requiresApprovalForDigital
+      ? currentStep === 0
+        ? 0
+        : currentStep === 2
+        ? 1
+        : 2
+      : currentStep;
+
+  const stepTitles =
+    signingMethod === "digital" && requiresApprovalForDigital
+      ? ["Select Method", "Approval", "Confirmation"]
+      : ["Select Method", "Upload Document", "Approval", "Confirmation"];
+
+  const getTitle = () => {
+    if (signingMethod === "manual" && currentStep === 1) {
+      return "Upload Invoice with Wet Ink Signature";
+    }
+    if (showApprovalFlow && currentStep === 2) return "Select Approval";
+    if (showApprovalFlow && currentStep === 3) return "Confirmation";
+    return "Process Digital Signing";
   };
 
   return (
@@ -903,24 +959,17 @@ const ProcessSigningModal = ({
             color: "#0175BF",
           }}
         >
-          {signingMethod === "manual" && currentStep === 1
-            ? "Upload Invoice with Wet Ink Signature"
-            : signingMethod === "manual" && currentStep === 2
-            ? "Select Approval"
-            : signingMethod === "manual" && currentStep === 3
-            ? "Confirmation"
-            : "Process Digital Signing"}
+          {getTitle()}
         </h2>
       </div>
 
-      {/* Steps Indicator (for Manual only) */}
-      {signingMethod === "manual" && (
+      {/* Steps Indicator (for approval flows only) */}
+      {showApprovalFlow && (
         <div style={{ padding: "24px 32px 0" }}>
-          <Steps current={currentStep} size="small">
-            <Step title="Select Method" />
-            <Step title="Upload Document" />
-            <Step title="Approval" />
-            <Step title="Confirmation" />
+          <Steps current={displayedStepIndex} size="small">
+            {stepTitles.map((title) => (
+              <Step key={title} title={title} />
+            ))}
           </Steps>
         </div>
       )}
@@ -929,8 +978,8 @@ const ProcessSigningModal = ({
       <div style={{ padding: "32px" }}>
         {currentStep === 0 && renderStep1()}
         {currentStep === 1 && signingMethod === "manual" && renderStep2()}
-        {currentStep === 2 && signingMethod === "manual" && renderStep3()}
-        {currentStep === 3 && signingMethod === "manual" && renderStep4()}
+        {currentStep === 2 && showApprovalFlow && renderStep3()}
+        {currentStep === 3 && showApprovalFlow && renderStep4()}
       </div>
 
       {/* Footer */}
@@ -940,11 +989,12 @@ const ProcessSigningModal = ({
           borderTop: "1px solid #e8e8e8",
           background: "#fafafa",
           display: "flex",
-          justifyContent: currentStep > 0 ? "space-between" : "flex-end",
+          justifyContent:
+            currentStep > 0 && showApprovalFlow ? "space-between" : "flex-end",
           gap: "12px",
         }}
       >
-        {currentStep > 0 && signingMethod === "manual" && (
+        {currentStep > 0 && showApprovalFlow && (
           <Button
             onClick={handleBack}
             size="large"
@@ -983,9 +1033,11 @@ const ProcessSigningModal = ({
                 height: "44px",
                 fontSize: "15px",
                 fontWeight: "500",
-              }}
-            >
-              {signingMethod === "digital" ? "Process Signing" : "Next"}
+            }}
+          >
+              {signingMethod === "digital" && !requiresApprovalForDigital
+                ? "Process Signing"
+                : "Next"}
             </Button>
           ) : currentStep < 3 ? (
             <Button

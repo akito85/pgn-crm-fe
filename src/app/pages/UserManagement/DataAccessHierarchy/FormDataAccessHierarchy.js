@@ -7,6 +7,7 @@ import {
   UnorderedListOutlined,
   DeleteOutlined,
   WarningOutlined,
+  StopOutlined,
 } from "@ant-design/icons";
 import { Alert, Form, Select, Spin, Tooltip } from "antd";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -281,7 +282,7 @@ const FormDataAccessHierarchy = (props) => {
       setInputCostCenterAlert(false);
     } else {
       const maxId = data.reduce(
-        (max, item) => (item.key > max ? item.key : max),
+        (max, item) => Math.max(max, Number(item.key) || 0),
         0
       );
       const values =
@@ -445,7 +446,7 @@ const FormDataAccessHierarchy = (props) => {
       });
       data?.forEach((node) => {
         const { costCenter, parent } = node;
-        if (parent !== null || parent === "" || parent === undefined) {
+        if (parent !== null && parent !== "" && parent !== undefined) {
           nodes[parent]?.children?.push(nodes[costCenter]);
         }
       });
@@ -598,7 +599,7 @@ const FormDataAccessHierarchy = (props) => {
         key: "no",
         title: "ACTION",
         fixed: "right",
-        width: 160,
+        width: 200,
         render: (_, record, data) => {
           const isDisabled = hasChildren(transformData, record?.key);
           return (
@@ -637,6 +638,18 @@ const FormDataAccessHierarchy = (props) => {
                   />
                 </div>
               </Tooltip>
+              {record?.id && record?.status === "ACTIVE" && (
+                <Tooltip title={"Inactivate"}>
+                  <div
+                    onClick={() => {
+                      setRecordId(record.id);
+                      setModalActive(true);
+                    }}
+                  >
+                    <StopOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
+                  </div>
+                </Tooltip>
+              )}
             </div>
           );
         },

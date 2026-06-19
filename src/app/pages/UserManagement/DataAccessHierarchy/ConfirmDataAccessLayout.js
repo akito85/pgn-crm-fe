@@ -42,6 +42,7 @@ const ConfirmDataAccessLayout = ({
         ? null
         : moment(formValue?.endDate).format(dateFormatting.dateCapital);
     delete formValue.startDate;
+    delete formValue.endDate;
     const {
       costCenter,
       sibling,
@@ -52,21 +53,13 @@ const ConfirmDataAccessLayout = ({
     } = formValue;
     const valueOfBody =
       typeAction === "create" ? formValue : { id: id, ...otherValues };
-    const body =
-      saveAs === "DRAFT"
-        ? {
-            ...valueOfBody,
-            hierarchy: updatedData,
-            description: descriptionHierarchy,
-            saveAs,
-          }
-        : {
-            ...valueOfBody,
-            hierarchy: updatedData,
-            description: descriptionHierarchy,
-            saveAs,
-            endDate,
-          };
+    const body = {
+      ...valueOfBody,
+      hierarchy: updatedData,
+      description: descriptionHierarchy,
+      saveAs,
+      endDate: saveAs === "DRAFT" ? null : endDate,
+    };
 
     setPayload(body);
     if (typeAction === "create") {
