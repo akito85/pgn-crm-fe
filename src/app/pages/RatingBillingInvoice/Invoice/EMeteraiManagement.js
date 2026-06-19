@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { message } from "antd";
 import { useDispatch, useSelector } from "react-redux";
-import { CheckOutlined, PlusOutlined } from "@ant-design/icons";
+import { CheckOutlined } from "@ant-design/icons";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import CardContainer from "../../../../components/CardContainer";
 import TableRBI from "../../../../components/TableRBI";
@@ -14,15 +14,55 @@ import StampingRequestModal from "./_components/StampingRequestModal";
 import ProcessSigningModal from "./_components/ProcessingSigningModal";
 import InvoiceDetailModal from "./_components/InvoiceDetailModal";
 import ModalApprovalEMeterai from "./_components/ModalApprovalEMeterai";
-import ModalRequestApprovalEMeterai from "./_components/ModalRequestApprovalEMeterai";
 import { getEMeteraiColumns } from "./_components/EMeteraiColumns";
 import {
   getAllEMeteraiInvoices,
   createStampingRequest,
+  createSigningRequest,
   uploadManualStamping,
   uploadManualSigning,
   getApprovalHistory,
 } from "../../../../redux/slices/rating_billing_invoice/emeterai";
+
+const APPROVAL_HISTORY_TABS = [
+  { value: "stamp", label: "Stamp" },
+  { value: "sign", label: "Sign" },
+];
+
+const getApprovalHistoryGroup = (key) => {
+  const normalizedKey = String(key || "").toLowerCase();
+
+  if (normalizedKey.includes("sign") || normalizedKey.includes("esign")) {
+    return "sign";
+  }
+
+  if (
+    normalizedKey.includes("stamp") ||
+    normalizedKey.includes("meterai") ||
+    normalizedKey.includes("emeterai")
+  ) {
+    return "stamp";
+  }
+
+  return null;
+};
+
+const groupApprovalHistoryByProcess = (data = {}) => {
+  const groupedData = {
+    stamp: [],
+    sign: [],
+  };
+
+  Object.entries(data || {}).forEach(([key, value]) => {
+    const group = getApprovalHistoryGroup(key);
+    if (!group) return;
+
+    const values = Array.isArray(value) ? value : [];
+    groupedData[group] = [...groupedData[group], ...values];
+  });
+
+  return groupedData;
+};
 
 const EMeteraiManagement = () => {
   const dispatch = useDispatch();
@@ -33,6 +73,7 @@ const EMeteraiManagement = () => {
     invoice_pagination,
     loading,
     stampingLoading,
+    signingLoading,
     data_approval_history,
   } = useSelector((state) => state.emeterai);
 
@@ -45,7 +86,6 @@ const EMeteraiManagement = () => {
   const [stampingModalVisible, setStampingModalVisible] = useState(false);
   const [signingModalVisible, setSigningModalVisible] = useState(false);
   const [modalApproval, setModalApproval] = useState(false);
-  const [modalRequest, setModalRequest] = useState(false);
   const [modalApprovalHistory, setModalApprovalHistory] = useState(false);
   const [dataApprovalHistory, setDataApprovalHistory] = useState({});
 
@@ -60,16 +100,14 @@ const EMeteraiManagement = () => {
     ) {
       const rawApprover = data_approval_history.dataApprover || {};
       const rawHistory = data_approval_history.dataHistory || {};
-      // Lowercase keys to match ModalHistory tab lookup behaviour
-      const dataApprover = Object.fromEntries(
-        Object.entries(rawApprover).map(([k, v]) => [k.toLowerCase(), v]),
-      );
-      const dataHistory = Object.fromEntries(
-        Object.entries(rawHistory).map(([k, v]) => [k.toLowerCase(), v]),
-      );
+      const dataApprover = groupApprovalHistoryByProcess(rawApprover);
+      const dataHistory = groupApprovalHistoryByProcess(rawHistory);
       setDataApprovalHistory({ dataApprover, dataHistory });
     } else {
-      setDataApprovalHistory({});
+      setDataApprovalHistory({
+        dataApprover: { stamp: [], sign: [] },
+        dataHistory: { stamp: [], sign: [] },
+      });
     }
   }, [data_approval_history]);
 
@@ -187,24 +225,33 @@ const EMeteraiManagement = () => {
     }
   };
 
+  const isManualStamp = (record) => {
+    const values = [
+      record?.stampType,
+      record?.stampingMethod,
+      record?.stampMethod,
+      record?.stampSource,
+    ];
+
+    return values.some((value) => {
+      if (!value) return false;
+      const normalized = String(value).toLowerCase().replace(/[\s-]/g, "_");
+      return (
+        normalized.includes("manual") ||
+        normalized.includes("physical") ||
+        normalized === "meterai" ||
+        normalized.includes("manual_meterai")
+      );
+    });
+  };
+
   // Handle stamping submission
   const handleStampingSubmit = async (submissionData) => {
-    console.log(submissionData.stampingMethod);
     try {
       if (submissionData.stampingMethod === "e-stamping") {
         const payload = {
-          invoiceNumber: submissionData.invoiceNumber,
-          jenisDoc: "invoice",
-          visLLX: "10",
-          visLLY: "10",
-          visURX: "500",
-          visURY: "700",
-          pageStamp: "1",
-          jenisIdentitas: "Test Jenis",
-          noIdentitas: "123456789",
-          namaIdentitas: "Test User",
-          kopur: "1",
-          remark: "Test stamp",
+          invoiceNumbers: [submissionData.invoiceNumber],
+          remark: submissionData.remark || "E-Meterai stamping request",
         };
 
         await dispatch(createStampingRequest(payload)).unwrap();
@@ -225,7 +272,7 @@ const EMeteraiManagement = () => {
 
       message.success(
         submissionData.stampingMethod === "e-stamping"
-          ? "E-Stamping request submitted successfully!"
+          ? "E-Stamping process submitted successfully!"
           : "Manual stamping uploaded successfully!",
       );
     } catch (error) {
@@ -241,9 +288,10 @@ const EMeteraiManagement = () => {
     try {
       if (signingMethod === "digital") {
         await dispatch(
-          createStampingRequest({
-            invoiceNumber,
-            signingMethod,
+          createSigningRequest({
+            invoiceNumbers: [invoiceNumber],
+            remark: remark || "E-Sign request",
+            apphierId,
           }),
         ).unwrap();
       } else if (signingMethod === "manual") {
@@ -279,16 +327,8 @@ const EMeteraiManagement = () => {
     setModalApproval(true);
   };
 
-  const handleBulkRequest = () => {
-    setModalRequest(true);
-  };
-
   const closeModalApproval = () => {
     setModalApproval(false);
-  };
-
-  const closeModalRequest = () => {
-    setModalRequest(false);
   };
 
   const handleRefreshBtn = () => {
@@ -298,18 +338,6 @@ const EMeteraiManagement = () => {
   // const transformedData = getTransformedData();
 
   const itemGrantAccess = [
-    {
-      action: "Request",
-      render: (
-        <ButtonComponent
-          icon={<PlusOutlined style={{ color: "#ffff" }} />}
-          type="primary"
-          onClick={handleBulkRequest}
-        >
-          Request Approval
-        </ButtonComponent>
-      ),
-    },
     {
       action: "Approval",
       render: (
@@ -401,7 +429,8 @@ const EMeteraiManagement = () => {
         }}
         invoiceData={selectedInvoice}
         onSubmit={handleSigningSubmit}
-        loading={stampingLoading}
+        loading={signingLoading}
+        requiresApprovalForDigital={isManualStamp(selectedInvoice)}
       />
 
       {/* Modal Approval E-Meterai */}
@@ -414,32 +443,13 @@ const EMeteraiManagement = () => {
         }}
       />
 
-      {/* Modal Request Approval E-Meterai */}
-      <ModalRequestApprovalEMeterai
-        isOpen={modalRequest}
-        handleClose={closeModalRequest}
-        onSuccess={() => {
-          closeModalRequest();
-          handleRefreshBtn();
-        }}
-      />
-
       {/* Modal Approval History */}
       <ModalHistory
         isOpen={modalApprovalHistory}
         handleClose={() => setModalApprovalHistory(false)}
         header={"Approval History"}
         width={1000}
-        tabOptions={Object.keys(dataApprovalHistory?.dataApprover || {}).map(
-          (key) => ({
-            value: key,
-            label: key
-              .toLowerCase()
-              .split("_")
-              .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-              .join(" "),
-          }),
-        )}
+        tabOptions={APPROVAL_HISTORY_TABS}
         dataApprover={dataApprovalHistory?.dataApprover}
         dataHistory={dataApprovalHistory?.dataHistory}
       />

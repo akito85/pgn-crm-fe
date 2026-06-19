@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Form, Spin, Select } from "antd";
 import { RightOutlined } from "@ant-design/icons";
-import moment from "moment";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import InputComponent from "../../../../../components/InputComponent";
@@ -212,7 +211,7 @@ const ModalRequestApprovalEMeterai = ({
   const [current, setCurrent] = useState(0);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [filterType, setFilterType] = useState("emeterai");
+  const [filterType, setFilterType] = useState("meterai");
 
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [selectedRows, setSelectedRows] = useState([]);
@@ -365,7 +364,7 @@ const ModalRequestApprovalEMeterai = ({
     setDataTable([]);
     setRemark("");
     setCurrent(0);
-    setFilterType("emeterai");
+    setFilterType("meterai");
     handleClose();
   };
 
@@ -651,7 +650,6 @@ const ModalRequestApprovalEMeterai = ({
                       style={{ width: 250 }}
                       className="filter-type-select"
                     >
-                      <Select.Option value="emeterai">E-Meterai (Digital)</Select.Option>
                       <Select.Option value="esign">E-Sign (Digital)</Select.Option>
                       <Select.Option value="meterai">Manual Meterai (Physical Stamp)</Select.Option>
                       <Select.Option value="sign">Manual Sign (Wet Ink Signature)</Select.Option>
