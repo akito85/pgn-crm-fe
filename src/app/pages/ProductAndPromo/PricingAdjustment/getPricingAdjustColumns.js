@@ -29,12 +29,14 @@ const formatStatus = (value) => {
 const getPricingAdjustColumns = ({ search, searchInput, searchedColumn, searchText, handleSearch }) => [
   {
     title: "NO",
+    key: "no",
     width: 50,
     align: "center",
     render: (_, __, index) => index + 1,
   },
   {
     title: "ADJUSTMENT NAME",
+    key: "name",
     sorter: true,
     dataIndex: "name",
     ellipsis: { showTitle: false },
@@ -42,6 +44,7 @@ const getPricingAdjustColumns = ({ search, searchInput, searchedColumn, searchTe
   },
   {
     title: "PRICE CODE",
+    key: "priceCode",
     sorter: true,
     dataIndex: "priceCode",
     ellipsis: { showTitle: false },
@@ -49,6 +52,7 @@ const getPricingAdjustColumns = ({ search, searchInput, searchedColumn, searchTe
   },
   {
     title: "PRICING DETAIL VALUE",
+    key: "pricing",
     sorter: true,
     dataIndex: "pricing",
     ellipsis: { showTitle: false },
@@ -56,6 +60,7 @@ const getPricingAdjustColumns = ({ search, searchInput, searchedColumn, searchTe
   },
   {
     title: "CRITERIA",
+    key: "criterias",
     sorter: true,
     dataIndex: "criterias",
     ellipsis: { showTitle: false },
@@ -63,6 +68,7 @@ const getPricingAdjustColumns = ({ search, searchInput, searchedColumn, searchTe
   },
   {
     title: "DESCRIPTION",
+    key: "criterias",
     sorter: true,
     dataIndex: "description",
     ellipsis: { showTitle: false },

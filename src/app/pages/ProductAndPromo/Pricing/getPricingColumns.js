@@ -28,12 +28,14 @@ const formatStatus = (value) => {
 const getPricingColumns = ({ search, searchInput, searchedColumn, searchText, handleSearch }) => [
   {
     title: "NO",
+    key: "no",
     width: 50,
     align: "center",
     render: (_, __, index) => index + 1,
   },
   {
     title: "PRICE CODE",
+    key: "priceCode",
     sorter: true,
     dataIndex: "priceCode",
     ellipsis: { showTitle: false },
@@ -41,6 +43,7 @@ const getPricingColumns = ({ search, searchInput, searchedColumn, searchText, ha
   },
   {
     title: "PRODUCT",
+    key: "product",
     sorter: true,
     dataIndex: "product",
     ellipsis: { showTitle: false },
@@ -48,6 +51,7 @@ const getPricingColumns = ({ search, searchInput, searchedColumn, searchText, ha
   },
   {
     title: "PRICING",
+    key: "pricing",
     sorter: true,
     dataIndex: "pricing",
     ellipsis: { showTitle: false },
@@ -55,6 +59,7 @@ const getPricingColumns = ({ search, searchInput, searchedColumn, searchText, ha
   },
   {
     title: "MAKER POSITION",
+    key: "makerPosition",
     sorter: true,
     dataIndex: "makerPosition",
     ellipsis: { showTitle: false },
@@ -62,6 +67,7 @@ const getPricingColumns = ({ search, searchInput, searchedColumn, searchText, ha
   },
   {
     title: "CRITERIA",
+    key: "criterias",
     sorter: true,
     dataIndex: "criterias",
     ellipsis: { showTitle: false },
@@ -69,6 +75,7 @@ const getPricingColumns = ({ search, searchInput, searchedColumn, searchText, ha
   },
   {
     title: "DESCRIPTION",
+    key: "priceDescription",
     sorter: true,
     dataIndex: "priceDescription",
     ellipsis: { showTitle: false },
