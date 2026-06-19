@@ -1,6 +1,6 @@
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Checkbox, Tooltip } from "antd";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import SVGIcon from "../../../../assets/Icon/index";
@@ -20,11 +20,13 @@ import {
 } from "../../../../redux/slices/product_promo/pricingAdjust";
 import { PRODUCT_PROMO_ROUTES } from "../../../../routes/product_promo/pp_routes";
 import getPricingAdjustColumns from "./getPricingAdjustColumns";
+import { nxGetAccountActions } from "../../../../components/Nx/NxGetAccountActions";
 
 const PAGE_SIZE = 20;
 
 const PricingAdjustTable = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const {
     list_pricingAdjust: dataSource,
     pagination_pricingAdjust: pagination,
@@ -39,9 +41,9 @@ const PricingAdjustTable = () => {
   const searchInput = useRef(null);
   const [page, setPage] = useState(0);
   const [searchedColumn, setSearchedColumn] = useState("");
-  const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
+  const [searchText, setSearchText] = useState("");
   const [filters, setFilters] = useState([]);
   const [filterRules, setFilterRules] = useState([]);
 
@@ -77,11 +79,12 @@ const PricingAdjustTable = () => {
       page: pageNum,
       pageSize: PAGE_SIZE,
       sort,
-      search: encodeURIComponent(JSON.stringify(search)),
+      search,
+      searchText,
       filters,
       filterRules,
     }),
-    [sort, search, filters, filterRules]
+    [sort, search, searchText, filters, filterRules]
   );
 
   const handleRefresh = useCallback(() => {
@@ -93,7 +96,7 @@ const PricingAdjustTable = () => {
   useEffect(() => {
     dispatch(getAllPricingAdjustPaginate({ ...buildBody(0), isLoadMore: false }));
     setPage(0);
-  }, [sort, search, filters, filterRules]); // intentionally omit dispatch/buildBody to avoid loop
+  }, [sort, search, searchText, filters, filterRules]); // intentionally omit dispatch/buildBody to avoid loop
 
   const handleLoadMore = () => {
     const nextPage = page + 1;
@@ -106,13 +109,16 @@ const PricingAdjustTable = () => {
   // --- Handlers ---
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
-    setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
     setSearch((prev) => {
       if (prev[dataIndex] !== selectedKeys[0]) setPage(0);
       return { ...prev, [dataIndex]: selectedKeys[0] };
     });
   };
+
+  const handleSearchBar = useCallback((value) => {
+    setSearchText(value || "");
+  }, []);
 
   const onSort = (_, __, sortInfo) => {
     const dataSort = sortInfo.order
@@ -132,11 +138,12 @@ const PricingAdjustTable = () => {
       page: 0,
       pageSize: PAGE_SIZE,
       sort,
-      search: encodeURIComponent(JSON.stringify(search)),
+      search,
+      searchText,
       filters,
       filterRules,
     }));
-  }, [dispatch, sort, search, filters, filterRules]);
+  }, [dispatch, sort, search, searchText, filters, filterRules]);
 
   const handleApprovalHistory = (data) => {
     dispatch(getApprovalHistory(data.id));
@@ -194,149 +201,27 @@ const PricingAdjustTable = () => {
     }));
   };
 
-  // --- Toolbar items ---
-  const toolbarItems = useMemo(() => [
-    {
-      action: "Download",
-      render: (
-        <ButtonComponent
-          icon={<SVGIcon name="IconButtonDownload" width={24} />}
-          type="submit"
-          onClick={handleDownload}
-        >
-          Download List
-        </ButtonComponent>
-      ),
-    },
-  ], [handleDownload]);
-
   // --- Action column items ---
-  const itemsActionView = useMemo(() => [
-    {
-      action: "view",
-      type: "table",
-      render: (record) => (
-        <Tooltip title="Detail">
-          <Link to={PRODUCT_PROMO_ROUTES.DETAIL_PRICING_ADJUSTMENT} state={{ id: record?.id }}>
-            <SVGIcon name="IconDetail" width={24} />
-          </Link>
-        </Tooltip>
-      ),
-    },
-    {
-      action: "Update",
-      type: "table",
-      render: (record, data_length) => {
-        const isEditable =
-          record.statusApproval === "DRAFT" ||
-          record.statusApproval === "REJECTED" ||
-          (record.status === "ACTIVE" && record.statusApproval === "APPROVED");
-        const icon =
-          data_length > 3 ? (
-            <ButtonComponent
-              icon={<SVGIcon name="IconEdit" color="#0075bf" width={24} />}
-              border={false}
-              disabled={!isEditable}
-            >
-              <span className="text-black ml-3">Update</span>
-            </ButtonComponent>
-          ) : (
-            <Tooltip title="Update">
-              <div className="pt-1">
-                <SVGIcon
-                  name="IconEdit"
-                  width={24}
-                  color={!isEditable ? "#8D91A0" : "#ACC424"}
-                  className={!isEditable ? "cursor-not-allowed" : undefined}
-                />
-              </div>
-            </Tooltip>
-          );
-        return isEditable ? (
-          <Link
-            to={PRODUCT_PROMO_ROUTES.UPDATE_PRICING_ADJUSTMENT}
-            state={{
-              id: record?.id,
-              prevPage: "table-price-adjust",
-              statusPriceAdjust: record?.status,
-              statusApprovalPriceAdjust: record?.statusApproval,
-            }}
-          >
-            {icon}
-          </Link>
-        ) : icon;
-      },
-    },
-    {
-      action: "Activate",
-      type: "table",
-      render: (record, data_length) => {
-        const isActivateOrInactivate =
-          (record.statusApproval === "APPROVED" && record.status === "ACTIVE") ||
-          (record.statusApproval === "DRAFT" && record.status === "ACTIVE") ||
-          (record.statusApproval === "REJECTED" && record.status === "ACTIVE");
-        return data_length > 3 ? (
-          <ButtonComponent
-            icon={
-              <Checkbox
-                className="inactive-check"
-                disabled={record?.status !== "ACTIVE"}
-                checked={record?.status !== "ACTIVE"}
-              />
-            }
-            border={false}
-            disabled={!isActivateOrInactivate}
-            onClick={() => handleOpenModalInactivate(record)}
-          >
-            <span className="text-black ml-5">
-              {record?.status !== "ACTIVE" ? "Activate" : "Inactivate"}
-            </span>
-          </ButtonComponent>
-        ) : (
-          <Tooltip title={record?.status === "ACTIVE" ? "Inactivate" : "Activate"}>
-            <div className="pt-1">
-              <Checkbox
-                className="inactive-check"
-                onClick={() => handleOpenModalInactivate(record)}
-                disabled={record?.status !== "ACTIVE"}
-                checked={record?.status !== "ACTIVE"}
-              />
-            </div>
-          </Tooltip>
-        );
-      },
-    },
-    {
-      action: "History",
-      type: "table",
-      render: (record, data_length) =>
-        data_length > 3 ? (
-          <ButtonComponent
-            icon={<SVGIcon name="IconLogHistory" color="#0075bf" width={24} />}
-            border={false}
-            onClick={() => handleApprovalHistory(record)}
-          >
-            <span className="text-black ml-3">Approval History</span>
-          </ButtonComponent>
-        ) : (
-          <Tooltip title="Approval History">
-            <div className="pt-1">
-              <SVGIcon
-                name="IconLogHistory"
-                color="#0075bf"
-                width={24}
-                onClick={() => handleApprovalHistory(record)}
-              />
-            </div>
-          </Tooltip>
-        ),
-    },
-  ], [handleOpenModalInactivate, handleApprovalHistory]);
+  const itemActions = useMemo(() => nxGetAccountActions({
+    handleView: ({ id }) =>
+      navigate(PRODUCT_PROMO_ROUTES.DETAIL_PRICING, {
+        state: { id }
+      }),
+    handleUpdate: ({ id, status, statusApproval }) => 
+      navigate(PRODUCT_PROMO_ROUTES.CREATE_PRICING, {
+        state: {
+          id, statusPricing: status, statusApprovalPricing: statusApproval
+        }
+      }),
+    handleActivate: handleOpenModalInactivate,
+    handleApprovalHistory,
+    handleDownload,
+  }), [handleDownload, handleOpenModalInactivate, handleApprovalHistory]);
 
   // --- Columns ---
   const actionCols = useColumnActionPermission(
     ["View", "Update", "Activate", "History"],
-    itemsActionView
+    itemActions
   );
 
   const baseColumns = useMemo(
@@ -350,7 +235,7 @@ const PricingAdjustTable = () => {
   return (
     <Fragment>
       <div className="flex flex-col gap-y-4">
-        <Toolbar items={toolbarItems} type="page" />
+        <Toolbar items={itemActions} type="page" />
         <NxTable
           idTable="pricing-adjust-table"
           dataSource={dataSource}
@@ -366,6 +251,7 @@ const PricingAdjustTable = () => {
           loading={loading}
           onAdvanceSearch={handleAdvancedSearch}
           onRefresh={handleRefresh}
+          onSearch={handleSearchBar}
         />
       </div>
 

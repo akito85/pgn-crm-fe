@@ -66,12 +66,19 @@ export const getGrantedAccessPriceAdjust = createAsyncThunk(
 
 export const getAllPricingAdjustPaginate = createAsyncThunk(
   "GET_ALL_PRICING_ADJUST_PAGINATE",
-  async ({ page, pageSize, sort, search, filters = [], filterRules = [], isLoadMore = false }, thunkAPI) => {
+  async ({ page, pageSize, sort, search, searchText, filters = [], filterRules = [], isLoadMore = false }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/price-adjustment/list-pricing-adjustment?page=${page}&size=${pageSize}&sort=${
-        sort || "createdDate~desc"
-      }&searchs=${search}&filters=${encodeURIComponent(JSON.stringify(filters))}&filterRules=${encodeURIComponent(JSON.stringify(filterRules))}`;
-      const response = await productPromoHttpService.getPagination(url);
+      const url = `/v1/dbs/api/price-adjustment/list-pricing-adjustment`;
+      const body = {
+        page,
+        size: pageSize,
+        sort: sort || "createdDate~desc",
+        search: searchText || null,
+        searchs: search || {},
+        filters,
+        filterRules,
+      };
+      const response = await productPromoHttpService.createData(url, body);
       return { ...response.data, isLoadMore };
     } catch (error) {
       if (error.response.data.code === 419) {
@@ -205,13 +212,19 @@ export const getApprovalHistory = createAsyncThunk(
 
 export const downloadPriceAdjust = createAsyncThunk(
   "DOWNLOAD_PRICE_ADJUST",
-  async ({ search, page, pageSize, sort, filters = [], filterRules = [] }, thunkAPI) => {
+  async ({ search, searchText, page, pageSize, sort, filters = [], filterRules = [] }, thunkAPI) => {
     try {
-      const searchParams = search === undefined ? "" : search;
-      const sortParams =
-        sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      const url = `/v1/dbs/api/price-adjustment/download-filter?page=${page}&size=${pageSize}&searchs=${searchParams}&sort=${sortParams}&filters=${encodeURIComponent(JSON.stringify(filters))}&filterRules=${encodeURIComponent(JSON.stringify(filterRules))}`;
-      const response = await productPromoHttpService.downloadData(url);
+      const url = `/v1/dbs/api/price-adjustment/download-filter`;
+      const body = {
+        page,
+        size: pageSize,
+        sort: sort || "createdDate~desc",
+        search: searchText || null,
+        searchs: search || {},
+        filters,
+        filterRules,
+      };
+      const response = await productPromoHttpService.downloadDataPost(url, body);
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(

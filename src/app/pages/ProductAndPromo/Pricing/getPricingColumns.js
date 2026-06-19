@@ -1,5 +1,5 @@
 import { getColumnSearchPropsUseFilteredValue } from "../../../../utils/getColumnSearchProps";
-import { hasValue, renderColumn } from "../../../../utils";
+import NxStatusComponent from "../../../../components/Nx/NxStatusComponent";
 
 const formatStatus = (value) => {
   switch (value) {
@@ -38,7 +38,6 @@ const getPricingColumns = ({ search, searchInput, searchedColumn, searchText, ha
     dataIndex: "priceCode",
     ellipsis: { showTitle: false },
     ...getColumnSearchPropsUseFilteredValue(search, "priceCode", searchInput, searchedColumn, searchText, handleSearch, true),
-    render: (text) => renderColumn("priceCode", hasValue(search["priceCode"]), searchText, text, true, "input", search),
   },
   {
     title: "PRODUCT",
@@ -46,7 +45,6 @@ const getPricingColumns = ({ search, searchInput, searchedColumn, searchText, ha
     dataIndex: "product",
     ellipsis: { showTitle: false },
     ...getColumnSearchPropsUseFilteredValue(search, "product", searchInput, searchedColumn, searchText, handleSearch, true),
-    render: (text) => renderColumn("product", hasValue(search["product"]), searchText, text, true, "input", search),
   },
   {
     title: "PRICING",
@@ -54,7 +52,6 @@ const getPricingColumns = ({ search, searchInput, searchedColumn, searchText, ha
     dataIndex: "pricing",
     ellipsis: { showTitle: false },
     ...getColumnSearchPropsUseFilteredValue(search, "pricing", searchInput, searchedColumn, searchText, handleSearch, true),
-    render: (text) => renderColumn("pricing", hasValue(search["pricing"]), searchText, text, true, "input", search),
   },
   {
     title: "MAKER POSITION",
@@ -62,7 +59,6 @@ const getPricingColumns = ({ search, searchInput, searchedColumn, searchText, ha
     dataIndex: "makerPosition",
     ellipsis: { showTitle: false },
     ...getColumnSearchPropsUseFilteredValue(search, "makerPosition", searchInput, searchedColumn, searchText, handleSearch, true),
-    render: (text) => renderColumn("makerPosition", hasValue(search["makerPosition"]), searchText, text, true, "input", search),
   },
   {
     title: "CRITERIA",
@@ -70,7 +66,6 @@ const getPricingColumns = ({ search, searchInput, searchedColumn, searchText, ha
     dataIndex: "criterias",
     ellipsis: { showTitle: false },
     ...getColumnSearchPropsUseFilteredValue(search, "criterias", searchInput, searchedColumn, searchText, handleSearch, true),
-    render: (text) => renderColumn("criterias", hasValue(search["criterias"]), searchText, text, true, "input", search),
   },
   {
     title: "DESCRIPTION",
@@ -78,7 +73,6 @@ const getPricingColumns = ({ search, searchInput, searchedColumn, searchText, ha
     dataIndex: "priceDescription",
     ellipsis: { showTitle: false },
     ...getColumnSearchPropsUseFilteredValue(search, "priceDescription", searchInput, searchedColumn, searchText, handleSearch, true),
-    render: (text) => renderColumn("priceDescription", hasValue(search["priceDescription"]), searchText, text, true, "input", search),
   },
   {
     title: "STATUS",
@@ -90,9 +84,13 @@ const getPricingColumns = ({ search, searchInput, searchedColumn, searchText, ha
     ...getColumnSearchPropsUseFilteredValue(search, "status", searchInput, searchedColumn, searchText, handleSearch, true),
     render: (value) => {
       const text = formatStatus(value);
-      return text
-        ? renderColumn("status", hasValue(search["status"]), searchText, text, false, "status", search)
-        : text;
+      return (
+        <div className="flex justify-center">
+          <NxStatusComponent colour={text}>
+            {text}
+          </NxStatusComponent>
+        </div>
+      )
     },
   },
   {
@@ -105,9 +103,13 @@ const getPricingColumns = ({ search, searchInput, searchedColumn, searchText, ha
     ...getColumnSearchPropsUseFilteredValue(search, "statusApproval", searchInput, searchedColumn, searchText, handleSearch, true),
     render: (value) => {
       const text = formatStatus(value);
-      return text
-        ? renderColumn("statusApproval", hasValue(search["statusApproval"]), searchText, text, false, "status", search)
-        : text;
+      return (
+        <div className="flex justify-center">
+          <NxStatusComponent colour={text}>
+            {text}
+          </NxStatusComponent>
+        </div>
+      )
     },
   },
 ];

@@ -1,5 +1,5 @@
 import { getColumnSearchPropsUseFilteredValue } from "../../../../utils/getColumnSearchProps";
-import { hasValue, renderColumn } from "../../../../utils";
+import NxStatusComponent from "../../../../components/Nx/NxStatusComponent";
 
 const formatStatus = (value) => {
   switch (value) {
@@ -39,7 +39,6 @@ const getPricingAdjustColumns = ({ search, searchInput, searchedColumn, searchTe
     dataIndex: "name",
     ellipsis: { showTitle: false },
     ...getColumnSearchPropsUseFilteredValue(search, "name", searchInput, searchedColumn, searchText, handleSearch, true),
-    render: (text) => renderColumn("name", hasValue(search["name"]), searchText, text, false, "input", search),
   },
   {
     title: "PRICE CODE",
@@ -47,7 +46,6 @@ const getPricingAdjustColumns = ({ search, searchInput, searchedColumn, searchTe
     dataIndex: "priceCode",
     ellipsis: { showTitle: false },
     ...getColumnSearchPropsUseFilteredValue(search, "priceCode", searchInput, searchedColumn, searchText, handleSearch, true),
-    render: (text) => renderColumn("priceCode", hasValue(search["priceCode"]), searchText, text, false, "input", search),
   },
   {
     title: "PRICING DETAIL VALUE",
@@ -55,7 +53,6 @@ const getPricingAdjustColumns = ({ search, searchInput, searchedColumn, searchTe
     dataIndex: "pricing",
     ellipsis: { showTitle: false },
     ...getColumnSearchPropsUseFilteredValue(search, "pricing", searchInput, searchedColumn, searchText, handleSearch, true),
-    render: (text) => renderColumn("pricing", hasValue(search["pricing"]), searchText, text, true, "input", search),
   },
   {
     title: "CRITERIA",
@@ -63,7 +60,6 @@ const getPricingAdjustColumns = ({ search, searchInput, searchedColumn, searchTe
     dataIndex: "criterias",
     ellipsis: { showTitle: false },
     ...getColumnSearchPropsUseFilteredValue(search, "criterias", searchInput, searchedColumn, searchText, handleSearch, true),
-    render: (text) => renderColumn("criterias", hasValue(search["criterias"]), searchText, text, true, "input", search),
   },
   {
     title: "DESCRIPTION",
@@ -71,7 +67,6 @@ const getPricingAdjustColumns = ({ search, searchInput, searchedColumn, searchTe
     dataIndex: "description",
     ellipsis: { showTitle: false },
     ...getColumnSearchPropsUseFilteredValue(search, "description", searchInput, searchedColumn, searchText, handleSearch, true),
-    render: (text) => renderColumn("description", hasValue(search["description"]), searchText, text, true, "input", search),
   },
   {
     title: "STATUS",
@@ -83,9 +78,13 @@ const getPricingAdjustColumns = ({ search, searchInput, searchedColumn, searchTe
     ...getColumnSearchPropsUseFilteredValue(search, "status", searchInput, searchedColumn, searchText, handleSearch, true),
     render: (value) => {
       const text = formatStatus(value);
-      return text
-        ? renderColumn("status", hasValue(search["status"]), searchText, text, false, "status", search)
-        : text;
+      return (
+        <div className="flex justify-center">
+          <NxStatusComponent colour={text}>
+            {text}
+          </NxStatusComponent>
+        </div>
+      )
     },
   },
   {
@@ -98,9 +97,13 @@ const getPricingAdjustColumns = ({ search, searchInput, searchedColumn, searchTe
     ...getColumnSearchPropsUseFilteredValue(search, "statusApproval", searchInput, searchedColumn, searchText, handleSearch, true),
     render: (value) => {
       const text = formatStatus(value);
-      return text
-        ? renderColumn("statusApproval", hasValue(search["statusApproval"]), searchText, text, false, "status", search)
-        : text;
+      return (
+        <div className="flex justify-center">
+          <NxStatusComponent colour={text}>
+            {text}
+          </NxStatusComponent>
+        </div>
+      )
     },
   },
 ];
