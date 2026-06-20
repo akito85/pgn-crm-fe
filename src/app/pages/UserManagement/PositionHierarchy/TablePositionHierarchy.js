@@ -3,6 +3,8 @@ import { Tooltip } from "antd";
 import NxTable from "../../../../components/Nx/NxTable";
 import StatusComponent from "../../../../components/StatusComponent";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
+import { getPositionHierarchyColumns } from "./getPositionHierarchyColumns";
+import { POSITION_HIERARCHY_PERMISSION_LIST } from "./positionHierarchyActions";
 
 export const columnsPositionHierarchy = [
   {
@@ -115,16 +117,33 @@ export const TablePositionHierarchy = ({
   onLoadMore = () => {},
   hasMore = false,
   itemActions = [],
+  search = {},
+  searchInput,
+  searchedColumn = "",
+  columnSearchText = "",
+  handleColumnSearch = () => {},
   ...rest
 }) => {
   const actionColumns = useColumnActionPermission(
-    ["View", "Activate", "Update", "duplicate"],
+    POSITION_HIERARCHY_PERMISSION_LIST,
     itemActions
   );
 
+  const baseColumns = useMemo(
+    () =>
+      getPositionHierarchyColumns({
+        search,
+        searchInput,
+        searchedColumn,
+        searchText: columnSearchText,
+        handleSearch: handleColumnSearch,
+      }),
+    [search, searchInput, searchedColumn, columnSearchText, handleColumnSearch]
+  );
+
   const allColumns = useMemo(
-    () => [...columnsPositionHierarchy, ...actionColumns],
-    [actionColumns]
+    () => [...baseColumns, ...actionColumns],
+    [baseColumns, actionColumns]
   );
 
   return (
@@ -147,10 +166,10 @@ export const TablePositionHierarchy = ({
       useInfiniteScroll={useInfiniteScroll}
       onLoadMore={onLoadMore}
       hasMore={hasMore}
-      showExport={true}
+      showExport={false}
       showAdvanceSearch={true}
       showSearchBar={true}
-      showRefresh={false}
+      showRefresh={true}
       tableScrolled={{ x: 1400, y: 600 }}
       {...rest}
     />

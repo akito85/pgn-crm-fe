@@ -5,6 +5,7 @@ import BreadCrumb from "../../../../components/BreadCrumb";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import DetailText from "../../../../components/DetailText";
 import ModalCustom from "../../../../components/Modal/ModalCustom";
+import ModalBack from "../../../../components/Modal/ModalBack";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import { Select, Spin, Tooltip } from "antd";
 import { USER_ROUTES } from "../../../../routes/user_management/user_routes";
@@ -34,6 +35,7 @@ const DetailPositionHierarchy = () => {
   const containerRefHierarchy = useRef(null);
   // use state
   const [openModal, setOpenModal] = useState(false);
+  const [openBackModal, setOpenBackModal] = useState(false);
   const [dataDiagram, setDataDiagram] = useState([]);
   const [selectedNode, setSelectedNode] = useState(null);
   const [body, setBody] = useState({});
@@ -364,16 +366,24 @@ const DetailPositionHierarchy = () => {
             )}
           </div>
         </BaseContainer>
+        <div className={"w-full flex"}>
+          <ButtonComponent
+            type={"submit"}
+            border={false}
+            onClick={() => setOpenBackModal(true)}
+            className={"my-5"}
+          >
+            Back
+          </ButtonComponent>
 
-        <ButtonComponent
-          type={"submit"}
-          icon={<ArrowLeftOutlined style={{ fontSize: "24px" }} />}
-          border={false}
-          onClick={() => navigate(-1)}
-          className={"my-5"}
-        >
-          Back
-        </ButtonComponent>
+        </div>
+
+        {/* modal back confirmation */}
+        <ModalBack
+          isOpen={openBackModal}
+          handleCancel={() => setOpenBackModal(false)}
+          handleOk={() => navigate(-1)}
+        />
 
         {/* modal detail position */}
         <ModalCustom

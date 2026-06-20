@@ -16,6 +16,7 @@ import { getColumnSearchProps } from '../../../../utils/getColumnSearchProps';
 import { useDispatch, useSelector } from 'react-redux';
 import { dateFormatting, formMessageRequired, hasValue, renderColumn, toTitleCase } from '../../../../utils';
 import { ModalAttention } from '../../../../components/Modal/ModalPopUp';
+import ModalBack from '../../../../components/Modal/ModalBack';
 import DetailPosition from './DetailPosition';
 import ConfirmationHierarchy from './ConfirmationHierarchy';
 import { createPositionHierarchy, getDetailHierarchy, getDetailPosition, getPosition, updatePositionHierarchy } from '../../../../redux/slices/user_management/position_hirarchy';
@@ -57,6 +58,7 @@ const PositionHierarchyForm = (props) => {
     const [modalCustom, setModalCustom] = useState(false);
     const [modalType, setModalType] = useState(false);
     const [modalEmptyList, setModalEmptyList] = useState(false);
+    const [openBackModal, setOpenBackModal] = useState(false);
     const [typeColumn, setTypeColumn] = useState('string');
     const [detailDiagram, setDetailDiagram] = useState([])
 
@@ -665,7 +667,7 @@ const PositionHierarchyForm = (props) => {
                     <Form.Item>
                         <div className={"w-full flex justify-end gap-2 mt-5"}>
                             <ButtonComponent
-                                icon={<SVGIcon name={`IconButtonClear`} width={24} />}
+                                icon={<SVGIcon name={`IconButtonClear`} width={20} />}
                                 border={false}
                                 type={'submit'}
                                 onClick={handleClearInput}
@@ -701,8 +703,7 @@ const PositionHierarchyForm = (props) => {
                     <div>
                         <ButtonComponent
                             type={"submit"}
-                            icon={<ArrowLeftOutlined style={{ fontSize: "24px" }} />}
-                            onClick={() => navigate(-1)}
+                            onClick={() => setOpenBackModal(true)}
                             className={'my-5'}
                             disabled={updateByDiagramClicked}
                         >
@@ -715,7 +716,7 @@ const PositionHierarchyForm = (props) => {
                             type={"submit"}
                             icon={<SVGIcon name={type === "update"
                                 ? `IconButtonReset`
-                                : `IconButtonClear`} width={24} />}
+                                : `IconButtonClear`} width={20} />}
                             onClick={handleResetHierarchy}
                             className={'my-5'}
                             disabled={updateByDiagramClicked}
@@ -787,6 +788,13 @@ const PositionHierarchyForm = (props) => {
                 handleCancel={handleCancel}
                 handleOk={handleCancel}
                 textList={'position list hierarchy'}
+            />
+
+            {/* modal back confirmation */}
+            <ModalBack
+                isOpen={openBackModal}
+                handleCancel={() => setOpenBackModal(false)}
+                handleOk={() => navigate(-1)}
             />
 
             {/* modal try again */}
