@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Modal, Select, Input, Button, Dropdown, Menu, Divider } from "antd";
+import { Modal, Select, Input, Button, Dropdown, Divider } from "antd";
 import {
   PlusOutlined,
   CloseOutlined,
@@ -236,17 +236,18 @@ const NxAdvanceSearch = ({
     onClose?.();
   };
 
-  // Logic dropdown menu
-  const getLogicMenu = (currentLogic, onChange) => (
-    <Menu
-      selectedKeys={[currentLogic]}
-      onClick={({ key }) => onChange(key)}
-      style={{ minWidth: 30 }}
-    >
-      <Menu.Item key="AND">AND</Menu.Item>
-      <Menu.Item key="OR">OR</Menu.Item>
-    </Menu>
-  );
+  // Logic dropdown menu config (antd v4's Dropdown `menu` prop expects a plain
+  // config object with `items`, not a <Menu> element, or it crashes with
+  // "React.Children.only expected to receive a single React element child")
+  const getLogicMenu = (currentLogic, onChange) => ({
+    selectedKeys: [currentLogic],
+    onClick: ({ key }) => onChange(key),
+    style: { minWidth: 30 },
+    items: [
+      { key: "AND", label: "AND" },
+      { key: "OR", label: "OR" },
+    ],
+  });
 
   return (
     <Modal
