@@ -11,6 +11,9 @@ const initialState = {
   dataProduct: {},
   dataStatus: {},
   loadingProduct: false,
+  list_product: [],
+  pagination_product: { totalPage: 0, totalElement: 0 },
+  loading_listProduct: false,
   dataListProductType: [],
   dataListProductClass: [],
   dataListServiceType: [],
@@ -112,13 +115,20 @@ export const getGlobalPropertiesAttachment = createAsyncThunk(
 
 export const getAllProductPaginate = createAsyncThunk(
   "GET_ALL_PRODUCT_PAGINATE",
-  async ({ page, pageSize, sort, search }, thunkAPI) => {
+  async ({ page, pageSize, sort, search, searchText, filters = [], filterRules = [], isLoadMore = false }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/product/listProduct?page=${page}&size=${pageSize}&sort=${
-        sort || "createdDate~desc"
-      }&searchs=${search}`;
-      const response = await productPromoHttpService.getPagination(url);
-      return response.data;
+      const url = `/v1/dbs/api/product/list-product`;
+      const body = {
+        page,
+        size: pageSize,
+        sort: sort || "createdDate~desc",
+        search: searchText || null,
+        searchs: search || {},
+        filters,
+        filterRules,
+      };
+      const response = await productPromoHttpService.createData(url, body);
+      return { ...response.data, isLoadMore };
     } catch (error) {
       console.log(error, " = error slice");
       return thunkAPI.rejectWithValue(error.response.data);
@@ -1475,14 +1485,30 @@ const productSlice = createSlice({
     [getAllProductPaginate.pending]: (state, action) => {
       state.loadingProduct = true;
       state.dataProduct = action.payload;
+      if (!action.meta.arg?.isLoadMore) {
+        state.loading_listProduct = true;
+        state.list_product = [];
+      }
     },
     [getAllProductPaginate.fulfilled]: (state, action) => {
       state.dataProduct = action.payload;
       state.loadingProduct = false;
+      state.loading_listProduct = false;
+      const { result, page, isLoadMore } = action.payload || {};
+      if (Array.isArray(result)) {
+        state.list_product = isLoadMore
+          ? [...state.list_product, ...result]
+          : result;
+      }
+      state.pagination_product = {
+        totalPage: page?.totalPages || 0,
+        totalElement: page?.totalElements || 0,
+      };
     },
     [getAllProductPaginate.rejected]: (state, action) => {
       state.dataProduct = action.payload;
       state.loadingProduct = false;
+      state.loading_listProduct = false;
     },
     /** List Product Pagination */
     [getAllProductActivePaginate.pending]: (state, action) => {

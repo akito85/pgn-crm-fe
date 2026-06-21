@@ -60,13 +60,19 @@ const initialState = {
 
 export const getAllPromoPaginate = createAsyncThunk(
   "GET_ALL_PROMO_PAGINATE",
-  async ({ page, pageSize, search, sort, isLoadMore }, thunkAPI) => {
+  async ({ page, pageSize, sort, search, searchText, filters = [], filterRules = [], isLoadMore }, thunkAPI) => {
     try {
-      const searchParams = search === undefined ? "" : search;
-      const sortParams =
-        sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      const url = `/v1/dbs/api/product-promo/list-product-promo?page=${page}&size=${pageSize}&searchs=${searchParams}&sort=${sortParams}`;
-      const response = await productPromoHttpService.getPagination(url);
+      const url = `/v1/dbs/api/product-promo/list-promo`;
+      const body = {
+        page,
+        size: pageSize,
+        sort: sort || "createdDate~desc",
+        search: searchText || null,
+        searchs: search || {},
+        filters,
+        filterRules,
+      };
+      const response = await productPromoHttpService.createData(url, body);
       return {
         ...response.data,
         isLoadMore,

@@ -35,7 +35,6 @@ const PricingTable = () => {
   } = useSelector((state) => state.pricing);
 
   const totalElement = pagination.totalElement;
-  const hasMore = dataSource.length < (totalElement || 0);
 
   // --- Search / sort / filter state ---
   const searchInput = useRef(null);
@@ -46,6 +45,8 @@ const PricingTable = () => {
   const [searchText, setSearchText] = useState("");
   const [filters, setFilters] = useState([]);
   const [filterRules, setFilterRules] = useState([]);
+  const [limitData, setLimitData] = useState(null);
+  const hasMore = !limitData && dataSource.length < (totalElement || 0);
 
   // --- Modal state ---
   const [openModalHistory, setOpenModalHistory] = useState(false);
@@ -77,14 +78,14 @@ const PricingTable = () => {
   const buildBody = useCallback(
     (pageNum) => ({
       page: pageNum,
-      pageSize: PAGE_SIZE,
+      pageSize: limitData || PAGE_SIZE,
       sort,
       search,
       searchText,
       filters,
       filterRules,
     }),
-    [sort, search, searchText, filters, filterRules]
+    [sort, search, searchText, filters, filterRules, limitData]
   );
 
   const handleRefresh = useCallback(() => {
@@ -96,7 +97,7 @@ const PricingTable = () => {
   useEffect(() => {
     dispatch(getAllPricingPaginate({ ...buildBody(0), isLoadMore: false }));
     setPage(0);
-  }, [sort, search, searchText, filters, filterRules]); // intentionally omit dispatch/buildBody to avoid loop
+  }, [sort, search, searchText, filters, filterRules, limitData]); // intentionally omit dispatch/buildBody to avoid loop
 
   const handleLoadMore = () => {
     const nextPage = page + 1;
@@ -130,6 +131,8 @@ const PricingTable = () => {
   const handleAdvancedSearch = (searchData) => {
     setFilters(searchData?.filters || []);
     setFilterRules(searchData?.filterRules || []);
+    const parsedLimit = parseInt(searchData?.limitData, 10);
+    setLimitData(Number.isFinite(parsedLimit) && parsedLimit > 0 ? parsedLimit : null);
     setPage(0);
   };
 

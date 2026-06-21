@@ -17,6 +17,9 @@ const initialState = {
   loading: false,
   isFailed: false,
   isSuccess: false,
+  list_tos: [],
+  pagination_tos: { totalPage: 0, totalElement: 0 },
+  loading_listTos: false,
   // data_criteria: [],
 
   // List Criteria
@@ -40,14 +43,20 @@ const initialState = {
 
 export const getAllTosPaginate = createAsyncThunk(
   "GET_ALL_SEARCH_TOS",
-  async ({ page, pageSize, search, sort }, thunkAPI) => {
+  async ({ page, pageSize, sort, search, searchText, filters = [], filterRules = [], isLoadMore = false }, thunkAPI) => {
     try {
-      const searchParams = search === undefined ? "" : search;
-      const sortParams =
-        sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      const url = `/v1/dbs/api/tos/search-tos?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
-      const response = await productPromoHttpService.getPagination(url);
-      return response.data;
+      const url = `/v1/dbs/api/tos/list-tos`;
+      const body = {
+        page,
+        size: pageSize,
+        sort: sort || "createdDate~desc",
+        search: searchText || null,
+        searchs: search || {},
+        filters,
+        filterRules,
+      };
+      const response = await productPromoHttpService.createData(url, body);
+      return { ...response.data, isLoadMore };
     } catch (error) {
       if (error.response.data.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
@@ -621,14 +630,28 @@ const tosSlice = createSlice({
     [getAllTosPaginate.pending]: (state, action) => {
       state.data = action.payload;
       state.loading = true;
+      if (!action.meta.arg?.isLoadMore) {
+        state.loading_listTos = true;
+        state.list_tos = [];
+      }
     },
     [getAllTosPaginate.fulfilled]: (state, action) => {
       state.data = action.payload;
       state.loading = false;
+      state.loading_listTos = false;
+      const { result, page, isLoadMore } = action.payload || {};
+      if (Array.isArray(result)) {
+        state.list_tos = isLoadMore ? [...state.list_tos, ...result] : result;
+      }
+      state.pagination_tos = {
+        totalPage: page?.totalPages || 0,
+        totalElement: page?.totalElements || 0,
+      };
     },
     [getAllTosPaginate.rejected]: (state, action) => {
       state.data = action.payload;
       state.loading = false;
+      state.loading_listTos = false;
     },
 
     // Get Criteria Paging

@@ -41,18 +41,27 @@ const initialState = {
   isFailed: false,
   isSuccess: false,
   message: "",
+  list_pricingRule: [],
+  pagination_pricingRule: { totalPage: 0, totalElement: 0 },
+  loading_listPricingRule: false,
 };
 
 export const getAllPricingRulePaginate = createAsyncThunk(
   "GET_ALL_PRICING_RULE_PAGINATE",
-  async ({ search, page, pageSize, sort }, thunkAPI) => {
+  async ({ page, pageSize, sort, search, searchText, filters = [], filterRules = [], isLoadMore = false }, thunkAPI) => {
     try {
-      const searchParams = search === undefined ? "" : search;
-      const sortParams =
-        sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      const url = `/v1/dbs/api/pricingRule/view/paging?search=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
-      const response = await productPromoHttpService.getPagination(url);
-      return response.data;
+      const url = `/v1/dbs/api/pricingRule/list-pricing-rule`;
+      const body = {
+        page,
+        size: pageSize,
+        sort: sort || "createdDate~desc",
+        search: searchText || null,
+        searchs: search || {},
+        filters,
+        filterRules,
+      };
+      const response = await productPromoHttpService.createData(url, body);
+      return { ...response.data, isLoadMore };
     } catch (error) {
       if (error.response.data.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
@@ -841,16 +850,32 @@ const pricingRuleSlice = createSlice({
       state.isSuccess = false;
       state.loading = true;
       state.data = action.payload;
+      if (!action.meta.arg?.isLoadMore) {
+        state.loading_listPricingRule = true;
+        state.list_pricingRule = [];
+      }
     },
     [getAllPricingRulePaginate.fulfilled]: (state, action) => {
       state.isFailed = false;
       state.isSuccess = false;
       state.data = action.payload;
       state.loading = false;
+      state.loading_listPricingRule = false;
+      const { result, page, isLoadMore } = action.payload || {};
+      if (Array.isArray(result)) {
+        state.list_pricingRule = isLoadMore
+          ? [...state.list_pricingRule, ...result]
+          : result;
+      }
+      state.pagination_pricingRule = {
+        totalPage: page?.totalPages || 0,
+        totalElement: page?.totalElements || 0,
+      };
     },
     [getAllPricingRulePaginate.rejected]: (state, action) => {
       state.data = action.payload;
       state.loading = false;
+      state.loading_listPricingRule = false;
     },
 
     // Get Header Pricing Rule
