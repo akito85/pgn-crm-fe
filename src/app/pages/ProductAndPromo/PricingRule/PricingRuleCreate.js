@@ -26,7 +26,7 @@ import productPromoHttpService from "../../../../redux/services/productPromoHttp
 import { showModalError, validateCreateUpdate } from "../../../../redux/slices/general_slice";
 import AttachmentSectionForm from "../Pricing/Form/AttachmentSectionForm";
 import BaseContainer from "../../../../components/BaseContainer";
-import { handleCheckCriteriaMissingValidation, handleMappingCriteriaGeneral } from "../UtilsProduct/UtilsAllProduct";
+import { getCriteriaIdByCode, handleCheckCriteriaMissingValidation, handleMappingCriteriaGeneral } from "../UtilsProduct/UtilsAllProduct";
 import { columnsTableCriteriaAll } from "../UtilsProduct/TableCriteriaAllProduct";
 
 const PricingRuleCreate = () => {
@@ -175,7 +175,16 @@ const PricingRuleCreate = () => {
               handleMappingCriteriaGeneral({
                 item: item,
                 index: index,
-                columnsTable: columnsTableCriteriaAll(),
+                columnsTable: columnsTableCriteriaAll(
+                  undefined,
+                  undefined,
+                  undefined,
+                  undefined,
+                  undefined,
+                  undefined,
+                  undefined,
+                  getCriteriaIdByCode(data_select_criteria, "COUNTRY", "id")
+                ),
                 criteriaValues: criteriaValues,
                 dataListCriteria: data_select_criteria?.map((item) => {
                   return {

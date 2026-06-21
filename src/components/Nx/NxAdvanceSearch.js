@@ -49,8 +49,26 @@ const NxAdvanceSearch = ({
 
   const isNumericOperator = (op) => op === "Greater than" || op === "Less than";
 
-  const renderValueInput = (value, operator, onChange) => {
+  // Heuristic: columns whose key contains "date" are treated as date columns so that
+  // Greater than / Less than can use a real date picker (value emitted as "YYYY-MM-DD",
+  // which the backend parseFilterDate understands).
+  const isDateColumn = (columnKey) =>
+    typeof columnKey === "string" && columnKey.toLowerCase().includes("date");
+
+  const renderValueInput = (value, operator, onChange, columnKey) => {
     if (operator === "Is empty" || operator === "Is not empty") return null;
+    if (isDateColumn(columnKey)) {
+      return (
+        <Input
+          placeholder="Select Date"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          type="date"
+          size="large"
+          style={{ borderRadius: 8 }}
+        />
+      );
+    }
     if (isNumericOperator(operator)) {
       return (
         <Input
@@ -159,6 +177,17 @@ const NxAdvanceSearch = ({
     );
   };
 
+  // Remove filter within a rule group
+  const removeRuleFilter = (ruleId, filterId) => {
+    setFilterRules(
+      filterRules.map((rule) =>
+        rule.id === ruleId
+          ? { ...rule, filters: rule.filters.filter((f) => f.id !== filterId) }
+          : rule
+      )
+    );
+  };
+
   // Update rule group logic
   const updateRuleLogic = (ruleId, logic) => {
     setFilterRules(
@@ -175,9 +204,16 @@ const NxAdvanceSearch = ({
 
   // Handle search
   const handleSearch = () => {
+    // Backend (FilterDTO) membaca field "condition" untuk konektor AND/OR antar-filter,
+    // sedangkan UI menyimpannya di "logic". Tanpa pemetaan ini, condition selalu null
+    // dan semua konektor diperlakukan sebagai AND.
+    const withCondition = (f) => ({ ...f, condition: f.logic });
     const searchData = {
-      filters: filters,
-      filterRules: filterRules,
+      filters: filters.map(withCondition),
+      filterRules: filterRules.map((rule) => ({
+        ...rule,
+        filters: rule.filters.map(withCondition),
+      })),
       limitData: limitData,
     };
     onSearch?.(searchData);
@@ -275,7 +311,8 @@ const NxAdvanceSearch = ({
                 {renderValueInput(
                   filters[0]?.value,
                   filters[0]?.operator,
-                  (val) => updateFilter(filters[0].id, "value", val)
+                  (val) => updateFilter(filters[0].id, "value", val),
+                  filters[0]?.column
                 )}
               </div>
             )}
@@ -336,13 +373,23 @@ const NxAdvanceSearch = ({
                       </Option>
                     ))}
                   </Select>
+
+                  <Button
+                    danger
+                    type="text"
+                    icon={<CloseOutlined />}
+                    onClick={() => removeFilter(filter.id)}
+                    title="Remove this filter"
+                    style={{ height: 40 }}
+                  />
                 </div>
 
                 {filter.operator !== "Is empty" && filter.operator !== "Is not empty" && (
                   renderValueInput(
                     filter.value,
                     filter.operator,
-                    (val) => updateFilter(filter.id, "value", val)
+                    (val) => updateFilter(filter.id, "value", val),
+                    filter.column
                   )
                 )}
               </div>
@@ -372,7 +419,7 @@ const NxAdvanceSearch = ({
         {filterRules.map((rule, ruleIndex) => (
           <div key={rule.id} className="flex flex-col gap-5 px-5 border-t ">
             <div className="flex gap-5">
-              <div className="mb-4">
+              <div className="mb-4 flex flex-col items-center gap-2">
                 <Dropdown
                   menu={getLogicMenu(rule.groupLogic, (logic) =>
                     updateRuleLogic(rule.id, logic)
@@ -389,6 +436,16 @@ const NxAdvanceSearch = ({
                     {rule.groupLogic} <DownOutlined />
                   </Button>
                 </Dropdown>
+                <Button
+                  danger
+                  type="text"
+                  icon={<CloseOutlined />}
+                  onClick={() => removeRuleGroup(rule.id)}
+                  title="Remove this filter group"
+                  style={{ fontSize: 13 }}
+                >
+                  Remove Group
+                </Button>
               </div>
 
               <div className="flex flex-col w-full">
@@ -455,13 +512,25 @@ const NxAdvanceSearch = ({
                           </Option>
                         ))}
                       </Select>
+
+                      {rule.filters.length > 1 && (
+                        <Button
+                          danger
+                          type="text"
+                          icon={<CloseOutlined />}
+                          onClick={() => removeRuleFilter(rule.id, filter.id)}
+                          title="Remove this filter"
+                          style={{ height: 40 }}
+                        />
+                      )}
                     </div>
 
                     {filter.operator !== "Is empty" && filter.operator !== "Is not empty" && (
                       renderValueInput(
                         filter.value,
                         filter.operator,
-                        (val) => updateRuleFilter(rule.id, filter.id, "value", val)
+                        (val) => updateRuleFilter(rule.id, filter.id, "value", val),
+                        filter.column
                       )
                     )}
                   </div>

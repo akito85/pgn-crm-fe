@@ -29,6 +29,8 @@ import {
   updatePriceAdjustBody,
   getBudgetList,
   getProvinceList,
+  getProvinceListByCountry,
+  getCountryList,
   getIndustrialSectorList,
   getAccountCategoryList,
   getServiceTypeList,
@@ -53,7 +55,7 @@ import moment from "moment";
 import { bytesConverter } from "../../../../utils/bytesConverter";
 import productPromoHttpService from "../../../../redux/services/productPromoHttpService";
 import { showModalError, validateCreateUpdate } from "../../../../redux/slices/general_slice";
-import { handleCheckCriteriaMissingValidation } from "../UtilsProduct/UtilsAllProduct";
+import { applyLocationCriteriaCascade, applyDeselectLocationCriteriaCascade, getCriteriaIdByCode, handleCheckCriteriaMissingValidation } from "../UtilsProduct/UtilsAllProduct";
 import { columnsTableCriteriaAll } from "../UtilsProduct/TableCriteriaAllProduct";
 import FunctionalCriteriaProduct from "../UtilsProduct/FunctionalCriteriaProduct";
 
@@ -176,9 +178,12 @@ const PricingAdjustForm = (props) => {
   const asserData = useCallback(
     (dataDetailPricingAdjustGeneral) => {
       // console.log(dataDetailPricingAdjustGeneral);
-      const criteria = (
-        dataDetailPricingAdjustGeneral?.rcriteriaPricingAdjustments || []
-      ).map((item) => item.criteria);
+      const criteria = applyLocationCriteriaCascade(
+        (dataDetailPricingAdjustGeneral?.rcriteriaPricingAdjustments || []).map(
+          (item) => item.criteria
+        ),
+        criteriaOptions
+      );
       const appHier =
         dataDetailPricingAdjustGeneral?.apphierId ||
         dataDetailPricingAdjustGeneral?.appHierId ||
@@ -206,7 +211,16 @@ const PricingAdjustForm = (props) => {
         (dataDetailPricingAdjustGeneral?.mpricingAdjustmentDetails || [])
           .filter((item) => !item?.allCriteria || !item?.allCriteria !== true)
           .map((adjustData, index) => {
-            const listIndex = columnsTableCriteriaAll().filter(
+            const listIndex = columnsTableCriteriaAll(
+              undefined,
+              undefined,
+              undefined,
+              undefined,
+              undefined,
+              undefined,
+              undefined,
+              getCriteriaIdByCode(criteriaOptions, "COUNTRY")
+            ).filter(
               (item) => !([1,2,3,4,5]).includes(item.indexValue)
             ).map(
               (item) => item.dataIndex
@@ -237,7 +251,7 @@ const PricingAdjustForm = (props) => {
           })
       );
     },
-    [form]
+    [form, criteriaOptions]
   );
 
   useEffect(() => {
@@ -449,21 +463,10 @@ const PricingAdjustForm = (props) => {
   };
 
   const handleSelectCriteria = (value) => {
-    let res = [...criteriaValues, value];
-    if (res.includes(13)) {
-      res.push(14);
-    }
-    if (res.includes(14)) {
-      res.push(39);
-    }
-    if (res.includes(39)) {
-      res.push(15);
-    }
-    if (res.includes(20)) {
-      res.push(19);
-    }
-    let outputArray = res.filter((item, index) => res.indexOf(item) === index);
-    outputArray = outputArray.includes(24) ? [24] : outputArray;
+    const outputArray = applyLocationCriteriaCascade(
+      [...criteriaValues, value],
+      criteriaOptions
+    );
     setCriteriaValues(outputArray);
     form.setFieldsValue({
       criteria: outputArray,
@@ -471,21 +474,11 @@ const PricingAdjustForm = (props) => {
   };
 
   const handleDeselectCriteria = (value) => {
-    let res = criteriaValues.filter((item) => item !== value);
-    if (!res.includes(15)) {
-      res = res.filter((item) => item !== 39);
-    }
-    if (!res.includes(39)) {
-      res = res.filter((item) => item !== 14);
-    }
-    if (!res.includes(14)) {
-      res = res.filter((item) => item !== 13);
-    }
-    if (!res.includes(19)) {
-      res = res.filter((item) => item !== 20);
-    }
-    let outputArray = res.filter((item, index) => res.indexOf(item) === index);
-    outputArray = outputArray.includes(24) ? [24] : outputArray;
+    const outputArray = applyDeselectLocationCriteriaCascade(
+      criteriaValues,
+      value,
+      criteriaOptions
+    );
     setCriteriaValues(outputArray);
     form.setFieldsValue({
       criteria: outputArray,
@@ -608,14 +601,32 @@ const PricingAdjustForm = (props) => {
             }
           );
 
-          const filteredCriteria = columnsTableCriteriaAll().filter(
+          const filteredCriteria = columnsTableCriteriaAll(
+              undefined,
+              undefined,
+              undefined,
+              undefined,
+              undefined,
+              undefined,
+              undefined,
+              getCriteriaIdByCode(criteriaOptions, "COUNTRY")
+            ).filter(
             (item) =>
               !([...formValue.criteria, 1, 2, 3, 4, 5] || []).includes(
                 item.indexValue
               )
           );
 
-          const filteredCriteria2 = columnsTableCriteriaAll().filter((item) =>
+          const filteredCriteria2 = columnsTableCriteriaAll(
+              undefined,
+              undefined,
+              undefined,
+              undefined,
+              undefined,
+              undefined,
+              undefined,
+              getCriteriaIdByCode(criteriaOptions, "COUNTRY")
+            ).filter((item) =>
             [...formValue.criteria].includes(item.indexValue)
           ); // no need for startdate because already handled at body
 
@@ -801,11 +812,29 @@ const PricingAdjustForm = (props) => {
       return obj;
     });
 
-    const filteredCriteria = columnsTableCriteriaAll().filter(
+    const filteredCriteria = columnsTableCriteriaAll(
+              undefined,
+              undefined,
+              undefined,
+              undefined,
+              undefined,
+              undefined,
+              undefined,
+              getCriteriaIdByCode(criteriaOptions, "COUNTRY")
+            ).filter(
       (item) => !([...formValue.criteria, 1,2,3,4,5] || []).includes(item.indexValue)
     );
 
-    const filteredCriteria2 = columnsTableCriteriaAll().filter((item) =>
+    const filteredCriteria2 = columnsTableCriteriaAll(
+              undefined,
+              undefined,
+              undefined,
+              undefined,
+              undefined,
+              undefined,
+              undefined,
+              getCriteriaIdByCode(criteriaOptions, "COUNTRY")
+            ).filter((item) =>
       ([...formValue.criteria]).includes(item.indexValue)
     ); // no need for startdate because already handled at body
 
@@ -1137,6 +1166,8 @@ const PricingAdjustForm = (props) => {
                 getApi={{
                   getBudgetList,
                   getProvinceList,
+                  getProvinceListByCountry,
+                  getCountryList,
                   getIndustrialSectorList,
                   getAccountCategoryList,
                   getServiceTypeList,
@@ -1153,6 +1184,7 @@ const PricingAdjustForm = (props) => {
                 }}
                 fixedColumn={["ADJUSTMENT TYPE", "ADJUSTMENT VALUE"]}
                 columnsTable={columnsTableCriteriaAll}
+                countryCriteriaId={getCriteriaIdByCode(criteriaOptions, "COUNTRY")}
                 checkStartDate={false}
               />
             </BaseContainer>

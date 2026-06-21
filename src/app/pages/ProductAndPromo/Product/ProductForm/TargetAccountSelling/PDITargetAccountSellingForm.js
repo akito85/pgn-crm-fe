@@ -15,10 +15,12 @@ import {
   getBudgetList,
   getCityList,
   getCostCenterList,
+  getCountryList,
   getDistrictList,
   getGsizesList,
   getIndustrialSectorList,
   getProvinceList,
+  getProvinceListByCountry,
   getServiceTypeList,
   getSorList,
   getSubDistrictList,
@@ -29,6 +31,7 @@ import {
 import { useSelector } from "react-redux";
 import FunctionalCriteriaProduct from "../../../UtilsProduct/FunctionalCriteriaProduct";
 import { columnsTableCriteriaAll } from "../../../UtilsProduct/TableCriteriaAllProduct";
+import { applyLocationCriteriaCascade, applyDeselectLocationCriteriaCascade, getCriteriaIdByCode } from "../../../UtilsProduct/UtilsAllProduct";
 
 const { TextArea } = Input;
 
@@ -664,21 +667,10 @@ const PDITargetAccountSellingForm = ({
   // };
 
   const handleSelectCriteria = (value) => {
-    let res = [...criteriaValues, value];
-    if (res.includes(13)) {
-      res.push(14);
-    }
-    if (res.includes(14)) {
-      res.push(39);
-    }
-    if (res.includes(39)) {
-      res.push(15);
-    }
-    if (res.includes(20)) {
-      res.push(19);
-    }
-    let outputArray = res.filter((item, index) => res.indexOf(item) === index);
-    outputArray = outputArray.includes(24) ? [24] : outputArray;
+    const outputArray = applyLocationCriteriaCascade(
+      [...criteriaValues, value],
+      dataListSelectCriteria
+    );
     handleProductObj(outputArray, "tasCriteria");
     form.setFieldsValue({
       tasCriteria: outputArray,
@@ -686,21 +678,11 @@ const PDITargetAccountSellingForm = ({
   };
 
   const handleDeselectCriteria = (value) => {
-    let res = criteriaValues.filter((item) => item !== value);
-    if (!res.includes(15)) {
-      res = res.filter((item) => item !== 39);
-    }
-    if (!res.includes(39)) {
-      res = res.filter((item) => item !== 14);
-    }
-    if (!res.includes(14)) {
-      res = res.filter((item) => item !== 13);
-    }
-    if (!res.includes(19)) {
-      res = res.filter((item) => item !== 20);
-    }
-    let outputArray = res.filter((item, index) => res.indexOf(item) === index);
-    outputArray = outputArray.includes(24) ? [24] : outputArray;
+    const outputArray = applyDeselectLocationCriteriaCascade(
+      criteriaValues,
+      value,
+      dataListSelectCriteria
+    );
     handleProductObj(outputArray, "tasCriteria");
     form.setFieldsValue({
       tasCriteria: outputArray,
@@ -796,6 +778,8 @@ const PDITargetAccountSellingForm = ({
         getApi={{
           getBudgetList,
           getProvinceList,
+          getProvinceListByCountry,
+          getCountryList,
           getIndustrialSectorList,
           getAccountCategoryList,
           getServiceTypeList,
@@ -810,6 +794,7 @@ const PDITargetAccountSellingForm = ({
           getDistrictList,
         }}
         columnsTable={columnsTableCriteriaAll}
+        countryCriteriaId={getCriteriaIdByCode(dataListSelectCriteria, "COUNTRY")}
         // checkStartDate={false}
         excludeRender={
           <div className="grid grid-cols-2 w-full gap-3">

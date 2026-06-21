@@ -22,6 +22,7 @@ const initialState = {
   // List Criteria
   data_province: [],
   data_city: [],
+  data_country: [],
   data_cost_center: [],
   data_sor: [],
   data_district: [],
@@ -333,6 +334,48 @@ export const getProvinceList = createAsyncThunk(
   async (thunkAPI) => {
     try {
       const url = `/v1/dbs/api/tos/province`;
+      const response = await productPromoHttpService.getAll(url);
+      return response.data.data?.map((item) => {
+        return {
+          value: item.id,
+          label: item.name,
+        };
+      });
+    } catch (error) {
+      if (error.response.data.code === 419) {
+        thunkAPI.dispatch(setBodyError(error));
+      }
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+export const getProvinceListByCountry = createAsyncThunk(
+  "GET_PROVINCE_LIST_BY_COUNTRY_TOS",
+  async (countryId, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/tos/province/byCountry/${countryId}`;
+      const response = await productPromoHttpService.getAll(url);
+      return response.data.data?.map((item) => {
+        return {
+          value: item.id,
+          label: item.name,
+        };
+      });
+    } catch (error) {
+      if (error.response.data.code === 419) {
+        thunkAPI.dispatch(setBodyError(error));
+      }
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+export const getCountryList = createAsyncThunk(
+  "GET_COUNTRY_LIST_TOS",
+  async (thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/tos/country`;
       const response = await productPromoHttpService.getAll(url);
       return response.data.data?.map((item) => {
         return {
@@ -765,6 +808,32 @@ const tosSlice = createSlice({
     [getProvinceList.rejected]: (state, action) => {
       state.loading = false;
       state.data_province = action.payload;
+    },
+
+    [getProvinceListByCountry.pending]: (state, action) => {
+      state.loading = true;
+      state.data_province = action.payload;
+    },
+    [getProvinceListByCountry.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.data_province = action.payload;
+    },
+    [getProvinceListByCountry.rejected]: (state, action) => {
+      state.loading = false;
+      state.data_province = action.payload;
+    },
+
+    [getCountryList.pending]: (state, action) => {
+      state.loading = true;
+      state.data_country = action.payload;
+    },
+    [getCountryList.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.data_country = action.payload;
+    },
+    [getCountryList.rejected]: (state, action) => {
+      state.loading = false;
+      state.data_country = action.payload;
     },
 
     [getCostCenterList.pending]: (state, action) => {

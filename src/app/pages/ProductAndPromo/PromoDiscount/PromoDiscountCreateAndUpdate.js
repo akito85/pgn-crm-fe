@@ -40,6 +40,7 @@ import NxModal from "../../../../components/Nx/NxModal";
 import PromoDiscountConfirm from "./Pages/PromoDiscountConfirm";
 import productPromoHttpService from "../../../../redux/services/productPromoHttpService";
 import {
+  getCriteriaIdByCode,
   handleDisabledEachColumnCriteria,
   handleMappingCriteriaGeneral,
 } from "../UtilsProduct/UtilsAllProduct";
@@ -148,17 +149,46 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
     }
   }, [dispatch, type, id]);
 
+  // Dependency Criteria
+  const applySelectCriteriaCascadePromo = (values) => {
+    const countryId = getCriteriaIdByCode(criteriaOptions, "COUNTRY");
+    let res = [...values];
+    if (res.includes(26)) {
+      //13
+      res.push(27);
+    }
+    if (res.includes(27)) {
+      //14
+      res.push(139); //39
+    }
+    if (res.includes(139)) {
+      res.push(28); //15
+    }
+    if (res.includes(28) && hasValue(countryId)) {
+      res.push(countryId);
+    }
+    if (res.includes(33)) {
+      //20
+      res.push(32); //19
+    }
+    let outputArray = res.filter((item, index) => res.indexOf(item) === index);
+    outputArray = outputArray.includes(37) ? [37] : outputArray.includes(25) ? [25] : outputArray;
+    return outputArray;
+  };
+
   const handleAssertData = useCallback(
     (dataDetail, dataCompare = [], dataListCriteria = []) => {
-      const tempCriteriaValues = dataDetail?.productPromoCriteriaDtos
-        ?.map((item) => {
-          return {
-            id: item?.id || null,
-            idCriteria: item?.idCriteria,
-            idPromo: item?.idPromo || null,
-          };
-        })
-        ?.map((item) => item.idCriteria);
+      const tempCriteriaValues = applySelectCriteriaCascadePromo(
+        dataDetail?.productPromoCriteriaDtos
+          ?.map((item) => {
+            return {
+              id: item?.id || null,
+              idCriteria: item?.idCriteria,
+              idPromo: item?.idPromo || null,
+            };
+          })
+          ?.map((item) => item.idCriteria) || []
+      );
 
       // console.log(tempDataCriteriaList,"data") //
       setStartDate(moment(dataDetail?.startDate));
@@ -198,7 +228,16 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
           idCompare: "id",
           status: dataDetail?.status,
           statusApproval: dataDetail?.statusApproval,
-          columnsTable: columnsTableCriteriaPromo(),
+          columnsTable: columnsTableCriteriaPromo(
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            getCriteriaIdByCode(criteriaOptions, "COUNTRY")
+          ),
           dataListCriteria: dataListCriteria,
         })
       );
@@ -211,7 +250,7 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
         })
       );
     },
-    [form]
+    [form, criteriaOptions]
   );
 
   useEffect(() => {
@@ -301,29 +340,8 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
     }
   }, [dataListAppHierDetail]);
 
-  // Dependency Criteria
   const handleSelectCriteria = (value) => {
-    let res = [...criteriaValues, value];
-    if (res.includes(26)) {
-      //13
-      res.push(27);
-    }
-    if (res.includes(27)) {
-      //14
-      res.push(139); //39
-    }
-    if (res.includes(139)) {
-      res.push(28); //15
-    }
-    if (res.includes(28)) {
-      res.push(3118);
-    }
-    if (res.includes(33)) {
-      //20
-      res.push(32); //19
-    }
-    let outputArray = res.filter((item, index) => res.indexOf(item) === index);
-    outputArray = outputArray.includes(37) ? [37] : outputArray.includes(25) ? [25] : outputArray;
+    const outputArray = applySelectCriteriaCascadePromo([...criteriaValues, value]);
     setCriteriaValues(outputArray);
     form.setFieldsValue({
       criteria: outputArray,
@@ -331,8 +349,9 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
   };
 
   const handleDeselectCriteria = (value) => {
+    const countryId = getCriteriaIdByCode(criteriaOptions, "COUNTRY");
     let res = criteriaValues.filter((item) => item !== value);
-    if (!res.includes(3118)) {
+    if (hasValue(countryId) && !res.includes(countryId)) {
       res = res.filter((item) => item !== 28);
     }
     if (!res.includes(28)) {
@@ -444,7 +463,16 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
           ...handleMappingCriteriaGeneral({
             item: item,
             index: index,
-            columnsTable: columnsTableCriteriaPromo(),
+            columnsTable: columnsTableCriteriaPromo(
+              undefined,
+              undefined,
+              undefined,
+              undefined,
+              undefined,
+              undefined,
+              undefined,
+              getCriteriaIdByCode(criteriaOptions, "COUNTRY")
+            ),
             criteriaValues: criteriaValues,
             dataListCriteria: dataListCriteria,
           }),
@@ -578,7 +606,16 @@ const PromoDiscountCreateAndUpdate = ({ type }) => {
         ...handleMappingCriteriaGeneral({
           item: item,
           index: index,
-          columnsTable: columnsTableCriteriaPromo(),
+          columnsTable: columnsTableCriteriaPromo(
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            getCriteriaIdByCode(criteriaOptions, "COUNTRY")
+          ),
           criteriaValues: criteriaValues,
           dataListCriteria: dataListCriteria,
         }),

@@ -11,12 +11,14 @@ import {
   getBudgetList,
   getCityList,
   getCostCenterList,
+  getCountryList,
   getCustomerList,
   getCustomerSegmentList,
   getDistrictList,
   getGsizesList,
   getIndustrialSectorList,
   getProvinceList,
+  getProvinceListByCountry,
   getSelectCriteria,
   getServiceTypeList,
   getSorList,
@@ -28,6 +30,7 @@ import moment from "moment";
 import { showModalError } from "../../../../../redux/slices/general_slice";
 import FunctionalCriteriaProduct from "../../UtilsProduct/FunctionalCriteriaProduct";
 import { columnsTableCriteriaAll } from "../../UtilsProduct/TableCriteriaAllProduct";
+import { hasValue } from "../../../../../utils";
 
 const PricingRule = ({
   form,
@@ -82,8 +85,12 @@ const PricingRule = ({
   };
 
   // Dependency Criteria
-  const handleSelectCriteria = (value) => {
-    let res = [...criteriaValues, value];
+  const getCriteriaIdByCode = (code) =>
+    (data_select_criteria || []).find((option) => option.code === code)?.id;
+
+  const applySelectCriteriaCascade = (values) => {
+    const countryId = getCriteriaIdByCode("COUNTRY");
+    let res = [...values];
     if (res.includes(13)) {
       res.push(14);
     }
@@ -93,20 +100,31 @@ const PricingRule = ({
     if (res.includes(39)) {
       res.push(15);
     }
+    if (res.includes(15) && hasValue(countryId)) {
+      res.push(countryId);
+    }
     if (res.includes(20)) {
       res.push(19);
     }
     let outputArray = res.filter((item, index) => res.indexOf(item) === index);
     outputArray = outputArray.includes(24) ? [24] : outputArray;
+    return outputArray;
+  };
+
+  const handleSelectCriteria = (value) => {
+    const outputArray = applySelectCriteriaCascade([...criteriaValues, value]);
     setCriteriaValues(outputArray);
     form.setFieldsValue({
       rPricingRuleCriterias: outputArray,
     });
   };
-// console.log(criteriaValues, ' lalal');
 
   const handleDeselectCriteria = (value) => {
+    const countryId = getCriteriaIdByCode("COUNTRY");
     let res = criteriaValues.filter((item) => item !== value);
+    if (hasValue(countryId) && !res.includes(countryId)) {
+      res = res.filter((item) => item !== 15);
+    }
     if (!res.includes(15)) {
       res = res.filter((item) => item !== 39);
     }
@@ -286,6 +304,8 @@ const PricingRule = ({
               getApi={{
                 getBudgetList,
                 getProvinceList,
+                getProvinceListByCountry,
+                getCountryList,
                 getIndustrialSectorList,
                 getAccountCategoryList,
                 getServiceTypeList,
@@ -300,6 +320,7 @@ const PricingRule = ({
                 getDistrictList,
               }}
               columnsTable={columnsTableCriteriaAll}
+              countryCriteriaId={getCriteriaIdByCode("COUNTRY")}
               endDate={endDate}
             />
           </>

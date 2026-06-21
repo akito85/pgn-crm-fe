@@ -2,6 +2,66 @@ import moment from "moment";
 import { dateFormatting, hasValue } from "../../../../utils";
 import { columnsTableCriteriaPromo } from "../PromoDiscount/Table/TableCriteriaPromo";
 
+// Resolves a criteria option's numeric id by its stable `code` (e.g. "COUNTRY"),
+// since numeric criteria ids can differ across environments while `code` does not.
+export const getCriteriaIdByCode = (criteriaOptions = [], code, idKey = "value") =>
+  (criteriaOptions || []).find((option) => option.code === code)?.[idKey];
+
+// Shared select-cascade for the City/District/Sub-District/Province/Country and
+// Account Group/Customer Segment criteria hierarchy used across Pricing, PricingRule,
+// PricingAdjustment, Product and similar modules. Country is resolved dynamically by
+// code since its numeric id is environment-specific; the rest are stable seed ids.
+export const applyLocationCriteriaCascade = (values, criteriaOptions = [], idKey = "value") => {
+  const countryId = getCriteriaIdByCode(criteriaOptions, "COUNTRY", idKey);
+  let res = [...(values || [])];
+  if (res.includes(13)) {
+    res.push(14);
+  }
+  if (res.includes(14)) {
+    res.push(39);
+  }
+  if (res.includes(39)) {
+    res.push(15);
+  }
+  if (res.includes(15) && hasValue(countryId)) {
+    res.push(countryId);
+  }
+  if (res.includes(20)) {
+    res.push(19);
+  }
+  let outputArray = res.filter((item, index) => res.indexOf(item) === index);
+  outputArray = outputArray.includes(24) ? [24] : outputArray;
+  return outputArray;
+};
+
+export const applyDeselectLocationCriteriaCascade = (
+  values,
+  deselectedValue,
+  criteriaOptions = [],
+  idKey = "value"
+) => {
+  const countryId = getCriteriaIdByCode(criteriaOptions, "COUNTRY", idKey);
+  let res = (values || []).filter((item) => item !== deselectedValue);
+  if (hasValue(countryId) && !res.includes(countryId)) {
+    res = res.filter((item) => item !== 15);
+  }
+  if (!res.includes(15)) {
+    res = res.filter((item) => item !== 39);
+  }
+  if (!res.includes(39)) {
+    res = res.filter((item) => item !== 14);
+  }
+  if (!res.includes(14)) {
+    res = res.filter((item) => item !== 13);
+  }
+  if (!res.includes(19)) {
+    res = res.filter((item) => item !== 20);
+  }
+  let outputArray = res.filter((item, index) => res.indexOf(item) === index);
+  outputArray = outputArray.includes(24) ? [24] : outputArray;
+  return outputArray;
+};
+
 export const lowerCaseCheckedCriteria = (name) => {
   let nameChecked = `${name
     ?.toString()

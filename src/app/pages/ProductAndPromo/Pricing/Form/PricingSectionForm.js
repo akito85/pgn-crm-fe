@@ -11,6 +11,7 @@ const dummyOptions = [
   { name: "District", value: 14 },
   { name: "City", value: 39 },
   { name: "Province", value: 15 },
+  { name: "Country", value: 3023, code: "COUNTRY" },
   { name: "Customer Segment", value: 19 },
   { name: "Account Group", value: 20 },
   { name: "All", value: 24 },

@@ -47,7 +47,7 @@ import { ModalError } from "../../../../components/Modal/ModalPopUp";
 import { bytesConverter } from "../../../../utils/bytesConverter";
 import { showModalError, validateCreateUpdate } from "../../../../redux/slices/general_slice";
 import { handleMandatory } from "./utils";
-import { handleCheckCriteriaMissingValidation } from "../UtilsProduct/UtilsAllProduct";
+import { applyLocationCriteriaCascade, handleCheckCriteriaMissingValidation } from "../UtilsProduct/UtilsAllProduct";
 
 const routes = (type) => [
   {
@@ -287,10 +287,13 @@ const ProductForm = (props) => {
         });
       setDataTablePDIProductDetail(arrayProductDetailNew);
       setDataTablePDICalculationRule(arrayCalculationRuleNew);
-      const criteria = (
-        dataDetailProductVersion?.mproductTargetAccountSelling
-          ?.mProductTargetAccountSellingCriteria || []
-      ).map((crit) => (crit.criteria ? parseInt(crit.criteria) : 0));
+      const criteria = applyLocationCriteriaCascade(
+        (
+          dataDetailProductVersion?.mproductTargetAccountSelling
+            ?.mProductTargetAccountSellingCriteria || []
+        ).map((crit) => (crit.criteria ? parseInt(crit.criteria) : 0)),
+        criteriaOptions
+      );
       const criteriaData = (
         dataDetailProductVersion?.mproductTargetAccountSelling?.criterias || []
       )

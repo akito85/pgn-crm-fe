@@ -77,7 +77,8 @@ export const columnsTableCriteriaAll = (
   searchText,
   handleSearch,
   search,
-  storedData
+  storedData,
+  countryCriteriaId
 ) => [
   {
     required: true,
@@ -368,6 +369,41 @@ export const columnsTableCriteriaAll = (
   },
   {
     required: true,
+    title: "COUNTRY",
+    width: 240,
+    //onFilter: (value, record) => //onFilter("country", value, record),
+    sorter: (a, b) => sorter("country", a, b),
+    dataIndex: "country",
+    dataIndexForm: "data_country",
+    indexValue: countryCriteriaId,
+    inputType: "select",
+    filteredValue: search?.["country"] ? [search?.["country"]] : null,
+    option: listOption["data_country"],
+    url: "getCountryList",
+    ...getColumnSearchPropsUseFilteredValueFE(
+      search,
+      "country",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+      "input",
+      storedData
+    ),
+    render: (text) =>
+      renderColumn(
+        "country",
+        hasValue(search["country"]),
+        searchText,
+        text?.label,
+        false,
+        "input",
+        search
+      ),
+  },
+  {
+    required: true,
     title: "PROVINCE",
     width: 240,
     //onFilter: (value, record) => //onFilter("province", value, record),
@@ -379,6 +415,7 @@ export const columnsTableCriteriaAll = (
     filteredValue: search?.["province"] ? [search?.["province"]] : null,
     option: listOption["data_province"],
     url: "getProvinceList",
+    dependDataIndex: "country",
     ...getColumnSearchPropsUseFilteredValueFE(
       search,
       "province",
