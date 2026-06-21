@@ -27,12 +27,14 @@ import {
   getBudgetList,
   getCityList,
   getCostCenterList,
+  getCountryList,
   getCustomerList,
   getCustomerSegmentList,
   getDistrictList,
   getGsizesList,
   getIndustrialSectorList,
   getProvinceList,
+  getProvinceListByCountry,
   getServiceTypeList,
   getSorList,
   getSubDistrictList,
@@ -158,10 +160,69 @@ const PricingForm = (props) => {
     }
   }, [dataListAppHierDetail]);
 
+  const getCriteriaIdByCode = useCallback(
+    (code) => criteriaOptions.find((option) => option.code === code)?.value,
+    [criteriaOptions]
+  );
+
+  const applySelectCriteriaCascade = useCallback(
+    (values) => {
+      const countryId = getCriteriaIdByCode("COUNTRY");
+      let res = [...values];
+      if (res.includes(13)) {
+        res.push(14);
+      }
+      if (res.includes(14)) {
+        res.push(39);
+      }
+      if (res.includes(39)) {
+        res.push(15);
+      }
+      if (res.includes(15) && hasValue(countryId)) {
+        res.push(countryId);
+      }
+      if (res.includes(20)) {
+        res.push(19);
+      }
+      let outputArray = res.filter((item, index) => res.indexOf(item) === index);
+      outputArray = outputArray.includes(24) ? [24] : outputArray;
+      return outputArray;
+    },
+    [getCriteriaIdByCode]
+  );
+
+  const applyDeselectCriteriaCascade = useCallback(
+    (values, deselectedValue) => {
+      const countryId = getCriteriaIdByCode("COUNTRY");
+      let res = values.filter((item) => item !== deselectedValue);
+      if (hasValue(countryId) && !res.includes(countryId)) {
+        res = res.filter((item) => item !== 15);
+      }
+      if (!res.includes(15)) {
+        res = res.filter((item) => item !== 39);
+      }
+      if (!res.includes(39)) {
+        res = res.filter((item) => item !== 14);
+      }
+      if (!res.includes(14)) {
+        res = res.filter((item) => item !== 13);
+      }
+      if (!res.includes(19)) {
+        res = res.filter((item) => item !== 20);
+      }
+      let outputArray = res.filter((item, index) => res.indexOf(item) === index);
+      outputArray = outputArray.includes(24) ? [24] : outputArray;
+      return outputArray;
+    },
+    [getCriteriaIdByCode]
+  );
+
   const asserData = useCallback(
     (dataDetailPricingGeneral) => {
-      const criteria = (dataDetailPricingGeneral?.rPricingCriterias || []).map(
-        (item) => item.criteria
+      const criteria = applySelectCriteriaCascade(
+        (dataDetailPricingGeneral?.rPricingCriterias || []).map(
+          (item) => item.criteria
+        )
       );
       const appHier = dataDetailPricingGeneral?.appHierId || 1;
       const obj = {
@@ -241,7 +302,16 @@ const PricingForm = (props) => {
           idCompare: "idPricing",
           status: dataDetailPricingGeneral?.status,
           statusApproval: dataDetailPricingGeneral?.statusApproval,
-          columnsTable: columnsTableCriteriaAll(),
+          columnsTable: columnsTableCriteriaAll(
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            getCriteriaIdByCode("COUNTRY")
+          ),
           dataListCriteria: dataListCriteria?.map((item) =>{
             return {
               ...item,
@@ -252,14 +322,16 @@ const PricingForm = (props) => {
         })
       );
     },
-    [form]
+    [form, applySelectCriteriaCascade]
   );
 
   const asserDataDraft = useCallback(
     (dataDetailPricingGeneral, dataDetailDraftPricingGeneral) => {
-      const criteria = (
-        dataDetailDraftPricingGeneral?.rPricingCriterias || []
-      ).map((item) => item.criteria);
+      const criteria = applySelectCriteriaCascade(
+        (dataDetailDraftPricingGeneral?.rPricingCriterias || []).map(
+          (item) => item.criteria
+        )
+      );
       const appHier = dataDetailDraftPricingGeneral?.appHierId || 1;
       const obj = {
         priceCode: dataDetailDraftPricingGeneral?.priceCode,
@@ -368,7 +440,16 @@ const PricingForm = (props) => {
           idCompare: "idPricing",
           status: dataDetailPricingGeneral?.status,
           statusApproval: dataDetailPricingGeneral?.statusApproval,
-          columnsTable: columnsTableCriteriaAll(),
+          columnsTable: columnsTableCriteriaAll(
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            getCriteriaIdByCode("COUNTRY")
+          ),
           dataListCriteria: dataListCriteria?.map((item) =>{
             return {
               ...item,
@@ -379,7 +460,7 @@ const PricingForm = (props) => {
         })
       );
     },
-    [form]
+    [form, applySelectCriteriaCascade]
   );
 
   useEffect(() => {
@@ -430,21 +511,7 @@ const PricingForm = (props) => {
   }, [dataListAppHierId]);
 
   const handleSelectCriteria = (value) => {
-    let res = [...criteriaValues, value];
-    if (res.includes(13)) {
-      res.push(14);
-    }
-    if (res.includes(14)) {
-      res.push(39);
-    }
-    if (res.includes(39)) {
-      res.push(15);
-    }
-    if (res.includes(20)) {
-      res.push(19);
-    }
-    let outputArray = res.filter((item, index) => res.indexOf(item) === index);
-    outputArray = outputArray.includes(24) ? [24] : outputArray;
+    const outputArray = applySelectCriteriaCascade([...criteriaValues, value]);
     setCriteriaValues(outputArray);
     form.setFieldsValue({
       criteria: outputArray,
@@ -452,21 +519,7 @@ const PricingForm = (props) => {
   };
 
   const handleDeselectCriteria = (value) => {
-    let res = criteriaValues.filter((item) => item !== value);
-    if (!res.includes(15)) {
-      res = res.filter((item) => item !== 39);
-    }
-    if (!res.includes(39)) {
-      res = res.filter((item) => item !== 14);
-    }
-    if (!res.includes(14)) {
-      res = res.filter((item) => item !== 13);
-    }
-    if (!res.includes(19)) {
-      res = res.filter((item) => item !== 20);
-    }
-    let outputArray = res.filter((item, index) => res.indexOf(item) === index);
-    outputArray = outputArray.includes(24) ? [24] : outputArray;
+    const outputArray = applyDeselectCriteriaCascade(criteriaValues, value);
     setCriteriaValues(outputArray);
     form.setFieldsValue({
       criteria: outputArray,
@@ -622,14 +675,32 @@ const PricingForm = (props) => {
               return obj;
             });
 
-            const filteredCriteria = columnsTableCriteriaAll().filter(
+            const filteredCriteria = columnsTableCriteriaAll(
+              undefined,
+              undefined,
+              undefined,
+              undefined,
+              undefined,
+              undefined,
+              undefined,
+              getCriteriaIdByCode("COUNTRY")
+            ).filter(
               (item) =>
                 !([...formValue.criteria, 1, 2, 3, 4, 5] || []).includes(
                   item.indexValue
                 )
             );
 
-            const filteredCriteria2 = columnsTableCriteriaAll().filter((item) =>
+            const filteredCriteria2 = columnsTableCriteriaAll(
+              undefined,
+              undefined,
+              undefined,
+              undefined,
+              undefined,
+              undefined,
+              undefined,
+              getCriteriaIdByCode("COUNTRY")
+            ).filter((item) =>
               [...formValue.criteria, 1].includes(item.indexValue)
             );
 
@@ -824,11 +895,29 @@ const PricingForm = (props) => {
       return obj;
     });
 
-    const filteredCriteria = columnsTableCriteriaAll().filter(
+    const filteredCriteria = columnsTableCriteriaAll(
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      getCriteriaIdByCode("COUNTRY")
+    ).filter(
       (item) => !([...formValue.criteria, 1,2,3,4,5] || []).includes(item.indexValue)
     );
 
-    const filteredCriteria2 = columnsTableCriteriaAll().filter((item) =>
+    const filteredCriteria2 = columnsTableCriteriaAll(
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      getCriteriaIdByCode("COUNTRY")
+    ).filter((item) =>
       ([...formValue.criteria, 1]).includes(item.indexValue)
     );
 
@@ -1119,6 +1208,8 @@ const PricingForm = (props) => {
                 getApi={{
                   getBudgetList,
                   getProvinceList,
+                  getProvinceListByCountry,
+                  getCountryList,
                   getIndustrialSectorList,
                   getAccountCategoryList,
                   getServiceTypeList,
@@ -1133,6 +1224,7 @@ const PricingForm = (props) => {
                   getDistrictList,
                 }}
                 columnsTable={columnsTableCriteriaAll}
+                countryCriteriaId={getCriteriaIdByCode("COUNTRY")}
                 checkStartDate={false}
               />
                 // <PricingDetailTableCriteria

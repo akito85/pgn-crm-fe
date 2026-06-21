@@ -37,9 +37,17 @@ import {
   getSubDistrictList,
   getAccountGroupList,
   getDistrictList,
+  getProvinceListByCountry,
+  getCountryList,
 } from "../../../../redux/slices/product_promo/tos";
 import { columnsTableCriteriaAll } from "../UtilsProduct/TableCriteriaAllProduct";
-import { handleCheckCriteriaMissingValidation, handleMappingCriteriaGeneral } from "../UtilsProduct/UtilsAllProduct";
+import {
+  handleCheckCriteriaMissingValidation,
+  handleMappingCriteriaGeneral,
+  getCriteriaIdByCode,
+  applyLocationCriteriaCascade,
+  applyDeselectLocationCriteriaCascade,
+} from "../UtilsProduct/UtilsAllProduct";
 import productPromoHttpService from "../../../../redux/services/productPromoHttpService";
 
 const TermOfServiceCreate = () => {
@@ -126,21 +134,10 @@ const TermOfServiceCreate = () => {
   };
 
   const handleSelectCriteria = (value) => {
-    let res = [...criteriaValues, value];
-    if (res.includes(13)) {
-      res.push(14);
-    }
-    if (res.includes(14)) {
-      res.push(39);
-    }
-    if (res.includes(39)) {
-      res.push(15);
-    }
-    if (res.includes(20)) {
-      res.push(19);
-    }
-    let outputArray = res.filter((item, index) => res.indexOf(item) === index);
-    outputArray = outputArray.includes(24) ? [24] : outputArray;
+    const outputArray = applyLocationCriteriaCascade(
+      [...criteriaValues, value],
+      criteriaOptions
+    );
     setCriteriaValues(outputArray);
     form.setFieldsValue({
       rPricingRuleCriterias: outputArray,
@@ -148,21 +145,11 @@ const TermOfServiceCreate = () => {
   };
 
   const handleDeselectCriteria = (value) => {
-    let res = criteriaValues.filter((item) => item !== value);
-    if (!res.includes(15)) {
-      res = res.filter((item) => item !== 39);
-    }
-    if (!res.includes(39)) {
-      res = res.filter((item) => item !== 14);
-    }
-    if (!res.includes(14)) {
-      res = res.filter((item) => item !== 13);
-    }
-    if (!res.includes(19)) {
-      res = res.filter((item) => item !== 20);
-    }
-    let outputArray = res.filter((item, index) => res.indexOf(item) === index);
-    outputArray = outputArray.includes(24) ? [24] : outputArray;
+    const outputArray = applyDeselectLocationCriteriaCascade(
+      criteriaValues,
+      value,
+      criteriaOptions
+    );
     setCriteriaValues(outputArray);
     form.setFieldsValue({
       rPricingRuleCriterias: outputArray,
@@ -227,7 +214,16 @@ const TermOfServiceCreate = () => {
             handleMappingCriteriaGeneral({
               item: item,
               index: index,
-              columnsTable: columnsTableCriteriaAll(),
+              columnsTable: columnsTableCriteriaAll(
+                undefined,
+                undefined,
+                undefined,
+                undefined,
+                undefined,
+                undefined,
+                undefined,
+                getCriteriaIdByCode(criteriaOptions, "COUNTRY")
+              ),
               criteriaValues: criteriaValues,
               dataListCriteria: (data_criteria || [])?.map((item) => {
                 return {
@@ -291,7 +287,16 @@ const TermOfServiceCreate = () => {
         handleMappingCriteriaGeneral({
           item: item,
           index: index,
-          columnsTable: columnsTableCriteriaAll(),
+          columnsTable: columnsTableCriteriaAll(
+                undefined,
+                undefined,
+                undefined,
+                undefined,
+                undefined,
+                undefined,
+                undefined,
+                getCriteriaIdByCode(criteriaOptions, "COUNTRY")
+              ),
           criteriaValues: criteriaValues,
           dataListCriteria: (data_criteria || [])?.map((item) => {
             return {
@@ -510,7 +515,10 @@ const TermOfServiceCreate = () => {
                   getSubDistrictList,
                   getAccountGroupList,
                   getDistrictList,
+                  getProvinceListByCountry,
+                  getCountryList,
                 }}
+                countryCriteriaId={getCriteriaIdByCode(criteriaOptions, "COUNTRY")}
                 columnsTable={columnsTableCriteriaAll}
                 checkStartDate={false}
               />

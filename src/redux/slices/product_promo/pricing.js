@@ -18,6 +18,7 @@ const initialState = {
   dataListAppHierId: [],
   dataListAppHierDetail: [],
   data_province: [],
+  data_country: [],
   data_city: [],
   data_cost_center: [],
   data_sor: [],
@@ -267,6 +268,48 @@ export const getProvinceList = createAsyncThunk(
   async (thunkAPI) => {
     try {
       const url = `/v1/dbs/api/maintain-pricing/province`;
+      const response = await productPromoHttpService.getAll(url);
+      return response.data.data.map((item) => {
+        return {
+          value: item.id,
+          label: item.name,
+        };
+      });
+    } catch (error) {
+      if (error.response.data.code === 419) {
+        thunkAPI.dispatch(setBodyError(error));
+      }
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+export const getProvinceListByCountry = createAsyncThunk(
+  "GET_PROVINCE_LIST_BY_COUNTRY_PRICING",
+  async (id, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/maintain-pricing/province/${id}`;
+      const response = await productPromoHttpService.getDetail(url);
+      return response.data.data.map((item) => {
+        return {
+          value: item.id,
+          label: item.name,
+        };
+      });
+    } catch (error) {
+      if (error.response.data.code === 419) {
+        thunkAPI.dispatch(setBodyError(error));
+      }
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+export const getCountryList = createAsyncThunk(
+  "GET_COUNTRY_LIST_PRICING",
+  async (thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/maintain-pricing/country`;
       const response = await productPromoHttpService.getAll(url);
       return response.data.data.map((item) => {
         return {
@@ -994,6 +1037,34 @@ const pricingSlice = createSlice({
     [getProvinceList.rejected]: (state, action) => {
       state.loadingPricing = false;
       state.data_province = action.payload;
+    },
+
+    // Get Province List By Country
+    [getProvinceListByCountry.pending]: (state, action) => {
+      state.loadingPricing = true;
+      state.data_province = action.payload;
+    },
+    [getProvinceListByCountry.fulfilled]: (state, action) => {
+      state.loadingPricing = false;
+      state.data_province = action.payload;
+    },
+    [getProvinceListByCountry.rejected]: (state, action) => {
+      state.loadingPricing = false;
+      state.data_province = action.payload;
+    },
+
+    // Get Country List
+    [getCountryList.pending]: (state, action) => {
+      state.loadingPricing = true;
+      state.data_country = action.payload;
+    },
+    [getCountryList.fulfilled]: (state, action) => {
+      state.loadingPricing = false;
+      state.data_country = action.payload;
+    },
+    [getCountryList.rejected]: (state, action) => {
+      state.loadingPricing = false;
+      state.data_country = action.payload;
     },
 
     // Get City List

@@ -22,7 +22,13 @@ import {
 } from "../../../../components/Modal/ModalPopUp";
 import TermOfServiceConfirmation from "./Modal/TermOfServiceConfirmation";
 import { showModalError, validateCreateUpdate } from "../../../../redux/slices/general_slice";
-import { handleCheckCriteriaMissingValidation, handleMappingCriteriaGeneral } from "../UtilsProduct/UtilsAllProduct";
+import {
+  handleCheckCriteriaMissingValidation,
+  handleMappingCriteriaGeneral,
+  getCriteriaIdByCode,
+  applyLocationCriteriaCascade,
+  applyDeselectLocationCriteriaCascade,
+} from "../UtilsProduct/UtilsAllProduct";
 import { columnsTableCriteriaAll } from "../UtilsProduct/TableCriteriaAllProduct";
 import {
   getBudgetList,
@@ -39,6 +45,8 @@ import {
   getSubDistrictList,
   getAccountGroupList,
   getDistrictList,
+  getProvinceListByCountry,
+  getCountryList,
 } from "../../../../redux/slices/product_promo/tos";
 import FunctionalCriteriaProduct from "../UtilsProduct/FunctionalCriteriaProduct";
 import productPromoHttpService from "../../../../redux/services/productPromoHttpService";
@@ -165,13 +173,17 @@ const TermOfServiceUpdate = () => {
 
   useEffect(() => {
     if (id && data_detail) {
+      const tempCriteriaValues = applyLocationCriteriaCascade(
+        mappingCriteria,
+        criteriaOptions
+      );
       form.setFieldsValue({
         name: data_detail.name,
         attribute: mappingAttribute,
-        rPricingRuleCriterias: mappingCriteria,
+        rPricingRuleCriterias: tempCriteriaValues,
         description: data_detail.description,
       });
-      setCriteriaValues(mappingCriteria);
+      setCriteriaValues(tempCriteriaValues);
       setListDataCriteria(dataCriteriaList);
     }
   }, [
@@ -181,6 +193,7 @@ const TermOfServiceUpdate = () => {
     mappingAttribute,
     mappingCriteria,
     dataCriteriaList,
+    criteriaOptions,
   ]);
 
   // Breadcrumbs
@@ -201,21 +214,10 @@ const TermOfServiceUpdate = () => {
 
   // Dependency Criteria
   const handleSelectCriteria = (value) => {
-    let res = [...criteriaValues, value];
-    if (res.includes(26)) {
-      res.push(27);
-    }
-    if (res.includes(27)) {
-      res.push(139);
-    }
-    if (res.includes(139)) {
-      res.push(28);
-    }
-    if (res.includes(33)) {
-      res.push(32);
-    }
-    let outputArray = res.filter((item, index) => res.indexOf(item) === index);
-    outputArray = outputArray.includes(24) ? [24] : outputArray;
+    const outputArray = applyLocationCriteriaCascade(
+      [...criteriaValues, value],
+      criteriaOptions
+    );
     setCriteriaValues(outputArray);
     form.setFieldsValue({
       rPricingRuleCriterias: outputArray,
@@ -223,21 +225,11 @@ const TermOfServiceUpdate = () => {
   };
 
   const handleDeselectCriteria = (value) => {
-    let res = criteriaValues.filter((item) => item !== value);
-    if (!res.includes(28)) {
-      res = res.filter((item) => item !== 139);
-    }
-    if (!res.includes(139)) {
-      res = res.filter((item) => item !== 27);
-    }
-    if (!res.includes(27)) {
-      res = res.filter((item) => item !== 26);
-    }
-    if (!res.includes(32)) {
-      res = res.filter((item) => item !== 33);
-    }
-    let outputArray = res.filter((item, index) => res.indexOf(item) === index);
-    outputArray = outputArray.includes(24) ? [24] : outputArray;
+    const outputArray = applyDeselectLocationCriteriaCascade(
+      criteriaValues,
+      value,
+      criteriaOptions
+    );
     setCriteriaValues(outputArray);
     form.setFieldsValue({
       rPricingRuleCriterias: outputArray,
@@ -299,7 +291,16 @@ const TermOfServiceUpdate = () => {
         handleMappingCriteriaGeneral({
           item: item,
           index: index,
-          columnsTable: columnsTableCriteriaAll(),
+          columnsTable: columnsTableCriteriaAll(
+                undefined,
+                undefined,
+                undefined,
+                undefined,
+                undefined,
+                undefined,
+                undefined,
+                getCriteriaIdByCode(criteriaOptions, "COUNTRY")
+              ),
           criteriaValues: criteriaValues,
           dataListCriteria: data_criteria?.map((item) =>{
             return {
@@ -363,7 +364,16 @@ const TermOfServiceUpdate = () => {
       handleMappingCriteriaGeneral({
         item: item,
         index: index,
-        columnsTable: columnsTableCriteriaAll(),
+        columnsTable: columnsTableCriteriaAll(
+                undefined,
+                undefined,
+                undefined,
+                undefined,
+                undefined,
+                undefined,
+                undefined,
+                getCriteriaIdByCode(criteriaOptions, "COUNTRY")
+              ),
         criteriaValues: criteriaValues,
         dataListCriteria: data_criteria?.map((item) =>{
           return {
@@ -585,7 +595,10 @@ const TermOfServiceUpdate = () => {
                 getSubDistrictList,
                 getAccountGroupList,
                 getDistrictList,
+                getProvinceListByCountry,
+                getCountryList,
               }}
+              countryCriteriaId={getCriteriaIdByCode(criteriaOptions, "COUNTRY")}
               columnsTable={columnsTableCriteriaAll}
               checkStartDate={false}
             />
