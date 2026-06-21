@@ -20,6 +20,7 @@ const initialState = {
   list_tos: [],
   pagination_tos: { totalPage: 0, totalElement: 0 },
   loading_listTos: false,
+  latestListReqId_tos: null,
   // data_criteria: [],
 
   // List Criteria
@@ -633,15 +634,28 @@ const tosSlice = createSlice({
       if (!action.meta.arg?.isLoadMore) {
         state.loading_listTos = true;
         state.list_tos = [];
+        state.latestListReqId_tos = action.meta.requestId;
       }
     },
     [getAllTosPaginate.fulfilled]: (state, action) => {
+      const { result, page, isLoadMore } = action.payload || {};
+      // Drop stale replace responses (out-of-order race when filters/search
+      // change quickly); only the most recent request owns the list.
+      if (!isLoadMore && action.meta.requestId !== state.latestListReqId_tos)
+        return;
       state.data = action.payload;
       state.loading = false;
       state.loading_listTos = false;
-      const { result, page, isLoadMore } = action.payload || {};
       if (Array.isArray(result)) {
-        state.list_tos = isLoadMore ? [...state.list_tos, ...result] : result;
+        if (isLoadMore) {
+          const existingIds = new Set(state.list_tos.map((it) => it.id));
+          state.list_tos = [
+            ...state.list_tos,
+            ...result.filter((it) => !existingIds.has(it.id)),
+          ];
+        } else {
+          state.list_tos = result;
+        }
       }
       state.pagination_tos = {
         totalPage: page?.totalPages || 0,

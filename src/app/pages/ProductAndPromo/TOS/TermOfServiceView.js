@@ -94,12 +94,15 @@ const TermOfServiceView = () => {
     setPage(0);
   }, [sort, search, searchText, filters, filterRules, limitData]); // intentionally omit dispatch/buildBody to avoid loop
 
-  const handleLoadMore = () => {
+  const handleLoadMore = async () => {
     const nextPage = page + 1;
-    if (nextPage <= (pagination.totalPage || 0)) {
-      dispatch(getAllTosPaginate({ ...buildBody(nextPage), isLoadMore: true }));
+    // page is 0-based, totalPage is a count → last valid index is totalPage-1.
+    if (nextPage < (pagination.totalPage || 0)) {
+      // await so NxTable's infinite-scroll gate stays closed until the fetch
+      // settles — prevents duplicate page dispatches on fast scrolling.
+      await dispatch(getAllTosPaginate({ ...buildBody(nextPage), isLoadMore: true }));
+      setPage(nextPage);
     }
-    setPage(nextPage);
   };
 
   // Breadcrumbs

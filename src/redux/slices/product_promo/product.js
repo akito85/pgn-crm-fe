@@ -14,6 +14,7 @@ const initialState = {
   list_product: [],
   pagination_product: { totalPage: 0, totalElement: 0 },
   loading_listProduct: false,
+  latestListReqId_product: null,
   dataListProductType: [],
   dataListProductClass: [],
   dataListServiceType: [],
@@ -1488,17 +1489,28 @@ const productSlice = createSlice({
       if (!action.meta.arg?.isLoadMore) {
         state.loading_listProduct = true;
         state.list_product = [];
+        state.latestListReqId_product = action.meta.requestId;
       }
     },
     [getAllProductPaginate.fulfilled]: (state, action) => {
+      const { result, page, isLoadMore } = action.payload || {};
+      // Drop stale replace responses (out-of-order race when filters/search
+      // change quickly); only the most recent request owns the list.
+      if (!isLoadMore && action.meta.requestId !== state.latestListReqId_product)
+        return;
       state.dataProduct = action.payload;
       state.loadingProduct = false;
       state.loading_listProduct = false;
-      const { result, page, isLoadMore } = action.payload || {};
       if (Array.isArray(result)) {
-        state.list_product = isLoadMore
-          ? [...state.list_product, ...result]
-          : result;
+        if (isLoadMore) {
+          const existingIds = new Set(state.list_product.map((it) => it.id));
+          state.list_product = [
+            ...state.list_product,
+            ...result.filter((it) => !existingIds.has(it.id)),
+          ];
+        } else {
+          state.list_product = result;
+        }
       }
       state.pagination_product = {
         totalPage: page?.totalPages || 0,

@@ -44,6 +44,7 @@ const initialState = {
   list_pricing: [],
   pagination_pricing: { totalPage: 0, totalElement: 0 },
   loading_listPricing: false,
+  latestListReqId_pricing: null,
 };
 
 export const getAllPricingPaginate = createAsyncThunk(
@@ -872,17 +873,28 @@ const pricingSlice = createSlice({
       if (!action.meta.arg?.isLoadMore) {
         state.loading_listPricing = true;
         state.list_pricing = [];
+        state.latestListReqId_pricing = action.meta.requestId;
       }
     },
     [getAllPricingPaginate.fulfilled]: (state, action) => {
+      const { result, page, isLoadMore } = action.payload || {};
+      // Drop stale replace responses (out-of-order race when filters/search
+      // change quickly); only the most recent request owns the list.
+      if (!isLoadMore && action.meta.requestId !== state.latestListReqId_pricing)
+        return;
       state.dataPricing = action.payload;
       state.loadingPricing = false;
       state.loading_listPricing = false;
-      const { result, page, isLoadMore } = action.payload || {};
       if (Array.isArray(result)) {
-        state.list_pricing = isLoadMore
-          ? [...state.list_pricing, ...result]
-          : result;
+        if (isLoadMore) {
+          const existingIds = new Set(state.list_pricing.map((it) => it.id));
+          state.list_pricing = [
+            ...state.list_pricing,
+            ...result.filter((it) => !existingIds.has(it.id)),
+          ];
+        } else {
+          state.list_pricing = result;
+        }
       }
       state.pagination_pricing = {
         totalPage: page?.totalPages || 0,

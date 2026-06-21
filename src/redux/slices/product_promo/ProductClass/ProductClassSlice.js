@@ -17,6 +17,7 @@ const initialState = {
   list_productClass: [],
   pagination_productClass: { totalPage: 0, totalElement: 0 },
   loading_listProductClass: false,
+  latestListReqId_productClass: null,
 };
 
 export const getAllProductClassPaginate = createAsyncThunk(
@@ -195,19 +196,35 @@ const productClassSlice = createSlice({
       if (!action.meta.arg?.isLoadMore) {
         state.loading_listProductClass = true;
         state.list_productClass = [];
+        state.latestListReqId_productClass = action.meta.requestId;
       }
     },
     [getAllProductClassPaginate.fulfilled]: (state, action) => {
+      const { result, page, isLoadMore } = action.payload || {};
+      // Drop stale replace responses (out-of-order race when filters/search
+      // change quickly); only the most recent request owns the list.
+      if (
+        !isLoadMore &&
+        action.meta.requestId !== state.latestListReqId_productClass
+      )
+        return;
       state.isFailed = false;
       state.isSuccess = false;
       state.data = action.payload;
       state.loading = false;
       state.loading_listProductClass = false;
-      const { result, page, isLoadMore } = action.payload || {};
       if (Array.isArray(result)) {
-        state.list_productClass = isLoadMore
-          ? [...state.list_productClass, ...result]
-          : result;
+        if (isLoadMore) {
+          const existingIds = new Set(
+            state.list_productClass.map((it) => it.id)
+          );
+          state.list_productClass = [
+            ...state.list_productClass,
+            ...result.filter((it) => !existingIds.has(it.id)),
+          ];
+        } else {
+          state.list_productClass = result;
+        }
       }
       state.pagination_productClass = {
         totalPage: page?.totalPages || 0,

@@ -20,13 +20,15 @@ const SearchBar = React.memo(({ placeholder = 'Search content here ....', onSear
   const handleChange = useCallback((e) => {
     const val = e.target.value;
     setLocalValue(val);
-    debouncedNotify(val);
-  }, [debouncedNotify]);
-
-  const handleClear = useCallback(() => {
-    setLocalValue('');
-    debouncedNotify.cancel();
-    onSearchRef.current?.('');
+    // Emptying the field (incl. the allowClear "×" button, which antd v4 fires
+    // through onChange — there is no onClear prop on v4 Input) notifies
+    // immediately instead of waiting out the debounce window.
+    if (val === '') {
+      debouncedNotify.cancel();
+      onSearchRef.current?.('');
+    } else {
+      debouncedNotify(val);
+    }
   }, [debouncedNotify]);
 
   return (
@@ -56,7 +58,6 @@ const SearchBar = React.memo(({ placeholder = 'Search content here ....', onSear
         }}
         onChange={handleChange}
         allowClear
-        onClear={handleClear}
       />
     </div>
   );

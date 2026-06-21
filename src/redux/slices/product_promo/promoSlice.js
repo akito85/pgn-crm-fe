@@ -9,6 +9,7 @@ import productPromoHttpService from "../../services/productPromoHttpService";
 
 const initialState = {
   list_promo: [],
+  latestListReqId_promo: null,
   pagination_promo: {
     totalPages: 0,
     totalElements: 0,
@@ -1219,11 +1220,16 @@ const promoSlice = createSlice({
     [getAllPromoPaginate.pending]: (state, action) => {
       if (!action.meta.arg?.isLoadMore) {
         state.loading = true;
+        state.latestListReqId_promo = action.meta.requestId;
       }
     },
     [getAllPromoPaginate.fulfilled]: (state, action) => {
-      state.loading = false;
       const { result, page, isLoadMore } = action.payload;
+      // Drop stale replace responses (out-of-order race when filters/search
+      // change quickly); only the most recent request owns the list.
+      if (!isLoadMore && action.meta.requestId !== state.latestListReqId_promo)
+        return;
+      state.loading = false;
 
       // Keep backward compatibility
       state.data = action.payload;

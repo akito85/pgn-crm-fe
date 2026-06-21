@@ -44,6 +44,7 @@ const initialState = {
   list_pricingRule: [],
   pagination_pricingRule: { totalPage: 0, totalElement: 0 },
   loading_listPricingRule: false,
+  latestListReqId_pricingRule: null,
 };
 
 export const getAllPricingRulePaginate = createAsyncThunk(
@@ -853,19 +854,35 @@ const pricingRuleSlice = createSlice({
       if (!action.meta.arg?.isLoadMore) {
         state.loading_listPricingRule = true;
         state.list_pricingRule = [];
+        state.latestListReqId_pricingRule = action.meta.requestId;
       }
     },
     [getAllPricingRulePaginate.fulfilled]: (state, action) => {
+      const { result, page, isLoadMore } = action.payload || {};
+      // Drop stale replace responses (out-of-order race when filters/search
+      // change quickly); only the most recent request owns the list.
+      if (
+        !isLoadMore &&
+        action.meta.requestId !== state.latestListReqId_pricingRule
+      )
+        return;
       state.isFailed = false;
       state.isSuccess = false;
       state.data = action.payload;
       state.loading = false;
       state.loading_listPricingRule = false;
-      const { result, page, isLoadMore } = action.payload || {};
       if (Array.isArray(result)) {
-        state.list_pricingRule = isLoadMore
-          ? [...state.list_pricingRule, ...result]
-          : result;
+        if (isLoadMore) {
+          const existingIds = new Set(
+            state.list_pricingRule.map((it) => it.id)
+          );
+          state.list_pricingRule = [
+            ...state.list_pricingRule,
+            ...result.filter((it) => !existingIds.has(it.id)),
+          ];
+        } else {
+          state.list_pricingRule = result;
+        }
       }
       state.pagination_pricingRule = {
         totalPage: page?.totalPages || 0,

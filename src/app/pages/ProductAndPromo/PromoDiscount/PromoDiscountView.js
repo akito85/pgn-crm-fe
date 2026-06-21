@@ -55,9 +55,11 @@ const PromoDiscountView = () => {
   const dataSourceWithKeys = useMemo(() => {
     if (!currentData || currentData.length === 0) return [];
 
+    // ids are unique (slice dedups on append) so use a stable key that does not
+    // shift when the list grows; a position-based key would remount rows.
     return currentData.map((item, index) => ({
       ...item,
-      key: `${item.id}-${index}`,
+      key: item.id ?? index,
     }));
   }, [currentData]);
 
@@ -175,7 +177,8 @@ const PromoDiscountView = () => {
     const nextPage = page + 1;
     const totalPages = pagination_promo?.totalPages || 0;
 
-    if (nextPage <= totalPages) {
+    // page is 0-based, totalPages is a count → last valid index is totalPages-1.
+    if (nextPage < totalPages) {
       await dispatch(
         getAllPromoPaginate({ ...buildBody(nextPage), isLoadMore: true })
       );
