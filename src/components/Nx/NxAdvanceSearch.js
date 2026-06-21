@@ -10,6 +10,12 @@ import TextArea from "antd/lib/input/TextArea";
 
 const { Option } = Select;
 
+// Monotonic counter for filter row ids. Date.now() collides when two rows are
+// added within the same millisecond, producing duplicate React keys and
+// cross-updating rows.
+let _filterUid = 0;
+const nextFilterId = () => ++_filterUid;
+
 const NxAdvanceSearch = ({
   visible,
   onClose,
@@ -20,7 +26,7 @@ const NxAdvanceSearch = ({
 }) => {
   const [filters, setFilters] = useState([
     {
-      id: Date.now(),
+      id: nextFilterId(),
       column: "",
       operator: "Contains",
       value: "",
@@ -49,11 +55,19 @@ const NxAdvanceSearch = ({
 
   const isNumericOperator = (op) => op === "Greater than" || op === "Less than";
 
-  // Heuristic: columns whose key contains "date" are treated as date columns so that
-  // Greater than / Less than can use a real date picker (value emitted as "YYYY-MM-DD",
-  // which the backend parseFilterDate understands).
-  const isDateColumn = (columnKey) =>
-    typeof columnKey === "string" && columnKey.toLowerCase().includes("date");
+  // A column is treated as a date column (real date picker, value emitted as
+  // "YYYY-MM-DD" which the backend parseFilterDate understands) when either:
+  //  - its definition opts in explicitly via isDate / filterType: "date", or
+  //  - its key matches a date suffix as a whole word.
+  // The previous `includes("date")` over-matched keys like "update"/"mandate".
+  const isDateColumn = (columnKey) => {
+    if (typeof columnKey !== "string") return false;
+    const col = filterableColumns.find(
+      (c, i) => getColumnKey(c, i) === columnKey
+    );
+    if (col && (col.isDate || col.filterType === "date")) return true;
+    return /(^|_)date$|Date$/.test(columnKey);
+  };
 
   const renderValueInput = (value, operator, onChange, columnKey) => {
     if (operator === "Is empty" || operator === "Is not empty") return null;
@@ -95,7 +109,7 @@ const NxAdvanceSearch = ({
   // Add new filter to main group
   const addFilter = () => {
     const newFilter = {
-      id: Date.now(),
+      id: nextFilterId(),
       column: "",
       operator: "Contains",
       value: "",
@@ -123,10 +137,10 @@ const NxAdvanceSearch = ({
     setFilterRules([
       ...filterRules,
       {
-        id: Date.now(),
+        id: nextFilterId(),
         filters: [
           {
-            id: Date.now() + 1,
+            id: nextFilterId(),
             column: "",
             operator: "Contains",
             value: "",
@@ -148,7 +162,7 @@ const NxAdvanceSearch = ({
               filters: [
                 ...rule.filters,
                 {
-                  id: Date.now(),
+                  id: nextFilterId(),
                   column: "",
                   operator: "Contains",
                   value: "",
@@ -223,7 +237,7 @@ const NxAdvanceSearch = ({
   const handleClear = () => {
     setFilters([
       {
-        id: Date.now(),
+        id: nextFilterId(),
         column: "",
         operator: "Contains",
         value: "",

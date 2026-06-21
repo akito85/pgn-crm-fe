@@ -24,6 +24,9 @@ const PromoDiscountTable = ({
   searchInput = null,
   handleSearch = () => {},
   loading = false,
+  onAdvanceSearch = () => {},
+  onSearch = () => {},
+  onRefresh = () => {},
 }) => {
   const navigate = useNavigate();
 
@@ -104,6 +107,9 @@ const PromoDiscountTable = ({
         setFixedColumns={setFixedColumns}
         columnDefinitions={columnDefinitions}
         loading={loading}
+        onAdvanceSearch={onAdvanceSearch}
+        onSearch={onSearch}
+        onRefresh={onRefresh}
       />
     </div>
   );

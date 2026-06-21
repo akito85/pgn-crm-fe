@@ -1,16 +1,10 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import { useSelector, useDispatch } from "react-redux";
-import BaseContainer from "../../../../components/BaseContainer";
-import { Spin, Input, Tooltip, Checkbox } from "antd";
+import { Tooltip, Checkbox } from "antd";
 import ButtonComponent from "../../../../components/ButtonComponent";
-import {
-  DownloadOutlined,
-  PlusOutlined,
-  FilterOutlined,
-} from "@ant-design/icons";
-import { NavLink, Link } from "react-router-dom";
-import Highlighter from "react-highlight-words";
+import { DownloadOutlined, PlusOutlined } from "@ant-design/icons";
+import { NavLink } from "react-router-dom";
 import { PRODUCT_PROMO_ROUTES } from "../../../../routes/product_promo/pp_routes";
 import SVGIcon from "../../../../assets/Icon/index";
 import {
@@ -21,27 +15,53 @@ import {
 import TermOfServiceDetail from "./Modal/TermOfServiceDetail";
 import TermOfServiceInactive from "./Modal/TermOfServiceInactive";
 import { ModalError } from "../../../../components/Modal/ModalPopUp";
-import TablePaginationNew from "../../../../components/TablePaginationNew";
+import NxCardContainer from "../../../../components/Nx/NxCardContainer";
+import NxTable from "../../../../components/Nx/NxTable";
+import NxStatusComponent from "../../../../components/Nx/NxStatusComponent";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../utils/getColumnSearchProps";
 import { hasValue, renderColumn } from "../../../../utils";
 import Toolbar from "../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
 
+const PAGE_SIZE = 20;
+
+const formatStatus = (value) => {
+  switch (value) {
+    case "WAITING APPROVAL":
+    case "WAITING_FOR_APPROVAL":
+    case "WAITING_APPROVAL":
+      return "Waiting Approval";
+    default:
+      return value
+        ? value.charAt(0).toUpperCase() + value.slice(1).toLowerCase()
+        : value;
+  }
+};
+
 const TermOfServiceView = () => {
   // Selector
-  const { data, loading } = useSelector((state) => state.tos);
+  const {
+    list_tos: dataSource,
+    pagination_tos: pagination,
+    loading_listTos: loading,
+  } = useSelector((state) => state.tos);
 
   // Declaration
   const dispatch = useDispatch();
   const searchInput = useRef(null);
 
+  const totalElement = pagination.totalElement;
+
   // State
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [page, setPage] = useState(0);
   const [searchedColumn, setSearchedColumn] = useState("");
-  const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
+  const [searchText, setSearchText] = useState("");
+  const [filters, setFilters] = useState([]);
+  const [filterRules, setFilterRules] = useState([]);
+  const [limitData, setLimitData] = useState(null);
+  const hasMore = !limitData && dataSource.length < (totalElement || 0);
 
   const [modalInactive, setModalInactive] = useState(false);
   const [modalDetail, setModalDetail] = useState(false);
@@ -49,27 +69,41 @@ const TermOfServiceView = () => {
   const [modalError, setModalError] = useState(false);
   const [bodyError, setBodyError] = useState({});
 
-  // Use Effect
+  // --- Fetch helpers ---
+  const buildBody = useCallback(
+    (pageNum) => ({
+      page: pageNum,
+      pageSize: limitData || PAGE_SIZE,
+      sort,
+      search,
+      searchText,
+      filters,
+      filterRules,
+    }),
+    [sort, search, searchText, filters, filterRules, limitData]
+  );
+
+  const handleRefresh = useCallback(() => {
+    dispatch(getAllTosPaginate({ ...buildBody(0), isLoadMore: false }));
+    setPage(0);
+  }, [dispatch, buildBody]);
+
+  // Re-fetch page 0 whenever sort / search / filters change
   useEffect(() => {
-    // let tempSearch = "";
-    // for (const dataIndex in search) {
-    //   if (Object.hasOwnProperty.call(search, dataIndex)) {
-    //     const tempSearchText = search[dataIndex];
-    //     if (tempSearchText) {
-    //       tempSearch += `${dataIndex}~${tempSearchText},`;
-    //     }
-    //   }
-    // }
-    // tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
-    dispatch(
-      getAllTosPaginate({
-        search: encodeURIComponent(JSON.stringify(search)),
-        sort,
-        page,
-        pageSize,
-      })
-    );
-  }, [search, sort, page, pageSize]);
+    dispatch(getAllTosPaginate({ ...buildBody(0), isLoadMore: false }));
+    setPage(0);
+  }, [sort, search, searchText, filters, filterRules, limitData]); // intentionally omit dispatch/buildBody to avoid loop
+
+  const handleLoadMore = async () => {
+    const nextPage = page + 1;
+    // page is 0-based, totalPage is a count → last valid index is totalPage-1.
+    if (nextPage < (pagination.totalPage || 0)) {
+      // await so NxTable's infinite-scroll gate stays closed until the fetch
+      // settles — prevents duplicate page dispatches on fast scrolling.
+      await dispatch(getAllTosPaginate({ ...buildBody(nextPage), isLoadMore: true }));
+      setPage(nextPage);
+    }
+  };
 
   // Breadcrumbs
   const routes = [
@@ -83,73 +117,11 @@ const TermOfServiceView = () => {
     },
   ];
 
-  // Search Column
-  const getColumnSearchProps = (dataIndex) => ({
-    filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }) => (
-      <div
-        style={{
-          padding: 8,
-        }}
-        onKeyDown={(e) => e.stopPropagation()}
-      >
-        <Input
-          ref={searchInput}
-          placeholder={`Search`}
-          value={selectedKeys[0]}
-          onChange={(e) =>
-            setSelectedKeys(e.target.value ? [e.target.value] : [])
-          }
-          onPressEnter={() => {
-            handleSearch(selectedKeys, confirm, dataIndex);
-          }}
-          style={{
-            marginBottom: 8,
-            display: "block",
-          }}
-        />
-      </div>
-    ),
-    filterIcon: (filtered) => (
-      <FilterOutlined
-        style={{
-          color: filtered ? "#1890ff" : undefined,
-        }}
-      />
-    ),
-    // onFilter: (value, record) =>
-    //   record[dataIndex]
-    //     ?.toString()
-    //     ?.toLowerCase()
-    //     ?.includes(value.toLowerCase()),
-    onFilterDropdownOpenChange: (visible) => {
-      if (visible) {
-        setTimeout(() => searchInput.current?.select(), 5000);
-      }
-    },
-    render: (text) =>
-      searchedColumn === dataIndex ? (
-        <Highlighter
-          highlightStyle={{
-            backgroundColor: "#ffc069",
-            padding: 0,
-          }}
-          searchWords={[searchText]}
-          autoEscape
-          textToHighlight={text ? text.toString() : ""}
-        />
-      ) : (
-        text
-      ),
-  });
-
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
-    setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
     setSearch((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
-      }
+      if (prevState[dataIndex] !== selectedKeys[0]) setPage(0);
       return {
         ...prevState,
         [dataIndex]: selectedKeys[0],
@@ -157,9 +129,16 @@ const TermOfServiceView = () => {
     });
   };
 
-  const handleChange = (pageChange, pageSizeChange) => {
-    setPage(pageSize !== pageSizeChange ? 1 : pageChange);
-    setPageSize(pageSizeChange);
+  const handleSearchBar = useCallback((value) => {
+    setSearchText(value || "");
+  }, []);
+
+  const handleAdvancedSearch = (searchData) => {
+    setFilters(searchData?.filters || []);
+    setFilterRules(searchData?.filterRules || []);
+    const parsedLimit = parseInt(searchData?.limitData, 10);
+    setLimitData(Number.isFinite(parsedLimit) && parsedLimit > 0 ? parsedLimit : null);
+    setPage(0);
   };
 
   const columns = [
@@ -167,7 +146,7 @@ const TermOfServiceView = () => {
       title: "NO",
       width: 60,
       align: "center",
-      render: (text, object, index) => (page - 1) * pageSize + index + 1,
+      render: (text, object, index) => index + 1,
     },
     {
       title: "NAME",
@@ -222,24 +201,6 @@ const TermOfServiceView = () => {
           "input",
           search
         ),
-      // render: (text) =>
-      //   searchedColumn === "attributes" ? (
-      //     <Highlighter
-      //       highlightStyle={{
-      //         backgroundColor: "#ffc069",
-      //         padding: 0,
-      //       }}
-      //       searchWords={[searchText]}
-      //       autoEscape
-      //       textToHighlight={text ? text.toString() : ""}
-      //     />
-      //   ) : text ? (
-      //     <Tooltip placement="topLeft" title={text}>
-      //       {text}
-      //     </Tooltip>
-      //   ) : (
-      //     ""
-      //   ),
     },
     {
       title: "CRITERIA",
@@ -267,24 +228,6 @@ const TermOfServiceView = () => {
           "input",
           search
         ),
-      // render: (text) =>
-      //   searchedColumn === "criterias" ? (
-      //     <Highlighter
-      //       highlightStyle={{
-      //         backgroundColor: "#ffc069",
-      //         padding: 0,
-      //       }}
-      //       searchWords={[searchText]}
-      //       autoEscape
-      //       textToHighlight={text ? text.toString() : ""}
-      //     />
-      //   ) : text ? (
-      //     <Tooltip placement="topLeft" title={text}>
-      //       {text}
-      //     </Tooltip>
-      //   ) : (
-      //     ""
-      //   ),
     },
     {
       title: "DESCRIPTION",
@@ -312,24 +255,6 @@ const TermOfServiceView = () => {
           "input",
           search
         ),
-      // render: (text) =>
-      //   searchedColumn === "description" ? (
-      //     <Highlighter
-      //       highlightStyle={{
-      //         backgroundColor: "#ffc069",
-      //         padding: 0,
-      //       }}
-      //       searchWords={[searchText]}
-      //       autoEscape
-      //       textToHighlight={text ? text.toString() : ""}
-      //     />
-      //   ) : text ? (
-      //     <Tooltip placement="topLeft" title={text}>
-      //       {text}
-      //     </Tooltip>
-      //   ) : (
-      //     ""
-      //   ),
     },
     {
       title: "STATUS",
@@ -346,109 +271,18 @@ const TermOfServiceView = () => {
         handleSearch,
         true
       ),
-      render: (index) => {
-        let text;
-        switch (index) {
-          case "WAITING APPROVAL":
-          case "WAITING_FOR_APPROVAL":
-          case "WAITING_APPROVAL":
-            text = "Waiting Approval";
-            break;
-          default:
-            text = index
-              ? index.charAt(0).toUpperCase() + index.slice(1).toLowerCase()
-              : index;
-            break;
-        }
-        return text
-          ? renderColumn(
-              "status",
-              hasValue(search["status"]),
-              searchText,
-              text,
-              false,
-              "status",
-              search
-            )
-          : text;
+      render: (value) => {
+        const text = formatStatus(value);
+        return text ? (
+          <div className="flex justify-center">
+            <NxStatusComponent colour={text}>{text}</NxStatusComponent>
+          </div>
+        ) : (
+          text
+        );
       },
     },
-
-    // {
-    //   title: "ACTION",
-    //   dataIndex: "id",
-    //   align: "center",
-    //   width: 150,
-    //   fixed: "right",
-    //   render: (id, record, index) => {
-    //     return (
-    //       <div className="flex w-full justify-center gap-6">
-    //         <Tooltip title="Detail">
-    //           <div className="pt-1">
-    //             <SVGIcon
-    //               name="IconDetail"
-    //               width={24}
-    //               onClick={() => {
-    //                 handleDetail(id);
-    //               }}
-    //             />
-    //           </div>
-    //         </Tooltip>
-
-    //         <Tooltip title="Update">
-    //           <div className="pt-1">
-    //             {record.status === "ACTIVE" ? (
-    //               <Link
-    //                 to={PRODUCT_PROMO_ROUTES.UPDATE_TERM_OF_SERVICE}
-    //                 state={{ id: id, status: record?.approvalStatus }}
-    //               >
-    //                 <SVGIcon name="IconEdit" width={24} />
-    //               </Link>
-    //             ) : (
-    //               <div
-    //                 className={
-    //                   record.status === "INACTIVE" ? "cursor-not-allowed" : ""
-    //                 }
-    //               >
-    //                 <SVGIcon
-    //                   name="IconEdit"
-    //                   width={24}
-    //                   color={
-    //                     record.status !== "INACTIVE" ? "#ACC424" : "#8D91A0"
-    //                   }
-    //                   className={
-    //                     record.status === "INACTIVE" ? "disabled" : undefined
-    //                   }
-    //                 />
-    //               </div>
-    //             )}
-    //           </div>
-    //         </Tooltip>
-
-    //         <Tooltip title={"Inactivate"}>
-    //           <div className="pt-1">
-    //             <Checkbox
-    //               onClick={() => {
-    //                 handleInactive(id);
-    //               }}
-    //               disabled={record.status === "ACTIVE" ? false : true}
-    //               checked={record.status === "ACTIVE" ? false : true}
-    //             />
-    //           </div>
-    //         </Tooltip>
-    //       </div>
-    //     );
-    //   },
-    // },
   ];
-
-  const onSort = (_, __, sort) => {
-    const dataSort =
-      sort.order !== undefined
-        ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
-        : "";
-    setSort(dataSort);
-  };
 
   // Handle Confirmation Inactive
   const handleInactive = (id) => {
@@ -464,21 +298,11 @@ const TermOfServiceView = () => {
 
   // Handle Download
   const handleDownload = () => {
-    // let tempSearch = "";
-    // for (const dataIndex in search) {
-    //   if (Object.hasOwnProperty.call(search, dataIndex)) {
-    //     const tempSearchText = search[dataIndex];
-    //     if (tempSearchText) {
-    //       tempSearch += `${dataIndex}~${tempSearchText},`;
-    //     }
-    //   }
-    // }
-    // tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
     dispatch(
       downloadTOS({
         search: encodeURIComponent(JSON.stringify(search)),
-        page,
-        pageSize,
+        page: 0,
+        pageSize: PAGE_SIZE,
         sort,
       })
     );
@@ -490,24 +314,7 @@ const TermOfServiceView = () => {
       .unwrap()
       .then(() => {
         setModalInactive(false);
-        // let tempSearch = "";
-        // for (const dataIndex in search) {
-        //   if (Object.hasOwnProperty.call(search, dataIndex)) {
-        //     const tempSearchText = search[dataIndex];
-        //     if (tempSearchText) {
-        //       tempSearch += `${dataIndex}~${tempSearchText},`;
-        //     }
-        //   }
-        // }
-        // tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
-        dispatch(
-          getAllTosPaginate({
-            search: encodeURIComponent(JSON.stringify(search)),
-            sort,
-            page,
-            pageSize,
-          })
-        );
+        handleRefresh();
       })
       .catch((error) => {
         if (Math.floor((error?.response?.data?.code || 0) / 100) === 5) {
@@ -613,12 +420,12 @@ const TermOfServiceView = () => {
           );
 
         return isEditable ? (
-          <Link
+          <NavLink
             to={PRODUCT_PROMO_ROUTES.UPDATE_TERM_OF_SERVICE}
             state={{ id: record?.id, status: record?.approvalStatus }}
           >
             {render}
-          </Link>
+          </NavLink>
         ) : (
           render
         );
@@ -666,6 +473,14 @@ const TermOfServiceView = () => {
     },
   ];
 
+  const onSort = (_, __, sortInfo) => {
+    const dataSort =
+      sortInfo.order !== undefined
+        ? `${sortInfo.field}~${sortInfo.order === "ascend" ? "asc" : "desc"}`
+        : "";
+    setSort(dataSort);
+  };
+
   const handleCloseModalError = () => {
     setModalError(false);
     setBodyError({});
@@ -676,90 +491,76 @@ const TermOfServiceView = () => {
     setBodyError({});
   };
 
+  const tableColumns = [
+    ...columns,
+    ...useColumnActionPermission(
+      ["view", "Update", "Activate"],
+      itemsActionView
+    ),
+  ];
+
   return (
     <>
-      <Spin spinning={loading}>
-        <BreadCrumb routes={routes} />
+      <BreadCrumb routes={routes} />
 
-        {/* <div className="flex w-full justify-end gap-3">
-          <ButtonComponent
-            icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
-            type="submit"
-            onClick={handleDownload}
-          >
-            Download List
-          </ButtonComponent>
-          <NavLink
-            to={PRODUCT_PROMO_ROUTES.CREATE_TERM_OF_SERVICE}
-            state={{ x: 1 }}
-          >
-            <ButtonComponent
-              icon={<PlusOutlined style={{ fontSize: "24px" }} />}
-              type="submit"
-            >
-              Create Terms Of Service
-            </ButtonComponent>
-          </NavLink>
-        </div> */}
-        <Toolbar items={itemsActionView} />
-        <BaseContainer header={"TERMS OF SERVICE INFORMATION"}>
-          <div className={"w-full"}>
-            <TablePaginationNew
-              dataSource={data?.result}
-              columns={[
-                ...columns,
-                ...useColumnActionPermission(
-                  ["view", "Update", "Activate"],
-                  itemsActionView
-                ),
-              ]}
-              current={page}
-              pageSize={pageSize}
-              onChange={handleChange}
-              onSizeChanger={handleChange}
-              onSort={onSort}
-              totalData={data?.page?.totalElements || 0}
-              tableScrolled={{ y: 525, x: 1800 }}
-            />
-          </div>
-        </BaseContainer>
-
-        {/* Modal Detail TOS */}
-        {chooseId !== "" ? (
-          <TermOfServiceDetail
-            openModal={modalDetail}
-            closeModal={() => {
-              setChooseId("");
-              setModalDetail(false);
-            }}
-            id={chooseId}
+      <NxCardContainer header="Terms Of Service Information" className="mt-4">
+        <div className="flex flex-col gap-y-4">
+          <Toolbar items={itemsActionView} type="page" />
+          <NxTable
+            idTable="tos-table"
+            dataSource={dataSource}
+            totalData={totalElement}
+            current={page}
+            tableScrolled={{ x: "max-content" }}
+            onSort={onSort}
+            columns={tableColumns}
+            usePagination={false}
+            useInfiniteScroll={true}
+            hasMore={hasMore}
+            onLoadMore={handleLoadMore}
+            loading={loading}
+            onAdvanceSearch={handleAdvancedSearch}
+            onRefresh={handleRefresh}
+            onSearch={handleSearchBar}
           />
-        ) : null}
+        </div>
+      </NxCardContainer>
 
-        {/* Modal Detail Inactivate */}
-        <TermOfServiceInactive
-          isOpen={modalInactive}
-          handleCancel={() => setModalInactive(false)}
-          handleOk={() => handleOk()}
+      {/* Modal Detail TOS */}
+      {chooseId !== "" ? (
+        <TermOfServiceDetail
+          openModal={modalDetail}
+          closeModal={() => {
+            setChooseId("");
+            setModalDetail(false);
+          }}
+          id={chooseId}
         />
+      ) : null}
 
-        {/** Modal Retry */}
-        <ModalError
-          isOpen={modalError}
-          handleOk={handleRetry}
-          handleCancel={handleCloseModalError}
-          customText={"Try Again"}
-        >
-          <div className="px-5 pt-5 pb-[10px] justify-center">
-            <div className="w-full flex gap-[20px]">
-              <SVGIcon name="IconFailed" width={48} />
-              <p className="text-[18px] font-bold">{"Failed"}</p>
-            </div>
-            <p className="pl-[70px]">{`Your data was not inactivated. ${bodyError.message}.`}</p>
-            <p className="pl-[70px]">Please try again.</p>
+      {/* Modal Detail Inactivate */}
+      <TermOfServiceInactive
+        isOpen={modalInactive}
+        handleCancel={() => setModalInactive(false)}
+        handleOk={() => handleOk()}
+      />
+
+      {/** Modal Retry */}
+      <ModalError
+        isOpen={modalError}
+        handleOk={handleRetry}
+        handleCancel={handleCloseModalError}
+        customText={"Try Again"}
+      >
+        <div className="px-5 pt-5 pb-[10px] justify-center">
+          <div className="w-full flex gap-[20px]">
+            <SVGIcon name="IconFailed" width={48} />
+            <p className="text-[18px] font-bold">{"Failed"}</p>
           </div>
-        </ModalError>
-      </Spin>
+          <p className="pl-[70px]">{`Your data was not inactivated. ${bodyError.message}.`}</p>
+          <p className="pl-[70px]">Please try again.</p>
+        </div>
+      </ModalError>
     </>
   );
 };

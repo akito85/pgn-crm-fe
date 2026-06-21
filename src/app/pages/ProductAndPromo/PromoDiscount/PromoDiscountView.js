@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo, memo } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo, memo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { PRODUCT_PROMO_ROUTES } from "../../../../routes/product_promo/pp_routes";
 import SVGIcon from "../../../../assets/Icon/index";
@@ -36,6 +36,9 @@ const PromoDiscountView = () => {
   const [searchedColumn, setSearchedColumn] = useState("");
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
+  const [filters, setFilters] = useState([]);
+  const [filterRules, setFilterRules] = useState([]);
+  const [limitData, setLimitData] = useState(null);
 
   const [modalInactive, setModalInactive] = useState(false);
   const [modalError, setModalError] = useState(false);
@@ -47,30 +50,42 @@ const PromoDiscountView = () => {
   // Memoized data for infinite scroll
   const currentData = useMemo(() => list_promo, [list_promo]);
   const currentPagination = pagination_promo;
-  const hasMore = currentData.length < (currentPagination?.totalElements || 0);
+  const hasMore = !limitData && currentData.length < (currentPagination?.totalElements || 0);
 
   const dataSourceWithKeys = useMemo(() => {
     if (!currentData || currentData.length === 0) return [];
 
+    // ids are unique (slice dedups on append) so use a stable key that does not
+    // shift when the list grows; a position-based key would remount rows.
     return currentData.map((item, index) => ({
       ...item,
-      key: `${item.id}-${index}`,
+      key: item.id ?? index,
     }));
   }, [currentData]);
 
-  useEffect(() => {
-    dispatch(
-      getAllPromoPaginate({
-        search: encodeURIComponent(JSON.stringify(search)),
-        page,
-        pageSize: loadMoreSize,
-        sort,
-        isLoadMore: false,
-      })
-    );
-    
+  // --- Fetch helpers ---
+  const buildBody = useCallback(
+    (pageNum) => ({
+      page: pageNum,
+      pageSize: limitData || loadMoreSize,
+      sort,
+      search,
+      searchText,
+      filters,
+      filterRules,
+    }),
+    [sort, search, searchText, filters, filterRules, limitData, loadMoreSize]
+  );
+
+  const handleRefresh = useCallback(() => {
+    dispatch(getAllPromoPaginate({ ...buildBody(0), isLoadMore: false }));
     setPage(0);
-  }, [dispatch, search, sort]);
+  }, [dispatch, buildBody]);
+
+  useEffect(() => {
+    dispatch(getAllPromoPaginate({ ...buildBody(0), isLoadMore: false }));
+    setPage(0);
+  }, [search, sort, searchText, filters, filterRules, limitData]); // intentionally omit dispatch/buildBody to avoid loop
 
   // Breadcrumbs
   const routes = [
@@ -108,17 +123,28 @@ const PromoDiscountView = () => {
   // Function Search Column
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
-    setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
     setSearch((prevState) => {
       if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
+        setPage(0);
       }
       return {
         ...prevState,
         [dataIndex]: selectedKeys[0],
       };
     });
+  };
+
+  const handleSearchBar = useCallback((value) => {
+    setSearchText(value || "");
+  }, []);
+
+  const handleAdvancedSearch = (searchData) => {
+    setFilters(searchData?.filters || []);
+    setFilterRules(searchData?.filterRules || []);
+    const parsedLimit = parseInt(searchData?.limitData, 10);
+    setLimitData(Number.isFinite(parsedLimit) && parsedLimit > 0 ? parsedLimit : null);
+    setPage(0);
   };
 
   const onSort = (_, __, sort) => {
@@ -151,15 +177,10 @@ const PromoDiscountView = () => {
     const nextPage = page + 1;
     const totalPages = pagination_promo?.totalPages || 0;
 
-    if (nextPage <= totalPages) {
+    // page is 0-based, totalPages is a count → last valid index is totalPages-1.
+    if (nextPage < totalPages) {
       await dispatch(
-        getAllPromoPaginate({
-          search: encodeURIComponent(JSON.stringify(search)),
-          page: nextPage,
-          pageSize: loadMoreSize,
-          sort,
-          isLoadMore: true,
-        })
+        getAllPromoPaginate({ ...buildBody(nextPage), isLoadMore: true })
       );
       setPage(nextPage);
     }
@@ -199,16 +220,7 @@ const PromoDiscountView = () => {
         // setModalInactive(true);
         handleClear();
         handleInactivateModal(false);
-        dispatch(
-          getAllPromoPaginate({
-            search: encodeURIComponent(JSON.stringify(search)),
-            page: 1,
-            pageSize: loadMoreSize,
-            sort,
-            isLoadMore: false,
-          })
-        );
-        setPage(1);
+        handleRefresh();
       })
       .catch((error) => {
         if (Math.floor((error.response.data.code || 0) / 100) === 5) {
@@ -247,6 +259,9 @@ const PromoDiscountView = () => {
                 searchInput={searchInput}
                 handleSearch={handleSearch}
                 loading={loading}
+                onAdvanceSearch={handleAdvancedSearch}
+                onSearch={handleSearchBar}
+                onRefresh={handleRefresh}
               />
             </NxBaseContainer>
           </NxCardContainer>

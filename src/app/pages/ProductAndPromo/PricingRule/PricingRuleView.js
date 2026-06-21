@@ -1,13 +1,7 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { NavLink, Link } from "react-router-dom";
-import {
-  Input,
-  Tooltip,
-  Spin,
-  Checkbox,
-  DatePicker,
-} from "antd";
+import { Tooltip, Checkbox } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import SVGIcon from "../../../../assets/Icon/index";
@@ -20,49 +14,61 @@ import {
   getListAppHier,
   getListAppHierDetail,
 } from "../../../../redux/slices/product_promo/PricingRule/PricingRuleSlice";
-import Highlighter from "react-highlight-words";
-import { FilterOutlined } from "@ant-design/icons";
-import moment from "moment";
-import BaseContainer from "../../../../components/BaseContainer";
 import {
   ModalInactiveErrorPricingRule,
   ModalInactiveSuccessPricingRule,
 } from "./Modal/ModalInactivePricingRule";
 import ModalHistory from "../../../../components/Modal/ModalHistory";
-import {
-  dateFormatting,
-  hasValue,
-  renderColumn,
-  renderDateColumn,
-} from "../../../../utils";
+import { hasValue, renderColumn, renderDateColumn } from "../../../../utils";
 import ModalInactivateWithHierarchy from "../../../../components/Modal/ModalInactivateWithHierarchy";
-import TablePaginationNew from "../../../../components/TablePaginationNew";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../utils/getColumnSearchProps";
+import NxCardContainer from "../../../../components/Nx/NxCardContainer";
+import NxTable from "../../../../components/Nx/NxTable";
+import NxStatusComponent from "../../../../components/Nx/NxStatusComponent";
 import Toolbar from "../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
 
-const objType = {
-  PRICING_RULE: "Create",
-  INACTIVE_PRICING_RULE: "Inactive",
+const PAGE_SIZE = 20;
+
+const formatStatus = (value) => {
+  switch (value) {
+    case "WAITING APPROVAL":
+    case "WAITING_FOR_APPROVAL":
+    case "WAITING_APPROVAL":
+    case "WAITING FOR APPROVAL":
+      return "Waiting Approval";
+    default:
+      return value
+        ? value.charAt(0).toUpperCase() + value.slice(1).toLowerCase()
+        : value;
+  }
 };
+
 const PricingRuleView = () => {
   // Selector
-  const { data, loading, data_approval_history } = useSelector(
-    (state) => state.pricingRule
-  );
+  const {
+    list_pricingRule: dataSource,
+    pagination_pricingRule: pagination,
+    loading_listPricingRule: loading,
+    data_approval_history,
+  } = useSelector((state) => state.pricingRule);
 
   // Declaration
   const dispatch = useDispatch();
   const searchInput = useRef(null);
-  const dataSource = data?.result;
+
+  const totalElement = pagination.totalElement;
 
   // State
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const [searchText, setSearchText] = useState("");
+  const [page, setPage] = useState(0);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
+  const [searchText, setSearchText] = useState("");
+  const [filters, setFilters] = useState([]);
+  const [filterRules, setFilterRules] = useState([]);
+  const [limitData, setLimitData] = useState(null);
+  const hasMore = !limitData && dataSource.length < (totalElement || 0);
   const [chooseId, setChooseId] = useState({});
   const [modalInactive, setModalInactive] = useState(false);
   const [modalConfirm, setModalConfirm] = useState(false);
@@ -71,24 +77,41 @@ const PricingRuleView = () => {
   const [modalApprovalHistory, setModalApprovalHistory] = useState(false);
   const [dataApprovalHistory, setDataApprovalHistory] = useState({});
 
-  // Use Effect
-  useEffect(() => {
-    let tempSearch = "";
-    for (const dataIndex in search) {
-      if (Object.hasOwnProperty.call(search, dataIndex)) {
-        const tempSearchText = search[dataIndex];
-        if (tempSearchText) {
-          tempSearch += `${dataIndex}~${tempSearchText},`;
-        }
-      }
-    }
-    tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
-    dispatch(
-      getAllPricingRulePaginate({ search: tempSearch, page, pageSize, sort })
-    );
-  }, [dispatch, search, page, pageSize, sort]);
+  // --- Fetch helpers ---
+  const buildBody = useCallback(
+    (pageNum) => ({
+      page: pageNum,
+      pageSize: limitData || PAGE_SIZE,
+      sort,
+      search,
+      searchText,
+      filters,
+      filterRules,
+    }),
+    [sort, search, searchText, filters, filterRules, limitData]
+  );
 
-  // console.log(dataApprovalHistory);
+  const handleRefresh = useCallback(() => {
+    dispatch(getAllPricingRulePaginate({ ...buildBody(0), isLoadMore: false }));
+    setPage(0);
+  }, [dispatch, buildBody]);
+
+  // Re-fetch page 0 whenever sort / search / filters change
+  useEffect(() => {
+    dispatch(getAllPricingRulePaginate({ ...buildBody(0), isLoadMore: false }));
+    setPage(0);
+  }, [sort, search, searchText, filters, filterRules, limitData]); // intentionally omit dispatch/buildBody to avoid loop
+
+  const handleLoadMore = async () => {
+    const nextPage = page + 1;
+    // page is 0-based, totalPage is a count → last valid index is totalPage-1.
+    if (nextPage < (pagination.totalPage || 0)) {
+      // await so NxTable's infinite-scroll gate stays closed until the fetch
+      // settles — prevents duplicate page dispatches on fast scrolling.
+      await dispatch(getAllPricingRulePaginate({ ...buildBody(nextPage), isLoadMore: true }));
+      setPage(nextPage);
+    }
+  };
 
   useEffect(() => {
     if (data_approval_history?.dataApprover) {
@@ -122,85 +145,12 @@ const PricingRuleView = () => {
     },
   ];
 
-  // Search Column Table
-  const getColumnSearchProps = (dataIndex, type) => ({
-    filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }) => {
-      const onDataChange = (value, dateString) => {
-        setSelectedKeys(dateString ? [dateString] : []);
-        handleSearch(dateString ? [dateString] : [], confirm, dataIndex);
-      };
-      return (
-        <div
-          style={{
-            padding: 8,
-          }}
-          onKeyDown={(e) => e.stopPropagation()}
-        >
-          {type === "date" ? (
-            <DatePicker onChange={onDataChange} />
-          ) : (
-            <Input
-              ref={searchInput}
-              placeholder={`Search`}
-              value={selectedKeys[0]}
-              onChange={(e) =>
-                setSelectedKeys(e.target.value ? [e.target.value] : [])
-              }
-              onPressEnter={() => {
-                handleSearch(selectedKeys, confirm, dataIndex);
-              }}
-              style={{
-                marginBottom: 8,
-                display: "block",
-              }}
-            />
-          )}
-        </div>
-      );
-    },
-    filterIcon: (filtered) => (
-      <FilterOutlined
-        style={{
-          color: filtered ? "#1890ff" : undefined,
-        }}
-      />
-    ),
-    // onFilter: (value, record) =>
-    //   record[dataIndex]?.toString().toLowerCase().includes(value.toLowerCase()),
-    onFilterDropdownOpenChange: (visible) => {
-      if (visible) {
-        setTimeout(() => searchInput.current?.select(), 5000);
-      }
-    },
-    render: (text) =>
-      searchedColumn === dataIndex ? (
-        <Highlighter
-          highlightStyle={{
-            backgroundColor: "#ffc069",
-            padding: 0,
-          }}
-          searchWords={
-            type === "date"
-              ? moment([searchText]).format(dateFormatting.dateFormal)
-              : [searchText]
-          }
-          autoEscape
-          textToHighlight={text ? text.toString() : ""}
-        />
-      ) : (
-        text
-      ),
-  });
-
   // Function Search Column
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
-    setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
     setSearch((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
-      }
+      if (prevState[dataIndex] !== selectedKeys[0]) setPage(0);
       return {
         ...prevState,
         [dataIndex]: selectedKeys[0],
@@ -208,10 +158,16 @@ const PricingRuleView = () => {
     });
   };
 
-  // Function Change Pagination
-  const handleChange = (page, pageSize) => {
-    setPage(page);
-    setPageSize(pageSize);
+  const handleSearchBar = useCallback((value) => {
+    setSearchText(value || "");
+  }, []);
+
+  const handleAdvancedSearch = (searchData) => {
+    setFilters(searchData?.filters || []);
+    setFilterRules(searchData?.filterRules || []);
+    const parsedLimit = parseInt(searchData?.limitData, 10);
+    setLimitData(Number.isFinite(parsedLimit) && parsedLimit > 0 ? parsedLimit : null);
+    setPage(0);
   };
 
   // Column
@@ -220,7 +176,7 @@ const PricingRuleView = () => {
       title: "NO",
       align: "center",
       width: 60,
-      render: (text, object, index) => (page - 1) * pageSize + index + 1,
+      render: (text, object, index) => index + 1,
     },
     {
       title: "PRICING RULE NAME",
@@ -342,32 +298,15 @@ const PricingRuleView = () => {
         handleSearch,
         true
       ),
-      render: (index) => {
-        let text;
-        switch (index) {
-          case "WAITING APPROVAL":
-          case "WAITING_FOR_APPROVAL":
-          case "WAITING_APPROVAL":
-          case "WAITING FOR APPROVAL":
-            text = "Waiting Approval";
-            break;
-          default:
-            text = index
-              ? index.charAt(0).toUpperCase() + index.slice(1).toLowerCase()
-              : index;
-            break;
-        }
-        return text
-          ? renderColumn(
-              "status",
-              hasValue(search["status"]),
-              searchText,
-              text,
-              false,
-              "status",
-              search
-            )
-          : text;
+      render: (value) => {
+        const text = formatStatus(value);
+        return text ? (
+          <div className="flex justify-center">
+            <NxStatusComponent colour={text}>{text}</NxStatusComponent>
+          </div>
+        ) : (
+          text
+        );
       },
     },
     {
@@ -385,144 +324,17 @@ const PricingRuleView = () => {
         handleSearch,
         true
       ),
-      render: (statusApproval) => {
-        let text;
-        switch (statusApproval) {
-          case "WAITING APPROVAL":
-          case "WAITING_FOR_APPROVAL":
-          case "WAITING_APPROVAL":
-          case "WAITING FOR APPROVAL":
-            text = "Waiting Approval";
-            break;
-          default:
-            text = statusApproval
-              ? statusApproval.charAt(0).toUpperCase() +
-                statusApproval.slice(1).toLowerCase()
-              : statusApproval;
-            break;
-        }
-        return text
-          ? renderColumn(
-              "statusApproval",
-              hasValue(search["statusApproval"]),
-              searchText,
-              text,
-              false,
-              "status",
-              search
-            )
-          : text;
+      render: (value) => {
+        const text = formatStatus(value);
+        return text ? (
+          <div className="flex justify-center">
+            <NxStatusComponent colour={text}>{text}</NxStatusComponent>
+          </div>
+        ) : (
+          text
+        );
       },
     },
-    // {
-    //   title: "ACTION",
-    //   dataIndex: "pricingRuleId",
-    //   fixed: "right",
-    //   width: "12%",
-    //   align: "center",
-    //   render: (id, record) => {
-    //     return (
-    //       <Space>
-    //         <Popover
-    //           trigger={"click"}
-    //           placement="bottomRight"
-    //           content={
-    //             <Space direction="vertical">
-    //               {record.approvalStatus !== "WAITING FOR APPROVAL" &&
-    //               record.status !== "INACTIVE" ? (
-    //                 <Link
-    //                   to={PRODUCT_PROMO_ROUTES.UPDATE_PRICING_RULE}
-    //                   state={{
-    //                     id: id,
-    //                     statusPricingRule: record.status,
-    //                     statusApprovalPricingRule: record.approvalStatus,
-    //                   }}
-    //                 >
-    //                   <ButtonComponent
-    //                     icon={
-    //                       <SVGIcon
-    //                         name="IconEdit"
-    //                         color={"#0075bf"}
-    //                         width={24}
-    //                       />
-    //                     }
-    //                     border={false}
-    //                   >
-    //                     <span className={"text-black"}> Update</span>
-    //                   </ButtonComponent>
-    //                 </Link>
-    //               ) : (
-    //                 <ButtonComponent
-    //                   icon={
-    //                     <SVGIcon name="IconEdit" color={"#8D91A0"} width={24} />
-    //                   }
-    //                   border={false}
-    //                   disabled={true}
-    //                 >
-    //                   <span className={"text-black"}> Update</span>
-    //                 </ButtonComponent>
-    //               )}
-    //               <ButtonComponent
-    //                 icon={
-    //                   <Checkbox
-    //                     className="inactive-check"
-    //                     checked={!(record.status === "ACTIVE")}
-    //                     disabled={
-    //                       !(
-    //                         record.status === "ACTIVE" &&
-    //                         record.approvalStatus !== "WAITING FOR APPROVAL"
-    //                       )
-    //                     }
-    //                   />
-    //                 }
-    //                 border={false}
-    //                 onClick={
-    //                   record.status === "ACTIVE" &&
-    //                   record.approvalStatus !== "WAITING FOR APPROVAL"
-    //                     ? () => handleActiveOrInactive(record)
-    //                     : undefined
-    //                 }
-    //               >
-    //                 <span className={"text-black"}>
-    //                   {record.status === "ACTIVE" ? "Inactivate" : "Activate"}
-    //                 </span>
-    //               </ButtonComponent>
-    //               <ButtonComponent
-    //                 icon={
-    //                   <SVGIcon
-    //                     name="IconLogHistory"
-    //                     color={"#0075bf"}
-    //                     width={24}
-    //                   />
-    //                 }
-    //                 border={false}
-    //                 onClick={() => handleApprovalHistory(id)}
-    //               >
-    //                 <span className={"text-black"}>Approval History</span>
-    //               </ButtonComponent>
-    //             </Space>
-    //           }
-    //         >
-    //           <ButtonComponent
-    //             icon={<MoreOutlined style={{ fontSize: "24px" }} />}
-    //             border={false}
-    //           />
-    //         </Popover>
-    //         <Tooltip title="Detail">
-    //           <Link
-    //             to={PRODUCT_PROMO_ROUTES.DETAIL_PRICING_RULE}
-    //             state={{ id: id }}
-    //           >
-    //             <ButtonComponent
-    //               icon={<SVGIcon name="IconDetail" width={24} />}
-    //               border={false}
-    //             />
-    //           </Link>
-    //         </Tooltip>
-    //       </Space>
-    //     );
-    //   },
-    // },
   ];
 
   // Handle Confirmation Active/Inactive
@@ -543,7 +355,7 @@ const PricingRuleView = () => {
       }
     }
     tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
-    dispatch(downloadPricingRule({ search: tempSearch, page, pageSize, sort }));
+    dispatch(downloadPricingRule({ search: tempSearch, page: 0, pageSize: PAGE_SIZE, sort }));
   };
 
   // Handle Cancel Modal Confirmation Inactive
@@ -563,27 +375,9 @@ const PricingRuleView = () => {
     dispatch(inactivePricingRule(dataValue))
       .unwrap()
       .then(() => {
-        // setModalInactive(true);
         handleClear();
         handleCancel();
-        let tempSearch = "";
-        for (const dataIndex in search) {
-          if (Object.hasOwnProperty.call(search, dataIndex)) {
-            const tempSearchText = search[dataIndex];
-            if (tempSearchText) {
-              tempSearch += `${dataIndex}~${tempSearchText},`;
-            }
-          }
-        }
-        tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
-        dispatch(
-          getAllPricingRulePaginate({
-            search: tempSearch,
-            page,
-            pageSize,
-            sort,
-          })
-        );
+        handleRefresh();
       })
       .catch((error) => {
         if (Math.floor((error.response.data.code || 0) / 100) === 5) {
@@ -782,10 +576,10 @@ const PricingRuleView = () => {
     }));
   };
 
-  const onSort = (_, __, sort) => {
+  const onSort = (_, __, sortInfo) => {
     const dataSort =
-      sort.order !== undefined
-        ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
+      sortInfo.order !== undefined
+        ? `${sortInfo.field}~${sortInfo.order === "ascend" ? "asc" : "desc"}`
         : "";
     setSort(dataSort);
   };
@@ -800,130 +594,78 @@ const PricingRuleView = () => {
     setBodyError({});
   };
 
+  const tableColumns = [
+    ...columns,
+    ...useColumnActionPermission(
+      ["view", "Update", "Activate", "History"],
+      itemsActionView
+    ),
+  ];
+
   return (
     <>
-      <Spin spinning={loading}>
-        <BreadCrumb routes={routes} />
+      <BreadCrumb routes={routes} />
 
-        {/* <div className="w-full flex justify-end gap-[20px]">
-          <ButtonComponent
-            icon={<SVGIcon name="IconButtonDownload" width={24} />}
-            type="submit"
-            onClick={() => handleDownload()}
-          >
-            Download List
-          </ButtonComponent>
+      <NxCardContainer header="Pricing Rule List" className="mt-4">
+        <div className="flex flex-col gap-y-4">
+          <Toolbar items={itemsActionView} type="page" />
+          <NxTable
+            idTable="pricing-rule-table"
+            dataSource={dataSource}
+            totalData={totalElement}
+            current={page}
+            tableScrolled={{ x: "max-content" }}
+            onSort={onSort}
+            columns={tableColumns}
+            usePagination={false}
+            useInfiniteScroll={true}
+            hasMore={hasMore}
+            onLoadMore={handleLoadMore}
+            loading={loading}
+            onAdvanceSearch={handleAdvancedSearch}
+            onRefresh={handleRefresh}
+            onSearch={handleSearchBar}
+          />
+        </div>
+      </NxCardContainer>
 
-          <NavLink to={PRODUCT_PROMO_ROUTES.CREATE_PRICING_RULE}>
-            <ButtonComponent
-              icon={<SVGIcon name="IconButtonCreate" width={24} />}
-              type="submit"
-            >
-              Create Pricing Rule
-            </ButtonComponent>
-          </NavLink>
-        </div> */}
-        <Toolbar items={itemsActionView} />
-        <BaseContainer header={"pricing rule list"}>
-          <div className="w-full">
-            <TablePaginationNew
-              dataSource={dataSource}
-              columns={[
-                ...columns,
-                ...useColumnActionPermission(
-                  ["view", "Update", "Activate", "History"],
-                  itemsActionView
-                ),
-              ]}
-              current={page}
-              pageSize={pageSize}
-              onChange={handleChange}
-              onShowSizeChange={handleChange}
-              totalData={data?.page?.totalElements || 0}
-              onSort={onSort}
-              tableScrolled={{
-                x: 1800,
-                y: 300,
-              }}
-            />
-          </div>
-        </BaseContainer>
+      <ModalInactivateWithHierarchy
+        selector={"pricingRule"}
+        dispatch={dispatch}
+        getAPIOption={getListAppHier}
+        getAPIDetail={getListAppHierDetail}
+        alertMessage={`Are you sure you want to inactivate Pricing Rule named ${
+          chooseId?.name || ""
+        }?`}
+        openModalInactivate={modalConfirm}
+        handleCloseModalInactivate={handleCancel}
+        onFinish={handleOk}
+      />
 
-        {/* Modal Confirmation Active/Inactive */}
-        {/* <ModalInactivePricingRule
-          isOpen={modalConfirm}
-          handleCancel={handleCancel}
-          handleOk={handleOk}
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-        >
-          <Form layout="vertical" form={form}>
-            <Form.Item
-              label="Approval Hierarchy"
-              name="appHierId"
-              rules={[
-                {
-                  required: true,
-                  message: "Please input your Approval Hierarchy!",
-                },
-              ]}
-            >
-              <Select
-                allowClear
-                onChange={(e) => handleSelect(e)}
-                style={{
-                  width: 300,
-                }}
-              >
-                {data_approval &&
-                  data_approval.map((ta, index) => (
-                    <Select.Option value={ta.appHierId} key={index}>
-                      {ta.approvalName}
-                    </Select.Option>
-                  ))}
-              </Select>
-            </Form.Item>
-          </Form>
-        </ModalInactivePricingRule> */}
+      {/* Modal Success Inactive */}
+      <ModalInactiveSuccessPricingRule
+        isOpen={modalInactive}
+        handleOk={() => setModalInactive(false)}
+        handleCancel={() => setModalInactive(false)}
+      />
 
-        <ModalInactivateWithHierarchy
-          selector={"pricingRule"}
-          dispatch={dispatch}
-          getAPIOption={getListAppHier}
-          getAPIDetail={getListAppHierDetail}
-          alertMessage={`Are you sure you want to inactivate Pricing Rule named ${
-            chooseId?.name || ""
-          }?`}
-          openModalInactivate={modalConfirm}
-          handleCloseModalInactivate={handleCancel}
-          onFinish={handleOk}
-        />
+      {/* Modal Error Inactive */}
+      <ModalInactiveErrorPricingRule
+        isOpen={modalError}
+        handleOk={handleRetry}
+        handleCancel={handleCloseModalError}
+      />
 
-        {/* Modal Success Inactive */}
-        <ModalInactiveSuccessPricingRule
-          isOpen={modalInactive}
-          handleOk={() => setModalInactive(false)}
-          handleCancel={() => setModalInactive(false)}
-        />
-
-        {/* Modal Error Inactive */}
-        <ModalInactiveErrorPricingRule
-          isOpen={modalError}
-          handleOk={handleRetry}
-          handleCancel={handleCloseModalError}
-        />
-
-        {/* Modal Approval History */}
-        <ModalHistory
-          isOpen={modalApprovalHistory && dataApprovalHistory}
-          handleClose={() => setModalApprovalHistory(false)}
-          header={"Approval History"}
-          width={850}
-          tabOptions={handleOptions()}
-          dataApprover={dataApprovalHistory?.dataApprover}
-          dataHistory={dataApprovalHistory?.dataHistory}
-        />
-      </Spin>
+      {/* Modal Approval History */}
+      <ModalHistory
+        isOpen={modalApprovalHistory && dataApprovalHistory}
+        handleClose={() => setModalApprovalHistory(false)}
+        header={"Approval History"}
+        width={850}
+        tabOptions={handleOptions()}
+        dataApprover={dataApprovalHistory?.dataApprover}
+        dataHistory={dataApprovalHistory?.dataHistory}
+      />
     </>
   );
 };
