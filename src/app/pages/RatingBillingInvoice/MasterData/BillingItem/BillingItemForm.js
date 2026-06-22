@@ -170,12 +170,8 @@ const BillingItemForm = (props) => {
   const [dataCriteriaTable, setDataCriteriaTable] = useState([]);
   const [isCriteriaEditing, setIsCriteriaEditing] = useState(false);
   const [dataMappingItemTable, setDataMappingItemTable] = useState([]);
-  // Ref to prevent the GL-account-list watcher from overwriting user edits
-  // after the criteria has been initialized for the current billing item.
   const criteriaGlInitializedRef = useRef(false);
   const criteriaGlDetailIdRef = useRef(null);
-  // Ref to prevent handleSetDataUpdate from re-firing when dependencies like
-  // buildCriteriaTableFromResponse change due to GL account search queries.
   const dataUpdateAppliedRef = useRef(null);
 
   // Approval States
@@ -216,9 +212,6 @@ const BillingItemForm = (props) => {
     });
   }, []);
 
-  // Initial data fetch — eager-load all data needed at render time.
-  // For update mode, also pre-load the dropdown lists (category/type/billType/criteria)
-  // so that form values set by handleSetDataUpdate resolve to labels instead of raw IDs.
   useEffect(() => {
     dispatch(clearBillingItemDetail());
     dispatch(getBillingItemCategory());
@@ -534,8 +527,6 @@ const BillingItemForm = (props) => {
         dispatch(getGlAccountBankById({ id: resolvedBankId }));
       }
 
-      // Attachment list is handled in the effect using getAttachmentDetail
-
       setdataTable(
         dataDetail?.mappingInformation?.map((item, index) => ({
           key: `${index + 1}`,
@@ -648,10 +639,6 @@ const BillingItemForm = (props) => {
       (data_BillingItemDetail.billingItemCode === id ||
         data_BillingItemDetail.id === id)
     ) {
-      // Only call handleSetDataUpdate ONCE per unique detail id.
-      // Without this guard, any change to handleSetDataUpdate's reference
-      // (e.g. caused by data_glAccountList changing on search) would re-fire
-      // this effect and wipe out rows that the user is actively editing.
       if (data_BillingItemDetail.id !== dataUpdateAppliedRef.current) {
         dataUpdateAppliedRef.current = data_BillingItemDetail.id;
         handleSetDataUpdate(data_BillingItemDetail);
@@ -660,17 +647,11 @@ const BillingItemForm = (props) => {
   }, [data_BillingItemDetail, type, id, handleSetDataUpdate]);
 
   useEffect(() => {
-    // Reset the flag whenever a new billing item detail is loaded,
-    // so that criteria names can be re-resolved for the new item.
     const currentDetailId = data_BillingItemDetail?.id;
     if (currentDetailId && currentDetailId !== criteriaGlDetailIdRef.current) {
       criteriaGlInitializedRef.current = false;
       criteriaGlDetailIdRef.current = currentDetailId;
     }
-
-    // Only rebuild criteria from server response ONCE per billing item load.
-    // Subsequent changes to data_glAccountList (e.g. from search queries)
-    // must NOT overwrite rows that the user is actively editing.
     if (
       type === "update" &&
       data_BillingItemDetail?.criteria?.length > 0 &&
