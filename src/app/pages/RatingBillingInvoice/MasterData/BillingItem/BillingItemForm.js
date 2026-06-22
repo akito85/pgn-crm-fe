@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { debounce } from "lodash";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -55,6 +55,7 @@ import {
   getBillingItemCategoryList,
   getBillingItemTypeList,
   getBillingItemCriteriaList,
+  clearBillingItemDetail,
 } from "../../../../../redux/slices/rating_billing_invoice/billingItem";
 import {
   showModalError,
@@ -169,6 +170,13 @@ const BillingItemForm = (props) => {
   const [dataCriteriaTable, setDataCriteriaTable] = useState([]);
   const [isCriteriaEditing, setIsCriteriaEditing] = useState(false);
   const [dataMappingItemTable, setDataMappingItemTable] = useState([]);
+  // Ref to prevent the GL-account-list watcher from overwriting user edits
+  // after the criteria has been initialized for the current billing item.
+  const criteriaGlInitializedRef = useRef(false);
+  const criteriaGlDetailIdRef = useRef(null);
+  // Ref to prevent handleSetDataUpdate from re-firing when dependencies like
+  // buildCriteriaTableFromResponse change due to GL account search queries.
+  const dataUpdateAppliedRef = useRef(null);
 
   // Approval States
   const [appHierDataDetail, setAppHierDataDetail] = useState([]);
@@ -183,10 +191,12 @@ const BillingItemForm = (props) => {
   const [typeSubmit, setTypeSubmit] = useState(false);
   const [dataSend, setDataSend] = useState({});
   const [loadingForm, setLoadingForm] = useState(false);
+  const [loadingSave, setLoadingSave] = useState(false);
   const selectedTransMappingType = Form.useWatch("type", form);
 
   const isLoading =
     loadingForm ||
+    loadingSave ||
     (type === "update" && loadingDetail && !data_BillingItemDetail?.id);
 
   const handleUpdateAttachment = useCallback((updater) => {
@@ -210,6 +220,7 @@ const BillingItemForm = (props) => {
   // For update mode, also pre-load the dropdown lists (category/type/billType/criteria)
   // so that form values set by handleSetDataUpdate resolve to labels instead of raw IDs.
   useEffect(() => {
+    dispatch(clearBillingItemDetail());
     dispatch(getBillingItemCategory());
     dispatch(getBillingItemCategoryDdl());
     dispatch(getAvailableApproval());
@@ -224,6 +235,9 @@ const BillingItemForm = (props) => {
       dispatch(getBillingItemCriteriaList());
       dispatch(getBillType());
     }
+    return () => {
+      dispatch(clearBillingItemDetail());
+    };
   }, [dispatch, type]);
 
   const handleSearchGLAccount = useCallback(
@@ -634,16 +648,36 @@ const BillingItemForm = (props) => {
       (data_BillingItemDetail.billingItemCode === id ||
         data_BillingItemDetail.id === id)
     ) {
-      handleSetDataUpdate(data_BillingItemDetail);
+      // Only call handleSetDataUpdate ONCE per unique detail id.
+      // Without this guard, any change to handleSetDataUpdate's reference
+      // (e.g. caused by data_glAccountList changing on search) would re-fire
+      // this effect and wipe out rows that the user is actively editing.
+      if (data_BillingItemDetail.id !== dataUpdateAppliedRef.current) {
+        dataUpdateAppliedRef.current = data_BillingItemDetail.id;
+        handleSetDataUpdate(data_BillingItemDetail);
+      }
     }
   }, [data_BillingItemDetail, type, id, handleSetDataUpdate]);
 
   useEffect(() => {
+    // Reset the flag whenever a new billing item detail is loaded,
+    // so that criteria names can be re-resolved for the new item.
+    const currentDetailId = data_BillingItemDetail?.id;
+    if (currentDetailId && currentDetailId !== criteriaGlDetailIdRef.current) {
+      criteriaGlInitializedRef.current = false;
+      criteriaGlDetailIdRef.current = currentDetailId;
+    }
+
+    // Only rebuild criteria from server response ONCE per billing item load.
+    // Subsequent changes to data_glAccountList (e.g. from search queries)
+    // must NOT overwrite rows that the user is actively editing.
     if (
       type === "update" &&
       data_BillingItemDetail?.criteria?.length > 0 &&
-      (data_glAccountList?.length > 0 || data_specialGLList?.length > 0)
+      (data_glAccountList?.length > 0 || data_specialGLList?.length > 0) &&
+      !criteriaGlInitializedRef.current
     ) {
+      criteriaGlInitializedRef.current = true;
       const criteriaRows = buildCriteriaTableFromResponse(
         data_BillingItemDetail.criteria,
       );
@@ -1238,6 +1272,7 @@ const BillingItemForm = (props) => {
   );
 
   const handleSave = (e) => {
+    setLoadingSave(true);
     dispatch(type === "create" ? createBillingItem(e) : updateBillingItem(e))
       .unwrap()
       .then(async (data) => {
@@ -1268,10 +1303,12 @@ const BillingItemForm = (props) => {
         }
 
         setLoadingForm(false);
+        setLoadingSave(false);
         handleClear("clear");
         handleDescriptionSuccess(e, type);
       })
       .catch((error) => {
+        setLoadingSave(false);
         if (Math.floor((error.response.data.code || 0) / 100) === 5) {
           const message =
             (error?.response &&
@@ -1542,7 +1579,8 @@ const BillingItemForm = (props) => {
             onSaveDraft={handleSaveDraft}
             onSubmit={handleSubmit}
             type={type}
-            disabled={isEditable}
+            disabled={isEditable || loadingSave}
+            isLoading={loadingSave}
           />
         </Form>
 
@@ -1550,7 +1588,7 @@ const BillingItemForm = (props) => {
         {openModal && (
           <ModalCustom
             isOpen={openModal}
-            handleCancel={() => setOpenModal(false)}
+            handleCancel={() => !loadingSave && setOpenModal(false)}
             header="CONFIRMATION"
             width={1200}
             type="confirmation"
@@ -1559,13 +1597,15 @@ const BillingItemForm = (props) => {
                 <ButtonComponent
                   type="default"
                   onClick={() => setOpenModal(false)}
+                  disabled={loadingSave}
                 >
                   Cancel
                 </ButtonComponent>
                 <ButtonComponent
                   type="submit"
                   onClick={() => handleSave(dataSend)}
-                  disabled={isLoading}
+                  isLoading={loadingSave}
+                  disabled={isLoading || loadingSave}
                 >
                   Confirm
                 </ButtonComponent>
