@@ -244,7 +244,7 @@ const BillingItemCategoryForm = ({ type }) => {
               size: item.size,
               fileName: item.fileName,
               fileSize: item.fileSize,
-              fileType: item.type,
+              fileType: item.fileType || item.type || "",
               fileCategoryId: item.fileCategoryId,
               fileCategoryName: item.fileCategoryName,
               pathFile: item.pathFile,

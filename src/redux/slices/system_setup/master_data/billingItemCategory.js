@@ -307,7 +307,7 @@ export const getDownloadBillingItemCategory = createAsyncThunk(
       const sortParams =
         sortArray.length > 0 ? sortArray.join("&sort=") : "createdDate~desc";
 
-      const url = `/v1/dbs/api/billing-item-category/download-filter?${searchParams ? `searchs=${encodeURIComponent(searchParams)}&` : ""}page=${page}&size=${size}&sort=${sortParams}`;
+      const url = `/v1/dbs/api/billing-item-category/download?${searchParams ? `searchs=${encodeURIComponent(searchParams)}&` : ""}page=${page}&size=${size}&sort=${sortParams}`;
       const response = await ratingBillingHttpService.downloadData(url);
       return response.data;
     } catch (response) {
