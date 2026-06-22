@@ -923,6 +923,9 @@ const billingItemSlice = createSlice({
       state.dataListAppHierId = [];
       state.dataListAppHierDetail = [];
     },
+    clearBillingItemDetail: (state) => {
+      state.data_BillingItemDetail = [];
+    },
   },
 
   extraReducers: {
@@ -1303,7 +1306,7 @@ const billingItemSlice = createSlice({
   },
 });
 
-export const { resetApprovalState } = billingItemSlice.actions;
+export const { resetApprovalState, clearBillingItemDetail } = billingItemSlice.actions;
 
 const { reducer } = billingItemSlice;
 export default reducer;

@@ -741,7 +741,7 @@ export const columnsRating = (
       },
       {
         key: "calculatedUsageNormal",
-        title: "NOMRAL",
+        title: "NORMAL",
         dataIndex: "calculatedUsageNormal",
         width: 130,
         sorter: true,

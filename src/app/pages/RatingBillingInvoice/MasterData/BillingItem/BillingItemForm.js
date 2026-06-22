@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { debounce } from "lodash";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -55,6 +55,7 @@ import {
   getBillingItemCategoryList,
   getBillingItemTypeList,
   getBillingItemCriteriaList,
+  clearBillingItemDetail,
 } from "../../../../../redux/slices/rating_billing_invoice/billingItem";
 import {
   showModalError,
@@ -169,6 +170,9 @@ const BillingItemForm = (props) => {
   const [dataCriteriaTable, setDataCriteriaTable] = useState([]);
   const [isCriteriaEditing, setIsCriteriaEditing] = useState(false);
   const [dataMappingItemTable, setDataMappingItemTable] = useState([]);
+  const criteriaGlInitializedRef = useRef(false);
+  const criteriaGlDetailIdRef = useRef(null);
+  const dataUpdateAppliedRef = useRef(null);
 
   // Approval States
   const [appHierDataDetail, setAppHierDataDetail] = useState([]);
@@ -183,10 +187,12 @@ const BillingItemForm = (props) => {
   const [typeSubmit, setTypeSubmit] = useState(false);
   const [dataSend, setDataSend] = useState({});
   const [loadingForm, setLoadingForm] = useState(false);
+  const [loadingSave, setLoadingSave] = useState(false);
   const selectedTransMappingType = Form.useWatch("type", form);
 
   const isLoading =
     loadingForm ||
+    loadingSave ||
     (type === "update" && loadingDetail && !data_BillingItemDetail?.id);
 
   const handleUpdateAttachment = useCallback((updater) => {
@@ -206,10 +212,8 @@ const BillingItemForm = (props) => {
     });
   }, []);
 
-  // Initial data fetch — eager-load all data needed at render time.
-  // For update mode, also pre-load the dropdown lists (category/type/billType/criteria)
-  // so that form values set by handleSetDataUpdate resolve to labels instead of raw IDs.
   useEffect(() => {
+    dispatch(clearBillingItemDetail());
     dispatch(getBillingItemCategory());
     dispatch(getBillingItemCategoryDdl());
     dispatch(getAvailableApproval());
@@ -224,6 +228,9 @@ const BillingItemForm = (props) => {
       dispatch(getBillingItemCriteriaList());
       dispatch(getBillType());
     }
+    return () => {
+      dispatch(clearBillingItemDetail());
+    };
   }, [dispatch, type]);
 
   const handleSearchGLAccount = useCallback(
@@ -520,8 +527,6 @@ const BillingItemForm = (props) => {
         dispatch(getGlAccountBankById({ id: resolvedBankId }));
       }
 
-      // Attachment list is handled in the effect using getAttachmentDetail
-
       setdataTable(
         dataDetail?.mappingInformation?.map((item, index) => ({
           key: `${index + 1}`,
@@ -634,16 +639,26 @@ const BillingItemForm = (props) => {
       (data_BillingItemDetail.billingItemCode === id ||
         data_BillingItemDetail.id === id)
     ) {
-      handleSetDataUpdate(data_BillingItemDetail);
+      if (data_BillingItemDetail.id !== dataUpdateAppliedRef.current) {
+        dataUpdateAppliedRef.current = data_BillingItemDetail.id;
+        handleSetDataUpdate(data_BillingItemDetail);
+      }
     }
   }, [data_BillingItemDetail, type, id, handleSetDataUpdate]);
 
   useEffect(() => {
+    const currentDetailId = data_BillingItemDetail?.id;
+    if (currentDetailId && currentDetailId !== criteriaGlDetailIdRef.current) {
+      criteriaGlInitializedRef.current = false;
+      criteriaGlDetailIdRef.current = currentDetailId;
+    }
     if (
       type === "update" &&
       data_BillingItemDetail?.criteria?.length > 0 &&
-      (data_glAccountList?.length > 0 || data_specialGLList?.length > 0)
+      (data_glAccountList?.length > 0 || data_specialGLList?.length > 0) &&
+      !criteriaGlInitializedRef.current
     ) {
+      criteriaGlInitializedRef.current = true;
       const criteriaRows = buildCriteriaTableFromResponse(
         data_BillingItemDetail.criteria,
       );
@@ -1238,6 +1253,7 @@ const BillingItemForm = (props) => {
   );
 
   const handleSave = (e) => {
+    setLoadingSave(true);
     dispatch(type === "create" ? createBillingItem(e) : updateBillingItem(e))
       .unwrap()
       .then(async (data) => {
@@ -1268,10 +1284,12 @@ const BillingItemForm = (props) => {
         }
 
         setLoadingForm(false);
+        setLoadingSave(false);
         handleClear("clear");
         handleDescriptionSuccess(e, type);
       })
       .catch((error) => {
+        setLoadingSave(false);
         if (Math.floor((error.response.data.code || 0) / 100) === 5) {
           const message =
             (error?.response &&
@@ -1542,7 +1560,8 @@ const BillingItemForm = (props) => {
             onSaveDraft={handleSaveDraft}
             onSubmit={handleSubmit}
             type={type}
-            disabled={isEditable}
+            disabled={isEditable || loadingSave}
+            isLoading={loadingSave}
           />
         </Form>
 
@@ -1550,7 +1569,7 @@ const BillingItemForm = (props) => {
         {openModal && (
           <ModalCustom
             isOpen={openModal}
-            handleCancel={() => setOpenModal(false)}
+            handleCancel={() => !loadingSave && setOpenModal(false)}
             header="CONFIRMATION"
             width={1200}
             type="confirmation"
@@ -1559,13 +1578,15 @@ const BillingItemForm = (props) => {
                 <ButtonComponent
                   type="default"
                   onClick={() => setOpenModal(false)}
+                  disabled={loadingSave}
                 >
                   Cancel
                 </ButtonComponent>
                 <ButtonComponent
                   type="submit"
                   onClick={() => handleSave(dataSend)}
-                  disabled={isLoading}
+                  isLoading={loadingSave}
+                  disabled={isLoading || loadingSave}
                 >
                   Confirm
                 </ButtonComponent>
