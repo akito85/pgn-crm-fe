@@ -144,12 +144,14 @@ const TermOfServiceView = () => {
   const columns = [
     {
       title: "NO",
+      key: "no",
       width: 60,
       align: "center",
       render: (text, object, index) => index + 1,
     },
     {
       title: "NAME",
+      key: "name",
       dataIndex: "name",
       sorter: true,
       ellipsis: {
@@ -177,6 +179,7 @@ const TermOfServiceView = () => {
     },
     {
       title: "ATTRIBUTE",
+      key: "attributes",
       dataIndex: "attributes",
       sorter: true,
       ellipsis: {
@@ -204,6 +207,7 @@ const TermOfServiceView = () => {
     },
     {
       title: "CRITERIA",
+      key: "criterias",
       dataIndex: "criterias",
       sorter: true,
       ellipsis: {
@@ -231,6 +235,7 @@ const TermOfServiceView = () => {
     },
     {
       title: "DESCRIPTION",
+      key: "description",
       dataIndex: "description",
       sorter: true,
       ellipsis: {
@@ -258,6 +263,7 @@ const TermOfServiceView = () => {
     },
     {
       title: "STATUS",
+      key: "status",
       dataIndex: "status",
       fixed: "right",
       width: 160,

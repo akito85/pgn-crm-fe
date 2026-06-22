@@ -174,12 +174,14 @@ const PricingRuleView = () => {
   const columns = [
     {
       title: "NO",
+      key: "no",
       align: "center",
       width: 60,
       render: (text, object, index) => index + 1,
     },
     {
       title: "PRICING RULE NAME",
+      key: "name",
       dataIndex: "name",
       sorter: true,
       ellipsis: {
@@ -210,6 +212,7 @@ const PricingRuleView = () => {
       dataIndex: "startDate",
       align: "center",
       sorter: true,
+      key: "startDate",
       ...getColumnSearchPropsUseFilteredValue(
         search,
         "startDate",
@@ -235,6 +238,7 @@ const PricingRuleView = () => {
       dataIndex: "endDate",
       align: "center",
       sorter: true,
+      key: "endDate",
       ...getColumnSearchPropsUseFilteredValue(
         search,
         "endDate",
@@ -260,6 +264,7 @@ const PricingRuleView = () => {
       dataIndex: "description",
       align: "left",
       sorter: true,
+      key: "description",
       ellipsis: {
         showTitle: false,
       },
@@ -286,6 +291,7 @@ const PricingRuleView = () => {
     {
       title: "STATUS",
       dataIndex: "status",
+      key: "status",
       fixed: "right",
       width: 160,
       sorter: true,
@@ -312,6 +318,7 @@ const PricingRuleView = () => {
     {
       title: "STATUS APPROVAL",
       dataIndex: "approvalStatus",
+      key: "approvalStatus",
       fixed: "right",
       width: 240,
       sorter: true,

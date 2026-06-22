@@ -206,6 +206,7 @@ const ProductClassView = () => {
   const columns = [
     {
       title: "NO",
+      key: "no",
       align: "center",
       width: 60,
       render: (text, object, index) => index + 1,
@@ -241,6 +242,7 @@ const ProductClassView = () => {
     {
       sorter: true,
       title: "DESCRIPTION",
+      key: "description",
       dataIndex: "description",
       ellipsis: {
         showTitle: false,
@@ -268,6 +270,7 @@ const ProductClassView = () => {
     {
       sorter: true,
       title: "STATUS",
+      key: "status",
       dataIndex: "status",
       fixed: "right",
       width: 160,
