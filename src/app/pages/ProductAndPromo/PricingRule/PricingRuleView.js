@@ -53,6 +53,8 @@ const PricingRuleView = () => {
     data_approval_history,
   } = useSelector((state) => state.pricingRule);
 
+  const { data: dataUser = {} } = useSelector((state) => state.profile);
+
   // Declaration
   const dispatch = useDispatch();
   const searchInput = useRef(null);
@@ -618,6 +620,7 @@ const PricingRuleView = () => {
           <Toolbar items={itemsActionView} type="page" />
           <NxTable
             idTable="pricing-rule-table"
+            userId={dataUser?.data?.username}
             dataSource={dataSource}
             totalData={totalElement}
             current={page}

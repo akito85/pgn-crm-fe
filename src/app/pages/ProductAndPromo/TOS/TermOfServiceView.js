@@ -46,6 +46,8 @@ const TermOfServiceView = () => {
     loading_listTos: loading,
   } = useSelector((state) => state.tos);
 
+  const { data: dataUser = {} } = useSelector((state) => state.profile);
+
   // Declaration
   const dispatch = useDispatch();
   const searchInput = useRef(null);
@@ -514,6 +516,7 @@ const TermOfServiceView = () => {
           <Toolbar items={itemsActionView} type="page" />
           <NxTable
             idTable="tos-table"
+            userId={dataUser?.data?.username}
             dataSource={dataSource}
             totalData={totalElement}
             current={page}

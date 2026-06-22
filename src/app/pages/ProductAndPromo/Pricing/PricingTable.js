@@ -33,6 +33,8 @@ const PricingTable = () => {
     loading_listPricing: loading,
     dataApprovalHistory,
   } = useSelector((state) => state.pricing);
+  
+  const { data: dataUser = {} } = useSelector((state) => state.profile);
 
   const totalElement = pagination.totalElement;
 
@@ -247,6 +249,7 @@ const PricingTable = () => {
         <Toolbar items={itemActions} type="page" />
         <NxTable
           idTable="pricing-table"
+          userId={dataUser?.data?.username}
           dataSource={dataSource}
           totalData={totalElement}
           current={page}

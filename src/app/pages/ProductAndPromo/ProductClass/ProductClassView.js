@@ -48,6 +48,8 @@ const ProductClassView = () => {
     data_detail,
   } = useSelector((state) => state.productClass);
 
+  const { data: dataUser = {} } = useSelector((state) => state.profile);
+
   // Declaration
   const dispatch = useDispatch();
   const searchInput = useRef(null);
@@ -451,6 +453,7 @@ const ProductClassView = () => {
           <Toolbar items={itemsActionView} type="page" />
           <NxTable
             idTable="product-class-table"
+            userId={dataUser?.data?.username}
             dataSource={dataSource}
             totalData={totalElement}
             current={page}

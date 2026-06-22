@@ -6,6 +6,7 @@ import { TablePromoView, itemsActionView } from "./Table/TablePromoView";
 import { nxGetAccountActions } from "../../../../components/Nx/NxGetAccountActions";
 import { useNavigate } from "react-router-dom";
 import { PRODUCT_PROMO_ROUTES } from "../../../../routes/product_promo/pp_routes";
+import { useSelector } from "react-redux";
 
 const PromoDiscountTable = ({
   data = [],
@@ -29,10 +30,10 @@ const PromoDiscountTable = ({
 }) => {
   const navigate = useNavigate();
 
-  const [fixedColumns, setFixedColumns] = useState(() => ({
-    right: ["status", "statusApproval", "action"],
-    left: [],
-  }));
+  const { data: dataUser = {} } = useSelector((state) => state.profile);
+  
+  const DEFAULT_FIXED_COLUMNS = { right: ["status", "statusApproval", "action"], left: [] };
+  const [fixedColumns, setFixedColumns] = useState(() => DEFAULT_FIXED_COLUMNS);
 
   const itemActions = nxGetAccountActions(
     {
@@ -87,6 +88,7 @@ const PromoDiscountTable = ({
       <Toolbar items={itemActions} />
       <NxTable
         idTable="promo-discount-table"
+        userId={dataUser?.data?.username}
         dataSource={data}
         totalData={totalElement}
         current={page}
@@ -105,6 +107,7 @@ const PromoDiscountTable = ({
         onAdvanceSearch={onAdvanceSearch}
         onSearch={onSearch}
         onRefresh={onRefresh}
+        onClearPreferences={() => setFixedColumns(DEFAULT_FIXED_COLUMNS)}
       />
     </div>
   );

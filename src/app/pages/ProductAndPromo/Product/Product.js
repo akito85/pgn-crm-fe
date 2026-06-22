@@ -856,6 +856,7 @@ const Product = () => {
           <Toolbar items={itemActions} type="page" />
           <NxTable
             idTable="product-table"
+            userId={dataUser?.data?.username}
             dataSource={dataSource}
             totalData={totalElement}
             current={page}
