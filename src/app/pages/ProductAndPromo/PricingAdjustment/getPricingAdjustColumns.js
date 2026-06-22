@@ -68,7 +68,7 @@ const getPricingAdjustColumns = ({ search, searchInput, searchedColumn, searchTe
   },
   {
     title: "DESCRIPTION",
-    key: "criterias",
+    key: "description",
     sorter: true,
     dataIndex: "description",
     ellipsis: { showTitle: false },

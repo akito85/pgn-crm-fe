@@ -54,12 +54,14 @@ const columns = (
   return [
     {
       title: "NO",
+      key: "no",
       width: 60,
       align: "center",
       render: (text, object, index) => index + 1,
     },
     {
       title: "LATEST VERSION",
+      key: "lastVersion",
       width: 240,
       sorter: true,
       align: "right",
@@ -86,6 +88,7 @@ const columns = (
     },
     {
       title: "PRODUCT NAME",
+      key: "productName",
       width: 240,
       sorter: true,
       dataIndex: "productName",
@@ -114,6 +117,7 @@ const columns = (
     },
     {
       title: "PRODUCT TYPE",
+      key: "productTypeName",
       width: 240,
       sorter: true,
       dataIndex: "productTypeName",
@@ -139,6 +143,7 @@ const columns = (
     },
     {
       title: "SERVICE TYPE",
+      key: "serviceTypeName",
       width: 240,
       sorter: true,
       dataIndex: "serviceTypeName",
@@ -167,6 +172,7 @@ const columns = (
     },
     {
       title: "PRODUCT CLASS",
+      key: "productClassName",
       width: 240,
       sorter: true,
       dataIndex: "productClassName",
@@ -195,6 +201,7 @@ const columns = (
     },
     {
       title: "PRICING",
+      key: "pricing",
       width: 240,
       sorter: true,
       dataIndex: "pricing",
@@ -223,6 +230,7 @@ const columns = (
     },
     {
       title: "LOCKED BY",
+      key: "lockedBy",
       width: 240,
       sorter: true,
       dataIndex: "lockedBy",
@@ -248,6 +256,7 @@ const columns = (
     },
     {
       title: "MAKER POSITION",
+      key: "makerPosition",
       width: 240,
       sorter: true,
       dataIndex: "makerPosition",
@@ -276,6 +285,7 @@ const columns = (
     },
     {
       title: "START DATE",
+      key: "startDate",
       width: 200,
       sorter: true,
       align: "center",
@@ -302,6 +312,7 @@ const columns = (
     },
     {
       title: "END DATE",
+      key: "endDate",
       width: 200,
       sorter: true,
       align: "center",
@@ -328,6 +339,7 @@ const columns = (
     },
     {
       title: "DESCRIPTION",
+      key: "productDescription",
       width: 320,
       sorter: true,
       dataIndex: "productDescription",
@@ -844,6 +856,8 @@ const Product = () => {
           <Toolbar items={itemActions} type="page" />
           <NxTable
             idTable="product-table"
+            userId={dataUser?.data?.username}
+            showRefresh={true}
             dataSource={dataSource}
             totalData={totalElement}
             current={page}
