@@ -279,6 +279,7 @@ const FunctionalCriteriaProduct = ({
   checkStartDate = true, //check product has date validation
   excludeRender = null,
   showInactivate = false, // opt-in per consumer
+  countryCriteriaId,
 }) => {
   // Selector
   const {
@@ -376,7 +377,16 @@ const FunctionalCriteriaProduct = ({
 
   useEffect(() => {
     if (type !== "detail" && type !== "preview" && dataCriteria?.length > 0){
-      [...columnsTable()]
+      [...columnsTable(
+        listOption,
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch,
+        search,
+        storedData,
+        countryCriteriaId
+      )]
         ?.filter(
           (item) =>
             ([...dataCriteria]?.includes(item?.indexValue) &&
@@ -423,8 +433,9 @@ const FunctionalCriteriaProduct = ({
       });
     }
     if (index === "country") {
-      if (dataCriteria.includes(3118)) {
-        dispatch(getApi?.getProvinceList(data?.value));
+      if (hasValue(countryCriteriaId) && dataCriteria.includes(countryCriteriaId)) {
+        const dispatchProvinceByCountry = getApi?.getProvinceListByCountry || getApi?.getProvinceList;
+        dispatch(dispatchProvinceByCountry?.(data?.value));
       }
       formTableCriteria.resetFields(["province", "city", "district", "subDistrict"]);
       setEditDataRecord((prevState) => {
@@ -748,7 +759,8 @@ const FunctionalCriteriaProduct = ({
         searchText,
         handleSearch,
         search,
-        storedData
+        storedData,
+        countryCriteriaId
       ),
       {
         title: "ACTION",

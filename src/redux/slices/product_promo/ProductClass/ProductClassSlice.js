@@ -14,18 +14,28 @@ const initialState = {
   isFailed: false,
   isSuccess: false,
   message: "",
+  list_productClass: [],
+  pagination_productClass: { totalPage: 0, totalElement: 0 },
+  loading_listProductClass: false,
+  latestListReqId_productClass: null,
 };
 
 export const getAllProductClassPaginate = createAsyncThunk(
   "GET_ALL_PRODUCT_CLASS_PAGINATE",
-  async ({ page, pageSize, search, sort }, thunkAPI) => {
+  async ({ page, pageSize, sort, search, searchText, filters = [], filterRules = [], isLoadMore = false }, thunkAPI) => {
     try {
-      const searchParams = search === undefined ? "" : search;
-      const sortParams =
-        sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      const url = `/v1/dbs/api/productClass/view/paging?page=${page}&size=${pageSize}&search=${searchParams}&sort=${sortParams}`;
-      const response = await productPromoHttpService.getPagination(url);
-      return response.data;
+      const url = `/v1/dbs/api/productClass/list-product-class`;
+      const body = {
+        page,
+        size: pageSize,
+        sort: sort || "createdDate~desc",
+        search: searchText || null,
+        searchs: search || {},
+        filters,
+        filterRules,
+      };
+      const response = await productPromoHttpService.createData(url, body);
+      return { ...response.data, isLoadMore };
     } catch (error) {
       if (error.response.data.code === 419) {
         thunkAPI.dispatch(setBodyError(error));
@@ -179,20 +189,52 @@ const productClassSlice = createSlice({
   initialState,
   extraReducers: {
     // Get All Product Class Pagination
-    [getAllProductClassPaginate.pending]: (state) => {
+    [getAllProductClassPaginate.pending]: (state, action) => {
       state.isFailed = false;
       state.isSuccess = false;
       state.loading = true;
+      if (!action.meta.arg?.isLoadMore) {
+        state.loading_listProductClass = true;
+        state.list_productClass = [];
+        state.latestListReqId_productClass = action.meta.requestId;
+      }
     },
     [getAllProductClassPaginate.fulfilled]: (state, action) => {
+      const { result, page, isLoadMore } = action.payload || {};
+      // Drop stale replace responses (out-of-order race when filters/search
+      // change quickly); only the most recent request owns the list.
+      if (
+        !isLoadMore &&
+        action.meta.requestId !== state.latestListReqId_productClass
+      )
+        return;
       state.isFailed = false;
       state.isSuccess = false;
       state.data = action.payload;
       state.loading = false;
+      state.loading_listProductClass = false;
+      if (Array.isArray(result)) {
+        if (isLoadMore) {
+          const existingIds = new Set(
+            state.list_productClass.map((it) => it.id)
+          );
+          state.list_productClass = [
+            ...state.list_productClass,
+            ...result.filter((it) => !existingIds.has(it.id)),
+          ];
+        } else {
+          state.list_productClass = result;
+        }
+      }
+      state.pagination_productClass = {
+        totalPage: page?.totalPages || 0,
+        totalElement: page?.totalElements || 0,
+      };
     },
     [getAllProductClassPaginate.rejected]: (state, action) => {
       state.data = action.payload;
       state.loading = false;
+      state.loading_listProductClass = false;
     },
 
     // Get Detail Product Class

@@ -1,7 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
-import { Spin, Input, Tooltip, Checkbox, Alert } from "antd";
-import { FilterOutlined, WarningOutlined } from "@ant-design/icons";
-import Highlighter from "react-highlight-words";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { Tooltip, Checkbox, Alert } from "antd";
+import { WarningOutlined } from "@ant-design/icons";
 import { NavLink, Link } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import BreadCrumb from "../../../../components/BreadCrumb";
@@ -14,36 +13,57 @@ import {
 } from "../../../../redux/slices/product_promo/ProductClass/ProductClassSlice";
 import SVGIcon from "../../../../assets/Icon/index";
 import ButtonComponent from "../../../../components/ButtonComponent";
-import BaseContainer from "../../../../components/BaseContainer";
 import {
   ModalConfirm,
   ModalError,
 } from "../../../../components/Modal/ModalPopUp";
 import ProductClassDetail from "./ProductClassDetail";
-import TablePaginationNew from "../../../../components/TablePaginationNew";
+import NxCardContainer from "../../../../components/Nx/NxCardContainer";
+import NxTable from "../../../../components/Nx/NxTable";
+import NxStatusComponent from "../../../../components/Nx/NxStatusComponent";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../utils/getColumnSearchProps";
 import { hasValue, renderColumn } from "../../../../utils";
 import Toolbar from "../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
 
+const PAGE_SIZE = 20;
+
+const formatStatus = (value) => {
+  switch (value) {
+    case "WAITING_FOR_APPROVAL":
+      return "Waiting Approval";
+    default:
+      return value
+        ? value.charAt(0).toUpperCase() + value.slice(1).toLowerCase()
+        : value;
+  }
+};
+
 const ProductClassView = () => {
   // Selector
-  const { data, data_detail, loading } = useSelector(
-    (state) => state.productClass
-  );
+  const {
+    list_productClass: dataSource,
+    pagination_productClass: pagination,
+    loading_listProductClass: loading,
+    data_detail,
+  } = useSelector((state) => state.productClass);
 
   // Declaration
   const dispatch = useDispatch();
   const searchInput = useRef(null);
-  const dataSource = data?.result;
+
+  const totalElement = pagination.totalElement;
 
   // State
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [page, setPage] = useState(0);
   const [searchedColumn, setSearchedColumn] = useState("");
-  const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
+  const [searchText, setSearchText] = useState("");
+  const [filters, setFilters] = useState([]);
+  const [filterRules, setFilterRules] = useState([]);
+  const [limitData, setLimitData] = useState(null);
+  const hasMore = !limitData && dataSource.length < (totalElement || 0);
 
   const [modalDetail, setModalDetail] = useState(false);
   const [chooseId, setChooseId] = useState("");
@@ -52,22 +72,41 @@ const ProductClassView = () => {
   const [modalError, setModalError] = useState(false);
   const [bodyError, setBodyError] = useState({});
 
-  // Use Effect
+  // --- Fetch helpers ---
+  const buildBody = useCallback(
+    (pageNum) => ({
+      page: pageNum,
+      pageSize: limitData || PAGE_SIZE,
+      sort,
+      search,
+      searchText,
+      filters,
+      filterRules,
+    }),
+    [sort, search, searchText, filters, filterRules, limitData]
+  );
+
+  const handleRefresh = useCallback(() => {
+    dispatch(getAllProductClassPaginate({ ...buildBody(0), isLoadMore: false }));
+    setPage(0);
+  }, [dispatch, buildBody]);
+
+  // Re-fetch page 0 whenever sort / search / filters change
   useEffect(() => {
-    let tempSearch = "";
-    for (const dataIndex in search) {
-      if (Object.hasOwnProperty.call(search, dataIndex)) {
-        const tempSearchText = search[dataIndex];
-        if (tempSearchText) {
-          tempSearch += `${dataIndex}~${tempSearchText},`;
-        }
-      }
+    dispatch(getAllProductClassPaginate({ ...buildBody(0), isLoadMore: false }));
+    setPage(0);
+  }, [sort, search, searchText, filters, filterRules, limitData]); // intentionally omit dispatch/buildBody to avoid loop
+
+  const handleLoadMore = async () => {
+    const nextPage = page + 1;
+    // page is 0-based, totalPage is a count → last valid index is totalPage-1.
+    if (nextPage < (pagination.totalPage || 0)) {
+      // await so NxTable's infinite-scroll gate stays closed until the fetch
+      // settles — prevents duplicate page dispatches on fast scrolling.
+      await dispatch(getAllProductClassPaginate({ ...buildBody(nextPage), isLoadMore: true }));
+      setPage(nextPage);
     }
-    tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
-    dispatch(
-      getAllProductClassPaginate({ search: tempSearch, sort, page, pageSize })
-    );
-  }, [search, sort, page, pageSize]);
+  };
 
   // Breadcrumbs
   const routes = [
@@ -81,71 +120,11 @@ const ProductClassView = () => {
     },
   ];
 
-  // Search Column Table
-  const getColumnSearchProps = (dataIndex) => ({
-    filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }) => (
-      <div
-        style={{
-          padding: 8,
-        }}
-        onKeyDown={(e) => e.stopPropagation()}
-      >
-        <Input
-          ref={searchInput}
-          placeholder={`Search ${dataIndex}`}
-          value={selectedKeys[0]}
-          onChange={(e) =>
-            setSelectedKeys(e.target.value ? [e.target.value] : [])
-          }
-          onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
-          style={{
-            marginBottom: 8,
-            display: "block",
-          }}
-        />
-      </div>
-    ),
-    filterIcon: (filtered) => (
-      <FilterOutlined
-        style={{
-          color: filtered ? "#1890ff" : undefined,
-        }}
-      />
-    ),
-    // onFilter: (value, record) =>
-    //   record[dataIndex]
-    //     ?.toString()
-    //     ?.toLowerCase()
-    //     ?.includes(value.toLowerCase()),
-    onFilterDropdownOpenChange: (visible) => {
-      if (visible) {
-        setTimeout(() => searchInput.current?.select(), 100);
-      }
-    },
-    render: (text) =>
-      searchedColumn === dataIndex ? (
-        <Highlighter
-          highlightStyle={{
-            backgroundColor: "#ffc069",
-            padding: 0,
-          }}
-          searchWords={[searchText]}
-          autoEscape
-          textToHighlight={text ? text.toString() : ""}
-        />
-      ) : (
-        text
-      ),
-  });
-
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
-    setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
     setSearch((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
-      }
+      if (prevState[dataIndex] !== selectedKeys[0]) setPage(0);
       return {
         ...prevState,
         [dataIndex]: selectedKeys[0],
@@ -153,15 +132,22 @@ const ProductClassView = () => {
     });
   };
 
-  const handleChange = (pageChange, pageSizeChange) => {
-    setPage(pageSize !== pageSizeChange ? 1 : pageChange);
-    setPageSize(pageSizeChange);
+  const handleSearchBar = useCallback((value) => {
+    setSearchText(value || "");
+  }, []);
+
+  const handleAdvancedSearch = (searchData) => {
+    setFilters(searchData?.filters || []);
+    setFilterRules(searchData?.filterRules || []);
+    const parsedLimit = parseInt(searchData?.limitData, 10);
+    setLimitData(Number.isFinite(parsedLimit) && parsedLimit > 0 ? parsedLimit : null);
+    setPage(0);
   };
 
-  const onSort = (_, __, sort) => {
+  const onSort = (_, __, sortInfo) => {
     const dataSort =
-      sort.order !== undefined
-        ? `${sort.field}~${sort.order === "ascend" ? "asc" : "desc"}`
+      sortInfo.order !== undefined
+        ? `${sortInfo.field}~${sortInfo.order === "ascend" ? "asc" : "desc"}`
         : "";
     setSort(dataSort);
   };
@@ -179,7 +165,7 @@ const ProductClassView = () => {
     }
     tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
     dispatch(
-      downloadProductClass({ search: tempSearch, page, pageSize, sort })
+      downloadProductClass({ search: tempSearch, page: 0, pageSize: PAGE_SIZE, sort })
     );
   };
 
@@ -202,24 +188,7 @@ const ProductClassView = () => {
       .unwrap()
       .then(() => {
         setModalInactive(false);
-        let tempSearch = "";
-        for (const dataIndex in search) {
-          if (Object.hasOwnProperty.call(search, dataIndex)) {
-            const tempSearchText = search[dataIndex];
-            if (tempSearchText) {
-              tempSearch += `${dataIndex}~${tempSearchText},`;
-            }
-          }
-        }
-        tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
-        dispatch(
-          getAllProductClassPaginate({
-            page,
-            pageSize,
-            search: tempSearch,
-            sort,
-          })
-        );
+        handleRefresh();
       })
       .catch((error) => {
         if (Math.floor((error?.response?.data?.code || 0) / 100) === 5) {
@@ -239,7 +208,7 @@ const ProductClassView = () => {
       title: "NO",
       align: "center",
       width: 60,
-      render: (text, object, index) => (page - 1) * pageSize + index + 1,
+      render: (text, object, index) => index + 1,
     },
     {
       sorter: true,
@@ -295,33 +264,6 @@ const ProductClassView = () => {
           "input",
           search
         ),
-
-      // render: (text) => {
-      //   if (searchedColumn === "description") {
-      //     return (
-      //       <Tooltip placement="topLeft" title={text}>
-      //         <Highlighter
-      //           highlightStyle={{
-      //             backgroundColor: "#ffc069",
-      //             padding: 0,
-      //           }}
-      //           searchWords={[searchText]}
-      //           autoEscape
-      //           textToHighlight={text ? text.toString() : ""}
-      //         />
-      //       </Tooltip>
-      //     );
-      //   } else {
-      //     if (text) {
-      //       return (
-      //         <Tooltip placement="topLeft" title={text}>
-      //           {text}
-      //         </Tooltip>
-      //       );
-      //     }
-      //     return "";
-      //   }
-      // },
     },
     {
       sorter: true,
@@ -338,99 +280,17 @@ const ProductClassView = () => {
         handleSearch,
         true
       ),
-      render: (index) => {
-        let text;
-        switch (index) {
-          case "WAITING_FOR_APPROVAL":
-            text = "Waiting Approval";
-            break;
-          default:
-            text = index
-              ? index.charAt(0).toUpperCase() + index.slice(1).toLowerCase()
-              : index;
-            break;
-        }
-        return text
-          ? renderColumn(
-              "status",
-              searchedColumn,
-              searchText,
-              text,
-              false,
-              "status",
-              search
-            )
-          : text;
+      render: (value) => {
+        const text = formatStatus(value);
+        return text ? (
+          <div className="flex justify-center">
+            <NxStatusComponent colour={text}>{text}</NxStatusComponent>
+          </div>
+        ) : (
+          text
+        );
       },
     },
-    // {
-    //   title: "ACTION",
-    //   dataIndex: "productClassId",
-    //   width: 120,
-    //   align: "center",
-    //   fixed: "right",
-    //   render: (id, record) => {
-    //     return (
-    //       <div className="flex w-full justify-center gap-6">
-    //         <Tooltip title="Detail">
-    //           <div className="pt-1">
-    //             <SVGIcon
-    //               name="IconDetail"
-    //               width={24}
-    //               onClick={() => {
-    //                 dispatch(getDetailProductClass(id));
-    //                 setModalDetail(true);
-    //               }}
-    //             />
-    //           </div>
-    //         </Tooltip>
-
-    //         <Tooltip title="Update">
-    //           <div className="pt-1">
-    //             {record.status === "ACTIVE" ? (
-    //               <Link
-    //                 to={PRODUCT_PROMO_ROUTES.UPDATE_PRODUCT_CLASS}
-    //                 state={{ id: id }}
-    //               >
-    //                 <SVGIcon name="IconEdit" width={24} />
-    //               </Link>
-    //             ) : (
-    //               <div
-    //                 className={
-    //                   record.status === "INACTIVE" ? "cursor-not-allowed" : ""
-    //                 }
-    //               >
-    //                 <SVGIcon
-    //                   name="IconEdit"
-    //                   width={24}
-    //                   color={
-    //                     record.status !== "INACTIVE" ? "#ACC424" : "#8D91A0"
-    //                   }
-    //                   className={
-    //                     record.status === "INACTIVE" ? "disabled" : undefined
-    //                   }
-    //                 />
-    //               </div>
-    //             )}
-    //           </div>
-    //         </Tooltip>
-
-    //         <Tooltip
-    //           title={record.status === "ACTIVE" ? "Inactivate" : "Activate"}
-    //         >
-    //           <div className="pt-1">
-    //             <Checkbox
-    //               onClick={() => {
-    //                 handleActiveOrInactive(record);
-    //               }}
-    //               checked={record.status !== "ACTIVE"}
-    //             />
-    //           </div>
-    //         </Tooltip>
-    //       </div>
-    //     );
-    //   },
-    // },
   ];
 
   const itemsActionView = [
@@ -571,104 +431,88 @@ const ProductClassView = () => {
     setBodyError({});
   };
 
+  const tableColumns = [
+    ...columns,
+    ...useColumnActionPermission(
+      ["view", "Update", "Activate"],
+      itemsActionView
+    ),
+  ];
+
   return (
     <>
-      <Spin spinning={loading}>
-        <BreadCrumb routes={routes} />
+      <BreadCrumb routes={routes} />
 
-        {/* <div className="w-full flex justify-end gap-[20px]">
-          <ButtonComponent
-            icon={<SVGIcon name="IconButtonDownload" width={24} />}
-            type="submit"
-            onClick={handleDownload}
-          >
-            Download List
-          </ButtonComponent>
+      <NxCardContainer header="Product Class List" className="mt-4">
+        <div className="flex flex-col gap-y-4">
+          <Toolbar items={itemsActionView} type="page" />
+          <NxTable
+            idTable="product-class-table"
+            dataSource={dataSource}
+            totalData={totalElement}
+            current={page}
+            tableScrolled={{ x: "max-content" }}
+            onSort={onSort}
+            columns={tableColumns}
+            usePagination={false}
+            useInfiniteScroll={true}
+            hasMore={hasMore}
+            onLoadMore={handleLoadMore}
+            loading={loading}
+            onAdvanceSearch={handleAdvancedSearch}
+            onRefresh={handleRefresh}
+            onSearch={handleSearchBar}
+          />
+        </div>
+      </NxCardContainer>
 
-          <NavLink to={PRODUCT_PROMO_ROUTES.CREATE_PRODUCT_CLASS}>
-            <ButtonComponent
-              icon={<SVGIcon name="IconButtonCreate" width={24} />}
-              type="submit"
-            >
-              Create Product Class
-            </ButtonComponent>
-          </NavLink>
-        </div> */}
-        <Toolbar items={itemsActionView} />
+      {/* Modal Detail */}
+      <ProductClassDetail
+        data_detail={data_detail}
+        openModal={modalDetail}
+        closeModal={() => setModalDetail(false)}
+      />
 
-        <BaseContainer header={"product class list"}>
-          <div className="w-full">
-            <TablePaginationNew
-              dataSource={dataSource}
-              columns={[
-                ...columns,
-                ...useColumnActionPermission(
-                  ["view", "Update", "Activate"],
-                  itemsActionView
-                ),
-              ]}
-              current={page}
-              pageSize={pageSize}
-              onChange={handleChange}
-              onShowSizeChange={handleChange}
-              tableScrolled={{
-                x: 1000,
-                y: 300,
-              }}
-              onSort={onSort}
-              totalData={data?.page?.totalElements || 0}
-            />
+      {/* Modal Confirmation Inactive */}
+      <ModalConfirm
+        isOpen={modalInactive}
+        handleCancel={() => setModalInactive(false)}
+        handleOk={handleOk}
+        width={activeOrInactive === "ACTIVE" ? 600 : 400}
+        useOk={true}
+      >
+        <div className="flex justify-center gap-[20px] mt-6">
+          <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
+          <p className={"text-[18px] font-bold"}>
+            {`Are you sure want to ${
+              activeOrInactive === "ACTIVE" ? "inactivate" : "activate"
+            } ?`}
+          </p>
+        </div>
+        {activeOrInactive === "ACTIVE" ? (
+          <Alert
+            message="Warning! if you inactivate this data, it can't be used."
+            type={"error"}
+          />
+        ) : null}
+      </ModalConfirm>
+
+      {/** Modal Retry */}
+      <ModalError
+        isOpen={modalError}
+        handleOk={handleRetry}
+        handleCancel={handleCloseModalError}
+        customText={"Try Again"}
+      >
+        <div className="px-5 pt-5 pb-[10px] justify-center">
+          <div className="w-full flex gap-[20px]">
+            <SVGIcon name="IconFailed" width={48} />
+            <p className="text-[18px] font-bold">{"Failed"}</p>
           </div>
-        </BaseContainer>
-
-        {/* Modal Detail */}
-        <ProductClassDetail
-          data_detail={data_detail}
-          openModal={modalDetail}
-          closeModal={() => setModalDetail(false)}
-        />
-
-        {/* Modal Confirmation Inactive */}
-        <ModalConfirm
-          isOpen={modalInactive}
-          handleCancel={() => setModalInactive(false)}
-          handleOk={handleOk}
-          width={activeOrInactive === "ACTIVE" ? 600 : 400}
-          useOk={true}
-        >
-          <div className="flex justify-center gap-[20px] mt-6">
-            <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
-            <p className={"text-[18px] font-bold"}>
-              {`Are you sure want to ${
-                activeOrInactive === "ACTIVE" ? "inactivate" : "activate"
-              } ?`}
-            </p>
-          </div>
-          {activeOrInactive === "ACTIVE" ? (
-            <Alert
-              message="Warning! if you inactivate this data, it can't be used."
-              type={"error"}
-            />
-          ) : null}
-        </ModalConfirm>
-
-        {/** Modal Retry */}
-        <ModalError
-          isOpen={modalError}
-          handleOk={handleRetry}
-          handleCancel={handleCloseModalError}
-          customText={"Try Again"}
-        >
-          <div className="px-5 pt-5 pb-[10px] justify-center">
-            <div className="w-full flex gap-[20px]">
-              <SVGIcon name="IconFailed" width={48} />
-              <p className="text-[18px] font-bold">{"Failed"}</p>
-            </div>
-            <p className="pl-[70px]">{`Your data was not inactivated. ${bodyError.message}.`}</p>
-            <p className="pl-[70px]">Please try again.</p>
-          </div>
-        </ModalError>
-      </Spin>
+          <p className="pl-[70px]">{`Your data was not inactivated. ${bodyError.message}.`}</p>
+          <p className="pl-[70px]">Please try again.</p>
+        </div>
+      </ModalError>
     </>
   );
 };

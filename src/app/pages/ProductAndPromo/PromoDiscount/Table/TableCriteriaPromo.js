@@ -57,7 +57,8 @@ export const columnsTableCriteriaPromo = (
   searchText,
   handleSearch,
   search,
-  storedData
+  storedData,
+  countryCriteriaId
 ) => [
   {
     required: true,
@@ -436,7 +437,7 @@ export const columnsTableCriteriaPromo = (
     sorter: (a, b) => sorter("country", a, b),
     dataIndex: "country",
     dataIndexForm: "data_country",
-    indexValue: 3118,
+    indexValue: countryCriteriaId,
     inputType: "select",
     filteredValue: search?.["country"] ? [search?.["country"]] : null,
     option: listOption["data_country"],

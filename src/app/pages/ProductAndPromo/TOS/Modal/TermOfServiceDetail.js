@@ -9,14 +9,18 @@ import { dateFormatting } from "../../../../../utils";
 import {
   getTosAttribute,
   getTosDetail,
+  getSelectCriteria,
 } from "../../../../../redux/slices/product_promo/tos";
 import { lowerCaseStatus } from "../../Product/utils";
 import { columnsTableCriteriaAll } from "../../UtilsProduct/TableCriteriaAllProduct";
+import { getCriteriaIdByCode } from "../../UtilsProduct/UtilsAllProduct";
 import FunctionalCriteriaProduct from "../../UtilsProduct/FunctionalCriteriaProduct";
 
 const TermOfServiceDetail = ({ openModal, closeModal, id }) => {
   // Selector
-  const { data_detail, data_attribute } = useSelector((state) => state.tos);
+  const { data_detail, data_attribute, data_criteria } = useSelector(
+    (state) => state.tos
+  );
 
   // Declaration
   const dispatch = useDispatch();
@@ -29,7 +33,15 @@ const TermOfServiceDetail = ({ openModal, closeModal, id }) => {
   }, [dispatch, id]);
   useEffect(() => {
     dispatch(getTosAttribute());
+    dispatch(getSelectCriteria());
   }, [dispatch]);
+
+  const criteriaOptions = (data_criteria || []).map((item) => ({
+    name: item.text,
+    value: item.id,
+    code: item?.code,
+  }));
+  const countryCriteriaId = getCriteriaIdByCode(criteriaOptions, "COUNTRY");
 
   const criteria = (data_detail?.criterias || [])?.map((item) => {
     return {
@@ -103,6 +115,7 @@ const TermOfServiceDetail = ({ openModal, closeModal, id }) => {
               dataCriteria={criteria} //ddl
               selector="tos"
               columnsTable={columnsTableCriteriaAll}
+              countryCriteriaId={countryCriteriaId}
             />
             {/* <TableDetailCriteria
               type={"detail"}

@@ -125,6 +125,21 @@ const NxTable = ({
     fixedColumnsProp: fixedColumns,
   });
 
+  // ── Auto height + container width ─────────────────────────────────────────
+  // NOTE: must run BEFORE useColumnLayout — useColumnLayout consumes
+  // `containerWidth` for responsive column auto-fit. Declaring it afterwards
+  // makes `containerWidth` a temporal-dead-zone reference (crash in dev /
+  // silently `undefined` in ES5 builds → auto-fit disabled).
+  const { dynamicScrollY, containerWidth } = useAutoHeight({
+    autoHeight,
+    tableScrollYProp,
+    useInfiniteScroll: useInfiniteScrollProp,
+    usePagination,
+    useSelect,
+    containerRef,
+  });
+  const tableScrollY = dynamicScrollY;
+
   // ── Column layout ─────────────────────────────────────────────────────────
   const {
     optionSelectedCol,
@@ -148,17 +163,6 @@ const NxTable = ({
     containerWidth,
     scrollX: tableScrolled?.x ?? 0,
   });
-
-  // ── Auto height + container width ─────────────────────────────────────────
-  const { dynamicScrollY, containerWidth } = useAutoHeight({
-    autoHeight,
-    tableScrollYProp,
-    useInfiniteScroll: useInfiniteScrollProp,
-    usePagination,
-    useSelect,
-    containerRef,
-  });
-  const tableScrollY = dynamicScrollY;
 
   // ── Keyboard navigation ───────────────────────────────────────────────────
   useKeyboardNav({ safeId, containerRef });

@@ -11,6 +11,10 @@ const initialState = {
   dataProduct: {},
   dataStatus: {},
   loadingProduct: false,
+  list_product: [],
+  pagination_product: { totalPage: 0, totalElement: 0 },
+  loading_listProduct: false,
+  latestListReqId_product: null,
   dataListProductType: [],
   dataListProductClass: [],
   dataListServiceType: [],
@@ -64,6 +68,7 @@ const initialState = {
   data_grant_access: {},
   data_budget: [],
   data_province: [],
+  data_country: [],
   data_city: [],
   data_industrial_sector: [],
   data_district: [],
@@ -111,13 +116,20 @@ export const getGlobalPropertiesAttachment = createAsyncThunk(
 
 export const getAllProductPaginate = createAsyncThunk(
   "GET_ALL_PRODUCT_PAGINATE",
-  async ({ page, pageSize, sort, search }, thunkAPI) => {
+  async ({ page, pageSize, sort, search, searchText, filters = [], filterRules = [], isLoadMore = false }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/product/listProduct?page=${page}&size=${pageSize}&sort=${
-        sort || "createdDate~desc"
-      }&searchs=${search}`;
-      const response = await productPromoHttpService.getPagination(url);
-      return response.data;
+      const url = `/v1/dbs/api/product/list-product`;
+      const body = {
+        page,
+        size: pageSize,
+        sort: sort || "createdDate~desc",
+        search: searchText || null,
+        searchs: search || {},
+        filters,
+        filterRules,
+      };
+      const response = await productPromoHttpService.createData(url, body);
+      return { ...response.data, isLoadMore };
     } catch (error) {
       console.log(error, " = error slice");
       return thunkAPI.rejectWithValue(error.response.data);
@@ -337,6 +349,42 @@ export const getProvinceList = createAsyncThunk(
   async (thunkAPI) => {
     try {
       const url = `/v1/dbs/api/product/getProvince`;
+      const response = await productPromoHttpService.getAll(url);
+      return (response.data || []).map((item) => {
+        return {
+          value: item.Id,
+          label: item.text,
+        };
+      });
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+export const getProvinceListByCountry = createAsyncThunk(
+  "GET_PROVINCE_LIST_BY_COUNTRY",
+  async (id, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/product/getProvinceByCountry/${id}`;
+      const response = await productPromoHttpService.getDetail(url);
+      return (response.data || []).map((item) => {
+        return {
+          value: item.Id,
+          label: item.text,
+        };
+      });
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error?.response);
+    }
+  }
+);
+
+export const getCountryList = createAsyncThunk(
+  "GET_COUNTRY_LIST",
+  async (thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/product/getCountry`;
       const response = await productPromoHttpService.getAll(url);
       return (response.data || []).map((item) => {
         return {
@@ -1438,14 +1486,41 @@ const productSlice = createSlice({
     [getAllProductPaginate.pending]: (state, action) => {
       state.loadingProduct = true;
       state.dataProduct = action.payload;
+      if (!action.meta.arg?.isLoadMore) {
+        state.loading_listProduct = true;
+        state.list_product = [];
+        state.latestListReqId_product = action.meta.requestId;
+      }
     },
     [getAllProductPaginate.fulfilled]: (state, action) => {
+      const { result, page, isLoadMore } = action.payload || {};
+      // Drop stale replace responses (out-of-order race when filters/search
+      // change quickly); only the most recent request owns the list.
+      if (!isLoadMore && action.meta.requestId !== state.latestListReqId_product)
+        return;
       state.dataProduct = action.payload;
       state.loadingProduct = false;
+      state.loading_listProduct = false;
+      if (Array.isArray(result)) {
+        if (isLoadMore) {
+          const existingIds = new Set(state.list_product.map((it) => it.id));
+          state.list_product = [
+            ...state.list_product,
+            ...result.filter((it) => !existingIds.has(it.id)),
+          ];
+        } else {
+          state.list_product = result;
+        }
+      }
+      state.pagination_product = {
+        totalPage: page?.totalPages || 0,
+        totalElement: page?.totalElements || 0,
+      };
     },
     [getAllProductPaginate.rejected]: (state, action) => {
       state.dataProduct = action.payload;
       state.loadingProduct = false;
+      state.loading_listProduct = false;
     },
     /** List Product Pagination */
     [getAllProductActivePaginate.pending]: (state, action) => {
@@ -1629,6 +1704,34 @@ const productSlice = createSlice({
     [getProvinceList.rejected]: (state, action) => {
       state.loadingProduct = false;
       state.data_province = action.payload;
+    },
+
+    // Get Province List By Country
+    [getProvinceListByCountry.pending]: (state, action) => {
+      state.loadingProduct = true;
+      state.data_province = action.payload;
+    },
+    [getProvinceListByCountry.fulfilled]: (state, action) => {
+      state.loadingProduct = false;
+      state.data_province = action.payload;
+    },
+    [getProvinceListByCountry.rejected]: (state, action) => {
+      state.loadingProduct = false;
+      state.data_province = action.payload;
+    },
+
+    // Get Country List
+    [getCountryList.pending]: (state, action) => {
+      state.loadingProduct = true;
+      state.data_country = action.payload;
+    },
+    [getCountryList.fulfilled]: (state, action) => {
+      state.loadingProduct = false;
+      state.data_country = action.payload;
+    },
+    [getCountryList.rejected]: (state, action) => {
+      state.loadingProduct = false;
+      state.data_country = action.payload;
     },
 
     // Get City List

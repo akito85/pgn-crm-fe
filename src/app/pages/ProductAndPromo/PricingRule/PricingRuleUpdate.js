@@ -28,7 +28,7 @@ import productPromoHttpService from "../../../../redux/services/productPromoHttp
 import { showModalError, validateCreateUpdate } from "../../../../redux/slices/general_slice";
 import AttachmentSectionForm from "../Pricing/Form/AttachmentSectionForm";
 import BaseContainer from "../../../../components/BaseContainer";
-import { handleCheckCriteriaMissingValidation, handleDisabledEachColumnCriteria } from "../UtilsProduct/UtilsAllProduct";
+import { applyLocationCriteriaCascade, getCriteriaIdByCode, handleCheckCriteriaMissingValidation, handleDisabledEachColumnCriteria } from "../UtilsProduct/UtilsAllProduct";
 import { columnsTableCriteriaAll } from "../UtilsProduct/TableCriteriaAllProduct";
 import { dateFormatting, hasValue } from "../../../../utils";
 
@@ -119,7 +119,11 @@ const PricingRuleUpdate = () => {
         };
       });
 
-      const mappingCriteria = criteriaSelect?.map((a) => a.id);
+      const mappingCriteria = applyLocationCriteriaCascade(
+        criteriaSelect?.map((a) => a.id),
+        data_select_criteria,
+        "id"
+      );
 
       // Data Detail Pricing Rule
       const dataDetailDraftPricingRule = (
@@ -258,7 +262,16 @@ const PricingRuleUpdate = () => {
           idCompare: "id",
           status: data_header?.status,
           statusApproval: data_header?.approvalStatus,
-          columnsTable: columnsTableCriteriaAll(),
+          columnsTable: columnsTableCriteriaAll(
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            getCriteriaIdByCode(data_select_criteria, "COUNTRY", "id")
+          ),
           dataListCriteria: data_select_criteria?.map((item) =>{
             return {
               ...item,
@@ -280,7 +293,11 @@ const PricingRuleUpdate = () => {
         };
       });
 
-      const mappingCriteria = criteriaSelect?.map((a) => a.id);
+      const mappingCriteria = applyLocationCriteriaCascade(
+        criteriaSelect?.map((a) => a.id),
+        data_select_criteria,
+        "id"
+      );
 
       // Data Detail Pricing Rule
       const dataDetailPricingRule = (
@@ -377,7 +394,16 @@ const PricingRuleUpdate = () => {
           idCompare: "id",
           status: data_header?.status,
           statusApproval: data_header?.approvalStatus,
-          columnsTable: columnsTableCriteriaAll(),
+          columnsTable: columnsTableCriteriaAll(
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            getCriteriaIdByCode(data_select_criteria, "COUNTRY", "id")
+          ),
           dataListCriteria: data_select_criteria?.map((item) =>{
             return {
               ...item,
@@ -499,14 +525,32 @@ const PricingRuleUpdate = () => {
             return obj;
           });
 
-          const filteredCriteria = columnsTableCriteriaAll().filter(
+          const filteredCriteria = columnsTableCriteriaAll(
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            getCriteriaIdByCode(data_select_criteria, "COUNTRY", "id")
+          ).filter(
             (item) =>
               !(
                 [...formValue.rPricingRuleCriterias, 1, 2, 3, 4, 5] || []
               ).includes(item.indexValue)
           );
           // console.log(filteredCriteria, "filteredCriteria");
-          const filteredCriteria2 = columnsTableCriteriaAll().filter((item) =>
+          const filteredCriteria2 = columnsTableCriteriaAll(
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            getCriteriaIdByCode(data_select_criteria, "COUNTRY", "id")
+          ).filter((item) =>
             ([...formValue.rPricingRuleCriterias, 1] || []).includes(
               item.indexValue
             )

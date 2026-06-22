@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Modal, Select, Input, Button, Dropdown, Menu, Divider } from "antd";
+import { Modal, Select, Input, Button, Dropdown, Divider } from "antd";
 import {
   PlusOutlined,
   CloseOutlined,
@@ -9,6 +9,12 @@ import {
 import TextArea from "antd/lib/input/TextArea";
 
 const { Option } = Select;
+
+// Monotonic counter for filter row ids. Date.now() collides when two rows are
+// added within the same millisecond, producing duplicate React keys and
+// cross-updating rows.
+let _filterUid = 0;
+const nextFilterId = () => ++_filterUid;
 
 const NxAdvanceSearch = ({
   visible,
@@ -20,7 +26,7 @@ const NxAdvanceSearch = ({
 }) => {
   const [filters, setFilters] = useState([
     {
-      id: Date.now(),
+      id: nextFilterId(),
       column: "",
       operator: "Contains",
       value: "",
@@ -49,8 +55,34 @@ const NxAdvanceSearch = ({
 
   const isNumericOperator = (op) => op === "Greater than" || op === "Less than";
 
-  const renderValueInput = (value, operator, onChange) => {
+  // A column is treated as a date column (real date picker, value emitted as
+  // "YYYY-MM-DD" which the backend parseFilterDate understands) when either:
+  //  - its definition opts in explicitly via isDate / filterType: "date", or
+  //  - its key matches a date suffix as a whole word.
+  // The previous `includes("date")` over-matched keys like "update"/"mandate".
+  const isDateColumn = (columnKey) => {
+    if (typeof columnKey !== "string") return false;
+    const col = filterableColumns.find(
+      (c, i) => getColumnKey(c, i) === columnKey
+    );
+    if (col && (col.isDate || col.filterType === "date")) return true;
+    return /(^|_)date$|Date$/.test(columnKey);
+  };
+
+  const renderValueInput = (value, operator, onChange, columnKey) => {
     if (operator === "Is empty" || operator === "Is not empty") return null;
+    if (isDateColumn(columnKey)) {
+      return (
+        <Input
+          placeholder="Select Date"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          type="date"
+          size="large"
+          style={{ borderRadius: 8 }}
+        />
+      );
+    }
     if (isNumericOperator(operator)) {
       return (
         <Input
@@ -77,7 +109,7 @@ const NxAdvanceSearch = ({
   // Add new filter to main group
   const addFilter = () => {
     const newFilter = {
-      id: Date.now(),
+      id: nextFilterId(),
       column: "",
       operator: "Contains",
       value: "",
@@ -105,10 +137,10 @@ const NxAdvanceSearch = ({
     setFilterRules([
       ...filterRules,
       {
-        id: Date.now(),
+        id: nextFilterId(),
         filters: [
           {
-            id: Date.now() + 1,
+            id: nextFilterId(),
             column: "",
             operator: "Contains",
             value: "",
@@ -130,7 +162,7 @@ const NxAdvanceSearch = ({
               filters: [
                 ...rule.filters,
                 {
-                  id: Date.now(),
+                  id: nextFilterId(),
                   column: "",
                   operator: "Contains",
                   value: "",
@@ -159,6 +191,17 @@ const NxAdvanceSearch = ({
     );
   };
 
+  // Remove filter within a rule group
+  const removeRuleFilter = (ruleId, filterId) => {
+    setFilterRules(
+      filterRules.map((rule) =>
+        rule.id === ruleId
+          ? { ...rule, filters: rule.filters.filter((f) => f.id !== filterId) }
+          : rule
+      )
+    );
+  };
+
   // Update rule group logic
   const updateRuleLogic = (ruleId, logic) => {
     setFilterRules(
@@ -175,9 +218,16 @@ const NxAdvanceSearch = ({
 
   // Handle search
   const handleSearch = () => {
+    // Backend (FilterDTO) membaca field "condition" untuk konektor AND/OR antar-filter,
+    // sedangkan UI menyimpannya di "logic". Tanpa pemetaan ini, condition selalu null
+    // dan semua konektor diperlakukan sebagai AND.
+    const withCondition = (f) => ({ ...f, condition: f.logic });
     const searchData = {
-      filters: filters,
-      filterRules: filterRules,
+      filters: filters.map(withCondition),
+      filterRules: filterRules.map((rule) => ({
+        ...rule,
+        filters: rule.filters.map(withCondition),
+      })),
       limitData: limitData,
     };
     onSearch?.(searchData);
@@ -187,7 +237,7 @@ const NxAdvanceSearch = ({
   const handleClear = () => {
     setFilters([
       {
-        id: Date.now(),
+        id: nextFilterId(),
         column: "",
         operator: "Contains",
         value: "",
@@ -200,17 +250,18 @@ const NxAdvanceSearch = ({
     onClose?.();
   };
 
-  // Logic dropdown menu
-  const getLogicMenu = (currentLogic, onChange) => (
-    <Menu
-      selectedKeys={[currentLogic]}
-      onClick={({ key }) => onChange(key)}
-      style={{ minWidth: 30 }}
-    >
-      <Menu.Item key="AND">AND</Menu.Item>
-      <Menu.Item key="OR">OR</Menu.Item>
-    </Menu>
-  );
+  // Logic dropdown menu config (antd v4's Dropdown `menu` prop expects a plain
+  // config object with `items`, not a <Menu> element, or it crashes with
+  // "React.Children.only expected to receive a single React element child")
+  const getLogicMenu = (currentLogic, onChange) => ({
+    selectedKeys: [currentLogic],
+    onClick: ({ key }) => onChange(key),
+    style: { minWidth: 30 },
+    items: [
+      { key: "AND", label: "AND" },
+      { key: "OR", label: "OR" },
+    ],
+  });
 
   return (
     <Modal
@@ -275,7 +326,8 @@ const NxAdvanceSearch = ({
                 {renderValueInput(
                   filters[0]?.value,
                   filters[0]?.operator,
-                  (val) => updateFilter(filters[0].id, "value", val)
+                  (val) => updateFilter(filters[0].id, "value", val),
+                  filters[0]?.column
                 )}
               </div>
             )}
@@ -336,13 +388,23 @@ const NxAdvanceSearch = ({
                       </Option>
                     ))}
                   </Select>
+
+                  <Button
+                    danger
+                    type="text"
+                    icon={<CloseOutlined />}
+                    onClick={() => removeFilter(filter.id)}
+                    title="Remove this filter"
+                    style={{ height: 40 }}
+                  />
                 </div>
 
                 {filter.operator !== "Is empty" && filter.operator !== "Is not empty" && (
                   renderValueInput(
                     filter.value,
                     filter.operator,
-                    (val) => updateFilter(filter.id, "value", val)
+                    (val) => updateFilter(filter.id, "value", val),
+                    filter.column
                   )
                 )}
               </div>
@@ -372,7 +434,7 @@ const NxAdvanceSearch = ({
         {filterRules.map((rule, ruleIndex) => (
           <div key={rule.id} className="flex flex-col gap-5 px-5 border-t ">
             <div className="flex gap-5">
-              <div className="mb-4">
+              <div className="mb-4 flex flex-col items-center gap-2">
                 <Dropdown
                   menu={getLogicMenu(rule.groupLogic, (logic) =>
                     updateRuleLogic(rule.id, logic)
@@ -389,6 +451,16 @@ const NxAdvanceSearch = ({
                     {rule.groupLogic} <DownOutlined />
                   </Button>
                 </Dropdown>
+                <Button
+                  danger
+                  type="text"
+                  icon={<CloseOutlined />}
+                  onClick={() => removeRuleGroup(rule.id)}
+                  title="Remove this filter group"
+                  style={{ fontSize: 13 }}
+                >
+                  Remove Group
+                </Button>
               </div>
 
               <div className="flex flex-col w-full">
@@ -455,13 +527,25 @@ const NxAdvanceSearch = ({
                           </Option>
                         ))}
                       </Select>
+
+                      {rule.filters.length > 1 && (
+                        <Button
+                          danger
+                          type="text"
+                          icon={<CloseOutlined />}
+                          onClick={() => removeRuleFilter(rule.id, filter.id)}
+                          title="Remove this filter"
+                          style={{ height: 40 }}
+                        />
+                      )}
                     </div>
 
                     {filter.operator !== "Is empty" && filter.operator !== "Is not empty" && (
                       renderValueInput(
                         filter.value,
                         filter.operator,
-                        (val) => updateRuleFilter(rule.id, filter.id, "value", val)
+                        (val) => updateRuleFilter(rule.id, filter.id, "value", val),
+                        filter.column
                       )
                     )}
                   </div>

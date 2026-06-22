@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import FunctionalCriteriaProduct from "../../UtilsProduct/FunctionalCriteriaProduct";
 import { columnsTableCriteriaPromo } from "../Table/TableCriteriaPromo";
 import ConditionPromo from "../Form/ConditionsPromo";
@@ -11,10 +12,28 @@ import NxTabs from "../../../../../components/Nx/NxTabs";
 import AttachmentComponent from "../../../../../components/Attachment/AttachmentComponent";
 import productPromoHttpService from "../../../../../redux/services/productPromoHttpService";
 import { configApp } from "../../../../../constants/configApp";
+import { getListCriteriaPromo } from "../../../../../redux/slices/product_promo/promoSlice";
+import { getCriteriaIdByCode } from "../../UtilsProduct/UtilsAllProduct";
 
 const PromoDiscountDetailPages = ({ detail, attachments = [] }) => {
   const [activeKey, setActiveKey] = useState(0);
   const [childActiveKey, setChildActiveKey] = useState(0);
+
+  const dispatch = useDispatch();
+  const { dataListCriteria } = useSelector((state) => state.promo);
+
+  useEffect(() => {
+    dispatch(getListCriteriaPromo());
+  }, [dispatch]);
+
+  const countryCriteriaId = getCriteriaIdByCode(
+    (dataListCriteria || []).map((criteria) => ({
+      name: criteria.text,
+      value: criteria.id,
+      code: criteria.code,
+    })),
+    "COUNTRY"
+  );
 
   const handleStatusCase = (index) => {
     let text;
@@ -50,7 +69,8 @@ const PromoDiscountDetailPages = ({ detail, attachments = [] }) => {
               searchText,
               handleSearch,
               search,
-              storedData
+              storedData,
+              countryCriteriaId
             )
           }
           fixedColumn={[
