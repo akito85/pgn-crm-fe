@@ -517,6 +517,7 @@ const TermOfServiceView = () => {
           <NxTable
             idTable="tos-table"
             userId={dataUser?.data?.username}
+            showRefresh={true}
             dataSource={dataSource}
             totalData={totalElement}
             current={page}

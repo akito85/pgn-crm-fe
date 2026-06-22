@@ -454,6 +454,7 @@ const ProductClassView = () => {
           <NxTable
             idTable="product-class-table"
             userId={dataUser?.data?.username}
+            showRefresh={true}
             dataSource={dataSource}
             totalData={totalElement}
             current={page}

@@ -89,6 +89,7 @@ const PromoDiscountTable = ({
       <NxTable
         idTable="promo-discount-table"
         userId={dataUser?.data?.username}
+        showRefresh={true}
         dataSource={data}
         totalData={totalElement}
         current={page}

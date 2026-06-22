@@ -250,6 +250,7 @@ const PricingTable = () => {
         <NxTable
           idTable="pricing-table"
           userId={dataUser?.data?.username}
+          showRefresh={true}
           dataSource={dataSource}
           totalData={totalElement}
           current={page}

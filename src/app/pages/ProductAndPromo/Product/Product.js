@@ -857,6 +857,7 @@ const Product = () => {
           <NxTable
             idTable="product-table"
             userId={dataUser?.data?.username}
+            showRefresh={true}
             dataSource={dataSource}
             totalData={totalElement}
             current={page}
