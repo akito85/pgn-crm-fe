@@ -53,6 +53,8 @@ const PricingRuleView = () => {
     data_approval_history,
   } = useSelector((state) => state.pricingRule);
 
+  const { data: dataUser = {} } = useSelector((state) => state.profile);
+
   // Declaration
   const dispatch = useDispatch();
   const searchInput = useRef(null);
@@ -174,12 +176,14 @@ const PricingRuleView = () => {
   const columns = [
     {
       title: "NO",
+      key: "no",
       align: "center",
       width: 60,
       render: (text, object, index) => index + 1,
     },
     {
       title: "PRICING RULE NAME",
+      key: "name",
       dataIndex: "name",
       sorter: true,
       ellipsis: {
@@ -210,6 +214,7 @@ const PricingRuleView = () => {
       dataIndex: "startDate",
       align: "center",
       sorter: true,
+      key: "startDate",
       ...getColumnSearchPropsUseFilteredValue(
         search,
         "startDate",
@@ -235,6 +240,7 @@ const PricingRuleView = () => {
       dataIndex: "endDate",
       align: "center",
       sorter: true,
+      key: "endDate",
       ...getColumnSearchPropsUseFilteredValue(
         search,
         "endDate",
@@ -260,6 +266,7 @@ const PricingRuleView = () => {
       dataIndex: "description",
       align: "left",
       sorter: true,
+      key: "description",
       ellipsis: {
         showTitle: false,
       },
@@ -286,6 +293,7 @@ const PricingRuleView = () => {
     {
       title: "STATUS",
       dataIndex: "status",
+      key: "status",
       fixed: "right",
       width: 160,
       sorter: true,
@@ -312,6 +320,7 @@ const PricingRuleView = () => {
     {
       title: "STATUS APPROVAL",
       dataIndex: "approvalStatus",
+      key: "approvalStatus",
       fixed: "right",
       width: 240,
       sorter: true,
@@ -611,6 +620,8 @@ const PricingRuleView = () => {
           <Toolbar items={itemsActionView} type="page" />
           <NxTable
             idTable="pricing-rule-table"
+            userId={dataUser?.data?.username}
+            showRefresh={true}
             dataSource={dataSource}
             totalData={totalElement}
             current={page}

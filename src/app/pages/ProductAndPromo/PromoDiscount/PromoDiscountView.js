@@ -241,7 +241,7 @@ const PromoDiscountView = () => {
       <Spin spinning={loading}>
         <div className="flex flex-col gap-y-4">
           <NxBreadCrumb routes={routes} />
-          <NxCardContainer header={"PROMO LIST"}>
+          <NxCardContainer header={"PRODUCT DISCOUNT"}>
             <NxBaseContainer border>
               <PromoDiscountTable
                 data={dataSourceWithKeys}

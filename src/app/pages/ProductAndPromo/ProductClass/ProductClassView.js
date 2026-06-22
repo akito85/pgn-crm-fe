@@ -48,6 +48,8 @@ const ProductClassView = () => {
     data_detail,
   } = useSelector((state) => state.productClass);
 
+  const { data: dataUser = {} } = useSelector((state) => state.profile);
+
   // Declaration
   const dispatch = useDispatch();
   const searchInput = useRef(null);
@@ -206,6 +208,7 @@ const ProductClassView = () => {
   const columns = [
     {
       title: "NO",
+      key: "no",
       align: "center",
       width: 60,
       render: (text, object, index) => index + 1,
@@ -241,6 +244,7 @@ const ProductClassView = () => {
     {
       sorter: true,
       title: "DESCRIPTION",
+      key: "description",
       dataIndex: "description",
       ellipsis: {
         showTitle: false,
@@ -268,6 +272,7 @@ const ProductClassView = () => {
     {
       sorter: true,
       title: "STATUS",
+      key: "status",
       dataIndex: "status",
       fixed: "right",
       width: 160,
@@ -448,6 +453,8 @@ const ProductClassView = () => {
           <Toolbar items={itemsActionView} type="page" />
           <NxTable
             idTable="product-class-table"
+            userId={dataUser?.data?.username}
+            showRefresh={true}
             dataSource={dataSource}
             totalData={totalElement}
             current={page}
