@@ -14,6 +14,7 @@ import CardComponent from "../../../../../components/Card/CardComponent";
 import DetailText from "../../../../../components/DetailText";
 import moment from "moment";
 import { dateFormatting } from "../../../../../utils";
+import NxTable from "../../../../../components/Nx/NxTable";
 
 function filterData(array, filters) {
   return array.filter((item) => {
@@ -56,6 +57,7 @@ const Detail = ({
 }) => {
   // Selector
   const { data_price_code } = useSelector((state) => state.pricingRule);
+  const { data: dataUser = {} } = useSelector((state) => state.profile);
 
   // Declaration
   const searchInput = useRef(null);
@@ -512,8 +514,12 @@ const Detail = ({
       ) : null}
 
       <div className="w-full">
-        <TablePagination
+        <NxTable
+          idTable="table-pricing-rule-detail"
+          userId={dataUser?.data?.username}
           dataSource={dataTable}
+          usePagination={false}
+          useInfiniteScroll={true}
           totalData={totalElement}
           current={page}
           pageSize={pageSize}

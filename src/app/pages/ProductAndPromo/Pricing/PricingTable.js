@@ -142,16 +142,8 @@ const PricingTable = () => {
   };
 
   const handleDownload = useCallback(() => {
-    dispatch(downloadPricing({
-      page: 0,
-      pageSize: PAGE_SIZE,
-      sort,
-      search,
-      searchText,
-      filters,
-      filterRules,
-    }));
-  }, [dispatch, sort, search, searchText, filters, filterRules]);
+    dispatch(downloadPricing({ ...buildBody(0) }));
+  }, [dispatch, buildBody]);
 
   const handleApprovalHistory = (data) => {
     dispatch(getApprovalHistory(data.id));
