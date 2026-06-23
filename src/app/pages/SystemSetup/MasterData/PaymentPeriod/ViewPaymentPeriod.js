@@ -67,7 +67,10 @@ const ViewPaymentPeriod = () => {
     }, [dispatch, id]);
 
     const detail = data_detail?.paymentPeriodDetail || {};
-    const attachments = data_detail?.attachmentList || [];
+    const attachments = (data_detail?.attachmentList || []).map((item) => ({
+        ...item,
+        dataType: "exist",
+    }));
 
 
     // Breadcrumbs
