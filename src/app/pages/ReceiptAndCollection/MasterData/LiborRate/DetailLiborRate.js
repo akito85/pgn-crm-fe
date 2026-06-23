@@ -30,13 +30,19 @@ const DetailLiborRate = (props) => {
 
   const isEditable = ((rateSource.id === null || rateSource.id === 0) || (rateIndex.status === "Draft" || rateIndex.status === "Rejected")) && rateIndex.approvalStatus !== "Waiting Approval";
 
-  const sourceOptions = (dataListRateSource || []).map(item => ({
-    label: `${item.sourceName}`,
-    value: item.id,
-    ...item
-  }));
+  const sourceOptions = React.useMemo(() => {
+    let list = [...(dataListRateSource || [])];
+    if (rateSource.id && !list.find(item => item.id === rateSource.id)) {
+        list.push(rateSource);
+    }
+    return list.map(item => ({
+      label: `${item.sourceName}`,
+      value: item.id,
+      ...item
+    }));
+  }, [dataListRateSource, rateSource]);
 
-  const currentSource = (dataListRateSource || []).find(item => item.id === selectedSource) || rateSource;
+  const currentSource = sourceOptions.find(item => item.id === selectedSource) || rateSource;
 
   return (
     <div className="flex flex-col gap-0 p-5">
