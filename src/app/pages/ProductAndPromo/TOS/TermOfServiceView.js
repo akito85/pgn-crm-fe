@@ -307,12 +307,7 @@ const TermOfServiceView = () => {
   // Handle Download
   const handleDownload = () => {
     dispatch(
-      downloadTOS({
-        search: encodeURIComponent(JSON.stringify(search)),
-        page: 0,
-        pageSize: PAGE_SIZE,
-        sort,
-      })
+      downloadTOS({ ...buildBody(0) })
     );
   };
 

@@ -822,13 +822,19 @@ export const getCustomerList = createAsyncThunk(
 
 export const downloadPricingRule = createAsyncThunk(
   "DOWNLOAD_PRICING_RULE",
-  async ({ search, page, pageSize, sort }, thunkAPI) => {
+  async ({ page, pageSize, sort, search, searchText, filters = [], filterRules = [] }, thunkAPI) => {
     try {
-      const searchParams = search === undefined ? "" : search;
-      const sortParams =
-        sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      const url = `/v1/dbs/api/pricingRule/downloadFilter?page=${page}&size=${pageSize}&search=${searchParams}&sort=${sortParams}`;
-      const response = await productPromoHttpService.downloadData(url);
+      const url = `/v1/dbs/api/pricingRule/downloadFilter`;
+      const body = {
+        page,
+        size: pageSize,
+        sort: sort || "createdDate~desc",
+        search: searchText || null,
+        searchs: search || {},
+        filters,
+        filterRules,
+      };
+      const response = await productPromoHttpService.downloadDataPost(url, body);
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(

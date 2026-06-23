@@ -354,17 +354,7 @@ const PricingRuleView = () => {
 
   // Handle Download
   const handleDownload = () => {
-    let tempSearch = "";
-    for (const dataIndex in search) {
-      if (Object.hasOwnProperty.call(search, dataIndex)) {
-        const tempSearchText = search[dataIndex];
-        if (tempSearchText) {
-          tempSearch += `${dataIndex}~${tempSearchText},`;
-        }
-      }
-    }
-    tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
-    dispatch(downloadPricingRule({ search: tempSearch, page: 0, pageSize: PAGE_SIZE, sort }));
+    dispatch(downloadPricingRule({ ...buildBody(0) }));
   };
 
   // Handle Cancel Modal Confirmation Inactive

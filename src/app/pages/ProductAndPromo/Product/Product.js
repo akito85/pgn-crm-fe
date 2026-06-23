@@ -801,12 +801,7 @@ const Product = () => {
 
   const handleDownload = () => {
     dispatch(
-      downloadProduct({
-        page: 0,
-        pageSize: PAGE_SIZE,
-        search: encodeURIComponent(JSON.stringify(search)),
-        sort,
-      })
+      downloadProduct({ ...buildBody(0) })
     );
   };
 

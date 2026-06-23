@@ -156,18 +156,8 @@ const ProductClassView = () => {
 
   // Handle Download
   const handleDownload = () => {
-    let tempSearch = "";
-    for (const dataIndex in search) {
-      if (Object.hasOwnProperty.call(search, dataIndex)) {
-        const tempSearchText = search[dataIndex];
-        if (tempSearchText) {
-          tempSearch += `${dataIndex}~${tempSearchText},`;
-        }
-      }
-    }
-    tempSearch = tempSearch ? tempSearch.slice(0, -1) : "";
     dispatch(
-      downloadProductClass({ search: tempSearch, page: 0, pageSize: PAGE_SIZE, sort })
+      downloadProductClass({ ...buildBody(0) })
     );
   };
 
