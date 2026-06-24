@@ -4,7 +4,7 @@ import CardContainer from "../../../../../components/CardContainer";
 import SVGIcon from "../../../../../assets/Icon/index";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import TableRBI from "../../../../../components/TableRBI";
-import { EyeOutlined, DownloadOutlined } from "@ant-design/icons";
+import { DownloadOutlined } from "@ant-design/icons";
 import { renderColumn } from "../../../../../utils";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import { RECEIPT_AND_COLLECTION_ROUTES } from "../../../../../routes/Receipt&Collection/rc_routes";
@@ -35,7 +35,8 @@ const ViewLiborRate = () => {
   const dispatch = useDispatch();
   const searchInput = useRef(null);
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const initialPageSize = 100;
+  const loadMoreSize = 20;
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const [search, setSearch] = useState({});
@@ -54,20 +55,60 @@ const ViewLiborRate = () => {
   const [selectedSource, setSelectedSource] = useState(null);
   // const rateIndexRef = useRef(null);
 
-  const handleFetch = useCallback(() => {
-    dispatch(
-      getPaginateRateIndex({
-        page,
-        pageSize,
-        sort,
-        search: encodeURIComponent(JSON.stringify(search)),
-      })
-    );
-  }, [dispatch, page, pageSize, search, sort]);
+  const [allData, setAllData] = useState([]);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const shouldResetRef = useRef(true);
+
+  const hasMore = allData.length < (data?.page?.totalElements || 0);
 
   useEffect(() => {
-    handleFetch();
-  }, [handleFetch]);
+    dispatch(
+      getPaginateRateIndex({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page: 1,
+        pageSize: initialPageSize,
+        sort,
+      })
+    );
+  }, [search, sort, dispatch, refreshKey]);
+
+  useEffect(() => {
+    if (data?.result) {
+      if (shouldResetRef.current || page === 1) {
+        setAllData(data.result);
+        shouldResetRef.current = false;
+      } else {
+        setAllData((prev) => {
+          const ids = new Set(prev.map((item) => item.id));
+          const newItems = data.result.filter((item) => !ids.has(item.id));
+          return [...prev, ...newItems];
+        });
+      }
+    }
+  }, [data, page]);
+
+  const handleRefresh = useCallback(() => {
+    shouldResetRef.current = true;
+    if (page === 1) {
+      setRefreshKey((prev) => prev + 1);
+    } else {
+      setPage(1);
+    }
+  }, [page]);
+
+  const handleLoadMore = useCallback(async () => {
+    if (allData.length >= (data?.page?.totalElements || 0)) return;
+    const nextPage = Math.floor(allData.length / loadMoreSize) + 1;
+    setPage(nextPage);
+    await dispatch(
+      getPaginateRateIndex({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page: nextPage,
+        pageSize: loadMoreSize,
+        sort,
+      })
+    );
+  }, [allData.length, data?.page?.totalElements, search, sort, dispatch, loadMoreSize]);
 
   const routes = [
     {
@@ -93,14 +134,26 @@ const ViewLiborRate = () => {
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
+    shouldResetRef.current = true;
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
-    setSearch((prevState) => ({ ...prevState, [dataIndex]: selectedKeys[0] }));
+    setSearch((prevState) => {
+      if (prevState[dataIndex] !== selectedKeys[0]) {
+        setPage(1);
+      }
+      return { ...prevState, [dataIndex]: selectedKeys[0] };
+    });
   };
 
-  const handleChange = (page, pageSize) => {
-    setPage(page);
-    setPageSize(pageSize);
+  const handleChange = (pageChange) => {
+    setPage(pageChange);
+  };
+
+  const onSort = (s) => {
+    const dataSort = s.order ? `${s.field}~${s.order === "ascend" ? "asc" : "desc"}` : "";
+    shouldResetRef.current = true;
+    setPage(1);
+    setSort(dataSort);
   };
 
   useEffect(() => {
@@ -136,7 +189,7 @@ const ViewLiborRate = () => {
       width: 60,
       key: "no",
       align: "center",
-      render: (text, object, index) => (page - 1) * pageSize + index + 1,
+      render: (text, object, index) => index + 1,
     },
     {
       title: "CODE",
@@ -254,7 +307,7 @@ const ViewLiborRate = () => {
   ];
 
   const handleDownload = () => {
-    dispatch(getDownloadRateIndex({ search: encodeURIComponent(JSON.stringify(search)), page, pageSize, sort }));
+    dispatch(getDownloadRateIndex({ search: encodeURIComponent(JSON.stringify(search)), page: 1, pageSize: initialPageSize, sort }));
   };
 
   const handleInactive = (r) => {
@@ -265,12 +318,21 @@ const ViewLiborRate = () => {
   };
 
   const handleSubmitModalInactivate = (res, handleClear) => {
-    const body = { id, appHierId: res.approvalHierarchy, status: status === "Inactive" ? "Active" : "Inactive", remark: res.remark };
-    setBody({ body });
-    dispatch(activeInactiveRateIndex({ body })).unwrap().then(() => {
+    const bodyPayload = { id, appHierId: res.approvalHierarchy, status: status === "Inactive" ? "Active" : "Inactive", remark: res.remark };
+    setBody({ body: bodyPayload });
+    dispatch(activeInactiveRateIndex({ body: bodyPayload })).unwrap().then(() => {
       handleClear();
       setOpenModalInactivate(false);
-      handleFetch();
+      shouldResetRef.current = true;
+      setPage(1);
+      dispatch(
+        getPaginateRateIndex({
+          search: encodeURIComponent(JSON.stringify(search)),
+          page: 1,
+          pageSize: initialPageSize,
+          sort,
+        })
+      );
     });
   };
 
@@ -332,7 +394,9 @@ const ViewLiborRate = () => {
       render: (record) => (
         <Tooltip title={"Detail"}>
           <Link to={RECEIPT_AND_COLLECTION_ROUTES.DETAIL_LIBOR_RATE} state={{ id: record?.id }}>
-            <EyeOutlined style={{ color: "#1890ff", fontSize: "18px" }} />
+            <div className="pt-0">
+              <SVGIcon name="IconDetail" width={20} />
+            </div>
           </Link>
         </Tooltip>
       ),
@@ -435,7 +499,7 @@ const ViewLiborRate = () => {
   ];
 
   const handleRetry = () => {
-    handleFetch();
+    handleRefresh();
   };
 
   const { renderModal } = useTryAgainHooks(handleRetry);
@@ -455,14 +519,14 @@ const ViewLiborRate = () => {
           <TableRBI
             showExport={true}
             handleDownload={handleDownload}
-            dataSource={data?.result}
-            pageSize={pageSize}
+            dataSource={allData}
+            pageSize={initialPageSize}
             columns={[...columns, ...useColumnActionPermission(["view", "history", "update", 'activate'], itemActions)]}
             current={page}
             onChange={handleChange}
             onSizeChanger={handleChange}
             totalData={data?.page?.totalElements}
-            onSort={(s) => setSort(s.order ? `${s.field}~${s.order === "ascend" ? "asc" : "desc"}` : "")}
+            onSort={onSort}
             tableScrolled={{ x: "max-content", y: 525 }}
             fixedColumns={fixedColumns}
             setFixedColumns={setFixedColumns}
@@ -471,6 +535,13 @@ const ViewLiborRate = () => {
             onRowClick={(record) => {
               setSelectedSource(record);
             }}
+            useInfiniteScroll={true}
+            usePagination={false}
+            onLoadMore={handleLoadMore}
+            hasMore={hasMore}
+            showRefresh={true}
+            onRefresh={handleRefresh}
+            refreshLabel="Refresh"
           />
         </CardContainer>
 
