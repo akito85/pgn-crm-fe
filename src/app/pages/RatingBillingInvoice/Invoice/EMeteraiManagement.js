@@ -17,8 +17,8 @@ import ModalApprovalEMeterai from "./_components/ModalApprovalEMeterai";
 import { getEMeteraiColumns } from "./_components/EMeteraiColumns";
 import {
   getAllEMeteraiInvoices,
-  createStampingRequest,
-  createSigningRequest,
+  requestStampingDigital,
+  requestSigningDigital,
   uploadManualStamping,
   uploadManualSigning,
   getApprovalHistory,
@@ -247,34 +247,30 @@ const EMeteraiManagement = () => {
 
   // Handle stamping submission
   const handleStampingSubmit = async (submissionData) => {
+    console.log("Submitting Stamping Data:", submissionData);
     try {
       if (submissionData.stampingMethod === "e-stamping") {
-        const payload = {
-          invoiceNumbers: [submissionData.invoiceNumber],
-          remark: submissionData.remark || "E-Meterai stamping request",
-        };
-
-        await dispatch(createStampingRequest(payload)).unwrap();
+        await dispatch(
+          requestStampingDigital({
+            invoiceNumber: submissionData.invoiceNumber,
+            id: submissionData.id,
+            remarks: submissionData.remarks,
+          }),
+        ).unwrap();
       } else if (submissionData.stampingMethod === "manual") {
-        const payload = {
-          invoiceNumber: submissionData.invoiceNumber,
-          file: submissionData.files?.[0] || submissionData.file,
-          remark: submissionData.remark,
-          apphierId: submissionData.apphierId,
-        };
-
-        await dispatch(uploadManualStamping(payload)).unwrap();
+        await dispatch(
+          uploadManualStamping({
+            invoiceNumber: submissionData.invoiceNumber,
+            file: submissionData.files?.[0] || submissionData.file,
+            remark: submissionData.remark,
+            apphierId: submissionData.apphierId,
+          }),
+        ).unwrap();
       }
 
       setStampingModalVisible(false);
       setSelectedInvoice(null);
       fetchInvoices();
-
-      message.success(
-        submissionData.stampingMethod === "e-stamping"
-          ? "E-Stamping process submitted successfully!"
-          : "Manual stamping uploaded successfully!",
-      );
     } catch (error) {
       console.error("❌ Stamping Submission Error:", error);
     }
@@ -282,16 +278,23 @@ const EMeteraiManagement = () => {
 
   // Handle signing submission
   const handleSigningSubmit = async (signingData) => {
-    const { invoiceNumber, signingMethod, file, remark, apphierId } =
-      signingData;
+    const {
+      invoiceNumber,
+      signingMethod,
+      file,
+      remark,
+      apphierId,
+      id,
+      remarks,
+    } = signingData;
 
     try {
       if (signingMethod === "digital") {
         await dispatch(
-          createSigningRequest({
-            invoiceNumbers: [invoiceNumber],
-            remark: remark || "E-Sign request",
-            apphierId,
+          requestSigningDigital({
+            invoiceNumber,
+            id,
+            remarks,
           }),
         ).unwrap();
       } else if (signingMethod === "manual") {
@@ -313,15 +316,6 @@ const EMeteraiManagement = () => {
     }
   };
 
-  // Sort Handler
-  const onSort = (_, __, sorter) => {
-    const dataSort =
-      sorter && sorter.order !== undefined
-        ? `${sorter.field}~${sorter.order === "ascend" ? "asc" : "desc"}`
-        : "billingPeriod~desc";
-    setSort(dataSort);
-  };
-
   // Bulk Action Handlers
   const handleBulkApproval = () => {
     setModalApproval(true);
@@ -331,11 +325,14 @@ const EMeteraiManagement = () => {
     setModalApproval(false);
   };
 
-  const handleRefreshBtn = () => {
-    fetchInvoices();
+  // Sort Handler
+  const onSort = (_, __, sorter) => {
+    const dataSort =
+      sorter && sorter.order !== undefined
+        ? `${sorter.field}~${sorter.order === "ascend" ? "asc" : "desc"}`
+        : "billingPeriod~desc";
+    setSort(dataSort);
   };
-
-  // const transformedData = getTransformedData();
 
   const itemGrantAccess = [
     {
@@ -439,7 +436,7 @@ const EMeteraiManagement = () => {
         handleClose={closeModalApproval}
         onSuccess={() => {
           closeModalApproval();
-          handleRefreshBtn();
+          fetchInvoices();
         }}
       />
 

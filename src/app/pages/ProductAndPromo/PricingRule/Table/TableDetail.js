@@ -93,6 +93,7 @@ export const columnsDetail = (
 ) => [
   {
     title: "NO",
+    key: "no",
     width: 60,
     align: "center",
     render: (value, row, index) => {
@@ -108,6 +109,7 @@ export const columnsDetail = (
   },
   {
     title: "MINIMUM",
+    key: "min",
     dataIndex: "min",
     sorter: true,
     align: "right",
@@ -144,6 +146,7 @@ export const columnsDetail = (
   },
   {
     title: "MAXIMUM",
+    key: "maximum",
     dataIndex: "maximumName",
     sorter: true,
     align: "right",
@@ -181,6 +184,7 @@ export const columnsDetail = (
   {
     title: "PRICE CODE",
     dataIndex: "priceCodeName",
+    key: "priceCodeName",
     sorter: true,
     align: "left",
     filteredValue: search?.["priceCodeName"]
@@ -215,6 +219,7 @@ export const columnsDetail = (
   },
   {
     title: "PRICE DETAIL",
+    key: "priceDetail",
     children: [
       {
         title: "VALUE",
@@ -259,6 +264,7 @@ export const columnsDetail = (
   },
   {
     title: "DESCRIPTION",
+    key: "description",
     dataIndex: "description",
     sorter: true,
     align: "left",
@@ -298,6 +304,7 @@ export const columnsDetail = (
   },
   {
     title: "ACTION",
+    key: "action",
     fixed: "right",
     align: "center",
     width: 110,

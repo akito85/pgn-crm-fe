@@ -11,8 +11,8 @@ import {
   Steps,
   Input,
   Select,
-  Spin,
   Table,
+  Spin,
 } from "antd";
 import {
   CloseOutlined,
@@ -27,6 +27,8 @@ import {
   getApprovalHierarchyList,
   getApphierDetail,
 } from "../../../../../redux/slices/rating_billing_invoice/emeterai";
+import InputComponent from "../../../../../components/InputComponent";
+import ButtonComponent from "../../../../../components/ButtonComponent";
 
 const { Dragger } = Upload;
 const { Step } = Steps;
@@ -46,68 +48,62 @@ const StampingRequestModal = ({
   const [stampingMethod, setStampingMethod] = useState("e-stamping");
   const [currentStep, setCurrentStep] = useState(0);
   const [fileList, setFileList] = useState([]);
-  const [remark, setRemark] = useState("");
+
+  // Shared fields for both methods
+  const [remarks, setRemarks] = useState("");
+  const [remarksError, setRemarksError] = useState("");
+
+  // Manual-only fields
   const [selectedApproval, setSelectedApproval] = useState(null);
   const [approvalDetail, setApprovalDetail] = useState([]);
 
   const invoice = React.useMemo(() => {
     if (!invoiceData) {
-      return {
-        invoiceNumber: "-",
-        customer: "-",
-        amount: 0,
-      };
+      return { invoiceNumber: "-", customer: "-", amount: 0, id: null };
     }
     return {
       invoiceNumber: invoiceData.invoiceNumber || "-",
       customer: invoiceData.customer || invoiceData.customerName || "-",
       amount: invoiceData.amount || invoiceData.totalAmountEqvIdr || 0,
+      // id field required by new digital API — sesuai dokumen user pakai recordId
+      id: invoiceData.recordId ?? null,
     };
   }, [invoiceData]);
 
+  // Reset all state when modal opens/closes
   useEffect(() => {
     if (visible) {
       setStampingMethod("e-stamping");
       setFileList([]);
       setCurrentStep(0);
-      setRemark("");
+      setRemarks("");
+      setRemarksError("");
       setSelectedApproval(null);
       setApprovalDetail([]);
     }
-  }, [visible, dispatch]);
+  }, [visible]);
 
+  // Map apphier detail into table-ready data
   useEffect(() => {
     if (data_apphier_detail && Array.isArray(data_apphier_detail)) {
       const data = data_apphier_detail.map((a, index) => ({
         ...a,
         key: index + 1,
         employeeDetail: Array.isArray(a.employeeDetail)
-          ? a.employeeDetail.map((b, idx) => ({
-              ...b,
-              key: idx + 1,
-            }))
+          ? a.employeeDetail.map((b, idx) => ({ ...b, key: idx + 1 }))
           : [],
       }));
-      setApprovalDetail(data || []);
+      setApprovalDetail(data);
     }
   }, [data_apphier_detail]);
-
-  const formatAmount = (amount) => {
-    if (typeof amount === "number") {
-      return `IDR ${new Intl.NumberFormat("id-ID").format(amount)}`;
-    }
-    return amount;
-  };
 
   const handleDownloadFile = async () => {
     try {
       await dispatch(
-        downloadOriginalInvoice({ invoiceNumber: invoice.invoiceNumber })
+        downloadOriginalInvoice({ invoiceNumber: invoice.invoiceNumber }),
       ).unwrap();
-      // Success message already handled in slice
     } catch (error) {
       console.error("❌ Error downloading document:", error);
-      // Error message already handled in slice
     }
   };
 
@@ -115,10 +111,10 @@ const StampingRequestModal = ({
     fileList,
     multiple: true,
     beforeUpload: (file) => {
-      const isPDF = file.type === "application/pdf";
-      const isJPG = file.type === "image/jpeg";
-      const isPNG = file.type === "image/png";
-      const isValidType = isPDF || isJPG || isPNG;
+      const isValidType =
+        file.type === "application/pdf" ||
+        file.type === "image/jpeg" ||
+        file.type === "image/png";
 
       if (!isValidType) {
         message.error("You can only upload PDF/JPG/PNG files!");
@@ -144,33 +140,39 @@ const StampingRequestModal = ({
     },
   };
 
+  // ─── Navigation ────────────────────────────────────────────────────────────
+
   const handleNext = () => {
     if (stampingMethod === "e-stamping") {
-      handleSubmit();
-    } else {
-      // For manual, validate step before going to next
-      if (currentStep === 0) {
-        // Step 0: Select Method - no validation needed, just go to next step
-        setCurrentStep(1);
-      } else if (currentStep === 1) {
-        // Step 1: Attachment - validate file upload and remark
-        if (fileList.length === 0) {
-          message.error("Please upload at least one file!");
-          return;
-        }
-        if (!remark || remark.trim() === "") {
-          message.error("Please provide a remark!");
-          return;
-        }
-        setCurrentStep(2);
-      } else if (currentStep === 2) {
-        // Step 2: Approval - validate approval selection
-        if (!selectedApproval) {
-          message.error("Please select approval hierarchy!");
-          return;
-        }
-        setCurrentStep(3);
+      if (!remarks || remarks.trim() === "") {
+        setRemarksError("Remarks are required for e-stamping.");
+        message.error("Remarks are required for e-stamping!");
+        return;
       }
+      setRemarksError("");
+      handleSubmit();
+      return;
+    }
+
+    // Manual flow validation per step
+    if (currentStep === 0) {
+      setCurrentStep(1);
+    } else if (currentStep === 1) {
+      if (fileList.length === 0) {
+        message.error("Please upload at least one file!");
+        return;
+      }
+      if (!remarks || remarks.trim() === "") {
+        message.error("Please provide a remark!");
+        return;
+      }
+      setCurrentStep(2);
+    } else if (currentStep === 2) {
+      if (!selectedApproval) {
+        message.error("Please select approval hierarchy!");
+        return;
+      }
+      setCurrentStep(3);
     }
   };
 
@@ -185,13 +187,38 @@ const StampingRequestModal = ({
     dispatch(getApphierDetail({ id: value }));
   };
 
+  const handleMethodChange = (e) => {
+    const newMethod = e.target.value;
+    setStampingMethod(newMethod);
+    setFileList([]);
+    setCurrentStep(0);
+    setRemarks("");
+    setSelectedApproval(null);
+    setApprovalDetail([]);
+
+    if (newMethod === "manual") {
+      dispatch(getApprovalHierarchyList());
+    }
+  };
+
+  // ─── Submit ─────────────────────────────────────────────────────────────────
+
   const handleSubmit = async () => {
+    if (stampingMethod === "e-stamping") {
+      if (!remarks || remarks.trim() === "") {
+        setRemarksError("Remarks are required for e-stamping.");
+        message.error("Remarks are required for e-stamping!");
+        return;
+      }
+      setRemarksError("");
+    }
+
     if (stampingMethod === "manual") {
       if (fileList.length === 0) {
         message.error("Please upload at least one file!");
         return;
       }
-      if (!remark || remark.trim() === "") {
+      if (!remarks || remarks.trim() === "") {
         message.error("Please provide a remark!");
         return;
       }
@@ -203,67 +230,48 @@ const StampingRequestModal = ({
 
     try {
       if (onSubmit) {
-        const submissionData = {
-          invoiceNumber: invoice.invoiceNumber,
-          customer: invoice.customer,
-          amount: invoice.amount,
-          stampingMethod: stampingMethod,
-          files:
-            stampingMethod === "manual"
-              ? fileList.map((file) => file.originFileObj || file)
-              : null,
-          remark:
-            stampingMethod === "manual" ? remark : "E-Meterai stamping request",
-          apphierId: stampingMethod === "manual" ? selectedApproval : null,
-          submittedAt: new Date().toISOString(),
-        };
+        const submissionData =
+          stampingMethod === "e-stamping"
+            ? {
+                invoiceNumber: invoice.invoiceNumber,
+                stampingMethod: "e-stamping",
+                id: invoice.id,
+                remarks: remarks.trim(),
+              }
+            : {
+                invoiceNumber: invoice.invoiceNumber,
+                stampingMethod: "manual",
+                files: fileList.map((file) => file.originFileObj || file),
+                remark: remarks,
+                apphierId: selectedApproval,
+                submittedAt: new Date().toISOString(),
+              };
 
         await onSubmit(submissionData);
-      } else {
-        console.warn("⚠️ No onSubmit handler provided, using local simulation");
-        await new Promise((resolve) => setTimeout(resolve, 1500));
-        message.success(
-          stampingMethod === "e-stamping"
-            ? "E-Stamping process submitted successfully!"
-            : "Physical stamp request with approval submitted successfully!"
-        );
-        onClose();
       }
 
-      setStampingMethod("e-stamping");
-      setFileList([]);
-      setCurrentStep(0);
-      setRemark("");
-      setSelectedApproval(null);
-      setApprovalDetail([]);
+      resetForm();
     } catch (error) {
       console.error("❌ Error in handleSubmit:", error);
     }
   };
 
   const handleCancel = () => {
-    setStampingMethod("e-stamping");
-    setFileList([]);
-    setCurrentStep(0);
-    setRemark("");
-    setSelectedApproval(null);
-    setApprovalDetail([]);
+    resetForm();
     onClose();
   };
 
-  const handleMethodChange = (e) => {
-    const newMethod = e.target.value;
-    setStampingMethod(newMethod);
+  const resetForm = () => {
+    setStampingMethod("e-stamping");
     setFileList([]);
     setCurrentStep(0);
-    setRemark("");
+    setRemarks("");
+    setRemarksError("");
     setSelectedApproval(null);
     setApprovalDetail([]);
-
-    if (newMethod === "manual") {
-      dispatch(getApprovalHierarchyList());
-    }
   };
+
+  // ─── Column definitions for approval table ──────────────────────────────────
 
   const columnsApproval = [
     {
@@ -309,103 +317,48 @@ const StampingRequestModal = ({
     },
   ];
 
+  // ─── Step renders ────────────────────────────────────────────────────────────
+
+  // Step 0 — Select method + e-stamping remarks field
   const renderStep1 = () => (
     <>
-      <div style={{ marginBottom: "32px" }}>
-        <div className="flex flex-col w-full gap-2">
+      <div style={{ marginBottom: "15px" }}>
+        <div className="grid grid-cols-2 w-full gap-2">
           <div className="w-full">
-            <label
-              style={{
-                display: "block",
-                marginBottom: "8px",
-                fontSize: "14px",
-                fontWeight: "500",
-                color: "#262626",
-              }}
-            >
-              Invoice:
-            </label>
-            <div
-              style={{
-                padding: "10px 12px",
-                background: "#f5f5f5",
-                border: "1px solid #d9d9d9",
-                borderRadius: "6px",
-                fontSize: "14px",
-                color: "#595959",
-              }}
-            >
-              {invoice.invoiceNumber}
-            </div>
+            <InputComponent
+              label="Invoice Number"
+              value={invoice.invoiceNumber}
+              disabled
+            />
           </div>
 
-          <div></div>
-
-          <div>
-            <label
-              style={{
-                display: "block",
-                marginBottom: "8px",
-                fontSize: "14px",
-                fontWeight: "500",
-                color: "#262626",
-              }}
-            >
-              Customer:
-            </label>
-            <div
-              style={{
-                padding: "10px 12px",
-                background: "#f5f5f5",
-                border: "1px solid #d9d9d9",
-                borderRadius: "6px",
-                fontSize: "14px",
-                color: "#595959",
-              }}
-            >
-              {invoice.customer}
-            </div>
+          <div className="w-full">
+            <InputComponent
+              label="Customer"
+              value={invoice.customer}
+              disabled
+            />
           </div>
 
-          <div></div>
-
-          <div>
-            <label
-              style={{
-                display: "block",
-                marginBottom: "8px",
-                fontSize: "14px",
-                fontWeight: "500",
-                color: "#262626",
-              }}
-            >
-              Total Amount:
-            </label>
-            <div
-              style={{
-                padding: "10px 12px",
-                background: "#f5f5f5",
-                border: "1px solid #d9d9d9",
-                borderRadius: "6px",
-                fontSize: "14px",
-                color: "#595959",
-                fontWeight: "600",
-              }}
-            >
-              {formatAmount(invoice.amount)}
-            </div>
+          <div className="col-span-2 w-full">
+            <InputComponent
+              typeNumber
+              label="Amount"
+              value={invoice.amount}
+              disabled
+            />
           </div>
         </div>
       </div>
 
-      <Divider style={{ margin: "32px 0" }} />
+      <Divider style={{ margin: "15px 0" }} />
 
-      <div style={{ marginBottom: "24px" }}>
+      <div style={{ marginBottom: "15px" }}>
         <label
           style={{
             display: "block",
-            marginBottom: "16px",
-            fontSize: "16px",
+            marginBottom: "15px",
+            fontSize: "14px",
             fontWeight: "600",
             color: "#262626",
           }}
@@ -417,23 +370,10 @@ const StampingRequestModal = ({
           onChange={handleMethodChange}
           style={{ width: "100%" }}
         >
-          <Space direction="vertical" size="large" style={{ width: "100%" }}>
+          <Space direction="vertical" size="small" style={{ width: "100%" }}>
             <Radio
               value="e-stamping"
-              style={{
-                fontSize: "15px",
-                padding: "12px 16px",
-                border: "2px solid #d9d9d9",
-                borderRadius: "8px",
-                width: "100%",
-                display: "flex",
-                alignItems: "center",
-                backgroundColor:
-                  stampingMethod === "e-stamping" ? "#e6f7ff" : "#ffffff",
-                borderColor:
-                  stampingMethod === "e-stamping" ? "#1890ff" : "#d9d9d9",
-                transition: "all 0.3s",
-              }}
+              style={radioStyle(stampingMethod === "e-stamping")}
             >
               <span style={{ fontWeight: "500" }}>
                 E-Stamping (Digital via PJAP)
@@ -441,20 +381,7 @@ const StampingRequestModal = ({
             </Radio>
             <Radio
               value="manual"
-              style={{
-                fontSize: "15px",
-                padding: "12px 16px",
-                border: "2px solid #d9d9d9",
-                borderRadius: "8px",
-                width: "100%",
-                display: "flex",
-                alignItems: "center",
-                backgroundColor:
-                  stampingMethod === "manual" ? "#e6f7ff" : "#ffffff",
-                borderColor:
-                  stampingMethod === "manual" ? "#1890ff" : "#d9d9d9",
-                transition: "all 0.3s",
-              }}
+              style={radioStyle(stampingMethod === "manual")}
             >
               <span style={{ fontWeight: "500" }}>Manual (Physical Stamp)</span>
             </Radio>
@@ -462,40 +389,75 @@ const StampingRequestModal = ({
         </Radio.Group>
       </div>
 
-      {stampingMethod === "e-stamping" && (
-        <div className="flex gap-3 bg-[#F5F5F5] p-3 rounded-[10px]">
-          <InfoCircleFilled
-            style={{ paddingTop: "2px", color: "#0175BF", fontSize: "20px" }}
-          />
-          <div className="flex flex-col">
-            <p style={{ fontWeight: 600 }}>E-Stamping Process</p>
-            <p>
-              Your invoice will be automatically stamped digitally through PJAP
-              (Penyedia Jasa Aplikasi Perpajakan) system. This process typically
-              takes 1-2 business days.
-            </p>
-          </div>
+      {/* Info banner */}
+      <div
+        className="flex gap-3 bg-[#F5F5F5] p-3 rounded-[10px]"
+        style={{ marginBottom: "15px" }}
+      >
+        <InfoCircleFilled
+          style={{ paddingTop: "2px", color: "#0175BF", fontSize: "16px" }}
+        />
+        <div className="flex flex-col">
+          {stampingMethod === "e-stamping" ? (
+            <>
+              <p style={{ fontWeight: 600, fontSize: "13px" }}>
+                E-Stamping Process
+              </p>
+              <p style={{ fontSize: "13px" }}>
+                Your invoice will be automatically stamped digitally through
+                PJAP (Penyedia Jasa Aplikasi Perpajakan) system. This process
+                typically takes 1-2 business days.
+              </p>
+            </>
+          ) : (
+            <>
+              <p style={{ fontWeight: 600, fontSize: "13px" }}>
+                Manual (Physical Stamp)
+              </p>
+              <p style={{ fontSize: "13px" }}>
+                Your invoice requires manual stamping. Please allow up to 3–5
+                business days for processing after submission.
+              </p>
+            </>
+          )}
         </div>
-      )}
+      </div>
 
-      {stampingMethod === "manual" && (
-        <div className="flex gap-3 bg-[#F5F5F5] p-3 rounded-[10px]">
-          <InfoCircleFilled
-            style={{ paddingTop: "2px", color: "#0175BF", fontSize: "20px" }}
+      {/* Remarks field shown on step 0 for e-stamping only */}
+      {stampingMethod === "e-stamping" && (
+        <div>
+          <InputComponent
+            type="textarea"
+            label="Remarks"
+            mandatory
+            rows={4}
+            placeholder="Enter remarks for e-stamping request"
+            value={remarks}
+            onChange={(e) => {
+              setRemarks(e.target.value);
+              if (e.target.value.trim()) {
+                setRemarksError("");
+              }
+            }}
           />
-          <div className="flex flex-col">
-            <p style={{ fontWeight: 600 }}>Manual (Physical Stamp)</p>
-            <p>
-              Your invoice requires manual stamping. Please allow up to 3–5
-              business days for processing after submission.
-            </p>
-          </div>
+          {remarksError && (
+            <span
+              style={{
+                color: "#ff4d4f",
+                fontSize: "12px",
+                marginTop: "4px",
+                display: "block",
+              }}
+            >
+              {remarksError}
+            </span>
+          )}
         </div>
       )}
     </>
   );
 
-  // Step 2: Attachment (for manual only)
+  // Step 1 (manual) — Upload attachment + remark
   const renderStep2 = () => (
     <>
       <div
@@ -504,12 +466,12 @@ const StampingRequestModal = ({
           border: "1px solid #adc6ff",
           borderRadius: "8px",
           padding: "24px",
-          marginBottom: "32px",
+          marginBottom: "15px",
         }}
       >
         <h3
           style={{
-            margin: "0 0 16px 0",
+            margin: "0 0 10px 0",
             fontSize: "15px",
             fontWeight: "600",
             color: "#262626",
@@ -533,7 +495,7 @@ const StampingRequestModal = ({
         </ol>
       </div>
 
-      <div style={{ marginBottom: "32px" }}>
+      <div style={{ marginBottom: "15px" }}>
         <Button
           type="default"
           size="large"
@@ -551,18 +513,18 @@ const StampingRequestModal = ({
         >
           {downloadLoading
             ? "Downloading..."
-            : "Download Stamped Invoice (.PDF)"}
+            : "Download Original Invoice (.PDF)"}
         </Button>
       </div>
 
-      <Divider style={{ margin: "32px 0" }} />
+      <Divider style={{ margin: "15px 0" }} />
 
       <div style={{ marginBottom: "24px" }}>
         <label
           style={{
             display: "block",
             marginBottom: "12px",
-            fontSize: "15px",
+            fontSize: "13px",
             fontWeight: "600",
             color: "#262626",
             textTransform: "uppercase",
@@ -633,33 +595,23 @@ const StampingRequestModal = ({
       )}
 
       <div>
-        <label
-          style={{
-            display: "block",
-            marginBottom: "8px",
-            fontSize: "15px",
-            fontWeight: "600",
-            color: "#262626",
-          }}
-        >
-          Remark <span style={{ color: "red" }}>*</span>
-        </label>
-        <TextArea
+        <InputComponent
+          label="Remark"
+          type="textarea"
+          mandatory
           rows={4}
           placeholder="Enter remark for manual stamping (required)"
-          value={remark}
-          onChange={(e) => setRemark(e.target.value)}
+          value={remarks}
+          onChange={(e) => setRemarks(e.target.value)}
           maxLength={500}
           showCount
-          style={{
-            fontSize: "14px",
-          }}
+          style={{ fontSize: "14px" }}
         />
       </div>
     </>
   );
 
-  // Step 3: Approval (for manual only)
+  // Step 2 (manual) — Select approval hierarchy
   const renderStep3 = () => (
     <>
       <div style={{ marginBottom: "24px" }}>
@@ -676,15 +628,7 @@ const StampingRequestModal = ({
         </p>
 
         <div style={{ marginBottom: "24px" }}>
-          <label
-            style={{
-              display: "block",
-              marginBottom: "8px",
-              fontSize: "14px",
-              fontWeight: "500",
-              color: "#262626",
-            }}
-          >
+          <label style={{ ...labelStyle, marginBottom: "8px" }}>
             Approval Hierarchy <span style={{ color: "red" }}>*</span>
           </label>
           <Select
@@ -744,10 +688,10 @@ const StampingRequestModal = ({
     </>
   );
 
-  // Step 4: Confirmation (for manual only)
+  // Step 3 (manual) — Confirmation
   const renderStep4 = () => {
     const selectedApprovalName = data_approval_hierarchy?.find(
-      (a) => a.appHierId === selectedApproval
+      (a) => a.appHierId === selectedApproval,
     )?.approvalName;
 
     return (
@@ -765,51 +709,18 @@ const StampingRequestModal = ({
           </h3>
 
           <div style={{ marginBottom: "24px" }}>
-            <p
-              style={{
-                fontSize: "14px",
-                color: "#8c8c8c",
-                marginBottom: "8px",
-              }}
-            >
-              Remark
-            </p>
-            <p style={{ fontSize: "15px", color: "#262626" }}>{remark}</p>
+            <p style={summaryLabelStyle}>Remark</p>
+            <p style={summaryValueStyle}>{remarks}</p>
           </div>
 
           <div style={{ marginBottom: "24px" }}>
-            <p
-              style={{
-                fontSize: "14px",
-                color: "#8c8c8c",
-                marginBottom: "8px",
-              }}
-            >
-              Approval Hierarchy
-            </p>
-            <p style={{ fontSize: "15px", color: "#262626" }}>
-              {selectedApprovalName || "-"}
-            </p>
+            <p style={summaryLabelStyle}>Approval Hierarchy</p>
+            <p style={summaryValueStyle}>{selectedApprovalName || "-"}</p>
           </div>
 
           <div style={{ marginBottom: "24px" }}>
-            <p
-              style={{
-                fontSize: "14px",
-                color: "#8c8c8c",
-                marginBottom: "12px",
-              }}
-            >
-              Approvers
-            </p>
-            <div
-              style={{
-                background: "#f5f5f5",
-                border: "1px solid #d9d9d9",
-                borderRadius: "6px",
-                padding: "16px",
-              }}
-            >
+            <p style={summaryLabelStyle}>Approvers</p>
+            <div style={cardBoxStyle}>
               {approvalDetail.length > 0 ? (
                 approvalDetail.map((approval, idx) => (
                   <div
@@ -829,23 +740,22 @@ const StampingRequestModal = ({
                     >
                       {approval.hierarchy} - {approval.position}
                     </p>
-                    {approval.employeeDetail &&
-                      approval.employeeDetail.length > 0 && (
-                        <div style={{ paddingLeft: "16px" }}>
-                          {approval.employeeDetail.map((emp, empIdx) => (
-                            <p
-                              key={empIdx}
-                              style={{
-                                fontSize: "14px",
-                                color: "#595959",
-                                marginBottom: "4px",
-                              }}
-                            >
-                              • {emp.employeeName} ({emp.email})
-                            </p>
-                          ))}
-                        </div>
-                      )}
+                    {approval.employeeDetail?.length > 0 && (
+                      <div style={{ paddingLeft: "16px" }}>
+                        {approval.employeeDetail.map((emp, empIdx) => (
+                          <p
+                            key={empIdx}
+                            style={{
+                              fontSize: "14px",
+                              color: "#595959",
+                              marginBottom: "4px",
+                            }}
+                          >
+                            • {emp.employeeName} ({emp.email})
+                          </p>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 ))
               ) : (
@@ -863,23 +773,8 @@ const StampingRequestModal = ({
           </div>
 
           <div>
-            <p
-              style={{
-                fontSize: "14px",
-                color: "#8c8c8c",
-                marginBottom: "12px",
-              }}
-            >
-              Files ({fileList.length})
-            </p>
-            <div
-              style={{
-                background: "#f5f5f5",
-                border: "1px solid #d9d9d9",
-                borderRadius: "6px",
-                padding: "16px",
-              }}
-            >
+            <p style={summaryLabelStyle}>Files ({fileList.length})</p>
+            <div style={cardBoxStyle}>
               {fileList.map((file, index) => (
                 <div
                   key={index}
@@ -904,29 +799,28 @@ const StampingRequestModal = ({
     );
   };
 
+  // ─── Helpers ─────────────────────────────────────────────────────────────────
+
   const getModalTitle = () => {
-    if (stampingMethod === "e-stamping") {
-      return "Stamping Process Request";
-    }
-    // For manual
-    if (currentStep === 0) return "Stamping Process Request";
-    if (currentStep === 1) return "Upload Invoice with Physical Stamp";
-    if (currentStep === 2) return "Select Approval";
-    if (currentStep === 3) return "Confirmation";
-    return "Stamping Process Request";
+    if (stampingMethod === "e-stamping") return "Stamping Process Request";
+    const titles = [
+      "Stamping Process Request",
+      "Upload Invoice with Physical Stamp",
+      "Select Approval",
+      "Confirmation",
+    ];
+    return titles[currentStep] || "Stamping Process Request";
   };
 
-  const getStepTitles = () => {
-    if (stampingMethod === "manual") {
-      return [
-        { title: "Select Method" },
-        { title: "Attachment" },
-        { title: "Approval" },
-        { title: "Confirmation" },
-      ];
-    }
-    return [];
-  };
+  const getStepTitles = () => [
+    { title: "Select Method" },
+    { title: "Attachment" },
+    { title: "Approval" },
+    { title: "Confirmation" },
+  ];
+
+  const isLastStep = currentStep === 3;
+  const isFirstStep = currentStep === 0;
 
   return (
     <Modal
@@ -938,9 +832,10 @@ const StampingRequestModal = ({
       bodyStyle={{ padding: 0 }}
     >
       <Spin spinning={externalLoading}>
+        {/* Header */}
         <div
           style={{
-            padding: "20px 24px",
+            padding: "10px 14px",
             borderBottom: "2px solid #e8e8e8",
             background: "#efefef",
           }}
@@ -948,7 +843,7 @@ const StampingRequestModal = ({
           <h2
             style={{
               margin: 0,
-              fontSize: "20px",
+              fontSize: "16px",
               fontWeight: "600",
               color: "#0175BF",
             }}
@@ -957,6 +852,7 @@ const StampingRequestModal = ({
           </h2>
         </div>
 
+        {/* Steps indicator (manual only) */}
         {stampingMethod === "manual" && (
           <div style={{ padding: "24px 32px 0" }}>
             <Steps current={currentStep} size="small">
@@ -967,6 +863,7 @@ const StampingRequestModal = ({
           </div>
         )}
 
+        {/* Content */}
         <div style={{ padding: "32px" }}>
           {currentStep === 0 && renderStep1()}
           {currentStep === 1 && stampingMethod === "manual" && renderStep2()}
@@ -974,96 +871,103 @@ const StampingRequestModal = ({
           {currentStep === 3 && stampingMethod === "manual" && renderStep4()}
         </div>
 
+        {/* Footer */}
         <div
           style={{
             padding: "16px 32px",
             borderTop: "1px solid #e8e8e8",
             background: "#fafafa",
             display: "flex",
-            justifyContent: currentStep > 0 ? "space-between" : "flex-end",
+            justifyContent: !isFirstStep ? "space-between" : "flex-end",
             gap: "12px",
           }}
         >
-          {currentStep > 0 && stampingMethod === "manual" && (
-            <Button
-              onClick={handleBack}
-              size="large"
-              style={{
-                minWidth: "120px",
-                height: "44px",
-                fontSize: "15px",
-              }}
-            >
+          {!isFirstStep && stampingMethod === "manual" && (
+            <ButtonComponent onClick={handleBack} size="small">
               Back
-            </Button>
+            </ButtonComponent>
           )}
 
           <div style={{ display: "flex", gap: "12px" }}>
-            <Button
-              onClick={handleCancel}
-              size="large"
-              style={{
-                minWidth: "120px",
-                height: "44px",
-                fontSize: "15px",
-              }}
-            >
+            <ButtonComponent onClick={handleCancel} size="small">
               Cancel
-            </Button>
+            </ButtonComponent>
 
-            {currentStep === 0 ? (
-              <Button
+            {!isLastStep ? (
+              <ButtonComponent
                 type="primary"
-                size="large"
-                icon={<CheckOutlined />}
+                size="small"
+                icon={
+                  isFirstStep && stampingMethod === "e-stamping" ? (
+                    <CheckOutlined />
+                  ) : undefined
+                }
                 onClick={handleNext}
                 loading={externalLoading}
-                style={{
-                  minWidth: "160px",
-                  height: "44px",
-                  fontSize: "15px",
-                  fontWeight: "500",
-                }}
               >
-                {stampingMethod === "e-stamping" ? "Submit Request" : "Next"}
-              </Button>
-            ) : currentStep < 3 ? (
-              <Button
-                type="primary"
-                size="large"
-                onClick={handleNext}
-                loading={externalLoading}
-                style={{
-                  minWidth: "160px",
-                  height: "44px",
-                  fontSize: "15px",
-                  fontWeight: "500",
-                }}
-              >
-                Next
-              </Button>
+                {stampingMethod === "e-stamping" || isFirstStep
+                  ? stampingMethod === "e-stamping"
+                    ? "Submit Request"
+                    : "Next"
+                  : "Next"}
+              </ButtonComponent>
             ) : (
-              <Button
+              <ButtonComponent
                 type="primary"
-                size="large"
+                size="small"
                 icon={<UploadOutlined />}
                 onClick={handleSubmit}
                 loading={externalLoading}
-                style={{
-                  minWidth: "160px",
-                  height: "44px",
-                  fontSize: "15px",
-                  fontWeight: "500",
-                }}
               >
                 Submit Request
-              </Button>
+              </ButtonComponent>
             )}
           </div>
         </div>
       </Spin>
     </Modal>
   );
+};
+
+// ─── Shared style constants ──────────────────────────────────────────────────
+
+const labelStyle = {
+  display: "block",
+  marginBottom: "8px",
+  fontSize: "14px",
+  fontWeight: "500",
+  color: "#262626",
+};
+
+const radioStyle = (active) => ({
+  fontSize: "12px",
+  padding: "8px 10px",
+  border: "2px solid",
+  borderRadius: "8px",
+  width: "100%",
+  display: "flex",
+  alignItems: "center",
+  backgroundColor: active ? "#e6f7ff" : "#ffffff",
+  borderColor: active ? "#1890ff" : "#d9d9d9",
+  transition: "all 0.3s",
+});
+
+const summaryLabelStyle = {
+  fontSize: "14px",
+  color: "#8c8c8c",
+  marginBottom: "8px",
+};
+
+const summaryValueStyle = {
+  fontSize: "15px",
+  color: "#262626",
+};
+
+const cardBoxStyle = {
+  background: "#f5f5f5",
+  border: "1px solid #d9d9d9",
+  borderRadius: "6px",
+  padding: "16px",
 };
 
 export default StampingRequestModal;

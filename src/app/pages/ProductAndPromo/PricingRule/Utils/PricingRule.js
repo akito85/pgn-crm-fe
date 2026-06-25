@@ -102,7 +102,9 @@ const PricingRule = ({
           />
         }
       >
-        {layout(valuePage)}
+        <div className="pt-4">
+          {layout(valuePage)}
+        </div>
       </BaseContainer>
 
       <BaseContainer header={"history log information"}>
