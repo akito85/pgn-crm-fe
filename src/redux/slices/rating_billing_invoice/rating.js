@@ -17,6 +17,12 @@ const initialState = {
   data_pricing: [],
   data_pricingRule: [],
   data_usageSA: [],
+  usage_pagination: {
+    totalPages: 0,
+    totalElements: 0,
+    currentPage: 0,
+    pageSize: 10,
+  },
   data_promoSA: [],
   data_periodicSA: [],
   loadingList: false,
@@ -266,7 +272,17 @@ export const getAllServiceAgreementPaginate = createAsyncThunk(
 export const getAllUsageServiceAgreementPaginate = createAsyncThunk(
   "GET_ALL_USAGE_SERVICE_AGREEMENT_PAGINATE",
   async (
-    { id, page, pageSize, search, sort, billPeriod, accountNumber },
+    {
+      id,
+      page,
+      pageSize,
+      search,
+      sort,
+      billPeriod,
+      accountNumber,
+      isLoadMore = false,
+      calculationCode,
+    },
     thunkAPI,
   ) => {
     try {
@@ -274,10 +290,13 @@ export const getAllUsageServiceAgreementPaginate = createAsyncThunk(
       const sortParams =
         sort === undefined || sort === "" ? "recordId~desc" : sort;
 
-      const url = `/v1/dbs/api/rating/list-usage/${id}?billPeriod=${encodeURIComponent(billPeriod)}&accountNumber=${accountNumber}&page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
+      const url = `/v1/dbs/api/rating/list-usage/${id}?billPeriod=${encodeURIComponent(billPeriod)}&accountNumber=${accountNumber}&page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}&calculationCode=${calculationCode}`;
 
       const response = await ratingBillingHttpService.getPagination(url);
-      return response.data;
+      return {
+        ...response.data,
+        isLoadMore,
+      };
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -293,6 +312,7 @@ export const getAllUsageServiceAgreementPaginate = createAsyncThunk(
         };
         thunkAPI.dispatch(showModalError(errorBody));
       }
+      return thunkAPI.rejectWithValue(error?.response?.data);
     }
   },
 );
@@ -605,7 +625,8 @@ export const getAllPromoServiceAgreementPaginate = createAsyncThunk(
   async ({ id, page, pageSize, search, sort }, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
-      const sortParams = sort === undefined || sort === "" ? "lineNumber~asc" : sort;
+      const sortParams =
+        sort === undefined || sort === "" ? "lineNumber~asc" : sort;
       const url = `/v1/dbs/api/rating/get-rating-promo?ratingCode=${id}&page=${page - 1}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
       const response = await ratingBillingHttpService.getPagination(url);
       const responseData = response.data?.data ?? response.data;
@@ -807,15 +828,51 @@ const ratingSlice = createSlice({
     },
 
     // Get All Usage Service Agreement Pagination
-    [getAllUsageServiceAgreementPaginate.pending]: (state) => {
-      state.loadingUsage = true;
+    // Get All Usage Service Agreement Pagination
+    [getAllUsageServiceAgreementPaginate.pending]: (state, action) => {
+      if (!action.meta.arg?.isLoadMore) {
+        state.loadingUsage = true;
+      }
     },
     [getAllUsageServiceAgreementPaginate.fulfilled]: (state, action) => {
       state.loadingUsage = false;
-      state.data_usageSA = action.payload;
+      const newData = action.payload?.result || [];
+      const isLoadMore = action.payload?.isLoadMore;
+
+      if (isLoadMore) {
+        // Deduplicate berdasarkan recordId (sesuaikan dengan unique key data usage)
+        const existingIds = new Set(
+          (state.data_usageSA?.result || []).map((item) => item.recordId),
+        );
+        const uniqueNewData = newData.filter(
+          (item) => !existingIds.has(item.recordId),
+        );
+        state.data_usageSA = {
+          ...action.payload,
+          result: [...(state.data_usageSA?.result || []), ...uniqueNewData],
+        };
+      } else {
+        state.data_usageSA = action.payload;
+      }
+
+      state.usage_pagination = {
+        totalPages: action.payload?.page?.totalPages || 0,
+        totalElements: action.payload?.page?.totalElements || 0,
+        currentPage: action.payload?.page?.number || 0,
+        pageSize: action.payload?.page?.size || 10,
+      };
     },
-    [getAllUsageServiceAgreementPaginate.rejected]: (state) => {
+    [getAllUsageServiceAgreementPaginate.rejected]: (state, action) => {
       state.loadingUsage = false;
+      if (!action.meta.arg?.isLoadMore) {
+        state.data_usageSA = [];
+        state.usage_pagination = {
+          totalPages: 0,
+          totalElements: 0,
+          currentPage: 0,
+          pageSize: 10,
+        };
+      }
     },
 
     // Get All Detail Service Agreement Pagination

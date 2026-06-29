@@ -1,62 +1,133 @@
-import React, { useEffect, useRef, useState, useMemo } from "react";
+import React, {
+  useEffect,
+  useRef,
+  useState,
+  useMemo,
+  useCallback,
+} from "react";
 import { useDispatch, useSelector } from "react-redux";
 import TableRBI from "../../../../../components/TableRBI";
 import { getAllUsageServiceAgreementPaginate } from "../../../../../redux/slices/rating_billing_invoice/rating";
 import { columnsUsage } from "./Table/TableUsage";
 import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
 
-const UsageSection = ({ ratingCode, calculationCode, accountNumber, billPeriod }) => {
-  const { data_usageSA, loadingUsage } = useSelector((state) => state.rating);
+const INITIAL_PAGE_SIZE = 100;
+const LOAD_MORE_SIZE = 20;
+
+const UsageSection = ({
+  ratingCode,
+  calculationCode,
+  accountNumber,
+  billPeriod,
+}) => {
+  const { data_usageSA, loadingUsage, usage_pagination } = useSelector(
+    (state) => state.rating,
+  );
 
   const dispatch = useDispatch();
   const searchInput = useRef(null);
-  const dataSource = data_usageSA?.result;
+
+  const dataSource = data_usageSA?.result || [];
+  const totalElements = usage_pagination?.totalElements || 0;
+  const hasMore = dataSource.length < totalElements;
 
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   const [fixedColumns, setFixedColumns] = useState(() => ({
     left: ["no"],
     right: [],
   }));
 
+  // Initial fetch / re-fetch saat filter/sort berubah
   useEffect(() => {
     dispatch(
       getAllUsageServiceAgreementPaginate({
         id: ratingCode,
         search: encodeURIComponent(JSON.stringify(search)),
-        page,
-        pageSize,
+        page: 1,
+        pageSize: INITIAL_PAGE_SIZE,
         sort,
         billPeriod,
         accountNumber,
-      })
+        isLoadMore: false, // reset data
+        calculationCode: calculationCode,
+      }),
     );
-  }, [dispatch, ratingCode, search, page, pageSize, sort, billPeriod, accountNumber]);
+    setPage(1);
+  }, [
+    dispatch,
+    ratingCode,
+    search,
+    sort,
+    billPeriod,
+    accountNumber,
+    calculationCode,
+  ]);
+
+  const handleLoadMore = useCallback(async () => {
+    if (isLoadingMore || !hasMore) return;
+
+    const nextPage = Math.floor(dataSource.length / LOAD_MORE_SIZE) + 1;
+
+    setIsLoadingMore(true);
+    try {
+      await dispatch(
+        getAllUsageServiceAgreementPaginate({
+          id: ratingCode,
+          search: encodeURIComponent(JSON.stringify(search)),
+          page: nextPage,
+          pageSize: LOAD_MORE_SIZE,
+          sort,
+          billPeriod,
+          accountNumber,
+          isLoadMore: true, // accumulate data
+        }),
+      );
+      setPage(nextPage);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  }, [
+    dispatch,
+    ratingCode,
+    search,
+    sort,
+    billPeriod,
+    accountNumber,
+    dataSource.length,
+    hasMore,
+    isLoadingMore,
+  ]);
+
+  const handleRefresh = useCallback(() => {
+    dispatch(
+      getAllUsageServiceAgreementPaginate({
+        id: ratingCode,
+        search: encodeURIComponent(JSON.stringify(search)),
+        page: 1,
+        pageSize: INITIAL_PAGE_SIZE,
+        sort,
+        billPeriod,
+        accountNumber,
+        isLoadMore: false,
+      }),
+    );
+    setPage(1);
+  }, [dispatch, ratingCode, search, sort, billPeriod, accountNumber]);
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(selectedKeys[0] ? dataIndex : "");
-    setSearch((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
-      }
-      return {
-        ...prevState,
-        [dataIndex]: selectedKeys[0],
-      };
-    });
-  };
-
-  const handleChangePage = (pageChange, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
-    setPage(tempPage);
-    setPageSize(pageSizeChange);
+    setSearch((prevState) => ({
+      ...prevState,
+      [dataIndex]: selectedKeys[0],
+    }));
   };
 
   const onSort = (_, __, sorter) => {
@@ -71,13 +142,13 @@ const UsageSection = ({ ratingCode, calculationCode, accountNumber, billPeriod }
     return columnsUsage(
       search,
       page,
-      pageSize,
+      LOAD_MORE_SIZE,
       searchInput,
       searchedColumn,
       searchText,
-      handleSearch
+      handleSearch,
     ).filter((item) => item?.title !== "APPROVED BY");
-  }, [search, page, pageSize, searchedColumn, searchText]);
+  }, [search, page, searchedColumn, searchText]);
 
   const allColumns = useMemo(() => {
     return baseColumns.map((col) => ({
@@ -122,20 +193,24 @@ const UsageSection = ({ ratingCode, calculationCode, accountNumber, billPeriod }
       </div>
       <div className="w-full">
         <TableRBI
+          idTable="usage-section-table"
           dataSource={dataSource}
           columns={processedColumns}
-          current={page}
-          pageSize={pageSize}
-          onChange={handleChangePage}
-          onSizeChanger={handleChangePage}
           showExport={false}
-          totalData={data_usageSA?.page?.totalElements || 0}
+          totalData={totalElements}
           tableScrolled={{ x: 2000, y: 525 }}
           onSort={onSort}
           columnDefinitions={columnDefinitions}
           fixedColumns={fixedColumns}
           setFixedColumns={setFixedColumns}
           loading={loadingUsage}
+          usePagination={false}
+          useInfiniteScroll={true}
+          onLoadMore={handleLoadMore}
+          hasMore={hasMore}
+          loadMoreThreshold={20}
+          showRefresh={true}
+          onRefresh={handleRefresh}
         />
       </div>
     </>
