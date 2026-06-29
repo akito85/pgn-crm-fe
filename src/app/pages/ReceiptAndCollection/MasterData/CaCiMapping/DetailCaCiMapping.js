@@ -1,12 +1,20 @@
 import moment from "moment";
-import DetailSection from "../../../../../components/DetailSection";
+import CardContainer from "../../../../../components/CardContainer";
 import DetailText from "../../../../../components/DetailText";
 import { dateFormatting } from "../../../../../utils";
 
 const DetailCaCiMapping = ({ data_detail }) => {
   return (
     <div>
-      <DetailSection header="PAYMENT CHANNEL CA CI MAPPING INFORMATION">
+      <CardContainer
+        header={
+          <div className="flex -my-4 justify-between items-center">
+            <p className="mt-[15px] text-primary">
+              PAYMENT CHANNEL CA CI MAPPING INFORMATION
+            </p>
+          </div>
+        }
+      >
         <div className="w-full grid grid-cols-5 gap-4">
           <DetailText label="Partner">{data_detail?.partnerId}</DetailText>
           <DetailText label="Collecting Agent">{data_detail?.collectingAgentId}</DetailText>
@@ -26,9 +34,17 @@ const DetailCaCiMapping = ({ data_detail }) => {
           <DetailText label="Status">{data_detail?.status}</DetailText>
           <DetailText label="Status Approval">{data_detail?.statusApproval}</DetailText>
         </div>
-      </DetailSection>
+      </CardContainer>
 
-      <DetailSection header="LOG HISTORY INFORMATION">
+      <CardContainer
+        header={
+          <div className="flex -my-4 justify-between items-center">
+            <p className="mt-[15px] text-primary">
+              LOG HISTORY INFORMATION
+            </p>
+          </div>
+        }
+      >
         <div className="w-full grid grid-cols-5 gap-4">
           <DetailText label="Record ID">{data_detail?.id}</DetailText>
           <DetailText label="Created Date">
@@ -44,7 +60,7 @@ const DetailCaCiMapping = ({ data_detail }) => {
           </DetailText>
           <DetailText label="Updated By">{data_detail?.updatedBy}</DetailText>
         </div>
-      </DetailSection>
+      </CardContainer>
     </div>
   );
 };

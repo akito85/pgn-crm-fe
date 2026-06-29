@@ -1,5 +1,5 @@
 import moment from "moment";
-import DetailSection from "../../../../../components/DetailSection";
+import CardContainer from "../../../../../components/CardContainer";
 import DetailText from "../../../../../components/DetailText";
 import { dateFormatting } from "../../../../../utils";
 
@@ -10,7 +10,15 @@ const DetailPartner = ({ data_detail, data_req }) => {
       {data_req?.isApprover &&
         data_req?.approvalType &&
         data_req?.approvalType === "INACTIVE_PAYMENT_METHOD" ? (
-        <DetailSection header={"INACTIVE REQUEST INFORMATION"}>
+        <CardContainer
+          header={
+            <div className="flex -my-4 justify-between items-center">
+              <p className="mt-[15px] text-primary">
+                INACTIVE REQUEST INFORMATION
+              </p>
+            </div>
+          }
+        >
           <div className="grid grid-cols-5 w-full gap-4">
             <DetailText label={"Requested Date"}>
               {data_req?.requestedDate
@@ -24,10 +32,18 @@ const DetailPartner = ({ data_detail, data_req }) => {
               {data_req?.remarks}
             </DetailText>
           </div>
-        </DetailSection>
+        </CardContainer>
       ) : null}
 
-      <DetailSection header={"PARTNER INFORMATION"}>
+      <CardContainer
+        header={
+          <div className="flex -my-4 justify-between items-center">
+            <p className="mt-[15px] text-primary">
+              PARTNER INFORMATION
+            </p>
+          </div>
+        }
+      >
         <div className="w-full grid grid-cols-5 gap-4">
           <DetailText label="Partner Code">
             {data_detail?.partnerCode}
@@ -59,9 +75,17 @@ const DetailPartner = ({ data_detail, data_req }) => {
             {data_detail?.statusApproval}
           </DetailText>
         </div>
-      </DetailSection>
+      </CardContainer>
 
-      <DetailSection header={"HISTORY LOG INFORMATION"}>
+      <CardContainer
+        header={
+          <div className="flex -my-4 justify-between items-center">
+            <p className="mt-[15px] text-primary">
+              HISTORY LOG INFORMATION
+            </p>
+          </div>
+        }
+      >
         <div className="w-full grid grid-cols-5 gap-4">
           <DetailText label={"Record ID"}>{data_detail?.id}</DetailText>
           <DetailText label={"Created Date"}>
@@ -75,7 +99,7 @@ const DetailPartner = ({ data_detail, data_req }) => {
           </DetailText>
           <DetailText label={"Updated By"}>{data_detail?.updatedBy}</DetailText>
         </div>
-      </DetailSection>
+      </CardContainer>
     </div>
   );
 };
