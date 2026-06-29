@@ -84,7 +84,7 @@ export const columnsCalculationSummary = (
       ),
   },
   {
-    title: "saType",
+    title: "SA Type",
     dataIndex: "saType",
     key: "saType",
     width: 180,

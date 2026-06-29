@@ -138,7 +138,15 @@ const ViewPaymentCycle = () => {
 
     const renderPaymentCycleInfo = () => (
         <div>
-            <DetailSection header={"PAYMENT CYCLE INFORMATION"}>
+            <CardContainer
+                header={
+                    <div className="flex -my-4 justify-between items-center">
+                        <p className="mt-[15px] text-primary">
+                            PAYMENT CYCLE INFORMATION
+                        </p>
+                    </div>
+                }
+            >
                 <div className="w-full grid grid-cols-4 gap-4">
                     <DetailText label="Period">{detail.periodName}</DetailText>
                     <DetailText label="Time Unit">{detail.timeUnit}</DetailText>
@@ -154,16 +162,8 @@ const ViewPaymentCycle = () => {
                             ? moment(detail.endDate).format(dateFormatting.dateCapital)
                             : ""}
                     </DetailText>
-                    <DetailText label="Status">
-                        <Tag color={getStatusColor(detail.status)}>
-                            {detail.status}
-                        </Tag>
-                    </DetailText>
-                    <DetailText label="Status Approval">
-                        <Tag color={getApprovalStatusColor(detail.statusApproval)}>
-                            {detail.statusApproval}
-                        </Tag>
-                    </DetailText>
+                    <DetailText label="Status">{detail.status}</DetailText>
+                    <DetailText label="Status Approval">{detail.statusApproval}</DetailText>
                     <DetailText label="Status Open">
                         {detail.statusOpen}
                     </DetailText>
@@ -173,9 +173,17 @@ const ViewPaymentCycle = () => {
                         </DetailText>
                     </div>
                 </div>
-            </DetailSection>
+            </CardContainer>
 
-            <DetailSection header={"HISTORY LOG INFORMATION"}>
+            <CardContainer
+                header={
+                    <div className="flex -my-4 justify-between items-center">
+                        <p className="mt-[15px] text-primary">
+                            HISTORY LOG INFORMATION
+                        </p>
+                    </div>
+                }
+            >
                 <div className="w-full grid grid-cols-4 gap-4">
                     <DetailText label={"Record ID"}>{detail.id}</DetailText>
                     <DetailText label={"Created Date"}>
@@ -191,7 +199,7 @@ const ViewPaymentCycle = () => {
                     </DetailText>
                     <DetailText label={"Updated By"}>{detail.updatedBy}</DetailText>
                 </div>
-            </DetailSection>
+            </CardContainer>
         </div>
     );
 

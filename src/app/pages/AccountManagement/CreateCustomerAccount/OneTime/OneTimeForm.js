@@ -1426,7 +1426,7 @@ const OneTimeForm = () => {
             distributionMedia: dmArray,
             financialInformation: {
               paymentChannel: {
-                ...fiObj,
+                paymentChannelType: fiObj.paymentChannelType,
                 virtualAccount:
                   fiObj.generateVA === undefined ? false : fiObj.generateVA,
               },
