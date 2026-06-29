@@ -98,7 +98,7 @@ const ListDetailDailyRate = () => {
       setConvertedRatesDraft(data_detail_draft?.convertedRate);
       setTabData([
         { value: "Daily Rate" },
-        { value: "Draft" },
+        // { value: "Draft" },
         { value: "Attachment" },
       ]);
     }
@@ -204,17 +204,24 @@ const ListDetailDailyRate = () => {
             />
           </CardContainer>
         );
-      case "Draft":
+      // case "Draft":
+      //   return (
+      //     <DetailDailyRate
+      //       key={"draft"}
+      //       data_detail={dataTextDraft}
+      //       // totalData={totalElementDraft}
+      //       // data_req={data_detail_draft?.tApprovalDto}
+      //     />
+      //   );
+      default:
         return (
           <DetailDailyRate
-            key={"draft"}
-            data_detail={dataTextDraft}
-            // totalData={totalElementDraft}
-            // data_req={data_detail_draft?.tApprovalDto}
+            key={"active"}
+            data_detail={dataText}
+            // totalData={totalElement}
+            // data_req={data_detail?.tApprovalDto}
           />
         );
-      default:
-        return <></>;
     }
   };
 
