@@ -138,7 +138,15 @@ const ViewPaymentPeriod = () => {
 
     const renderPaymentPeriodInfo = () => (
         <div>
-            <DetailSection header={"PAYMENT PERIOD INFORMATION"}>
+            <CardContainer
+                header={
+                    <div className="flex -my-4 justify-between items-center">
+                        <p className="mt-[15px] text-primary">
+                            PAYMENT PERIOD INFORMATION
+                        </p>
+                    </div>
+                }
+            >
                 <div className="w-full grid grid-cols-4 gap-4">
                     <DetailText label="Period Name">{detail.periodName}</DetailText>
                     <DetailText label="Start Date">
@@ -151,30 +159,26 @@ const ViewPaymentPeriod = () => {
                             ? moment(detail.endDate).format(dateFormatting.dateCapital)
                             : ""}
                     </DetailText>
-                    <DetailText label="Status">
-                        <Tag color={getStatusColor(detail.status)}>
-                            {detail.status}
-                        </Tag>
-                    </DetailText>
-                    <DetailText label="Status Approval">
-                        <Tag color={getApprovalStatusColor(detail.statusApproval)}>
-                            {detail.statusApproval}
-                        </Tag>
-                    </DetailText>
-                    <DetailText label="Status Open">
-                        <Tag color={detail.statusOpen?.toUpperCase() === "OPEN" ? "green" : "red"}>
-                            {detail.statusOpen}
-                        </Tag>
-                    </DetailText>
+                    <DetailText label="Status">{detail.status}</DetailText>
+                    <DetailText label="Status Approval">{detail.statusApproval}</DetailText>
+                    <DetailText label="Status Open">{detail.statusOpen}</DetailText>
                     <div className="col-span-4">
                         <DetailText label="Description">
                             {detail.description}
                         </DetailText>
                     </div>
                 </div>
-            </DetailSection>
+            </CardContainer>
 
-            <DetailSection header={"HISTORY LOG INFORMATION"}>
+            <CardContainer
+                header={
+                    <div className="flex -my-4 justify-between items-center">
+                        <p className="mt-[15px] text-primary">
+                            HISTORY LOG INFORMATION
+                        </p>
+                    </div>
+                }
+            >
                 <div className="w-full grid grid-cols-4 gap-4">
                     <DetailText label={"Record ID"}>{detail.id}</DetailText>
                     <DetailText label={"Created Date"}>
@@ -190,7 +194,7 @@ const ViewPaymentPeriod = () => {
                     </DetailText>
                     <DetailText label={"Updated By"}>{detail.updatedBy}</DetailText>
                 </div>
-            </DetailSection>
+            </CardContainer>
         </div>
     );
 
