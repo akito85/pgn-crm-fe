@@ -47,7 +47,7 @@ import { ModalError } from "../../../../components/Modal/ModalPopUp";
 import { bytesConverter } from "../../../../utils/bytesConverter";
 import { showModalError, validateCreateUpdate } from "../../../../redux/slices/general_slice";
 import { handleMandatory } from "./utils";
-import { applyLocationCriteriaCascade, handleCheckCriteriaMissingValidation } from "../UtilsProduct/UtilsAllProduct";
+import { applyLocationCriteriaCascade, handleCheckCriteriaMissingValidation, getCriteriaIdByCode } from "../UtilsProduct/UtilsAllProduct";
 
 const routes = (type) => [
   {
@@ -895,6 +895,11 @@ const ProductForm = (props) => {
               obj[`${criteria2.dataIndex}Name`] =
                 item[`${criteria2.dataIndex}Name`];
             });
+            const countryCriteriaId = getCriteriaIdByCode(criteriaOptions, "COUNTRY");
+            if (countryCriteriaId && (productInfoObj.tasCriteria || []).includes(countryCriteriaId)) {
+              obj.country = item.country;
+              obj.countryName = item.countryName;
+            }
             filteredCriteria.forEach((criteria) => {
               obj[criteria.dataIndex] = null;
             });
@@ -1453,6 +1458,11 @@ const ProductForm = (props) => {
                         obj[`${criteria2.dataIndex}Name`] =
                           item[`${criteria2.dataIndex}Name`];
                       });
+                      const countryCriteriaId = getCriteriaIdByCode(criteriaOptions, "COUNTRY");
+                      if (countryCriteriaId && (productInfoObj.tasCriteria || []).includes(countryCriteriaId)) {
+                        obj.country = item.country;
+                        obj.countryName = item.countryName;
+                      }
                       filteredCriteria.forEach((criteria) => {
                         obj[criteria.dataIndex] = null;
                       });
