@@ -146,6 +146,7 @@ const PricingRuleDetail = () => {
           district: item.district,
           city: item.city,
           province: item.province,
+          country: item.country,
           area: item.area,
           sor: item.sor,
           industrialSector: item.industrialSector,
@@ -325,6 +326,7 @@ const PricingRuleDetail = () => {
             criteriaValues={criteriaValues}
             data={listDataDetail}
             listDataCriteria={listDataCriteria}
+            countryCriteriaId={(data_header?.rpricingRuleCriterias || []).find((item) => item.criteriaName === "Country")?.criteria}
           />
         );
       case "Draft":
@@ -339,6 +341,7 @@ const PricingRuleDetail = () => {
             criteriaValues={criteriaValuesDraft}
             data={listDataDetailDraft}
             listDataCriteria={listDataCriteriaDraft}
+            countryCriteriaId={(data_detail_draft?.rPricingRuleCriterias || data_header?.rpricingRuleCriterias || []).find((item) => item.criteriaName === "Country")?.criteria}
           />
         );
       case "Attachment":
