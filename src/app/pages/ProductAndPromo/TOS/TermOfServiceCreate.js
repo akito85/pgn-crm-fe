@@ -597,6 +597,7 @@ const TermOfServiceCreate = () => {
             criteriaValues={criteriaValues}
             apiAttribute={dataAttribute}
             apiCriteria={data_criteria}
+            countryCriteriaId={getCriteriaIdByCode(criteriaOptions, "COUNTRY")}
           />
         ) : null}
 
