@@ -206,13 +206,16 @@ const PricingAdjustTable = () => {
   // --- Action column items ---
   const itemActions = useMemo(() => nxGetAccountActions({
     handleView: ({ id }) =>
-      navigate(PRODUCT_PROMO_ROUTES.DETAIL_PRICING, {
+      navigate(PRODUCT_PROMO_ROUTES.DETAIL_PRICING_ADJUSTMENT, {
         state: { id }
       }),
-    handleUpdate: ({ id, status, statusApproval }) => 
-      navigate(PRODUCT_PROMO_ROUTES.CREATE_PRICING, {
+    handleUpdate: ({ id, status, statusApproval }) =>
+      navigate(PRODUCT_PROMO_ROUTES.UPDATE_PRICING_ADJUSTMENT, {
         state: {
-          id, statusPricing: status, statusApprovalPricing: statusApproval
+          id,
+          prevPage: "table-price-adjust",
+          statusPriceAdjust: status,
+          statusApprovalPriceAdjust: statusApproval,
         }
       }),
     handleActivate: handleOpenModalInactivate,
@@ -237,7 +240,7 @@ const PricingAdjustTable = () => {
   return (
     <Fragment>
       <div className="flex flex-col gap-y-4">
-        <Toolbar items={itemActions} type="page" />
+        <Toolbar items={itemActions.filter((i) => i.action !== "Create")} type="page" />
         <NxTable
           idTable="pricing-adjust-table"
           userId={dataUser?.data?.username}
