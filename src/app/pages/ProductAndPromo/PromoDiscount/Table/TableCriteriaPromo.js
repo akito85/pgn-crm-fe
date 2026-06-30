@@ -247,7 +247,7 @@ export const columnsTableCriteriaPromo = (
   },
   {
     required: true,
-    title: "ACCOUNT GROUP",
+    title: "ACCOUNT GROUP TYPE",
     key: "accountGroup",
     width: 240,
     //onFilter: (value, record) => //onFilter("accountGroup", value, record),
