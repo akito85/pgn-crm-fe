@@ -14,6 +14,7 @@ const LayoutContentTabPriceAdjust = ({
   dataDetail = {},
   dataLogInformation = {},
   bodyPricing = {},
+  countryCriteriaId,
 }) => {
   return (
     <>
@@ -67,6 +68,7 @@ const LayoutContentTabPriceAdjust = ({
               "ADJUSTMENT VALUE",
               // "DESCRIPTION",
             ]}
+            countryCriteriaId={countryCriteriaId}
           />
       </BaseContainer>
       <BaseContainer header={"HISTORY LOG INFORMATION"}>
