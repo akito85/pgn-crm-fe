@@ -282,7 +282,7 @@ export const getAllBillingCancelTaskPaginate = createAsyncThunk(
 
 export const getAllBillingItemPaginate = createAsyncThunk(
   "GET_ALL_BILLING_ITEM_PAGINATE",
-  async ({ billHeaderId, pageBI, pageSizeBI, searchBI, sortBI }, thunkAPI) => {
+  async ({ billHeaderId, pageBI, pageSizeBI, searchBI, sortBI, isLoadMore = false }, thunkAPI) => {
     try {
       const searchParams = searchBI === undefined ? "" : searchBI;
       const sortParams =
@@ -290,7 +290,7 @@ export const getAllBillingItemPaginate = createAsyncThunk(
       const url = `/v1/dbs/api/billing/billing-item/${billHeaderId}?page=${pageBI}&size=${pageSizeBI}&sort=${sortParams}&searchs=${searchParams}`;
       const response = await ratingBillingHttpService.getPagination(url);
       const responseData = response.data?.data ?? response.data;
-      return responseData;
+      return { ...responseData, isLoadMore };
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -313,14 +313,14 @@ export const getAllBillingItemPaginate = createAsyncThunk(
 
 export const getAllRatingResultPaginate = createAsyncThunk(
   "GET_ALL_RATING_RESULT_PAGINATE",
-  async ({ id, page, pageSize, search, sort }, thunkAPI) => {
+  async ({ id, page, pageSize, search, sort, isLoadMore = false }, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams = sort === undefined || sort === "" ? "id~desc" : sort;
       const url = `/v1/dbs/api/billing/rating-result/${id}?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
       const response = await ratingBillingHttpService.getPagination(url);
       const responseData = response.data?.data ?? response.data;
-      return responseData;
+      return { ...responseData, isLoadMore };
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -343,7 +343,7 @@ export const getAllRatingResultPaginate = createAsyncThunk(
 
 export const getAllAdjustmentPaginate = createAsyncThunk(
   "GET_ALL_ADJUSTMENT_PAGINATE",
-  async ({ id, page, pageSize, search, sort }, thunkAPI) => {
+  async ({ id, page, pageSize, search, sort, isLoadMore = false }, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams =
@@ -351,7 +351,7 @@ export const getAllAdjustmentPaginate = createAsyncThunk(
       const url = `/v1/dbs/api/billing/adjustment-item/${id}?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
       const response = await ratingBillingHttpService.getPagination(url);
       const responseData = response.data?.data ?? response.data;
-      return responseData;
+      return { ...responseData, isLoadMore };
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -880,39 +880,90 @@ const billingSlice = createSlice({
     },
 
     // Get All Billing Item Pagination
-    [getAllBillingItemPaginate.pending]: (state) => {
-      state.loadingDetail = true;
+    [getAllBillingItemPaginate.pending]: (state, action) => {
+      if (!action.meta.arg?.isLoadMore) {
+        state.loadingDetail = true;
+      }
     },
     [getAllBillingItemPaginate.fulfilled]: (state, action) => {
       state.loadingDetail = false;
-      state.data_billingItem = action.payload;
+      const isLoadMore = action.payload?.isLoadMore;
+      const newResult = action.payload?.result || [];
+      if (isLoadMore) {
+        const existingIds = new Set(
+          (state.data_billingItem?.result || []).map((item) => item.id)
+        );
+        const uniqueNew = newResult.filter((item) => !existingIds.has(item.id));
+        state.data_billingItem = {
+          ...action.payload,
+          result: [...(state.data_billingItem?.result || []), ...uniqueNew],
+        };
+      } else {
+        state.data_billingItem = action.payload;
+      }
     },
-    [getAllBillingItemPaginate.rejected]: (state) => {
-      state.loadingDetail = false;
+    [getAllBillingItemPaginate.rejected]: (state, action) => {
+      if (!action.meta.arg?.isLoadMore) {
+        state.loadingDetail = false;
+      }
     },
 
     // Get All Rating Result Pagination
-    [getAllRatingResultPaginate.pending]: (state) => {
-      state.loadingDetail = true;
+    [getAllRatingResultPaginate.pending]: (state, action) => {
+      if (!action.meta.arg?.isLoadMore) {
+        state.loadingDetail = true;
+      }
     },
     [getAllRatingResultPaginate.fulfilled]: (state, action) => {
       state.loadingDetail = false;
-      state.data_ratingResult = action.payload;
+      const isLoadMore = action.payload?.isLoadMore;
+      const newResult = action.payload?.result || [];
+      if (isLoadMore) {
+        const existingIds = new Set(
+          (state.data_ratingResult?.result || []).map((item) => item.id)
+        );
+        const uniqueNew = newResult.filter((item) => !existingIds.has(item.id));
+        state.data_ratingResult = {
+          ...action.payload,
+          result: [...(state.data_ratingResult?.result || []), ...uniqueNew],
+        };
+      } else {
+        state.data_ratingResult = action.payload;
+      }
     },
-    [getAllRatingResultPaginate.rejected]: (state) => {
-      state.loadingDetail = false;
+    [getAllRatingResultPaginate.rejected]: (state, action) => {
+      if (!action.meta.arg?.isLoadMore) {
+        state.loadingDetail = false;
+      }
     },
 
     // Get All Adjustment Pagination
-    [getAllAdjustmentPaginate.pending]: (state) => {
-      state.loadingDetail = true;
+    [getAllAdjustmentPaginate.pending]: (state, action) => {
+      if (!action.meta.arg?.isLoadMore) {
+        state.loadingDetail = true;
+      }
     },
     [getAllAdjustmentPaginate.fulfilled]: (state, action) => {
       state.loadingDetail = false;
-      state.data_adjustment = action.payload;
+      const isLoadMore = action.payload?.isLoadMore;
+      const newResult = action.payload?.result || [];
+      if (isLoadMore) {
+        const existingIds = new Set(
+          (state.data_adjustment?.result || []).map((item) => item.id)
+        );
+        const uniqueNew = newResult.filter((item) => !existingIds.has(item.id));
+        state.data_adjustment = {
+          ...action.payload,
+          result: [...(state.data_adjustment?.result || []), ...uniqueNew],
+        };
+      } else {
+        state.data_adjustment = action.payload;
+      }
     },
-    [getAllAdjustmentPaginate.rejected]: (state) => {
-      state.loadingDetail = false;
+    [getAllAdjustmentPaginate.rejected]: (state, action) => {
+      if (!action.meta.arg?.isLoadMore) {
+        state.loadingDetail = false;
+      }
     },
 
     // Download Billing

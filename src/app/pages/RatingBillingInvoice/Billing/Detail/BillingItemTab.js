@@ -6,14 +6,15 @@ import { columnsBillingItem } from "./Table/TableBillingItem";
 import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
 
 const BillingItemTab = ({ billingCodeId, calculationCodeId, billHeaderId }) => {
-  const { data_billingItem } = useSelector((state) => state.billing);
+  const { data_billingItem, loadingDetail } = useSelector((state) => state.billing);
 
   const dispatch = useDispatch();
   const searchInput = useRef(null);
   const dataSourceBI = data_billingItem?.result;
 
-  const [pageBI, setPageBI] = useState(1);
-  const [pageSizeBI, setPageSizeBI] = useState(10);
+  const initialPageSize = 100;
+  const [loadMoreSize] = useState(20);
+
   const [searchedColumnBI, setSearchedColumnBI] = useState("");
   const [searchTextBI, setSearchTextBI] = useState("");
   const [sortBI, setSortBI] = useState("");
@@ -24,38 +25,64 @@ const BillingItemTab = ({ billingCodeId, calculationCodeId, billHeaderId }) => {
     right: [],
   }));
 
+  // Load awal saat billHeaderId atau search/sort berubah
   useEffect(() => {
-    dispatch(
-      getAllBillingItemPaginate({
-        billHeaderId,
-        searchBI: encodeURIComponent(JSON.stringify(searchBI)),
-        pageBI,
-        pageSizeBI,
-        sortBI,
-      }),
-    );
-  }, [dispatch, billHeaderId, searchBI, pageBI, pageSizeBI, sortBI]);
+    if (billHeaderId) {
+      dispatch(
+        getAllBillingItemPaginate({
+          billHeaderId,
+          searchBI: encodeURIComponent(JSON.stringify(searchBI)),
+          pageBI: 1,
+          pageSizeBI: initialPageSize,
+          sortBI,
+          isLoadMore: false,
+        }),
+      );
+    }
+  }, [dispatch, billHeaderId, searchBI, sortBI]);
 
   const handleSearchBI = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchTextBI(selectedKeys[0]);
     setSearchedColumnBI(dataIndex);
-    setSearchBI((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPageBI(1);
-      }
-      return {
-        ...prevState,
-        [dataIndex]: selectedKeys[0],
-      };
-    });
+    setSearchBI((prevState) => ({
+      ...prevState,
+      [dataIndex]: selectedKeys[0],
+    }));
   };
 
-  const handleChangePageBI = (pageChange, pageSizeChange) => {
-    const tempPage = pageSizeBI !== pageSizeChange ? 1 : pageChange;
-    setPageBI(tempPage);
-    setPageSizeBI(pageSizeChange);
+  const handleLoadMoreBI = async () => {
+    const totalElements = data_billingItem?.page?.totalElements || 0;
+    const currentLength = dataSourceBI?.length || 0;
+    if (currentLength >= totalElements) return;
+
+    const nextPage = Math.floor(currentLength / loadMoreSize) + 1;
+    await dispatch(
+      getAllBillingItemPaginate({
+        billHeaderId,
+        searchBI: encodeURIComponent(JSON.stringify(searchBI)),
+        pageBI: nextPage,
+        pageSizeBI: loadMoreSize,
+        sortBI,
+        isLoadMore: true,
+      }),
+    );
   };
+
+  const handleRefreshBI = () => {
+    dispatch(
+      getAllBillingItemPaginate({
+        billHeaderId,
+        searchBI: encodeURIComponent(JSON.stringify(searchBI)),
+        pageBI: 1,
+        pageSizeBI: initialPageSize,
+        sortBI,
+        isLoadMore: false,
+      }),
+    );
+  };
+
+  const hasMoreBI = (dataSourceBI?.length || 0) < (data_billingItem?.page?.totalElements || 0);
 
   const onSortBI = (_, __, sorter) => {
     const dataSort =
@@ -67,15 +94,15 @@ const BillingItemTab = ({ billingCodeId, calculationCodeId, billHeaderId }) => {
 
   const baseColumnsBI = useMemo(() => {
     return columnsBillingItem(
-      pageBI,
-      pageSizeBI,
+      0,
+      0,
       searchInput,
       searchedColumnBI,
       searchTextBI,
       handleSearchBI,
       searchBI,
     );
-  }, [pageBI, pageSizeBI, searchedColumnBI, searchTextBI, searchBI]);
+  }, [searchedColumnBI, searchTextBI, searchBI]);
 
   const allColumnsBI = useMemo(() => {
     return baseColumnsBI.map((col) => ({
@@ -120,10 +147,6 @@ const BillingItemTab = ({ billingCodeId, calculationCodeId, billHeaderId }) => {
         size="small"
         dataSource={dataSourceWithKeys}
         columns={processedColumnsBI}
-        current={pageBI}
-        pageSize={pageSizeBI}
-        onChange={handleChangePageBI}
-        onSizeChanger={handleChangePageBI}
         totalData={data_billingItem?.page?.totalElements || 0}
         tableScrolled={{ x: 2200, y: 525 }}
         onSort={onSortBI}
@@ -131,7 +154,14 @@ const BillingItemTab = ({ billingCodeId, calculationCodeId, billHeaderId }) => {
         fixedColumns={fixedColumnsBI}
         showExport={false}
         setFixedColumns={setFixedColumnsBI}
-        loading={false}
+        loading={loadingDetail}
+        usePagination={false}
+        useInfiniteScroll={true}
+        onLoadMore={handleLoadMoreBI}
+        hasMore={hasMoreBI}
+        showRefresh={true}
+        onRefresh={handleRefreshBI}
+        loadMoreThreshold={15}
       />
     </div>
   );

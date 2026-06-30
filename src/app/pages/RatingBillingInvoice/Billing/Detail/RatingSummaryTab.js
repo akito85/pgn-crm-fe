@@ -6,14 +6,15 @@ import { columnsRatingResult } from "./Table/TableRatingResult";
 import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
 
 const RatingSummaryTab = ({ billHeaderId }) => {
-  const { data_ratingResult } = useSelector((state) => state.billing);
+  const { data_ratingResult, loadingDetail } = useSelector((state) => state.billing);
 
   const dispatch = useDispatch();
   const searchInput = useRef(null);
   const dataSourceRR = data_ratingResult?.result;
 
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const initialPageSize = 100;
+  const [loadMoreSize] = useState(20);
+
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState("");
@@ -24,38 +25,64 @@ const RatingSummaryTab = ({ billHeaderId }) => {
     right: [],
   }));
 
+  // Load awal saat billHeaderId atau search/sort berubah
   useEffect(() => {
-    dispatch(
-      getAllRatingResultPaginate({
-        id: billHeaderId,
-        search: encodeURIComponent(JSON.stringify(search)),
-        page,
-        pageSize,
-        sort,
-      })
-    );
-  }, [dispatch, billHeaderId, search, page, pageSize, sort]);
+    if (billHeaderId) {
+      dispatch(
+        getAllRatingResultPaginate({
+          id: billHeaderId,
+          search: encodeURIComponent(JSON.stringify(search)),
+          page: 1,
+          pageSize: initialPageSize,
+          sort,
+          isLoadMore: false,
+        })
+      );
+    }
+  }, [dispatch, billHeaderId, search, sort]);
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
-    setSearch((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
-      }
-      return {
-        ...prevState,
-        [dataIndex]: selectedKeys[0],
-      };
-    });
+    setSearch((prevState) => ({
+      ...prevState,
+      [dataIndex]: selectedKeys[0],
+    }));
   };
 
-  const handleChangePage = (pageChange, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
-    setPage(tempPage);
-    setPageSize(pageSizeChange);
+  const handleLoadMore = async () => {
+    const totalElements = data_ratingResult?.page?.totalElements || 0;
+    const currentLength = dataSourceRR?.length || 0;
+    if (currentLength >= totalElements) return;
+
+    const nextPage = Math.floor(currentLength / loadMoreSize) + 1;
+    await dispatch(
+      getAllRatingResultPaginate({
+        id: billHeaderId,
+        search: encodeURIComponent(JSON.stringify(search)),
+        page: nextPage,
+        pageSize: loadMoreSize,
+        sort,
+        isLoadMore: true,
+      })
+    );
   };
+
+  const handleRefresh = () => {
+    dispatch(
+      getAllRatingResultPaginate({
+        id: billHeaderId,
+        search: encodeURIComponent(JSON.stringify(search)),
+        page: 1,
+        pageSize: initialPageSize,
+        sort,
+        isLoadMore: false,
+      })
+    );
+  };
+
+  const hasMore = (dataSourceRR?.length || 0) < (data_ratingResult?.page?.totalElements || 0);
 
   const onSort = (_, __, sorter) => {
     const dataSort =
@@ -67,15 +94,15 @@ const RatingSummaryTab = ({ billHeaderId }) => {
 
   const baseColumnsRR = useMemo(() => {
     return columnsRatingResult(
-      page,
-      pageSize,
+      0,
+      0,
       searchInput,
       searchedColumn,
       searchText,
       handleSearch,
       search
     );
-  }, [page, pageSize, searchedColumn, searchText, search]);
+  }, [searchedColumn, searchText, search]);
 
   const allColumnsRR = useMemo(() => {
     return baseColumnsRR.map((col) => ({
@@ -101,10 +128,6 @@ const RatingSummaryTab = ({ billHeaderId }) => {
         size="small"
         dataSource={dataSourceRR}
         columns={processedColumnsRR}
-        current={page}
-        pageSize={pageSize}
-        onChange={handleChangePage}
-        onSizeChanger={handleChangePage}
         totalData={data_ratingResult?.page?.totalElements || 0}
         tableScrolled={{ x: 1200, y: 525 }}
         onSort={onSort}
@@ -112,7 +135,14 @@ const RatingSummaryTab = ({ billHeaderId }) => {
         fixedColumns={fixedColumnsRR}
         showExport={false}
         setFixedColumns={setFixedColumnsRR}
-        loading={false}
+        loading={loadingDetail}
+        usePagination={false}
+        useInfiniteScroll={true}
+        onLoadMore={handleLoadMore}
+        hasMore={hasMore}
+        showRefresh={true}
+        onRefresh={handleRefresh}
+        loadMoreThreshold={15}
       />
     </div>
   );
