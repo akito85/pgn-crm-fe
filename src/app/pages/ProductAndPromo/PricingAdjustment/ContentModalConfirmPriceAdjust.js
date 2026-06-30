@@ -23,6 +23,7 @@ const ContentModalConfirmPriceAdjust = ({
   listCriteria = [],
   selectedHierarchy,
   dataOption = [],
+  countryCriteriaId,
 }) => {
   const [typePricingInfo, setTypePricingInfo] = useState(
     listSectionInfo[0].value
@@ -76,6 +77,7 @@ const ContentModalConfirmPriceAdjust = ({
                 dataCriteria={criteriaValues || []} //ddl
                 columnsTable={columnsTableCriteriaAll}
                 fixedColumn={["ADJUSTMENT TYPE", "ADJUSTMENT VALUE"]}
+                countryCriteriaId={countryCriteriaId}
               />
               {/* <PricingAdjustTableDetail
                 type={"detail"}

@@ -260,7 +260,7 @@ export const getListCriteria = createAsyncThunk(
     try {
       const url = "/v1/dbs/api/price-adjustment/list-criteria";
       const response = await productPromoHttpService.getAll(url);
-      return (response.data.data || []).filter(
+      return (response.data || []).filter(
         (item) => item.glbTypeValId !== 24
       );
     } catch (error) {

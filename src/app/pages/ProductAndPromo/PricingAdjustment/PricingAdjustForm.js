@@ -1305,6 +1305,7 @@ const PricingAdjustForm = (props) => {
               listCriteria={formatCriteria(formValue.criteria || [])}
               dataOption={appHierOptions}
               selectedHierarchy={selectedHierarchy}
+              countryCriteriaId={getCriteriaIdByCode(criteriaOptions, "COUNTRY")}
             />
           </ModalCustom>
         ) : null}

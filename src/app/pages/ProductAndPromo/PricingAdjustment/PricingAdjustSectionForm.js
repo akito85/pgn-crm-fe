@@ -24,8 +24,9 @@ const PricingAdjustSectionForm = ({
   status = ""
 }) => {
   const [description, setDescription] = useState("");
-  const criteriaOptionsFix =
-    criteriaOptions.length > 0 ? criteriaOptions : dummyOptions;
+  const criteriaOptionsFix = criteriaOptions;
+    // criteriaOptions.length > 0 ? criteriaOptions : dummyOptions;
+    // criteriaOptions.length > 0 ? criteriaOptions : dummyOptions;
   return (
     <div className="flex flex-col w-full gap-3">
       {priceCode ? (
