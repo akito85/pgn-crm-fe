@@ -24,6 +24,7 @@ const LayoutContentTab = ({
   listPricingDetailAdjustment = [],
   dataLogInformation = {},
   dataDetailSelected = {},
+  countryCriteriaId,
 }) => {
   return (
     <>
@@ -55,6 +56,7 @@ const LayoutContentTab = ({
           type={type}
           selector="pricing"
           columnsTable={columnsTableCriteriaAll}
+          countryCriteriaId={countryCriteriaId}
           // fixedColumn={[
           //   "ADJUSTMENT TYPE",
           //   "ADJUSTMENT VALUE",

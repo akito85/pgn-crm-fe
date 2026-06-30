@@ -14,6 +14,7 @@ const TermOfServiceConfirmation = ({
   criteriaValues = [],
   apiAttribute,
   apiCriteria,
+  countryCriteriaId,
 }) => {
   // find data attribute
   const matchedObjectsAttribute = apiAttribute?.filter((obj) =>
@@ -87,6 +88,7 @@ const TermOfServiceConfirmation = ({
               data={listDataCriteria}
               dataCriteria={criteriaValues}
               columnsTable={columnsTableCriteriaAll}
+              countryCriteriaId={countryCriteriaId}
             />
             {/* <FunctionalTableCriteriaTOS
               type={"detail"}

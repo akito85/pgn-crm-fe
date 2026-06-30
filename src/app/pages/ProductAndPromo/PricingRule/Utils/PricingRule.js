@@ -16,6 +16,7 @@ const PricingRule = ({
   data = [],
   listDataCriteria = [],
   criteriaValues = [],
+  countryCriteriaId,
 }) => {
   // State
   const [valuePage, setValuePage] = useState("Detail");
@@ -38,6 +39,7 @@ const PricingRule = ({
             dataCriteria={criteriaValues} //ddl
             selector="pricingRule"
             columnsTable={columnsTableCriteriaAll}
+            countryCriteriaId={countryCriteriaId}
           />
           // <Criteria
           //   type={"detail"}

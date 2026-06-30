@@ -153,6 +153,7 @@ const TermOfServiceUpdate = () => {
           district: item.district,
           city: item.city,
           province: item.province,
+          country: item.country,
           area: item.area,
           sor: item.sor,
           industrialSector: item.industrialSector,
@@ -673,6 +674,7 @@ const TermOfServiceUpdate = () => {
           criteriaValues={criteriaValues}
           apiAttribute={dataAttribute}
           apiCriteria={data_criteria}
+          countryCriteriaId={getCriteriaIdByCode(criteriaOptions, "COUNTRY")}
         />
 
         {/** Modal Retry */}

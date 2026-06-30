@@ -253,6 +253,17 @@ const PDITargetAccountSelling = ({
             type={"detail"}
             selector="product"
             columnsTable={columnsTableCriteriaAll}
+            countryCriteriaId={
+              (dataObject.mProductTargetAccountSellingCriteria || [])
+                .find((item) => item.criteriaName === "Country")
+                ?.criteria
+                ? parseInt(
+                    (dataObject.mProductTargetAccountSellingCriteria || []).find(
+                      (item) => item.criteriaName === "Country"
+                    ).criteria
+                  )
+                : undefined
+            }
           />
         // <TablePaginationNew
         //   type="FE"

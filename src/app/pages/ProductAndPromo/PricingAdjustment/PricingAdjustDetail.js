@@ -84,6 +84,12 @@ const PricingAdjustDetail = () => {
     dataDetailDraftPricingAdjustGeneral,
   } = useSelector((state) => state.pricingAdjust);
 
+  const countryCriteriaId = (
+    dataDetailPricingAdjustGeneral?.rcriteriaPricingAdjustments ||
+    dataDetailDraftPricingAdjustGeneral?.rcriteriaPricingAdjustments ||
+    []
+  ).find((item) => item.criteriaName === "Country")?.criteria;
+
   useEffect(() => {
     if (id) {
       dispatch(getDetailPricingAdjustGeneral({ id }));
@@ -160,6 +166,10 @@ const PricingAdjustDetail = () => {
                 value: adjustData[`${item.slice(0, -2)}`],
               };
             });
+            obj["country"] = {
+              label: adjustData.countryName,
+              value: adjustData.country,
+            };
             return obj;
           }
         )
@@ -245,6 +255,10 @@ const PricingAdjustDetail = () => {
               value: adjustData[`${item.slice(0, -2)}`],
             };
           });
+          obj["country"] = {
+            label: adjustData.countryName,
+            value: adjustData.country,
+          };
           return obj;
         })
       );
@@ -350,6 +364,7 @@ const PricingAdjustDetail = () => {
             dataDetail={bodyDetail}
             dataLogInformation={dataLogInformation}
             bodyPricing={bodyPricing}
+            countryCriteriaId={countryCriteriaId}
           />
         );
       case "Draft":
@@ -363,6 +378,7 @@ const PricingAdjustDetail = () => {
             dataDetail={bodyDraft}
             dataLogInformation={dataLogInformation}
             bodyPricing={bodyPricing}
+            countryCriteriaId={countryCriteriaId}
           />
         );
       case "Attachment":
