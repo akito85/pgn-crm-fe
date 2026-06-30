@@ -19,6 +19,7 @@ const ContentModalConfirmPricing = ({
   listCriteria = [],
   selectedHierarchy,
   dataOption = [],
+  countryCriteriaId,
 }) => {
   const [typePricingInfo, setTypePricingInfo] = useState(
     listSectionInfo[0].value
@@ -113,6 +114,7 @@ const ContentModalConfirmPricing = ({
             data={listDataCriteria}
             dataCriteria={criteriaValues}
             columnsTable={columnsTableCriteriaAll}
+            countryCriteriaId={countryCriteriaId}
           />
           )}
         </div>
