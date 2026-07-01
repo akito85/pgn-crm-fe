@@ -689,8 +689,6 @@ const PricingRuleUpdate = () => {
 
   // Handle Confirm
   const handleConfirm = () => {
-    setModalConfirm(false);
-
     if (statusPricingRule === "DRAFT") {
       bodyData?.mPricingRuleDetails?.map((e) => {
         return {
@@ -743,8 +741,7 @@ const PricingRuleUpdate = () => {
             body
           );
         }
-        loadingForm(false);
-        setModalConfirm(false);
+        setLoadingForm(false);
       })
       .catch((error) => {
         if (Math.floor((error.response.data.code || 0) / 100) === 5) {
@@ -754,6 +751,7 @@ const PricingRuleUpdate = () => {
               error.response.data.message) ||
             error.message ||
             error.toString();
+          setModalConfirm(false);
           setBodyError({ message });
           setModalError(true);
         }
@@ -921,6 +919,7 @@ const PricingRuleUpdate = () => {
           apiCriteria={data_select_criteria}
           apiApproval={data_approval}
           apiApprovalList={data_approval_list}
+          loading={isLoading}
         />
 
         {/** Modal Retry */}

@@ -58,6 +58,7 @@ const ConfirmationLayout = ({
   apiCriteria,
   apiApproval,
   apiApprovalList,
+  loading = false,
 }) => {
   // Declaration
   const searchInput = useRef(null);
@@ -169,12 +170,13 @@ const ConfirmationLayout = ({
       width={1000}
       footer={
         <div className={"w-full flex justify-end gap-5"}>
-          <ButtonComponent type={"default"} onClick={closeModal}>
+          <ButtonComponent type={"default"} disabled={loading} onClick={closeModal}>
             Cancel
           </ButtonComponent>
           <ButtonComponent
             type={"submit"}
             border={false}
+            loading={loading}
             onClick={handleConfirm}
           >
             Confirm
