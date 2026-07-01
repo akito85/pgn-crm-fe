@@ -147,7 +147,7 @@ export const columnsTableCriteria = (
     ),
   },
   {
-    title: "ACCOUNT GROUP",
+    title: "ACCOUNT GROUP TYPE",
     width: 240,
     dataIndex: "accountGroupId",
     onFilter: (value, record) => onFilter("accountGroupId", value, record),
@@ -398,7 +398,7 @@ export const columnsTableCriteriaDetail = (
     ),
   },
   {
-    title: "ACCOUNT GROUP",
+    title: "ACCOUNT GROUP TYPE",
     width: 240,
     dataIndex: "accountGroup",
     indexValue: 20,

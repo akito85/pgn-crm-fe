@@ -920,6 +920,7 @@ const PricingAdjustForm = (props) => {
                 error.response.data.message) ||
               error.message ||
               error.toString();
+            handleCancelModalConfirm();
             setBodyError({ message });
             setModalError(true);
           }
@@ -959,6 +960,7 @@ const PricingAdjustForm = (props) => {
                 error.response.data.message) ||
               error.message ||
               error.toString();
+            handleCancelModalConfirm();
             setBodyError({ message });
             setModalError(true);
           }
@@ -1269,11 +1271,13 @@ const PricingAdjustForm = (props) => {
                 <ButtonComponent
                   onClick={handleCancelModalConfirm}
                   type="default"
+                  disabled={isLoading}
                 >
                   Cancel
                 </ButtonComponent>
                 <ButtonComponent
                   type="submit"
+                  loading={isLoading}
                   onClick={handleProcessModalConfirm}
                 >
                   Confirm
@@ -1305,6 +1309,7 @@ const PricingAdjustForm = (props) => {
               listCriteria={formatCriteria(formValue.criteria || [])}
               dataOption={appHierOptions}
               selectedHierarchy={selectedHierarchy}
+              countryCriteriaId={getCriteriaIdByCode(criteriaOptions, "COUNTRY")}
             />
           </ModalCustom>
         ) : null}

@@ -85,6 +85,9 @@ const PricingDetail = (props) => {
     loadingPricing,
     priceAdjustListById,
   } = useSelector((state) => state.pricing);
+
+  const countryCriteriaId = (dataDetailPricingGeneral?.rPricingCriterias || dataDetailDraftPricingGeneral?.rPricingCriterias || [])
+    .find((item) => item.criteriaName === "Country")?.criteria;
   const [modalEndDateHistory, setModalEndDateHistory] = useState(false);
   const [selectedDetailEndDate, setSelectedDetailEndDate] = useState({});
   const [tableDetailEndDate, setTableDetailEndDate] = useState([]);
@@ -482,6 +485,7 @@ const PricingDetail = (props) => {
               setListDataCriteria={setListDataCriteria}
               listPricingDetailAdjustment={listPricingDetailAdjustment}
               dataLogInformation={dataLogInformation}
+              countryCriteriaId={countryCriteriaId}
             />
           ) : null}
           {typePricingInfo === "Draft" ? (
@@ -503,6 +507,7 @@ const PricingDetail = (props) => {
               setListDataCriteria={setListDataCriteriaDraft}
               listPricingDetailAdjustment={listPricingDetailAdjustment}
               dataLogInformation={dataLogInformation}
+              countryCriteriaId={countryCriteriaId}
             />
           ) : null}
           <div

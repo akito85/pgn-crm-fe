@@ -81,23 +81,19 @@ const ProductClassCreate = () => {
   // handle Confirm
   const handleConfirm = useCallback(async () => {
     try {
-      setModalConfirm(false);
       const successBody = {
         title: `Successful`,
         description: "Your data has been created.",
       };
       dispatch(createProductClass({ body: data, responseSuccess: successBody }))
         .unwrap()
-        .then(() => {
-          form.resetFields();
-          setModalConfirm(false);
-        })
         .catch((error) => {
           if (Math.floor((error?.response?.data?.code || 0) / 100) === 5) {
             const message =
               error?.response?.data?.message ||
               error?.message ||
               error?.toString();
+            setModalConfirm(false);
             setBodyError({ message });
             setModalError(true);
           }
@@ -216,6 +212,7 @@ const ProductClassCreate = () => {
             <div className={"w-full flex justify-end gap-5"}>
               <ButtonComponent
                 type={"default"}
+                disabled={loading}
                 onClick={() => setModalConfirm(false)}
               >
                 Cancel
@@ -223,6 +220,7 @@ const ProductClassCreate = () => {
               <ButtonComponent
                 type={"submit"}
                 border={false}
+                loading={loading}
                 onClick={() => handleConfirm()}
               >
                 Confirm

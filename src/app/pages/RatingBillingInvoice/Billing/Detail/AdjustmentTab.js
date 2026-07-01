@@ -6,14 +6,15 @@ import { columnsAdjustment } from "./Table/TableAdjustment";
 import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
 
 const AdjustmentTab = ({ billHeaderId }) => {
-  const { data_adjustment } = useSelector((state) => state.billing);
+  const { data_adjustment, loadingDetail } = useSelector((state) => state.billing);
 
   const dispatch = useDispatch();
   const searchInput = useRef(null);
   const dataSource = data_adjustment?.result;
 
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const initialPageSize = 100;
+  const [loadMoreSize] = useState(20);
+
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState("");
@@ -24,38 +25,64 @@ const AdjustmentTab = ({ billHeaderId }) => {
     right: [],
   }));
 
-useEffect(() => {
-    dispatch(
-      getAllAdjustmentPaginate({
-        id: billHeaderId,
-        search: encodeURIComponent(JSON.stringify(search)),
-        page,
-        pageSize,
-        sort,
-      })
-    );
-  }, [dispatch, billHeaderId, search, page, pageSize, sort]); 
+  // Load awal saat billHeaderId atau search/sort berubah
+  useEffect(() => {
+    if (billHeaderId) {
+      dispatch(
+        getAllAdjustmentPaginate({
+          id: billHeaderId,
+          search: encodeURIComponent(JSON.stringify(search)),
+          page: 1,
+          pageSize: initialPageSize,
+          sort,
+          isLoadMore: false,
+        })
+      );
+    }
+  }, [dispatch, billHeaderId, search, sort]);
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
-    setSearch((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
-      }
-      return {
-        ...prevState,
-        [dataIndex]: selectedKeys[0],
-      };
-    });
+    setSearch((prevState) => ({
+      ...prevState,
+      [dataIndex]: selectedKeys[0],
+    }));
   };
 
-  const handleChangePage = (pageChange, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
-    setPage(tempPage);
-    setPageSize(pageSizeChange);
+  const handleLoadMore = async () => {
+    const totalElements = data_adjustment?.page?.totalElements || 0;
+    const currentLength = dataSource?.length || 0;
+    if (currentLength >= totalElements) return;
+
+    const nextPage = Math.floor(currentLength / loadMoreSize) + 1;
+    await dispatch(
+      getAllAdjustmentPaginate({
+        id: billHeaderId,
+        search: encodeURIComponent(JSON.stringify(search)),
+        page: nextPage,
+        pageSize: loadMoreSize,
+        sort,
+        isLoadMore: true,
+      })
+    );
   };
+
+  const handleRefresh = () => {
+    dispatch(
+      getAllAdjustmentPaginate({
+        id: billHeaderId,
+        search: encodeURIComponent(JSON.stringify(search)),
+        page: 1,
+        pageSize: initialPageSize,
+        sort,
+        isLoadMore: false,
+      })
+    );
+  };
+
+  const hasMore = (dataSource?.length || 0) < (data_adjustment?.page?.totalElements || 0);
 
   const onSort = (_, __, sorter) => {
     const dataSort =
@@ -67,15 +94,15 @@ useEffect(() => {
 
   const baseColumns = useMemo(() => {
     return columnsAdjustment(
-      page,
-      pageSize,
+      0,
+      0,
       searchInput,
       searchedColumn,
       searchText,
       handleSearch,
       search
     );
-  }, [page, pageSize, searchedColumn, searchText, search]);
+  }, [searchedColumn, searchText, search]);
 
   const allColumns = useMemo(() => {
     return baseColumns.map((col) => ({
@@ -101,10 +128,6 @@ useEffect(() => {
         size="small"
         dataSource={dataSource}
         columns={processedColumns}
-        current={page}
-        pageSize={pageSize}
-        onChange={handleChangePage}
-        onSizeChanger={handleChangePage}
         totalData={data_adjustment?.page?.totalElements || 0}
         tableScrolled={{ x: 4500, y: 525 }}
         onSort={onSort}
@@ -112,7 +135,14 @@ useEffect(() => {
         fixedColumns={fixedColumns}
         showExport={false}
         setFixedColumns={setFixedColumns}
-        loading={false}
+        loading={loadingDetail}
+        usePagination={false}
+        useInfiniteScroll={true}
+        onLoadMore={handleLoadMore}
+        hasMore={hasMore}
+        showRefresh={true}
+        onRefresh={handleRefresh}
+        loadMoreThreshold={15}
       />
     </div>
   );

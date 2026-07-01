@@ -191,7 +191,7 @@ export const columnsTableCriteriaAll = (
   },
   {
     required: true,
-    title: "ACCOUNT GROUP",
+    title: "ACCOUNT GROUP TYPE",
     width: 240,
     //onFilter: (value, record) => //onFilter("accountGroup", value, record),
     sorter: (a, b) => sorter("accountGroup", a, b),

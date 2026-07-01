@@ -192,7 +192,7 @@ export const columnsBillingItem = (
       handleSearchBI,
       true
     ),
-    render: (text) =>
+    render: (text,record) =>
       renderColumn(
         "quantity",
         hasValue(searchBI["quantity"]),
@@ -200,7 +200,8 @@ export const columnsBillingItem = (
         separatorNumber(text),
         false,
         "input",
-        searchBI
+        searchBI,
+        record.uom === "MMBTU" ? "energi" : "usage",
       ),
   },
   {
@@ -322,7 +323,7 @@ export const columnsBillingItem = (
       handleSearchBI,
       true
     ),
-    render: (text) =>
+    render: (text,record) =>
       renderColumn(
         "amount",
         hasValue(searchBI["amount"]),
@@ -330,7 +331,8 @@ export const columnsBillingItem = (
         text,
         false,
         "input",
-        searchBI
+        searchBI,
+        record.currency === "USD" ? "currency-usd" : "currency-idr",
       ),
   },
   {
@@ -348,7 +350,7 @@ export const columnsBillingItem = (
       handleSearchBI,
       true
     ),
-    render: (text) =>
+    render: (text,record) =>
       renderColumn(
         "discountAmount",
         hasValue(searchBI["discountAmount"]),
@@ -356,7 +358,8 @@ export const columnsBillingItem = (
         text,
         false,
         "input",
-        searchBI
+        searchBI,
+        record.currency === "USD" ? "currency-usd" : "currency-idr",
       ),
   },
   {
@@ -374,7 +377,7 @@ export const columnsBillingItem = (
       handleSearchBI,
       true
     ),
-    render: (text) =>
+    render: (text,record) =>
       renderColumn(
         "totalAmount",
         hasValue(searchBI["totalAmount"]),
@@ -382,7 +385,8 @@ export const columnsBillingItem = (
         text,
         false,
         "input",
-        searchBI
+        searchBI,
+        record.currency === "USD" ? "currency-usd" : "currency-idr",
       ),
   },
   {
@@ -738,7 +742,7 @@ export const columnsBillingItem = (
       handleSearchBI,
       true
     ),
-    render: (text) =>
+    render: (text,record) =>
       renderColumn(
         "totalAmountEqv",
         hasValue(searchBI["totalAmountEqv"]),
@@ -746,7 +750,8 @@ export const columnsBillingItem = (
         text,
         false,
         "input",
-        searchBI
+        searchBI,
+        record.convertedCurrency === "USD" ? "currency-usd" : "currency-idr",
       ),
   },
   {

@@ -153,6 +153,7 @@ const TermOfServiceUpdate = () => {
           district: item.district,
           city: item.city,
           province: item.province,
+          country: item.country,
           area: item.area,
           sor: item.sor,
           industrialSector: item.industrialSector,
@@ -452,16 +453,13 @@ const TermOfServiceUpdate = () => {
 
     dispatch(updateTOS({ body: body }))
       .unwrap()
-      .then(() => {
-        form.resetFields();
-        setModalConfirm(false);
-      })
       .catch((error) => {
         if (Math.floor((error?.response?.data?.code || 0) / 100) === 5) {
           const message =
             error?.response?.data?.message ||
             error?.message ||
             error?.toString();
+          setModalConfirm(false);
           setBodyError({ message });
           setModalError(true);
         }
@@ -673,6 +671,8 @@ const TermOfServiceUpdate = () => {
           criteriaValues={criteriaValues}
           apiAttribute={dataAttribute}
           apiCriteria={data_criteria}
+          countryCriteriaId={getCriteriaIdByCode(criteriaOptions, "COUNTRY")}
+          loading={loading}
         />
 
         {/** Modal Retry */}

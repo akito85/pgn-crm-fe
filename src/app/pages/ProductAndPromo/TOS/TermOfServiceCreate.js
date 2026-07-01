@@ -369,18 +369,13 @@ const TermOfServiceCreate = () => {
 
     dispatch(createTOS({ body: body }))
       .unwrap()
-      .then(() => {
-        form.resetFields();
-        setModalConfirm(false);
-      })
       .catch((error) => {
-        // console.log(error,"error");
         if (Math.floor((error?.code || 0) / 100) === 5) {
           const message =
             error?.response?.data?.message ||
             error?.message ||
             error?.toString();
-          setModalConfirm(false)
+          setModalConfirm(false);
           setBodyError({ message });
           setModalError(true);
         }
@@ -597,6 +592,8 @@ const TermOfServiceCreate = () => {
             criteriaValues={criteriaValues}
             apiAttribute={dataAttribute}
             apiCriteria={data_criteria}
+            countryCriteriaId={getCriteriaIdByCode(criteriaOptions, "COUNTRY")}
+            loading={loading}
           />
         ) : null}
 

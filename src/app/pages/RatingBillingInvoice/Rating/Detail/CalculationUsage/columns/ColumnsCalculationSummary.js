@@ -84,7 +84,7 @@ export const columnsCalculationSummary = (
       ),
   },
   {
-    title: "SA Type",
+    title: "SA TYPE",
     dataIndex: "saType",
     key: "saType",
     width: 180,
@@ -204,9 +204,9 @@ export const getExpandedColumns = () => [
     align: "center",
     render: (text) => {
       // Jika null atau undefined, tampilkan kosong
-      if (text === null || text === undefined) return "";
+      if (text === null || text === undefined || text === 0) return "0";
       // Jika 0, tampilkan 0
-      if (text === 0) return "0";
+      // if (text === 0) return "0";
       // Jika ada nilai lainnya, tampilkan nilai tersebut
       return text;
     },
@@ -219,9 +219,9 @@ export const getExpandedColumns = () => [
     align: "center",
     render: (text) => {
       // Jika null atau undefined, tampilkan kosong
-      if (text === null || text === undefined) return "";
+      if (text === null || text === undefined || text === 0) return "Unlimited";
       // Jika 0, tampilkan "Unlimited"
-      if (text === 0) return "Unlimited";
+      // if (text === 0) return "Unlimited";
       // Jika ada nilai lainnya, tampilkan nilai tersebut
       return text;
     },
