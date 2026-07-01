@@ -196,7 +196,7 @@ const ProductClassView = () => {
   const totalElement = pagination.totalElement;
 
   // State
-  const [page, setPage] = useState(0);
+  const [page, setPage] = useState(1);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
@@ -228,20 +228,20 @@ const ProductClassView = () => {
   );
 
   const handleRefresh = useCallback(() => {
-    dispatch(getAllProductClassPaginate({ ...buildBody(0), isLoadMore: false }));
-    setPage(0);
+    dispatch(getAllProductClassPaginate({ ...buildBody(1), isLoadMore: false }));
+    setPage(1);
   }, [dispatch, buildBody]);
 
-  // Re-fetch page 0 whenever sort / search / filters change
+  // Re-fetch page 1 whenever sort / search / filters change
   useEffect(() => {
-    dispatch(getAllProductClassPaginate({ ...buildBody(0), isLoadMore: false }));
-    setPage(0);
+    dispatch(getAllProductClassPaginate({ ...buildBody(1), isLoadMore: false }));
+    setPage(1);
   }, [sort, search, searchText, filters, filterRules, limitData]); // intentionally omit dispatch/buildBody to avoid loop
 
   const handleLoadMore = async () => {
     const nextPage = page + 1;
     // page is 0-based, totalPage is a count → last valid index is totalPage-1.
-    if (nextPage < (pagination.totalPage || 0)) {
+    if (nextPage <= (pagination.totalPage || 1)) {
       // await so NxTable's infinite-scroll gate stays closed until the fetch
       // settles — prevents duplicate page dispatches on fast scrolling.
       await dispatch(getAllProductClassPaginate({ ...buildBody(nextPage), isLoadMore: true }));
@@ -265,7 +265,7 @@ const ProductClassView = () => {
     confirm();
     setSearchedColumn(dataIndex);
     setSearch((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) setPage(0);
+      if (prevState[dataIndex] !== selectedKeys[0]) setPage(1);
       return {
         ...prevState,
         [dataIndex]: selectedKeys[0],
@@ -282,7 +282,7 @@ const ProductClassView = () => {
     setFilterRules(searchData?.filterRules || []);
     const parsedLimit = parseInt(searchData?.limitData, 10);
     setLimitData(Number.isFinite(parsedLimit) && parsedLimit > 0 ? parsedLimit : null);
-    setPage(0);
+    setPage(1);
   };
 
   const onSort = (_, __, sortInfo) => {
@@ -296,7 +296,7 @@ const ProductClassView = () => {
   // Handle Download
   const handleDownload = () => {
     dispatch(
-      downloadProductClass({ ...buildBody(0) })
+      downloadProductClass({ ...buildBody(1) })
     );
   };
 
