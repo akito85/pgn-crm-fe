@@ -382,6 +382,7 @@ const GasDepositCreatePage = () => {
   const mutationColumns = useMemo(
     () => [
       { key: "no", title: "NO", dataIndex: "no", width: 20, align: "center" },
+      { key: "documentNumber", title: "DOCUMENT NUMBER", dataIndex: "documentNumber", width: 120 },
       { key: "billingPeriod", title: "BILLING PERIOD", dataIndex: "billingPeriod", width: 80, align: "center" },
       { key: "mutationDate", title: "MUTATION DATE", dataIndex: "mutationDate", width: 80, align: "center" },
       { key: "mutationType", title: "MUTATION TYPE", dataIndex: "mutationType", width: 100 },
@@ -615,6 +616,7 @@ const GasDepositCreatePage = () => {
           description: row.description,
           status: row.status,
           statusApproval: row.statusApproval,
+          documentNumber: row.documentNumber,
         })),
       };
 
@@ -943,6 +945,7 @@ const GasDepositCreatePage = () => {
             price: values.price || "",
             amount: values.amount || "",
             description: values.description || "",
+            documentNumber: values.documentNumber || "",
           };
 
           setMutationRows((prev) => {
