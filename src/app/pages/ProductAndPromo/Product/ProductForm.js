@@ -691,6 +691,7 @@ const ProductForm = (props) => {
   };
 
   const handleProcessModalConfirm = () => {
+    setLoadingForm(true);
     let body = {
       productDescription: productInfoObj.productDescription || null,
       save: typeSubmit.toUpperCase(),
@@ -1039,6 +1040,8 @@ const ProductForm = (props) => {
                 error.response.data.message) ||
               error.message ||
               error.toString();
+            setLoadingForm(false);
+            handleCancelModalConfirm();
             setBodyError({ message });
             setModalError(true);
           }
@@ -1076,6 +1079,8 @@ const ProductForm = (props) => {
                 error.response.data.message) ||
               error.message ||
               error.toString();
+            setLoadingForm(false);
+            handleCancelModalConfirm();
             setBodyError({ message });
             setModalError(true);
           }
@@ -1113,6 +1118,8 @@ const ProductForm = (props) => {
                 error.response.data.message) ||
               error.message ||
               error.toString();
+            setLoadingForm(false);
+            handleCancelModalConfirm();
             setBodyError({ message });
             setModalError(true);
           }
@@ -1150,6 +1157,8 @@ const ProductForm = (props) => {
                 error.response.data.message) ||
               error.message ||
               error.toString();
+            setLoadingForm(false);
+            handleCancelModalConfirm();
             setBodyError({ message });
             setModalError(true);
           }
@@ -2111,11 +2120,13 @@ const ProductForm = (props) => {
                 <ButtonComponent
                   onClick={handleCancelModalConfirm}
                   type="default"
+                  disabled={isLoading}
                 >
                   Cancel
                 </ButtonComponent>
                 <ButtonComponent
                   type="submit"
+                  loading={isLoading}
                   onClick={handleProcessModalConfirm}
                 >
                   Confirm

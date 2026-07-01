@@ -294,7 +294,6 @@ const PricingRuleCreate = () => {
 
   // Handle Confirm
   const handleConfirm = () => {
-    setModalConfirm(false);
     bodyData?.mPricingRuleDetails?.map((e) => {
       return {
         id: delete e.id,
@@ -338,7 +337,6 @@ const PricingRuleCreate = () => {
           );
         }
         setLoadingForm(false);
-        setModalConfirm(false);
       })
       .catch((error) => {
         if (Math.floor((error.response.data.code || 0) / 100) === 5) {
@@ -348,6 +346,7 @@ const PricingRuleCreate = () => {
               error.response.data.message) ||
             error.message ||
             error.toString();
+          setModalConfirm(false);
           setBodyError({ message });
           setModalError(true);
         }
@@ -552,6 +551,7 @@ const PricingRuleCreate = () => {
           apiCriteria={data_select_criteria}
           apiApproval={data_approval}
           apiApprovalList={data_approval_list}
+          loading={isLoading}
         />
 
         {/** Modal Retry */}

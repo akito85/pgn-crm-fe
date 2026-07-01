@@ -453,16 +453,13 @@ const TermOfServiceUpdate = () => {
 
     dispatch(updateTOS({ body: body }))
       .unwrap()
-      .then(() => {
-        form.resetFields();
-        setModalConfirm(false);
-      })
       .catch((error) => {
         if (Math.floor((error?.response?.data?.code || 0) / 100) === 5) {
           const message =
             error?.response?.data?.message ||
             error?.message ||
             error?.toString();
+          setModalConfirm(false);
           setBodyError({ message });
           setModalError(true);
         }
@@ -675,6 +672,7 @@ const TermOfServiceUpdate = () => {
           apiAttribute={dataAttribute}
           apiCriteria={data_criteria}
           countryCriteriaId={getCriteriaIdByCode(criteriaOptions, "COUNTRY")}
+          loading={loading}
         />
 
         {/** Modal Retry */}
