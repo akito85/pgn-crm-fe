@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Tooltip, Checkbox, Alert } from "antd";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Tooltip, Checkbox, Alert, Popover, Skeleton } from "antd";
 import { WarningOutlined } from "@ant-design/icons";
 import { NavLink, Link } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
@@ -24,9 +24,148 @@ import NxStatusComponent from "../../../../components/Nx/NxStatusComponent";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../utils/getColumnSearchProps";
 import { hasValue, renderColumn } from "../../../../utils";
 import Toolbar from "../../../../components/Toolbar";
-import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
+import useGrantAccessHooks from "../../../../components/useGrantAccessHooks";
+import IconThreeDots from "../../../../assets/Icon/Nx/IconThreeDots";
 
 const PAGE_SIZE = 20;
+
+const RenderProductClassActions = ({ record, itemRender = [], totalLength, permissions = [] }) => {
+  const [open, setOpen] = useState(false);
+  const sliceColumn = "view";
+
+  if (totalLength > 2) {
+    return (
+      <div className="w-full flex justify-center items-center gap-2.5">
+        <Popover
+          open={open}
+          onOpenChange={setOpen}
+          trigger="click"
+          placement="bottomRight"
+          showArrow={false}
+          overlayInnerStyle={{ border: "1px solid #C8CDD4" }}
+          className="text-black transition-colors duration-300 hover:text-[#0075bf]"
+          content={
+            <div className="flex flex-col">
+              {itemRender
+                ?.filter((item) => item?.action !== sliceColumn)
+                ?.sort((a, b) => (a?.action || "").localeCompare(b?.action || ""))
+                ?.map((item, index) => {
+                  if (permissions?.includes(item?.action)) {
+                    return (
+                      <div key={item.action} className="inline-flex items-center text-black" onClick={() => setOpen(false)}>
+                        {item?.render(record, totalLength, index)}
+                      </div>
+                    );
+                  }
+                  return null;
+                })}
+            </div>
+          }
+        >
+          <div className="inline-flex items-center cursor-pointer">
+            <IconThreeDots />
+          </div>
+        </Popover>
+        <div className="inline-flex items-center">
+          {itemRender
+            ?.filter((item) => item?.action === sliceColumn)
+            ?.map((item, index) => {
+              if (permissions?.includes(sliceColumn)) {
+                return item?.render(record, totalLength, index);
+              }
+              return null;
+            })}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-full flex justify-center gap-2.5 items-center">
+      {itemRender?.map((item, index) => {
+        if (permissions?.includes(item?.action)) {
+          return (
+            <span key={item.action} className="inline-flex items-center">
+              {item?.render(record, totalLength, index)}
+            </span>
+          );
+        }
+        return null;
+      })}
+    </div>
+  );
+};
+
+const useProductClassActionPermission = (permissionList = [], itemsRender = []) => {
+  const access = useGrantAccessHooks("page");
+  const isLoading = access?.loading;
+
+  const lowerCaseAccessList = useMemo(
+    () => access?.actions?.map((item) => item?.toLowerCase()),
+    [access]
+  );
+  const lowerCasePermissionList = useMemo(
+    () => permissionList?.map((item) => item?.toLowerCase()),
+    [permissionList]
+  );
+  const lowerCaseItemsRender = useMemo(
+    () =>
+      itemsRender
+        ?.map((item) => ({ ...item, action: item?.action?.toLowerCase() }))
+        ?.filter((item) => item?.type === "table"),
+    [itemsRender]
+  );
+
+  const arrayActions = useMemo(() => {
+    const filtered = lowerCaseAccessList?.filter((item) =>
+      lowerCasePermissionList?.includes(item)
+    );
+    return lowerCaseItemsRender
+      ?.filter((itemRender) => filtered?.includes(itemRender?.action))
+      ?.map((item) => item?.action);
+  }, [lowerCaseAccessList, lowerCaseItemsRender, lowerCasePermissionList]);
+
+  return useMemo(() => {
+    if (isLoading) {
+      return [
+        {
+          key: "action",
+          title: "ACTION",
+          dataIndex: "action",
+          fixed: "right",
+          width: 111,
+          render: () => (
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <div style={{ width: "100%", transform: "scaleY(0.55)", transformOrigin: "center" }}>
+                <Skeleton.Button active size="small" shape="round" block />
+              </div>
+            </div>
+          ),
+        },
+      ];
+    }
+    if (!arrayActions || arrayActions.length === 0) return [];
+    return [
+      {
+        key: "action",
+        title: "ACTION",
+        dataIndex: "action",
+        fixed: "right",
+        width: 90,
+        render: (text, record, index) => (
+          <RenderProductClassActions
+            text={text}
+            record={record}
+            index={index}
+            itemRender={lowerCaseItemsRender}
+            totalLength={arrayActions.length}
+            permissions={arrayActions}
+          />
+        ),
+      },
+    ];
+  }, [isLoading, arrayActions, lowerCaseItemsRender]);
+};
 
 const formatStatus = (value) => {
   switch (value) {
@@ -208,6 +347,7 @@ const ProductClassView = () => {
       title: "NAME",
       dataIndex: "name",
       key: "name",
+      width: 240,
       ellipsis: {
         showTitle: false,
       },
@@ -235,6 +375,7 @@ const ProductClassView = () => {
       sorter: true,
       title: "DESCRIPTION",
       key: "description",
+      with: 240,
       dataIndex: "description",
       ellipsis: {
         showTitle: false,
@@ -342,13 +483,13 @@ const ProductClassView = () => {
       type: "table",
       render: (record, data_length) => {
         const render =
-          data_length > 3 ? (
+          data_length >= 3 ? (
             <ButtonComponent
               icon={<SVGIcon name="IconEdit" color="#0075bf" width={24} />}
               border={false}
             >
-              {data_length > 3 && (
-                <span className="text-black ml-3"> Update</span>
+              {data_length >= 3 && (
+                <span className="text-black ml-1"> Update</span>
               )}
             </ButtonComponent>
           ) : (
@@ -382,7 +523,7 @@ const ProductClassView = () => {
       action: "Activate",
       type: "table",
       render: (record, data_length) => {
-        return data_length > 3 ? (
+        return data_length >= 3 ? (
           <ButtonComponent
             icon={
               <Checkbox
@@ -394,7 +535,7 @@ const ProductClassView = () => {
             border={false}
             onClick={() => handleActiveOrInactive(record)}
           >
-            <span className="text-black ml-5">
+            <span className="text-black ml-3">
               {record?.status !== "ACTIVE" ? "Activate" : "Inactivate"}
             </span>
           </ButtonComponent>
@@ -428,7 +569,7 @@ const ProductClassView = () => {
 
   const tableColumns = [
     ...columns,
-    ...useColumnActionPermission(
+    ...useProductClassActionPermission(
       ["view", "Update", "Activate"],
       itemsActionView
     ),
