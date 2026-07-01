@@ -440,6 +440,7 @@ const itemsActionView = (
   handleOpenModalLock = () => {},
   handleDownload = () => {},
   dataUser = {},
+  loadingDownload = false,
 ) => [
   {
     action: "Download",
@@ -448,6 +449,8 @@ const itemsActionView = (
         icon={<SVGIcon name="IconButtonDownload" width={24} />}
         type="submit"
         onClick={handleDownload}
+        loading={loadingDownload}
+        disabled={loadingDownload}
       >
         Download List
       </ButtonComponent>
@@ -596,7 +599,7 @@ const Product = () => {
   const totalElement = pagination.totalElement;
 
   const searchInput = useRef(null);
-  const [page, setPage] = useState(0);
+  const [page, setPage] = useState(1);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
@@ -604,6 +607,7 @@ const Product = () => {
   const [filters, setFilters] = useState([]);
   const [filterRules, setFilterRules] = useState([]);
   const [limitData, setLimitData] = useState(null);
+  const [loadingDownload, setLoadingDownload] = useState(false);
   const hasMore = !limitData && dataSource.length < (totalElement || 0);
 
   const [openModalHistory, setOpenModalHistory] = useState(false);
@@ -631,20 +635,20 @@ const Product = () => {
   );
 
   const handleRefresh = useCallback(() => {
-    dispatch(getAllProductPaginate({ ...buildBody(0), isLoadMore: false }));
-    setPage(0);
+    dispatch(getAllProductPaginate({ ...buildBody(1), isLoadMore: false }));
+    setPage(1);
   }, [dispatch, buildBody]);
 
-  // Re-fetch page 0 whenever sort / search / filters change
+  // Re-fetch page 1 whenever sort / search / filters change
   useEffect(() => {
-    dispatch(getAllProductPaginate({ ...buildBody(0), isLoadMore: false }));
-    setPage(0);
+    dispatch(getAllProductPaginate({ ...buildBody(1), isLoadMore: false }));
+    setPage(1);
   }, [sort, search, searchText, filters, filterRules, limitData]); // intentionally omit dispatch/buildBody to avoid loop
 
   const handleLoadMore = async () => {
     const nextPage = page + 1;
     // page is 0-based, totalPage is a count → last valid index is totalPage-1.
-    if (nextPage < (pagination.totalPage || 0)) {
+    if (nextPage <= (pagination.totalPage || 1)) {
       // await so NxTable's infinite-scroll gate stays closed until the fetch
       // settles — prevents duplicate page dispatches on fast scrolling.
       await dispatch(getAllProductPaginate({ ...buildBody(nextPage), isLoadMore: true }));
@@ -670,7 +674,7 @@ const Product = () => {
     confirm();
     setSearchedColumn(dataIndex);
     setSearch((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) setPage(0);
+      if (prevState[dataIndex] !== selectedKeys[0]) setPage(1);
       return {
         ...prevState,
         [dataIndex]: selectedKeys[0],
@@ -687,7 +691,7 @@ const Product = () => {
     setFilterRules(searchData?.filterRules || []);
     const parsedLimit = parseInt(searchData?.limitData, 10);
     setLimitData(Number.isFinite(parsedLimit) && parsedLimit > 0 ? parsedLimit : null);
-    setPage(0);
+    setPage(1);
   };
 
   const handleApprovalHistory = (data) => {
@@ -799,10 +803,10 @@ const Product = () => {
     setBodyError({});
   };
 
-  const handleDownload = () => {
-    dispatch(
-      downloadProduct({ ...buildBody(0) })
-    );
+  const handleDownload = async () => {
+    setLoadingDownload(true);
+    await dispatch(downloadProduct({ ...buildBody(1) }));
+    setLoadingDownload(false);
   };
 
   const renderType = () => {
@@ -831,6 +835,7 @@ const Product = () => {
     handleOpenModalLock,
     handleDownload,
     dataUser,
+    loadingDownload,
   );
 
   const actionCols = useColumnActionPermission(

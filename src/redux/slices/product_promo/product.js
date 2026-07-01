@@ -122,7 +122,7 @@ export const getAllProductPaginate = createAsyncThunk(
       const body = {
         page,
         size: pageSize,
-        sort: sort || "createdDate~desc",
+        sort: sort || "id~desc",
         search: searchText || null,
         searchs: search || {},
         filters,

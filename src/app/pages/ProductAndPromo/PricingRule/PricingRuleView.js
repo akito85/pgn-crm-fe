@@ -62,7 +62,7 @@ const PricingRuleView = () => {
   const totalElement = pagination.totalElement;
 
   // State
-  const [page, setPage] = useState(0);
+  const [page, setPage] = useState(1);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
@@ -70,6 +70,7 @@ const PricingRuleView = () => {
   const [filters, setFilters] = useState([]);
   const [filterRules, setFilterRules] = useState([]);
   const [limitData, setLimitData] = useState(null);
+  const [loadingDownload, setLoadingDownload] = useState(false);
   const hasMore = !limitData && dataSource.length < (totalElement || 0);
   const [chooseId, setChooseId] = useState({});
   const [modalInactive, setModalInactive] = useState(false);
@@ -94,20 +95,20 @@ const PricingRuleView = () => {
   );
 
   const handleRefresh = useCallback(() => {
-    dispatch(getAllPricingRulePaginate({ ...buildBody(0), isLoadMore: false }));
-    setPage(0);
+    dispatch(getAllPricingRulePaginate({ ...buildBody(1), isLoadMore: false }));
+    setPage(1);
   }, [dispatch, buildBody]);
 
-  // Re-fetch page 0 whenever sort / search / filters change
+  // Re-fetch page 1 whenever sort / search / filters change
   useEffect(() => {
-    dispatch(getAllPricingRulePaginate({ ...buildBody(0), isLoadMore: false }));
-    setPage(0);
+    dispatch(getAllPricingRulePaginate({ ...buildBody(1), isLoadMore: false }));
+    setPage(1);
   }, [sort, search, searchText, filters, filterRules, limitData]); // intentionally omit dispatch/buildBody to avoid loop
 
   const handleLoadMore = async () => {
     const nextPage = page + 1;
     // page is 0-based, totalPage is a count → last valid index is totalPage-1.
-    if (nextPage < (pagination.totalPage || 0)) {
+    if (nextPage <= (pagination.totalPage || 1)) {
       // await so NxTable's infinite-scroll gate stays closed until the fetch
       // settles — prevents duplicate page dispatches on fast scrolling.
       await dispatch(getAllPricingRulePaginate({ ...buildBody(nextPage), isLoadMore: true }));
@@ -152,7 +153,7 @@ const PricingRuleView = () => {
     confirm();
     setSearchedColumn(dataIndex);
     setSearch((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) setPage(0);
+      if (prevState[dataIndex] !== selectedKeys[0]) setPage(1);
       return {
         ...prevState,
         [dataIndex]: selectedKeys[0],
@@ -169,7 +170,7 @@ const PricingRuleView = () => {
     setFilterRules(searchData?.filterRules || []);
     const parsedLimit = parseInt(searchData?.limitData, 10);
     setLimitData(Number.isFinite(parsedLimit) && parsedLimit > 0 ? parsedLimit : null);
-    setPage(0);
+    setPage(1);
   };
 
   // Column
@@ -353,8 +354,10 @@ const PricingRuleView = () => {
   };
 
   // Handle Download
-  const handleDownload = () => {
-    dispatch(downloadPricingRule({ ...buildBody(0) }));
+  const handleDownload = async () => {
+    setLoadingDownload(true);
+    await dispatch(downloadPricingRule({ ...buildBody(1) }));
+    setLoadingDownload(false);
   };
 
   // Handle Cancel Modal Confirmation Inactive
@@ -405,7 +408,9 @@ const PricingRuleView = () => {
         <ButtonComponent
           icon={<SVGIcon name="IconButtonDownload" width={24} />}
           type="submit"
-          onClick={() => handleDownload()}
+          onClick={handleDownload}
+          loading={loadingDownload}
+          disabled={loadingDownload}
         >
           Download List
         </ButtonComponent>
