@@ -15,6 +15,7 @@ const TermOfServiceConfirmation = ({
   apiAttribute,
   apiCriteria,
   countryCriteriaId,
+  loading = false,
 }) => {
   // find data attribute
   const matchedObjectsAttribute = apiAttribute?.filter((obj) =>
@@ -41,12 +42,13 @@ const TermOfServiceConfirmation = ({
       width={1000}
       footer={
         <div className={"w-full flex justify-end gap-5"}>
-          <ButtonComponent type={"default"} onClick={closeModal}>
+          <ButtonComponent type={"default"} disabled={loading} onClick={closeModal}>
             Cancel
           </ButtonComponent>
           <ButtonComponent
             type={"submit"}
             border={false}
+            loading={loading}
             onClick={handleConfirm}
           >
             Confirm
