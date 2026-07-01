@@ -99,23 +99,19 @@ const ProductClassUpdate = () => {
 
   // handle Confirm
   const handleConfirm = () => {
-    setModalConfirm(false);
     const successBody = {
       title: `Successful`,
       description: "Your data has been updated.",
     };
     dispatch(updateProductClass({ body: data, responseSuccess: successBody }))
       .unwrap()
-      .then(() => {
-        form.resetFields();
-        setModalConfirm(false);
-      })
       .catch((error) => {
         if (Math.floor((error?.response?.data?.code || 0) / 100) === 5) {
           const message =
             error?.response?.data?.message ||
             error?.message ||
             error?.toString();
+          setModalConfirm(false);
           setBodyError({ message });
           setModalError(true);
         }
@@ -232,6 +228,7 @@ const ProductClassUpdate = () => {
             <div className={"w-full flex justify-end gap-5"}>
               <ButtonComponent
                 type={"default"}
+                disabled={loading}
                 onClick={() => setModalConfirm(false)}
               >
                 Cancel
@@ -239,6 +236,7 @@ const ProductClassUpdate = () => {
               <ButtonComponent
                 type={"submit"}
                 border={false}
+                loading={loading}
                 onClick={() => handleConfirm()}
               >
                 Confirm
