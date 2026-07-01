@@ -39,6 +39,7 @@ const PromoDiscountView = () => {
   const [filters, setFilters] = useState([]);
   const [filterRules, setFilterRules] = useState([]);
   const [limitData, setLimitData] = useState(null);
+  const [loadingDownload, setLoadingDownload] = useState(false);
 
   const [modalInactive, setModalInactive] = useState(false);
   const [modalError, setModalError] = useState(false);
@@ -161,8 +162,9 @@ const PromoDiscountView = () => {
   };
 
   // Handle Download
-  const handleDownload = () => {
-    dispatch(
+  const handleDownload = async () => {
+    setLoadingDownload(true);
+    await dispatch(
       downloadPromo({
         search: encodeURIComponent(JSON.stringify(search)),
         page,
@@ -170,6 +172,7 @@ const PromoDiscountView = () => {
         sort,
       })
     );
+    setLoadingDownload(false);
   };
 
   // Handle Load More
@@ -251,6 +254,7 @@ const PromoDiscountView = () => {
                 handleInactive={handleInactivateModal}
                 handleApprovalHistory={handleApprovalHistory}
                 handleDownload={handleDownload}
+                loadingDownload={loadingDownload}
                 handleLoadMore={handleLoadMore}
                 hasMore={hasMore}
                 searchText={searchText}

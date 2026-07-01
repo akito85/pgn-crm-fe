@@ -40,7 +40,7 @@ const PricingTable = () => {
 
   // --- Search / sort / filter state ---
   const searchInput = useRef(null);
-  const [page, setPage] = useState(0);
+  const [page, setPage] = useState(1);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
@@ -48,6 +48,7 @@ const PricingTable = () => {
   const [filters, setFilters] = useState([]);
   const [filterRules, setFilterRules] = useState([]);
   const [limitData, setLimitData] = useState(null);
+  const [loadingDownload, setLoadingDownload] = useState(false);
   const hasMore = !limitData && dataSource.length < (totalElement || 0);
 
   // --- Modal state ---
@@ -91,20 +92,20 @@ const PricingTable = () => {
   );
 
   const handleRefresh = useCallback(() => {
-    dispatch(getAllPricingPaginate({ ...buildBody(0), isLoadMore: false }));
-    setPage(0);
+    dispatch(getAllPricingPaginate({ ...buildBody(1), isLoadMore: false }));
+    setPage(1);
   }, [dispatch, buildBody]);
 
-  // Re-fetch page 0 whenever sort / search / filters change
+  // Re-fetch page 1 whenever sort / search / filters change
   useEffect(() => {
-    dispatch(getAllPricingPaginate({ ...buildBody(0), isLoadMore: false }));
-    setPage(0);
+    dispatch(getAllPricingPaginate({ ...buildBody(1), isLoadMore: false }));
+    setPage(1);
   }, [sort, search, searchText, filters, filterRules, limitData]); // intentionally omit dispatch/buildBody to avoid loop
 
   const handleLoadMore = async () => {
     const nextPage = page + 1;
     // page is 0-based, totalPage is a count → last valid index is totalPage-1.
-    if (nextPage < (pagination.totalPage || 0)) {
+    if (nextPage <= (pagination.totalPage || 1)) {
       // await so NxTable's infinite-scroll gate stays closed until the fetch
       // settles — prevents duplicate page dispatches on fast scrolling.
       await dispatch(getAllPricingPaginate({ ...buildBody(nextPage), isLoadMore: true }));
@@ -117,7 +118,7 @@ const PricingTable = () => {
     confirm();
     setSearchedColumn(dataIndex);
     setSearch((prev) => {
-      if (prev[dataIndex] !== selectedKeys[0]) setPage(0);
+      if (prev[dataIndex] !== selectedKeys[0]) setPage(1);
       return { ...prev, [dataIndex]: selectedKeys[0] };
     });
   };
@@ -138,11 +139,13 @@ const PricingTable = () => {
     setFilterRules(searchData?.filterRules || []);
     const parsedLimit = parseInt(searchData?.limitData, 10);
     setLimitData(Number.isFinite(parsedLimit) && parsedLimit > 0 ? parsedLimit : null);
-    setPage(0);
+    setPage(1);
   };
 
-  const handleDownload = useCallback(() => {
-    dispatch(downloadPricing({ ...buildBody(0) }));
+  const handleDownload = useCallback(async () => {
+    setLoadingDownload(true);
+    await dispatch(downloadPricing({ ...buildBody(1) }));
+    setLoadingDownload(false);
   }, [dispatch, buildBody]);
 
   const handleApprovalHistory = (data) => {
@@ -210,7 +213,7 @@ const PricingTable = () => {
       }),
     handleCreate: () =>
       navigate(PRODUCT_PROMO_ROUTES.CREATE_PRICING),
-    handleUpdate: ({ id, status, statusApproval }) => 
+    handleUpdate: ({ id, status, statusApproval }) =>
       navigate(PRODUCT_PROMO_ROUTES.CREATE_PRICING, {
         state: {
           id, statusPricing: status, statusApprovalPricing: statusApproval
@@ -219,7 +222,8 @@ const PricingTable = () => {
     handleActivate: handleOpenModalInactivate,
     handleApprovalHistory,
     handleDownload,
-  }), [handleDownload, handleOpenModalInactivate, handleApprovalHistory]);
+    loadingDownload,
+  }), [handleDownload, handleOpenModalInactivate, handleApprovalHistory, loadingDownload]);
 
   // --- Columns ---
   const actionCols = useColumnActionPermission(
