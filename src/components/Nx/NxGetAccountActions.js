@@ -9,6 +9,7 @@ const nxGetAccountActions = ({
   handleView = () => {},
   handleApproval = () => {},
   handleDownload = () => {},
+  loadingDownload = false,
   handleActivate = () => {},
   handleInactivate = () => {},
   handleApprovalHistory = () => {},
@@ -28,6 +29,8 @@ const nxGetAccountActions = ({
         icon={<SVGIcon name="IconButtonDownload" width={14} />}
         type="submit"
         onClick={handleDownload}
+        loading={loadingDownload}
+        disabled={loadingDownload}
       >
         Download List
       </Button>

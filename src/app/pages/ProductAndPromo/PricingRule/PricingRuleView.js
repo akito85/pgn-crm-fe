@@ -70,6 +70,7 @@ const PricingRuleView = () => {
   const [filters, setFilters] = useState([]);
   const [filterRules, setFilterRules] = useState([]);
   const [limitData, setLimitData] = useState(null);
+  const [loadingDownload, setLoadingDownload] = useState(false);
   const hasMore = !limitData && dataSource.length < (totalElement || 0);
   const [chooseId, setChooseId] = useState({});
   const [modalInactive, setModalInactive] = useState(false);
@@ -353,8 +354,10 @@ const PricingRuleView = () => {
   };
 
   // Handle Download
-  const handleDownload = () => {
-    dispatch(downloadPricingRule({ ...buildBody(1) }));
+  const handleDownload = async () => {
+    setLoadingDownload(true);
+    await dispatch(downloadPricingRule({ ...buildBody(1) }));
+    setLoadingDownload(false);
   };
 
   // Handle Cancel Modal Confirmation Inactive
@@ -405,7 +408,9 @@ const PricingRuleView = () => {
         <ButtonComponent
           icon={<SVGIcon name="IconButtonDownload" width={24} />}
           type="submit"
-          onClick={() => handleDownload()}
+          onClick={handleDownload}
+          loading={loadingDownload}
+          disabled={loadingDownload}
         >
           Download List
         </ButtonComponent>

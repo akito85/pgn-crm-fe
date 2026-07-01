@@ -16,6 +16,7 @@ const PromoDiscountTable = ({
   handleInactive = () => {},
   handleApprovalHistory = () => {},
   handleDownload = () => {},
+  loadingDownload = false,
   handleLoadMore = () => {},
   hasMore = false,
   searchText = "",
@@ -43,6 +44,7 @@ const PromoDiscountTable = ({
       handleInactivate: ({ id }) => handleInactive(true, id),
       handleApprovalHistory: ({ id }) => handleApprovalHistory(id),
       handleDownload,
+      loadingDownload,
     }
   );
 

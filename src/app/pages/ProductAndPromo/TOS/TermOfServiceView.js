@@ -63,6 +63,7 @@ const TermOfServiceView = () => {
   const [filters, setFilters] = useState([]);
   const [filterRules, setFilterRules] = useState([]);
   const [limitData, setLimitData] = useState(null);
+  const [loadingDownload, setLoadingDownload] = useState(false);
   const hasMore = !limitData && dataSource.length < (totalElement || 0);
 
   const [modalInactive, setModalInactive] = useState(false);
@@ -305,10 +306,10 @@ const TermOfServiceView = () => {
   };
 
   // Handle Download
-  const handleDownload = () => {
-    dispatch(
-      downloadTOS({ ...buildBody(1) })
-    );
+  const handleDownload = async () => {
+    setLoadingDownload(true);
+    await dispatch(downloadTOS({ ...buildBody(1) }));
+    setLoadingDownload(false);
   };
 
   // handle Active/Inactive
@@ -339,6 +340,8 @@ const TermOfServiceView = () => {
           icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
           type="submit"
           onClick={handleDownload}
+          loading={loadingDownload}
+          disabled={loadingDownload}
         >
           Download List
         </ButtonComponent>

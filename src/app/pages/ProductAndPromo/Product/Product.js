@@ -440,6 +440,7 @@ const itemsActionView = (
   handleOpenModalLock = () => {},
   handleDownload = () => {},
   dataUser = {},
+  loadingDownload = false,
 ) => [
   {
     action: "Download",
@@ -448,6 +449,8 @@ const itemsActionView = (
         icon={<SVGIcon name="IconButtonDownload" width={24} />}
         type="submit"
         onClick={handleDownload}
+        loading={loadingDownload}
+        disabled={loadingDownload}
       >
         Download List
       </ButtonComponent>
@@ -604,6 +607,7 @@ const Product = () => {
   const [filters, setFilters] = useState([]);
   const [filterRules, setFilterRules] = useState([]);
   const [limitData, setLimitData] = useState(null);
+  const [loadingDownload, setLoadingDownload] = useState(false);
   const hasMore = !limitData && dataSource.length < (totalElement || 0);
 
   const [openModalHistory, setOpenModalHistory] = useState(false);
@@ -799,10 +803,10 @@ const Product = () => {
     setBodyError({});
   };
 
-  const handleDownload = () => {
-    dispatch(
-      downloadProduct({ ...buildBody(1) })
-    );
+  const handleDownload = async () => {
+    setLoadingDownload(true);
+    await dispatch(downloadProduct({ ...buildBody(1) }));
+    setLoadingDownload(false);
   };
 
   const renderType = () => {
@@ -831,6 +835,7 @@ const Product = () => {
     handleOpenModalLock,
     handleDownload,
     dataUser,
+    loadingDownload,
   );
 
   const actionCols = useColumnActionPermission(

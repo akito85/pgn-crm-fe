@@ -204,6 +204,7 @@ const ProductClassView = () => {
   const [filters, setFilters] = useState([]);
   const [filterRules, setFilterRules] = useState([]);
   const [limitData, setLimitData] = useState(null);
+  const [loadingDownload, setLoadingDownload] = useState(false);
   const hasMore = !limitData && dataSource.length < (totalElement || 0);
 
   const [modalDetail, setModalDetail] = useState(false);
@@ -294,10 +295,10 @@ const ProductClassView = () => {
   };
 
   // Handle Download
-  const handleDownload = () => {
-    dispatch(
-      downloadProductClass({ ...buildBody(1) })
-    );
+  const handleDownload = async () => {
+    setLoadingDownload(true);
+    await dispatch(downloadProductClass({ ...buildBody(1) }));
+    setLoadingDownload(false);
   };
 
   // Handle Confirmation Active/Inactive
@@ -437,6 +438,8 @@ const ProductClassView = () => {
           icon={<SVGIcon name="IconButtonDownload" width={24} />}
           type="submit"
           onClick={handleDownload}
+          loading={loadingDownload}
+          disabled={loadingDownload}
         >
           Download List
         </ButtonComponent>

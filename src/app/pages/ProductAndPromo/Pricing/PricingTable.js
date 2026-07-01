@@ -48,6 +48,7 @@ const PricingTable = () => {
   const [filters, setFilters] = useState([]);
   const [filterRules, setFilterRules] = useState([]);
   const [limitData, setLimitData] = useState(null);
+  const [loadingDownload, setLoadingDownload] = useState(false);
   const hasMore = !limitData && dataSource.length < (totalElement || 0);
 
   // --- Modal state ---
@@ -141,8 +142,10 @@ const PricingTable = () => {
     setPage(1);
   };
 
-  const handleDownload = useCallback(() => {
-    dispatch(downloadPricing({ ...buildBody(1) }));
+  const handleDownload = useCallback(async () => {
+    setLoadingDownload(true);
+    await dispatch(downloadPricing({ ...buildBody(1) }));
+    setLoadingDownload(false);
   }, [dispatch, buildBody]);
 
   const handleApprovalHistory = (data) => {
@@ -210,7 +213,7 @@ const PricingTable = () => {
       }),
     handleCreate: () =>
       navigate(PRODUCT_PROMO_ROUTES.CREATE_PRICING),
-    handleUpdate: ({ id, status, statusApproval }) => 
+    handleUpdate: ({ id, status, statusApproval }) =>
       navigate(PRODUCT_PROMO_ROUTES.CREATE_PRICING, {
         state: {
           id, statusPricing: status, statusApprovalPricing: statusApproval
@@ -219,7 +222,8 @@ const PricingTable = () => {
     handleActivate: handleOpenModalInactivate,
     handleApprovalHistory,
     handleDownload,
-  }), [handleDownload, handleOpenModalInactivate, handleApprovalHistory]);
+    loadingDownload,
+  }), [handleDownload, handleOpenModalInactivate, handleApprovalHistory, loadingDownload]);
 
   // --- Columns ---
   const actionCols = useColumnActionPermission(

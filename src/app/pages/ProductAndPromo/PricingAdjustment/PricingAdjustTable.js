@@ -48,6 +48,7 @@ const PricingAdjustTable = () => {
   const [searchText, setSearchText] = useState("");
   const [filters, setFilters] = useState([]);
   const [filterRules, setFilterRules] = useState([]);
+  const [loadingDownload, setLoadingDownload] = useState(false);
 
   // --- Modal state ---
   const [openModalHistory, setOpenModalHistory] = useState(false);
@@ -135,8 +136,9 @@ const PricingAdjustTable = () => {
     setPage(1);
   };
 
-  const handleDownload = useCallback(() => {
-    dispatch(downloadPriceAdjust({
+  const handleDownload = useCallback(async () => {
+    setLoadingDownload(true);
+    await dispatch(downloadPriceAdjust({
       page: 1,
       pageSize: PAGE_SIZE,
       sort,
@@ -145,6 +147,7 @@ const PricingAdjustTable = () => {
       filters,
       filterRules,
     }));
+    setLoadingDownload(false);
   }, [dispatch, sort, search, searchText, filters, filterRules]);
 
   const handleApprovalHistory = (data) => {
@@ -221,7 +224,8 @@ const PricingAdjustTable = () => {
     handleActivate: handleOpenModalInactivate,
     handleApprovalHistory,
     handleDownload,
-  }), [handleDownload, handleOpenModalInactivate, handleApprovalHistory]);
+    loadingDownload,
+  }), [handleDownload, handleOpenModalInactivate, handleApprovalHistory, loadingDownload]);
 
   // --- Columns ---
   const actionCols = useColumnActionPermission(
