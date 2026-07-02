@@ -14,6 +14,7 @@ import StatCard from "../../../../components/StatCard";
 import TableRBI from "../../../../components/TableRBI";
 import StatusComponent from "../../../../components/StatusComponent";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
+import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 import {
   getParameters,
   getHeaderSummary,
@@ -155,6 +156,23 @@ const MonitoringCustomerPage = () => {
   const [activeTab, setActiveTab] = useState("1");
   const [visitedTabs, setVisitedTabs] = useState(new Set(["1"]));
 
+  const [fixedColumns, setFixedColumns] = useState(() => {
+    try {
+      const saved = localStorage.getItem("monitoringCustomerFixedColumns");
+      return saved ? JSON.parse(saved) : { left: ["no"], right: [] };
+    } catch (e) {
+      return { left: ["no"], right: [] };
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("monitoringCustomerFixedColumns", JSON.stringify(fixedColumns));
+    } catch (e) {
+      // ignore storage errors
+    }
+  }, [fixedColumns]);
+
   useEffect(() => {
     dispatch(getParameters());
   }, [dispatch]);
@@ -198,6 +216,20 @@ const MonitoringCustomerPage = () => {
     if (currentContent.length >= totalElements) return;
     const nextPage = Math.floor(currentContent.length / LOAD_MORE_SIZE);
     await dispatch(tabThunk({ period: filterPeriod, page: nextPage, size: LOAD_MORE_SIZE, isLoadMore: true }));
+  };
+
+  // --- Refresh handler — reload tab aktif dari awal ---
+  const handleRefresh = () => {
+    if (!filterPeriod) return;
+    const thunkMap = {
+      "1": () => dispatch(getMasterVsPraBilling({ period: filterPeriod, page: 0, size: INITIAL_SIZE, isLoadMore: false })),
+      "2": () => dispatch(getPraBillingVsRating({ period: filterPeriod, page: 0, size: INITIAL_SIZE, isLoadMore: false })),
+      "3": () => dispatch(getRatingVsBilling({ period: filterPeriod, page: 0, size: INITIAL_SIZE, isLoadMore: false })),
+      "4": () => dispatch(getBillingVsInvoice({ period: filterPeriod, page: 0, size: INITIAL_SIZE, isLoadMore: false })),
+      "5": () => dispatch(getBillingVsApproval({ period: filterPeriod, page: 0, size: INITIAL_SIZE, isLoadMore: false })),
+      "7": () => dispatch(getBillingVsAdjustment({ period: filterPeriod, page: 0, size: INITIAL_SIZE, isLoadMore: false })),
+    };
+    thunkMap[activeTab]?.();
   };
 
   const tab1Content = masterVsPraBilling.content ?? [];
@@ -315,6 +347,19 @@ const MonitoringCustomerPage = () => {
 
               const hasMore = dataSource.length < totalData;
 
+              // Process columns to ensure key and apply fixed columns
+              const allTabColumns = tab.columns.map((col) => ({
+                ...col,
+                key: col.key || col.dataIndex || col.title,
+              }));
+
+              const processedColumns = applyFixedColumns(allTabColumns, fixedColumns);
+
+              const columnDefinitions = allTabColumns.map((col) => ({
+                key: col.key || col.dataIndex || col.title,
+                title: col.title,
+              }));
+
               // Tab 6 (Billing Vs Late Charge) belum memiliki API — tampilkan placeholder
               if (isTab6) {
                 return {
@@ -339,7 +384,7 @@ const MonitoringCustomerPage = () => {
                     <TableRBI
                       idTable={`table-step-${tab.key}`}
                       dataSource={dataSource}
-                      columns={tab.columns}
+                      columns={processedColumns}
                       totalData={totalData}
                       loading={tabLoading}
                       tableScrolled={{ x: "max-content", y: 450 }}
@@ -348,9 +393,14 @@ const MonitoringCustomerPage = () => {
                       onLoadMore={onLoadMore}
                       hasMore={hasMore}
                       loadMoreThreshold={20}
+                      showRefresh={true}
+                      onRefresh={handleRefresh}
+                      columnDefinitions={columnDefinitions}
+                      fixedColumns={fixedColumns}
+                      setFixedColumns={setFixedColumns}
                       useSelect={true}
-                      showAdvanceSearch={false}
-                      showSearchBar={false}
+                      showAdvanceSearch={true}
+                      showSearchBar={true}
                     />
                   </div>
                   </div>
