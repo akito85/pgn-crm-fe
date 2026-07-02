@@ -138,7 +138,7 @@ const stepTabItems = [
 ];
 
 // Initial page size & load-more batch size (same for all tabs)
-const INITIAL_SIZE = 20;
+const INITIAL_SIZE = 100;
 const LOAD_MORE_SIZE = 20;
 
 const MonitoringCustomerPage = () => {
