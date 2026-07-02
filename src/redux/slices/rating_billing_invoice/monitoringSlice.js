@@ -81,11 +81,11 @@ export const getHeaderSummary = createAsyncThunk(
 
 export const getMasterVsPraBilling = createAsyncThunk(
   "GET_MASTER_VS_PRABILLING",
-  async ({ period, page = 0, size = 10, search = "" }, thunkAPI) => {
+  async ({ period, page = 0, size = 10, search = "", isLoadMore = false }, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/monitoringcustomer/master-vs-prabilling?period=${period}&page=${page}&size=${size}${search ? `&search=${encodeURIComponent(search)}` : ""}`;
       const response = await ratingBillingHttpService.getAll(url);
-      return response.data;
+      return { ...response.data, isLoadMore };
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -104,11 +104,11 @@ export const getMasterVsPraBilling = createAsyncThunk(
 
 export const getPraBillingVsRating = createAsyncThunk(
   "GET_PRABILLING_VS_RATING",
-  async ({ period, page = 0, size = 10, search = "" }, thunkAPI) => {
+  async ({ period, page = 0, size = 10, search = "", isLoadMore = false }, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/monitoringcustomer/prabilling-vs-rating?period=${period}&page=${page}&size=${size}${search ? `&search=${encodeURIComponent(search)}` : ""}`;
       const response = await ratingBillingHttpService.getAll(url);
-      return response.data;
+      return { ...response.data, isLoadMore };
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -127,11 +127,11 @@ export const getPraBillingVsRating = createAsyncThunk(
 
 export const getRatingVsBilling = createAsyncThunk(
   "GET_RATING_VS_BILLING",
-  async ({ period, page = 0, size = 10, search = "" }, thunkAPI) => {
+  async ({ period, page = 0, size = 10, search = "", isLoadMore = false }, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/monitoringcustomer/rating-vs-billing?period=${period}&page=${page}&size=${size}${search ? `&search=${encodeURIComponent(search)}` : ""}`;
       const response = await ratingBillingHttpService.getAll(url);
-      return response.data;
+      return { ...response.data, isLoadMore };
     } catch (error) {
       const message = error?.response?.data?.message || error?.message || error?.toString();
       if (error?.response?.data?.code === 500 || error?.response?.data?.code === 419) {
@@ -146,11 +146,11 @@ export const getRatingVsBilling = createAsyncThunk(
 
 export const getBillingVsInvoice = createAsyncThunk(
   "GET_BILLING_VS_INVOICE",
-  async ({ period, page = 0, size = 10, search = "" }, thunkAPI) => {
+  async ({ period, page = 0, size = 10, search = "", isLoadMore = false }, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/monitoringcustomer/billing-vs-invoice?period=${period}&page=${page}&size=${size}${search ? `&search=${encodeURIComponent(search)}` : ""}`;
       const response = await ratingBillingHttpService.getAll(url);
-      return response.data;
+      return { ...response.data, isLoadMore };
     } catch (error) {
       const message = error?.response?.data?.message || error?.message || error?.toString();
       if (error?.response?.data?.code === 500 || error?.response?.data?.code === 419) {
@@ -165,11 +165,11 @@ export const getBillingVsInvoice = createAsyncThunk(
 
 export const getBillingVsApproval = createAsyncThunk(
   "GET_BILLING_VS_APPROVAL",
-  async ({ period, page = 0, size = 10, search = "" }, thunkAPI) => {
+  async ({ period, page = 0, size = 10, search = "", isLoadMore = false }, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/monitoringcustomer/billing-vs-approval?period=${period}&page=${page}&size=${size}${search ? `&search=${encodeURIComponent(search)}` : ""}`;
       const response = await ratingBillingHttpService.getAll(url);
-      return response.data;
+      return { ...response.data, isLoadMore };
     } catch (error) {
       const message = error?.response?.data?.message || error?.message || error?.toString();
       if (error?.response?.data?.code === 500 || error?.response?.data?.code === 419) {
@@ -184,11 +184,11 @@ export const getBillingVsApproval = createAsyncThunk(
 
 export const getBillingVsAdjustment = createAsyncThunk(
   "GET_BILLING_VS_ADJUSTMENT",
-  async ({ period, page = 0, size = 10, search = "" }, thunkAPI) => {
+  async ({ period, page = 0, size = 10, search = "", isLoadMore = false }, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/monitoringcustomer/billing-vs-adjustment?period=${period}&page=${page}&size=${size}${search ? `&search=${encodeURIComponent(search)}` : ""}`;
       const response = await ratingBillingHttpService.getAll(url);
-      return response.data;
+      return { ...response.data, isLoadMore };
     } catch (error) {
       const message = error?.response?.data?.message || error?.message || error?.toString();
       if (error?.response?.data?.code === 500 || error?.response?.data?.code === 419) {
@@ -240,7 +240,17 @@ const monitoringSlice = createSlice({
       })
       .addCase(getMasterVsPraBilling.fulfilled, (state, action) => {
         state.loadingTab1 = false;
-        if (action.payload) state.masterVsPraBilling = action.payload;
+        if (action.payload) {
+          const { isLoadMore, ...rest } = action.payload;
+          if (isLoadMore) {
+            state.masterVsPraBilling = {
+              ...rest,
+              content: [...(state.masterVsPraBilling.content || []), ...(rest.content || [])],
+            };
+          } else {
+            state.masterVsPraBilling = rest;
+          }
+        }
       })
       .addCase(getMasterVsPraBilling.rejected, (state) => {
         state.loadingTab1 = false;
@@ -252,7 +262,17 @@ const monitoringSlice = createSlice({
       })
       .addCase(getPraBillingVsRating.fulfilled, (state, action) => {
         state.loadingTab2 = false;
-        if (action.payload) state.praBillingVsRating = action.payload;
+        if (action.payload) {
+          const { isLoadMore, ...rest } = action.payload;
+          if (isLoadMore) {
+            state.praBillingVsRating = {
+              ...rest,
+              content: [...(state.praBillingVsRating.content || []), ...(rest.content || [])],
+            };
+          } else {
+            state.praBillingVsRating = rest;
+          }
+        }
       })
       .addCase(getPraBillingVsRating.rejected, (state) => {
         state.loadingTab2 = false;
@@ -262,7 +282,17 @@ const monitoringSlice = createSlice({
       .addCase(getRatingVsBilling.pending, (state) => { state.loadingTab3 = true; })
       .addCase(getRatingVsBilling.fulfilled, (state, action) => {
         state.loadingTab3 = false;
-        if (action.payload) state.ratingVsBilling = action.payload;
+        if (action.payload) {
+          const { isLoadMore, ...rest } = action.payload;
+          if (isLoadMore) {
+            state.ratingVsBilling = {
+              ...rest,
+              content: [...(state.ratingVsBilling.content || []), ...(rest.content || [])],
+            };
+          } else {
+            state.ratingVsBilling = rest;
+          }
+        }
       })
       .addCase(getRatingVsBilling.rejected, (state) => { state.loadingTab3 = false; })
 
@@ -270,7 +300,17 @@ const monitoringSlice = createSlice({
       .addCase(getBillingVsInvoice.pending, (state) => { state.loadingTab4 = true; })
       .addCase(getBillingVsInvoice.fulfilled, (state, action) => {
         state.loadingTab4 = false;
-        if (action.payload) state.billingVsInvoice = action.payload;
+        if (action.payload) {
+          const { isLoadMore, ...rest } = action.payload;
+          if (isLoadMore) {
+            state.billingVsInvoice = {
+              ...rest,
+              content: [...(state.billingVsInvoice.content || []), ...(rest.content || [])],
+            };
+          } else {
+            state.billingVsInvoice = rest;
+          }
+        }
       })
       .addCase(getBillingVsInvoice.rejected, (state) => { state.loadingTab4 = false; })
 
@@ -278,7 +318,17 @@ const monitoringSlice = createSlice({
       .addCase(getBillingVsApproval.pending, (state) => { state.loadingTab5 = true; })
       .addCase(getBillingVsApproval.fulfilled, (state, action) => {
         state.loadingTab5 = false;
-        if (action.payload) state.billingVsApproval = action.payload;
+        if (action.payload) {
+          const { isLoadMore, ...rest } = action.payload;
+          if (isLoadMore) {
+            state.billingVsApproval = {
+              ...rest,
+              content: [...(state.billingVsApproval.content || []), ...(rest.content || [])],
+            };
+          } else {
+            state.billingVsApproval = rest;
+          }
+        }
       })
       .addCase(getBillingVsApproval.rejected, (state) => { state.loadingTab5 = false; })
 
@@ -286,7 +336,17 @@ const monitoringSlice = createSlice({
       .addCase(getBillingVsAdjustment.pending, (state) => { state.loadingTab7 = true; })
       .addCase(getBillingVsAdjustment.fulfilled, (state, action) => {
         state.loadingTab7 = false;
-        if (action.payload) state.billingVsAdjustment = action.payload;
+        if (action.payload) {
+          const { isLoadMore, ...rest } = action.payload;
+          if (isLoadMore) {
+            state.billingVsAdjustment = {
+              ...rest,
+              content: [...(state.billingVsAdjustment.content || []), ...(rest.content || [])],
+            };
+          } else {
+            state.billingVsAdjustment = rest;
+          }
+        }
       })
       .addCase(getBillingVsAdjustment.rejected, (state) => { state.loadingTab7 = false; });
   },
