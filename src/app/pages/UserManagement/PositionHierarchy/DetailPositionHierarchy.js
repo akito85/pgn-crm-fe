@@ -71,6 +71,7 @@ const DetailPositionHierarchy = () => {
                 ? idMap[item.positionId]
                 : null,
             positionName: item?.positionName,
+            employeeCount: item?.employeeCount,
             status: item?.status,
             remark: item?.description,
           };
@@ -80,8 +81,8 @@ const DetailPositionHierarchy = () => {
     }
   }, [id, dispatch, data_detail, data_position]);
 
-  console.log(data_detail?.rPhierarchys);
-  console.log(dataDiagram);
+  // console.log(data_detail?.rPhierarchys);
+  // console.log(dataDiagram);
 
   // handle cancel modal
   const handleCancel = () => {
@@ -168,7 +169,7 @@ const DetailPositionHierarchy = () => {
                           ))}
                         className="text-[12px]"
                       >
-                        {nodeDatum.positionName?.split(", ")?.length}{" "}
+                        {nodeDatum.employeeCount}{" "}
                         Employee(s)
                       </Tooltip>
                     </p>
@@ -253,7 +254,7 @@ const DetailPositionHierarchy = () => {
 
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
 
-  console.log(transformDataToTree(dataDiagram));
+  // console.log(transformDataToTree(dataDiagram));
 
   return (
     <>
