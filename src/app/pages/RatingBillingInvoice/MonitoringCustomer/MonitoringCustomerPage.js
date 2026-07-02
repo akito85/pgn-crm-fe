@@ -14,6 +14,7 @@ import StatCard from "../../../../components/StatCard";
 import TableRBI from "../../../../components/TableRBI";
 import StatusComponent from "../../../../components/StatusComponent";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
+import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 import {
   getParameters,
   getHeaderSummary,
@@ -43,16 +44,14 @@ const okCol = (title, dataIndex) => ({
   },
 });
 
-// Placeholder sentinel — diganti saat render dengan makeNoCol(currentPage, pageSize)
-const noCol = { key: "no" };
-
-const makeNoCol = (currentPage, pageSize) => ({
+// NO column — index-based (no page offset needed for infinite scroll)
+const noCol = {
   title: "NO",
   key: "no",
   width: 60,
   align: "center",
-  render: (_, __, index) => (currentPage - 1) * pageSize + index + 1,
-});
+  render: (_, __, index) => index + 1,
+};
 
 const accountNumberCol = {
   title: "ACCOUNT NUMBER",
@@ -138,6 +137,10 @@ const stepTabItems = [
   },
 ];
 
+// Initial page size & load-more batch size (same for all tabs)
+const INITIAL_SIZE = 100;
+const LOAD_MORE_SIZE = 20;
+
 const MonitoringCustomerPage = () => {
   const {
     loading, loadingHeader,
@@ -152,24 +155,23 @@ const MonitoringCustomerPage = () => {
   const [filterPeriod, setFilterPeriod] = useState(null);
   const [activeTab, setActiveTab] = useState("1");
   const [visitedTabs, setVisitedTabs] = useState(new Set(["1"]));
-  const [tab1Page, setTab1Page] = useState(0);
-  const tab1Size = 10;
-  const tab1Search = "";
-  const [tab2Page, setTab2Page] = useState(0);
-  const tab2Size = 10;
-  const tab2Search = "";
-  const [tab3Page, setTab3Page] = useState(0);
-  const tab3Size = 10;
-  const tab3Search = "";
-  const [tab4Page, setTab4Page] = useState(0);
-  const tab4Size = 10;
-  const tab4Search = "";
-  const [tab5Page, setTab5Page] = useState(0);
-  const tab5Size = 10;
-  const tab5Search = "";
-  const [tab7Page, setTab7Page] = useState(0);
-  const tab7Size = 10;
-  const tab7Search = "";
+
+  const [fixedColumns, setFixedColumns] = useState(() => {
+    try {
+      const saved = localStorage.getItem("monitoringCustomerFixedColumns");
+      return saved ? JSON.parse(saved) : { left: ["no"], right: [] };
+    } catch (e) {
+      return { left: ["no"], right: [] };
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("monitoringCustomerFixedColumns", JSON.stringify(fixedColumns));
+    } catch (e) {
+      // ignore storage errors
+    }
+  }, [fixedColumns]);
 
   useEffect(() => {
     dispatch(getParameters());
@@ -184,41 +186,65 @@ const MonitoringCustomerPage = () => {
   useEffect(() => {
     if (filterPeriod) {
       dispatch(getHeaderSummary(filterPeriod));
-      setTab1Page(0);
-      dispatch(getMasterVsPraBilling({ period: filterPeriod, page: 0, size: tab1Size, search: tab1Search }));
-      setTab2Page(0);
-      setTab3Page(0);
-      setTab4Page(0);
-      setTab5Page(0);
-      setTab7Page(0);
+      dispatch(getMasterVsPraBilling({ period: filterPeriod, page: 0, size: INITIAL_SIZE, isLoadMore: false }));
       setActiveTab("1");
       setVisitedTabs(new Set(["1"]));
     }
-  }, [filterPeriod, dispatch]); // tab1Size dan tab1Search adalah konstanta
+  }, [filterPeriod, dispatch]);
 
   const handleTabChange = (key) => {
     setActiveTab(key);
     if (!visitedTabs.has(key)) {
       setVisitedTabs((prev) => new Set(prev).add(key));
       if (key === "2") {
-        setTab2Page(0);
-        dispatch(getPraBillingVsRating({ period: filterPeriod, page: 0, size: tab2Size, search: tab2Search }));
+        dispatch(getPraBillingVsRating({ period: filterPeriod, page: 0, size: INITIAL_SIZE, isLoadMore: false }));
       } else if (key === "3") {
-        setTab3Page(0);
-        dispatch(getRatingVsBilling({ period: filterPeriod, page: 0, size: tab3Size, search: tab3Search }));
+        dispatch(getRatingVsBilling({ period: filterPeriod, page: 0, size: INITIAL_SIZE, isLoadMore: false }));
       } else if (key === "4") {
-        setTab4Page(0);
-        dispatch(getBillingVsInvoice({ period: filterPeriod, page: 0, size: tab4Size, search: tab4Search }));
+        dispatch(getBillingVsInvoice({ period: filterPeriod, page: 0, size: INITIAL_SIZE, isLoadMore: false }));
       } else if (key === "5") {
-        setTab5Page(0);
-        dispatch(getBillingVsApproval({ period: filterPeriod, page: 0, size: tab5Size, search: tab5Search }));
+        dispatch(getBillingVsApproval({ period: filterPeriod, page: 0, size: INITIAL_SIZE, isLoadMore: false }));
       } else if (key === "7") {
-        setTab7Page(0);
-        dispatch(getBillingVsAdjustment({ period: filterPeriod, page: 0, size: tab7Size, search: tab7Search }));
+        dispatch(getBillingVsAdjustment({ period: filterPeriod, page: 0, size: INITIAL_SIZE, isLoadMore: false }));
       }
-      // key "6" (Billing Vs Late Charge) has no thunk — mark visited, no dispatch
+      // key "6" (Billing Vs Late Charge) has no API — mark visited, no dispatch
     }
   };
+
+  // --- Load-more handlers (per tab) ---
+  const makeLoadMore = (currentContent, totalElements, tabThunk) => async () => {
+    if (currentContent.length >= totalElements) return;
+    const nextPage = Math.floor(currentContent.length / LOAD_MORE_SIZE);
+    await dispatch(tabThunk({ period: filterPeriod, page: nextPage, size: LOAD_MORE_SIZE, isLoadMore: true }));
+  };
+
+  // --- Refresh handler — reload tab aktif dari awal ---
+  const handleRefresh = () => {
+    if (!filterPeriod) return;
+    const thunkMap = {
+      "1": () => dispatch(getMasterVsPraBilling({ period: filterPeriod, page: 0, size: INITIAL_SIZE, isLoadMore: false })),
+      "2": () => dispatch(getPraBillingVsRating({ period: filterPeriod, page: 0, size: INITIAL_SIZE, isLoadMore: false })),
+      "3": () => dispatch(getRatingVsBilling({ period: filterPeriod, page: 0, size: INITIAL_SIZE, isLoadMore: false })),
+      "4": () => dispatch(getBillingVsInvoice({ period: filterPeriod, page: 0, size: INITIAL_SIZE, isLoadMore: false })),
+      "5": () => dispatch(getBillingVsApproval({ period: filterPeriod, page: 0, size: INITIAL_SIZE, isLoadMore: false })),
+      "7": () => dispatch(getBillingVsAdjustment({ period: filterPeriod, page: 0, size: INITIAL_SIZE, isLoadMore: false })),
+    };
+    thunkMap[activeTab]?.();
+  };
+
+  const tab1Content = masterVsPraBilling.content ?? [];
+  const tab2Content = praBillingVsRating.content ?? [];
+  const tab3Content = ratingVsBilling.content ?? [];
+  const tab4Content = billingVsInvoice.content ?? [];
+  const tab5Content = billingVsApproval.content ?? [];
+  const tab7Content = billingVsAdjustment.content ?? [];
+
+  const handleLoadMore1 = makeLoadMore(tab1Content, masterVsPraBilling.totalElements ?? 0, getMasterVsPraBilling);
+  const handleLoadMore2 = makeLoadMore(tab2Content, praBillingVsRating.totalElements ?? 0, getPraBillingVsRating);
+  const handleLoadMore3 = makeLoadMore(tab3Content, ratingVsBilling.totalElements ?? 0, getRatingVsBilling);
+  const handleLoadMore4 = makeLoadMore(tab4Content, billingVsInvoice.totalElements ?? 0, getBillingVsInvoice);
+  const handleLoadMore5 = makeLoadMore(tab5Content, billingVsApproval.totalElements ?? 0, getBillingVsApproval);
+  const handleLoadMore7 = makeLoadMore(tab7Content, billingVsAdjustment.totalElements ?? 0, getBillingVsAdjustment);
 
   const routes = [
     { path: "", breadcrumbName: "Rating & Billing" },
@@ -291,12 +317,12 @@ const MonitoringCustomerPage = () => {
               const isTab7 = tab.key === "7";
 
               const dataSource =
-                isTab1 ? (masterVsPraBilling.content ?? []) :
-                isTab2 ? (praBillingVsRating.content ?? []) :
-                isTab3 ? (ratingVsBilling.content ?? []) :
-                isTab4 ? (billingVsInvoice.content ?? []) :
-                isTab5 ? (billingVsApproval.content ?? []) :
-                isTab7 ? (billingVsAdjustment.content ?? []) : [];
+                isTab1 ? tab1Content :
+                isTab2 ? tab2Content :
+                isTab3 ? tab3Content :
+                isTab4 ? tab4Content :
+                isTab5 ? tab5Content :
+                isTab7 ? tab7Content : [];
 
               const totalData =
                 isTab1 ? (masterVsPraBilling.totalElements ?? 0) :
@@ -311,30 +337,28 @@ const MonitoringCustomerPage = () => {
                 isTab3 ? loadingTab3 : isTab4 ? loadingTab4 :
                 isTab5 ? loadingTab5 : isTab7 ? loadingTab7 : false;
 
-              const tabPageSize =
-                isTab1 ? tab1Size : isTab2 ? tab2Size :
-                isTab3 ? tab3Size : isTab4 ? tab4Size :
-                isTab5 ? tab5Size : isTab7 ? tab7Size : 10;
+              const onLoadMore =
+                isTab1 ? handleLoadMore1 :
+                isTab2 ? handleLoadMore2 :
+                isTab3 ? handleLoadMore3 :
+                isTab4 ? handleLoadMore4 :
+                isTab5 ? handleLoadMore5 :
+                isTab7 ? handleLoadMore7 : undefined;
 
-              const tabCurrent =
-                isTab1 ? tab1Page + 1 : isTab2 ? tab2Page + 1 :
-                isTab3 ? tab3Page + 1 : isTab4 ? tab4Page + 1 :
-                isTab5 ? tab5Page + 1 : isTab7 ? tab7Page + 1 : 1;
+              const hasMore = dataSource.length < totalData;
 
-              const tabOnChange =
-                isTab1 ? (p) => { setTab1Page(p - 1); dispatch(getMasterVsPraBilling({ period: filterPeriod, page: p - 1, size: tab1Size, search: tab1Search })); } :
-                isTab2 ? (p) => { setTab2Page(p - 1); dispatch(getPraBillingVsRating({ period: filterPeriod, page: p - 1, size: tab2Size, search: tab2Search })); } :
-                isTab3 ? (p) => { setTab3Page(p - 1); dispatch(getRatingVsBilling({ period: filterPeriod, page: p - 1, size: tab3Size, search: tab3Search })); } :
-                isTab4 ? (p) => { setTab4Page(p - 1); dispatch(getBillingVsInvoice({ period: filterPeriod, page: p - 1, size: tab4Size, search: tab4Search })); } :
-                isTab5 ? (p) => { setTab5Page(p - 1); dispatch(getBillingVsApproval({ period: filterPeriod, page: p - 1, size: tab5Size, search: tab5Search })); } :
-                isTab6 ? () => {} :
-                isTab7 ? (p) => { setTab7Page(p - 1); dispatch(getBillingVsAdjustment({ period: filterPeriod, page: p - 1, size: tab7Size, search: tab7Search })); } :
-                undefined;
+              // Process columns to ensure key and apply fixed columns
+              const allTabColumns = tab.columns.map((col) => ({
+                ...col,
+                key: col.key || col.dataIndex || col.title,
+              }));
 
-              // Inject noCol dengan konteks pagination yang tepat
-              const columns = tab.columns.map((col) =>
-                col.key === "no" ? makeNoCol(tabCurrent, tabPageSize) : col
-              );
+              const processedColumns = applyFixedColumns(allTabColumns, fixedColumns);
+
+              const columnDefinitions = allTabColumns.map((col) => ({
+                key: col.key || col.dataIndex || col.title,
+                title: col.title,
+              }));
 
               // Tab 6 (Billing Vs Late Charge) belum memiliki API — tampilkan placeholder
               if (isTab6) {
@@ -360,17 +384,23 @@ const MonitoringCustomerPage = () => {
                     <TableRBI
                       idTable={`table-step-${tab.key}`}
                       dataSource={dataSource}
-                      columns={columns}
-                      pageSize={tabPageSize}
-                      current={tabCurrent}
-                      loading={tabLoading}
+                      columns={processedColumns}
                       totalData={totalData}
-                      tableScrolled={{ x: "max-content" }}
-                      usePagination={true}
+                      loading={tabLoading}
+                      tableScrolled={{ x: "max-content", y: 450 }}
+                      usePagination={false}
+                      useInfiniteScroll={true}
+                      onLoadMore={onLoadMore}
+                      hasMore={hasMore}
+                      loadMoreThreshold={20}
+                      showRefresh={true}
+                      onRefresh={handleRefresh}
+                      columnDefinitions={columnDefinitions}
+                      fixedColumns={fixedColumns}
+                      setFixedColumns={setFixedColumns}
                       useSelect={true}
-                      showAdvanceSearch={false}
-                      showSearchBar={false}
-                      onChange={tabOnChange}
+                      showAdvanceSearch={true}
+                      showSearchBar={true}
                     />
                   </div>
                   </div>
