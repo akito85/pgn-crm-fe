@@ -222,11 +222,11 @@ const productClassSlice = createSlice({
       if (Array.isArray(result)) {
         if (isLoadMore) {
           const existingIds = new Set(
-            state.list_productClass.map((it) => it.id)
+            state.list_productClass.map((it) => it.productClassId)
           );
           state.list_productClass = [
             ...state.list_productClass,
-            ...result.filter((it) => !existingIds.has(it.id)),
+            ...result.filter((it) => !existingIds.has(it.productClassId)),
           ];
         } else {
           state.list_productClass = result;

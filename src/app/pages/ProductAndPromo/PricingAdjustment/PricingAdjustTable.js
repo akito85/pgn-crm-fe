@@ -41,13 +41,14 @@ const PricingAdjustTable = () => {
 
   // --- Search / sort / filter state ---
   const searchInput = useRef(null);
-  const [page, setPage] = useState(0);
+  const [page, setPage] = useState(1);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
   const [searchText, setSearchText] = useState("");
   const [filters, setFilters] = useState([]);
   const [filterRules, setFilterRules] = useState([]);
+  const [loadingDownload, setLoadingDownload] = useState(false);
 
   // --- Modal state ---
   const [openModalHistory, setOpenModalHistory] = useState(false);
@@ -90,19 +91,19 @@ const PricingAdjustTable = () => {
   );
 
   const handleRefresh = useCallback(() => {
-    dispatch(getAllPricingAdjustPaginate({ ...buildBody(0), isLoadMore: false }));
-    setPage(0);
+    dispatch(getAllPricingAdjustPaginate({ ...buildBody(1), isLoadMore: false }));
+    setPage(1);
   }, [dispatch, buildBody]);
 
-  // Re-fetch page 0 whenever sort / search / filters change
+  // Re-fetch page 1 whenever sort / search / filters change
   useEffect(() => {
-    dispatch(getAllPricingAdjustPaginate({ ...buildBody(0), isLoadMore: false }));
-    setPage(0);
+    dispatch(getAllPricingAdjustPaginate({ ...buildBody(1), isLoadMore: false }));
+    setPage(1);
   }, [sort, search, searchText, filters, filterRules]); // intentionally omit dispatch/buildBody to avoid loop
 
   const handleLoadMore = () => {
     const nextPage = page + 1;
-    if (nextPage <= (pagination.totalPage || 0)) {
+    if (nextPage <= (pagination.totalPage || 1)) {
       dispatch(getAllPricingAdjustPaginate({ ...buildBody(nextPage), isLoadMore: true }));
     }
     setPage(nextPage);
@@ -113,7 +114,7 @@ const PricingAdjustTable = () => {
     confirm();
     setSearchedColumn(dataIndex);
     setSearch((prev) => {
-      if (prev[dataIndex] !== selectedKeys[0]) setPage(0);
+      if (prev[dataIndex] !== selectedKeys[0]) setPage(1);
       return { ...prev, [dataIndex]: selectedKeys[0] };
     });
   };
@@ -132,12 +133,13 @@ const PricingAdjustTable = () => {
   const handleAdvancedSearch = (searchData) => {
     setFilters(searchData?.filters || []);
     setFilterRules(searchData?.filterRules || []);
-    setPage(0);
+    setPage(1);
   };
 
-  const handleDownload = useCallback(() => {
-    dispatch(downloadPriceAdjust({
-      page: 0,
+  const handleDownload = useCallback(async () => {
+    setLoadingDownload(true);
+    await dispatch(downloadPriceAdjust({
+      page: 1,
       pageSize: PAGE_SIZE,
       sort,
       search,
@@ -145,6 +147,7 @@ const PricingAdjustTable = () => {
       filters,
       filterRules,
     }));
+    setLoadingDownload(false);
   }, [dispatch, sort, search, searchText, filters, filterRules]);
 
   const handleApprovalHistory = (data) => {
@@ -221,7 +224,8 @@ const PricingAdjustTable = () => {
     handleActivate: handleOpenModalInactivate,
     handleApprovalHistory,
     handleDownload,
-  }), [handleDownload, handleOpenModalInactivate, handleApprovalHistory]);
+    loadingDownload,
+  }), [handleDownload, handleOpenModalInactivate, handleApprovalHistory, loadingDownload]);
 
   // --- Columns ---
   const actionCols = useColumnActionPermission(
