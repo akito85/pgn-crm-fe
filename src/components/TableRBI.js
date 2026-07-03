@@ -111,27 +111,27 @@ const TableRBI = ({
   pageSize,
   current,
   loading,
-  onChange = () => { },
-  onSizeChanger = () => { },
+  onChange = () => {},
+  onSizeChanger = () => {},
   totalData,
   onDelete,
   rowSelection,
-  onRowClicked = () => { },
+  onRowClicked = () => {},
   tableScrolled,
   expandable,
   className,
   useSelect = true,
   usePagination = true,
   useInfiniteScroll = false,
-  onLoadMore = () => { },
+  onLoadMore = () => {},
   hasMore = false,
   loadMoreThreshold = 20,
-  onSort = () => { },
-  handleDownload = () => { },
+  onSort = () => {},
+  handleDownload = () => {},
   columnDefinitions,
   fixedColumns = { left: [], right: [] },
-  setFixedColumns = () => { },
-  onAdvanceSearch = () => { },
+  setFixedColumns = () => {},
+  onAdvanceSearch = () => {},
   onRow,
   rowClassName,
   customHeaderLeft,
@@ -144,8 +144,8 @@ const TableRBI = ({
   refreshIcon,
   enableRowClick = false,
   selectedRowKey = null,
-  onRowClick = () => { },
-  onSearch = () => { },
+  onRowClick = () => {},
+  onSearch = () => {},
   tableSize = "default",
   summary,
   rowKey,
@@ -167,6 +167,7 @@ const TableRBI = ({
   const lastScrollTopRef = React.useRef(0);
 
   const tableRef = React.useRef(null);
+  const containerRef = React.useRef(null);
 
   // Fungsi helper untuk mengumpulkan semua keys dari kolom (termasuk children)
   const getAllColumnKeys = useCallback((cols) => {
@@ -193,6 +194,23 @@ const TableRBI = ({
       setColumnOrder(initialOrder);
     }
   }, [columns, columnOrder.length, getAllColumnKeys]);
+
+  // Apply border-radius to table
+  React.useLayoutEffect(() => {
+    if (!containerRef.current) return;
+    const antTable = containerRef.current.querySelector(
+      `#${idTable} .ant-table`,
+    );
+    const antTableContainer = containerRef.current.querySelector(
+      `#${idTable} .ant-table-container`,
+    );
+    // Apply border-radius only to top corners if footer exists, otherwise all corners
+    const radius = usePagination || useInfiniteScroll ? "8px 8px 0 0" : "8px";
+    if (antTable)
+      antTable.style.setProperty("border-radius", radius, "important");
+    if (antTableContainer)
+      antTableContainer.style.setProperty("border-radius", radius, "important");
+  }, [idTable, usePagination, useInfiniteScroll]);
 
   // Infinite scroll handler
   React.useEffect(() => {
@@ -613,7 +631,7 @@ const TableRBI = ({
   );
 
   return (
-    <div className={"flex flex-col w-full"}>
+    <div ref={containerRef} className={"flex flex-col w-full"}>
       <style>
         {`
         #${idTable} .ant-table-content {
@@ -651,11 +669,40 @@ const TableRBI = ({
           z-index: 3;
         }
 
+        /* Table shape & borders */
+        #${idTable} .ant-table {
+          border-radius: 8px 8px 0 0 !important;
+          overflow: hidden !important;
+          border: none !important;
+          border-collapse: collapse;
+          border-spacing: 0;
+        }
+
+        #${idTable} .ant-table-container {
+          border-radius: 8px 8px 0 0 !important;
+          overflow: hidden !important;
+          border: none !important;
+        }
+
+        #${idTable} .ant-table-container table > thead > tr:first-child > *:first-child {
+          border-start-start-radius: 8px !important;
+          border-left: 1px solid #C8CDD4 !important;
+        }
+
+        #${idTable} .ant-table-container table > thead > tr:first-child > *:last-child {
+          border-start-end-radius: 8px !important;
+          border-right: 1px solid #C8CDD4 !important;
+        }
+
+        /* Header borders */
         #${idTable} .ant-table-thead > tr > th {
           position: relative;
           z-index: 4;
-          background-color: #0075BF !important;
+          background-color: #2C6FAD !important;
           color: white !important;
+          border-right: 1px solid rgba(255, 255, 255, 0.2) !important;
+          border-bottom: 1px solid #C8CDD4 !important;
+          border-top: 1px solid #C8CDD4 !important;
         }
 
         #${idTable} .ant-table-thead > tr > th .ant-table-column-sorter {
@@ -666,10 +713,24 @@ const TableRBI = ({
           color: white !important;
         }
 
+        /* Cell borders */
+        #${idTable} .ant-table-tbody > tr > td {
+          border-right: 1px solid #C8CDD4 !important;
+          border-bottom: 1px solid #C8CDD4 !important;
+        }
+
+        #${idTable} .ant-table-tbody > tr > td:first-child {
+          border-left: 1px solid #C8CDD4 !important;
+        }
+
+        #${idTable} .ant-table-tbody > tr > td:last-child {
+          border-right: 1px solid #C8CDD4 !important;
+        }
+
         #${idTable} .ant-table-thead .ant-table-cell-fix-left,
         #${idTable} .ant-table-thead .ant-table-cell-fix-right {
           z-index: 5;
-          background-color: #0075BF !important;
+          background-color: #2C6FAD !important;
           color: white !important;
         }
 
@@ -807,7 +868,11 @@ const TableRBI = ({
             <div className="flex justify-end gap-2 items-center">
               {showRefresh && (
                 <Button
-                  icon={refreshIcon || <ReloadOutlined style={{ fontSize: "14px" }} />}
+                  icon={
+                    refreshIcon || (
+                      <ReloadOutlined style={{ fontSize: "14px" }} />
+                    )
+                  }
                   onClick={handleRefresh}
                   loading={loading}
                   style={{
@@ -841,10 +906,7 @@ const TableRBI = ({
 
               {showSearchBar && (
                 <div style={{ width: "250px" }}>
-                  <SearchBar
-                    placeholder="Search Content"
-                    onChange={onSearch}
-                  />
+                  <SearchBar placeholder="Search Content" onChange={onSearch} />
                 </div>
               )}
             </div>
@@ -874,7 +936,25 @@ const TableRBI = ({
       />
 
       {useInfiniteScroll ? (
-        <div className={"w-full flex justify-end mt-3 items-center"}>
+        <div
+          style={{
+            position: "relative",
+            zIndex: "1",
+            marginTop: "-1px",
+            borderTop: "1px solid #C8CDD4",
+            borderLeft: "1px solid #C8CDD4",
+            borderRight: "1px solid #C8CDD4",
+            borderBottom: "1px solid #C8CDD4",
+            borderRadius: "0 0 8px 8px",
+            background: "#fff",
+            padding: "6px 12px",
+            display: "flex",
+            justifyContent: "flex-end",
+            alignItems: "center",
+            gap: "8px",
+            width: "100%",
+          }}
+        >
           <span style={{ fontSize: "12px", color: "#666" }}>
             Showing {dataSource?.length || 0} rows
             {isLoadingMore && " | Loading..."}
@@ -887,7 +967,24 @@ const TableRBI = ({
           </span>
         </div>
       ) : usePagination ? (
-        <div className={"w-full flex justify-between mt-3 items-center"}>
+        <div
+          style={{
+            position: "relative",
+            zIndex: "1",
+            marginTop: "-1px",
+            borderTop: "1px solid #C8CDD4",
+            borderLeft: "none",
+            borderRight: "none",
+            borderBottom: "1px solid #C8CDD4",
+            borderRadius: "0 0 8px 8px",
+            background: "#fff",
+            padding: "6px 12px",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            width: "100%",
+          }}
+        >
           <div className="flex items-center gap-3">
             <Select
               value={pageSize}
