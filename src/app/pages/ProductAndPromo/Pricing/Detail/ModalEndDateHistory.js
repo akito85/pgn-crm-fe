@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import CardComponent from "../../../../../components/Card/CardComponent";
 import DetailText from "../../../../../components/DetailText";
@@ -109,15 +109,10 @@ const ModalEndDateHistory = ({
   const searchInput = useRef(null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [totalElements, setTotalElement] = useState(0);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [fieldSort, setFieldSort] = useState("");
   const [orderSort, setOrderSort] = useState("");
-
-  useEffect(() => {
-    setTotalElement(dataTable.length);
-  }, [dataTable]);
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -164,32 +159,11 @@ const ModalEndDateHistory = ({
       setOrderSort("");
     }
   };
-  const filterDataByPage = () => {
-    let result = [...dataTable];
-    if (searchedColumn) {
-      const fixSearchText = searchText.toLowerCase();
-      result = result.filter((item) => {
-        return item[searchedColumn]?.toLowerCase().includes(fixSearchText);
-      });
-    }
-    const handleDataSort = (obj) => {
-      return obj[fieldSort]?.toLowerCase();
-    };
-    if (fieldSort) {
-      result.sort((a, b) => {
-        let fa = handleDataSort(a);
-        let fb = handleDataSort(b);
-        if (fa < fb) {
-          return orderSort === "asc" ? -1 : 1;
-        }
-        if (fa > fb) {
-          return orderSort === "asc" ? 1 : -1;
-        }
-        return 0;
-      });
-    }
-    return result.slice((page - 1) * pageSize, page * pageSize);
-  };
+  const filteredSortedData = computeDisplayData();
+  const displayData = filteredSortedData.slice(
+    (page - 1) * pageSize,
+    page * pageSize
+  );
   return (
     <ModalCustom
       isOpen={openModal}
@@ -215,8 +189,8 @@ const ModalEndDateHistory = ({
         </CardComponent>
         <NxTable
           idTable="end-date-history-table"
-          dataSource={computeDisplayData()}
-          totalData={computeDisplayData().length}
+          dataSource={displayData}
+          totalData={filteredSortedData.length}
           current={page}
           pageSize={pageSize}
           tableScrolled={{ y: 300, x: true }}
@@ -232,6 +206,7 @@ const ModalEndDateHistory = ({
           onSort={onSort}
           usePagination={true}
           showSearchBar={false}
+          showAdvanceSearch={false}
         />
       </div>
     </ModalCustom>
