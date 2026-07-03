@@ -330,6 +330,7 @@ const PricingAdjustTable = () => {
         dispatch={dispatch}
         getAPIOption={getListAppHier}
         getAPIDetail={getListAppHierDetail}
+        selector={"pricingAdjust"}
         alertMessage={`Are you sure you want to inactivate Pricing Adjustment with ID ${dataInactivate?.id || ""}?`}
         openModalInactivate={openModalInactivate}
         handleCloseModalInactivate={handleCancelModalInactivate}
