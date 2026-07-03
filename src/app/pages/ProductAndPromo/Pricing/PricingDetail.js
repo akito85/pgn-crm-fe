@@ -27,6 +27,7 @@ import LayoutContentTab from "./Detail/LayoutContentTab";
 import { ModalError } from "../../../../components/Modal/ModalPopUp";
 import SVGIcon from "../../../../assets/Icon/index";
 import { dateFormatting } from "../../../../utils";
+import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 
 const routes = [
   {
@@ -338,8 +339,7 @@ const PricingDetail = (props) => {
     setTypePricingDetail(listSectionPricingDetail[0].value);
     setTypePricingInfo(temp);
   };
-  const handlePricingDetail = (e) => {
-    const temp = e.target.value;
+  const handlePricingDetail = (temp) => {
     if (temp === listSectionPricingDetail[1].value) {
       setDataDetailSelected({});
     }
@@ -457,7 +457,7 @@ const PricingDetail = (props) => {
             onChange={handlePricingInfo}
             currentPosition={typePricingInfo}
           />
-          <BaseContainer
+          <NxCardContainer
             header={`${
               typePricingInfo === "Draft"
                 ? "PRICING"
@@ -465,7 +465,7 @@ const PricingDetail = (props) => {
             } INFORMATION`}
           >
             {showSection()}
-          </BaseContainer>
+          </NxCardContainer>
           {typePricingInfo === listSectionInfo[0].value ? (
             <LayoutContentTab
               key={"active-detail"}
