@@ -8,6 +8,7 @@ import { getColumnSearchPropsPaging } from "../../../../../../utils/getColumnSea
 import { columnsTableCriteria } from "../../columnTableCriteria";
 import { columnsTableCriteriaAll } from "../../../UtilsProduct/TableCriteriaAllProduct";
 import FunctionalCriteriaProduct from"../../../UtilsProduct/FunctionalCriteriaProduct";
+import NxBaseContainer from "../../../../../../components/Nx/NxBaseContainer";
 
 const onFilter = (dataIndex, value, record) => {
   const search = value.toLowerCase();
@@ -232,7 +233,7 @@ const PDITargetAccountSelling = ({
     );
   };
   return (
-    <div className="flex flex-col gap-4">
+    <NxBaseContainer border>
       <div className="grid grid-cols-4 gap-2 w-full">
         <DetailText label={"Name"}>{dataObject.name}</DetailText>
         <DetailText label={"Criteria"}>{valueCriteria()}</DetailText>
@@ -284,7 +285,9 @@ const PDITargetAccountSelling = ({
         //   )}
         // />
       ) : null}
-    </div>
+    </NxBaseContainer>
+    // <div className="flex flex-col gap-4">
+    // </div>
   );
 };
 

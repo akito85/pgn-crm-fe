@@ -27,6 +27,8 @@ import TablePaginationNew from "../../../../../components/TablePaginationNew";
 import ToolbarDynamic from "../../UtilsProduct/ToolbarDynamic";
 import { useColumnActionPermissionDynamic } from "../../UtilsProduct/useColumnActionPermissionDynamic";
 import NxTable from "../../../../../components/Nx/NxTable";
+import NxCardContainer from "../../../../../components/Nx/NxCardContainer";
+import NxBaseContainer from "../../../../../components/Nx/NxBaseContainer";
 
 const onFilter = (dataIndex, value, record) => {
   const search = value.toLowerCase();
@@ -1149,182 +1151,184 @@ const ProductVersionInformation = ({
   };
   // console.log(dataTable, "dataTable")
   return (
-    <BaseContainer header={"PRODUCT VERSION INFORMATION"}>
-      <div className="flex flex-col w-full gap-3">
-        {/* <div className="flex w-full justify-end">
-          <NavLink
-            to={PRODUCT_PROMO_ROUTES.CREATE_PRODUCT}
-            state={{ prevPage: "detail-product", idParent: idProduct }}
-          >
-            <ButtonComponent
-              icon={<SVGIcon name="IconButtonCreate" width={24} />}
-              type="submit"
-              disabled={
-                !editableProduct ||
-                dataTable.some(
-                  (item) =>
-                    item.status === "DRAFT" ||
-                    item.status === "WAITING FOR RELEASE"
-                )
-              }
-              onClick={handleCreate}
+    <NxCardContainer header={"PRODUCT VERSION INFORMATION"}>
+      {/* <NxBaseContainer border> */}
+        <div className="flex flex-col w-full gap-3">
+          {/* <div className="flex w-full justify-end">
+            <NavLink
+              to={PRODUCT_PROMO_ROUTES.CREATE_PRODUCT}
+              state={{ prevPage: "detail-product", idParent: idProduct }}
             >
-              Create
-            </ButtonComponent>
-          </NavLink>
-        </div> */}
-        <ToolbarDynamic
-          items={itemsActionView(
-            idProduct,
-            editableProduct,
-            dataTable,
-            handleCreate,
-            updateActiveProduct,
-            handleExtendTerminate,
-            handleRelease,
-            handleApprovalHistory
-          )}
-          selector={"product"}
-          url={"/product-promo/detail-product"}
-        />
-        <NxTable
-          idTable={"product-version-information"}
-          userId={dataUser?.data?.username}
-          type="FE"
-          dataSource={dataTable}
-          totalData={totalElements}
-          current={page}
-          showAdvanceSearch={false}
-          showSearchBar={false}
-          usePagination={false}
-          useInfiniteScroll={true}
-          pageSize={pageSize}
-          tableScrolled={{ y: 525, x: 2300 }}
-          onChange={handleChangeSize}
-          columns={[
-            ...columns({
-              page,
-              pageSize,
-              searchInput,
-              searchedColumn,
-              searchText,
-              handleSearch,
-              search,
+              <ButtonComponent
+                icon={<SVGIcon name="IconButtonCreate" width={24} />}
+                type="submit"
+                disabled={
+                  !editableProduct ||
+                  dataTable.some(
+                    (item) =>
+                      item.status === "DRAFT" ||
+                      item.status === "WAITING FOR RELEASE"
+                  )
+                }
+                onClick={handleCreate}
+              >
+                Create
+              </ButtonComponent>
+            </NavLink>
+          </div> */}
+          <ToolbarDynamic
+            items={itemsActionView(
+              idProduct,
               editableProduct,
+              dataTable,
+              handleCreate,
               updateActiveProduct,
               handleExtendTerminate,
               handleRelease,
-              handleApprovalHistory,
-              idProduct,
-            }),
-            ...useColumnActionPermissionDynamic(
-              "/product-promo/detail-product",
-              "product",
-              ["Update", "Extend", "Terminate", "Release", "History", "View"],
-              itemsActionView(
-                idProduct,
+              handleApprovalHistory
+            )}
+            selector={"product"}
+            url={"/product-promo/detail-product"}
+          />
+          <NxTable
+            idTable={"product-version-information"}
+            userId={dataUser?.data?.username}
+            type="FE"
+            dataSource={dataTable}
+            totalData={totalElements}
+            current={page}
+            showAdvanceSearch={false}
+            showSearchBar={false}
+            usePagination={false}
+            useInfiniteScroll={true}
+            pageSize={pageSize}
+            tableScrolled={{ y: 525, x: 2300 }}
+            onChange={handleChangeSize}
+            columns={[
+              ...columns({
+                page,
+                pageSize,
+                searchInput,
+                searchedColumn,
+                searchText,
+                handleSearch,
+                search,
                 editableProduct,
-                dataTable,
-                handleCreate,
                 updateActiveProduct,
                 handleExtendTerminate,
                 handleRelease,
-                handleApprovalHistory
+                handleApprovalHistory,
+                idProduct,
+              }),
+              ...useColumnActionPermissionDynamic(
+                "/product-promo/detail-product",
+                "product",
+                ["Update", "Extend", "Terminate", "Release", "History", "View"],
+                itemsActionView(
+                  idProduct,
+                  editableProduct,
+                  dataTable,
+                  handleCreate,
+                  updateActiveProduct,
+                  handleExtendTerminate,
+                  handleRelease,
+                  handleApprovalHistory
+                ),
+                "view"
               ),
-              "view"
-            ),
-          ]}
-        />
-      </div>
-      {/* Modal Release */}
-      <ModalApproveOrReject
-        isOpen={modalRelease}
-        handleCloseModal={handleCloseModalRelease}
-        onFinish={handleConfirmRelease}
-        header={`Release Information`}
-        approveOrReject={"Release"}
-        menu={"Product Version"}
-        named={`Product Version ${dataSelected?.version}`}
-        loading={loadingRelease}
-        // isOpen={modalRelease}
-        // header={`Release Information`}
-        // message={`Are you sure you want to release this Product Version?`}
-        // width={1000}
-        // handleCancel={handleCloseModalRelease}
-        // footer={
-        //   <div className={"w-full flex justify-end gap-5"}>
-        //     <ButtonComponent type={"default"} onClick={handleCloseModalRelease}>
-        //       Cancel
-        //     </ButtonComponent>
-        //     <ButtonComponent
-        //       form={"formRelease"}
-        //       type={"submit"}
-        //       htmlType={"submit"}
-        //       border={false}
-        //     >
-        //       Confirm
-        //     </ButtonComponent>
-        //   </div>
-        // }
-      />
-      {/* <Form name="formRelease" form={form} onFinish={handleConfirmRelease}>
-          <Form.Item
-            name={"remark"}
-            rules={[{ message: requiredMessage("Remark"), required: true }]}
-          >
-            <InputComponent
-              rows={1}
-              placeholder="Type your remark"
-              type="textarea"
-              value={remark}
-              onChange={(e) => setRemark(e.target.value)}
-            />
-          </Form.Item>
-        </Form>
-      </ModalApproveOrReject> */}
-
-      {/** Modal Extend Terminate */}
-      <ModalExtendTerminate
-        type={extendOrTerminate}
-        header={`${
-          extendOrTerminate === "extend" ? "Extend" : "Terminate"
-        } Information`}
-        handleCloseModal={handleCloseModalExtendTerminate}
-        handleSubmit={handleConfirmExtendTerminate}
-        openModalExtendTerminate={modalExtendTerminate}
-        selectedProduct={dataSelected}
-        objProductVersion={dataProductInfo}
-      />
-
-      <ModalHistory
-        isOpen={openModalHistory && dataApprovalHistory}
-        handleClose={() => setOpenModalHistory(false)}
-        header={"Approval History"}
-        width={850}
-        tabOptions={handleOptions()}
-        dataApprover={dataApprovalHistory?.dataApprover}
-        dataHistory={dataApprovalHistory?.dataHistory}
-      />
-
-      {/** Modal Retry */}
-      <ModalError
-        isOpen={modalError}
-        handleOk={handleRetry}
-        handleCancel={handleCloseModalError}
-        customText={"Try Again"}
-      >
-        <div className="px-5 pt-5 pb-[10px] justify-center">
-          <div className="w-full flex gap-[20px]">
-            <SVGIcon name="IconFailed" width={48} />
-            <p className="text-[18px] font-bold">{"Failed"}</p>
-          </div>
-          <p className="pl-[70px]">{`Your data was not ${
-            bodyError.type === "release" ? "released" : "submitted"
-          }. ${bodyError.message}.`}</p>
-          <p className="pl-[70px]">Please try again.</p>
+            ]}
+          />
         </div>
-      </ModalError>
-    </BaseContainer>
+        {/* Modal Release */}
+        <ModalApproveOrReject
+          isOpen={modalRelease}
+          handleCloseModal={handleCloseModalRelease}
+          onFinish={handleConfirmRelease}
+          header={`Release Information`}
+          approveOrReject={"Release"}
+          menu={"Product Version"}
+          named={`Product Version ${dataSelected?.version}`}
+          loading={loadingRelease}
+          // isOpen={modalRelease}
+          // header={`Release Information`}
+          // message={`Are you sure you want to release this Product Version?`}
+          // width={1000}
+          // handleCancel={handleCloseModalRelease}
+          // footer={
+          //   <div className={"w-full flex justify-end gap-5"}>
+          //     <ButtonComponent type={"default"} onClick={handleCloseModalRelease}>
+          //       Cancel
+          //     </ButtonComponent>
+          //     <ButtonComponent
+          //       form={"formRelease"}
+          //       type={"submit"}
+          //       htmlType={"submit"}
+          //       border={false}
+          //     >
+          //       Confirm
+          //     </ButtonComponent>
+          //   </div>
+          // }
+        />
+        {/* <Form name="formRelease" form={form} onFinish={handleConfirmRelease}>
+            <Form.Item
+              name={"remark"}
+              rules={[{ message: requiredMessage("Remark"), required: true }]}
+            >
+              <InputComponent
+                rows={1}
+                placeholder="Type your remark"
+                type="textarea"
+                value={remark}
+                onChange={(e) => setRemark(e.target.value)}
+              />
+            </Form.Item>
+          </Form>
+        </ModalApproveOrReject> */}
+
+        {/** Modal Extend Terminate */}
+        <ModalExtendTerminate
+          type={extendOrTerminate}
+          header={`${
+            extendOrTerminate === "extend" ? "Extend" : "Terminate"
+          } Information`}
+          handleCloseModal={handleCloseModalExtendTerminate}
+          handleSubmit={handleConfirmExtendTerminate}
+          openModalExtendTerminate={modalExtendTerminate}
+          selectedProduct={dataSelected}
+          objProductVersion={dataProductInfo}
+        />
+
+        <ModalHistory
+          isOpen={openModalHistory && dataApprovalHistory}
+          handleClose={() => setOpenModalHistory(false)}
+          header={"Approval History"}
+          width={850}
+          tabOptions={handleOptions()}
+          dataApprover={dataApprovalHistory?.dataApprover}
+          dataHistory={dataApprovalHistory?.dataHistory}
+        />
+
+        {/** Modal Retry */}
+        <ModalError
+          isOpen={modalError}
+          handleOk={handleRetry}
+          handleCancel={handleCloseModalError}
+          customText={"Try Again"}
+        >
+          <div className="px-5 pt-5 pb-[10px] justify-center">
+            <div className="w-full flex gap-[20px]">
+              <SVGIcon name="IconFailed" width={48} />
+              <p className="text-[18px] font-bold">{"Failed"}</p>
+            </div>
+            <p className="pl-[70px]">{`Your data was not ${
+              bodyError.type === "release" ? "released" : "submitted"
+            }. ${bodyError.message}.`}</p>
+            <p className="pl-[70px]">Please try again.</p>
+          </div>
+        </ModalError>
+      {/* </NxBaseContainer> */}
+    </NxCardContainer>
   );
 };
 

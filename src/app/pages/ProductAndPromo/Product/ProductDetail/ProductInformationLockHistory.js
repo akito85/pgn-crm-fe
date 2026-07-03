@@ -38,22 +38,6 @@ const columns = (
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {
-      title: "ACTION",
-      key: "action",
-      width: 200,
-      align: "left",
-      dataIndex: "lockType",
-      onFilter: (value, record) => onFilter("lockType", value, record),
-      sorter: (a, b) => sorter("lockType", a, b),
-      ...getColumnSearchPropsPaging(
-        "lockType",
-        searchInput,
-        searchedColumn,
-        searchText,
-        handleSearch
-      ),
-    },
-    {
       title: "ACTION BY",
       key: "actionBy",
       width: 200,
@@ -129,6 +113,22 @@ const columns = (
           return "";
         }
       },
+    },
+    {
+      title: "ACTION",
+      key: "action",
+      width: 200,
+      align: "left",
+      dataIndex: "lockType",
+      onFilter: (value, record) => onFilter("lockType", value, record),
+      sorter: (a, b) => sorter("lockType", a, b),
+      ...getColumnSearchPropsPaging(
+        "lockType",
+        searchInput,
+        searchedColumn,
+        searchText,
+        handleSearch
+      ),
     },
   ];
 

@@ -13,6 +13,7 @@ import DetailText from "../../../../../components/DetailText";
 import SVGIcon from "../../../../../assets/Icon/index";
 import NxTable from "../../../../../components/Nx/NxTable";
 import { useSelector } from "react-redux";
+import NxCardContainer from "../../../../../components/Nx/NxCardContainer";
 
 const onFilter = (dataIndex, value, record) => {
   const search = value.toLowerCase();
@@ -458,7 +459,7 @@ const ProductExtendTerminate = ({ data = [] }) => {
 
   return (
     <Fragment>
-      <BaseContainer header={"EXTEND & TERMINATE HISTORY"}>
+      <NxCardContainer header={"EXTEND & TERMINATE HISTORY"}>
         <NxTable
           idTable={"product-information-extend-terminate"}
           userId={dataUser?.data?.username}
@@ -483,7 +484,7 @@ const ProductExtendTerminate = ({ data = [] }) => {
             handleSelectedDetail
           )}
         />
-      </BaseContainer>
+      </NxCardContainer>
       {modalDetail ? (
         <ModalCustom
           isOpen={modalDetail}
