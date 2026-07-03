@@ -229,6 +229,22 @@ const ProductClassView = () => {
     [sort, search, searchText, filters, filterRules, limitData]
   );
 
+  const buildBodyDownload = useCallback(
+    (pageNum) => ({
+      page: pageNum,
+      // Download always fetches every matching record regardless of the
+      // "limit data" advanced-search filter (that only caps the table view) —
+      // totalElement reflects the full count for the current search/filters.
+      pageSize: totalElement || PAGE_SIZE,
+      sort,
+      search,
+      searchText,
+      filters,
+      filterRules,
+    }),
+    [sort, search, searchText, filters, filterRules, totalElement]
+  );
+
   const handleRefresh = useCallback(() => {
     dispatch(getAllProductClassPaginate({ ...buildBody(1), isLoadMore: false }));
     setPage(1);
@@ -298,7 +314,7 @@ const ProductClassView = () => {
   // Handle Download
   const handleDownload = async () => {
     setLoadingDownload(true);
-    await dispatch(downloadProductClass({ ...buildBody(1) }));
+    await dispatch(downloadProductClass({ ...buildBodyDownload(1) }));
     setLoadingDownload(false);
   };
 

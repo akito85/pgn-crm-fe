@@ -87,6 +87,22 @@ const TermOfServiceView = () => {
     [sort, search, searchText, filters, filterRules, limitData]
   );
 
+  const buildBodyDownload = useCallback(
+    (pageNum) => ({
+      page: pageNum,
+      // Download always fetches every matching record regardless of the
+      // "limit data" advanced-search filter (that only caps the table view) —
+      // totalElement reflects the full count for the current search/filters.
+      pageSize: totalElement || PAGE_SIZE,
+      sort,
+      search,
+      searchText,
+      filters,
+      filterRules,
+    }),
+    [sort, search, searchText, filters, filterRules, totalElement]
+  );
+
   const handleRefresh = useCallback(() => {
     dispatch(getAllTosPaginate({ ...buildBody(1), isLoadMore: false }));
     setPage(1);
@@ -309,7 +325,7 @@ const TermOfServiceView = () => {
   // Handle Download
   const handleDownload = async () => {
     setLoadingDownload(true);
-    await dispatch(downloadTOS({ ...buildBody(1) }));
+    await dispatch(downloadTOS({ ...buildBodyDownload(1) }));
     setLoadingDownload(false);
   };
 

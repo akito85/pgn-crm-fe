@@ -141,7 +141,10 @@ const PricingAdjustTable = () => {
     setLoadingDownload(true);
     await dispatch(downloadPriceAdjust({
       page: 1,
-      pageSize: PAGE_SIZE,
+      // Download always fetches every matching record regardless of the
+      // table's page size — totalElement reflects the full count for the
+      // current search/filters.
+      pageSize: totalElement || PAGE_SIZE,
       sort,
       search,
       searchText,
@@ -149,7 +152,7 @@ const PricingAdjustTable = () => {
       filterRules,
     }));
     setLoadingDownload(false);
-  }, [dispatch, sort, search, searchText, filters, filterRules]);
+  }, [dispatch, sort, search, searchText, filters, filterRules, totalElement]);
 
   const handleApprovalHistory = (data) => {
     dispatch(getApprovalHistory(data.id));
