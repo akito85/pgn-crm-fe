@@ -34,6 +34,7 @@ const PAGE_SIZE = 20;
 const formatStatus = (value) => {
   switch (value) {
     case "WAITING APPROVAL":
+    case "WAITING FOR APPROVAL":
     case "WAITING_FOR_APPROVAL":
     case "WAITING_APPROVAL":
       return "Waiting Approval";

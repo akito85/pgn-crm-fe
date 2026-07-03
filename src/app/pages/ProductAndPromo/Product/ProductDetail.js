@@ -382,7 +382,10 @@ const ProductDetail = () => {
                       key: listSectionInfo[1].value,
                       label: listSectionInfo[1].value,
                       children: (
-                        <ProductInformationLockHistory data={dataListLockHistory || []} />
+                        <ProductInformationLockHistory
+                          data={dataListLockHistory || []}
+                          idProduct={id}
+                        />
                       ),
                     },
                   ]}

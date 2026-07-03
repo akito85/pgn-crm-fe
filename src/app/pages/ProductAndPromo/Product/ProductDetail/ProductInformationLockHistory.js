@@ -134,7 +134,7 @@ const columns = (
 
   return result;
 };
-const ProductInformationLockHistory = ({ data = [] }) => {
+const ProductInformationLockHistory = ({ data = [], idProduct }) => {
   const searchInput = useRef(null);
   const [dataTable, setDataTable] = useState([]);
   const [page, setPage] = useState(1);
@@ -171,7 +171,11 @@ const ProductInformationLockHistory = ({ data = [] }) => {
   return (
     <div className="flex flex-col w-full mt-4">
       <NxTable
-        idTable={"product-information-lock-history"}
+        idTable={
+          idProduct
+            ? `product-information-lock-history-${idProduct}`
+            : "product-information-lock-history"
+        }
         userId={dataUser?.data?.username}
         showAdvanceSearch={false}
         showSearchBar={false}

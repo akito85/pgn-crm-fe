@@ -8,7 +8,6 @@ const PricingLogInformationDetail = ({ data }) => {
   return (
     <NxBaseContainer border>
       <div className="w-full grid grid-cols-5 gap-5">
-        {console.log(data, "data")}
         <DetailText label="Record ID">{data?.recordId}</DetailText>
         <DetailText label={"Created Date"}>
           {moment(data.createdDate).format(dateFormatting.dateTime)}
