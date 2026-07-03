@@ -177,6 +177,7 @@ const TableAttachment = ({
         pageSize={pageSize}
         tableScrolled={{ y: 300, x: 1500 }}
         onChange={handleChangeSize}
+        onSizeChanger={handleChangeSize}
         onSort={onSort}
         columns={columnAttachmentData(
           page,
@@ -188,6 +189,7 @@ const TableAttachment = ({
           previewFileAttachment
         )}
         showAdvanceSearch={false}
+        showSearchBar={false}
       />
     </div>
   );
