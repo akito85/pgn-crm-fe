@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import TablePagination from "../../../../../components/TablePagination";
+import NxTable from "../../../../../components/Nx/NxTable";
 import { getColumnSearchProps } from "../../../../../utils/getColumnSearchProps";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
@@ -169,7 +169,8 @@ const TableAttachment = ({
   };
   return (
     <div className="flex flex-col w-full gap-3">
-      <TablePagination
+      <NxTable
+        idTable={"table-attachment-pricing-detail"}
         dataSource={dataTable}
         totalData={totalElements}
         current={page}
@@ -186,6 +187,7 @@ const TableAttachment = ({
           handleSearch,
           previewFileAttachment
         )}
+        showAdvanceSearch={false}
       />
     </div>
   );
