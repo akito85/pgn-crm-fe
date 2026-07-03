@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import CardComponent from "../../../../../components/Card/CardComponent";
 import DetailText from "../../../../../components/DetailText";
-import TablePagination from "../../../../../components/TablePagination";
+import NxTable from "../../../../../components/Nx/NxTable";
 import { getColumnSearchProps } from "../../../../../utils/getColumnSearchProps";
 import Highlighter from "react-highlight-words";
 import { Tooltip } from "antd";
@@ -128,6 +128,33 @@ const ModalEndDateHistory = ({
     setPage(pageSize !== pageSizeChange ? 1 : pageChange);
     setPageSize(pageSizeChange);
   };
+
+  const computeDisplayData = () => {
+    let result = [...dataTable];
+    if (searchedColumn) {
+      const fixSearchText = searchText.toLowerCase();
+      result = result.filter((item) => {
+        return item[searchedColumn]?.toLowerCase().includes(fixSearchText);
+      });
+    }
+    const handleDataSort = (obj) => {
+      return obj[fieldSort]?.toLowerCase();
+    };
+    if (fieldSort) {
+      result.sort((a, b) => {
+        let fa = handleDataSort(a);
+        let fb = handleDataSort(b);
+        if (fa < fb) {
+          return orderSort === "asc" ? -1 : 1;
+        }
+        if (fa > fb) {
+          return orderSort === "asc" ? 1 : -1;
+        }
+        return 0;
+      });
+    }
+    return result;
+  };
   const onSort = (_, __, sort) => {
     if (sort.order) {
       setFieldSort(sort.field);
@@ -186,9 +213,10 @@ const ModalEndDateHistory = ({
             {dataObj.description}
           </DetailText>
         </CardComponent>
-        <TablePagination
-          dataSource={filterDataByPage()}
-          totalData={totalElements}
+        <NxTable
+          idTable="end-date-history-table"
+          dataSource={computeDisplayData()}
+          totalData={computeDisplayData().length}
           current={page}
           pageSize={pageSize}
           tableScrolled={{ y: 300, x: true }}
@@ -202,6 +230,8 @@ const ModalEndDateHistory = ({
             handleSearch
           )}
           onSort={onSort}
+          usePagination={true}
+          showSearchBar={false}
         />
       </div>
     </ModalCustom>
