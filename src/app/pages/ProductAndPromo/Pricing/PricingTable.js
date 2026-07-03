@@ -1,7 +1,7 @@
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
-import { Checkbox, Tooltip } from "antd";
+import { Button, Checkbox, Tooltip } from "antd";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import SVGIcon from "../../../../assets/Icon/index";
 import Toolbar from "../../../../components/Toolbar";
@@ -211,24 +211,69 @@ const PricingTable = () => {
   };
 
   // --- Action column items ---
-  const itemActions = useMemo(() => nxGetAccountActions({
-    handleView: ({ id }) =>
-      navigate(PRODUCT_PROMO_ROUTES.DETAIL_PRICING, {
-        state: { id }
-      }),
-    handleCreate: () =>
-      navigate(PRODUCT_PROMO_ROUTES.CREATE_PRICING),
-    handleUpdate: ({ id, status, statusApproval }) =>
-      navigate(PRODUCT_PROMO_ROUTES.CREATE_PRICING, {
-        state: {
-          id, statusPricing: status, statusApprovalPricing: statusApproval
-        }
-      }),
-    handleActivate: handleOpenModalInactivate,
-    handleApprovalHistory,
-    handleDownload,
-    loadingDownload,
-  }), [handleDownload, handleOpenModalInactivate, handleApprovalHistory, loadingDownload]);
+  const itemActions = useMemo(() => {
+    const actions = nxGetAccountActions({
+      handleView: ({ id }) =>
+        navigate(PRODUCT_PROMO_ROUTES.DETAIL_PRICING, {
+          state: { id }
+        }),
+      handleCreate: () =>
+        navigate(PRODUCT_PROMO_ROUTES.CREATE_PRICING),
+      handleUpdate: ({ id, status, statusApproval }) =>
+        navigate(PRODUCT_PROMO_ROUTES.CREATE_PRICING, {
+          state: {
+            id, statusPricing: status, statusApprovalPricing: statusApproval
+          }
+        }),
+      handleActivate: handleOpenModalInactivate,
+      handleApprovalHistory,
+      handleDownload,
+      loadingDownload,
+    });
+
+    // NxGetAccountActions' "Activate" checkbox is checked based on ACTIVE status,
+    // which shows it ticked before the record is actually inactivated.
+    // Override locally so it only shows checked once the record is INACTIVE.
+    return actions.map((item) => {
+      if (item.action !== "Activate") return item;
+      return {
+        ...item,
+        render: (record, actionLength, index) => {
+          const isInactive = record.status === "INACTIVE";
+          const content =
+            actionLength > 3 ? (
+              <Button
+                icon={
+                  <Checkbox
+                    checked={isInactive}
+                    style={{ transform: "scale(0.9)" }}
+                    className="action-checkbox"
+                  />
+                }
+                onClick={() => handleOpenModalInactivate(record)}
+                type={"action"}
+              >
+                Inactivate
+              </Button>
+            ) : (
+              <Tooltip
+                title={isInactive ? "Activate" : ""}
+                key={`table-action-${index}`}
+              >
+                <Checkbox
+                  className="action-checkbox"
+                  checked={isInactive}
+                  onClick={() => handleOpenModalInactivate(record)}
+                  style={{ transform: "scale(0.9)" }}
+                />
+              </Tooltip>
+            );
+
+          return <Fragment key={`table-action-${index}`}>{content}</Fragment>;
+        },
+      };
+    });
+  }, [handleDownload, handleOpenModalInactivate, handleApprovalHistory, loadingDownload]);
 
   // --- Columns ---
   const actionCols = useColumnActionPermission(
