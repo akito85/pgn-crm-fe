@@ -26,6 +26,7 @@ import { useDispatch, useSelector } from "react-redux";
 import TablePaginationNew from "../../../../../components/TablePaginationNew";
 import ToolbarDynamic from "../../UtilsProduct/ToolbarDynamic";
 import { useColumnActionPermissionDynamic } from "../../UtilsProduct/useColumnActionPermissionDynamic";
+import NxTable from "../../../../../components/Nx/NxTable";
 
 const onFilter = (dataIndex, value, record) => {
   const search = value.toLowerCase();
@@ -59,12 +60,14 @@ const columns = ({
   const result = [
     {
       title: "NO",
+      key: "no",
       width: 60,
       align: "center",
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {
       title: "VERSION",
+      key: "version",
       width: 240,
       align: "right",
       dataIndex: "version",
@@ -100,6 +103,7 @@ const columns = ({
     },
     {
       title: "START DATE",
+      key: "startDate",
       width: 240,
       align: "center",
       dataIndex: "startDate",
@@ -135,6 +139,7 @@ const columns = ({
     },
     {
       title: "END DATE",
+      key: "endDate",
       width: 240,
       align: "center",
       dataIndex: "endDate",
@@ -170,6 +175,7 @@ const columns = ({
     },
     {
       title: "RELEASE DATE",
+      key: "releaseDate",
       width: 240,
       align: "center",
       dataIndex: "releaseDate",    
@@ -205,6 +211,7 @@ const columns = ({
     },
     {
       title: "DESCRIPTION",
+      key: "description",
       width: 240,
       dataIndex: "description",
       filteredValue: search?.["description"] ? [search?.["description"]] : null,
@@ -270,6 +277,7 @@ const columns = ({
     },
     {
       title: "STATUS",
+      key: "status",
       width: 240,
       dataIndex: "status",
       fixed: "right",
@@ -323,6 +331,7 @@ const columns = ({
     },
     {
       title: "STATUS APPROVAL",
+      key: "approvalStatus",
       width: 240,
       dataIndex: "approvalStatus",
       fixed: "right",
@@ -916,6 +925,8 @@ const ProductVersionInformation = ({
   );
   const [search, setSearch] = useState({});
 
+  const { data: dataUser = {} } = useSelector((state) => state.profile);
+  
   useEffect(() => {
     if (dataApprovalHistoryProductVersion?.dataApprover) {
       const temp = {
@@ -1176,11 +1187,17 @@ const ProductVersionInformation = ({
           selector={"product"}
           url={"/product-promo/detail-product"}
         />
-        <TablePaginationNew
+        <NxTable
+          idTable={"product-version-information"}
+          userId={dataUser?.data?.username}
           type="FE"
           dataSource={dataTable}
           totalData={totalElements}
           current={page}
+          showAdvanceSearch={false}
+          showSearchBar={false}
+          usePagination={false}
+          useInfiniteScroll={true}
           pageSize={pageSize}
           tableScrolled={{ y: 525, x: 2300 }}
           onChange={handleChangeSize}

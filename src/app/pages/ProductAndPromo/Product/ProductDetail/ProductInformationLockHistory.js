@@ -5,6 +5,8 @@ import { getColumnSearchPropsPaging } from "../../../../../utils/getColumnSearch
 import moment from "moment";
 import { dateFormatting } from "../../../../../utils";
 import TablePaginationNew from "../../../../../components/TablePaginationNew";
+import NxTable from "../../../../../components/Nx/NxTable";
+import { useSelector } from "react-redux";
 
 const onFilter = (dataIndex, value, record) => {
   const search = value.toLowerCase();
@@ -30,12 +32,14 @@ const columns = (
   const result = [
     {
       title: "NO",
+      key: "no",
       width: 60,
       align: "center",
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {
       title: "ACTION",
+      key: "action",
       width: 200,
       align: "left",
       dataIndex: "lockType",
@@ -51,6 +55,7 @@ const columns = (
     },
     {
       title: "ACTION BY",
+      key: "actionBy",
       width: 200,
       align: "left",
       dataIndex: "lockBy",
@@ -66,6 +71,7 @@ const columns = (
     },
     {
       title: "ACTION DATE",
+      key: "actionDate",
       width: 200,
       align: "center",
       dataIndex: "actionDate",
@@ -81,6 +87,7 @@ const columns = (
     },
     {
       title: "REMARK",
+      key: "remark",
       width: 240,
       dataIndex: "description",
       onFilter: (value, record) => onFilter("description", value, record),
@@ -136,6 +143,8 @@ const ProductInformationLockHistory = ({ data = [] }) => {
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
 
+  const { data: dataUser = {} } = useSelector((state) => state.profile);
+  
   useEffect(() => {
     let result = data.map((item) => ({
       ...item,
@@ -160,8 +169,13 @@ const ProductInformationLockHistory = ({ data = [] }) => {
     setPageSize(pageSizeChange);
   };
   return (
-    <div className="flex flex-col w-full">
-      <TablePaginationNew
+    <div className="flex flex-col w-full mt-4">
+      <NxTable
+        idTable={"product-information-lock-history"}
+        userId={dataUser?.data?.username}
+        showAdvanceSearch={false}
+        showSearchBar={false}
+        usePagination={false}
         type="FE"
         dataSource={dataTable}
         totalData={totalElements}

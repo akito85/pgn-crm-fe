@@ -9,6 +9,8 @@ import DetailText from "../../../../../../components/DetailText";
 import moment from "moment";
 import { dateFormatting, hasValue, renderColumn } from "../../../../../../utils";
 import SVGIcon from "../../../../../../assets/Icon/index";
+import NxTable from "../../../../../../components/Nx/NxTable";
+import { useSelector } from "react-redux";
 
 const onFilter = (dataIndex, value, record) => {
   const search = value.toLowerCase();
@@ -37,12 +39,14 @@ const columns = (
   const result = [
     {
       title: "NO",
+      key: "no",
       width: 60,
       align: "center",
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {
       title: "NAME",
+      key: "name",
       width: 160,
       dataIndex: "name",
       filteredValue: search?.["name"] ? [search?.["name"]] : null,
@@ -81,6 +85,7 @@ const columns = (
       width: 160,
       align: "right",
       dataIndex: "value",
+      key: "value",
       // onFilter: (value, record) => onFilter("value", value, record),
       filteredValue: search?.["value"] ? [search?.["value"]] : null,
       sorter: (a, b) => sorter("value", a, b),
@@ -114,6 +119,7 @@ const columns = (
     },
     {
       title: "UNIT",
+      key: "unit",
       width: 160,
       align: "center",
       dataIndex: "uomName",
@@ -150,6 +156,7 @@ const columns = (
     },
     {
       title: "DESCRIPTION",
+      key: "description",
       width: 180,
       dataIndex: "description",
       filteredValue: search?.["description"] ? [search?.["description"]] : null,
@@ -219,6 +226,7 @@ const columns = (
     
     {
       title: "ACTION",
+      key: "action",
       fixed: "right",
       width: "12%",
       align: "center",
@@ -249,6 +257,8 @@ const PDICalculationRule = ({ data = [] }) => {
   const [search, setSearch] = useState({});
   const [modalHistory, setModalHistory] = useState(false);
   const [dataHistory, setDataHistory] = useState(false);
+  
+  const { data: dataUser = {} } = useSelector((state) => state.profile);
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -280,7 +290,12 @@ const PDICalculationRule = ({ data = [] }) => {
 
   return (
     <Fragment>
-      <TablePaginationNew
+      <NxTable
+        idTable={"product-information-calculation-rule"}
+        userId={dataUser?.data?.username}
+        showAdvanceSearch={false}
+        showSearchBar={false}
+        usePagination={false}
         type="FE"
         dataSource={data}
         totalData={data.length}

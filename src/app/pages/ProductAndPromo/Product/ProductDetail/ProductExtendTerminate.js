@@ -11,6 +11,8 @@ import ButtonComponent from "../../../../../components/ButtonComponent";
 import CardComponent from "../../../../../components/Card/CardComponent";
 import DetailText from "../../../../../components/DetailText";
 import SVGIcon from "../../../../../assets/Icon/index";
+import NxTable from "../../../../../components/Nx/NxTable";
+import { useSelector } from "react-redux";
 
 const onFilter = (dataIndex, value, record) => {
   const search = value.toLowerCase();
@@ -70,12 +72,14 @@ const columns = (
   const result = [
     {
       title: "NO",
+      key: "no",
       width: 60,
       align: "center",
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {
       title: "ACTION",
+      key: "action",
       width: 160,
       align: "left",
       dataIndex: "type",
@@ -112,6 +116,7 @@ const columns = (
     },
     {
       title: "ACTION BY",
+      key: "actionBy",
       width: 160,
       align: "left",
       dataIndex: "actionBy",
@@ -148,6 +153,7 @@ const columns = (
     },
     {
       title: "ACTION DATE",
+      key: "actionDate",
       width: 160,
       align: "center",
       dataIndex: "actionDate",
@@ -183,6 +189,7 @@ const columns = (
     },
     {
       title: "END DATE BEFORE",
+      key: "endDateBefore",
       width: 160,
       align: "center",
       dataIndex: "endDateBefore",
@@ -218,6 +225,7 @@ const columns = (
     },
     {
       title: "END DATE AFTER",
+      key: "endDateAfter",
       width: 160,
       align: "center",
       dataIndex: "endDateAfter",
@@ -253,6 +261,7 @@ const columns = (
     },
     {
       title: "REMARK",
+      key: "remark",
       width: 180,
       dataIndex: "description",
       filteredValue: search?.["description"] ? [search?.["description"]] : null,
@@ -318,6 +327,7 @@ const columns = (
     },
     {
       title: "STATUS",
+      key: "status",
       width: 180,
       dataIndex: "status",
       fixed: "right",
@@ -365,6 +375,7 @@ const columns = (
     },
     {
       title: "ACTION",
+      key: "action",
       align: "center",
       width: 120,
       fixed: "right",
@@ -393,6 +404,8 @@ const ProductExtendTerminate = ({ data = [] }) => {
   const [search, setSearch] = useState({});
   const [selectedData, setSelectedData] = useState({});
   const [modalDetail, setModalDetail] = useState(false);
+
+  const { data: dataUser = {} } = useSelector((state) => state.profile);
 
   useEffect(() => {
     let result = data.map((item) => {
@@ -446,7 +459,12 @@ const ProductExtendTerminate = ({ data = [] }) => {
   return (
     <Fragment>
       <BaseContainer header={"EXTEND & TERMINATE HISTORY"}>
-        <TablePaginationNew
+        <NxTable
+          idTable={"product-information-extend-terminate"}
+          userId={dataUser?.data?.username}
+          showAdvanceSearch={false}
+          showSearchBar={false}
+          usePagination={false}
           type="FE"
           dataSource={dataTable}
           totalData={totalElements}

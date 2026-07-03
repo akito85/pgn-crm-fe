@@ -7,6 +7,8 @@ import ButtonComponent from "../../../../../../components/ButtonComponent";
 import ModalCustom from "../../../../../../components/Modal/ModalCustom";
 import TablePaginationNew from "../../../../../../components/TablePaginationNew";
 import { hasValue, renderColumn } from "../../../../../../utils";
+import NxTable from "../../../../../../components/Nx/NxTable";
+import { useSelector } from "react-redux";
 
 const onFilter = (dataIndex, value, record) => {
   const search = value.toLowerCase();
@@ -35,12 +37,14 @@ const columns = (
   const result = [
     {
       title: "NO",
+      key: "no",
       width: 60,
       align: "center",
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {
       title: "TERM OF SERVICE",
+      key: "tosName",
       // width: 160,
       dataIndex: "tosName",
       filteredValue: search?.["tosName"] ? [search?.["tosName"]] : null,
@@ -76,6 +80,7 @@ const columns = (
     },
     {
       title: "DESCRIPTION",
+      key: "description",
       // width: 180,
       dataIndex: "description",
       filteredValue: search?.["description"] ? [search?.["description"]] : null,
@@ -141,6 +146,7 @@ const columns = (
     },
     {
       title: "ACTION",
+      key: "action",
       align: "center",
       width: 120,
       fixed: "right",
@@ -168,6 +174,8 @@ const PDITermOfService = ({ data = [] }) => {
   const [selectedData, setSelectedData] = useState({});
   const [modalTosDetail, setModalTosDetail] = useState(false);
   const [search, setSearch] = useState({});
+
+  const { data: dataUser = {} } = useSelector((state) => state.profile);
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -200,7 +208,12 @@ const PDITermOfService = ({ data = [] }) => {
   };
   return (
     <>
-      <TablePaginationNew
+      <NxTable
+        idTable={"product-information-term-of-service"}
+        userId={dataUser?.data?.username}
+        showAdvanceSearch={false}
+        showSearchBar={false}
+        usePagination={false}
         type="FE"
         dataSource={data}
         totalData={data.length}
