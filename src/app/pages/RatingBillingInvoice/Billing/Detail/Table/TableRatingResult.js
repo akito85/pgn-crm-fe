@@ -192,7 +192,7 @@ export const columnsRatingResult = (
       handleSearch,
       true
     ),
-    render: (text) =>
+    render: (text, record) =>
       renderColumn(
         "quantity",
         hasValue(search["quantity"]),
@@ -200,7 +200,8 @@ export const columnsRatingResult = (
         separatorNumber(text),
         false,
         "input",
-        search
+        search,
+        record.uom === "MMBTU" ? "energi" : "usage",
       ),
   },
   {
@@ -296,7 +297,7 @@ export const columnsRatingResult = (
       handleSearch,
       true
     ),
-    render: (text) =>
+    render: (text, record) =>
       renderColumn(
         "price",
         hasValue(search["price"]),
@@ -304,7 +305,8 @@ export const columnsRatingResult = (
         separatorNumber(text),
         false,
         "input",
-        search
+        search,
+        record.currency === "USD" ? "currency-usd" : "currency-idr",
       ),
   },
   {
@@ -322,7 +324,7 @@ export const columnsRatingResult = (
       handleSearch,
       true
     ),
-    render: (text) =>
+    render: (text, record) =>
       renderColumn(
         "amount",
         hasValue(search["amount"]),
@@ -330,7 +332,8 @@ export const columnsRatingResult = (
         separatorNumber(text),
         false,
         "input",
-        search
+        search,
+        record.currency === "USD" ? "currency-usd" : "currency-idr",
       ),
   },
   {
@@ -348,7 +351,7 @@ export const columnsRatingResult = (
       handleSearch,
       true
     ),
-    render: (text) =>
+    render: (text, record) =>
       renderColumn(
         "discountAmount",
         hasValue(search["discountAmount"]),
@@ -356,7 +359,8 @@ export const columnsRatingResult = (
         separatorNumber(text),
         false,
         "input",
-        search
+        search,
+        record.currency === "USD" ? "currency-usd" : "currency-idr",
       ),
   },
   {
@@ -374,7 +378,7 @@ export const columnsRatingResult = (
       handleSearch,
       true
     ),
-    render: (text) =>
+    render: (text,record) =>
       renderColumn(
         "totalAmount",
         hasValue(search["totalAmount"]),
@@ -382,7 +386,8 @@ export const columnsRatingResult = (
         separatorNumber(text),
         false,
         "input",
-        search
+        search,
+        record.currency === "USD" ? "currency-usd" : "currency-idr",
       ),
   },
   {
@@ -400,7 +405,7 @@ export const columnsRatingResult = (
       handleSearch,
       true
     ),
-    render: (text) =>
+    render: (text, record) =>
       renderColumn(
         "vatBasis",
         hasValue(search["vatBasis"]),
@@ -408,7 +413,8 @@ export const columnsRatingResult = (
         separatorNumber(text),
         false,
         "input",
-        search
+        search,
+        record.currency === "USD" ? "currency-usd" : "currency-idr",
       ),
   },
   {
@@ -426,7 +432,7 @@ export const columnsRatingResult = (
       handleSearch,
       true
     ),
-    render: (text) =>
+    render: (text, record) =>
       renderColumn(
         "vatBasisEqv",
         hasValue(search["vatBasisEqv"]),
@@ -434,7 +440,8 @@ export const columnsRatingResult = (
         separatorNumber(text),
         false,
         "input",
-        search
+        search,
+        record.convertedCurrency === "USD" ? "currency-usd" : "currency-idr",
       ),
   },
   {
@@ -504,7 +511,7 @@ export const columnsRatingResult = (
       handleSearch,
       true
     ),
-    render: (text) =>
+    render: (text, record) =>
       renderColumn(
         "vat",
         hasValue(search["vat"]),
@@ -512,7 +519,8 @@ export const columnsRatingResult = (
         separatorNumber(text),
         false,
         "input",
-        search
+        search,
+        record.currency === "USD" ? "currency-usd" : "currency-idr",
       ),
   },
   {
@@ -530,7 +538,7 @@ export const columnsRatingResult = (
       handleSearch,
       true
     ),
-    render: (text) =>
+    render: (text, record) =>
       renderColumn(
         "vatEqv",
         hasValue(search["vatEqv"]),
@@ -538,7 +546,8 @@ export const columnsRatingResult = (
         separatorNumber(text),
         false,
         "input",
-        search
+        search,
+        record.convertedCurrency === "USD" ? "currency-usd" : "currency-idr",
       ),
   },
   {
@@ -738,7 +747,7 @@ export const columnsRatingResult = (
       handleSearch,
       true
     ),
-    render: (text) =>
+    render: (text,record) =>
       renderColumn(
         "totalAmountEqv",
         hasValue(search["totalAmountEqv"]),
@@ -746,7 +755,8 @@ export const columnsRatingResult = (
         separatorNumber(text),
         false,
         "input",
-        search
+        search,
+        record.convertedCurrency === "USD" ? "currency-usd" : "currency-idr",
       ),
   },
   {

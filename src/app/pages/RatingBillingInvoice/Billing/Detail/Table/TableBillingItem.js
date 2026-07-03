@@ -404,7 +404,7 @@ export const columnsBillingItem = (
       handleSearchBI,
       true
     ),
-    render: (text) =>
+    render: (text,record) =>
       renderColumn(
         "vatBasis",
         hasValue(searchBI["vatBasis"]),
@@ -412,7 +412,8 @@ export const columnsBillingItem = (
         text,
         false,
         "input",
-        searchBI
+        searchBI,
+        record.currency === "USD" ? "currency-usd" : "currency-idr",
       ),
   },
   {
@@ -430,7 +431,7 @@ export const columnsBillingItem = (
       handleSearchBI,
       true
     ),
-    render: (text) =>
+    render: (text,record) =>
       renderColumn(
         "vatBasisEqv",
         hasValue(searchBI["vatBasisEqv"]),
@@ -438,7 +439,8 @@ export const columnsBillingItem = (
         text,
         false,
         "input",
-        searchBI
+        searchBI,
+        record.convertedCurrency === "USD" ? "currency-usd" : "currency-idr",
       ),
   },
   {
@@ -508,7 +510,7 @@ export const columnsBillingItem = (
       handleSearchBI,
       true
     ),
-    render: (text) =>
+    render: (text,record) =>
       renderColumn(
         "vat",
         hasValue(searchBI["vat"]),
@@ -516,7 +518,8 @@ export const columnsBillingItem = (
         text,
         false,
         "input",
-        searchBI
+        searchBI,
+        record.currency === "USD" ? "currency-usd" : "currency-idr",
       ),
   },
   {
@@ -534,7 +537,7 @@ export const columnsBillingItem = (
       handleSearchBI,
       true
     ),
-    render: (text) =>
+    render: (text,record) =>
       renderColumn(
         "vatEqv",
         hasValue(searchBI["vatEqv"]),
@@ -542,7 +545,8 @@ export const columnsBillingItem = (
         text,
         false,
         "input",
-        searchBI
+        searchBI,
+        record.convertedCurrency === "USD" ? "currency-usd" : "currency-idr",
       ),
   },
   {
