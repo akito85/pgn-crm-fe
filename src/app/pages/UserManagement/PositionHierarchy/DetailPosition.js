@@ -8,6 +8,8 @@ import { getColumnSearchProps } from "../../../../utils/getColumnSearchProps";
 import Highlighter from "react-highlight-words";
 import { Tooltip } from "antd";
 import { updatePagination } from "../../../../utils/updatePagination";
+import NxTable from "../../../../components/Nx/NxTable";
+import { useSelector } from "react-redux";
 
 const DetailPosition = ({
   data_detail,
@@ -25,6 +27,8 @@ const DetailPosition = ({
   const [search, setSearch] = useState({});
   const [typeColumn, setTypeColumn] = useState("string");
 
+  const { data: dataUser = {} } = useSelector((state) => state.profile);
+  
   // handle set data
   const handleSetData = useCallback((data_detail, data_position) => {
     const idMap = data_position?.reduce((acc, item) => {
@@ -233,7 +237,7 @@ const DetailPosition = ({
           />
         ) : text ? (
           <Tooltip placement="topLeft" title={text}>
-            {text}
+            {renderDateConverter(text, "date")}
           </Tooltip>
         ) : (
           ""
@@ -299,7 +303,7 @@ const DetailPosition = ({
           />
         ) : text ? (
           <Tooltip placement="topLeft" title={text}>
-            {text}
+            {renderDateConverter(text, "date")}
           </Tooltip>
         ) : (
           ""
@@ -374,7 +378,9 @@ const DetailPosition = ({
                 ASSIGNMENT LIST
               </p>
             </div>
-            <TablePagination
+            <NxTable
+              idTable={"table-detail-position"}
+              userId={dataUser?.data?.username}
               dataSource={updatePagination(
                 data?.employee,
                 "data",
@@ -402,6 +408,9 @@ const DetailPosition = ({
                 x: 1700,
                 y: 300,
               }}
+              usePagination={false}
+              showAdvanceSearch={false}
+              showSearchBar={false}
             />
           </div>
         </>
