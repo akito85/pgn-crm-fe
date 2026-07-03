@@ -908,6 +908,7 @@ const ProductVersionInformation = ({
   const [bodyError, setBodyError] = useState({});
   const [remark, setRemark] = useState("");
   const [extendOrTerminate, setExtendOrTerminate] = useState("extend");
+  const [loadingRelease, setLoadingRelease] = useState(false);
   const [openModalHistory, setOpenModalHistory] = useState(false);
   const [dataApprovalHistory, setDataApprovalHistory] = useState({});
   const { dataApprovalHistoryProductVersion } = useSelector(
@@ -1005,6 +1006,8 @@ const ProductVersionInformation = ({
     setModalExtendTerminate(false);
   };
   const handleCloseModalRelease = () => {
+    // Guard against closing while the release request is still in flight.
+    if (loadingRelease) return;
     setRemark("");
     setDataSelected({});
     setModalRelease(false);
@@ -1014,11 +1017,14 @@ const ProductVersionInformation = ({
       productVersionId: dataSelected.id || 0, //Product Version Id
       description: formValue.remark,
     };
-    dispatch(releaseProduct({ data }))
+    setLoadingRelease(true);
+    return dispatch(releaseProduct({ data }))
       .unwrap()
       .then(() => {
-        handleCloseModalRelease();
         handleClear();
+        setRemark("");
+        setDataSelected({});
+        setModalRelease(false);
         dispatch(getProductVersionList({ id: idProduct }));
         dispatch(getDetailProduct({ id: idProduct }));
         dispatch(getLockHistory({ id: idProduct }));
@@ -1039,6 +1045,9 @@ const ProductVersionInformation = ({
           });
           setModalError(true);
         }
+      })
+      .finally(() => {
+        setLoadingRelease(false);
       });
   };
   const handleConfirmExtendTerminate = (res, handleClear) => {
@@ -1219,6 +1228,7 @@ const ProductVersionInformation = ({
         approveOrReject={"Release"}
         menu={"Product Version"}
         named={`Product Version ${dataSelected?.version}`}
+        loading={loadingRelease}
         // isOpen={modalRelease}
         // header={`Release Information`}
         // message={`Are you sure you want to release this Product Version?`}

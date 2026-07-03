@@ -94,6 +94,7 @@ const ProductDetail = () => {
   });
   const [modalError, setModalError] = useState(false);
   const [bodyError, setBodyError] = useState({});
+  const [loadingApproval, setLoadingApproval] = useState(false);
   const showButtonApproval =
     bodyApproval.isApprover !== null && bodyApproval.isApprover;
   const stateActive =
@@ -210,6 +211,8 @@ const ProductDetail = () => {
     setApproveOrReject(type);
   };
   const handleCloseModalApproveReject = () => {
+    // Guard against closing while the approve/reject request is still in flight.
+    if (loadingApproval) return;
     setRemark("");
     setModalConfirm(false);
     form.resetFields();
@@ -222,13 +225,15 @@ const ProductDetail = () => {
       action: approveOrReject === "Approve" ? "APPROVE" : "REJECT",
     };
     // console.log(body);
+    setLoadingApproval(true);
     switch (bodyApproval.approvalType) {
       case "INACTIVE_PRODUCT":
-        dispatch(approvalInactiveProduct({ body }))
+        return dispatch(approvalInactiveProduct({ body }))
           .unwrap()
           .then((res) => {
-            handleCloseModalApproveReject();
             handleClear();
+            setRemark("");
+            setModalConfirm(false);
           })
           .catch((error) => {
             if (Math.floor((error.response.data.code || 0) / 100) === 5) {
@@ -242,14 +247,17 @@ const ProductDetail = () => {
               setBodyError({ message, body: { ...formValue }, handleClear });
               setModalError(true);
             }
+          })
+          .finally(() => {
+            setLoadingApproval(false);
           });
-        break;
       case "PRODUCT_VERSION":
-        dispatch(approvalProductVersion({ body }))
+        return dispatch(approvalProductVersion({ body }))
           .unwrap()
           .then((res) => {
-            handleCloseModalApproveReject();
             handleClear();
+            setRemark("");
+            setModalConfirm(false);
           })
           .catch((error) => {
             if (Math.floor((error.response.data.code || 0) / 100) === 5) {
@@ -263,14 +271,17 @@ const ProductDetail = () => {
               setBodyError({ message, body: { ...formValue }, handleClear });
               setModalError(true);
             }
+          })
+          .finally(() => {
+            setLoadingApproval(false);
           });
-        break;
       case "EXTEND_PRODUCT_VERSION":
-        dispatch(approvalExtendProductVersion({ body }))
+        return dispatch(approvalExtendProductVersion({ body }))
           .unwrap()
           .then((res) => {
-            handleCloseModalApproveReject();
             handleClear();
+            setRemark("");
+            setModalConfirm(false);
           })
           .catch((error) => {
             if (Math.floor((error.response.data.code || 0) / 100) === 5) {
@@ -284,14 +295,17 @@ const ProductDetail = () => {
               setBodyError({ message, body: { ...formValue }, handleClear });
               setModalError(true);
             }
+          })
+          .finally(() => {
+            setLoadingApproval(false);
           });
-        break;
       case "TERMINATE_PRODUCT_VERSION":
-        dispatch(approvalTerminateProductVersion({ body }))
+        return dispatch(approvalTerminateProductVersion({ body }))
           .unwrap()
           .then((res) => {
-            handleCloseModalApproveReject();
             handleClear();
+            setRemark("");
+            setModalConfirm(false);
           })
           .catch((error) => {
             if (Math.floor((error.response.data.code || 0) / 100) === 5) {
@@ -305,12 +319,14 @@ const ProductDetail = () => {
               setBodyError({ message, body: { ...formValue }, handleClear });
               setModalError(true);
             }
+          })
+          .finally(() => {
+            setLoadingApproval(false);
           });
-        break;
       default:
-        break;
+        setLoadingApproval(false);
+        return;
     }
-    setModalConfirm(false);
   };
   const handleActiveProduct = (record) => {
     dispatch(getDetailProductVersion({ id: record.id }));
@@ -502,6 +518,7 @@ const ProductDetail = () => {
           ? "Product"
           : "Product Version"}
           named={`${dataDetailProduct.productName}`}
+          loading={loadingApproval}
           // isOpen={modalConfirm}
           // header={`${approveOrReject} information`}
           // message={`Are you sure you want to ${approveOrReject} ${
