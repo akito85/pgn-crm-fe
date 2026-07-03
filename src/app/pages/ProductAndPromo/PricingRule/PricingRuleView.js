@@ -79,6 +79,7 @@ const PricingRuleView = () => {
   const [bodyError, setBodyError] = useState({});
   const [modalApprovalHistory, setModalApprovalHistory] = useState(false);
   const [dataApprovalHistory, setDataApprovalHistory] = useState({});
+  const [loadingInactive, setLoadingInactive] = useState(false);
 
   // --- Fetch helpers ---
   const buildBody = useCallback(
@@ -374,6 +375,7 @@ const PricingRuleView = () => {
       description: res.remark,
       name: chooseId.name,
     };
+    setLoadingInactive(true);
     dispatch(inactivePricingRule(dataValue))
       .unwrap()
       .then(() => {
@@ -392,6 +394,9 @@ const PricingRuleView = () => {
           setBodyError({ body: { ...res }, handleClear, message });
           setModalError(true);
         }
+      })
+      .finally(() => {
+        setLoadingInactive(false);
       });
   };
 
@@ -646,6 +651,7 @@ const PricingRuleView = () => {
         openModalInactivate={modalConfirm}
         handleCloseModalInactivate={handleCancel}
         onFinish={handleOk}
+        loading={loadingInactive}
       />
 
       {/* Modal Success Inactive */}

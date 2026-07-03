@@ -58,6 +58,7 @@ const PricingTable = () => {
   const [modalError, setModalError] = useState(false);
   const [bodyError, setBodyError] = useState({});
   const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
+  const [loadingInactivate, setLoadingInactivate] = useState(false);
 
   // --- Approval history reshape ---
   useEffect(() => {
@@ -170,6 +171,7 @@ const PricingTable = () => {
       appHierId: res.approvalHierarchy,
       remark: res.remark,
     };
+    setLoadingInactivate(true);
     dispatch(inactivePricing({ data }))
       .unwrap()
       .then(() => {
@@ -184,6 +186,9 @@ const PricingTable = () => {
           setBodyError({ body: { ...res }, handleClear, message });
           setModalError(true);
         }
+      })
+      .finally(() => {
+        setLoadingInactivate(false);
       });
   };
 
@@ -282,6 +287,7 @@ const PricingTable = () => {
         openModalInactivate={openModalInactivate}
         handleCloseModalInactivate={handleCancelModalInactivate}
         onFinish={handleSubmitModalInactivate}
+        loading={loadingInactivate}
       />
 
       <ModalError

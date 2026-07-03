@@ -7,6 +7,7 @@ const TermOfServiceInactive = ({
   isOpen,
   handleCancel = () => {},
   handleOk = () => {},
+  loading = false,
 }) => {
   return (
     <ModalConfirm
@@ -15,6 +16,7 @@ const TermOfServiceInactive = ({
       handleOk={handleOk}
       width={500}
       useOk={true}
+      loading={loading}
     >
       <div className="flex justify-center gap-[20px] mt-6">
         <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />

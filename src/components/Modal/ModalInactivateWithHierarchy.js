@@ -22,6 +22,7 @@ const ModalInactivateWithHierarchy = ({
   onFinish = () => {},
   addEndDate = false,
   dataStartDate = null,
+  loading = false,
 }) => {
   const [form] = Form.useForm();
   const searchInput = useRef(null);
@@ -121,11 +122,13 @@ const ModalInactivateWithHierarchy = ({
       header={header}
       width={850}
       type={"confirmation"}
+      loading={loading}
       footer={
         <div className="w-full flex justify-end gap-5 p-4">
           <ButtonComponent
             onClick={handleCancelModalInactivateFinal}
             type="default"
+            disabled={loading}
           >
             Cancel
           </ButtonComponent>
@@ -133,6 +136,7 @@ const ModalInactivateWithHierarchy = ({
             form="inactivateForm"
             type="submit"
             htmlType="submit"
+            loading={loading}
           >
             Confirm
           </ButtonComponent>

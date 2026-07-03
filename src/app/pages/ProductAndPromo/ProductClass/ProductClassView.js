@@ -213,6 +213,7 @@ const ProductClassView = () => {
   const [activeOrInactive, setActiveOrInactive] = useState("");
   const [modalError, setModalError] = useState(false);
   const [bodyError, setBodyError] = useState({});
+  const [loadingInactive, setLoadingInactive] = useState(false);
 
   // --- Fetch helpers ---
   const buildBody = useCallback(
@@ -310,6 +311,7 @@ const ProductClassView = () => {
 
   // handle Active/Inactive
   const handleOk = () => {
+    setLoadingInactive(true);
     dispatch(
       inactiveProductClass({
         id: chooseId,
@@ -331,6 +333,9 @@ const ProductClassView = () => {
           setBodyError({ message });
           setModalError(true);
         }
+      })
+      .finally(() => {
+        setLoadingInactive(false);
       });
   };
 
@@ -621,6 +626,7 @@ const ProductClassView = () => {
         handleOk={handleOk}
         width={activeOrInactive === "ACTIVE" ? 600 : 400}
         useOk={true}
+        loading={loadingInactive}
       >
         <div className="flex justify-center gap-[20px] mt-6">
           <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />

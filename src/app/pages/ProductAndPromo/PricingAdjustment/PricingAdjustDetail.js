@@ -310,7 +310,7 @@ const PricingAdjustDetail = () => {
     };
     // console.log(obj);
     if (bodyApproval.approvalType === "INACTIVE_PRICING_ADJUSTMENT") {
-      dispatch(approvalInactivePriceAdjust(obj))
+      return dispatch(approvalInactivePriceAdjust(obj))
         .unwrap()
         .then((res) => {
           handleClear();
@@ -330,7 +330,7 @@ const PricingAdjustDetail = () => {
           }
         });
     } else {
-      dispatch(approvalCreatePriceAdjust(obj))
+      return dispatch(approvalCreatePriceAdjust(obj))
         .unwrap()
         .then((res) => {
           handleClear();
@@ -349,7 +349,6 @@ const PricingAdjustDetail = () => {
           }
         });
     }
-    setModalConfirm(false);
   };
   const showSection = () => {
     switch (typePriceAdjustInfo) {

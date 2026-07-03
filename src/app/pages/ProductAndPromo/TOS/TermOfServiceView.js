@@ -71,6 +71,7 @@ const TermOfServiceView = () => {
   const [chooseId, setChooseId] = useState("");
   const [modalError, setModalError] = useState(false);
   const [bodyError, setBodyError] = useState({});
+  const [loadingInactive, setLoadingInactive] = useState(false);
 
   // --- Fetch helpers ---
   const buildBody = useCallback(
@@ -314,6 +315,7 @@ const TermOfServiceView = () => {
 
   // handle Active/Inactive
   const handleOk = () => {
+    setLoadingInactive(true);
     dispatch(inactiveTos({ id: chooseId }))
       .unwrap()
       .then(() => {
@@ -329,6 +331,9 @@ const TermOfServiceView = () => {
           setBodyError({ message });
           setModalError(true);
         }
+      })
+      .finally(() => {
+        setLoadingInactive(false);
       });
   };
 
@@ -551,6 +556,7 @@ const TermOfServiceView = () => {
         isOpen={modalInactive}
         handleCancel={() => setModalInactive(false)}
         handleOk={() => handleOk()}
+        loading={loadingInactive}
       />
 
       {/** Modal Retry */}

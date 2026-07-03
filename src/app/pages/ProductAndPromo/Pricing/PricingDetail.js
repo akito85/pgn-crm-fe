@@ -367,7 +367,7 @@ const PricingDetail = (props) => {
     // console.log(obj);
     // handleCloseModalApproveReject();
     if (bodyApproval.approvalType === "INACTIVE_PRICING") {
-      dispatch(approvalInactivePricing(obj))
+      return dispatch(approvalInactivePricing(obj))
         .unwrap()
         .then((res) => {
           handleClear();
@@ -387,7 +387,7 @@ const PricingDetail = (props) => {
           }
         });
     } else {
-      dispatch(approvalCreatePricing(obj))
+      return dispatch(approvalCreatePricing(obj))
         .unwrap()
         .then((res) => {
           handleCloseModalApproveReject();
