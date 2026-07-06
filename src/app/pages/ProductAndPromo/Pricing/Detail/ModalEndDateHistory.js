@@ -195,6 +195,7 @@ const ModalEndDateHistory = ({
           pageSize={pageSize}
           tableScrolled={{ y: 300, x: true }}
           onChange={handleChangeSize}
+          onSizeChanger={handleChangeSize}
           columns={columns(
             page,
             pageSize,
