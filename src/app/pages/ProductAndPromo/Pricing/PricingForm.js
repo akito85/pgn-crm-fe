@@ -53,6 +53,7 @@ import { columnsTableCriteriaAll } from "../UtilsProduct/TableCriteriaAllProduct
 import FunctionalCriteriaProduct from "../UtilsProduct/FunctionalCriteriaProduct";
 import { dateFormatting, hasValue } from "../../../../utils";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
+import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
 
 const routes = (type) => [
   {
@@ -1245,55 +1246,57 @@ const PricingForm = (props) => {
                   )}
                 </NxCardContainer>
               ) : null}
-              <div className="flex w-full justify-between align-middle my-3">
-                <ButtonComponent
-                  type={"submit"}
-                  onClick={() => setModalBack(true)}
-                  icon={
-                    <LeftOutlined
-                      style={{
-                        color: "#fff",
-                        fontSize: 24,
-                        justifyItems: "center",
-                      }}
-                    />
-                  }
-                >
-                  Back
-                </ButtonComponent>
-                <div className="flex align-middle gap-3">
+              <NxBaseContainer border>
+                <div className="flex w-full justify-between align-middle my-3">
                   <ButtonComponent
+                    type={"submit"}
+                    onClick={() => setModalBack(true)}
                     icon={
-                      <SVGIcon
-                        name={
-                          type === "update" ? `IconButtonReset` : `IconButtonClear`
-                        }
-                        width={24}
+                      <LeftOutlined
+                        style={{
+                          color: "#fff",
+                          fontSize: 24,
+                          justifyItems: "center",
+                        }}
                       />
                     }
-                    type="submit"
-                    onClick={handleClear}
                   >
-                    {type === "update" ? "Reset" : "Clear"}
+                    Back
                   </ButtonComponent>
-                  <ButtonComponent
-                    htmlType="submit"
-                    type="submit"
-                    onClick={() => setTypeSubmit(listTypeSubmit[1])}
-                    // disabled={disableSubmit}
-                  >
-                    Save as Draft
-                  </ButtonComponent>
-                  <ButtonComponent
-                    htmlType="submit"
-                    type="submit"
-                    onClick={() => setTypeSubmit(listTypeSubmit[0])}
-                    // disabled={disableSubmit}
-                  >
-                    Save & Submit
-                  </ButtonComponent>
+                  <div className="flex align-middle gap-3">
+                    <ButtonComponent
+                      icon={
+                        <SVGIcon
+                          name={
+                            type === "update" ? `IconButtonReset` : `IconButtonClear`
+                          }
+                          width={24}
+                        />
+                      }
+                      type="submit"
+                      onClick={handleClear}
+                    >
+                      {type === "update" ? "Reset" : "Clear"}
+                    </ButtonComponent>
+                    <ButtonComponent
+                      htmlType="submit"
+                      type="submit"
+                      onClick={() => setTypeSubmit(listTypeSubmit[1])}
+                      // disabled={disableSubmit}
+                    >
+                      Save as Draft
+                    </ButtonComponent>
+                    <ButtonComponent
+                      htmlType="submit"
+                      type="submit"
+                      onClick={() => setTypeSubmit(listTypeSubmit[0])}
+                      // disabled={disableSubmit}
+                    >
+                      Save & Submit
+                    </ButtonComponent>
+                  </div>
                 </div>
-              </div>
+              </NxBaseContainer>
             </div>
           </Form>
         </div>

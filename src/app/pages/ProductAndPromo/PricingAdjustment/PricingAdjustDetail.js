@@ -26,6 +26,7 @@ import { bytesConverter } from "../../../../utils/bytesConverter";
 import { dateFormatting } from "../../../../utils";
 import { columnsTableCriteria } from "./columnTableCriteriaPriceAdjust";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
+import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
 
 const routes = [
   {
@@ -435,43 +436,45 @@ const PricingAdjustDetail = () => {
             />
           </div>
           {showSection()}
-          <div
-            className={`flex w-full${
-              showButtonApproval ? " justify-between" : ""
-            } align-middle my-3`}
-          >
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => navigate(-1)}
-              icon={
-                <LeftOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 24,
-                    justifyItems: "center",
-                  }}
-                />
-              }
+          <NxBaseContainer border>
+            <div
+              className={`flex w-full${
+                showButtonApproval ? " justify-between" : ""
+              } align-middle my-3`}
             >
-              Back
-            </ButtonComponent>
-            {showButtonApproval ? (
-              <div className="flex align-middle gap-3">
-                <ButtonComponent
-                  type="reject"
-                  onClick={() => handleModalConfirmation("Reject")}
-                >
-                  Reject
-                </ButtonComponent>
-                <ButtonComponent
-                  type="approve"
-                  onClick={() => handleModalConfirmation("Approve")}
-                >
-                  Approve
-                </ButtonComponent>
-              </div>
-            ) : null}
-          </div>
+              <ButtonComponent
+                type={"submit"}
+                onClick={() => navigate(-1)}
+                icon={
+                  <LeftOutlined
+                    style={{
+                      color: "#fff",
+                      fontSize: 24,
+                      justifyItems: "center",
+                    }}
+                  />
+                }
+              >
+                Back
+              </ButtonComponent>
+              {showButtonApproval ? (
+                <div className="flex align-middle gap-3">
+                  <ButtonComponent
+                    type="reject"
+                    onClick={() => handleModalConfirmation("Reject")}
+                  >
+                    Reject
+                  </ButtonComponent>
+                  <ButtonComponent
+                    type="approve"
+                    onClick={() => handleModalConfirmation("Approve")}
+                  >
+                    Approve
+                  </ButtonComponent>
+                </div>
+              ) : null}
+            </div>
+          </NxBaseContainer>
           {/* Modal Approve/Reject*/}
           <ModalApproveOrReject
             isOpen={modalConfirm}
