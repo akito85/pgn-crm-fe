@@ -58,7 +58,7 @@ export const getListRatingGasPaginate = createAsyncThunk(
       const responseData = response.data?.data ?? response.data;
 
       return {
-        ...responseData, // spread { result, page, link }
+        ...responseData,
         isLoadMore,
       };
     } catch (error) {
@@ -88,7 +88,6 @@ export const getListBillingPeriodForRating = createAsyncThunk(
       const url = `/v1/dbs/api/rbi/calculation/billingperiod/1`;
       const response = await ratingBillingHttpService.getAll(url);
 
-      // Transform data sesuai struktur response
       const rawData =
         response?.body?.data?.data ||
         response?.data?.data ||
@@ -501,7 +500,7 @@ export const getAllCalculationSummaryPaginate = createAsyncThunk(
   },
 );
 
-// Calculation Summary Expand - Tabel yang di-expand
+// Calculation Summary Expand 
 export const getAllCalculationSummaryExpandPaginate = createAsyncThunk(
   "GET_ALL_CALCULATION_SUMMARY_EXPAND_PAGINATE",
   async (
@@ -543,16 +542,18 @@ export const getAllCalculationSummaryExpandPaginate = createAsyncThunk(
 // GET CALCULATION DETAIL
 export const getAllCalculationDetailPaginate = createAsyncThunk(
   "GET_ALL_CALCULATION_DETAIL_PAGINATE",
-  async ({ calculationCode, page, pageSize, search, sort }, thunkAPI) => {
+  async ({ calculationCode, page, pageSize, search, sort, isLoadMore = false }, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "transactionDate~desc" : sort;
 
-      // API endpoint menggunakan calculationCode, bukan id
       const url = `/v1/dbs/api/rating/detail-rating?calculationCode=${calculationCode}&page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
       const response = await ratingBillingHttpService.getPagination(url);
-      return response.data;
+      return {
+        ...response.data,
+        isLoadMore,
+      };
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -584,8 +585,6 @@ export const getAllAdjustmentPaginate = createAsyncThunk(
       // const url = `/v1/dbs/api/rating/list-adjustment/${id}?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
       // const response = await ratingBillingHttpService.getPagination(url);
       // return response.data;
-
-      // DUMMY DATA - Hapus setelah backend ready
       await new Promise((resolve) => setTimeout(resolve, 500));
 
       const dummyData = {
@@ -662,8 +661,6 @@ export const getAllPeriodicServiceAgreementPaginate = createAsyncThunk(
       // const url = `/v1/dbs/api/rating/list-periodic/${id}?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
       // const response = await ratingBillingHttpService.getPagination(url);
       // return response.data;
-
-      // DUMMY DATA - Sesuai dengan gambar yang diberikan
       await new Promise((resolve) => setTimeout(resolve, 500));
 
       const allDummyData = [
@@ -696,7 +693,6 @@ export const getAllPeriodicServiceAgreementPaginate = createAsyncThunk(
         },
       ];
 
-      // Terapkan pencarian jika ada
       let filteredData = [...allDummyData];
 
       if (search && Object.keys(search).length > 0) {
@@ -710,7 +706,6 @@ export const getAllPeriodicServiceAgreementPaginate = createAsyncThunk(
         });
       }
 
-      // Terapkan sorting jika ada
       if (sort) {
         const [field, order] = sort.split("~");
         filteredData.sort((a, b) => {
@@ -725,7 +720,6 @@ export const getAllPeriodicServiceAgreementPaginate = createAsyncThunk(
         });
       }
 
-      // Terapkan pagination
       const startIndex = (page - 1) * pageSize;
       const endIndex = startIndex + pageSize;
       const paginatedData = filteredData.slice(startIndex, endIndex);
@@ -783,10 +777,10 @@ const ratingSlice = createSlice({
 
       if (isLoadMore) {
         const existingIds = new Set(
-          (state.data?.result || []).map((item) => item.ratingCode), // ← pastikan ratingCode
+          (state.data?.result || []).map((item) => item.ratingCode),
         );
         const uniqueNewData = newResult.filter(
-          (item) => !existingIds.has(item.ratingCode), // ← pastikan ratingCode
+          (item) => !existingIds.has(item.ratingCode),
         );
         state.data = {
           ...action.payload,
@@ -828,7 +822,6 @@ const ratingSlice = createSlice({
     },
 
     // Get All Usage Service Agreement Pagination
-    // Get All Usage Service Agreement Pagination
     [getAllUsageServiceAgreementPaginate.pending]: (state, action) => {
       if (!action.meta.arg?.isLoadMore) {
         state.loadingUsage = true;
@@ -840,7 +833,6 @@ const ratingSlice = createSlice({
       const isLoadMore = action.payload?.isLoadMore;
 
       if (isLoadMore) {
-        // Deduplicate berdasarkan recordId (sesuaikan dengan unique key data usage)
         const existingIds = new Set(
           (state.data_usageSA?.result || []).map((item) => item.recordId),
         );
@@ -1023,7 +1015,7 @@ const ratingSlice = createSlice({
       }
     },
 
-    // Get All Calculation Summary Expand (Data di dalam expand)
+    // Get All Calculation Summary Expand
     [getAllCalculationSummaryExpandPaginate.pending]: (state, action) => {
       const { id } = action.meta.arg;
       state.loadingExpand[id] = true;
@@ -1040,16 +1032,39 @@ const ratingSlice = createSlice({
     },
 
     // Get All Calculation Detail Pagination
-    [getAllCalculationDetailPaginate.pending]: (state) => {
-      state.loadingCalculation = true;
+    [getAllCalculationDetailPaginate.pending]: (state, action) => {
+      if (!action.meta.arg?.isLoadMore) {
+        state.loadingCalculation = true;
+      }
     },
     [getAllCalculationDetailPaginate.fulfilled]: (state, action) => {
       state.loadingCalculation = false;
-      state.data_calculationDetail = action.payload;
+      const isLoadMore = action.payload.isLoadMore;
+      const newResult = action.payload?.result || [];
+
+      if (isLoadMore) {
+        const existingIds = new Set(
+          (state.data_calculationDetail?.result || []).map((item) => item.ratingDetailId),
+        );
+        const uniqueNewData = newResult.filter(
+          (item) => !existingIds.has(item.ratingDetailId),
+        );
+        state.data_calculationDetail = {
+          ...action.payload,
+          result: [
+            ...(state.data_calculationDetail?.result || []),
+            ...uniqueNewData,
+          ],
+        };
+      } else {
+        state.data_calculationDetail = action.payload;
+      }
     },
-    [getAllCalculationDetailPaginate.rejected]: (state) => {
+    [getAllCalculationDetailPaginate.rejected]: (state, action) => {
       state.loadingCalculation = false;
-      state.data_calculationDetail = [];
+      if (!action.meta.arg?.isLoadMore) {
+        state.data_calculationDetail = [];
+      }
     },
 
     // Get All Adjustment Pagination

@@ -115,7 +115,7 @@ const RatingPage = () => {
         getListRatingGasPaginate({
           search: encodeURIComponent(JSON.stringify(search)),
           page: 1,
-          pageSize: initialPageSize, // load pertama 100
+          pageSize: initialPageSize,
           sort,
           period: selectedBillingPeriod,
           isLoadMore: false,
@@ -160,7 +160,7 @@ const RatingPage = () => {
         getListRatingGasPaginate({
           search: encodeURIComponent(JSON.stringify(search)),
           page: nextPage,
-          pageSize: loadMoreSize, // load more 20
+          pageSize: loadMoreSize,
           sort,
           period: selectedBillingPeriod,
           isLoadMore: true,

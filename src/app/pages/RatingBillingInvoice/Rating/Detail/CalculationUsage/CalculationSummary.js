@@ -35,19 +35,15 @@ const CalculationSummary = ({ ratingCode, calculationCode, saType }) => {
     right: [],
   }));
 
-  // Data source untuk tabel utama
   const dataSource = useMemo(() => {
     return (data_calculationSummary?.result || []).map((item) => ({
       ...item,
       key: item.ratingLineId,
     }));
   }, [data_calculationSummary]);
-
-  // Hitung hasMore untuk infinite scroll
   const currentPagination = data_calculationSummary?.page || {};
   const hasMore = dataSource.length < (currentPagination?.totalElements || 0);
 
-  // Initial fetch - load pertama kali dengan pageSize besar
   useEffect(() => {
     if (ratingCode && calculationCode) {
       dispatch(
@@ -65,7 +61,6 @@ const CalculationSummary = ({ ratingCode, calculationCode, saType }) => {
     }
   }, [ratingCode, calculationCode, search, sort, dispatch]);
 
-  // Handle expand row
   const handleExpand = (expanded, record) => {
     const rowKey = record.key;
     
@@ -105,7 +100,6 @@ const CalculationSummary = ({ ratingCode, calculationCode, saType }) => {
     });
   };
 
-  // Handle load more untuk infinite scroll
   const handleLoadMore = async () => {
     const totalElements = currentPagination?.totalElements || 0;
     const currentDataLength = dataSource.length;

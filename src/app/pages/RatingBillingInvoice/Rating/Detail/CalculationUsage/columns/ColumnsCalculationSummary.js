@@ -13,7 +13,6 @@ import {
 } from "../../../../../../../utils/formatCurrency";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../../../utils/getColumnSearchProps";
 
-// Kolom untuk tabel utama tetap sama, tidak ada perubahan
 export const columnsCalculationSummary = (
   search = {},
   page,
@@ -203,11 +202,7 @@ export const getExpandedColumns = () => [
     width: 100,
     align: "center",
     render: (text) => {
-      // Jika null atau undefined, tampilkan kosong
       if (text === null || text === undefined || text === 0) return "0";
-      // Jika 0, tampilkan 0
-      // if (text === 0) return "0";
-      // Jika ada nilai lainnya, tampilkan nilai tersebut
       return text;
     },
   },
@@ -218,11 +213,7 @@ export const getExpandedColumns = () => [
     width: 100,
     align: "center",
     render: (text) => {
-      // Jika null atau undefined, tampilkan kosong
       if (text === null || text === undefined || text === 0) return "Unlimited";
-      // Jika 0, tampilkan "Unlimited"
-      // if (text === 0) return "Unlimited";
-      // Jika ada nilai lainnya, tampilkan nilai tersebut
       return text;
     },
   },

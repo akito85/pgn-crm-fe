@@ -11,7 +11,8 @@ const CalculationDetail = ({ calculationCode }) => {
   const searchInput = useRef(null);
 
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [loadMoreSize] = useState(20);
+  const initialPageSize = 100;
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [sort, setSort] = useState("");
@@ -28,13 +29,15 @@ const CalculationDetail = ({ calculationCode }) => {
         getAllCalculationDetailPaginate({
           calculationCode,
           search: encodeURIComponent(JSON.stringify(search)),
-          page,
-          pageSize,
+          page: 1,
+          pageSize: initialPageSize,
           sort,
+          isLoadMore: false,
         })
       );
+      setPage(1);
     }
-  }, [calculationCode, search, page, pageSize, sort, dispatch]);
+  }, [calculationCode, search, sort, dispatch]);
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -51,9 +54,45 @@ const CalculationDetail = ({ calculationCode }) => {
     });
   };
 
-  const handleChange = (pageChange, pageSizeChange) => {
-    setPage(pageSize !== pageSizeChange ? 1 : pageChange);
-    setPageSize(pageSizeChange);
+  const handleLoadMore = async () => {
+    const currentPagination = data_calculationDetail?.page || {};
+    const totalElements = currentPagination?.totalElements || 0;
+    const currentDataLength = (data_calculationDetail?.result || []).length;
+
+    if (currentDataLength >= totalElements) {
+      return;
+    }
+
+    const nextPage = Math.floor(currentDataLength / loadMoreSize) + 1;
+
+    await dispatch(
+      getAllCalculationDetailPaginate({
+        calculationCode,
+        search: encodeURIComponent(JSON.stringify(search)),
+        page: nextPage,
+        pageSize: loadMoreSize,
+        sort,
+        isLoadMore: true,
+      })
+    );
+    
+    setPage(nextPage);
+  };
+
+  const handleRefresh = () => {
+    if (calculationCode) {
+      dispatch(
+        getAllCalculationDetailPaginate({
+          calculationCode,
+          search: encodeURIComponent(JSON.stringify(search)),
+          page: 1,
+          pageSize: initialPageSize,
+          sort,
+          isLoadMore: false,
+        })
+      );
+      setPage(1);
+    }
   };
 
   const onSortApi = (_, __, sorter) => {
@@ -67,33 +106,31 @@ const CalculationDetail = ({ calculationCode }) => {
   const baseColumns = useMemo(
     () =>
       columnsCalculationDetail(
-        page,
-        pageSize,
+        1,
+        initialPageSize,
         searchInput,
         searchedColumn,
         searchText,
         handleSearch,
         search
       ),
-    [page, pageSize, searchedColumn, searchText, search]
+    [searchedColumn, searchText, search]
   );
 
-  // Process dataSource untuk menambahkan rowSpan pada Time Unit
   const processedDataSource = useMemo(() => {
     const dataSource = data_calculationDetail?.result || [];
     if (!dataSource || dataSource.length === 0) return [];
 
-    // Deep copy untuk menghindari error "object is not extensible"
-    const processed = dataSource.map(item => ({ ...item }));
+    const processed = dataSource.map(item => ({
+      ...item,
+      key: item.ratingDetailId,
+    }));
     let currentTimeUnit = null;
     let timeUnitStartIndex = 0;
 
-    // First pass: identify time unit groups
     processed.forEach((item, index) => {
       if (item.timeUnit !== currentTimeUnit) {
-        // New time unit group starts
         if (currentTimeUnit !== null) {
-          // Set rowSpan for previous group
           const rowSpan = index - timeUnitStartIndex;
           processed[timeUnitStartIndex].timeUnitRowSpan = rowSpan;
           for (let i = timeUnitStartIndex + 1; i < index; i++) {
@@ -105,7 +142,6 @@ const CalculationDetail = ({ calculationCode }) => {
       }
     });
 
-    // Handle last group
     if (currentTimeUnit !== null) {
       const rowSpan = processed.length - timeUnitStartIndex;
       processed[timeUnitStartIndex].timeUnitRowSpan = rowSpan;
@@ -119,7 +155,6 @@ const CalculationDetail = ({ calculationCode }) => {
 
   const allColumns = useMemo(() => {
     const columnsWithKeys = baseColumns.map((col) => {
-      // Tambahkan render khusus untuk Time Unit dengan rowSpan
       if (col.key === 'timeUnit' || col.dataIndex === 'timeUnit') {
         const originalRender = col.render;
         
@@ -138,7 +173,6 @@ const CalculationDetail = ({ calculationCode }) => {
               };
             }
             
-            // Apply original render if exists
             let content;
             if (originalRender) {
               content = originalRender(text, record, index);
@@ -175,16 +209,16 @@ const CalculationDetail = ({ calculationCode }) => {
     }));
   }, [allColumns]);
 
+  const currentPagination = data_calculationDetail?.page || {};
+  const hasMore = (data_calculationDetail?.result || []).length < (currentPagination?.totalElements || 0);
+
   return (
     <div className="w-full pt-4">
       <TableRBI
+        idTable="calculation-detail-table"
         dataSource={processedDataSource}
         columns={processedColumns}
-        current={page}
-        pageSize={pageSize}
-        onChange={handleChange}
-        onSizeChanger={handleChange}
-        totalData={data_calculationDetail?.page?.totalElements || 0}
+        totalData={currentPagination?.totalElements || 0}
         tableScrolled={{ y: 400, x: 2000 }}
         onSort={onSortApi}
         showExport={true}
@@ -192,6 +226,13 @@ const CalculationDetail = ({ calculationCode }) => {
         fixedColumns={fixedColumns}
         setFixedColumns={setFixedColumns}
         loading={loadingCalculation}
+        usePagination={false}
+        useInfiniteScroll={true}
+        onLoadMore={handleLoadMore}
+        hasMore={hasMore}
+        showRefresh={true}
+        onRefresh={handleRefresh}
+        loadMoreThreshold={20}
       />
     </div>
   );
