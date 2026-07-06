@@ -52,6 +52,7 @@ import { handleCheckCriteriaMissingValidation, handleDisabledEachColumnCriteria 
 import { columnsTableCriteriaAll } from "../UtilsProduct/TableCriteriaAllProduct";
 import FunctionalCriteriaProduct from "../UtilsProduct/FunctionalCriteriaProduct";
 import { dateFormatting, hasValue } from "../../../../utils";
+import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 
 const routes = (type) => [
   {
@@ -1111,186 +1112,190 @@ const PricingForm = (props) => {
     <>
       <Spin spinning={isLoading}>
         <BreadCrumb routes={routes(type)} />
-        <RadioTabs
-          data={listSectionInfo}
-          onChange={handlePricingInfo}
-          currentPosition={typePricingInfo}
-        />
-        <Form
-          id="pricingForm"
-          form={form}
-          layout={"vertical"}
-          onFinish={handleSubmitForm}
-          onFinishFailed={handleErrorSubmit}
-          scrollToFirstError={true}
-        >
-          <BaseContainer header={`${typePricingInfo} INFORMATION`}>
-            <div
-              style={{
-                display:
-                  typePricingInfo !== listSectionInfo[0].value
-                    ? "none"
-                    : undefined,
-              }}
-            >
-              <PricingSectionForm
-                criteriaOptions={criteriaOptions}
-                handlePriceCode={handlePriceCode}
-                handleSelectCriteria={handleSelectCriteria}
-                handleDeselectCriteria={handleDeselectCriteria}
-                handleClearCriteria={handleClearCriteria}
-                type={type}
-                status={dataDetailPricingGeneral?.status}
-              />
-            </div>
-            <div
-              style={{
-                display:
-                  typePricingInfo !== listSectionInfo[1].value
-                    ? "none"
-                    : undefined,
-              }}
-            >
-              <ApprovalSectionForm
-                dataTable={appHierDataDetail}
-                dataOption={appHierOptions}
-                selectedHierarchy={selectedHierarchy}
-                updateSelectedHierarchy={setSelectedHierarchy}
-              />
-            </div>
-            <div
-              style={{
-                display:
-                  typePricingInfo !== listSectionInfo[2].value
-                    ? "none"
-                    : undefined,
-              }}
-            >
-              <AttachmentSectionForm
-                type={type}
-                data={listDataAttachment}
-                updateData={setListDataAttachment}
-                dispatch={dispatch}
-                getAPICategory={getListCategory}
-                mandatory={true}
-              />
-            </div>
-          </BaseContainer>
-          {typePricingInfo === listSectionInfo[0].value ? (
-            <BaseContainer
-              header={"PRICING DETAIL INFORMATION"}
-              type="tabs"
-              element={
-                <RadioTabs
-                  data={listSectionPricingDetail}
-                  onChange={handlePricingDetail}
-                  currentPosition={typePricingDetail}
-                />
-              }
-            >
-              {typePricingDetail === listSectionPricingDetail[0].value ? (
-                <PricingDetailTableDetail
-                  type={type}
-                  data={listDataDetail}
-                  priceCode={priceCode}
-                  updateData={setListDataDetail}
-                  dispatch={dispatch}
-                  status={statusPricing}
-                />
-              ) : (
-                <FunctionalCriteriaProduct
-                type={type}
-                data={listDataCriteria || []} //data
-                dataCriteria={criteriaValues || []} //ddl
-                updateData={setListDataCriteria}
-                setStoredData={setStoredDataInline}
-                storedData={storedDataInline}
-                // startDate={startDate ? moment(startDate) : undefined}
-                selector="pricing"
-                getApi={{
-                  getBudgetList,
-                  getProvinceList,
-                  getProvinceListByCountry,
-                  getCountryList,
-                  getIndustrialSectorList,
-                  getAccountCategoryList,
-                  getServiceTypeList,
-                  getSorList,
-                  getCostCenterList,
-                  getGsizesList,
-                  getCustomerSegmentList,
-                  getCustomerList,
-                  getCityList,
-                  getSubDistrictList,
-                  getAccountGroupList,
-                  getDistrictList,
-                }}
-                columnsTable={columnsTableCriteriaAll}
-                countryCriteriaId={getCriteriaIdByCode("COUNTRY")}
-                checkStartDate={false}
-              />
-                // <PricingDetailTableCriteria
-                //   type={type}
-                //   data={listDataCriteria}
-                //   dataCriteria={criteriaValues}
-                //   updateData={setListDataCriteria}
-                //   dispatch={dispatch}
-                //   setStoredData={setStoredDataInline}
-                //   storedData={storedDataInline}
-                // />
-              )}
-            </BaseContainer>
-          ) : null}
-          <div className="flex w-full justify-between align-middle my-3">
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => setModalBack(true)}
-              icon={
-                <LeftOutlined
+        <div className="flex flex-col gap-y-4">
+          <RadioTabs
+            data={listSectionInfo}
+            onChange={handlePricingInfo}
+            currentPosition={typePricingInfo}
+          />
+          <Form
+            id="pricingForm"
+            form={form}
+            layout={"vertical"}
+            onFinish={handleSubmitForm}
+            onFinishFailed={handleErrorSubmit}
+            scrollToFirstError={true}
+          >
+            <div className="flex flex-col gap-y-4">
+              <NxCardContainer header={`${typePricingInfo} INFORMATION`}>
+                <div
                   style={{
-                    color: "#fff",
-                    fontSize: 24,
-                    justifyItems: "center",
+                    display:
+                      typePricingInfo !== listSectionInfo[0].value
+                        ? "none"
+                        : undefined,
                   }}
-                />
-              }
-            >
-              Back
-            </ButtonComponent>
-            <div className="flex align-middle gap-3">
-              <ButtonComponent
-                icon={
-                  <SVGIcon
-                    name={
-                      type === "update" ? `IconButtonReset` : `IconButtonClear`
-                    }
-                    width={24}
+                >
+                  <PricingSectionForm
+                    criteriaOptions={criteriaOptions}
+                    handlePriceCode={handlePriceCode}
+                    handleSelectCriteria={handleSelectCriteria}
+                    handleDeselectCriteria={handleDeselectCriteria}
+                    handleClearCriteria={handleClearCriteria}
+                    type={type}
+                    status={dataDetailPricingGeneral?.status}
                   />
-                }
-                type="submit"
-                onClick={handleClear}
-              >
-                {type === "update" ? "Reset" : "Clear"}
-              </ButtonComponent>
-              <ButtonComponent
-                htmlType="submit"
-                type="submit"
-                onClick={() => setTypeSubmit(listTypeSubmit[1])}
-                // disabled={disableSubmit}
-              >
-                Save as Draft
-              </ButtonComponent>
-              <ButtonComponent
-                htmlType="submit"
-                type="submit"
-                onClick={() => setTypeSubmit(listTypeSubmit[0])}
-                // disabled={disableSubmit}
-              >
-                Save & Submit
-              </ButtonComponent>
+                </div>
+                <div
+                  style={{
+                    display:
+                      typePricingInfo !== listSectionInfo[1].value
+                        ? "none"
+                        : undefined,
+                  }}
+                >
+                  <ApprovalSectionForm
+                    dataTable={appHierDataDetail}
+                    dataOption={appHierOptions}
+                    selectedHierarchy={selectedHierarchy}
+                    updateSelectedHierarchy={setSelectedHierarchy}
+                  />
+                </div>
+                <div
+                  style={{
+                    display:
+                      typePricingInfo !== listSectionInfo[2].value
+                        ? "none"
+                        : undefined,
+                  }}
+                >
+                  <AttachmentSectionForm
+                    type={type}
+                    data={listDataAttachment}
+                    updateData={setListDataAttachment}
+                    dispatch={dispatch}
+                    getAPICategory={getListCategory}
+                    mandatory={true}
+                  />
+                </div>
+              </NxCardContainer>
+              {typePricingInfo === listSectionInfo[0].value ? (
+                <NxCardContainer
+                  header={"PRICING DETAIL INFORMATION"}
+                  type="tabs"
+                  element={
+                    <RadioTabs
+                      data={listSectionPricingDetail}
+                      onChange={handlePricingDetail}
+                      currentPosition={typePricingDetail}
+                    />
+                  }
+                >
+                  {typePricingDetail === listSectionPricingDetail[0].value ? (
+                    <PricingDetailTableDetail
+                      type={type}
+                      data={listDataDetail}
+                      priceCode={priceCode}
+                      updateData={setListDataDetail}
+                      dispatch={dispatch}
+                      status={statusPricing}
+                    />
+                  ) : (
+                    <FunctionalCriteriaProduct
+                    type={type}
+                    data={listDataCriteria || []} //data
+                    dataCriteria={criteriaValues || []} //ddl
+                    updateData={setListDataCriteria}
+                    setStoredData={setStoredDataInline}
+                    storedData={storedDataInline}
+                    // startDate={startDate ? moment(startDate) : undefined}
+                    selector="pricing"
+                    getApi={{
+                      getBudgetList,
+                      getProvinceList,
+                      getProvinceListByCountry,
+                      getCountryList,
+                      getIndustrialSectorList,
+                      getAccountCategoryList,
+                      getServiceTypeList,
+                      getSorList,
+                      getCostCenterList,
+                      getGsizesList,
+                      getCustomerSegmentList,
+                      getCustomerList,
+                      getCityList,
+                      getSubDistrictList,
+                      getAccountGroupList,
+                      getDistrictList,
+                    }}
+                    columnsTable={columnsTableCriteriaAll}
+                    countryCriteriaId={getCriteriaIdByCode("COUNTRY")}
+                    checkStartDate={false}
+                  />
+                    // <PricingDetailTableCriteria
+                    //   type={type}
+                    //   data={listDataCriteria}
+                    //   dataCriteria={criteriaValues}
+                    //   updateData={setListDataCriteria}
+                    //   dispatch={dispatch}
+                    //   setStoredData={setStoredDataInline}
+                    //   storedData={storedDataInline}
+                    // />
+                  )}
+                </NxCardContainer>
+              ) : null}
+              <div className="flex w-full justify-between align-middle my-3">
+                <ButtonComponent
+                  type={"submit"}
+                  onClick={() => setModalBack(true)}
+                  icon={
+                    <LeftOutlined
+                      style={{
+                        color: "#fff",
+                        fontSize: 24,
+                        justifyItems: "center",
+                      }}
+                    />
+                  }
+                >
+                  Back
+                </ButtonComponent>
+                <div className="flex align-middle gap-3">
+                  <ButtonComponent
+                    icon={
+                      <SVGIcon
+                        name={
+                          type === "update" ? `IconButtonReset` : `IconButtonClear`
+                        }
+                        width={24}
+                      />
+                    }
+                    type="submit"
+                    onClick={handleClear}
+                  >
+                    {type === "update" ? "Reset" : "Clear"}
+                  </ButtonComponent>
+                  <ButtonComponent
+                    htmlType="submit"
+                    type="submit"
+                    onClick={() => setTypeSubmit(listTypeSubmit[1])}
+                    // disabled={disableSubmit}
+                  >
+                    Save as Draft
+                  </ButtonComponent>
+                  <ButtonComponent
+                    htmlType="submit"
+                    type="submit"
+                    onClick={() => setTypeSubmit(listTypeSubmit[0])}
+                    // disabled={disableSubmit}
+                  >
+                    Save & Submit
+                  </ButtonComponent>
+                </div>
+              </div>
             </div>
-          </div>
-        </Form>
+          </Form>
+        </div>
 
         {/** Modal Confirm */}
         {modalConfirm ? (

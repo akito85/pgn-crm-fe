@@ -236,7 +236,7 @@ const PricingTable = () => {
       handleCreate: () =>
         navigate(PRODUCT_PROMO_ROUTES.CREATE_PRICING),
       handleUpdate: ({ id, status, statusApproval }) =>
-        navigate(PRODUCT_PROMO_ROUTES.CREATE_PRICING, {
+        navigate(PRODUCT_PROMO_ROUTES.UPDATE_PRICING, {
           state: {
             id, statusPricing: status, statusApprovalPricing: statusApproval
           }
