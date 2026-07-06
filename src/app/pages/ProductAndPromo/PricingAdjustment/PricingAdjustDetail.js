@@ -25,6 +25,7 @@ import SVGIcon from "../../../../assets/Icon/index";
 import { bytesConverter } from "../../../../utils/bytesConverter";
 import { dateFormatting } from "../../../../utils";
 import { columnsTableCriteria } from "./columnTableCriteriaPriceAdjust";
+import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 
 const routes = [
   {
@@ -382,14 +383,14 @@ const PricingAdjustDetail = () => {
         );
       case "Attachment":
         return (
-          <BaseContainer header={"Attachment Information"}>
+          <NxCardContainer header={"Attachment Information"}>
             <AttachmentSectionForm
               type={type}
               data={listDataAttachment}
               updateData={setListDataAttachment}
               dispatch={dispatch}
             />
-          </BaseContainer>
+          </NxCardContainer>
         );
     }
   };
@@ -412,129 +413,131 @@ const PricingAdjustDetail = () => {
         tip={"Loading..."}
       >
         <BreadCrumb routes={routes} />
-        {bodyApproval.isApprover &&
-        bodyApproval.approvalType &&
-        bodyApproval.approvalType === "INACTIVE_PRICING_ADJUSTMENT" ? (
-          <BaseContainer header={"INACTIVE REQUEST INFORMATION"}>
-            <PricingInactiveRequest
-              data={
-                bodyApproval.approvalDetail !== null
-                  ? bodyApproval.approvalDetail
-                  : {}
-              }
-            />
-          </BaseContainer>
-        ) : null}
-        <div className="mt-[30px]">
-          <RadioTabs
-            data={listSectionInfo}
-            onChange={handlePriceAdjustInfo}
-            currentPosition={typePriceAdjustInfo}
-          />
-        </div>
-        {showSection()}
-        <div
-          className={`flex w-full${
-            showButtonApproval ? " justify-between" : ""
-          } align-middle my-3`}
-        >
-          <ButtonComponent
-            type={"submit"}
-            onClick={() => navigate(-1)}
-            icon={
-              <LeftOutlined
-                style={{
-                  color: "#fff",
-                  fontSize: 24,
-                  justifyItems: "center",
-                }}
+        <div className="flex flex-col gap-y-4">
+          {bodyApproval.isApprover &&
+          bodyApproval.approvalType &&
+          bodyApproval.approvalType === "INACTIVE_PRICING_ADJUSTMENT" ? (
+            <NxCardContainer header={"INACTIVE REQUEST INFORMATION"}>
+              <PricingInactiveRequest
+                data={
+                  bodyApproval.approvalDetail !== null
+                    ? bodyApproval.approvalDetail
+                    : {}
+                }
               />
-            }
-          >
-            Back
-          </ButtonComponent>
-          {showButtonApproval ? (
-            <div className="flex align-middle gap-3">
-              <ButtonComponent
-                type="reject"
-                onClick={() => handleModalConfirmation("Reject")}
-              >
-                Reject
-              </ButtonComponent>
-              <ButtonComponent
-                type="approve"
-                onClick={() => handleModalConfirmation("Approve")}
-              >
-                Approve
-              </ButtonComponent>
-            </div>
+            </NxCardContainer>
           ) : null}
-        </div>
-        {/* Modal Approve/Reject*/}
-        <ModalApproveOrReject
-          isOpen={modalConfirm}
-          handleCloseModal={handleCloseModalApproveReject}
-          onFinish={handleConfirm}
-          header={`${approveOrReject} information`}
-          approveOrReject={approveOrReject}
-          menu={"Pricing Adjustment"}
-          named={`${dataDetailPricingAdjustGeneral?.name|| ""}`}
-          // isOpen={modalConfirm}
-          // header={`${approveOrReject} information`}
-          // message={`Are you sure you want to ${approveOrReject} Price Adjustment?`}
-          // width={1000}
-          // handleCancel={handleCloseModalApproveReject}
-          // footer={
-          //   <div className={"w-full flex justify-end gap-5"}>
-          //     <ButtonComponent
-          //       type={"default"}
-          //       onClick={handleCloseModalApproveReject}
-          //     >
-          //       Cancel
-          //     </ButtonComponent>
-          //     <ButtonComponent
-          //       form={"formApproveRejcet"}
-          //       type={"submit"}
-          //       htmlType={"submit"}
-          //       border={false}
-          //     >
-          //       Confirm
-          //     </ButtonComponent>
-          //   </div>
-          // }
-        />
-          {/* <Form form={form} name="formApproveRejcet" onFinish={handleConfirm}>
-            <Form.Item
-              name={"remark"}
-              rules={[{ message: requiredMessage("Remark"), required: true }]}
-            >
-              <InputComponent
-                rows={1}
-                placeholder="Type your remark"
-                type="textarea"
-                value={remark}
-                onChange={(e) => setRemark(e.target.value)}
-              />
-            </Form.Item>
-          </Form>
-        </ModalApproveOrReject> */}
-
-        {/** Modal Retry */}
-        <ModalError
-          isOpen={modalError}
-          handleOk={handleRetry}
-          handleCancel={handleCloseModalError}
-          customText={"Try Again"}
-        >
-          <div className="px-5 pt-5 pb-[10px] justify-center">
-            <div className="w-full flex gap-[20px]">
-              <SVGIcon name="IconFailed" width={48} />
-              <p className="text-[18px] font-bold">{"Failed"}</p>
-            </div>
-            <p className="pl-[70px]">{`Your data was not inactivate ${bodyError.message}.`}</p>
-            <p className="pl-[70px]">Please try again.</p>
+          <div className="mt-[30px]">
+            <RadioTabs
+              data={listSectionInfo}
+              onChange={handlePriceAdjustInfo}
+              currentPosition={typePriceAdjustInfo}
+            />
           </div>
-        </ModalError>
+          {showSection()}
+          <div
+            className={`flex w-full${
+              showButtonApproval ? " justify-between" : ""
+            } align-middle my-3`}
+          >
+            <ButtonComponent
+              type={"submit"}
+              onClick={() => navigate(-1)}
+              icon={
+                <LeftOutlined
+                  style={{
+                    color: "#fff",
+                    fontSize: 24,
+                    justifyItems: "center",
+                  }}
+                />
+              }
+            >
+              Back
+            </ButtonComponent>
+            {showButtonApproval ? (
+              <div className="flex align-middle gap-3">
+                <ButtonComponent
+                  type="reject"
+                  onClick={() => handleModalConfirmation("Reject")}
+                >
+                  Reject
+                </ButtonComponent>
+                <ButtonComponent
+                  type="approve"
+                  onClick={() => handleModalConfirmation("Approve")}
+                >
+                  Approve
+                </ButtonComponent>
+              </div>
+            ) : null}
+          </div>
+          {/* Modal Approve/Reject*/}
+          <ModalApproveOrReject
+            isOpen={modalConfirm}
+            handleCloseModal={handleCloseModalApproveReject}
+            onFinish={handleConfirm}
+            header={`${approveOrReject} information`}
+            approveOrReject={approveOrReject}
+            menu={"Pricing Adjustment"}
+            named={`${dataDetailPricingAdjustGeneral?.name|| ""}`}
+            // isOpen={modalConfirm}
+            // header={`${approveOrReject} information`}
+            // message={`Are you sure you want to ${approveOrReject} Price Adjustment?`}
+            // width={1000}
+            // handleCancel={handleCloseModalApproveReject}
+            // footer={
+            //   <div className={"w-full flex justify-end gap-5"}>
+            //     <ButtonComponent
+            //       type={"default"}
+            //       onClick={handleCloseModalApproveReject}
+            //     >
+            //       Cancel
+            //     </ButtonComponent>
+            //     <ButtonComponent
+            //       form={"formApproveRejcet"}
+            //       type={"submit"}
+            //       htmlType={"submit"}
+            //       border={false}
+            //     >
+            //       Confirm
+            //     </ButtonComponent>
+            //   </div>
+            // }
+          />
+            {/* <Form form={form} name="formApproveRejcet" onFinish={handleConfirm}>
+              <Form.Item
+                name={"remark"}
+                rules={[{ message: requiredMessage("Remark"), required: true }]}
+              >
+                <InputComponent
+                  rows={1}
+                  placeholder="Type your remark"
+                  type="textarea"
+                  value={remark}
+                  onChange={(e) => setRemark(e.target.value)}
+                />
+              </Form.Item>
+            </Form>
+          </ModalApproveOrReject> */}
+
+          {/** Modal Retry */}
+          <ModalError
+            isOpen={modalError}
+            handleOk={handleRetry}
+            handleCancel={handleCloseModalError}
+            customText={"Try Again"}
+          >
+            <div className="px-5 pt-5 pb-[10px] justify-center">
+              <div className="w-full flex gap-[20px]">
+                <SVGIcon name="IconFailed" width={48} />
+                <p className="text-[18px] font-bold">{"Failed"}</p>
+              </div>
+              <p className="pl-[70px]">{`Your data was not inactivate ${bodyError.message}.`}</p>
+              <p className="pl-[70px]">Please try again.</p>
+            </div>
+          </ModalError>
+        </div>
       </Spin>
     </>
   );
