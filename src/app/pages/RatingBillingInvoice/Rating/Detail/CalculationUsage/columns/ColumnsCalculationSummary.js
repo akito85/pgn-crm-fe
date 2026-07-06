@@ -303,8 +303,7 @@ export const getExpandedColumns = () => [
 ];
 
 export const renderExpandedRow = (record, expandData, loadingExpand) => {
-  // Gunakan logic rowKey yang sama dengan handleExpand
-  const rowKey = record.id || `${record.transactionDate}-${record.saType}`;
+  const rowKey = record.key;
   const isLoading = loadingExpand[rowKey];
   const expandedData = expandData[rowKey]?.result || [];
 
