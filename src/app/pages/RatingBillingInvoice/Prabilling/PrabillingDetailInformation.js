@@ -22,7 +22,7 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
     <div className="flex flex-col gap-1">
         {/* Prabilling Information - CollapsibleContainer */}
         <CollapsibleContainer header={"Prabilling Information"} border className="mt-4">
-          <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[repeat(5,auto)] gap-x-8 gap-y-2 sm:gap-y-1">
+          <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-8 gap-y-4">
             <DetailText label={"Init Code"}>
               {prabillData?.initCode || ""}
             </DetailText>
@@ -74,13 +74,13 @@ const PrabillingDetailInformation = ({ data, tabHeader }) => {
                   </DetailText>
                   <DetailText label={"Completion Date"}>
                     {prabillData?.updateDtm
-                      ? moment(prabillData.updateDtm).format("DD MMM YYYY HH:mm:ss")
-                      : ""}
+                       ? moment(prabillData.updateDtm).format("DD MMM YYYY HH:mm:ss")
+                       : ""}
                   </DetailText>
                 </React.Fragment>
               ))}
 
-            <DetailText label={"Remark"} className="col-span-5">
+            <DetailText label={"Remark"} className="col-span-full">
               {prabillData?.remark || ""}
             </DetailText>
           </div>
