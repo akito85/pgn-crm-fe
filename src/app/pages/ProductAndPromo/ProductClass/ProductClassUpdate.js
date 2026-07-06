@@ -21,6 +21,7 @@ import DetailText from "../../../../components/DetailText";
 import InputComponent from "../../../../components/InputComponent";
 import productPromoHttpService from "../../../../redux/services/productPromoHttpService";
 import { validateCreateUpdate } from "../../../../redux/slices/general_slice";
+import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 
 const ProductClassUpdate = () => {
   // Selector
@@ -139,7 +140,7 @@ const ProductClassUpdate = () => {
         <BreadCrumb routes={routes} />
 
         <Form layout="vertical" form={form} onFinish={handleSave}>
-          <BaseContainer header={"product class information"}>
+          <NxCardContainer header={"product class information"}>
             <div className="w-full grid grid-cols-2 gap-2">
               <Form.Item label={"Name"} name={"name"}>
                 <InputComponent disabled />
@@ -164,7 +165,7 @@ const ProductClassUpdate = () => {
                 </Form.Item>
               </div>
             </div>
-          </BaseContainer>
+          </NxCardContainer>
 
           <div className="mt-[30px] flex">
             <ButtonComponent
