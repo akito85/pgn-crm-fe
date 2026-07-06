@@ -39,7 +39,7 @@ const CalculationSummary = ({ ratingCode, calculationCode, saType }) => {
   const dataSource = useMemo(() => {
     return (data_calculationSummary?.result || []).map((item) => ({
       ...item,
-      key: item.id || `${item.transactionDate}-${item.saType}`,
+      key: item.ratingLineId,
     }));
   }, [data_calculationSummary]);
 
@@ -67,15 +67,14 @@ const CalculationSummary = ({ ratingCode, calculationCode, saType }) => {
 
   // Handle expand row
   const handleExpand = (expanded, record) => {
-    // Hitung rowKey konsisten dengan dataSource mapping
-    const rowKey = record.id || `${record.transactionDate}-${record.saType}`;
+    const rowKey = record.key;
     
     if (expanded) {
       setExpandedRowKeys([...expandedRowKeys, rowKey]);
       
       dispatch(
         getAllCalculationSummaryExpandPaginate({
-          id: record.id || rowKey,
+          id: rowKey,
           ratingCode,
           calculationCode,
           saType,
