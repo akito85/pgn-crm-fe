@@ -606,7 +606,7 @@ const TermOfServiceUpdate = () => {
             </NxCardContainer>
           </div>
 
-          <div className="mt-[30px] flex">
+          <div className="mt-[30px] flex items-center">
             <ButtonComponent
               type={"submit"}
               onClick={handleBack}
@@ -623,8 +623,8 @@ const TermOfServiceUpdate = () => {
               Back
             </ButtonComponent>
 
-            <div className={"w-full flex justify-end gap-5"}>
-              <Form.Item>
+            <div className={"w-full flex justify-end items-center gap-5"}>
+              <Form.Item style={{ marginBottom: 0 }}>
                 <ButtonComponent
                   icon={<SVGIcon name="IconButtonReset" width={24} />}
                   type="submit"
@@ -637,7 +637,7 @@ const TermOfServiceUpdate = () => {
                   Reset
                 </ButtonComponent>
               </Form.Item>
-              <Form.Item>
+              <Form.Item style={{ marginBottom: 0 }}>
                 <ButtonComponent
                   type="submit"
                   htmlType={"submit"}
