@@ -1,5 +1,5 @@
 import React, { useState, Fragment, useEffect } from "react";
-import { Form, Spin } from "antd";
+import { Button, Form, Spin } from "antd";
 import { PRODUCT_PROMO_ROUTES } from "../../../../routes/product_promo/pp_routes";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import BaseContainer from "../../../../components/BaseContainer";
@@ -8,7 +8,6 @@ import PricingSectionDetail from "./Detail/PricingSectionDetail";
 import AttachmentSectionForm from "./Form/AttachmentSectionForm";
 import moment from "moment";
 import ButtonComponent from "../../../../components/ButtonComponent";
-import { LeftOutlined } from "@ant-design/icons";
 import { useNavigate, useLocation } from "react-router";
 import ModalApproveOrReject from "../../../../components/Modal/ModalApproveOrReject";
 import PricingInactiveRequest from "./Detail/PricingInactiveRequest";
@@ -517,21 +516,12 @@ const PricingDetail = (props) => {
                 showButtonApproval ? " justify-between" : ""
               } align-middle my-3`}
             >
-              <ButtonComponent
-                type={"submit"}
+              <Button
                 onClick={() => navigate(-1)}
-                icon={
-                  <LeftOutlined
-                    style={{
-                      color: "#fff",
-                      fontSize: 24,
-                      justifyItems: "center",
-                    }}
-                  />
-                }
+                type="menu"
               >
                 Back
-              </ButtonComponent>
+              </Button>
               {showButtonApproval ? (
                 <div className="flex align-middle gap-3">
                   <ButtonComponent

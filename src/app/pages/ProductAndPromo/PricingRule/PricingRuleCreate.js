@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import { PRODUCT_PROMO_ROUTES } from "../../../../routes/product_promo/pp_routes";
-import { Form, Spin } from "antd";
+import { Button, Form, Spin } from "antd";
 import PricingRule from "./Form/PricingRule";
 import Approval from "./Form/Approval";
 import RadioTabs from "../../../../components/RadioTabs";
@@ -13,7 +13,7 @@ import {
   ModalConfirm,
   ModalError,
 } from "../../../../components/Modal/ModalPopUp";
-import { WarningOutlined, LeftOutlined } from "@ant-design/icons";
+import { WarningOutlined } from "@ant-design/icons";
 import ConfirmationLayout from "./Modal/ConfirmationLayout";
 import {
   createPricingRule,
@@ -472,21 +472,12 @@ const PricingRuleCreate = () => {
 
             <NxBaseContainer border className="mt-4">
               <div className="flex items-center">
-                <ButtonComponent
-                  type={"submit"}
+                <Button
                   onClick={handleBack}
-                  icon={
-                    <LeftOutlined
-                      style={{
-                        color: "#fff",
-                        fontSize: 24,
-                        justifyItems: "center",
-                      }}
-                    />
-                  }
+                  type="menu"
                 >
                   Back
-                </ButtonComponent>
+                </Button>
 
                 <div className={"w-full flex justify-end items-center gap-5"}>
                   <Form.Item style={{ marginBottom: 0 }}>

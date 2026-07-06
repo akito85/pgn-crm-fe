@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Form, Modal, Spin } from "antd";
+import { Button, Form, Modal, Spin } from "antd";
 import BaseContainer from "../../../../components/BaseContainer";
 import PricingSectionForm from "./Form/PricingSectionForm";
 import ApprovalSectionForm from "./Form/ApprovalSectionForm";
@@ -10,7 +10,6 @@ import PricingDetailTableDetail from "./Form/PricingDetailTableDetail";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import SVGIcon from "../../../../assets/Icon/index";
-import { LeftOutlined } from "@ant-design/icons";
 import RadioTabs from "../../../../components/RadioTabs";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -1248,21 +1247,12 @@ const PricingForm = (props) => {
               ) : null}
               <NxBaseContainer border>
                 <div className="flex w-full justify-between align-middle my-3">
-                  <ButtonComponent
-                    type={"submit"}
+                  <Button
                     onClick={() => setModalBack(true)}
-                    icon={
-                      <LeftOutlined
-                        style={{
-                          color: "#fff",
-                          fontSize: 24,
-                          justifyItems: "center",
-                        }}
-                      />
-                    }
+                    type="menu"
                   >
                     Back
-                  </ButtonComponent>
+                  </Button>
                   <div className="flex align-middle gap-3">
                     <ButtonComponent
                       icon={

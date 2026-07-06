@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Form, Spin, Steps } from "antd";
+import { Button, Form, Spin, Steps } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import { PRODUCT_PROMO_ROUTES } from "../../../../routes/product_promo/pp_routes";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -2054,21 +2054,12 @@ const ProductForm = (props) => {
               ) : null}
               <NxBaseContainer border>
                 <div className="flex w-full justify-between align-middle my-3">
-                  <ButtonComponent
-                    type={"submit"}
+                  <Button
                     onClick={() => setModalBack(true)}
-                    icon={
-                      <LeftOutlined
-                        style={{
-                          color: "#fff",
-                          fontSize: 24,
-                          justifyItems: "center",
-                        }}
-                      />
-                    }
+                    type="menu"
                   >
                     Back
-                  </ButtonComponent>
+                  </Button>
                   <div className="flex align-middle gap-3">
                     <ButtonComponent
                       icon={

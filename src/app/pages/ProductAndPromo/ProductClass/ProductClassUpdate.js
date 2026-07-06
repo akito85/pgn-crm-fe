@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Spin, Form } from "antd";
+import { Button, Spin, Form } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import { PRODUCT_PROMO_ROUTES } from "../../../../routes/product_promo/pp_routes";
 import {
@@ -11,7 +11,7 @@ import {
 import BaseContainer from "../../../../components/BaseContainer";
 import SVGIcon from "../../../../assets/Icon/index";
 import ButtonComponent from "../../../../components/ButtonComponent";
-import { LeftOutlined, WarningOutlined } from "@ant-design/icons";
+import { WarningOutlined } from "@ant-design/icons";
 import {
   ModalConfirm,
   ModalError,
@@ -170,21 +170,12 @@ const ProductClassUpdate = () => {
 
           <NxBaseContainer border className="mt-4">
             <div className="flex items-center">
-              <ButtonComponent
-                type={"submit"}
+              <Button
                 onClick={handleBack}
-                icon={
-                  <LeftOutlined
-                    style={{
-                      color: "#fff",
-                      fontSize: 24,
-                      justifyItems: "center",
-                    }}
-                  />
-                }
+                type="menu"
               >
                 Back
-              </ButtonComponent>
+              </Button>
 
               <div className={"w-full flex justify-end items-center gap-5"}>
                 <Form.Item style={{ marginBottom: 0 }}>

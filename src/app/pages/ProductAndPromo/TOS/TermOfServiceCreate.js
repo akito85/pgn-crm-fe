@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Form, Spin, Select } from "antd";
+import { Button, Form, Spin, Select } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import BreadCrumb from "../../../../components/BreadCrumb";
@@ -13,7 +13,7 @@ import {
   createTOS,
 } from "../../../../redux/slices/product_promo/tos";
 import ButtonComponent from "../../../../components/ButtonComponent";
-import { LeftOutlined, WarningOutlined } from "@ant-design/icons";
+import { WarningOutlined } from "@ant-design/icons";
 import SVGIcon from "../../../../assets/Icon/index";
 import {
   ModalConfirm,
@@ -526,21 +526,12 @@ const TermOfServiceCreate = () => {
           </div>
 
           <div className="mt-[30px] flex items-center">
-            <ButtonComponent
-              type={"submit"}
+            <Button
               onClick={handleBack}
-              icon={
-                <LeftOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 24,
-                    justifyItems: "center",
-                  }}
-                />
-              }
+              type="menu"
             >
               Back
-            </ButtonComponent>
+            </Button>
 
             <div className={"w-full flex justify-end items-center gap-5"}>
               <Form.Item style={{ marginBottom: 0 }}>

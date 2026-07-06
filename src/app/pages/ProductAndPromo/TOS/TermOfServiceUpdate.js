@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Spin, Form, Select } from "antd";
+import { Button, Spin, Form, Select } from "antd";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   getTosAttribute,
@@ -14,7 +14,7 @@ import BaseContainer from "../../../../components/BaseContainer";
 import InputComponent from "../../../../components/InputComponent";
 import SelectComponent from "../../../../components/SelectComponent";
 import ButtonComponent from "../../../../components/ButtonComponent";
-import { LeftOutlined, WarningOutlined } from "@ant-design/icons";
+import { WarningOutlined } from "@ant-design/icons";
 import SVGIcon from "../../../../assets/Icon/index";
 import {
   ModalConfirm,
@@ -607,21 +607,12 @@ const TermOfServiceUpdate = () => {
           </div>
 
           <div className="mt-[30px] flex items-center">
-            <ButtonComponent
-              type={"submit"}
+            <Button
               onClick={handleBack}
-              icon={
-                <LeftOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 24,
-                    justifyItems: "center",
-                  }}
-                />
-              }
+              type="menu"
             >
               Back
-            </ButtonComponent>
+            </Button>
 
             <div className={"w-full flex justify-end items-center gap-5"}>
               <Form.Item style={{ marginBottom: 0 }}>

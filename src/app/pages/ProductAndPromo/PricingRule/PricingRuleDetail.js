@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Spin } from "antd";
+import { Button, Spin } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import { PRODUCT_PROMO_ROUTES } from "../../../../routes/product_promo/pp_routes";
 import RadioTabs from "../../../../components/RadioTabs";
@@ -13,7 +13,6 @@ import {
   getHeaderPricingRule,
 } from "../../../../redux/slices/product_promo/PricingRule/PricingRuleSlice";
 import ButtonComponent from "../../../../components/ButtonComponent";
-import { LeftOutlined } from "@ant-design/icons";
 import {
   ModalApproveOrRejectPricingRule,
   ModalErrorApproveOrRejectPricingRule,
@@ -465,21 +464,12 @@ const PricingRuleDetail = () => {
 
         <NxBaseContainer border className="mt-4">
           <div className="flex">
-            <ButtonComponent
-              type={"submit"}
+            <Button
               onClick={() => navigate(-1)}
-              icon={
-                <LeftOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 24,
-                    justifyItems: "center",
-                  }}
-                />
-              }
+              type="menu"
             >
               Back
-            </ButtonComponent>
+            </Button>
 
             {showButtonApproval ? (
               <div className={"w-full flex justify-end gap-5"}>
