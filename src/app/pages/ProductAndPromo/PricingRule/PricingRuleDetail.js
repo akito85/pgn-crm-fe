@@ -26,6 +26,7 @@ import AttachmentComponent from "../../../../components/Attachment/AttachmentCom
 import productPromoHttpService from "../../../../redux/services/productPromoHttpService";
 import { configApp } from "../../../../constants/configApp";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
+import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
 
 const PricingRuleDetail = () => {
   // Selector
@@ -462,46 +463,48 @@ const PricingRuleDetail = () => {
           {layout(valuePage)}
         </div>
 
-        <div className="flex mt-[30px]">
-          <ButtonComponent
-            type={"submit"}
-            onClick={() => navigate(-1)}
-            icon={
-              <LeftOutlined
-                style={{
-                  color: "#fff",
-                  fontSize: 24,
-                  justifyItems: "center",
-                }}
-              />
-            }
-          >
-            Back
-          </ButtonComponent>
+        <NxBaseContainer border className="mt-4">
+          <div className="flex">
+            <ButtonComponent
+              type={"submit"}
+              onClick={() => navigate(-1)}
+              icon={
+                <LeftOutlined
+                  style={{
+                    color: "#fff",
+                    fontSize: 24,
+                    justifyItems: "center",
+                  }}
+                />
+              }
+            >
+              Back
+            </ButtonComponent>
 
-          {showButtonApproval ? (
-            <div className={"w-full flex justify-end gap-5"}>
-              <ButtonComponent
-                type="reject"
-                onClick={() => {
-                  setModalConfirm(true);
-                  setApproveOrReject("Reject");
-                }}
-              >
-                Reject
-              </ButtonComponent>
-              <ButtonComponent
-                type="approve"
-                onClick={() => {
-                  setModalConfirm(true);
-                  setApproveOrReject("Approve");
-                }}
-              >
-                Approve
-              </ButtonComponent>
-            </div>
-          ) : null}
-        </div>
+            {showButtonApproval ? (
+              <div className={"w-full flex justify-end gap-5"}>
+                <ButtonComponent
+                  type="reject"
+                  onClick={() => {
+                    setModalConfirm(true);
+                    setApproveOrReject("Reject");
+                  }}
+                >
+                  Reject
+                </ButtonComponent>
+                <ButtonComponent
+                  type="approve"
+                  onClick={() => {
+                    setModalConfirm(true);
+                    setApproveOrReject("Approve");
+                  }}
+                >
+                  Approve
+                </ButtonComponent>
+              </div>
+            ) : null}
+          </div>
+        </NxBaseContainer>
 
         {/* Modal Approve/Reject*/}
         <ModalApproveOrRejectPricingRule

@@ -32,6 +32,7 @@ import { applyLocationCriteriaCascade, getCriteriaIdByCode, handleCheckCriteriaM
 import { columnsTableCriteriaAll } from "../UtilsProduct/TableCriteriaAllProduct";
 import { dateFormatting, hasValue } from "../../../../utils";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
+import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
 
 const PricingRuleUpdate = () => {
   // Selector
@@ -842,56 +843,58 @@ const PricingRuleUpdate = () => {
               </NxCardContainer>
             </div>
 
-            <div className="mt-[30px] flex">
-              <ButtonComponent
-                type={"submit"}
-                onClick={handleBack}
-                icon={
-                  <LeftOutlined
-                    style={{
-                      color: "#fff",
-                      fontSize: 24,
-                      justifyItems: "center",
-                    }}
-                  />
-                }
-              >
-                Back
-              </ButtonComponent>
+            <NxBaseContainer border className="mt-4">
+              <div className="flex items-center">
+                <ButtonComponent
+                  type={"submit"}
+                  onClick={handleBack}
+                  icon={
+                    <LeftOutlined
+                      style={{
+                        color: "#fff",
+                        fontSize: 24,
+                        justifyItems: "center",
+                      }}
+                    />
+                  }
+                >
+                  Back
+                </ButtonComponent>
 
-              <div className={"w-full flex justify-end gap-5"}>
-                <Form.Item>
-                  <ButtonComponent
-                    icon={<SVGIcon name="IconButtonReset" width={24} />}
-                    type="submit"
-                    onClick={handleReset}
-                    disabled={storedDataInline}
-                  >
-                    Reset
-                  </ButtonComponent>
-                </Form.Item>
-                <Form.Item>
-                  <ButtonComponent
-                    type="submit"
-                    htmlType={"submit"}
-                    onClick={() => setFlag(1)}
-                    disabled={storedDataInline}
-                  >
-                    Save as Draft
-                  </ButtonComponent>
-                </Form.Item>
-                <Form.Item>
-                  <ButtonComponent
-                    type="submit"
-                    htmlType={"submit"}
-                    onClick={() => setFlag(2)}
-                    disabled={storedDataInline}
-                  >
-                    Save & Submit
-                  </ButtonComponent>
-                </Form.Item>
+                <div className={"w-full flex justify-end items-center gap-5"}>
+                  <Form.Item style={{ marginBottom: 0 }}>
+                    <ButtonComponent
+                      icon={<SVGIcon name="IconButtonReset" width={24} />}
+                      type="submit"
+                      onClick={handleReset}
+                      disabled={storedDataInline}
+                    >
+                      Reset
+                    </ButtonComponent>
+                  </Form.Item>
+                  <Form.Item style={{ marginBottom: 0 }}>
+                    <ButtonComponent
+                      type="submit"
+                      htmlType={"submit"}
+                      onClick={() => setFlag(1)}
+                      disabled={storedDataInline}
+                    >
+                      Save as Draft
+                    </ButtonComponent>
+                  </Form.Item>
+                  <Form.Item style={{ marginBottom: 0 }}>
+                    <ButtonComponent
+                      type="submit"
+                      htmlType={"submit"}
+                      onClick={() => setFlag(2)}
+                      disabled={storedDataInline}
+                    >
+                      Save & Submit
+                    </ButtonComponent>
+                  </Form.Item>
+                </div>
               </div>
-            </div>
+            </NxBaseContainer>
           </Form>
 
           {/* Modal Back*/}

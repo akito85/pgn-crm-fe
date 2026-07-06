@@ -25,10 +25,10 @@ import {
 import productPromoHttpService from "../../../../redux/services/productPromoHttpService";
 import { showModalError, validateCreateUpdate } from "../../../../redux/slices/general_slice";
 import AttachmentSectionForm from "../Pricing/Form/AttachmentSectionForm";
-import BaseContainer from "../../../../components/BaseContainer";
 import { getCriteriaIdByCode, handleCheckCriteriaMissingValidation, handleMappingCriteriaGeneral } from "../UtilsProduct/UtilsAllProduct";
 import { columnsTableCriteriaAll } from "../UtilsProduct/TableCriteriaAllProduct";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
+import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
 
 const PricingRuleCreate = () => {
   // Selector
@@ -470,58 +470,60 @@ const PricingRuleCreate = () => {
               </NxCardContainer>
             </div>
 
-            <div className="mt-[30px] flex">
-              <ButtonComponent
-                type={"submit"}
-                onClick={handleBack}
-                icon={
-                  <LeftOutlined
-                    style={{
-                      color: "#fff",
-                      fontSize: 24,
-                      justifyItems: "center",
-                    }}
-                  />
-                }
-              >
-                Back
-              </ButtonComponent>
+            <NxBaseContainer border className="mt-4">
+              <div className="flex items-center">
+                <ButtonComponent
+                  type={"submit"}
+                  onClick={handleBack}
+                  icon={
+                    <LeftOutlined
+                      style={{
+                        color: "#fff",
+                        fontSize: 24,
+                        justifyItems: "center",
+                      }}
+                    />
+                  }
+                >
+                  Back
+                </ButtonComponent>
 
-              <div className={"w-full flex justify-end gap-5"}>
-                <Form.Item>
-                  <ButtonComponent
-                    icon={<SVGIcon name="IconButtonClear" width={24} />}
-                    type="submit"
-                    onClick={() => {
-                      handleClear();
-                    }}
-                    disabled={storedDataInline}
-                  >
-                    Clear
-                  </ButtonComponent>
-                </Form.Item>
-                <Form.Item>
-                  <ButtonComponent
-                    type="submit"
-                    htmlType={"submit"}
-                    onClick={() => setFlag(1)}
-                    disabled={storedDataInline}
-                  >
-                    Save as Draft
-                  </ButtonComponent>
-                </Form.Item>
-                <Form.Item>
-                  <ButtonComponent
-                    type="submit"
-                    htmlType={"submit"}
-                    onClick={() => setFlag(2)}
-                    disabled={storedDataInline}
-                  >
-                    Save & Submit
-                  </ButtonComponent>
-                </Form.Item>
+                <div className={"w-full flex justify-end items-center gap-5"}>
+                  <Form.Item style={{ marginBottom: 0 }}>
+                    <ButtonComponent
+                      icon={<SVGIcon name="IconButtonClear" width={24} />}
+                      type="submit"
+                      onClick={() => {
+                        handleClear();
+                      }}
+                      disabled={storedDataInline}
+                    >
+                      Clear
+                    </ButtonComponent>
+                  </Form.Item>
+                  <Form.Item style={{ marginBottom: 0 }}>
+                    <ButtonComponent
+                      type="submit"
+                      htmlType={"submit"}
+                      onClick={() => setFlag(1)}
+                      disabled={storedDataInline}
+                    >
+                      Save as Draft
+                    </ButtonComponent>
+                  </Form.Item>
+                  <Form.Item style={{ marginBottom: 0 }}>
+                    <ButtonComponent
+                      type="submit"
+                      htmlType={"submit"}
+                      onClick={() => setFlag(2)}
+                      disabled={storedDataInline}
+                    >
+                      Save & Submit
+                    </ButtonComponent>
+                  </Form.Item>
+                </div>
               </div>
-            </div>
+            </NxBaseContainer>
           </Form>
 
           {/* Modal Back*/}
