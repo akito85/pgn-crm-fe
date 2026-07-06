@@ -6,6 +6,7 @@ import { Form, Select } from "antd";
 import { getListApprovalById } from "../../../../../redux/slices/product_promo/PricingRule/PricingRuleSlice";
 import TablePagination from "../../../../../components/TablePagination";
 import { columnsApproval, columnsExpandApproval } from "../Table/TableApproval";
+import NxCardContainer from "../../../../../components/Nx/NxCardContainer";
 
 // Column Approval Expand
 const expandedRowRender = (record) => {
@@ -95,7 +96,7 @@ const Approval = ({
 
   return (
     <div>
-      <BaseContainer header={"Approval Information"}>
+      <NxCardContainer header={"Approval Information"}>
         <div className="w-full grid grid-cols-1 gap-2">
           <div className="w-1/3">
             <Form.Item
@@ -142,7 +143,7 @@ const Approval = ({
             />
           ) : null}
         </div>
-      </BaseContainer>
+      </NxCardContainer>
     </div>
   );
 };

@@ -25,6 +25,7 @@ import { dateFormat } from "../../../../utils";
 import AttachmentComponent from "../../../../components/Attachment/AttachmentComponent";
 import productPromoHttpService from "../../../../redux/services/productPromoHttpService";
 import { configApp } from "../../../../constants/configApp";
+import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 
 const PricingRuleDetail = () => {
   // Selector
@@ -435,7 +436,7 @@ const PricingRuleDetail = () => {
           {bodyApproval.isApprover &&
             bodyApproval.approvalType &&
             bodyApproval.approvalType === "INACTIVE_PRICING_RULE" && (
-              <BaseContainer header={"inactive request information"}>
+              <NxCardContainer header={"inactive request information"}>
                 <div className="w-full grid grid-cols-4 gap-3">
                   <DetailText label={"Requested Date"}>
                     {bodyApproval.approvalDetail.requestedDate
@@ -451,7 +452,7 @@ const PricingRuleDetail = () => {
                     {bodyApproval.approvalDetail.remarks}
                   </DetailText>
                 </div>
-              </BaseContainer>
+              </NxCardContainer>
             )}
           <RadioTabs
             data={listSectionInfo}
