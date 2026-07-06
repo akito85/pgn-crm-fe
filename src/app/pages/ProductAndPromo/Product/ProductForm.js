@@ -48,6 +48,7 @@ import { bytesConverter } from "../../../../utils/bytesConverter";
 import { showModalError, validateCreateUpdate } from "../../../../redux/slices/general_slice";
 import { handleMandatory } from "./utils";
 import { applyLocationCriteriaCascade, handleCheckCriteriaMissingValidation, getCriteriaIdByCode } from "../UtilsProduct/UtilsAllProduct";
+import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 
 const routes = (type) => [
   {
@@ -1912,193 +1913,198 @@ const ProductForm = (props) => {
     <>
       <Spin spinning={isLoading}>
         <BreadCrumb routes={routes(type)} />
-        <RadioTabs
-          data={listSectionInfo}
-          onChange={handleProductInfo}
-          currentPosition={typeProductInfo}
-        />
-        <Form
-          id="productForm"
-          form={form}
-          layout={"vertical"}
-          onFinish={handleSubmitForm}
-          onFinishFailed={handleErrorSubmit}
-          scrollToFirstError={true}
-        >
-          <BaseContainer header={`${typeProductInfo} INFORMATION`}>
-            <div
-              style={{
-                display:
-                  typeProductInfo !== listSectionInfo[0].value
-                    ? "none"
-                    : undefined,
-              }}
-            >
-              <ProductSectionForm
-                type={
-                  type === "create" && prevPage !== "detail-product"
-                    ? "create"
-                    : versionUpdate === 1
-                    ? "create"
-                    : "update"
-                }
-                dispatch={dispatch}
-                handleProductObj={handleProductInfoObj}
-                productObj={productInfoObj}
-                status={dataDetailProductVersion?.status}
-              />
-            </div>
-            <div
-              style={{
-                display:
-                  typeProductInfo !== listSectionInfo[1].value
-                    ? "none"
-                    : undefined,
-              }}
-            >
-              <ApprovalSectionForm
-                dataTable={dataListAppHierDetailForm}
-                dataOption={dataListAppHierIdForm}
-                selectedHierarchy={selectedHierarchy}
-                updateSelectedHierarchy={setSelectedHierarchy}
-              />
-            </div>
-            <div
-              style={{
-                display:
-                  typeProductInfo !== listSectionInfo[2].value
-                    ? "none"
-                    : undefined,
-              }}
-            >
-              <AttachmentSectionForm
-                type={type}
-                data={listDataAttachment}
-                updateData={setListDataAttachment}
-                typeSelector="product"
-                dispatch={dispatch}
-                getAPICategory={getListCategory}
-                mandatory={true}
-              />
-            </div>
-          </BaseContainer>
-          {typeProductInfo === listSectionInfo[0].value ? (
-            <BaseContainer header={"PRODUCT DETAIL INFORMATION"}>
-              <div className="flex flex-col w-full gap-3">
-                <div className="grid grid-cols-10 gap-4 w-full">
-                  <span className="mt-[10px]">
-                    <LeftCircleOutlined
-                      style={{ fontSize: "24px", color: "#0075bf" }}
-                      onClick={scrollLeftHandler}
-                    />
-                  </span>
-                  <div
-                    ref={containerRef}
-                    className="overflow-x-scroll scrollStepsCstm col-span-8"
-                  >
-                    <Steps
-                      current={current}
-                      items={steps()}
-                      labelPlacement="vertical"
-                    />
-                  </div>
-                  <span className="mt-[10px] flex justify-end">
-                    <RightCircleOutlined
-                      style={{ fontSize: "24px", color: "#0075bf" }}
-                      onClick={scrollRightHandler}
-                    />
-                  </span>
-                </div>
-                {steps()[current].content}
-                <div className="flex w-full justify-end gap-x-4">
-                  {current > 0 && (
-                    <ButtonComponent
-                      onClick={handleButtonPrev}
-                      type={"submit"}
-                      disabled={storedData}
-                    >
-                      <LeftOutlined
-                        style={{
-                          justifyItems: "center",
-                          fontSize: 18,
-                          color: "#fff",
-                        }}
-                      />
-                      Previous
-                    </ButtonComponent>
-                  )}
-                  {current < steps().length - 1 && (
-                    <ButtonComponent
-                      onClick={handleButtonNext}
-                      disabled={steps()[current].disabled}
-                      type={"submit"}
-                    >
-                      Next
-                      <RightOutlined
-                        style={{
-                          justifyItems: "center",
-                          fontSize: 18,
-                          color: "#fff",
-                        }}
-                      />
-                    </ButtonComponent>
-                  )}
-                </div>
-              </div>
-            </BaseContainer>
-          ) : null}
-          <div className="flex w-full justify-between align-middle my-3">
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => setModalBack(true)}
-              icon={
-                <LeftOutlined
+        <div className="flex flex-col gap-y-4">
+          <RadioTabs
+            data={listSectionInfo}
+            onChange={handleProductInfo}
+            currentPosition={typeProductInfo}
+          />
+          <Form
+            id="productForm"
+            form={form}
+            layout={"vertical"}
+            onFinish={handleSubmitForm}
+            onFinishFailed={handleErrorSubmit}
+            scrollToFirstError={true}
+          >
+            <div className="flex flex-col gap-y-4">
+
+              <NxCardContainer header={`${typeProductInfo} INFORMATION`}>
+                <div
                   style={{
-                    color: "#fff",
-                    fontSize: 24,
-                    justifyItems: "center",
+                    display:
+                      typeProductInfo !== listSectionInfo[0].value
+                        ? "none"
+                        : undefined,
                   }}
-                />
-              }
-            >
-              Back
-            </ButtonComponent>
-            <div className="flex align-middle gap-3">
-              <ButtonComponent
-                icon={
-                  <SVGIcon
-                    name={
-                      type === "update" ? `IconButtonReset` : `IconButtonClear`
+                >
+                  <ProductSectionForm
+                    type={
+                      type === "create" && prevPage !== "detail-product"
+                        ? "create"
+                        : versionUpdate === 1
+                        ? "create"
+                        : "update"
                     }
-                    width={24}
+                    dispatch={dispatch}
+                    handleProductObj={handleProductInfoObj}
+                    productObj={productInfoObj}
+                    status={dataDetailProductVersion?.status}
+                  />
+                </div>
+                <div
+                  style={{
+                    display:
+                      typeProductInfo !== listSectionInfo[1].value
+                        ? "none"
+                        : undefined,
+                  }}
+                >
+                  <ApprovalSectionForm
+                    dataTable={dataListAppHierDetailForm}
+                    dataOption={dataListAppHierIdForm}
+                    selectedHierarchy={selectedHierarchy}
+                    updateSelectedHierarchy={setSelectedHierarchy}
+                  />
+                </div>
+                <div
+                  style={{
+                    display:
+                      typeProductInfo !== listSectionInfo[2].value
+                        ? "none"
+                        : undefined,
+                  }}
+                >
+                  <AttachmentSectionForm
+                    type={type}
+                    data={listDataAttachment}
+                    updateData={setListDataAttachment}
+                    typeSelector="product"
+                    dispatch={dispatch}
+                    getAPICategory={getListCategory}
+                    mandatory={true}
+                  />
+                </div>
+              </NxCardContainer>
+              {typeProductInfo === listSectionInfo[0].value ? (
+                <NxCardContainer header={"PRODUCT DETAIL INFORMATION"}>
+                  <div className="flex flex-col w-full gap-3">
+                    <div className="grid grid-cols-10 gap-4 w-full">
+                      <span className="mt-[10px]">
+                        <LeftCircleOutlined
+                          style={{ fontSize: "24px", color: "#0075bf" }}
+                          onClick={scrollLeftHandler}
+                        />
+                      </span>
+                      <div
+                        ref={containerRef}
+                        className="overflow-x-scroll scrollStepsCstm col-span-8"
+                      >
+                        <Steps
+                          current={current}
+                          items={steps()}
+                          labelPlacement="vertical"
+                        />
+                      </div>
+                      <span className="mt-[10px] flex justify-end">
+                        <RightCircleOutlined
+                          style={{ fontSize: "24px", color: "#0075bf" }}
+                          onClick={scrollRightHandler}
+                        />
+                      </span>
+                    </div>
+                    {steps()[current].content}
+                    <div className="flex w-full justify-end gap-x-4">
+                      {current > 0 && (
+                        <ButtonComponent
+                          onClick={handleButtonPrev}
+                          type={"submit"}
+                          disabled={storedData}
+                        >
+                          <LeftOutlined
+                            style={{
+                              justifyItems: "center",
+                              fontSize: 18,
+                              color: "#fff",
+                            }}
+                          />
+                          Previous
+                        </ButtonComponent>
+                      )}
+                      {current < steps().length - 1 && (
+                        <ButtonComponent
+                          onClick={handleButtonNext}
+                          disabled={steps()[current].disabled}
+                          type={"submit"}
+                        >
+                          Next
+                          <RightOutlined
+                            style={{
+                              justifyItems: "center",
+                              fontSize: 18,
+                              color: "#fff",
+                            }}
+                          />
+                        </ButtonComponent>
+                      )}
+                    </div>
+                  </div>
+                </NxCardContainer>
+              ) : null}
+            </div>
+            <div className="flex w-full justify-between align-middle my-3">
+              <ButtonComponent
+                type={"submit"}
+                onClick={() => setModalBack(true)}
+                icon={
+                  <LeftOutlined
+                    style={{
+                      color: "#fff",
+                      fontSize: 24,
+                      justifyItems: "center",
+                    }}
                   />
                 }
-                type="submit"
-                onClick={handleClear}
               >
-                {type === "update" ? "Reset" : "Clear"}
+                Back
               </ButtonComponent>
-              <ButtonComponent
-                disabled={preventSubmit()}
-                form="productForm"
-                htmlType="submit"
-                type="submit"
-                onClick={() => setTypeSubmit(listTypeSubmit[1])}
-              >
-                Save as Draft
-              </ButtonComponent>
-              <ButtonComponent
-                disabled={preventSubmit()}
-                form="productForm"
-                htmlType="submit"
-                type="submit"
-                onClick={() => setTypeSubmit(listTypeSubmit[0])}
-              >
-                Save & Submit
-              </ButtonComponent>
+              <div className="flex align-middle gap-3">
+                <ButtonComponent
+                  icon={
+                    <SVGIcon
+                      name={
+                        type === "update" ? `IconButtonReset` : `IconButtonClear`
+                      }
+                      width={24}
+                    />
+                  }
+                  type="submit"
+                  onClick={handleClear}
+                >
+                  {type === "update" ? "Reset" : "Clear"}
+                </ButtonComponent>
+                <ButtonComponent
+                  disabled={preventSubmit()}
+                  form="productForm"
+                  htmlType="submit"
+                  type="submit"
+                  onClick={() => setTypeSubmit(listTypeSubmit[1])}
+                >
+                  Save as Draft
+                </ButtonComponent>
+                <ButtonComponent
+                  disabled={preventSubmit()}
+                  form="productForm"
+                  htmlType="submit"
+                  type="submit"
+                  onClick={() => setTypeSubmit(listTypeSubmit[0])}
+                >
+                  Save & Submit
+                </ButtonComponent>
+              </div>
             </div>
-          </div>
-        </Form>
+          </Form>
+        </div>
 
         {/* Modal Back */}
         <ModalBack

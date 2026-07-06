@@ -305,6 +305,7 @@ const FunctionalCriteriaProduct = ({
     data_product,
     data_product_version,
   } = useSelector((state) => state[selector]);
+  const { data: dataUser = {} } = useSelector((state) => state.profile);
 
   // Declaration
   const dispatch = useDispatch();
@@ -747,6 +748,7 @@ const FunctionalCriteriaProduct = ({
     const temp = [
       {
         title: "NO",
+        key: "no",
         width: 60,
         dataIndex: "no",
         align: "center",
@@ -764,6 +766,7 @@ const FunctionalCriteriaProduct = ({
       ),
       {
         title: "ACTION",
+        key: "operation",
         dataIndex: "operation",
         width: storedData ? 240 : showInactivate ? 160 : 120,
         fixed: "right",
@@ -971,6 +974,10 @@ const FunctionalCriteriaProduct = ({
           <Form form={formTableCriteria} component={false}>
             <NxTable
               idTable="functional-criteria-product-table"
+              userId={dataUser?.data?.username}
+              showAdvanceSearch={false}
+              showSearchBar={false}
+              usePagination={false}
               dataSource={data}
               columns={processedColumns.map((col) => ({
                 ...col,

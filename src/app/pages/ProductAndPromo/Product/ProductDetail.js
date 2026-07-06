@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Form, Spin } from "antd";
+import { Button, Form, Spin } from "antd";
 import { PRODUCT_PROMO_ROUTES } from "../../../../routes/product_promo/pp_routes";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import BaseContainer from "../../../../components/BaseContainer";
@@ -36,6 +36,7 @@ import { ModalError } from "../../../../components/Modal/ModalPopUp";
 import SVGIcon from "../../../../assets/Icon/index";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 import NxTabs from "../../../../components/Nx/NxTabs";
+import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
 
 const routes = [
   {
@@ -488,43 +489,48 @@ const ProductDetail = () => {
           {stateActive ? (
             <ProductExtendTerminate data={dataListExtendTerminateHistory || []} />
           ) : null}
-          <div
-            className={`flex w-full${
-              showButtonApproval ? " justify-between" : ""
-            } align-middle my-3`}
-          >
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => navigate(-1)}
-              icon={
-                <LeftOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 24,
-                    justifyItems: "center",
-                  }}
-                />
-              }
+          <NxBaseContainer border>
+            <div
+              className={`flex w-full${
+                showButtonApproval ? " justify-between" : ""
+              } align-middle my-3`}
             >
-              Back
-            </ButtonComponent>
-            {showButtonApproval ? (
-              <div className="flex align-middle gap-3">
-                <ButtonComponent
-                  type="reject"
-                  onClick={() => handleModalConfirmation("Reject")}
-                >
-                  Reject
-                </ButtonComponent>
-                <ButtonComponent
-                  type="approve"
-                  onClick={() => handleModalConfirmation("Approve")}
-                >
-                  Approve
-                </ButtonComponent>
-              </div>
-            ) : null}
-          </div>
+              <Button type="menu" onClick={() => navigate(-1)}>
+                Back
+              </Button>
+              {/* <ButtonComponent
+                type={"submit"}
+                onClick={() => navigate(-1)}
+                icon={
+                  <LeftOutlined
+                    style={{
+                      color: "#fff",
+                      fontSize: 24,
+                      justifyItems: "center",
+                    }}
+                  />
+                }
+              >
+                Back
+              </ButtonComponent> */}
+              {showButtonApproval ? (
+                <div className="flex align-middle gap-3">
+                  <ButtonComponent
+                    type="reject"
+                    onClick={() => handleModalConfirmation("Reject")}
+                  >
+                    Reject
+                  </ButtonComponent>
+                  <ButtonComponent
+                    type="approve"
+                    onClick={() => handleModalConfirmation("Approve")}
+                  >
+                    Approve
+                  </ButtonComponent>
+                </div>
+              ) : null}
+            </div>
+          </NxBaseContainer>
 
           {/* Modal Approve/Reject*/}
           <ModalApproveOrReject
