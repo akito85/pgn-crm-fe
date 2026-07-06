@@ -1,11 +1,11 @@
 import React, { useCallback, useState } from "react";
-import { Spin, Form } from "antd";
+import { Button, Spin, Form } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import { PRODUCT_PROMO_ROUTES } from "../../../../routes/product_promo/pp_routes";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import ButtonComponent from "../../../../components/ButtonComponent";
-import { LeftOutlined, WarningOutlined } from "@ant-design/icons";
+import { WarningOutlined } from "@ant-design/icons";
 import SVGIcon from "../../../../assets/Icon/index";
 import BaseContainer from "../../../../components/BaseContainer";
 import {
@@ -18,6 +18,8 @@ import { createProductClass } from "../../../../redux/slices/product_promo/Produ
 import InputComponent from "../../../../components/InputComponent";
 import productPromoHttpService from "../../../../redux/services/productPromoHttpService";
 import { validateCreateUpdate } from "../../../../redux/slices/general_slice";
+import NxCardContainer from "../../../../components/Nx/NxCardContainer";
+import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
 
 const ProductClassCreate = () => {
   // Selector
@@ -119,7 +121,7 @@ const ProductClassCreate = () => {
         <BreadCrumb routes={routes} />
 
         <Form layout="vertical" form={form} onFinish={handleSave}>
-          <BaseContainer header={"product class information"}>
+          <NxCardContainer header={"product class information"}>
             <div className="w-full grid grid-cols-2 gap-2">
               <Form.Item
                 label={"Name"}
@@ -148,42 +150,35 @@ const ProductClassCreate = () => {
                 </Form.Item>
               </div>
             </div>
-          </BaseContainer>
+          </NxCardContainer>
 
-          <div className="mt-[30px] flex">
-            <ButtonComponent
-              type={"submit"}
-              onClick={handleBack}
-              icon={
-                <LeftOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 24,
-                    justifyItems: "center",
-                  }}
-                />
-              }
-            >
-              Back
-            </ButtonComponent>
+          <NxBaseContainer border className="mt-4">
+            <div className="flex items-center">
+              <Button
+                onClick={handleBack}
+                type="menu"
+              >
+                Back
+              </Button>
 
-            <div className={"w-full flex justify-end gap-5"}>
-              <Form.Item>
-                <ButtonComponent
-                  icon={<SVGIcon name="IconButtonClear" width={24} />}
-                  type="submit"
-                  onClick={() => form.resetFields()}
-                >
-                  Clear
-                </ButtonComponent>
-              </Form.Item>
-              <Form.Item>
-                <ButtonComponent type="submit" htmlType={"submit"}>
-                  Save
-                </ButtonComponent>
-              </Form.Item>
+              <div className={"w-full flex justify-end items-center gap-5"}>
+                <Form.Item style={{ marginBottom: 0 }}>
+                  <ButtonComponent
+                    icon={<SVGIcon name="IconButtonClear" width={24} />}
+                    type="submit"
+                    onClick={() => form.resetFields()}
+                  >
+                    Clear
+                  </ButtonComponent>
+                </Form.Item>
+                <Form.Item style={{ marginBottom: 0 }}>
+                  <ButtonComponent type="submit" htmlType={"submit"}>
+                    Save
+                  </ButtonComponent>
+                </Form.Item>
+              </div>
             </div>
-          </div>
+          </NxBaseContainer>
         </Form>
 
         {/* Modal Back*/}

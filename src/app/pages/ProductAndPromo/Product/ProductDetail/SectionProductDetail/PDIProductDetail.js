@@ -9,6 +9,8 @@ import DetailText from "../../../../../../components/DetailText";
 import { dateFormatting, hasValue, renderColumn } from "../../../../../../utils";
 import moment from "moment";
 import ModalCustom from "../../../../../../components/Modal/ModalCustom";
+import NxTable from "../../../../../../components/Nx/NxTable";
+import { useSelector } from "react-redux";
 
 const onFilter = (dataIndex, value, record) => {
   const search = value.toLowerCase();
@@ -37,12 +39,14 @@ const columns = (
   const result = [
     {
       title: "NO",
+      key: "no",
       width: 60,
       align: "center",
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {
       title: "NAME",
+      key: "name",
       width: 160,
       dataIndex: "name",
       filteredValue: search?.["name"] ? [search?.["name"]] : null,
@@ -78,6 +82,7 @@ const columns = (
     },
     {
       title: "VALUE",
+      key: "value",
       width: 160,
       align: "right",
       dataIndex: "value",
@@ -114,6 +119,7 @@ const columns = (
     },
     {
       title: "UNIT",
+      key: "unitName",
       width: 160,
       align: "center",
       dataIndex: "unitName",
@@ -150,6 +156,7 @@ const columns = (
     },
     {
       title: "DESCRIPTION",
+      key: "description",
       width: 180,
       dataIndex: "description",
       filteredValue: search?.["description"] ? [search?.["description"]] : null,
@@ -215,6 +222,7 @@ const columns = (
     },
     {
       title: "ACTION",
+      key: "action",
       fixed: "right",
       width: "12%",
       align: "center",
@@ -246,6 +254,8 @@ const PDIProductDetail = ({ data = [] }) => {
   const [modalHistory, setModalHistory] = useState(false);
   const [dataHistory, setDataHistory] = useState(false);
 
+  const { data: dataUser = {} } = useSelector((state) => state.profile);
+  
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
@@ -278,7 +288,12 @@ const PDIProductDetail = ({ data = [] }) => {
 
   return (
     <Fragment>
-      <TablePaginationNew
+      <NxTable
+        idTable={"product-information-lock-history"}
+        userId={dataUser?.data?.username}
+        showAdvanceSearch={false}
+        showSearchBar={false}
+        usePagination={false}
         type="FE"
         dataSource={data}
         totalData={data.length}

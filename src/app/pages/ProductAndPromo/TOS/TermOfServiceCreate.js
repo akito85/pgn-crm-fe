@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Form, Spin, Select } from "antd";
+import { Button, Form, Spin, Select } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import BreadCrumb from "../../../../components/BreadCrumb";
@@ -13,7 +13,7 @@ import {
   createTOS,
 } from "../../../../redux/slices/product_promo/tos";
 import ButtonComponent from "../../../../components/ButtonComponent";
-import { LeftOutlined, WarningOutlined } from "@ant-design/icons";
+import { WarningOutlined } from "@ant-design/icons";
 import SVGIcon from "../../../../assets/Icon/index";
 import {
   ModalConfirm,
@@ -49,6 +49,7 @@ import {
   applyDeselectLocationCriteriaCascade,
 } from "../UtilsProduct/UtilsAllProduct";
 import productPromoHttpService from "../../../../redux/services/productPromoHttpService";
+import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 
 const TermOfServiceCreate = () => {
   // Selector
@@ -400,145 +401,140 @@ const TermOfServiceCreate = () => {
         <BreadCrumb routes={routes} />
 
         <Form layout="vertical" form={form} onFinish={handleSave}>
-          <BaseContainer header={"TERMS OF SERVICE INFORMATION"}>
-            <div className="w-full grid grid-cols-2 gap-2">
-              <Form.Item
-                label={"Name"}
-                name={"name"}
-                rules={[{ required: true, message: "Please input your Name!" }]}
-              >
-                <InputComponent maxLength={100}/>
-              </Form.Item>
-              <div className="col-span-2">
+          <div className="flex flex-col gap-y-4">
+
+            <NxCardContainer header={"TERMS OF SERVICE INFORMATION"}>
+              <div className="w-full grid grid-cols-2 gap-2">
                 <Form.Item
-                  label={"Attribute"}
-                  name={"attribute"}
-                  className={"w-full"}
-                  rules={[
-                    {
-                      required: true,
-                      message: "Please input your Attribute!",
-                    },
-                  ]}
+                  label={"Name"}
+                  name={"name"}
+                  rules={[{ required: true, message: "Please input your Name!" }]}
                 >
-                  <SelectComponent mode="multiple">
-                    {dataAttribute &&
-                      dataAttribute?.map((data, index) => (
-                        <Select.Option value={data.glbTypeValId} key={index}>
-                          {data.name}
-                        </Select.Option>
-                      ))}
-                  </SelectComponent>
+                  <InputComponent maxLength={100}/>
                 </Form.Item>
-              </div>
-              <div className="col-span-2">
-                <Form.Item
-                  label={"Criteria"}
-                  name={"rPricingRuleCriterias"}
-                  className={"w-full"}
-                  rules={[
-                    {
-                      required: true,
-                      message: "Please input your Criteria!",
-                    },
-                  ]}
-                >
-                  <SelectComponent
-                    mode="multiple"
-                    onSelect={handleSelectCriteria}
-                    onDeselect={handleDeselectCriteria}
-                    onClear={handleClearCriteria}
+                <div className="col-span-2">
+                  <Form.Item
+                    label={"Attribute"}
+                    name={"attribute"}
+                    className={"w-full"}
+                    rules={[
+                      {
+                        required: true,
+                        message: "Please input your Attribute!",
+                      },
+                    ]}
                   >
-                    {data_criteria &&
-                      data_criteria
-                        ?.filter((item) => item?.id !== 38)
-                        ?.map((data, index) => (
-                          <Select.Option value={data.id} key={index}>
-                            {data.text}
+                    <SelectComponent mode="multiple">
+                      {dataAttribute &&
+                        dataAttribute?.map((data, index) => (
+                          <Select.Option value={data.glbTypeValId} key={index}>
+                            {data.name}
                           </Select.Option>
                         ))}
-                  </SelectComponent>
-                </Form.Item>
+                    </SelectComponent>
+                  </Form.Item>
+                </div>
+                <div className="col-span-2">
+                  <Form.Item
+                    label={"Criteria"}
+                    name={"rPricingRuleCriterias"}
+                    className={"w-full"}
+                    rules={[
+                      {
+                        required: true,
+                        message: "Please input your Criteria!",
+                      },
+                    ]}
+                  >
+                    <SelectComponent
+                      mode="multiple"
+                      onSelect={handleSelectCriteria}
+                      onDeselect={handleDeselectCriteria}
+                      onClear={handleClearCriteria}
+                    >
+                      {data_criteria &&
+                        data_criteria
+                          ?.filter((item) => item?.id !== 38)
+                          ?.map((data, index) => (
+                            <Select.Option value={data.id} key={index}>
+                              {data.text}
+                            </Select.Option>
+                          ))}
+                    </SelectComponent>
+                  </Form.Item>
+                </div>
+                <div className="col-span-2">
+                  <Form.Item
+                    label={"Description"}
+                    name={"description"}
+                    className={"w-full"}
+                  >
+                    <InputComponent
+                      type="textarea"
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                    />
+                  </Form.Item>
+                </div>
               </div>
-              <div className="col-span-2">
-                <Form.Item
-                  label={"Description"}
-                  name={"description"}
-                  className={"w-full"}
-                >
-                  <InputComponent
-                    type="textarea"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                  />
-                </Form.Item>
-              </div>
-            </div>
-          </BaseContainer>
+            </NxCardContainer>
 
-          <BaseContainer header={"criteria information"}>
-            <div className="w-full">
-              {/* <FunctionalTableCriteriaTOS
-                type={"create"}
-                data={listDataCriteria}
-                dataCriteria={criteriaValues}
-                updateData={setListDataCriteria}
-                setStoredData={setStoredDataInline}
-                storedData={storedDataInline}
-              /> */}
-              <FunctionalCriteriaProduct
-                type={"create"}
-                data={listDataCriteria || []} //data
-                dataCriteria={criteriaValues || []} //ddl
-                updateData={setListDataCriteria}
-                setStoredData={setStoredDataInline}
-                storedData={storedDataInline}
-                startDate={undefined}
-                selector="tos"
-                getApi={{
-                  getBudgetList,
-                  getProvinceList,
-                  getIndustrialSectorList,
-                  getAccountCategoryList,
-                  getServiceTypeList,
-                  getSorList,
-                  getCostCenterList,
-                  getGsizesList,
-                  getCustomerSegmentList,
-                  getCustomerList,
-                  getCityList,
-                  getSubDistrictList,
-                  getAccountGroupList,
-                  getDistrictList,
-                  getProvinceListByCountry,
-                  getCountryList,
-                }}
-                countryCriteriaId={getCriteriaIdByCode(criteriaOptions, "COUNTRY")}
-                columnsTable={columnsTableCriteriaAll}
-                checkStartDate={false}
-              />
-            </div>
-          </BaseContainer>
-
-          <div className="mt-[30px] flex">
-            <ButtonComponent
-              type={"submit"}
-              onClick={handleBack}
-              icon={
-                <LeftOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 24,
-                    justifyItems: "center",
+            <NxCardContainer header={"criteria information"}>
+              <div className="w-full">
+                {/* <FunctionalTableCriteriaTOS
+                  type={"create"}
+                  data={listDataCriteria}
+                  dataCriteria={criteriaValues}
+                  updateData={setListDataCriteria}
+                  setStoredData={setStoredDataInline}
+                  storedData={storedDataInline}
+                /> */}
+                <FunctionalCriteriaProduct
+                  type={"create"}
+                  data={listDataCriteria || []} //data
+                  dataCriteria={criteriaValues || []} //ddl
+                  updateData={setListDataCriteria}
+                  setStoredData={setStoredDataInline}
+                  storedData={storedDataInline}
+                  startDate={undefined}
+                  selector="tos"
+                  idTable="tos-create-criteria-table"
+                  getApi={{
+                    getBudgetList,
+                    getProvinceList,
+                    getIndustrialSectorList,
+                    getAccountCategoryList,
+                    getServiceTypeList,
+                    getSorList,
+                    getCostCenterList,
+                    getGsizesList,
+                    getCustomerSegmentList,
+                    getCustomerList,
+                    getCityList,
+                    getSubDistrictList,
+                    getAccountGroupList,
+                    getDistrictList,
+                    getProvinceListByCountry,
+                    getCountryList,
                   }}
+                  countryCriteriaId={getCriteriaIdByCode(criteriaOptions, "COUNTRY")}
+                  columnsTable={columnsTableCriteriaAll}
+                  checkStartDate={false}
                 />
-              }
+              </div>
+            </NxCardContainer>
+          </div>
+
+          <div className="mt-[30px] flex items-center">
+            <Button
+              onClick={handleBack}
+              type="menu"
             >
               Back
-            </ButtonComponent>
+            </Button>
 
-            <div className={"w-full flex justify-end gap-5"}>
-              <Form.Item>
+            <div className={"w-full flex justify-end items-center gap-5"}>
+              <Form.Item style={{ marginBottom: 0 }}>
                 <ButtonComponent
                   icon={<SVGIcon name="IconButtonClear" width={24} />}
                   type="submit"
@@ -553,7 +549,7 @@ const TermOfServiceCreate = () => {
                   Clear
                 </ButtonComponent>
               </Form.Item>
-              <Form.Item>
+              <Form.Item style={{ marginBottom: 0 }}>
                 <ButtonComponent
                   type="submit"
                   htmlType={"submit"}

@@ -71,6 +71,7 @@ const PromoDiscountConfirmPromoSection = ({
                     "TIERING",
                   ]}
                   selector="promo"
+                  idTable="promo-confirm-criteria-table"
                 />
               ),
             },

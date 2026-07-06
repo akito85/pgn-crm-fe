@@ -1,7 +1,7 @@
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
-import { Checkbox, Tooltip } from "antd";
+import { Button, Checkbox, Tooltip } from "antd";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import SVGIcon from "../../../../assets/Icon/index";
 import Toolbar from "../../../../components/Toolbar";
@@ -57,6 +57,7 @@ const PricingAdjustTable = () => {
   const [modalError, setModalError] = useState(false);
   const [bodyError, setBodyError] = useState({});
   const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
+  const [loadingInactivate, setLoadingInactivate] = useState(false);
 
   // --- Approval history reshape ---
   useEffect(() => {
@@ -140,7 +141,10 @@ const PricingAdjustTable = () => {
     setLoadingDownload(true);
     await dispatch(downloadPriceAdjust({
       page: 1,
-      pageSize: PAGE_SIZE,
+      // Download always fetches every matching record regardless of the
+      // table's page size — totalElement reflects the full count for the
+      // current search/filters.
+      pageSize: totalElement || PAGE_SIZE,
       sort,
       search,
       searchText,
@@ -148,7 +152,7 @@ const PricingAdjustTable = () => {
       filterRules,
     }));
     setLoadingDownload(false);
-  }, [dispatch, sort, search, searchText, filters, filterRules]);
+  }, [dispatch, sort, search, searchText, filters, filterRules, totalElement]);
 
   const handleApprovalHistory = (data) => {
     dispatch(getApprovalHistory(data.id));
@@ -171,6 +175,7 @@ const PricingAdjustTable = () => {
       appHierId: res.approvalHierarchy,
       description: res.remark,
     };
+    setLoadingInactivate(true);
     dispatch(inactivePricingAdjust({ data }))
       .unwrap()
       .then(() => {
@@ -185,6 +190,9 @@ const PricingAdjustTable = () => {
           setBodyError({ body: { ...res }, handleClear, message });
           setModalError(true);
         }
+      })
+      .finally(() => {
+        setLoadingInactivate(false);
       });
   };
 
@@ -207,25 +215,70 @@ const PricingAdjustTable = () => {
   };
 
   // --- Action column items ---
-  const itemActions = useMemo(() => nxGetAccountActions({
-    handleView: ({ id }) =>
-      navigate(PRODUCT_PROMO_ROUTES.DETAIL_PRICING_ADJUSTMENT, {
-        state: { id }
-      }),
-    handleUpdate: ({ id, status, statusApproval }) =>
-      navigate(PRODUCT_PROMO_ROUTES.UPDATE_PRICING_ADJUSTMENT, {
-        state: {
-          id,
-          prevPage: "table-price-adjust",
-          statusPriceAdjust: status,
-          statusApprovalPriceAdjust: statusApproval,
-        }
-      }),
-    handleActivate: handleOpenModalInactivate,
-    handleApprovalHistory,
-    handleDownload,
-    loadingDownload,
-  }), [handleDownload, handleOpenModalInactivate, handleApprovalHistory, loadingDownload]);
+  const itemActions = useMemo(() => {
+    const actions = nxGetAccountActions({
+      handleView: ({ id }) =>
+        navigate(PRODUCT_PROMO_ROUTES.DETAIL_PRICING_ADJUSTMENT, {
+          state: { id }
+        }),
+      handleUpdate: ({ id, status, statusApproval }) =>
+        navigate(PRODUCT_PROMO_ROUTES.UPDATE_PRICING_ADJUSTMENT, {
+          state: {
+            id,
+            prevPage: "table-price-adjust",
+            statusPriceAdjust: status,
+            statusApprovalPriceAdjust: statusApproval,
+          }
+        }),
+      handleActivate: handleOpenModalInactivate,
+      handleApprovalHistory,
+      handleDownload,
+      loadingDownload,
+    });
+
+    // NxGetAccountActions' "Activate" checkbox is checked based on ACTIVE status,
+    // which shows it ticked before the record is actually inactivated.
+    // Override locally so it only shows checked once the record is INACTIVE.
+    return actions.map((item) => {
+      if (item.action !== "Activate") return item;
+      return {
+        ...item,
+        render: (record, actionLength, index) => {
+          const isInactive = record.status === "INACTIVE";
+          const content =
+            actionLength > 3 ? (
+              <Button
+                icon={
+                  <Checkbox
+                    checked={isInactive}
+                    style={{ transform: "scale(0.9)" }}
+                    className="action-checkbox"
+                  />
+                }
+                onClick={() => handleOpenModalInactivate(record)}
+                type={"action"}
+              >
+                Inactivate
+              </Button>
+            ) : (
+              <Tooltip
+                title={isInactive ? "Activate" : ""}
+                key={`table-action-${index}`}
+              >
+                <Checkbox
+                  className="action-checkbox"
+                  checked={isInactive}
+                  onClick={() => handleOpenModalInactivate(record)}
+                  style={{ transform: "scale(0.9)" }}
+                />
+              </Tooltip>
+            );
+
+          return <Fragment key={`table-action-${index}`}>{content}</Fragment>;
+        },
+      };
+    });
+  }, [handleDownload, handleOpenModalInactivate, handleApprovalHistory, loadingDownload]);
 
   // --- Columns ---
   const actionCols = useColumnActionPermission(
@@ -280,10 +333,12 @@ const PricingAdjustTable = () => {
         dispatch={dispatch}
         getAPIOption={getListAppHier}
         getAPIDetail={getListAppHierDetail}
+        selector={"pricingAdjust"}
         alertMessage={`Are you sure you want to inactivate Pricing Adjustment with ID ${dataInactivate?.id || ""}?`}
         openModalInactivate={openModalInactivate}
         handleCloseModalInactivate={handleCancelModalInactivate}
         onFinish={handleSubmitModalInactivate}
+        loading={loadingInactivate}
       />
 
       <ModalError

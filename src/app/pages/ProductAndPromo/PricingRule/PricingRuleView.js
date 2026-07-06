@@ -79,6 +79,7 @@ const PricingRuleView = () => {
   const [bodyError, setBodyError] = useState({});
   const [modalApprovalHistory, setModalApprovalHistory] = useState(false);
   const [dataApprovalHistory, setDataApprovalHistory] = useState({});
+  const [loadingInactive, setLoadingInactive] = useState(false);
 
   // --- Fetch helpers ---
   const buildBody = useCallback(
@@ -92,6 +93,22 @@ const PricingRuleView = () => {
       filterRules,
     }),
     [sort, search, searchText, filters, filterRules, limitData]
+  );
+
+  const buildBodyDownload = useCallback(
+    (pageNum) => ({
+      page: pageNum,
+      // Download always fetches every matching record regardless of the
+      // "limit data" advanced-search filter (that only caps the table view) —
+      // totalElement reflects the full count for the current search/filters.
+      pageSize: totalElement || PAGE_SIZE,
+      sort,
+      search,
+      searchText,
+      filters,
+      filterRules,
+    }),
+    [sort, search, searchText, filters, filterRules, totalElement]
   );
 
   const handleRefresh = useCallback(() => {
@@ -356,7 +373,7 @@ const PricingRuleView = () => {
   // Handle Download
   const handleDownload = async () => {
     setLoadingDownload(true);
-    await dispatch(downloadPricingRule({ ...buildBody(1) }));
+    await dispatch(downloadPricingRule({ ...buildBodyDownload(1) }));
     setLoadingDownload(false);
   };
 
@@ -374,6 +391,7 @@ const PricingRuleView = () => {
       description: res.remark,
       name: chooseId.name,
     };
+    setLoadingInactive(true);
     dispatch(inactivePricingRule(dataValue))
       .unwrap()
       .then(() => {
@@ -392,6 +410,9 @@ const PricingRuleView = () => {
           setBodyError({ body: { ...res }, handleClear, message });
           setModalError(true);
         }
+      })
+      .finally(() => {
+        setLoadingInactive(false);
       });
   };
 
@@ -646,6 +667,7 @@ const PricingRuleView = () => {
         openModalInactivate={modalConfirm}
         handleCloseModalInactivate={handleCancel}
         onFinish={handleOk}
+        loading={loadingInactive}
       />
 
       {/* Modal Success Inactive */}

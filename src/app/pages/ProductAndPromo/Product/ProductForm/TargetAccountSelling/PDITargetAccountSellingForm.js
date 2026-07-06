@@ -794,6 +794,7 @@ const PDITargetAccountSellingForm = ({
           getDistrictList,
         }}
         columnsTable={columnsTableCriteriaAll}
+        idTable="tas-form-criteria-table"
         countryCriteriaId={getCriteriaIdByCode(dataListSelectCriteria, "COUNTRY")}
         // checkStartDate={false}
         excludeRender={

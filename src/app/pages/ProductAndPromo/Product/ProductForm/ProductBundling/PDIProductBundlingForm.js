@@ -7,6 +7,7 @@ import { getColumnSearchPropsPaging } from "../../../../../../utils/getColumnSea
 import ModalFormProductBundling from "./ModalFormProductBundling";
 import { useSelector } from "react-redux";
 import TablePaginationNew from "../../../../../../components/TablePaginationNew";
+import NxTable from "../../../../../../components/Nx/NxTable";
 
 const onFilter = (dataIndex, value, record) => {
   const tempSearchText = value.toLowerCase();
@@ -38,12 +39,14 @@ const columns = (
   const result = [
     {
       title: "NO",
+      key: "no",
       width: 60,
       align: "center",
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {
       title: "PRODUCT NAME",
+      key: "productName",
       width: 240,
       dataIndex: "productName",
       onFilter: (value, record) => onFilter("productName", value, record),
@@ -88,6 +91,7 @@ const columns = (
     },
     {
       title: "DISCOUNT TYPE",
+      key: "discountTypeName",
       width: 240,
       dataIndex: "discountTypeName",
       onFilter: (value, record) => onFilter("discountTypeName", value, record),
@@ -102,6 +106,7 @@ const columns = (
     },
     {
       title: "DISCOUNT VALUE",
+      key: "discountAmount",
       width: 240,
       align: "right",
       dataIndex: "discountAmount",
@@ -132,6 +137,7 @@ const columns = (
     },
     {
       title: "START DATE",
+      key: "startDate",
       width: 240,
       align: "center",
       dataIndex: "startDate",
@@ -147,6 +153,7 @@ const columns = (
     },
     {
       title: "END DATE",
+      key: "endDate",
       width: 240,
       align: "center",
       dataIndex: "endDate",
@@ -162,6 +169,7 @@ const columns = (
     },
     {
       title: "DESCRIPTIONS",
+      key: "description",
       width: 180,
       dataIndex: "description",
       onFilter: (value, record) => onFilter("description", value, record),
@@ -206,6 +214,7 @@ const columns = (
     },
     {
       title: "ACTION",
+      key: "action",
       width: 120,
       align: "center",
       fixed: "right",
@@ -268,6 +277,8 @@ const PDIProductBundlingForm = ({
   const [typeForm, setTypeForm] = useState(typeFormList[0]);
   const [dataEdit, setDataEdit] = useState({});
 
+  const { data: dataUser = {} } = useSelector((state) => state.profile);
+  
   const {
     dataListProductType = [],
     dataListProductClass = [],
@@ -340,7 +351,12 @@ const PDIProductBundlingForm = ({
           </ButtonComponent>
         </div>
       ) : null}
-      <TablePaginationNew
+      <NxTable
+        idTable={`product-bundling-table-${type}`}
+        userId={dataUser?.data?.username}
+        showAdvanceSearch={false}
+        showSearchBar={false}
+        usePagination={false}
         type="FE"
         dataSource={data}
         totalData={data.length}
