@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Spin } from "antd";
+import { Button, Spin } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import { PRODUCT_PROMO_ROUTES } from "../../../../routes/product_promo/pp_routes";
 import RadioTabs from "../../../../components/RadioTabs";
@@ -13,7 +13,6 @@ import {
   getHeaderPricingRule,
 } from "../../../../redux/slices/product_promo/PricingRule/PricingRuleSlice";
 import ButtonComponent from "../../../../components/ButtonComponent";
-import { LeftOutlined } from "@ant-design/icons";
 import {
   ModalApproveOrRejectPricingRule,
   ModalErrorApproveOrRejectPricingRule,
@@ -25,6 +24,8 @@ import { dateFormat } from "../../../../utils";
 import AttachmentComponent from "../../../../components/Attachment/AttachmentComponent";
 import productPromoHttpService from "../../../../redux/services/productPromoHttpService";
 import { configApp } from "../../../../constants/configApp";
+import NxCardContainer from "../../../../components/Nx/NxCardContainer";
+import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
 
 const PricingRuleDetail = () => {
   // Selector
@@ -435,7 +436,7 @@ const PricingRuleDetail = () => {
           {bodyApproval.isApprover &&
             bodyApproval.approvalType &&
             bodyApproval.approvalType === "INACTIVE_PRICING_RULE" && (
-              <BaseContainer header={"inactive request information"}>
+              <NxCardContainer header={"inactive request information"}>
                 <div className="w-full grid grid-cols-4 gap-3">
                   <DetailText label={"Requested Date"}>
                     {bodyApproval.approvalDetail.requestedDate
@@ -451,7 +452,7 @@ const PricingRuleDetail = () => {
                     {bodyApproval.approvalDetail.remarks}
                   </DetailText>
                 </div>
-              </BaseContainer>
+              </NxCardContainer>
             )}
           <RadioTabs
             data={listSectionInfo}
@@ -461,46 +462,39 @@ const PricingRuleDetail = () => {
           {layout(valuePage)}
         </div>
 
-        <div className="flex mt-[30px]">
-          <ButtonComponent
-            type={"submit"}
-            onClick={() => navigate(-1)}
-            icon={
-              <LeftOutlined
-                style={{
-                  color: "#fff",
-                  fontSize: 24,
-                  justifyItems: "center",
-                }}
-              />
-            }
-          >
-            Back
-          </ButtonComponent>
+        <NxBaseContainer border className="mt-4">
+          <div className="flex">
+            <Button
+              onClick={() => navigate(-1)}
+              type="menu"
+            >
+              Back
+            </Button>
 
-          {showButtonApproval ? (
-            <div className={"w-full flex justify-end gap-5"}>
-              <ButtonComponent
-                type="reject"
-                onClick={() => {
-                  setModalConfirm(true);
-                  setApproveOrReject("Reject");
-                }}
-              >
-                Reject
-              </ButtonComponent>
-              <ButtonComponent
-                type="approve"
-                onClick={() => {
-                  setModalConfirm(true);
-                  setApproveOrReject("Approve");
-                }}
-              >
-                Approve
-              </ButtonComponent>
-            </div>
-          ) : null}
-        </div>
+            {showButtonApproval ? (
+              <div className={"w-full flex justify-end gap-5"}>
+                <ButtonComponent
+                  type="reject"
+                  onClick={() => {
+                    setModalConfirm(true);
+                    setApproveOrReject("Reject");
+                  }}
+                >
+                  Reject
+                </ButtonComponent>
+                <ButtonComponent
+                  type="approve"
+                  onClick={() => {
+                    setModalConfirm(true);
+                    setApproveOrReject("Approve");
+                  }}
+                >
+                  Approve
+                </ButtonComponent>
+              </div>
+            ) : null}
+          </div>
+        </NxBaseContainer>
 
         {/* Modal Approve/Reject*/}
         <ModalApproveOrRejectPricingRule

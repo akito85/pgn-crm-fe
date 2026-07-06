@@ -34,6 +34,7 @@ const PAGE_SIZE = 20;
 const formatStatus = (value) => {
   switch (value) {
     case "WAITING APPROVAL":
+    case "WAITING FOR APPROVAL":
     case "WAITING_FOR_APPROVAL":
     case "WAITING_APPROVAL":
       return "Waiting Approval";
@@ -634,6 +635,22 @@ const Product = () => {
     [sort, search, searchText, filters, filterRules, limitData]
   );
 
+  const buildBodyDownload = useCallback(
+    (pageNum) => ({
+      page: pageNum,
+      // Download always fetches every matching record regardless of the
+      // "limit data" advanced-search filter (that only caps the table view) —
+      // totalElement reflects the full count for the current search/filters.
+      pageSize: totalElement || PAGE_SIZE,
+      sort,
+      search,
+      searchText,
+      filters,
+      filterRules,
+    }),
+    [sort, search, searchText, filters, filterRules, totalElement]
+  );
+
   const handleRefresh = useCallback(() => {
     dispatch(getAllProductPaginate({ ...buildBody(1), isLoadMore: false }));
     setPage(1);
@@ -805,7 +822,7 @@ const Product = () => {
 
   const handleDownload = async () => {
     setLoadingDownload(true);
-    await dispatch(downloadProduct({ ...buildBody(1) }));
+    await dispatch(downloadProduct({ ...buildBodyDownload(1) }));
     setLoadingDownload(false);
   };
 

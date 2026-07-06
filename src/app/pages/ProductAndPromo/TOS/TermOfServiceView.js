@@ -71,6 +71,7 @@ const TermOfServiceView = () => {
   const [chooseId, setChooseId] = useState("");
   const [modalError, setModalError] = useState(false);
   const [bodyError, setBodyError] = useState({});
+  const [loadingInactive, setLoadingInactive] = useState(false);
 
   // --- Fetch helpers ---
   const buildBody = useCallback(
@@ -84,6 +85,22 @@ const TermOfServiceView = () => {
       filterRules,
     }),
     [sort, search, searchText, filters, filterRules, limitData]
+  );
+
+  const buildBodyDownload = useCallback(
+    (pageNum) => ({
+      page: pageNum,
+      // Download always fetches every matching record regardless of the
+      // "limit data" advanced-search filter (that only caps the table view) —
+      // totalElement reflects the full count for the current search/filters.
+      pageSize: totalElement || PAGE_SIZE,
+      sort,
+      search,
+      searchText,
+      filters,
+      filterRules,
+    }),
+    [sort, search, searchText, filters, filterRules, totalElement]
   );
 
   const handleRefresh = useCallback(() => {
@@ -308,12 +325,13 @@ const TermOfServiceView = () => {
   // Handle Download
   const handleDownload = async () => {
     setLoadingDownload(true);
-    await dispatch(downloadTOS({ ...buildBody(1) }));
+    await dispatch(downloadTOS({ ...buildBodyDownload(1) }));
     setLoadingDownload(false);
   };
 
   // handle Active/Inactive
   const handleOk = () => {
+    setLoadingInactive(true);
     dispatch(inactiveTos({ id: chooseId }))
       .unwrap()
       .then(() => {
@@ -329,6 +347,9 @@ const TermOfServiceView = () => {
           setBodyError({ message });
           setModalError(true);
         }
+      })
+      .finally(() => {
+        setLoadingInactive(false);
       });
   };
 
@@ -551,6 +572,7 @@ const TermOfServiceView = () => {
         isOpen={modalInactive}
         handleCancel={() => setModalInactive(false)}
         handleOk={() => handleOk()}
+        loading={loadingInactive}
       />
 
       {/** Modal Retry */}

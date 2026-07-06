@@ -233,6 +233,7 @@ const Promo = ({
                   storedData={storedDataInline}
                   startDate={startDate}
                   selector="promo"
+                  idTable="promo-form-criteria-table"
                   getApi={{
                     getBudgetList,
                     getCountryList,

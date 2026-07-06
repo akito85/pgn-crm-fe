@@ -12,6 +12,7 @@ import {
   getPricingRuleDetail,
 } from "../../../../../../redux/slices/product_promo/product";
 import { useDispatch, useSelector } from "react-redux";
+import NxBaseContainer from "../../../../../../components/Nx/NxBaseContainer";
 
 const PDIPricing = ({ dataPricing = {}, dataDetailProduct = {} }) => {
   const dispatch = useDispatch();
@@ -80,7 +81,8 @@ const PDIPricing = ({ dataPricing = {}, dataDetailProduct = {} }) => {
     return format;
   };
   return (
-    <div className="flex flex-col w-full gap-4">
+    <NxBaseContainer border>
+
       <div className="grid grid-cols-10 align-middle">
         <div className="col-span-9">
           <div className="grid grid-cols-3 gap-4">
@@ -178,7 +180,9 @@ const PDIPricing = ({ dataPricing = {}, dataDetailProduct = {} }) => {
           typeLog={true}
         />
       </ModalCustom>
-    </div>
+    </NxBaseContainer>
+    // <div className="flex flex-col w-full gap-4">
+    // </div>
   );
 };
 

@@ -115,6 +115,7 @@ const ContentModalConfirmPricing = ({
             dataCriteria={criteriaValues}
             columnsTable={columnsTableCriteriaAll}
             countryCriteriaId={countryCriteriaId}
+            idTable="pricing-confirm-criteria-table"
           />
           )}
         </div>

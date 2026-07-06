@@ -167,8 +167,11 @@ const PromoDiscountView = () => {
     await dispatch(
       downloadPromo({
         search: encodeURIComponent(JSON.stringify(search)),
-        page,
-        pageSize: loadMoreSize,
+        // Download always fetches every matching record regardless of the
+        // table's load-more page size — totalElements reflects the full
+        // count for the current search/filters, and page resets to the start.
+        page: 0,
+        pageSize: pagination_promo?.totalElements || loadMoreSize,
         sort,
       })
     );
