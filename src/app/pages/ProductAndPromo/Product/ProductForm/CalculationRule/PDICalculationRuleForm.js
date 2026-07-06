@@ -604,7 +604,7 @@ const PDICalculationRuleForm = ({
         </div> */}
         <Form form={formTable} component={false}>
           <NxTable
-            id="pdi-calculation-rule-table"
+            idTable="pdi-calculation-rule-table"
             userId={dataUser?.data?.username}
             showAdvanceSearch={false}
             showSearchBar={false}
