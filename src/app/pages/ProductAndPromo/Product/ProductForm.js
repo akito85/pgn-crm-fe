@@ -49,6 +49,7 @@ import { showModalError, validateCreateUpdate } from "../../../../redux/slices/g
 import { handleMandatory } from "./utils";
 import { applyLocationCriteriaCascade, handleCheckCriteriaMissingValidation, getCriteriaIdByCode } from "../UtilsProduct/UtilsAllProduct";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
+import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
 
 const routes = (type) => [
   {
@@ -2051,57 +2052,59 @@ const ProductForm = (props) => {
                   </div>
                 </NxCardContainer>
               ) : null}
-            </div>
-            <div className="flex w-full justify-between align-middle my-3">
-              <ButtonComponent
-                type={"submit"}
-                onClick={() => setModalBack(true)}
-                icon={
-                  <LeftOutlined
-                    style={{
-                      color: "#fff",
-                      fontSize: 24,
-                      justifyItems: "center",
-                    }}
-                  />
-                }
-              >
-                Back
-              </ButtonComponent>
-              <div className="flex align-middle gap-3">
-                <ButtonComponent
-                  icon={
-                    <SVGIcon
-                      name={
-                        type === "update" ? `IconButtonReset` : `IconButtonClear`
+              <NxBaseContainer border>
+                <div className="flex w-full justify-between align-middle my-3">
+                  <ButtonComponent
+                    type={"submit"}
+                    onClick={() => setModalBack(true)}
+                    icon={
+                      <LeftOutlined
+                        style={{
+                          color: "#fff",
+                          fontSize: 24,
+                          justifyItems: "center",
+                        }}
+                      />
+                    }
+                  >
+                    Back
+                  </ButtonComponent>
+                  <div className="flex align-middle gap-3">
+                    <ButtonComponent
+                      icon={
+                        <SVGIcon
+                          name={
+                            type === "update" ? `IconButtonReset` : `IconButtonClear`
+                          }
+                          width={24}
+                        />
                       }
-                      width={24}
-                    />
-                  }
-                  type="submit"
-                  onClick={handleClear}
-                >
-                  {type === "update" ? "Reset" : "Clear"}
-                </ButtonComponent>
-                <ButtonComponent
-                  disabled={preventSubmit()}
-                  form="productForm"
-                  htmlType="submit"
-                  type="submit"
-                  onClick={() => setTypeSubmit(listTypeSubmit[1])}
-                >
-                  Save as Draft
-                </ButtonComponent>
-                <ButtonComponent
-                  disabled={preventSubmit()}
-                  form="productForm"
-                  htmlType="submit"
-                  type="submit"
-                  onClick={() => setTypeSubmit(listTypeSubmit[0])}
-                >
-                  Save & Submit
-                </ButtonComponent>
-              </div>
+                      type="submit"
+                      onClick={handleClear}
+                    >
+                      {type === "update" ? "Reset" : "Clear"}
+                    </ButtonComponent>
+                    <ButtonComponent
+                      disabled={preventSubmit()}
+                      form="productForm"
+                      htmlType="submit"
+                      type="submit"
+                      onClick={() => setTypeSubmit(listTypeSubmit[1])}
+                    >
+                      Save as Draft
+                    </ButtonComponent>
+                    <ButtonComponent
+                      disabled={preventSubmit()}
+                      form="productForm"
+                      htmlType="submit"
+                      type="submit"
+                      onClick={() => setTypeSubmit(listTypeSubmit[0])}
+                    >
+                      Save & Submit
+                    </ButtonComponent>
+                  </div>
+                </div>
+              </NxBaseContainer>
             </div>
           </Form>
         </div>
