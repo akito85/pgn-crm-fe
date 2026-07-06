@@ -1210,6 +1210,7 @@ const PricingForm = (props) => {
                     storedData={storedDataInline}
                     // startDate={startDate ? moment(startDate) : undefined}
                     selector="pricing"
+                    idTable="pricing-form-criteria-table"
                     getApi={{
                       getBudgetList,
                       getProvinceList,

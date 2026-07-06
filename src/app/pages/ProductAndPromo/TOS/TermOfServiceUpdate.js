@@ -580,6 +580,7 @@ const TermOfServiceUpdate = () => {
                 storedData={storedDataInline}
                 startDate={undefined}
                 selector="tos"
+                idTable="tos-update-criteria-table"
                 getApi={{
                   getBudgetList,
                   getProvinceList,

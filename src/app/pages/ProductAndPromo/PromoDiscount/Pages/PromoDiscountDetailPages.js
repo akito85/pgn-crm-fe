@@ -61,6 +61,7 @@ const PromoDiscountDetailPages = ({ detail, attachments = [] }) => {
           dataCriteria={detail?.criteriaValues} //ddl
           type={"detail"}
           selector="promo"
+          idTable="promo-detail-criteria-table"
           columnsTable={(listOption, searchInput, searchedColumn, searchText, handleSearch, search, storedData) =>
             columnsTableCriteriaPromo(
               listOption,

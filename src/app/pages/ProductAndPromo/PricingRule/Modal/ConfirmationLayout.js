@@ -262,6 +262,7 @@ const ConfirmationLayout = ({
               data={listDataCriteria || []} //data
               dataCriteria={criteriaValues || []} //ddl
               columnsTable={columnsTableCriteriaAll}
+              idTable="pricing-rule-confirm-criteria-table"
             />
           </div>
         </div>

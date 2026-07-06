@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from "react-redux";
 import moment from "moment";
 import { Button, Checkbox, Form, Input, Select, Space, Tooltip } from "antd";
 import NxTable from "../../../../components/Nx/NxTable";
-import { nxApplyFixedColumns } from "../../../../utils/Nx/nxApplyFixedColumns";
 import SVGIcon from "../../../../assets/Icon/index";
 import DateComponent from "../../../../components/DateComponent";
 import { NumericFormat } from "react-number-format";
@@ -280,6 +279,7 @@ const FunctionalCriteriaProduct = ({
   excludeRender = null,
   showInactivate = false, // opt-in per consumer
   countryCriteriaId,
+  idTable, // unique NxTable id per consumer — required so Column Settings (hidden/fixed/width/order) persist independently per table instead of colliding across every form that renders this component
 }) => {
   // Selector
   const {
@@ -880,8 +880,11 @@ const FunctionalCriteriaProduct = ({
     );
   };
 
-  // Fixed columns state for NxTable column settings
-  const [fixedColumns, setFixedColumns] = useState({ left: [], right: ["operation"] });
+  // Default fixed-column layout seeded into NxTable — must stay a stable
+  // constant (not mirrored from NxTable's live state) so "Reset columns"
+  // has a true default to restore to instead of resetting to whatever the
+  // user last pinned.
+  const [fixedColumns] = useState({ left: [], right: ["operation"] });
 
   const allColumns = useMemo(
     () =>
@@ -893,11 +896,6 @@ const FunctionalCriteriaProduct = ({
     // search, searchedColumn, searchText, storedData, page, pageSize
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [dataCriteria, type, fixedColumn, listOption, search, searchedColumn, searchText, storedData, page, pageSize]
-  );
-
-  const processedColumns = useMemo(
-    () => nxApplyFixedColumns(allColumns, fixedColumns),
-    [allColumns, fixedColumns]
   );
 
   const columnDefinitions = useMemo(
@@ -973,13 +971,13 @@ const FunctionalCriteriaProduct = ({
         <div className="flex flex-col w-full gap-4">
           <Form form={formTableCriteria} component={false}>
             <NxTable
-              idTable="functional-criteria-product-table"
+              idTable={idTable || `functional-criteria-${selector}-${type}`}
               userId={dataUser?.data?.username}
               showAdvanceSearch={false}
               showSearchBar={false}
               usePagination={false}
               dataSource={data}
-              columns={processedColumns.map((col) => ({
+              columns={allColumns.map((col) => ({
                 ...col,
                 onCell: (record) => ({
                   record,
@@ -1015,7 +1013,6 @@ const FunctionalCriteriaProduct = ({
               }
               columnDefinitions={columnDefinitions}
               fixedColumns={fixedColumns}
-              setFixedColumns={setFixedColumns}
             />
           </Form>
           {/* Modal History Log */}

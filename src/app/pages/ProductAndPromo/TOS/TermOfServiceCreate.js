@@ -498,6 +498,7 @@ const TermOfServiceCreate = () => {
                   storedData={storedDataInline}
                   startDate={undefined}
                   selector="tos"
+                  idTable="tos-create-criteria-table"
                   getApi={{
                     getBudgetList,
                     getProvinceList,

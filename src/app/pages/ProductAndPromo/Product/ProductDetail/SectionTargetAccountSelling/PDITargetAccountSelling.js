@@ -253,6 +253,7 @@ const PDITargetAccountSelling = ({
             dataCriteria={dataCriteria} //ddl
             type={"detail"}
             selector="product"
+            idTable="tas-detail-criteria-table"
             columnsTable={columnsTableCriteriaAll}
             countryCriteriaId={
               (dataObject.mProductTargetAccountSellingCriteria || [])

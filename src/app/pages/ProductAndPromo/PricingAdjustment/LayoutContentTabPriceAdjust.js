@@ -68,6 +68,7 @@ const LayoutContentTabPriceAdjust = ({
             dataCriteria={criteriaValues} //ddl
             type={"detail"}
             selector="pricingAdjust"
+            idTable="price-adjust-detail-criteria-table"
             columnsTable={columnsTableCriteriaAll}
             fixedColumn={[
               "ADJUSTMENT TYPE",

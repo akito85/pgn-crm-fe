@@ -78,6 +78,7 @@ const ContentModalConfirmPriceAdjust = ({
                 columnsTable={columnsTableCriteriaAll}
                 fixedColumn={["ADJUSTMENT TYPE", "ADJUSTMENT VALUE"]}
                 countryCriteriaId={countryCriteriaId}
+                idTable="price-adjust-confirm-criteria-table"
               />
               {/* <PricingAdjustTableDetail
                 type={"detail"}

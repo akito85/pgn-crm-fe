@@ -40,6 +40,7 @@ const PricingRule = ({
             data={listDataCriteria} //data
             dataCriteria={criteriaValues} //ddl
             selector="pricingRule"
+            idTable="pricing-rule-detail-criteria-table"
             columnsTable={columnsTableCriteriaAll}
             countryCriteriaId={countryCriteriaId}
           />

@@ -302,6 +302,7 @@ const PricingRule = ({
               storedData={storedData}
               startDate={startDate ? moment(startDate) : undefined}
               selector="pricingRule"
+              idTable="pricing-rule-form-criteria-table"
               getApi={{
                 getBudgetList,
                 getProvinceList,

@@ -1167,6 +1167,7 @@ const PricingAdjustForm = (props) => {
                   storedData={storedDataInline}
                   // startDate={startDate ? moment(startDate) : undefined}
                   selector="pricingAdjust"
+                  idTable="price-adjust-form-criteria-table"
                   getApi={{
                     getBudgetList,
                     getProvinceList,

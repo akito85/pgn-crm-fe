@@ -58,6 +58,7 @@ const LayoutContentTab = ({
                     dataCriteria={criteriaValues} //ddl
                     type={type}
                     selector="pricing"
+                    idTable="pricing-detail-criteria-table"
                     columnsTable={columnsTableCriteriaAll}
                     countryCriteriaId={countryCriteriaId}
                   />
