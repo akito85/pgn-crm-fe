@@ -10,6 +10,7 @@ const ModalConfirm = ({
   width,
   bodyStyle,
   useOk = false,
+  loading = false,
 }) => {
   return (
     <Modal
@@ -23,10 +24,10 @@ const ModalConfirm = ({
       maskClosable={false}
       footer={[
         <div key="footer" className={"w-full justify-end flex gap-1"}>
-          <ButtonComponent type={"default"} onClick={handleCancel}>
+          <ButtonComponent type={"default"} onClick={handleCancel} disabled={loading}>
             {useOk === true ? "Back" : "Cancel"}
           </ButtonComponent>
-          <ButtonComponent type={"submit"} onClick={handleOk}>
+          <ButtonComponent type={"submit"} onClick={handleOk} loading={loading}>
             {useOk === true ? "Yes" : "Confirm"}
           </ButtonComponent>
         </div>,

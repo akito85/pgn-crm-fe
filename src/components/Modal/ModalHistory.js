@@ -190,6 +190,7 @@ const ModalHistory = (props) => {
                       <Avatar
                         shape="square"
                         size={36}
+                        className="flex-shrink-0"
                         icon={handleIconAvatar(approver)}
                         style={styleBackgroundAvatar(approver)}
                       />
@@ -199,7 +200,7 @@ const ModalHistory = (props) => {
                             {approver?.name || "-"}
                           </p>
                         </Tooltip>
-                        <p className="text-[10px] text-gray-400 m-0 truncate">{`{Divisi Name}`}</p>
+                        <p className="text-[10px] text-gray-400 m-0 truncate">{approver?.role}</p>
                       </div>
                     </div>
                     {index !== dataApproverFinal.length - 1 ? (

@@ -19,6 +19,7 @@ import { hasValue, renderColumn, requiredMessage } from "../../../../../../utils
 import SectionInfoProductDetail from "../../ProductDetail/SectionPricing/SectionInfoProductDetail";
 import TablePaginationNew from "../../../../../../components/TablePaginationNew";
 import { getColumnSearchPropsUseFilteredValueFE } from "../../../../../../utils/getColumnSearchProps";
+import NxTable from "../../../../../../components/Nx/NxTable";
 
 const onFilter = (dataIndex, value, record) => {
   const tempSearchText = value.toLowerCase();
@@ -50,12 +51,14 @@ const columns = ({
   const result = [
     {
       title: "NO",
+      key: "no",
       width: 60,
       align: "center",
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {
       title: "TERMS OF SERVICE",
+      key: "tosName",
       width: 180,
       dataIndex: "tosName",
       onFilter: (value, record) => onFilter("tosName", value, record),
@@ -83,6 +86,7 @@ const columns = ({
     },
     {
       title: "DESCRIPTIONS",
+      key: "description",
       width: 240,
       dataIndex: "description",
       onFilter: (value, record) => onFilter("description", value, record),
@@ -113,6 +117,7 @@ const columns = ({
     },
     {
       title: "ACTION",
+      key: "operation",
       width: 120,
       dataIndex: "operation",
       render: (_, record) => {
@@ -209,7 +214,7 @@ const PDITosForm = ({
     dataListServiceType = [],
     dataListTos = [],
   } = useSelector((state) => state.product);
-  console.log(data, "test");
+  const { data: dataUser = {} } = useSelector((state) => state.profile);
   
   useEffect(() => {
     if (type === "form") {
@@ -354,7 +359,12 @@ const PDITosForm = ({
           </ButtonComponent>
         </div>
       ) : null}
-      <TablePaginationNew
+      <NxTable
+        idTable={"tableTOS"}
+        userId={dataUser?.data?.username}
+        showAdvanceSearch={false}
+        showSearchBar={false}
+        usePagination={false}
         type="FE"
         dataSource={data}
         totalData={data.length}

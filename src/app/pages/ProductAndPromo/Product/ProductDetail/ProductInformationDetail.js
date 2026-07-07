@@ -1,9 +1,10 @@
 import React from "react";
 import DetailText from "../../../../../components/DetailText";
+import NxBaseContainer from "../../../../../components/Nx/NxBaseContainer";
 
 const ProductInformationDetail = ({ data }) => {
   return (
-    <div>
+    <NxBaseContainer border>
       <div className="grid grid-cols-4 w-full gap-2">
         <DetailText label={"Product Name"}>{data.productName}</DetailText>
         <DetailText label={"Product Type"}>{data.productType}</DetailText>
@@ -25,7 +26,9 @@ const ProductInformationDetail = ({ data }) => {
       <div className="w-full">
         <DetailText label={"Description"}>{data.productDescription}</DetailText>
       </div>
-    </div>
+    </NxBaseContainer>
+    // <div>
+    // </div>
   );
 };
 

@@ -1,5 +1,5 @@
 import React, { useState, Fragment, useEffect } from "react";
-import { Form, Spin } from "antd";
+import { Button, Form, Spin } from "antd";
 import { PRODUCT_PROMO_ROUTES } from "../../../../routes/product_promo/pp_routes";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import BaseContainer from "../../../../components/BaseContainer";
@@ -8,7 +8,6 @@ import PricingSectionDetail from "./Detail/PricingSectionDetail";
 import AttachmentSectionForm from "./Form/AttachmentSectionForm";
 import moment from "moment";
 import ButtonComponent from "../../../../components/ButtonComponent";
-import { LeftOutlined } from "@ant-design/icons";
 import { useNavigate, useLocation } from "react-router";
 import ModalApproveOrReject from "../../../../components/Modal/ModalApproveOrReject";
 import PricingInactiveRequest from "./Detail/PricingInactiveRequest";
@@ -27,6 +26,8 @@ import LayoutContentTab from "./Detail/LayoutContentTab";
 import { ModalError } from "../../../../components/Modal/ModalPopUp";
 import SVGIcon from "../../../../assets/Icon/index";
 import { dateFormatting } from "../../../../utils";
+import NxCardContainer from "../../../../components/Nx/NxCardContainer";
+import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
 
 const routes = [
   {
@@ -338,8 +339,7 @@ const PricingDetail = (props) => {
     setTypePricingDetail(listSectionPricingDetail[0].value);
     setTypePricingInfo(temp);
   };
-  const handlePricingDetail = (e) => {
-    const temp = e.target.value;
+  const handlePricingDetail = (temp) => {
     if (temp === listSectionPricingDetail[1].value) {
       setDataDetailSelected({});
     }
@@ -367,7 +367,7 @@ const PricingDetail = (props) => {
     // console.log(obj);
     // handleCloseModalApproveReject();
     if (bodyApproval.approvalType === "INACTIVE_PRICING") {
-      dispatch(approvalInactivePricing(obj))
+      return dispatch(approvalInactivePricing(obj))
         .unwrap()
         .then((res) => {
           handleClear();
@@ -387,7 +387,7 @@ const PricingDetail = (props) => {
           }
         });
     } else {
-      dispatch(approvalCreatePricing(obj))
+      return dispatch(approvalCreatePricing(obj))
         .unwrap()
         .then((res) => {
           handleCloseModalApproveReject();
@@ -457,7 +457,7 @@ const PricingDetail = (props) => {
             onChange={handlePricingInfo}
             currentPosition={typePricingInfo}
           />
-          <BaseContainer
+          <NxCardContainer
             header={`${
               typePricingInfo === "Draft"
                 ? "PRICING"
@@ -465,7 +465,7 @@ const PricingDetail = (props) => {
             } INFORMATION`}
           >
             {showSection()}
-          </BaseContainer>
+          </NxCardContainer>
           {typePricingInfo === listSectionInfo[0].value ? (
             <LayoutContentTab
               key={"active-detail"}
@@ -510,43 +510,36 @@ const PricingDetail = (props) => {
               countryCriteriaId={countryCriteriaId}
             />
           ) : null}
-          <div
-            className={`flex w-full${
-              showButtonApproval ? " justify-between" : ""
-            } align-middle my-3`}
-          >
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => navigate(-1)}
-              icon={
-                <LeftOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 24,
-                    justifyItems: "center",
-                  }}
-                />
-              }
+          <NxBaseContainer border>
+            <div
+              className={`flex w-full${
+                showButtonApproval ? " justify-between" : ""
+              } align-middle my-3`}
             >
-              Back
-            </ButtonComponent>
-            {showButtonApproval ? (
-              <div className="flex align-middle gap-3">
-                <ButtonComponent
-                  type="reject"
-                  onClick={() => handleModalConfirmation("Reject")}
-                >
-                  Reject
-                </ButtonComponent>
-                <ButtonComponent
-                  type="approve"
-                  onClick={() => handleModalConfirmation("Approve")}
-                >
-                  Approve
-                </ButtonComponent>
-              </div>
-            ) : null}
-          </div>
+              <Button
+                onClick={() => navigate(-1)}
+                type="menu"
+              >
+                Back
+              </Button>
+              {showButtonApproval ? (
+                <div className="flex align-middle gap-3">
+                  <ButtonComponent
+                    type="reject"
+                    onClick={() => handleModalConfirmation("Reject")}
+                  >
+                    Reject
+                  </ButtonComponent>
+                  <ButtonComponent
+                    type="approve"
+                    onClick={() => handleModalConfirmation("Approve")}
+                  >
+                    Approve
+                  </ButtonComponent>
+                </div>
+              ) : null}
+            </div>
+          </NxBaseContainer>
         </div>
 
         <ModalEndDateHistory

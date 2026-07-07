@@ -31,6 +31,7 @@ import { showModalError } from "../../../../../redux/slices/general_slice";
 import FunctionalCriteriaProduct from "../../UtilsProduct/FunctionalCriteriaProduct";
 import { columnsTableCriteriaAll } from "../../UtilsProduct/TableCriteriaAllProduct";
 import { hasValue } from "../../../../../utils";
+import NxCardContainer from "../../../../../components/Nx/NxCardContainer";
 
 const PricingRule = ({
   form,
@@ -178,8 +179,8 @@ const PricingRule = ({
   // };
 
   return (
-    <div>
-      <BaseContainer header={"pricing rule information"}>
+    <div className="flex flex-col gap-y-4">
+      <NxCardContainer header={"pricing rule information"}>
         <div className="w-full grid grid-cols-3 gap-2">
           <Form.Item
             label={"Pricing Rule"}
@@ -269,9 +270,9 @@ const PricingRule = ({
             </Form.Item>
           </div>
         </div>
-      </BaseContainer>
+      </NxCardContainer>
 
-      <BaseContainer
+      <NxCardContainer
         header={"pricing rule detail"}
         type={"tabs"}
         element={
@@ -301,6 +302,7 @@ const PricingRule = ({
               storedData={storedData}
               startDate={startDate ? moment(startDate) : undefined}
               selector="pricingRule"
+              idTable="pricing-rule-form-criteria-table"
               getApi={{
                 getBudgetList,
                 getProvinceList,
@@ -333,7 +335,7 @@ const PricingRule = ({
           //   setStoredData={setStoredData}
           // />
         )}
-      </BaseContainer>
+      </NxCardContainer>
     </div>
   );
 };

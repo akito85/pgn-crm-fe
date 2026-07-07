@@ -14,6 +14,7 @@ import CardComponent from "../../../../../../components/Card/CardComponent";
 import DetailText from "../../../../../../components/DetailText";
 import Highlighter from "react-highlight-words";
 import TablePaginationNew from "../../../../../../components/TablePaginationNew";
+import NxTable from "../../../../../../components/Nx/NxTable";
 
 const onFilter = (dataIndex, value, record) => {
   const tempSearchText = value.toLowerCase();
@@ -42,12 +43,14 @@ const columns = (
   return [
     {
       title: "NO",
+      key: "no",
       width: 60,
       align: "center",
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {
       title: "PRODUCT NAME",
+      key: "productName",
       width: 240,
       ellipsis: {
         showTitle: false,
@@ -92,6 +95,7 @@ const columns = (
     },
     {
       title: "PRODUCT TYPE",
+      key: "productTypeName",
       width: 240,
       ellipsis: {
         showTitle: false,
@@ -136,6 +140,7 @@ const columns = (
     },
     {
       title: "PRODUCT CLASS",
+      key: "productClassName",
       width: 240,
       ellipsis: {
         showTitle: false,
@@ -180,6 +185,7 @@ const columns = (
     },
     {
       title: "SERVICE TYPE",
+      key: "serviceTypeName",
       width: 240,
       ellipsis: {
         showTitle: false,
@@ -226,6 +232,7 @@ const columns = (
       title: "START DATE",
       width: 240,
       dataIndex: "startDate",
+      key: "startDate",
       onFilter: (value, record) => onFilter("startDate", value, record),
       sorter: (a, b) => sorter("startDate", a, b),
       ...getColumnSearchPropsPaging(
@@ -240,6 +247,7 @@ const columns = (
       title: "END DATE",
       width: 240,
       dataIndex: "endDate",
+      key: "endDate",
       onFilter: (value, record) => onFilter("endDate", value, record),
       sorter: (a, b) => sorter("endDate", a, b),
       ...getColumnSearchPropsPaging(
@@ -280,6 +288,8 @@ const ModalFormEligibilityProduct = ({
     (state) => state.product
   );
 
+  const { data: dataUser = {} } = useSelector((state) => state.profile);
+  
   useEffect(() => {
     if (typeForm === "update" && dataFormObj && dataFormObj.productName) {
       form.setFieldsValue({
@@ -450,7 +460,12 @@ const ModalFormEligibilityProduct = ({
         <div className="flex flex-col gap-4">
           <SectionInfoProductDetail dataDetailProduct={dataObj} />
           {typeForm === "create" ? (
-            <TablePaginationNew
+            <NxTable
+              idTable={`eligibility-product-table-${typeForm}`}
+              userId={dataUser?.data?.username}
+              showAdvanceSearch={false}
+              showSearchBar={false}
+              usePagination={false}
               type="FE"
               dataSource={dataTable}
               totalData={dataTable.length}

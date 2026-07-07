@@ -481,6 +481,7 @@ export const getAllTabColumns = (
         1: { text: "In Progress" },
         2: { text: "Success" },
         3: { text: "Failed" },
+        4: { text: "Scheduled" },
         5: { text: "Open" },
       };
       const config = statusConfig[status] || {

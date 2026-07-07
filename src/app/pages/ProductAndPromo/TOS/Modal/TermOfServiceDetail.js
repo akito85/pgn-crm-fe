@@ -114,6 +114,7 @@ const TermOfServiceDetail = ({ openModal, closeModal, id }) => {
               data={data_detail?.listCriterias} //data
               dataCriteria={criteria} //ddl
               selector="tos"
+              idTable="tos-detail-criteria-table"
               columnsTable={columnsTableCriteriaAll}
               countryCriteriaId={countryCriteriaId}
             />

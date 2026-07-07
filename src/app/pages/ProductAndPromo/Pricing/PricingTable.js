@@ -1,7 +1,7 @@
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
-import { Checkbox, Tooltip } from "antd";
+import { Button, Checkbox, Tooltip } from "antd";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import SVGIcon from "../../../../assets/Icon/index";
 import Toolbar from "../../../../components/Toolbar";
@@ -58,6 +58,7 @@ const PricingTable = () => {
   const [modalError, setModalError] = useState(false);
   const [bodyError, setBodyError] = useState({});
   const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
+  const [loadingInactivate, setLoadingInactivate] = useState(false);
 
   // --- Approval history reshape ---
   useEffect(() => {
@@ -89,6 +90,22 @@ const PricingTable = () => {
       filterRules,
     }),
     [sort, search, searchText, filters, filterRules, limitData]
+  );
+
+  const buildBodyDownload = useCallback(
+    (pageNum) => ({
+      page: pageNum,
+      // Download always fetches every matching record regardless of the
+      // "limit data" advanced-search filter (that only caps the table view) —
+      // totalElement reflects the full count for the current search/filters.
+      pageSize: totalElement || PAGE_SIZE,
+      sort,
+      search,
+      searchText,
+      filters,
+      filterRules,
+    }),
+    [sort, search, searchText, filters, filterRules, totalElement]
   );
 
   const handleRefresh = useCallback(() => {
@@ -144,9 +161,9 @@ const PricingTable = () => {
 
   const handleDownload = useCallback(async () => {
     setLoadingDownload(true);
-    await dispatch(downloadPricing({ ...buildBody(1) }));
+    await dispatch(downloadPricing({ ...buildBodyDownload(1) }));
     setLoadingDownload(false);
-  }, [dispatch, buildBody]);
+  }, [dispatch, buildBodyDownload]);
 
   const handleApprovalHistory = (data) => {
     dispatch(getApprovalHistory(data.id));
@@ -170,6 +187,7 @@ const PricingTable = () => {
       appHierId: res.approvalHierarchy,
       remark: res.remark,
     };
+    setLoadingInactivate(true);
     dispatch(inactivePricing({ data }))
       .unwrap()
       .then(() => {
@@ -184,6 +202,9 @@ const PricingTable = () => {
           setBodyError({ body: { ...res }, handleClear, message });
           setModalError(true);
         }
+      })
+      .finally(() => {
+        setLoadingInactivate(false);
       });
   };
 
@@ -206,24 +227,76 @@ const PricingTable = () => {
   };
 
   // --- Action column items ---
-  const itemActions = useMemo(() => nxGetAccountActions({
-    handleView: ({ id }) =>
-      navigate(PRODUCT_PROMO_ROUTES.DETAIL_PRICING, {
-        state: { id }
-      }),
-    handleCreate: () =>
-      navigate(PRODUCT_PROMO_ROUTES.CREATE_PRICING),
-    handleUpdate: ({ id, status, statusApproval }) =>
-      navigate(PRODUCT_PROMO_ROUTES.CREATE_PRICING, {
-        state: {
-          id, statusPricing: status, statusApprovalPricing: statusApproval
-        }
-      }),
-    handleActivate: handleOpenModalInactivate,
-    handleApprovalHistory,
-    handleDownload,
-    loadingDownload,
-  }), [handleDownload, handleOpenModalInactivate, handleApprovalHistory, loadingDownload]);
+  const itemActions = useMemo(() => {
+    const actions = nxGetAccountActions({
+      handleView: ({ id }) =>
+        navigate(PRODUCT_PROMO_ROUTES.DETAIL_PRICING, {
+          state: { id }
+        }),
+      handleCreate: () =>
+        navigate(PRODUCT_PROMO_ROUTES.CREATE_PRICING),
+      handleUpdate: ({ id, status, statusApproval }) =>
+        navigate(PRODUCT_PROMO_ROUTES.UPDATE_PRICING, {
+          state: {
+            id, statusPricing: status, statusApprovalPricing: statusApproval
+          }
+        }),
+      handleActivate: handleOpenModalInactivate,
+      handleApprovalHistory,
+      handleDownload,
+      loadingDownload,
+    });
+
+    // NxGetAccountActions' "Activate" checkbox is checked based on ACTIVE status,
+    // which shows it ticked before the record is actually inactivated.
+    // Override locally so it only shows checked once the record is INACTIVE.
+    return actions.map((item) => {
+      if (item.action !== "Activate") return item;
+      return {
+        ...item,
+        render: (record, actionLength, index) => {
+          const isInactive = record.status === "INACTIVE";
+          // Only allow inactivating a record that is ACTIVE and already Approved —
+          // matches the "Inactivate" action's own disabled rule in NxGetAccountActions.
+          const canInactivate =
+            record.status === "ACTIVE" && record.statusApproval === "APPROVED";
+          const content =
+            actionLength > 3 ? (
+              <Button
+                icon={
+                  <Checkbox
+                    checked={isInactive}
+                    disabled={!canInactivate}
+                    style={{ transform: "scale(0.9)" }}
+                    className="action-checkbox"
+                  />
+                }
+                disabled={!canInactivate}
+                onClick={() => handleOpenModalInactivate(record)}
+                type={"action"}
+              >
+                Inactivate
+              </Button>
+            ) : (
+              <Tooltip
+                title={isInactive ? "Activate" : ""}
+                key={`table-action-${index}`}
+              >
+                <Checkbox
+                  className="action-checkbox"
+                  checked={isInactive}
+                  disabled={!canInactivate}
+                  onClick={() => handleOpenModalInactivate(record)}
+                  style={{ transform: "scale(0.9)" }}
+                />
+              </Tooltip>
+            );
+
+          return <Fragment key={`table-action-${index}`}>{content}</Fragment>;
+        },
+      };
+    });
+  }, [handleDownload, handleOpenModalInactivate, handleApprovalHistory, loadingDownload]);
 
   // --- Columns ---
   const actionCols = useColumnActionPermission(
@@ -282,6 +355,7 @@ const PricingTable = () => {
         openModalInactivate={openModalInactivate}
         handleCloseModalInactivate={handleCancelModalInactivate}
         onFinish={handleSubmitModalInactivate}
+        loading={loadingInactivate}
       />
 
       <ModalError

@@ -16,6 +16,7 @@ import {
 import { getColumnSearchPropsCriteria } from "../../columnTableCriteria";
 import InputComponent from "../../../../../../components/InputComponent";
 import { requiredMessage } from "../../../../../../utils";
+import NxTable from "../../../../../../components/Nx/NxTable";
 
 const onFilter = (dataIndex, value, record) => {
   const tempSearchText = value.toLowerCase();
@@ -185,6 +186,7 @@ const PDICalculationRuleForm = ({
     dataListNameCalculationRule = [],
     dataListUnit = [],
   } = useSelector((state) => state.product);
+  const { data: dataUser = {} } = useSelector((state) => state.profile);
   const exludeExisting =
     dataTable.length > 0 ? dataTable.map((item) => item?.name?.value) : [];
   const listName = dataListNameCalculationRule.filter(
@@ -330,6 +332,7 @@ const PDICalculationRuleForm = ({
     const temp = [
       {
         title: "NO",
+        key: "no",
         width: 60,
         dataIndex: "no",
         align: "center",
@@ -337,6 +340,7 @@ const PDICalculationRuleForm = ({
       },
       {
         title: "NAME",
+        key: "name",
         width: 240,
         dataIndex: "name",
         onFilter: (value, record) => onFilter("name", value, record),
@@ -354,6 +358,7 @@ const PDICalculationRuleForm = ({
       },
       {
         title: "VALUE",
+        key: "value",
         width: 240,
         dataIndex: "value",
         onFilter: (value, record) => onFilter("value", value, record),
@@ -370,6 +375,7 @@ const PDICalculationRuleForm = ({
       },
       {
         title: "UNIT",
+        key: "unit",
         width: 240,
         align: "center",
         dataIndex: "unit",
@@ -388,6 +394,7 @@ const PDICalculationRuleForm = ({
       },
       {
         title: "DESCRIPTION",
+        key: "description",
         width: 240,
         dataIndex: "description",
         onFilter: (value, record) => onFilter("description", value, record),
@@ -433,6 +440,7 @@ const PDICalculationRuleForm = ({
       },
       {
         title: "ACTION",
+        key: "operation",
         width: 240,
         fixed: "right",
         dataIndex: "operation",
@@ -563,7 +571,7 @@ const PDICalculationRuleForm = ({
       ) : null}
 
       <div className={"relative flex flex-col w-full"}>
-        <div
+        {/* <div
           className={`${
             totalData !== 0 ? "z-[1] absolute mt-4" : "my-4"
           } w-1/4 flex`}
@@ -593,9 +601,14 @@ const PDICalculationRuleForm = ({
               ))
               .splice(1)}
           </Select>
-        </div>
+        </div> */}
         <Form form={formTable} component={false}>
-          <Table
+          <NxTable
+            idTable="pdi-calculation-rule-table"
+            userId={dataUser?.data?.username}
+            showAdvanceSearch={false}
+            showSearchBar={false}
+            usePagination={false}
             dataSource={dataTable}
             columns={filterColumn(
               columns().map((col) => ({
