@@ -24,7 +24,9 @@ const initialState = {
   data_prevBilling: [],
   data_cancel_billing: [],
   dataListCategory: [],
+  list_billing_period: [],
   loadingList: false,
+  loadingPeriod: false,
   loadingRequest: false,
   loadingApproval: false,
   loadingDetail: false,
@@ -148,12 +150,12 @@ export const cancelApprovalBilling = createAsyncThunk(
 
 export const getAllBillingPaginate = createAsyncThunk(
   "GET_ALL_BILLING_PAGINATE",
-  async ({ page, pageSize, search, sort, isLoadMore = false }, thunkAPI) => {
+  async ({ page, pageSize, search, sort, billPeriod, isLoadMore = false }, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      const url = `/v1/dbs/api/billing/list-billing-gas?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
+      const url = `/v1/dbs/api/billing/list-billing-gas?page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}${billPeriod ? `&billPeriod=${encodeURIComponent(billPeriod)}` : ""}`;
       const response = await ratingBillingHttpService.getPagination(url);
       const responseData = response.data?.data ?? response.data;
 
@@ -374,12 +376,12 @@ export const getAllAdjustmentPaginate = createAsyncThunk(
 
 export const downloadBillingList = createAsyncThunk(
   "DOWNLOAD_BILLING_LIST",
-  async ({ page, pageSize, search, sort }, thunkAPI) => {
+  async ({ page, pageSize, search, sort, billPeriod }, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      const url = `/v1/dbs/api/billing/download-filter?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
+      const url = `/v1/dbs/api/billing/download-filter?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}${billPeriod ? `&billPeriod=${encodeURIComponent(billPeriod)}` : ""}`;
       const response = await ratingBillingHttpService.downloadData(url);
       return response.data;
     } catch (error) {
@@ -630,6 +632,49 @@ export const getAttachmentCategoryBilling = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
       return [];
+    }
+  },
+);
+
+export const getListBillingPeriodForBilling = createAsyncThunk(
+  "GET_LIST_BILLING_PERIOD_FOR_BILLING",
+  async (_, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/rbi/calculation/billingperiod/1`;
+      const response = await ratingBillingHttpService.getAll(url);
+
+      const rawData =
+        response?.body?.data?.data ||
+        response?.data?.data ||
+        response?.data ||
+        [];
+
+      const transformedData = Array.isArray(rawData)
+        ? rawData.map((item) => ({
+            id: item.id,
+            name: item.name,
+            code: item.code,
+            ...item,
+          }))
+        : [];
+
+      return transformedData;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response?.data);
     }
   },
 );
@@ -1097,6 +1142,19 @@ const billingSlice = createSlice({
     },
     [getAttachmentCategoryBilling.rejected]: (state) => {
       state.dataListCategory = [];
+    },
+
+    // Get List Billing Period
+    [getListBillingPeriodForBilling.pending]: (state) => {
+      state.loadingPeriod = true;
+    },
+    [getListBillingPeriodForBilling.fulfilled]: (state, action) => {
+      state.loadingPeriod = false;
+      state.list_billing_period = action.payload;
+    },
+    [getListBillingPeriodForBilling.rejected]: (state) => {
+      state.loadingPeriod = false;
+      state.list_billing_period = [];
     },
   },
 });

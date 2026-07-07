@@ -21,6 +21,7 @@ import {
   getAllBillingRequestPaginate,
   getApprovalHistory,
   setBillingFilters,
+  getListBillingPeriodForBilling,
 } from "../../../../redux/slices/rating_billing_invoice/billing";
 import { checkAccountingExists } from "../../../../redux/slices/rating_billing_invoice/accounting";
 import { showModalError } from "../../../../redux/slices/general_slice";
@@ -35,9 +36,10 @@ import { useColumnActionPermission } from "../../../../components/ColumnActionPe
 import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 import CardContainer from "../../../../components/CardContainer";
 import { CloseSquareOutlined } from "@ant-design/icons";
+import SelectComponent from "../../../../components/SelectComponent";
 
 const BillingPage = () => {
-  const { data, loadingList, loadingHistory, data_approval_history, filters } = useSelector(
+  const { data, loadingList, loadingHistory, data_approval_history, filters, list_billing_period } = useSelector(
     (state) => state.billing,
   );
 
@@ -67,6 +69,7 @@ const BillingPage = () => {
   const [accountNumberId, setAccountNumberId] = useState("");
   const [activeRowKey, setActiveRowKey] = useState(null);
   const [selectedBillingData, setSelectedBillingData] = useState(null);
+  const [selectedBillingPeriod, setSelectedBillingPeriod] = useState(null);
 
   const [fixedColumns, setFixedColumns] = useState(() => {
     try {
@@ -85,6 +88,35 @@ const BillingPage = () => {
       // ignore storage errors
     }
   }, [fixedColumns]);
+
+  // Fetch billing period saat mount
+  useEffect(() => {
+    dispatch(getListBillingPeriodForBilling());
+  }, [dispatch]);
+
+  // Set default billing period ke bulan & tahun sekarang
+  useEffect(() => {
+    if (
+      list_billing_period &&
+      list_billing_period.length > 0 &&
+      !selectedBillingPeriod
+    ) {
+      const now = new Date();
+      const currentMonth = now.toLocaleString("en-US", { month: "short" });
+      const currentYear = now.getFullYear();
+      const currentPeriodName = `${currentMonth} ${currentYear}`;
+
+      const currentPeriod = list_billing_period.find(
+        (item) => item.name === currentPeriodName,
+      );
+
+      if (currentPeriod) {
+        setSelectedBillingPeriod(currentPeriod.name);
+      } else {
+        setSelectedBillingPeriod(list_billing_period[0].name);
+      }
+    }
+  }, [list_billing_period, selectedBillingPeriod]);
 
   // Simpan filters ke Redux
   useEffect(() => {
@@ -111,18 +143,23 @@ const BillingPage = () => {
     }
   }, [activeRowKey, pageDetail]);
 
+  const initialPageSize = 100;
+
   useEffect(() => {
-    dispatch(
-      getAllBillingPaginate({
-        search: encodeURIComponent(JSON.stringify(search)),
-        page: 1,
-        pageSize: 100,
-        sort,
-        isLoadMore: false,
-      }),
-    );
-    setPage(1);
-  }, [dispatch, search, sort]);
+    if (selectedBillingPeriod) {
+      dispatch(
+        getAllBillingPaginate({
+          search: encodeURIComponent(JSON.stringify(search)),
+          page: 1,
+          pageSize: initialPageSize,
+          sort,
+          billPeriod: selectedBillingPeriod,
+          isLoadMore: false,
+        }),
+      );
+      setPage(1);
+    }
+  }, [dispatch, search, sort, selectedBillingPeriod]);
 
   useEffect(() => {
     if (data_approval_history?.dataApprover) {
@@ -160,8 +197,6 @@ const BillingPage = () => {
     });
   }, []);
 
-  const initialPageSize = 100;
-
   const handleLoadMore = async () => {
     const totalElements = data?.page?.totalElements || 0;
     const currentDataLength = dataSource?.length || 0;
@@ -170,16 +205,19 @@ const BillingPage = () => {
 
     const nextPage = Math.floor(currentDataLength / loadMoreSize) + 1;
 
-    await dispatch(
-      getAllBillingPaginate({
-        search: encodeURIComponent(JSON.stringify(search)),
-        page: nextPage,
-        pageSize: loadMoreSize,
-        sort,
-        isLoadMore: true,
-      }),
-    );
-    setPage(nextPage);
+    if (selectedBillingPeriod) {
+      await dispatch(
+        getAllBillingPaginate({
+          search: encodeURIComponent(JSON.stringify(search)),
+          page: nextPage,
+          pageSize: loadMoreSize,
+          sort,
+          billPeriod: selectedBillingPeriod,
+          isLoadMore: true,
+        }),
+      );
+      setPage(nextPage);
+    }
   };
 
   const hasMore = (dataSource?.length || 0) < (data?.page?.totalElements || 0);
@@ -193,14 +231,17 @@ const BillingPage = () => {
   };
 
   const handleDownload = () => {
-    dispatch(
-      downloadBillingList({
-        search: encodeURIComponent(JSON.stringify(search)),
-        page,
-        pageSize: loadMoreSize,
-        sort,
-      }),
-    );
+    if (selectedBillingPeriod) {
+      dispatch(
+        downloadBillingList({
+          search: encodeURIComponent(JSON.stringify(search)),
+          page,
+          pageSize: loadMoreSize,
+          sort,
+          billPeriod: selectedBillingPeriod,
+        }),
+      );
+    }
   };
 
   const handleDetail = (record) => {
@@ -241,15 +282,18 @@ const BillingPage = () => {
   const handleRefresh = () => {
     const reqSearch = encodeURIComponent(JSON.stringify(search));
 
-    dispatch(
-      getAllBillingPaginate({
-        search: reqSearch,
-        page: 1,
-        pageSize: initialPageSize,
-        sort,
-        isLoadMore: false,
-      }),
-    );
+    if (selectedBillingPeriod) {
+      dispatch(
+        getAllBillingPaginate({
+          search: reqSearch,
+          page: 1,
+          pageSize: initialPageSize,
+          sort,
+          billPeriod: selectedBillingPeriod,
+          isLoadMore: false,
+        }),
+      );
+    }
 
     dispatch(
       getAllBillingRequestPaginate({
@@ -268,6 +312,11 @@ const BillingPage = () => {
         isLoadMore: false,
       }),
     );
+    setPage(1);
+  };
+
+  const handleBillingPeriodChange = (value) => {
+    setSelectedBillingPeriod(value);
     setPage(1);
   };
 
@@ -483,6 +532,20 @@ const BillingPage = () => {
           enableRowClick={true}
           selectedRowKey={activeRowKey}
           onRowClick={handleDetail}
+          customHeaderLeft={
+            <div className="flex items-center gap-1">
+              <SelectComponent
+                value={selectedBillingPeriod}
+                onChange={handleBillingPeriodChange}
+                placeholder="Select Period"
+                style={{ width: "120px" }}
+                options={(list_billing_period || []).map((item) => ({
+                  label: item?.name,
+                  value: item?.name,
+                }))}
+              />
+            </div>
+          }
         />
       </CardContainer>
 
