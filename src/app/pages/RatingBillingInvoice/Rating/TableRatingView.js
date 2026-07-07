@@ -574,8 +574,7 @@ export const columnsRating = (
         dataIndex: "minUsage",
         width: 150,
         sorter: true,
-        isClassification: true,
-        align: "center",
+        isNumber: true,
         ...getColumnSearchPropsUseFilteredValue(
           search,
           "minUsage",
@@ -584,7 +583,7 @@ export const columnsRating = (
           searchText,
           handleSearch,
         ),
-        render: (text) =>
+        render: (text, record) =>
           renderColumn(
             "minUsage",
             hasValue(search["minUsage"]),
@@ -593,7 +592,7 @@ export const columnsRating = (
             false,
             "input",
             search,
-            "usage",
+            record.uom === "MMBTU" ? "energi" : "volume"
           ),
       },
       {
@@ -602,8 +601,7 @@ export const columnsRating = (
         dataIndex: "maxUsage",
         width: 150,
         sorter: true,
-        isClassification: true,
-        align: "center",
+        isNumber: true,
         ...getColumnSearchPropsUseFilteredValue(
           search,
           "maxUsage",
@@ -612,7 +610,7 @@ export const columnsRating = (
           searchText,
           handleSearch,
         ),
-        render: (text) =>
+        render: (text, record) =>
           renderColumn(
             "maxUsage",
             hasValue(search["maxUsage"]),
@@ -621,7 +619,7 @@ export const columnsRating = (
             false,
             "input",
             search,
-            "usage",
+            record.uom === "MMBTU" ? "energi" : "volume"
           ),
       },
       {
@@ -657,8 +655,7 @@ export const columnsRating = (
         dataIndex: "price",
         width: 150,
         sorter: true,
-        isClassification: true,
-        align: "center",
+        isNumber: true,
         ...getColumnSearchPropsUseFilteredValue(
           search,
           "price",
@@ -667,7 +664,7 @@ export const columnsRating = (
           searchText,
           handleSearch,
         ),
-        render: (text) =>
+        render: (text,record) =>
           renderColumn(
             "price",
             hasValue(search["price"]),
@@ -676,7 +673,7 @@ export const columnsRating = (
             false,
             "input",
             search,
-            "currency-idr",
+            record.currency === "USD" ? "currency-usd" : "currency-idr",
           ),
       },
       {
@@ -717,8 +714,7 @@ export const columnsRating = (
         dataIndex: "calculatedUsageMin",
         width: 120,
         sorter: true,
-        isClassification: true,
-        align: "center",
+        isNumber: true,
         ...getColumnSearchPropsUseFilteredValue(
           search,
           "calculatedUsageMin",
@@ -727,7 +723,7 @@ export const columnsRating = (
           searchText,
           handleSearch,
         ),
-        render: (text) =>
+        render: (text, record) =>
           renderColumn(
             "calculatedUsageMin",
             hasValue(search["calculatedUsageMin"]),
@@ -736,7 +732,7 @@ export const columnsRating = (
             false,
             "input",
             search,
-            "usage",
+            record.uom === "MMBTU" ? "energi" : "volume"
           ),
       },
       {
@@ -745,8 +741,7 @@ export const columnsRating = (
         dataIndex: "calculatedUsageNormal",
         width: 130,
         sorter: true,
-        isClassification: true,
-        align: "center",
+        isNumber: true,
         ...getColumnSearchPropsUseFilteredValue(
           search,
           "calculatedUsageNormal",
@@ -755,7 +750,7 @@ export const columnsRating = (
           searchText,
           handleSearch,
         ),
-        render: (text) =>
+        render: (text, record) =>
           renderColumn(
             "calculatedUsageNormal",
             hasValue(search["calculatedUsageNormal"]),
@@ -764,7 +759,7 @@ export const columnsRating = (
             false,
             "input",
             search,
-            "usage",
+            record.uom === "MMBTU" ? "energi" : "volume"
           ),
       },
       {
@@ -773,8 +768,7 @@ export const columnsRating = (
         dataIndex: "calculatedUsageUop",
         width: 150,
         sorter: true,
-        isClassification: true,
-        align: "center",
+        isNumber: true,
         ...getColumnSearchPropsUseFilteredValue(
           search,
           "calculatedUsageUop",
@@ -783,7 +777,7 @@ export const columnsRating = (
           searchText,
           handleSearch,
         ),
-        render: (text) =>
+        render: (text, record) =>
           renderColumn(
             "calculatedUsageUop",
             hasValue(search["calculatedUsageUop"]),
@@ -792,7 +786,7 @@ export const columnsRating = (
             false,
             "input",
             search,
-            "usage",
+            record.uom === "MMBTU" ? "energi" : "volume"
           ),
       },
       {
@@ -801,8 +795,7 @@ export const columnsRating = (
         dataIndex: "calculatedAdjustment",
         width: 150,
         sorter: true,
-        isClassification: true,
-        align: "center",
+        isNumber: true,
         ...getColumnSearchPropsUseFilteredValue(
           search,
           "calculatedAdjustment",
@@ -811,7 +804,7 @@ export const columnsRating = (
           searchText,
           handleSearch,
         ),
-        render: (text) =>
+        render: (text, record) =>
           renderColumn(
             "calculatedAdjustment",
             hasValue(search["calculatedAdjustment"]),
@@ -820,7 +813,7 @@ export const columnsRating = (
             false,
             "input",
             search,
-            "usage",
+            record.uom === "MMBTU" ? "energi" : "volume"
           ),
       },
       {
@@ -829,8 +822,7 @@ export const columnsRating = (
         dataIndex: "calculatedTotal",
         width: 150,
         sorter: true,
-        isClassification: true,
-        align: "center",
+        isNumber: true,
         ...getColumnSearchPropsUseFilteredValue(
           search,
           "calculatedTotal",
@@ -839,7 +831,7 @@ export const columnsRating = (
           searchText,
           handleSearch,
         ),
-        render: (text) =>
+        render: (text, record) =>
           renderColumn(
             "calculatedTotal",
             hasValue(search["calculatedTotal"]),
@@ -848,7 +840,7 @@ export const columnsRating = (
             false,
             "input",
             search,
-            "usage",
+            record.uom === "MMBTU" ? "energi" : "volume"
           ),
       },
     ],
@@ -862,8 +854,7 @@ export const columnsRating = (
         dataIndex: "convertedCalculatedUom",
         width: 150,
         sorter: true,
-        isClassification: true,
-        align: "center",
+        isNumber: true,
         ...getColumnSearchPropsUseFilteredValue(
           search,
           "convertedCalculatedUom",
@@ -889,8 +880,7 @@ export const columnsRating = (
         dataIndex: "convertedCalculatedMin",
         width: 130,
         sorter: true,
-        isClassification: true,
-        align: "center",
+        isNumber: true,
         ...getColumnSearchPropsUseFilteredValue(
           search,
           "convertedCalculatedMin",
@@ -899,7 +889,7 @@ export const columnsRating = (
           searchText,
           handleSearch,
         ),
-        render: (text) =>
+        render: (text, record) =>
           renderColumn(
             "convertedCalculatedMin",
             hasValue(search["convertedCalculatedMin"]),
@@ -908,7 +898,7 @@ export const columnsRating = (
             false,
             "input",
             search,
-            "usage",
+            record.convertedCalculatedUom === "MMBTU" ? "energi" : "volume"
           ),
       },
       {
@@ -917,8 +907,7 @@ export const columnsRating = (
         dataIndex: "convertedCalculatedNormal",
         width: 150,
         sorter: true,
-        isClassification: true,
-        align: "center",
+        isNumber: true,
         ...getColumnSearchPropsUseFilteredValue(
           search,
           "convertedCalculatedNormal",
@@ -927,7 +916,7 @@ export const columnsRating = (
           searchText,
           handleSearch,
         ),
-        render: (text) =>
+        render: (text, record) =>
           renderColumn(
             "convertedCalculatedNormal",
             hasValue(search["convertedCalculatedNormal"]),
@@ -936,7 +925,7 @@ export const columnsRating = (
             false,
             "input",
             search,
-            "usage",
+            record.convertedCalculatedUom === "MMBTU" ? "energi" : "volume"
           ),
       },
       {
@@ -945,8 +934,7 @@ export const columnsRating = (
         dataIndex: "convertedCalculatedOup",
         width: 150,
         sorter: true,
-        isClassification: true,
-        align: "center",
+        isNumber: true,
         ...getColumnSearchPropsUseFilteredValue(
           search,
           "convertedCalculatedOup",
@@ -955,7 +943,7 @@ export const columnsRating = (
           searchText,
           handleSearch,
         ),
-        render: (text) =>
+        render: (text, record) =>
           renderColumn(
             "convertedCalculatedOup",
             hasValue(search["convertedCalculatedOup"]),
@@ -964,7 +952,7 @@ export const columnsRating = (
             false,
             "input",
             search,
-            "usage",
+            record.convertedCalculatedUom === "MMBTU" ? "energi" : "volume"
           ),
       },
       {
@@ -973,8 +961,7 @@ export const columnsRating = (
         dataIndex: "convertedCalculatedAdjustment",
         width: 150,
         sorter: true,
-        isClassification: true,
-        align: "center",
+        isNumber: true,
         ...getColumnSearchPropsUseFilteredValue(
           search,
           "convertedCalculatedAdjustment",
@@ -983,7 +970,7 @@ export const columnsRating = (
           searchText,
           handleSearch,
         ),
-        render: (text) =>
+        render: (text, record) =>
           renderColumn(
             "convertedCalculatedAdjustment",
             hasValue(search["convertedCalculatedAdjustment"]),
@@ -992,7 +979,7 @@ export const columnsRating = (
             false,
             "input",
             search,
-            "usage",
+            record.convertedCalculatedUom === "MMBTU" ? "energi" : "volume"
           ),
       },
       {
@@ -1001,8 +988,7 @@ export const columnsRating = (
         dataIndex: "convertedCalculatedTotal",
         width: 150,
         sorter: true,
-        isClassification: true,
-        align: "center",
+        isNumber: true,
         ...getColumnSearchPropsUseFilteredValue(
           search,
           "convertedCalculatedTotal",
@@ -1011,7 +997,7 @@ export const columnsRating = (
           searchText,
           handleSearch,
         ),
-        render: (text) =>
+        render: (text, record) =>
           renderColumn(
             "convertedCalculatedTotal",
             hasValue(search["convertedCalculatedTotal"]),
@@ -1020,7 +1006,7 @@ export const columnsRating = (
             false,
             "input",
             search,
-            "usage",
+            record.convertedCalculatedUom === "MMBTU" ? "energi" : "volume"
           ),
       },
     ],
@@ -1034,8 +1020,7 @@ export const columnsRating = (
         dataIndex: "amountPartitionMin",
         width: 150,
         sorter: true,
-        isClassification: true,
-        align: "center",
+        isNumber : true,
         ...getColumnSearchPropsUseFilteredValue(
           search,
           "amountPartitionMin",
@@ -1044,7 +1029,7 @@ export const columnsRating = (
           searchText,
           handleSearch,
         ),
-        render: (text) =>
+        render: (text,record) =>
           renderColumn(
             "amountPartitionMin",
             hasValue(search["amountPartitionMin"]),
@@ -1053,7 +1038,7 @@ export const columnsRating = (
             false,
             "input",
             search,
-            "currency-idr",
+            record.currency === "USD" ? "currency-usd" : "currency-idr",
           ),
       },
       {
@@ -1062,8 +1047,7 @@ export const columnsRating = (
         dataIndex: "amountPartitionNormal",
         width: 130,
         sorter: true,
-        isClassification: true,
-        align: "center",
+        isNumber : true,
         ...getColumnSearchPropsUseFilteredValue(
           search,
           "amountPartitionNormal",
@@ -1072,7 +1056,7 @@ export const columnsRating = (
           searchText,
           handleSearch,
         ),
-        render: (text) =>
+        render: (text, record) =>
           renderColumn(
             "amountPartitionNormal",
             hasValue(search["amountPartitionNormal"]),
@@ -1081,7 +1065,7 @@ export const columnsRating = (
             false,
             "input",
             search,
-            "currency-idr",
+            record.currency === "USD" ? "currency-usd" : "currency-idr",
           ),
       },
       {
@@ -1090,8 +1074,7 @@ export const columnsRating = (
         dataIndex: "amountPartitionOup",
         width: 150,
         sorter: true,
-        isClassification: true,
-        align: "center",
+        isNumber : true,
         ...getColumnSearchPropsUseFilteredValue(
           search,
           "amountPartitionOup",
@@ -1100,7 +1083,7 @@ export const columnsRating = (
           searchText,
           handleSearch,
         ),
-        render: (text) =>
+        render: (text, record) =>
           renderColumn(
             "amountPartitionOup",
             hasValue(search["amountPartitionOup"]),
@@ -1109,7 +1092,7 @@ export const columnsRating = (
             false,
             "input",
             search,
-            "currency-idr",
+            record.currency === "USD" ? "currency-usd" : "currency-idr",
           ),
       },
     ],
@@ -1129,7 +1112,7 @@ export const columnsRating = (
       searchText,
       handleSearch,
     ),
-    render: (text) =>
+    render: (text, record) =>
       renderColumn(
         "amountPartition",
         hasValue(search["amountPartition"]),
@@ -1138,7 +1121,7 @@ export const columnsRating = (
         false,
         "input",
         search,
-        "currency-idr",
+        record.currency === "USD" ? "currency-usd" : "currency-idr",
       ),
   },
   {
@@ -1156,7 +1139,7 @@ export const columnsRating = (
       searchText,
       handleSearch,
     ),
-    render: (text) =>
+    render: (text, record) =>
       renderColumn(
         "amountPartitionAdjustment",
         hasValue(search["amountPartitionAdjustment"]),
@@ -1165,7 +1148,7 @@ export const columnsRating = (
         false,
         "input",
         search,
-        "currency-idr",
+        record.currency === "USD" ? "currency-usd" : "currency-idr",
       ),
   },
   {
@@ -1183,7 +1166,7 @@ export const columnsRating = (
       searchText,
       handleSearch,
     ),
-    render: (text) =>
+    render: (text, record) =>
       renderColumn(
         "amountPartitionTotal",
         hasValue(search["amountPartitionTotal"]),
@@ -1192,7 +1175,7 @@ export const columnsRating = (
         false,
         "input",
         search,
-        "currency-idr",
+        record.currency === "USD" ? "currency-usd" : "currency-idr",
       ),
   },
 ];

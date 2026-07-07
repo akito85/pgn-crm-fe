@@ -25,7 +25,6 @@ const PeriodicSection = ({ ratingCode, calculationCode }) => {
   }));
 
   useEffect(() => {
-    // Dispatch dengan ratingCode sebagai id
     dispatch(
       getAllPeriodicServiceAgreementPaginate({
         id: ratingCode,

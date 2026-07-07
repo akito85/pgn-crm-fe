@@ -276,7 +276,7 @@ const DetailLog = ({ data, tabHeader, showCard = true }) => {
 
   const tableContent = (
     <>
-      <TableRBI
+      {/* <TableRBI
         idTable="calculation-log-table"
         columns={processedColumns}
         dataSource={resultData}
@@ -293,7 +293,7 @@ const DetailLog = ({ data, tabHeader, showCard = true }) => {
         onLoadMore={handleLoadMore}
         hasMore={hasMore}
         loadMoreThreshold={20}
-      />
+      /> */}
 
       <TableCalculateLog calculationCode={calculationCode} />
     </>

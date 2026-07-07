@@ -6,6 +6,7 @@ import React, {
   useCallback,
 } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import useFormatNumberConfig from "../../../../hooks/useFormatNumberConfig";
 import { useNavigate } from "react-router-dom";
 import { Tooltip, Dropdown, Menu } from "antd";
 import { MoreOutlined } from "@ant-design/icons";
@@ -45,6 +46,8 @@ const BillingPage = () => {
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  useFormatNumberConfig();
   const searchInput = useRef(null);
   const dataSource = data?.result;
   const detailRef = useRef(null);

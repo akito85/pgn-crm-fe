@@ -671,19 +671,17 @@ export const columnsBilling = (
       handleSearch,
       true
     ),
-    render: (text) => {
-      if (hasValue(search["quantity"])) {
+    render: (text,record) => {
         return renderColumn(
           "quantity",
-          true,
+          hasValue(search["quantity"]),
           searchText,
           text,
           false,
           "input",
-          search
+          search,
+          record.uom === "MMBTU" ? "energi" : "volume"
         );
-      }
-      return numberFormatting(text);
     },
   },
   {
@@ -729,20 +727,17 @@ export const columnsBilling = (
       handleSearch,
       true
     ),
-    render: (text) => {
-      if (hasValue(search["amount"])) {
-        return renderColumn(
-          "amount",
-          true,
-          searchText,
-          text,
-          false,
-          "input",
-          search
-        );
-      }
-      return numberFormatting(text);
-    },
+    render: (text, record) =>
+      renderColumn(
+        "amount",
+        hasValue(search["amount"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+        record.currency === "USD" ? "currency-usd" : "currency-idr"
+      ),
   },
   {
     key: "adjustment",
@@ -760,20 +755,17 @@ export const columnsBilling = (
       handleSearch,
       true
     ),
-    render: (text) => {
-      if (hasValue(search["adjustment"])) {
-        return renderColumn(
-          "adjustment",
-          true,
-          searchText,
-          text,
-          false,
-          "input",
-          search
-        );
-      }
-      return numberFormatting(text);
-    },
+    render: (text,record) =>
+      renderColumn(
+        "adjustment",
+        hasValue(search["adjustment"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+        record.currency === "USD" ? "currency-usd" : "currency-idr"
+      ),
   },
   {
     key: "vat",
@@ -791,20 +783,17 @@ export const columnsBilling = (
       handleSearch,
       true
     ),
-    render: (text) => {
-      if (hasValue(search["vat"])) {
-        return renderColumn(
-          "vat",
-          true,
-          searchText,
-          text,
-          false,
-          "input",
-          search
-        );
-      }
-      return numberFormatting(text);
-    },
+    render: (text,record) =>
+      renderColumn(
+        "vat",
+        hasValue(search["vat"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+        record.currency === "USD" ? "currency-usd" : "currency-idr"
+      ),
   },
   {
     key: "vatEqv",
@@ -822,22 +811,18 @@ export const columnsBilling = (
       handleSearch,
       true
     ),
-    render: (text) => {
-      if (hasValue(search["vatEqv"])) {
-        return renderColumn(
-          "vatEqv",
-          true,
-          searchText,
-          text,
-          false,
-          "input",
-          search
-        );
-      }
-      return numberFormatting(text);
-    },
+    render: (text) =>
+      renderColumn(
+        "vatEqv",
+        hasValue(search["vatEqv"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+        "number"
+      ),
   },
-  // PERUBAHAN: withHoldingTaxCode → withholdingTaxCode (sesuai response API terbaru)
   {
     key: "withholdingTaxCode",
     title: "WITHHOLDING TAX CODE",
@@ -865,7 +850,6 @@ export const columnsBilling = (
         search
       ),
   },
-  // PERUBAHAN: withHoldingTaxRate → withholdingTaxRate (sesuai response API terbaru)
   {
     key: "withholdingTaxRate",
     title: "WITHHOLDING TAX RATE",
@@ -882,22 +866,18 @@ export const columnsBilling = (
       handleSearch,
       true
     ),
-    render: (text) => {
-      if (hasValue(search["withholdingTaxRate"])) {
-        return renderColumn(
-          "withholdingTaxRate",
-          true,
-          searchText,
-          text,
-          false,
-          "input",
-          search
-        );
-      }
-      return numberFormatting(text);
-    },
+    render: (text) =>
+      renderColumn(
+        "withholdingTaxRate",
+        hasValue(search["withholdingTaxRate"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+        "number"
+      ),
   },
-  // PERUBAHAN: withHoldingTax → withholdingTax (sesuai response API terbaru)
   {
     key: "withholdingTax",
     title: "WITHHOLDING TAX",
@@ -941,20 +921,17 @@ export const columnsBilling = (
       handleSearch,
       true
     ),
-    render: (text) => {
-      if (hasValue(search["prevBalance"])) {
-        return renderColumn(
-          "prevBalance",
-          true,
-          searchText,
-          text,
-          false,
-          "input",
-          search
-        );
-      }
-      return numberFormatting(text);
-    },
+    render: (text) =>
+      renderColumn(
+        "prevBalance",
+        hasValue(search["prevBalance"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+        "number"
+      ),
   },
   {
     key: "balance",
@@ -972,20 +949,17 @@ export const columnsBilling = (
       handleSearch,
       true
     ),
-    render: (text) => {
-      if (hasValue(search["balance"])) {
-        return renderColumn(
-          "balance",
-          true,
-          searchText,
-          text,
-          false,
-          "input",
-          search
-        );
-      }
-      return numberFormatting(text);
-    },
+    render: (text) =>
+      renderColumn(
+        "balance",
+        hasValue(search["balance"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+        "number"
+      ),
   },
   {
     key: "totalAmount",
@@ -1003,7 +977,7 @@ export const columnsBilling = (
       handleSearch,
       true
     ),
-    render: (text) =>
+    render: (text, record) =>
       renderColumn(
         "totalAmount",
         hasValue(search["totalAmount"]),
@@ -1011,7 +985,8 @@ export const columnsBilling = (
         text,
         false,
         "input",
-        search
+        search,
+        record.currency === "USD" ? "currency-usd" : "currency-idr"
       ),
   },
   {
@@ -1057,7 +1032,7 @@ export const columnsBilling = (
       handleSearch,
       true
     ),
-    render: (text) =>
+    render: (text,record) =>
       renderColumn(
         "totalAmountEqv",
         hasValue(search["totalAmountEqv"]),
@@ -1065,7 +1040,8 @@ export const columnsBilling = (
         text,
         false,
         "input",
-        search
+        search,
+        record.convertedCurrency === "USD" ? "currency-usd" : "currency-idr"
       ),
   },
   {
@@ -1146,7 +1122,8 @@ export const columnsBilling = (
         text,
         false,
         "input",
-        search
+        search,
+        "number"
       ),
   },
   {
@@ -1176,7 +1153,6 @@ export const columnsBilling = (
         search
       ),
   },
-  // PERUBAHAN: accountDate → accountingDate (sesuai response API terbaru)
   {
     key: "accountingDate",
     title: "ACCOUNTING DATE",

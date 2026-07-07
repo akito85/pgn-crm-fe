@@ -6,14 +6,8 @@ import {
   renderColumn,
   renderDateColumn,
 } from "../../../../../../../utils";
-import {
-  numberFormatting,
-  currencyFormatting,
-  usageFormatting,
-} from "../../../../../../../utils/formatCurrency";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../../../utils/getColumnSearchProps";
 
-// Kolom untuk tabel utama tetap sama, tidak ada perubahan
 export const columnsCalculationSummary = (
   search = {},
   page,
@@ -62,6 +56,7 @@ export const columnsCalculationSummary = (
     key: "usage",
     width: 180,
     sorter: true,
+    isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "usage",
@@ -80,7 +75,7 @@ export const columnsCalculationSummary = (
         false,
         "input",
         search,
-        "usage",
+        "volume",
       ),
   },
   {
@@ -114,7 +109,6 @@ export const columnsCalculationSummary = (
     dataIndex: "priceAmount",
     key: "priceAmount",
     width: 150,
-    align: "right",
     sorter: true,
     isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -143,15 +137,39 @@ export const columnsCalculationSummary = (
     dataIndex: "priceTotalAmount",
     key: "priceTotalAmount",
     width: 180,
-    align: "right",
     sorter: true,
     isNumber: true,
-    render: (text) => currencyFormatting(text, "idr"),
+    ...getColumnSearchPropsUseFilteredValue(
+      search,
+      "priceTotalAmount",
+      searchInput,
+      searchedColumn,
+      searchText,
+      handleSearch,
+      true,
+    ),
+    render: (text) =>
+      renderColumn(
+        "priceTotalAmount",
+        hasValue(search["priceTotalAmount"]),
+        searchText,
+        text,
+        false,
+        "input",
+        search,
+        "currency-idr",
+      ),
   },
 ];
 
 // data expand column
-export const getExpandedColumns = () => [
+export const getExpandedColumns = (
+  search = {},
+  searchInput,
+  searchedColumn,
+  searchText,
+  handleSearch,
+) => [
   {
     key: "no",
     title: "NO",
@@ -165,7 +183,16 @@ export const getExpandedColumns = () => [
     key: "uom",
     width: 100,
     align: "center",
-    render: (text) => text || "",
+    render: (text) =>
+      renderColumn(
+        "uom",
+        hasValue(search["uom"]),
+        searchText,
+        text || "",
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "CALCULATED USAGE PARTITION",
@@ -175,24 +202,54 @@ export const getExpandedColumns = () => [
         dataIndex: "usagePartitionMin",
         key: "usagePartitionMin",
         width: 150,
-        align: "right",
-        render: (text) => usageFormatting(text),
+       isNumber : true,
+        render: (text, record) =>
+          renderColumn(
+            "usagePartitionMin",
+            hasValue(search["usagePartitionMin"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search,
+            record.uom === "MMBTU" ? "energi" : "usage",
+          ),
       },
       {
         title: "NORMAL",
         dataIndex: "usagePartitionNormal",
         key: "usagePartitionNormal",
         width: 150,
-        align: "right",
-        render: (text) => usageFormatting(text),
+        isNumber : true,
+        render: (text, record) =>
+          renderColumn(
+            "usagePartitionNormal",
+            hasValue(search["usagePartitionNormal"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search,
+             record.uom === "MMBTU" ? "energi" : "usage",
+          ),
       },
       {
         title: "OUP",
         dataIndex: "usagePartitionOup",
         key: "usagePartitionOup",
         width: 150,
-        align: "right",
-        render: (text) => usageFormatting(text),
+        isNumber : true,
+        render: (text, record) =>
+          renderColumn(
+            "usagePartitionOup",
+            hasValue(search["usagePartitionOup"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search,
+             record.uom === "MMBTU" ? "energi" : "usage",
+          ),
       },
     ],
   },
@@ -201,30 +258,34 @@ export const getExpandedColumns = () => [
     dataIndex: "rangeMin",
     key: "rangeMin",
     width: 100,
-    align: "center",
-    render: (text) => {
-      // Jika null atau undefined, tampilkan kosong
-      if (text === null || text === undefined || text === 0) return "0";
-      // Jika 0, tampilkan 0
-      // if (text === 0) return "0";
-      // Jika ada nilai lainnya, tampilkan nilai tersebut
-      return text;
-    },
+    isNumber : true,
+    render: (text) =>
+      renderColumn(
+        "rangeMin",
+        hasValue(search["rangeMin"]),
+        searchText,
+        text === null || text === undefined || text === 0 ? "0" : text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "Range Max",
     dataIndex: "rangeMax",
     key: "rangeMax",
     width: 100,
-    align: "center",
-    render: (text) => {
-      // Jika null atau undefined, tampilkan kosong
-      if (text === null || text === undefined || text === 0) return "Unlimited";
-      // Jika 0, tampilkan "Unlimited"
-      // if (text === 0) return "Unlimited";
-      // Jika ada nilai lainnya, tampilkan nilai tersebut
-      return text;
-    },
+    isNumber : true,
+    render: (text) =>
+      renderColumn(
+        "rangeMax",
+        hasValue(search["rangeMax"]),
+        searchText,
+        text === null || text === undefined || text === 0 ? "Unlimited" : text,
+        false,
+        "input",
+        search,
+      ),
   },
   {
     title: "PRICE",
@@ -235,7 +296,16 @@ export const getExpandedColumns = () => [
         key: "priceCurrency",
         width: 120,
         align: "center",
-        render: (text) => text || "",
+        render: (text) =>
+          renderColumn(
+            "priceCurrency",
+            hasValue(search["priceCurrency"]),
+            searchText,
+            text || "",
+            false,
+            "input",
+            search,
+          ),
       },
       {
         title: "CODE",
@@ -243,31 +313,70 @@ export const getExpandedColumns = () => [
         key: "priceCode",
         width: 150,
         align: "center",
-        render: (text) => text || "",
+        render: (text) =>
+          renderColumn(
+            "priceCode",
+            hasValue(search["priceCode"]),
+            searchText,
+            text || "",
+            false,
+            "input",
+            search,
+          ),
       },
       {
         title: "MIN",
         dataIndex: "priceMin",
         key: "priceMin",
         width: 150,
-        align: "right",
-        render: (text) => currencyFormatting(text, "idr"),
+        isNumber : true,
+        render: (text,record) =>
+          renderColumn(
+            "priceMin",
+            hasValue(search["priceMin"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search,
+            record.priceCurrency === "USD" ? "currency-usd" : "currency-idr",
+          ),
       },
       {
         title: "NORMAL",
         dataIndex: "priceNormal",
         key: "priceNormal",
         width: 150,
-        align: "right",
-        render: (text) => currencyFormatting(text, "idr"),
+        isNumber : true,
+        render: (text,record) =>
+          renderColumn(
+            "priceNormal",
+            hasValue(search["priceNormal"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search,
+            record.priceCurrency === "USD" ? "currency-usd" : "currency-idr",
+          ),
       },
       {
         title: "OUP",
         dataIndex: "priceOup",
         key: "priceOup",
         width: 150,
-        align: "right",
-        render: (text) => currencyFormatting(text, "idr"),
+        isNumber : true,
+        render: (text,record) =>
+          renderColumn(
+            "priceOup",
+            hasValue(search["priceOup"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search,
+            record.priceCurrency === "USD" ? "currency-usd" : "currency-idr",
+          ),
       },
     ],
   },
@@ -279,35 +388,80 @@ export const getExpandedColumns = () => [
         dataIndex: "amountPartitionMin",
         key: "amountPartitionMin",
         width: 200,
-        align: "right",
-        render: (text) => currencyFormatting(text, "idr"),
+        isNumber : true,
+        render: (text, record) =>
+          renderColumn(
+            "amountPartitionMin",
+            hasValue(search["amountPartitionMin"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search,
+            record.priceCurrency === "USD" ? "currency-usd" : "currency-idr",
+          ),
       },
       {
         title: "NORMAL",
         dataIndex: "amountPartitionNormal",
         key: "amountPartitionNormal",
         width: 200,
-        align: "right",
-        render: (text) => currencyFormatting(text, "idr"),
+        isNumber : true,
+        render: (text,record) =>
+          renderColumn(
+            "amountPartitionNormal",
+            hasValue(search["amountPartitionNormal"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search,
+            record.priceCurrency === "USD" ? "currency-usd" : "currency-idr",
+          ),
       },
       {
         title: "OUP",
         dataIndex: "amountPartitionOup",
         key: "amountPartitionOup",
         width: 200,
-        align: "right",
-        render: (text) => currencyFormatting(text, "idr"),
+        isNumber : true,
+        render: (text, record) =>
+          renderColumn(
+            "amountPartitionOup",
+            hasValue(search["amountPartitionOup"]),
+            searchText,
+            text,
+            false,
+            "input",
+            search,
+            record.priceCurrency === "USD" ? "currency-usd" : "currency-idr",
+          ),
       },
     ],
   },
 ];
 
-export const renderExpandedRow = (record, expandData, loadingExpand) => {
+export const renderExpandedRow = (
+  record,
+  expandData,
+  loadingExpand,
+  search = {},
+  searchInput,
+  searchedColumn,
+  searchText,
+  handleSearch,
+) => {
   const rowKey = record.key;
   const isLoading = loadingExpand[rowKey];
   const expandedData = expandData[rowKey]?.result || [];
 
-  const expandedColumns = getExpandedColumns();
+  const expandedColumns = getExpandedColumns(
+    search,
+    searchInput,
+    searchedColumn,
+    searchText,
+    handleSearch,
+  );
 
   // Show loading state
   if (isLoading) {
