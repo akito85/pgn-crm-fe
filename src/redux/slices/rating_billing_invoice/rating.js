@@ -543,14 +543,14 @@ export const getAllCalculationSummaryExpandPaginate = createAsyncThunk(
 // GET CALCULATION DETAIL
 export const getAllCalculationDetailPaginate = createAsyncThunk(
   "GET_ALL_CALCULATION_DETAIL_PAGINATE",
-  async ({ calculationCode, page, pageSize, search, sort }, thunkAPI) => {
+  async ({ ratingCode, calculationCode, page, pageSize, search, sort }, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams =
         sort === undefined || sort === "" ? "transactionDate~desc" : sort;
 
       // API endpoint menggunakan calculationCode, bukan id
-      const url = `/v1/dbs/api/rating/detail-rating?calculationCode=${calculationCode}&page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
+      const url = `/v1/dbs/api/rating/detail-rating?ratingCode=${ratingCode}&calculationCode=${calculationCode}&page=${page}&size=${pageSize}&sort=${sortParams}&searchs=${searchParams}`;
       const response = await ratingBillingHttpService.getPagination(url);
       return response.data;
     } catch (error) {

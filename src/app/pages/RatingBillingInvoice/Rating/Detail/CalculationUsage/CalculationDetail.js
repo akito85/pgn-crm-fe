@@ -5,7 +5,7 @@ import { getAllCalculationDetailPaginate } from "../../../../../../redux/slices/
 import { columnsCalculationDetail } from "./columns/ColumnsCalculationDetail";
 import { applyFixedColumns } from "../../../../../../utils/applyFixedColumns";
 
-const CalculationDetail = ({ calculationCode }) => {
+const CalculationDetail = ({ calculationCode, ratingCode }) => {
   const { data_calculationDetail, loadingCalculation } = useSelector((state) => state.rating);
   const dispatch = useDispatch();
   const searchInput = useRef(null);
@@ -26,6 +26,7 @@ const CalculationDetail = ({ calculationCode }) => {
     if (calculationCode) {
       dispatch(
         getAllCalculationDetailPaginate({
+          ratingCode,
           calculationCode,
           search: encodeURIComponent(JSON.stringify(search)),
           page,
