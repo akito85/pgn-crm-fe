@@ -1,10 +1,6 @@
 // TableRBI.js (with resizable columns + grouped columns support + customHeaderLeft + showExport control)
 import React, { useMemo, useState, useCallback } from "react";
-import {
-  DownloadOutlined,
-  FilterOutlined,
-  ReloadOutlined,
-} from "@ant-design/icons";
+import { FilterOutlined, ReloadOutlined } from "@ant-design/icons";
 import { Button, Pagination, Select, Table } from "antd";
 import ColumnSettings from "./ColumnSettings/ColumnSettings";
 import SearchBar from "./SearchBar";
@@ -500,11 +496,14 @@ const TableRBI = ({
     const normal = [];
 
     const visibleMap = new Map(visible.map((c) => [c.key, c]));
+    const isActionColumn = (key) =>
+      typeof key === "string" &&
+      ["action", "actions"].includes(key.toLowerCase());
 
     // Preserve left order based on fixedColumns.left
     if (Array.isArray(fixedColumns.left)) {
       fixedColumns.left.forEach((key) => {
-        if (visibleMap.has(key)) {
+        if (visibleMap.has(key) && !isActionColumn(key)) {
           leftFixed.push(visibleMap.get(key));
           visibleMap.delete(key);
         }
@@ -514,6 +513,10 @@ const TableRBI = ({
     // Collect remaining visible columns into normal/right based on their fixed prop
     const autoRightFixed = [];
     for (const col of visibleMap.values()) {
+      if (isActionColumn(col.key)) {
+        continue;
+      }
+
       const isExplicitRightFixed =
         Array.isArray(fixedColumns.right) &&
         fixedColumns.right.includes(col.key);
@@ -535,7 +538,10 @@ const TableRBI = ({
     // Preserve right order based on fixedColumns.right
     if (Array.isArray(fixedColumns.right)) {
       fixedColumns.right.forEach((key) => {
-        // prefer columns that are remaining in visibleMap (not already in leftFixed)
+        if (isActionColumn(key)) {
+          return;
+        }
+
         const col = visible.find((c) => c.key === key);
         if (col) {
           rightFixed.push(col);
@@ -547,10 +553,14 @@ const TableRBI = ({
     // listed in fixedColumns.right.
     rightFixed.push(...autoRightFixed);
 
+    // Always keep any action column(s) at the far right
+    const actionFixed = visible.filter((col) => isActionColumn(col.key));
+
     const finalCols = [
       ...leftFixed.map((c) => processColumn(c, "left")),
       ...normal.map((c) => processColumn(c, undefined)),
       ...rightFixed.map((c) => processColumn(c, "right")),
+      ...actionFixed.map((c) => processColumn(c, "right")),
     ];
 
     return finalCols;
