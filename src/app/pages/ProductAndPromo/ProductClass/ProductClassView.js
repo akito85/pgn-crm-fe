@@ -474,7 +474,7 @@ const ProductClassView = () => {
             icon={<SVGIcon name="IconButtonCreate" width={24} />}
             type="submit"
           >
-            Create Product Class
+            Create
           </ButtonComponent>
         </NavLink>
       ),

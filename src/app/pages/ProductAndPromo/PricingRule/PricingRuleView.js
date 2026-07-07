@@ -445,7 +445,7 @@ const PricingRuleView = () => {
             icon={<SVGIcon name="IconButtonCreate" width={24} />}
             type="submit"
           >
-            Create Pricing Rule
+            Create
           </ButtonComponent>
         </NavLink>
       ),
