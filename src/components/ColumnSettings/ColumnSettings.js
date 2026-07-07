@@ -1,7 +1,7 @@
 // components/ColumnSettings/ColumnSettings.js
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import ReactDOM from "react-dom";
-import { Button, Input, Checkbox, Radio } from "antd";
+import { Button, Input, Checkbox, Radio, message } from "antd";
 import { DownOutlined, UpOutlined, SearchOutlined } from "@ant-design/icons";
 
 const ColumnSettings = ({
@@ -21,6 +21,7 @@ const ColumnSettings = ({
   const [panelPos, setPanelPos] = useState({ top: 0, left: 0 });
   const panelRef = useRef(null);
   const buttonRef = useRef(null);
+  const MIN_VISIBLE_COLUMNS = 5;
 
   const updatePanelPos = useCallback(() => {
     if (buttonRef.current) {
@@ -68,6 +69,10 @@ const ColumnSettings = ({
     setIsOpen((prev) => !prev);
   };
 
+  const getColumnKey = useCallback((col, index) => {
+    return col.key || col.dataIndex || col.title || `column-${index}`;
+  }, []);
+
   // Filtered columns for search
   const filteredColumns = searchText
     ? columns.filter((col) =>
@@ -75,10 +80,18 @@ const ColumnSettings = ({
       )
     : columns;
 
+  const visibleColumnCount = columns.filter((col, index) => {
+    return !hiddenColumns.includes(getColumnKey(col, index));
+  }).length;
+
   // Check if column is visible
   const isColumnVisible = (columnKey) => {
     return !hiddenColumns.includes(columnKey);
   };
+
+  const isActionColumn = (columnKey) =>
+    typeof columnKey === "string" &&
+    ["action", "actions"].includes(columnKey.toLowerCase());
 
   // Check if column is fixed
   const isColumnFixed = (columnKey) => {
@@ -116,6 +129,13 @@ const ColumnSettings = ({
   // Handle visibility checkbox change
   const handleVisibilityChange = (e, columnKey) => {
     const checked = e.target.checked;
+    if (!checked && visibleColumnCount <= MIN_VISIBLE_COLUMNS) {
+      message.warning(
+        `Minimal ${MIN_VISIBLE_COLUMNS} kolom harus tetap aktif.`,
+      );
+      return;
+    }
+
     let newHidden;
     if (checked) {
       // Show column - remove from hidden
@@ -127,8 +147,32 @@ const ColumnSettings = ({
     onHiddenColumnsChange?.(newHidden);
   };
 
+  const allColumnsVisible = visibleColumnCount === columns.length;
+  const hasSomeVisible = visibleColumnCount > 0;
+
+  const handleHeaderCheckboxChange = (e) => {
+    const checked = e.target.checked;
+    if (checked) {
+      onHiddenColumnsChange?.([]);
+      return;
+    }
+
+    const minimumVisible = Math.min(MIN_VISIBLE_COLUMNS, columns.length);
+    const keysToKeepVisible = columns
+      .slice(0, minimumVisible)
+      .map((col, index) => getColumnKey(col, index));
+
+    const newHidden = columns
+      .map((col, index) => getColumnKey(col, index))
+      .filter((columnKey) => !keysToKeepVisible.includes(columnKey));
+
+    onHiddenColumnsChange?.(newHidden);
+  };
+
   // Handle fixed checkbox change
   const handleFixedChange = (e, columnKey) => {
+    if (isActionColumn(columnKey)) return;
+
     const checked = e.target.checked;
     if (!onFixedColumnsChange) return;
 
@@ -263,7 +307,13 @@ const ColumnSettings = ({
                 marginBottom: 6,
               }}
             >
-              <div style={{ textAlign: "center" }}>✓</div>
+              <div style={{ textAlign: "center" }}>
+                <Checkbox
+                  indeterminate={hasSomeVisible && !allColumnsVisible}
+                  checked={allColumnsVisible}
+                  onChange={handleHeaderCheckboxChange}
+                />
+              </div>
               <div>COLUMN NAME</div>
               <div style={{ textAlign: "center" }}>FIXED</div>
               <div style={{ textAlign: "center" }}>POSITION</div>
@@ -278,14 +328,15 @@ const ColumnSettings = ({
               }}
             >
               {filteredColumns.map((col, index) => {
-                const isVisible = isColumnVisible(col.key);
-                const isFixed = isColumnFixed(col.key);
-                const isStaticallyFixedCol = isStaticallyFixed(col.key);
-                const position = getFixedPosition(col.key);
+                const columnKey = getColumnKey(col, index);
+                const isVisible = isColumnVisible(columnKey);
+                const isFixed = isColumnFixed(columnKey);
+                const isStaticallyFixedCol = isStaticallyFixed(columnKey);
+                const position = getFixedPosition(columnKey);
 
                 return (
                   <div
-                    key={col.key || index}
+                    key={columnKey}
                     style={{
                       display: "grid",
                       gridTemplateColumns: "35px 1fr 55px 110px",
@@ -300,7 +351,10 @@ const ColumnSettings = ({
                     <div style={{ textAlign: "center" }}>
                       <Checkbox
                         checked={isVisible}
-                        onChange={(e) => handleVisibilityChange(e, col.key)}
+                        onChange={(e) => handleVisibilityChange(e, columnKey)}
+                        disabled={
+                          isVisible && visibleColumnCount <= MIN_VISIBLE_COLUMNS
+                        }
                       />
                     </div>
 
@@ -323,19 +377,29 @@ const ColumnSettings = ({
                     <div style={{ textAlign: "center" }}>
                       <Checkbox
                         checked={isFixed}
-                        onChange={(e) => handleFixedChange(e, col.key)}
-                        disabled={!isVisible || isStaticallyFixedCol}
+                        onChange={(e) => handleFixedChange(e, columnKey)}
+                        disabled={
+                          !isVisible ||
+                          isStaticallyFixedCol ||
+                          isActionColumn(columnKey)
+                        }
                       />
                     </div>
 
                     {/* Position Radio Buttons */}
                     <div>
                       <Radio.Group
-                        value={position || "left"}
-                        onChange={(e) =>
-                          handlePositionChange(col.key, e.target.value)
+                        value={
+                          isActionColumn(columnKey)
+                            ? "right"
+                            : position || "left"
                         }
-                        disabled={!isFixed || !isVisible}
+                        onChange={(e) =>
+                          handlePositionChange(columnKey, e.target.value)
+                        }
+                        disabled={
+                          !isFixed || !isVisible || isActionColumn(columnKey)
+                        }
                         size="small"
                         buttonStyle="solid"
                         style={{ display: "flex", gap: "4px" }}
