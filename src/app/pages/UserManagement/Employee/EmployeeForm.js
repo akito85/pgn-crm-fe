@@ -139,14 +139,22 @@ const EmployeeForm = (props) => {
   // the job/position lookups are all loaded. Without data_job/data_post in the
   // dependency list, assert() can run before lookups arrive and leave assignment
   // rows with null job/position values.
+  // Guarded to run once per id: getListJob/getListPosition/getEmployeeDetail can
+  // resolve a second time after the form is already interactive (e.g. StrictMode's
+  // double-invoked mount effect in dev), producing new data_detail/data_job/data_post
+  // references. Without this guard, assert() re-fires and wipes out any row the user
+  // has already added to the (still-unsaved) assignment table.
+  const assertedForIdRef = useRef(null);
   useEffect(() => {
     if (
       id &&
       data_detail?.employeeCode === id &&
       hasValue(data_job?.data) &&
-      hasValue(data_post?.data)
+      hasValue(data_post?.data) &&
+      assertedForIdRef.current !== id
     ) {
       assert();
+      assertedForIdRef.current = id;
     }
   }, [id, data_detail, data_job, data_post]);
 
