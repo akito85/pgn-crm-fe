@@ -542,7 +542,7 @@ export const getAllCalculationSummaryExpandPaginate = createAsyncThunk(
 // GET CALCULATION DETAIL
 export const getAllCalculationDetailPaginate = createAsyncThunk(
   "GET_ALL_CALCULATION_DETAIL_PAGINATE",
-  async ({ ratingCode, calculationCode, page, pageSize, search, sort }, thunkAPI) => {
+  async ({ ratingCode, calculationCode, page, pageSize, search, sort, isLoadMore = false }, thunkAPI) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams =
