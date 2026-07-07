@@ -574,8 +574,7 @@ export const columnsRating = (
         dataIndex: "minUsage",
         width: 150,
         sorter: true,
-        isClassification: true,
-        align: "center",
+        isNumber: true,
         ...getColumnSearchPropsUseFilteredValue(
           search,
           "minUsage",
@@ -602,8 +601,7 @@ export const columnsRating = (
         dataIndex: "maxUsage",
         width: 150,
         sorter: true,
-        isClassification: true,
-        align: "center",
+        isNumber: true,
         ...getColumnSearchPropsUseFilteredValue(
           search,
           "maxUsage",
@@ -657,8 +655,7 @@ export const columnsRating = (
         dataIndex: "price",
         width: 150,
         sorter: true,
-        isClassification: true,
-        align: "center",
+        isNumber: true,
         ...getColumnSearchPropsUseFilteredValue(
           search,
           "price",
@@ -717,8 +714,7 @@ export const columnsRating = (
         dataIndex: "calculatedUsageMin",
         width: 120,
         sorter: true,
-        isClassification: true,
-        align: "center",
+        isNumber: true,
         ...getColumnSearchPropsUseFilteredValue(
           search,
           "calculatedUsageMin",
@@ -745,8 +741,7 @@ export const columnsRating = (
         dataIndex: "calculatedUsageNormal",
         width: 130,
         sorter: true,
-        isClassification: true,
-        align: "center",
+        isNumber: true,
         ...getColumnSearchPropsUseFilteredValue(
           search,
           "calculatedUsageNormal",
@@ -773,8 +768,7 @@ export const columnsRating = (
         dataIndex: "calculatedUsageUop",
         width: 150,
         sorter: true,
-        isClassification: true,
-        align: "center",
+        isNumber: true,
         ...getColumnSearchPropsUseFilteredValue(
           search,
           "calculatedUsageUop",
@@ -801,8 +795,7 @@ export const columnsRating = (
         dataIndex: "calculatedAdjustment",
         width: 150,
         sorter: true,
-        isClassification: true,
-        align: "center",
+        isNumber: true,
         ...getColumnSearchPropsUseFilteredValue(
           search,
           "calculatedAdjustment",
@@ -829,8 +822,7 @@ export const columnsRating = (
         dataIndex: "calculatedTotal",
         width: 150,
         sorter: true,
-        isClassification: true,
-        align: "center",
+        isNumber: true,
         ...getColumnSearchPropsUseFilteredValue(
           search,
           "calculatedTotal",
@@ -862,8 +854,7 @@ export const columnsRating = (
         dataIndex: "convertedCalculatedUom",
         width: 150,
         sorter: true,
-        isClassification: true,
-        align: "center",
+        isNumber: true,
         ...getColumnSearchPropsUseFilteredValue(
           search,
           "convertedCalculatedUom",
@@ -889,8 +880,7 @@ export const columnsRating = (
         dataIndex: "convertedCalculatedMin",
         width: 130,
         sorter: true,
-        isClassification: true,
-        align: "center",
+        isNumber: true,
         ...getColumnSearchPropsUseFilteredValue(
           search,
           "convertedCalculatedMin",
@@ -917,8 +907,7 @@ export const columnsRating = (
         dataIndex: "convertedCalculatedNormal",
         width: 150,
         sorter: true,
-        isClassification: true,
-        align: "center",
+        isNumber: true,
         ...getColumnSearchPropsUseFilteredValue(
           search,
           "convertedCalculatedNormal",
@@ -945,8 +934,7 @@ export const columnsRating = (
         dataIndex: "convertedCalculatedOup",
         width: 150,
         sorter: true,
-        isClassification: true,
-        align: "center",
+        isNumber: true,
         ...getColumnSearchPropsUseFilteredValue(
           search,
           "convertedCalculatedOup",
@@ -973,8 +961,7 @@ export const columnsRating = (
         dataIndex: "convertedCalculatedAdjustment",
         width: 150,
         sorter: true,
-        isClassification: true,
-        align: "center",
+        isNumber: true,
         ...getColumnSearchPropsUseFilteredValue(
           search,
           "convertedCalculatedAdjustment",
@@ -1001,8 +988,7 @@ export const columnsRating = (
         dataIndex: "convertedCalculatedTotal",
         width: 150,
         sorter: true,
-        isClassification: true,
-        align: "center",
+        isNumber: true,
         ...getColumnSearchPropsUseFilteredValue(
           search,
           "convertedCalculatedTotal",
@@ -1034,8 +1020,7 @@ export const columnsRating = (
         dataIndex: "amountPartitionMin",
         width: 150,
         sorter: true,
-        isClassification: true,
-        align: "center",
+        isNumber : true,
         ...getColumnSearchPropsUseFilteredValue(
           search,
           "amountPartitionMin",
@@ -1062,8 +1047,7 @@ export const columnsRating = (
         dataIndex: "amountPartitionNormal",
         width: 130,
         sorter: true,
-        isClassification: true,
-        align: "center",
+        isNumber : true,
         ...getColumnSearchPropsUseFilteredValue(
           search,
           "amountPartitionNormal",
@@ -1090,8 +1074,7 @@ export const columnsRating = (
         dataIndex: "amountPartitionOup",
         width: 150,
         sorter: true,
-        isClassification: true,
-        align: "center",
+        isNumber : true,
         ...getColumnSearchPropsUseFilteredValue(
           search,
           "amountPartitionOup",

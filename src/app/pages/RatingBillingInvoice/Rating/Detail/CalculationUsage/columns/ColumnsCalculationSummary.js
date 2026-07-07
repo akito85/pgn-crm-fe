@@ -56,6 +56,7 @@ export const columnsCalculationSummary = (
     key: "usage",
     width: 180,
     sorter: true,
+    isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
       "usage",
@@ -74,7 +75,7 @@ export const columnsCalculationSummary = (
         false,
         "input",
         search,
-        "usage",
+        "volume",
       ),
   },
   {
@@ -108,7 +109,6 @@ export const columnsCalculationSummary = (
     dataIndex: "priceAmount",
     key: "priceAmount",
     width: 150,
-    align: "right",
     sorter: true,
     isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -137,7 +137,6 @@ export const columnsCalculationSummary = (
     dataIndex: "priceTotalAmount",
     key: "priceTotalAmount",
     width: 180,
-    align: "right",
     sorter: true,
     isNumber: true,
     ...getColumnSearchPropsUseFilteredValue(
@@ -203,7 +202,7 @@ export const getExpandedColumns = (
         dataIndex: "usagePartitionMin",
         key: "usagePartitionMin",
         width: 150,
-        align: "right",
+       isNumber : true,
         render: (text, record) =>
           renderColumn(
             "usagePartitionMin",
@@ -221,7 +220,7 @@ export const getExpandedColumns = (
         dataIndex: "usagePartitionNormal",
         key: "usagePartitionNormal",
         width: 150,
-        align: "right",
+        isNumber : true,
         render: (text, record) =>
           renderColumn(
             "usagePartitionNormal",
@@ -239,7 +238,7 @@ export const getExpandedColumns = (
         dataIndex: "usagePartitionOup",
         key: "usagePartitionOup",
         width: 150,
-        align: "right",
+        isNumber : true,
         render: (text, record) =>
           renderColumn(
             "usagePartitionOup",
@@ -259,7 +258,7 @@ export const getExpandedColumns = (
     dataIndex: "rangeMin",
     key: "rangeMin",
     width: 100,
-    align: "center",
+    isNumber : true,
     render: (text) =>
       renderColumn(
         "rangeMin",
@@ -276,7 +275,7 @@ export const getExpandedColumns = (
     dataIndex: "rangeMax",
     key: "rangeMax",
     width: 100,
-    align: "center",
+    isNumber : true,
     render: (text) =>
       renderColumn(
         "rangeMax",
@@ -330,7 +329,7 @@ export const getExpandedColumns = (
         dataIndex: "priceMin",
         key: "priceMin",
         width: 150,
-        align: "right",
+        isNumber : true,
         render: (text,record) =>
           renderColumn(
             "priceMin",
@@ -348,7 +347,7 @@ export const getExpandedColumns = (
         dataIndex: "priceNormal",
         key: "priceNormal",
         width: 150,
-        align: "right",
+        isNumber : true,
         render: (text,record) =>
           renderColumn(
             "priceNormal",
@@ -366,7 +365,7 @@ export const getExpandedColumns = (
         dataIndex: "priceOup",
         key: "priceOup",
         width: 150,
-        align: "right",
+        isNumber : true,
         render: (text,record) =>
           renderColumn(
             "priceOup",
@@ -389,7 +388,7 @@ export const getExpandedColumns = (
         dataIndex: "amountPartitionMin",
         key: "amountPartitionMin",
         width: 200,
-        align: "right",
+        isNumber : true,
         render: (text, record) =>
           renderColumn(
             "amountPartitionMin",
@@ -407,7 +406,7 @@ export const getExpandedColumns = (
         dataIndex: "amountPartitionNormal",
         key: "amountPartitionNormal",
         width: 200,
-        align: "right",
+        isNumber : true,
         render: (text,record) =>
           renderColumn(
             "amountPartitionNormal",
@@ -425,7 +424,7 @@ export const getExpandedColumns = (
         dataIndex: "amountPartitionOup",
         key: "amountPartitionOup",
         width: 200,
-        align: "right",
+        isNumber : true,
         render: (text, record) =>
           renderColumn(
             "amountPartitionOup",

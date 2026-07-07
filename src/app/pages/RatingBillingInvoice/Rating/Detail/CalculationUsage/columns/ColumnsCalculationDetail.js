@@ -83,7 +83,7 @@ export const columnsCalculationDetail = (
     dataIndex: "usage",
     key: "usage",
     width: 150,
-    align: "right",
+    isNumber : true,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -112,7 +112,7 @@ export const columnsCalculationDetail = (
     dataIndex: "minUsage",
     key: "minUsage",
     width: 150,
-    align: "right",
+    isNumber : true,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -141,7 +141,7 @@ export const columnsCalculationDetail = (
     dataIndex: "maxUsage",
     key: "maxUsage",
     width: 150,
-    align: "right",
+    isNumber : true,
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -232,7 +232,6 @@ export const columnsCalculationDetail = (
         key: "calculatedUsageMin",
         width: 130,
         isNumber: true,
-        align: "right",
         sorter: true,
         ...getColumnSearchPropsUseFilteredValue(
           search,
@@ -262,7 +261,6 @@ export const columnsCalculationDetail = (
         key: "calculatedUsageNormal",
         width: 150,
         isNumber: true,
-        align: "right",
         sorter: true,
         ...getColumnSearchPropsUseFilteredValue(
           search,
@@ -292,7 +290,6 @@ export const columnsCalculationDetail = (
         key: "calculatedUsageOup",
         width: 130,
         isNumber: true,
-        align: "right",
         sorter: true,
         ...getColumnSearchPropsUseFilteredValue(
           search,
@@ -357,7 +354,6 @@ export const columnsCalculationDetail = (
         key: "convertedCalculatedMin",
         width: 130,
         isNumber: true,
-        align: "right",
         sorter: true,
         ...getColumnSearchPropsUseFilteredValue(
           search,
@@ -387,7 +383,6 @@ export const columnsCalculationDetail = (
         key: "convertedCalculatedNormal",
         width: 150,
         isNumber: true,
-        align: "right",
         sorter: true,
         ...getColumnSearchPropsUseFilteredValue(
           search,
@@ -417,7 +412,6 @@ export const columnsCalculationDetail = (
         key: "convertedCalculatedOup",
         width: 130,
         isNumber: true,
-        align: "right",
         sorter: true,
         ...getColumnSearchPropsUseFilteredValue(
           search,
@@ -481,7 +475,6 @@ export const columnsCalculationDetail = (
         key: "priceMin",
         width: 130,
         isNumber: true,
-        align: "right",
         sorter: true,
         ...getColumnSearchPropsUseFilteredValue(
           search,
@@ -511,7 +504,6 @@ export const columnsCalculationDetail = (
         key: "priceNormal",
         width: 150,
         isNumber: true,
-        align: "right",
         sorter: true,
         ...getColumnSearchPropsUseFilteredValue(
           search,
@@ -541,7 +533,6 @@ export const columnsCalculationDetail = (
         key: "priceOup",
         width: 130,
         isNumber: true,
-        align: "right",
         sorter: true,
         ...getColumnSearchPropsUseFilteredValue(
           search,
@@ -605,7 +596,6 @@ export const columnsCalculationDetail = (
         key: "amountPartitionMin",
         width: 150,
         isNumber: true,
-        align: "right",
         sorter: true,
         ...getColumnSearchPropsUseFilteredValue(
           search,
@@ -635,7 +625,6 @@ export const columnsCalculationDetail = (
         key: "amountPartitionNormal",
         width: 170,
         isNumber: true,
-        align: "right",
         sorter: true,
         ...getColumnSearchPropsUseFilteredValue(
           search,
@@ -665,7 +654,6 @@ export const columnsCalculationDetail = (
         key: "amountPartitionOup",
         width: 150,
         isNumber: true,
-        align: "right",
         sorter: true,
         ...getColumnSearchPropsUseFilteredValue(
           search,
@@ -697,7 +685,6 @@ export const columnsCalculationDetail = (
     key: "amountPartition",
     width: 160,
     isNumber: true,
-    align: "right",
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
@@ -727,7 +714,6 @@ export const columnsCalculationDetail = (
     key: "amountPartitionTotal",
     width: 180,
     isNumber: true,
-    align: "right",
     sorter: true,
     ...getColumnSearchPropsUseFilteredValue(
       search,
