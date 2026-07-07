@@ -41,6 +41,7 @@ const EditableCell = ({
     onInput = () => { },
     maxLength,
     form,
+    employeeStartDate,
     ...restProps
 }) => {
     // const [form] = Form.useForm();
@@ -64,6 +65,15 @@ const EditableCell = ({
     const handleDisableDate = (current) => {
         if (dataIndex === "endDate") {
             return current && current < moment(form.getFieldValue("startDate"));
+        } else if (dataIndex === "startDate") {
+            // Row start date must be strictly after today AND strictly after the
+            // employee's own start date (from the outer EmployeeForm), whichever is later.
+            const today = moment().startOf("day");
+            const minStartDate =
+                employeeStartDate && moment(employeeStartDate).startOf("day").isAfter(today)
+                    ? moment(employeeStartDate).startOf("day")
+                    : today;
+            return current && current.startOf("day").isSameOrBefore(minStartDate);
         } else {
             return current && current < moment().add(-1, "days");
         }
@@ -232,7 +242,8 @@ const TableInlineEmployee = ({
     messageValidate,
     actionFix,
     setMessageValidate = () => { },
-    setInserted = () => { }
+    setInserted = () => { },
+    employeeStartDate,
 }) => {
     const [form] = Form.useForm();
     const [editingKey, setEditingKey] = useState("");
@@ -592,6 +603,7 @@ const TableInlineEmployee = ({
                                         form: form,
                                         onInput: col.onInput,
                                         maxLength: col.maxLength,
+                                        employeeStartDate,
                                     }),
                                 };
                             })
@@ -697,6 +709,7 @@ const TableInlineEmployee = ({
                                     form: form,
                                     onInput: col.onInput,
                                     maxLength: col.maxLength,
+                                    employeeStartDate,
                                 }),
                             };
                         })

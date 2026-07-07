@@ -48,6 +48,7 @@ const EmployeeForm = (props) => {
   const dispatch = useDispatch();
   const location = useLocation();
   const [form] = Form.useForm();
+  const employeeStartDate = Form.useWatch("startDate", form);
   const [modalConfirmasi, setModalConfirmasi] = useState(false);
   const [modalBack, setModalBack] = useState(false);
   const [tableData, setTableData] = useState([]);
@@ -626,6 +627,7 @@ const EmployeeForm = (props) => {
               checkInputBy={"positionId"}
               checkNameColumn={"Position"}
               setInserted={setDisabledButton}
+              employeeStartDate={employeeStartDate}
             />
           </div>
           <div className={"w-full my-5 flex"}>
