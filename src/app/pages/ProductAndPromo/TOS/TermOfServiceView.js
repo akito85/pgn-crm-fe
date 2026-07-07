@@ -379,7 +379,7 @@ const TermOfServiceView = () => {
             icon={<PlusOutlined style={{ fontSize: "24px" }} />}
             type="submit"
           >
-            Create Terms Of Service
+            Create
           </ButtonComponent>
         </NavLink>
       ),
