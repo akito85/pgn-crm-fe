@@ -468,7 +468,7 @@ const itemsActionView = (
           icon={<SVGIcon name="IconButtonCreate" width={24} />}
           type="submit"
         >
-          Create Product
+          Create
         </ButtonComponent>
       </NavLink>
     ),
