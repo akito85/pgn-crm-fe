@@ -245,16 +245,22 @@ const PricingAdjustTable = () => {
         ...item,
         render: (record, actionLength, index) => {
           const isInactive = record.status === "INACTIVE";
+          // Only allow inactivating a record that is ACTIVE and already Approved —
+          // matches the "Inactivate" action's own disabled rule in NxGetAccountActions.
+          const canInactivate =
+            record.status === "ACTIVE" && record.statusApproval === "APPROVED";
           const content =
             actionLength > 3 ? (
               <Button
                 icon={
                   <Checkbox
                     checked={isInactive}
+                    disabled={!canInactivate}
                     style={{ transform: "scale(0.9)" }}
                     className="action-checkbox"
                   />
                 }
+                disabled={!canInactivate}
                 onClick={() => handleOpenModalInactivate(record)}
                 type={"action"}
               >
@@ -268,6 +274,7 @@ const PricingAdjustTable = () => {
                 <Checkbox
                   className="action-checkbox"
                   checked={isInactive}
+                  disabled={!canInactivate}
                   onClick={() => handleOpenModalInactivate(record)}
                   style={{ transform: "scale(0.9)" }}
                 />
