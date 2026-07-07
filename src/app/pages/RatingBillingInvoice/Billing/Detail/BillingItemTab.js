@@ -25,7 +25,6 @@ const BillingItemTab = ({ billingCodeId, calculationCodeId, billHeaderId }) => {
     right: [],
   }));
 
-  // Load awal saat billHeaderId atau search/sort berubah
   useEffect(() => {
     if (billHeaderId) {
       dispatch(

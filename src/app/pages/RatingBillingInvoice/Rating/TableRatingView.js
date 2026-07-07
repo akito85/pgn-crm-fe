@@ -584,7 +584,7 @@ export const columnsRating = (
           searchText,
           handleSearch,
         ),
-        render: (text) =>
+        render: (text, record) =>
           renderColumn(
             "minUsage",
             hasValue(search["minUsage"]),
@@ -593,7 +593,7 @@ export const columnsRating = (
             false,
             "input",
             search,
-            "usage",
+            record.uom === "MMBTU" ? "energi" : "volume"
           ),
       },
       {
@@ -612,7 +612,7 @@ export const columnsRating = (
           searchText,
           handleSearch,
         ),
-        render: (text) =>
+        render: (text, record) =>
           renderColumn(
             "maxUsage",
             hasValue(search["maxUsage"]),
@@ -621,7 +621,7 @@ export const columnsRating = (
             false,
             "input",
             search,
-            "usage",
+            record.uom === "MMBTU" ? "energi" : "volume"
           ),
       },
       {
@@ -667,7 +667,7 @@ export const columnsRating = (
           searchText,
           handleSearch,
         ),
-        render: (text) =>
+        render: (text,record) =>
           renderColumn(
             "price",
             hasValue(search["price"]),
@@ -676,7 +676,7 @@ export const columnsRating = (
             false,
             "input",
             search,
-            "currency-idr",
+            record.currency === "USD" ? "currency-usd" : "currency-idr",
           ),
       },
       {
@@ -727,7 +727,7 @@ export const columnsRating = (
           searchText,
           handleSearch,
         ),
-        render: (text) =>
+        render: (text, record) =>
           renderColumn(
             "calculatedUsageMin",
             hasValue(search["calculatedUsageMin"]),
@@ -736,7 +736,7 @@ export const columnsRating = (
             false,
             "input",
             search,
-            "usage",
+            record.uom === "MMBTU" ? "energi" : "volume"
           ),
       },
       {
@@ -755,7 +755,7 @@ export const columnsRating = (
           searchText,
           handleSearch,
         ),
-        render: (text) =>
+        render: (text, record) =>
           renderColumn(
             "calculatedUsageNormal",
             hasValue(search["calculatedUsageNormal"]),
@@ -764,7 +764,7 @@ export const columnsRating = (
             false,
             "input",
             search,
-            "usage",
+            record.uom === "MMBTU" ? "energi" : "volume"
           ),
       },
       {
@@ -783,7 +783,7 @@ export const columnsRating = (
           searchText,
           handleSearch,
         ),
-        render: (text) =>
+        render: (text, record) =>
           renderColumn(
             "calculatedUsageUop",
             hasValue(search["calculatedUsageUop"]),
@@ -792,7 +792,7 @@ export const columnsRating = (
             false,
             "input",
             search,
-            "usage",
+            record.uom === "MMBTU" ? "energi" : "volume"
           ),
       },
       {
@@ -811,7 +811,7 @@ export const columnsRating = (
           searchText,
           handleSearch,
         ),
-        render: (text) =>
+        render: (text, record) =>
           renderColumn(
             "calculatedAdjustment",
             hasValue(search["calculatedAdjustment"]),
@@ -820,7 +820,7 @@ export const columnsRating = (
             false,
             "input",
             search,
-            "usage",
+            record.uom === "MMBTU" ? "energi" : "volume"
           ),
       },
       {
@@ -839,7 +839,7 @@ export const columnsRating = (
           searchText,
           handleSearch,
         ),
-        render: (text) =>
+        render: (text, record) =>
           renderColumn(
             "calculatedTotal",
             hasValue(search["calculatedTotal"]),
@@ -848,7 +848,7 @@ export const columnsRating = (
             false,
             "input",
             search,
-            "usage",
+            record.uom === "MMBTU" ? "energi" : "volume"
           ),
       },
     ],
@@ -899,7 +899,7 @@ export const columnsRating = (
           searchText,
           handleSearch,
         ),
-        render: (text) =>
+        render: (text, record) =>
           renderColumn(
             "convertedCalculatedMin",
             hasValue(search["convertedCalculatedMin"]),
@@ -908,7 +908,7 @@ export const columnsRating = (
             false,
             "input",
             search,
-            "usage",
+            record.convertedCalculatedUom === "MMBTU" ? "energi" : "volume"
           ),
       },
       {
@@ -927,7 +927,7 @@ export const columnsRating = (
           searchText,
           handleSearch,
         ),
-        render: (text) =>
+        render: (text, record) =>
           renderColumn(
             "convertedCalculatedNormal",
             hasValue(search["convertedCalculatedNormal"]),
@@ -936,7 +936,7 @@ export const columnsRating = (
             false,
             "input",
             search,
-            "usage",
+            record.convertedCalculatedUom === "MMBTU" ? "energi" : "volume"
           ),
       },
       {
@@ -955,7 +955,7 @@ export const columnsRating = (
           searchText,
           handleSearch,
         ),
-        render: (text) =>
+        render: (text, record) =>
           renderColumn(
             "convertedCalculatedOup",
             hasValue(search["convertedCalculatedOup"]),
@@ -964,7 +964,7 @@ export const columnsRating = (
             false,
             "input",
             search,
-            "usage",
+            record.convertedCalculatedUom === "MMBTU" ? "energi" : "volume"
           ),
       },
       {
@@ -983,7 +983,7 @@ export const columnsRating = (
           searchText,
           handleSearch,
         ),
-        render: (text) =>
+        render: (text, record) =>
           renderColumn(
             "convertedCalculatedAdjustment",
             hasValue(search["convertedCalculatedAdjustment"]),
@@ -992,7 +992,7 @@ export const columnsRating = (
             false,
             "input",
             search,
-            "usage",
+            record.convertedCalculatedUom === "MMBTU" ? "energi" : "volume"
           ),
       },
       {
@@ -1011,7 +1011,7 @@ export const columnsRating = (
           searchText,
           handleSearch,
         ),
-        render: (text) =>
+        render: (text, record) =>
           renderColumn(
             "convertedCalculatedTotal",
             hasValue(search["convertedCalculatedTotal"]),
@@ -1020,7 +1020,7 @@ export const columnsRating = (
             false,
             "input",
             search,
-            "usage",
+            record.convertedCalculatedUom === "MMBTU" ? "energi" : "volume"
           ),
       },
     ],
@@ -1044,7 +1044,7 @@ export const columnsRating = (
           searchText,
           handleSearch,
         ),
-        render: (text) =>
+        render: (text,record) =>
           renderColumn(
             "amountPartitionMin",
             hasValue(search["amountPartitionMin"]),
@@ -1053,7 +1053,7 @@ export const columnsRating = (
             false,
             "input",
             search,
-            "currency-idr",
+            record.currency === "USD" ? "currency-usd" : "currency-idr",
           ),
       },
       {
@@ -1072,7 +1072,7 @@ export const columnsRating = (
           searchText,
           handleSearch,
         ),
-        render: (text) =>
+        render: (text, record) =>
           renderColumn(
             "amountPartitionNormal",
             hasValue(search["amountPartitionNormal"]),
@@ -1081,7 +1081,7 @@ export const columnsRating = (
             false,
             "input",
             search,
-            "currency-idr",
+            record.currency === "USD" ? "currency-usd" : "currency-idr",
           ),
       },
       {
@@ -1100,7 +1100,7 @@ export const columnsRating = (
           searchText,
           handleSearch,
         ),
-        render: (text) =>
+        render: (text, record) =>
           renderColumn(
             "amountPartitionOup",
             hasValue(search["amountPartitionOup"]),
@@ -1109,7 +1109,7 @@ export const columnsRating = (
             false,
             "input",
             search,
-            "currency-idr",
+            record.currency === "USD" ? "currency-usd" : "currency-idr",
           ),
       },
     ],
@@ -1129,7 +1129,7 @@ export const columnsRating = (
       searchText,
       handleSearch,
     ),
-    render: (text) =>
+    render: (text, record) =>
       renderColumn(
         "amountPartition",
         hasValue(search["amountPartition"]),
@@ -1138,7 +1138,7 @@ export const columnsRating = (
         false,
         "input",
         search,
-        "currency-idr",
+        record.currency === "USD" ? "currency-usd" : "currency-idr",
       ),
   },
   {
@@ -1156,7 +1156,7 @@ export const columnsRating = (
       searchText,
       handleSearch,
     ),
-    render: (text) =>
+    render: (text, record) =>
       renderColumn(
         "amountPartitionAdjustment",
         hasValue(search["amountPartitionAdjustment"]),
@@ -1165,7 +1165,7 @@ export const columnsRating = (
         false,
         "input",
         search,
-        "currency-idr",
+        record.currency === "USD" ? "currency-usd" : "currency-idr",
       ),
   },
   {
@@ -1183,7 +1183,7 @@ export const columnsRating = (
       searchText,
       handleSearch,
     ),
-    render: (text) =>
+    render: (text, record) =>
       renderColumn(
         "amountPartitionTotal",
         hasValue(search["amountPartitionTotal"]),
@@ -1192,7 +1192,7 @@ export const columnsRating = (
         false,
         "input",
         search,
-        "currency-idr",
+        record.currency === "USD" ? "currency-usd" : "currency-idr",
       ),
   },
 ];

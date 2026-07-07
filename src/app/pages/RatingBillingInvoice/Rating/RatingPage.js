@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import useFormatNumberConfig from "../../../../hooks/useFormatNumberConfig";
 import { Tabs } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import CardContainer from "../../../../components/CardContainer";
@@ -25,6 +26,10 @@ const RatingPage = () => {
   );
 
   const dispatch = useDispatch();
+
+  // Fetch global format number config (IDR, USD, USAGE, TEMPERATUR, dll.)
+  // Hanya fetch sekali jika config belum ada di Redux
+  useFormatNumberConfig();
   const searchInput = useRef(null);
   const dataSource = data?.result;
 

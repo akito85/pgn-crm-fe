@@ -212,7 +212,12 @@ const CalculationSummary = ({ ratingCode, calculationCode, saType }) => {
           expandedRowRender: (record) => renderExpandedRow(
             record, 
             data_calculationSummaryExpand,
-            loadingExpand
+            loadingExpand,
+            search,
+            searchInput,
+            searchedColumn,
+            searchText,
+            handleSearch,
           ),
           rowExpandable: () => true,
           columnWidth: 48,
