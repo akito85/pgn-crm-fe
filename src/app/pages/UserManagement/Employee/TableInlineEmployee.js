@@ -344,7 +344,10 @@ const TableInlineEmployee = ({
     };
     const renderDelete = (record) => {
         // return record.status === "ACTIVE" || record.status === "INACTIVE" ? (
-        return record.id ? (
+        // assignId (not id) marks a row loaded from the backend: NxTable injects
+        // a synthetic `id` into every row for its own rowKey needs, so `id` alone
+        // can't tell a saved row apart from a newly-added, unsaved one.
+        return record.assignId ? (
             <ButtonComponent
                 disabled
                 icon={<SVGIcon name="IconDelete" width={24} color={"#C0BEC6"} />}
@@ -394,11 +397,11 @@ const TableInlineEmployee = ({
                                 <Popover
                                     content={
                                         <Space direction="vertical">
-                                            {record?.id ? (
+                                            {record?.assignId ? (
                                                 <ButtonComponent
                                                     icon={<SVGIcon name="IconDetail" width={24} />}
                                                     border={false}
-                                                    onClick={() => onDetail(record?.id)}
+                                                    onClick={() => onDetail(record?.assignId)}
                                                 >
                                                     <span className={"text-black"}> Detail</span>
                                                 </ButtonComponent>
@@ -413,7 +416,7 @@ const TableInlineEmployee = ({
                                                         />
                                                     }
                                                     border={false}
-                                                // onClick={() => onDetail(record?.id)}
+                                                // onClick={() => onDetail(record?.assignId)}
                                                 >
                                                     <span className={"text-[#C0BEC6]"}> Detail</span>
                                                 </ButtonComponent>
@@ -449,7 +452,7 @@ const TableInlineEmployee = ({
                                     />
                                 </Popover>
                                 {/* {record.status === "ACTIVE" || record.status === "INACTIVE" ? ( */}
-                                {record.id ? (
+                                {record.assignId ? (
                                     <ButtonComponent
                                         disabled
                                         icon={
@@ -472,7 +475,7 @@ const TableInlineEmployee = ({
                                     <ButtonComponent
                                         icon={<SVGIcon name="IconDetail" width={24} />}
                                         border={false}
-                                        onClick={() => onDetail(record?.id)}
+                                        onClick={() => onDetail(record?.assignId)}
                                     />
                                 )}
                                 {actionButton?.includes("update") && (
@@ -492,7 +495,7 @@ const TableInlineEmployee = ({
                                         <Checkbox
                                             onClick={
                                                 record?.status === "ACTIVE"
-                                                    ? () => onInactive(record?.id)
+                                                    ? () => onInactive(record?.assignId)
                                                     : undefined
                                             }
                                             checked={record?.status === "ACTIVE"}

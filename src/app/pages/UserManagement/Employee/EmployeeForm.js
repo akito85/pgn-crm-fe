@@ -130,6 +130,12 @@ const EmployeeForm = (props) => {
       }
       return {
         id: item?.assignId,
+        // Kept separate from `id`: NxTable auto-assigns a synthetic `id` to any
+        // row lacking one (for its internal rowKey), which would otherwise make
+        // newly-added, unsaved rows look "persisted" to TableInlineEmployee's
+        // delete/detail checks. assignId is only ever set for rows loaded from
+        // the backend and is never touched by that fallback.
+        assignId: item?.assignId,
         employeeCode: item?.employeeCode,
         key: (index + 1).toString(),
         jobId: jobId,
