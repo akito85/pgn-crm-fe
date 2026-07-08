@@ -57,6 +57,7 @@ const EmployeeForm = (props) => {
   // which raced against assert()'s own state updates on Reset.
   const watchedFormValues = Form.useWatch([], form);
   const [modalConfirmasi, setModalConfirmasi] = useState(false);
+  const [isSavingEmployee, setIsSavingEmployee] = useState(false);
   const [modalBack, setModalBack] = useState(false);
   const [tableData, setTableData] = useState([]);
   const [data, setData] = useState({});
@@ -488,15 +489,18 @@ const EmployeeForm = (props) => {
 
   // handle save
   const saveEmployee = async () => {
+    setIsSavingEmployee(true);
     try {
-      setModalConfirmasi(false);
       if (type === "update") {
         await dispatch(updateEmployee(payload?.requesBody))?.unwrap();
       } else {
         await dispatch(createEmployee(payload?.requesBody))?.unwrap();
       }
+      setModalConfirmasi(false);
     } catch (error) {
       setModalConfirmasi(false);
+    } finally {
+      setIsSavingEmployee(false);
     }
   };
 
@@ -715,17 +719,19 @@ const EmployeeForm = (props) => {
           type={"confirmation"}
           header={"CONFIRMATION"}
           handleCancel={handleCancel}
+          loading={isSavingEmployee}
           width={1000}
           footer=
           {
             <div className={"w-full flex justify-end gap-5"}>
-              <ButtonComponent type={"default"} onClick={handleCancel}>
+              <ButtonComponent type={"default"} onClick={handleCancel} disabled={isSavingEmployee}>
                 Cancel
               </ButtonComponent>
               <ButtonComponent
                 type={"submit"}
                 border={false}
                 onClick={saveEmployee}
+                loading={isSavingEmployee}
               >
                 Confirm
               </ButtonComponent>
