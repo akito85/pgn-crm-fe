@@ -38,7 +38,7 @@ const CalculationDetail = ({ calculationCode, ratingCode }) => {
       );
       setPage(1);
     }
-  }, [calculationCode, search, sort, dispatch]);
+  }, [calculationCode, ratingCode, search, sort, dispatch]);
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
