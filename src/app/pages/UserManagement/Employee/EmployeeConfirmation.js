@@ -144,7 +144,7 @@ const EmployeeConfirmation = ({ data, data_emp }) => {
     return (
         <div>
             <div className={"w-full flex flex-col gap-5"}>
-                <NxCardContainer header={'EMPLOYEE ASSIGMNET'}>
+                <NxCardContainer header={'EMPLOYEE ASSIGNMENT'}>
                     <NxBaseContainer border>
                         <div className={"w-full grid grid-cols-3 gap-5"}>
                             <DetailText label={"Employee Number"}>
