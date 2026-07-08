@@ -17,13 +17,19 @@ const initialState = {
 // get all data cost center
 export const getAllCostCenter = createAsyncThunk(
   "GET_ALL_MASTER_COST_CENTER",
-  async ({ search, page, pageSize, sort }, thunkAPI) => {
+  async ({ search, searchText, page, pageSize, sort, filters = [], filterRules = [] }, thunkAPI) => {
     try {
-      const searchParams = search === undefined ? "" : search;
-      const sortParams =
-        sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      const url = `/v1/dbs/api/costcenter/paging?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
-      const response = await userHttpService.getPagination(url);
+      const url = `/v1/dbs/api/costcenter/paging`;
+      const body = {
+        page,
+        size: pageSize,
+        sort: sort || "createdDate~desc",
+        search: searchText || null,
+        searchs: search || {},
+        filters,
+        filterRules,
+      };
+      const response = await userHttpService.createData(url, body);
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(
@@ -238,7 +244,7 @@ export const activateCostCenter = createAsyncThunk(
       thunkAPI.dispatch(
         validateError({
           error: errorBody(errorCode(response), status, errorMessage(response)),
-          action: "INACTIVE_MASTER_JOB",
+          action: "ACTIVATE_COST_CENTER",
           back: false,
         })
       );
@@ -270,13 +276,19 @@ export const deleteCostCenter = createAsyncThunk(
 
 export const downloadMasterCostCenter = createAsyncThunk(
   "DOWNLOAD_MASTER_COST_CENTER",
-  async ({ sort, page, pageSize, search }, thunkAPI) => {
+  async ({ sort, page, pageSize, search, searchText, filters = [], filterRules = [] }, thunkAPI) => {
     try {
-      const searchParams = search === undefined ? "" : search;
-      const sortParams =
-        sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      const url = `/v1/dbs/api/costcenter/download-filter/?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
-      const response = await userHttpService.downloadData(url);
+      const url = `/v1/dbs/api/costcenter/download-filter`;
+      const body = {
+        page,
+        size: pageSize,
+        sort: sort || "createdDate~desc",
+        search: searchText || null,
+        searchs: search || {},
+        filters,
+        filterRules,
+      };
+      const response = await userHttpService.downloadData(url, body);
       return response.data;
     } catch (error) {
       thunkAPI.dispatch(
