@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { NavLink, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Tooltip, Checkbox } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
@@ -27,6 +27,7 @@ import NxTable from "../../../../components/Nx/NxTable";
 import NxStatusComponent from "../../../../components/Nx/NxStatusComponent";
 import Toolbar from "../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
+import { nxGetAccountActions } from "../../../../components/Nx/NxGetAccountActions";
 
 const PAGE_SIZE = 20;
 
@@ -57,6 +58,7 @@ const PricingRuleView = () => {
 
   // Declaration
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const searchInput = useRef(null);
 
   const totalElement = pagination.totalElement;
@@ -422,176 +424,118 @@ const PricingRuleView = () => {
     setModalApprovalHistory(true);
   };
 
-  const itemsActionView = [
-    {
-      action: "Download",
-      render: (
-        <ButtonComponent
-          icon={<SVGIcon name="IconButtonDownload" width={24} />}
-          type="submit"
-          onClick={handleDownload}
-          loading={loadingDownload}
-          disabled={loadingDownload}
-        >
-          Download List
-        </ButtonComponent>
-      ),
-    },
-    {
-      action: "Create",
-      render: (
-        <NavLink to={PRODUCT_PROMO_ROUTES.CREATE_PRICING_RULE}>
-          <ButtonComponent
-            icon={<SVGIcon name="IconButtonCreate" width={24} />}
-            type="submit"
-          >
-            Create
-          </ButtonComponent>
-        </NavLink>
-      ),
-    },
-    //table
-    {
-      action: "view",
-      type: "table",
-      render: (record, data_length) => {
-        return (
-          <Tooltip title="Detail">
-            <Link
-              to={PRODUCT_PROMO_ROUTES.DETAIL_PRICING_RULE}
-              state={{ id: record?.pricingRuleId }}
-            >
-              <ButtonComponent
-                icon={<SVGIcon name="IconDetail" width={24} />}
-                border={false}
-              />
-            </Link>
-          </Tooltip>
-        );
-      },
-    },
-    {
-      action: "Update",
-      type: "table",
-      render: (record, data_length) => {
-        const isEditable =
-          record.approvalStatus === "DRAFT" ||
-          record.approvalStatus === "REJECTED" ||
-          (record.status === "ACTIVE" && record.approvalStatus === "APPROVED");
+  // Same icon component/style as Pricing.js's table (nxGetAccountActions) —
+  // Update/Activate keep Pricing Rule's own eligibility rules, overridden
+  // after the shared action list is built so the markup stays identical.
+  const itemsActionView = nxGetAccountActions({
+    handleView: (record) =>
+      navigate(PRODUCT_PROMO_ROUTES.DETAIL_PRICING_RULE, {
+        state: { id: record?.pricingRuleId },
+      }),
+    handleCreate: () => navigate(PRODUCT_PROMO_ROUTES.CREATE_PRICING_RULE),
+    handleUpdate: (record) =>
+      navigate(PRODUCT_PROMO_ROUTES.UPDATE_PRICING_RULE, {
+        state: {
+          id: record?.pricingRuleId,
+          statusPricingRule: record.status,
+          statusApprovalPricingRule: record.approvalStatus,
+        },
+      }),
+    handleDownload,
+    loadingDownload,
+    handleActivate: handleActiveOrInactive,
+    handleApprovalHistory: (record) =>
+      handleApprovalHistory(record?.pricingRuleId),
+  }).map((item) => {
+    if (item.action === "Update") {
+      return {
+        ...item,
+        render: (record, actionLength, index) => {
+          const isEditable =
+            record.approvalStatus === "DRAFT" ||
+            record.approvalStatus === "REJECTED" ||
+            (record.status === "ACTIVE" && record.approvalStatus === "APPROVED");
 
-        const render =
-          data_length > 3 ? (
+          const navigateToUpdate = () =>
+            navigate(PRODUCT_PROMO_ROUTES.UPDATE_PRICING_RULE, {
+              state: {
+                id: record?.pricingRuleId,
+                statusPricingRule: record.status,
+                statusApprovalPricingRule: record.approvalStatus,
+              },
+            });
+
+          return actionLength > 3 ? (
             <ButtonComponent
-              icon={<SVGIcon name="IconEdit" color="#0075bf" width={24} />}
-              border={false}
+              icon={<SVGIcon name="IconEdit" color="#0075bf" width={20} />}
               disabled={!isEditable}
+              onClick={() => isEditable && navigateToUpdate()}
+              type={"action"}
             >
-              {data_length > 3 && (
-                <span className="text-black ml-3"> Update</span>
-              )}
+              Update
             </ButtonComponent>
           ) : (
-            <Tooltip title="Update">
-              <div className="pt-1">
-                <SVGIcon
-                  name="IconEdit"
-                  width={24}
-                  color={!isEditable ? "#8D91A0" : "#ACC424"}
-                  className={!isEditable ? "cursor-not-allowed" : undefined}
-                />
-              </div>
+            <Tooltip
+              title={isEditable ? "Update" : ""}
+              key={`table-action-${index}`}
+            >
+              <ButtonComponent
+                onClick={() => isEditable && navigateToUpdate()}
+                disabled={!isEditable}
+                type="table-action"
+              >
+                <SVGIcon name="IconEdit" width={20} />
+              </ButtonComponent>
             </Tooltip>
           );
+        },
+      };
+    }
+    if (item.action === "Activate") {
+      return {
+        ...item,
+        render: (record, actionLength, index) => {
+          const isActivateOrInactivate =
+            (record?.approvalStatus === "APPROVED" && record?.status === "ACTIVE") ||
+            (record?.approvalStatus === "DRAFT" && record?.status === "ACTIVE") ||
+            (record?.approvalStatus === "REJECTED" && record?.status === "ACTIVE");
+          const isActive = record?.status === "ACTIVE";
 
-        return isEditable ? (
-          <Link
-            to={PRODUCT_PROMO_ROUTES.UPDATE_PRICING_RULE}
-            state={{
-              id: record?.pricingRuleId,
-              statusPricingRule: record.status,
-              statusApprovalPricingRule: record.approvalStatus,
-            }}
-          >
-            {render}
-          </Link>
-        ) : (
-          render
-        );
-      },
-    },
-    {
-      action: "Activate",
-      type: "table",
-      render: (record, data_length) => {
-        const isActivateOrInactivate =
-          (record?.approvalStatus=== "APPROVED" &&
-            record?.status === "ACTIVE") ||
-          (record?.approvalStatus=== "DRAFT" && record?.status === "ACTIVE") ||
-          (record?.approvalStatus=== "REJECTED" &&
-            record?.status === "ACTIVE");
-
-        return data_length > 3 ? (
-          <ButtonComponent
-            icon={
-              <Checkbox
-                className="inactive-check"
-                disabled={record?.status === "ACTIVE" ? false : true}
-                checked={record?.status === "ACTIVE" ? false : true}
-              />
-            }
-            border={false}
-            disabled={!isActivateOrInactivate}
-            onClick={() => handleActiveOrInactive(record)}
-          >
-            <span className="text-black ml-5">
-              {record?.status !== "ACTIVE" ? "Activate" : "Inactivate"}
-            </span>
-          </ButtonComponent>
-        ) : (
-          <Tooltip
-            title={record?.status === "ACTIVE" ? "Inactivate" : "Activate"}
-          >
-            <div className="pt-1">
+          return actionLength > 3 ? (
+            <ButtonComponent
+              icon={
+                <Checkbox
+                  className="inactive-check"
+                  disabled={!isActive}
+                  checked={!isActive}
+                />
+              }
+              border={false}
+              disabled={!isActivateOrInactivate}
+              onClick={() => handleActiveOrInactive(record)}
+            >
+              <span className="text-black ml-5">
+                {isActive ? "Inactivate" : "Activate"}
+              </span>
+            </ButtonComponent>
+          ) : (
+            <Tooltip
+              title={isActive ? "Inactivate" : "Activate"}
+              key={`table-action-${index}`}
+            >
               <Checkbox
                 className="inactive-check"
                 onClick={() => handleActiveOrInactive(record)}
-                disabled={record?.status === "ACTIVE" ? false : true}
-                checked={record?.status === "ACTIVE" ? false : true}
+                disabled={!isActive}
+                checked={!isActive}
               />
-            </div>
-          </Tooltip>
-        );
-      },
-    },
-    {
-      action: "History",
-      type: "table",
-      render: (record, data_length) => {
-        return data_length > 3 ? (
-          <ButtonComponent
-            icon={
-              <SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />
-            }
-            border={false}
-            onClick={() => handleApprovalHistory(record?.pricingRuleId)}
-          >
-            <span className={"text-black ml-3"}>Approval History</span>
-          </ButtonComponent>
-        ) : (
-          <Tooltip title="Approval History">
-            <div className="pt-1">
-              <SVGIcon
-                name="IconLogHistory"
-                color={"#0075bf"}
-                width={24}
-                onClick={() => handleApprovalHistory(record?.id)}
-              />
-            </div>
-          </Tooltip>
-        );
-      },
-    },
-  ];
+            </Tooltip>
+          );
+        },
+      };
+    }
+    return item;
+  });
 
   const handleOptions = () => {
     const data = dataApprovalHistory?.dataApprover || {};
