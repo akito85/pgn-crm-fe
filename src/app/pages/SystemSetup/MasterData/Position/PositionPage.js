@@ -205,23 +205,32 @@ const PositionPage = () => {
   };
 
   // handle download
+  const buildBodyDownload = useCallback(
+    (pageNum) => ({
+      page: pageNum,
+      // Download always fetches every matching record regardless of the
+      // infinite-scroll page size in view — totalElements reflects the full
+      // count for the current search/filters.
+      pageSize: totalElements || pageSize,
+      sort,
+      search,
+      searchText: globalSearchText,
+      filters,
+      filterRules,
+    }),
+    [sort, search, globalSearchText, filters, filterRules, totalElements, pageSize]
+  );
+
   const handleDownload = useCallback(async () => {
     setIsDownloading(true);
     try {
-      await dispatch(
-        downloadMasterPosition({
-          search: encodeURIComponent(JSON.stringify(search)),
-          page: 0,
-          pageSize,
-          sort,
-        })
-      ).unwrap();
+      await dispatch(downloadMasterPosition({ ...buildBodyDownload(1) })).unwrap();
     } catch {
       // errors are already surfaced via validateError in the thunk
     } finally {
       setIsDownloading(false);
     }
-  }, [search, pageSize, sort, dispatch]);
+  }, [dispatch, buildBodyDownload]);
 
   // handle retry
   const handleRetry = () => {

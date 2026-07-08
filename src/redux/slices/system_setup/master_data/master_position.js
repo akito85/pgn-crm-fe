@@ -189,13 +189,19 @@ export const updateMasterPosition = createAsyncThunk(
 
 export const downloadMasterPosition = createAsyncThunk(
   "DOWNLOAD_MASTER_POSITION",
-  async ({ sort, page, pageSize, search }, thunkAPI) => {
+  async ({ page, pageSize, sort, search, searchText, filters = [], filterRules = [] }, thunkAPI) => {
     try {
-      const searchParams = search === undefined ? "" : search;
-      const sortParams =
-        sort === undefined || sort === "" ? "createdDate~desc" : sort;
-      const url = `/v1/dbs/api/position/download-filter?searchs=${searchParams}&page=${page}&size=${pageSize}&sort=${sortParams}`;
-      const response = await userHttpService.downloadData(url);
+      const url = `/v1/dbs/api/position/download-filter`;
+      const body = {
+        page,
+        size: pageSize,
+        sort: sort || "createdDate~desc",
+        search: searchText || null,
+        searchs: search || {},
+        filters,
+        filterRules,
+      };
+      const response = await userHttpService.downloadData(url, body);
       return response.data;
     } catch (response) {
       thunkAPI.dispatch(
