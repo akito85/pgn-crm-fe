@@ -51,6 +51,11 @@ const EmployeeForm = (props) => {
   const location = useLocation();
   const [form] = Form.useForm();
   const employeeStartDate = Form.useWatch("startDate", form);
+  // Watching all fields keeps the dirty-check below purely derived from render
+  // state (current watched values + current tableData vs. the snapshot taken
+  // in assert()), instead of tracked via onValuesChange/useEffect ordering,
+  // which raced against assert()'s own state updates on Reset.
+  const watchedFormValues = Form.useWatch([], form);
   const [modalConfirmasi, setModalConfirmasi] = useState(false);
   const [modalBack, setModalBack] = useState(false);
   const [tableData, setTableData] = useState([]);
@@ -71,6 +76,33 @@ const EmployeeForm = (props) => {
     return result;
   };
   const [disabledButton, setDisabledButton] = useState(false);
+  // Snapshot of the form + assignment table taken right after an existing
+  // employee's data is loaded into the form (see assert()). Used to detect
+  // whether the user has actually changed anything in update mode, so the
+  // Save button can stay disabled until there is something to save.
+  const initialSnapshotRef = useRef(null);
+  // Only the fields actually rendered as Form.Items are compared: employeeId/
+  // employeeCode/phoneEdit are set via setFieldsValue but never mounted, so
+  // Form.useWatch may not reliably report them — including them here would
+  // make the snapshot comparison mismatch even when nothing user-editable changed.
+  const DIRTY_CHECK_FIELDS = ["empNumber", "firstName", "lastName", "empType", "phone", "email", "startDate", "endDate", "description"];
+  const serializeFormState = (formValues, tableRows) => {
+    const normalizeValue = (val) => (moment.isMoment(val) ? val.format("YYYY-MM-DD") : val);
+    const normalizedForm = DIRTY_CHECK_FIELDS.reduce((acc, key) => {
+      acc[key] = normalizeValue(formValues?.[key]);
+      return acc;
+    }, {});
+    const normalizedTable = (tableRows || []).map((row) => ({
+      ...row,
+      startDate: normalizeValue(row?.startDate),
+      endDate: normalizeValue(row?.endDate),
+    }));
+    return JSON.stringify({ form: normalizedForm, table: normalizedTable });
+  };
+  const isFormDirty =
+    type === "update" &&
+    initialSnapshotRef.current !== null &&
+    serializeFormState(watchedFormValues, tableData) !== initialSnapshotRef.current;
   // isPreparing guards the Spin in edit mode until the correct employee's detail
   // AND all lookup data (job, position) are present. Without this guard the shared
   // Redux `loading` flag collapses the spinner as soon as the first action resolves,
@@ -112,7 +144,7 @@ const EmployeeForm = (props) => {
         status: item?.status,
       };
     });
-    form.setFieldsValue({
+    const formValues = {
       employeeId: data_detail?.employeeId,
       employeeCode: data_detail?.employeeCode,
       empNumber: data_detail?.empNumber,
@@ -131,10 +163,12 @@ const EmployeeForm = (props) => {
           ? moment(data_detail?.endDate).clone()
           : "",
       description: data_detail?.description,
-    });
+    };
+    form.setFieldsValue(formValues);
     setTableData(dataTable);
     setPage(1);
     setPageSize(pageSize);
+    initialSnapshotRef.current = serializeFormState(formValues, dataTable);
   };
 
   // Populate form and assignment table only when the right employee's detail AND
@@ -658,7 +692,11 @@ const EmployeeForm = (props) => {
                 >
                   {type === "update" ? "Reset" : "Clear"}
                 </Button>
-                <Button type="approve" htmlType="submit" disabled={disabledButton}>
+                <Button
+                  type="approve"
+                  htmlType="submit"
+                  disabled={disabledButton || (type === "update" && !isFormDirty)}
+                >
                   Save
                 </Button>
               </div>
