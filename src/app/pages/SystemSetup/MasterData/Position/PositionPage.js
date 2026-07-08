@@ -40,6 +40,11 @@ const PositionPage = () => {
   const [search, setSearch] = useState({});
   const [fixedColumns, setFixedColumns] = useState({ left: [], right: [] });
 
+  // Advance search (filter builder) + top free-text search bar state
+  const [filters, setFilters] = useState([]);
+  const [filterRules, setFilterRules] = useState([]);
+  const [globalSearchText, setGlobalSearchText] = useState("");
+
   // Column-level filter state
   const searchInput = useRef(null);
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -84,10 +89,13 @@ const PositionPage = () => {
       try {
         const result = await dispatch(
           getListMasterPosition({
-            search: encodeURIComponent(JSON.stringify(search)),
+            search,
+            searchText: globalSearchText,
             page: page + 1, // position API is 1-based
             pageSize,
             sort,
+            filters,
+            filterRules,
           })
         ).unwrap();
         if (signal?.aborted) return;
@@ -106,7 +114,7 @@ const PositionPage = () => {
         if (!signal?.aborted) setIsLoading(false);
       }
     },
-    [search, sort, pageSize, dispatch]
+    [search, sort, pageSize, dispatch, globalSearchText, filters, filterRules]
   );
 
   // Initial load and reload on filter / sort / pageSize change.
@@ -122,7 +130,7 @@ const PositionPage = () => {
       signal.aborted = true;
       isFetchingRef.current = false;
     };
-  }, [search, sort, pageSize]); // intentionally exclude fetchPage to avoid loop
+  }, [search, sort, pageSize, globalSearchText, filters, filterRules]); // intentionally exclude fetchPage to avoid loop
 
   const onLoadMore = useCallback(() => {
     if (!hasMoreRef.current || isFetchingRef.current) return;
@@ -141,6 +149,17 @@ const PositionPage = () => {
   const handleSizeChanger = (_, pageSizeChange) => {
     setPageSize(pageSizeChange);
   };
+
+  // handle advance search (filter builder modal) — searchData is null when cleared
+  const handleAdvancedSearch = useCallback((searchData) => {
+    setFilters(searchData?.filters || []);
+    setFilterRules(searchData?.filterRules || []);
+  }, []);
+
+  // handle top free-text search bar
+  const handleSearchBar = useCallback((value) => {
+    setGlobalSearchText(value || "");
+  }, []);
 
   const onSort = (_, __, sortInfo) => {
     const dataSort =
@@ -418,6 +437,8 @@ const PositionPage = () => {
             onSizeChanger={handleSizeChanger}
             onSort={onSort}
             onRefresh={handleRefresh}
+            onAdvanceSearch={handleAdvancedSearch}
+            onSearch={handleSearchBar}
             fixedColumns={fixedColumns}
             setFixedColumns={setFixedColumns}
             useInfiniteScroll={true}
