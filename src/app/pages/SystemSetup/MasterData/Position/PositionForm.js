@@ -239,25 +239,28 @@ const PositionForm = (props) => {
         width={700}
         type={"confirmation"}
       >
-        {/* <div className={"w-full flex flex-col h-[20vh] flex-wrap gap-y-3"}> */}
-        <span className="text-primary uppercase">Position Information</span>
-        <div className={"w-full grid grid-cols-2"}>
-          <DetailText label={"Position Name"}>{formValue?.name}</DetailText>
-          <DetailText label={"Cost Center"}>{costCenterName}</DetailText>
-        </div>
-        <div>
-          <div className={"w-full grid grid-cols-1 gap-3"}>
-            <DetailText label={"Description"}>
-              {formValue?.description}
-            </DetailText>
+        <div className="flex flex-col gap-y-4">
+          {/* <div className={"w-full flex flex-col h-[20vh] flex-wrap gap-y-3"}> */}
+          <NxCardContainer header={"POSITION INFORMATION"}>
+            <div className={"w-full grid grid-cols-2"}>
+              <DetailText label={"Position Name"}>{formValue?.name}</DetailText>
+              <DetailText label={"Cost Center"}>{costCenterName}</DetailText>
+            </div>
+            <div>
+              <div className={"w-full grid grid-cols-1 gap-3"}>
+                <DetailText label={"Description"}>
+                  {formValue?.description}
+                </DetailText>
+              </div>
+            </div>
+          </NxCardContainer>
+          {/* </div> */}
+          <div className={"flex w-full justify-end gap-2"}>
+            <ButtonComponent onClick={handleCancel}>Cancel</ButtonComponent>
+            <ButtonComponent type={"submit"} onClick={handleSave}>
+              Confirm
+            </ButtonComponent>
           </div>
-        </div>
-        {/* </div> */}
-        <div className={"flex w-full justify-end gap-2"}>
-          <ButtonComponent onClick={handleCancel}>Cancel</ButtonComponent>
-          <ButtonComponent type={"submit"} onClick={handleSave}>
-            Confirm
-          </ButtonComponent>
         </div>
       </ModalCustom>
       <ModalConfirm
