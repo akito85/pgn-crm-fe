@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import moment from "moment";
-import { Checkbox, DatePicker, Form, Input, Select, Spin } from "antd";
+import { Button, Checkbox, DatePicker, Form, Input, Select, Spin } from "antd";
 import BaseContainer from "../../../../components/BaseContainer";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
@@ -36,6 +36,8 @@ import { useTryAgainHooks } from "../../../../utils/useTryAgainHooks";
 import EmployeeConfirmation from "./EmployeeConfirmation";
 import { sorterFunction } from "../../../../utils/sorterFunction";
 import userHttpService from "../../../../redux/services/userHttpService";
+import NxCardContainer from "../../../../components/Nx/NxCardContainer";
+import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
 const { Option } = Select;
 
 const EmployeeForm = (props) => {
@@ -509,7 +511,7 @@ const EmployeeForm = (props) => {
       <Spin spinning={isPreparing || isLoading}>
         <BreadCrumb routes={routes} />
         <Form form={form} layout={"vertical"} onFinish={handleConfirmation}>
-          <BaseContainer
+          <NxCardContainer
             header={type === "update" ? "UPDATE EMPLOYEE" : "CREATE EMPLOYEE"}
           >
             <GridLayout cols={4}>
@@ -612,7 +614,7 @@ const EmployeeForm = (props) => {
                 </Form.Item>
               </div>
             </GridLayout>
-          </BaseContainer>
+          </NxCardContainer>
           <div className={"my-5"}>
             <TableInlineEmployee
               header={"EMPLOYEE ASSIGNMENT"}
@@ -638,38 +640,30 @@ const EmployeeForm = (props) => {
               employeeStartDate={employeeStartDate}
             />
           </div>
-          <div className={"w-full my-5 flex"}>
-            <ButtonComponent
-              icon={
-                <LeftOutlined style={{ fontSize: "24px", color: "#fff" }} />
-              }
-              type="button"
-              onClick={() => setModalBack(true)}
-              disabled={disabledButton}
-            >
-              Back
-            </ButtonComponent>
-            <div className={"w-full flex justify-end gap-5"}>
-              <ButtonComponent
-                icon={
-                  <SVGIcon
-                    name={
-                      type === "update" ? `IconButtonReset` : `IconButtonClear`
-                    }
-                    width={24}
-                  />
-                }
-                type="button"
-                onClick={handleClear}
+          <NxBaseContainer border>
+            <div className={"w-full flex"}>
+              <Button
+                type="menu"
+                onClick={() => setModalBack(true)}
                 disabled={disabledButton}
               >
-                {type === "update" ? "Reset" : "Clear"}
-              </ButtonComponent>
-              <ButtonComponent type="submit" htmlType={"submit"} disabled={disabledButton}>
-                Save
-              </ButtonComponent>
+                Back
+              </Button>
+              <div className={"w-full flex justify-end gap-5"}>
+                <Button
+                  type="reject"
+                  icon={<SVGIcon name="IconButtonClear" width={14} />}
+                  onClick={handleClear}
+                  disabled={disabledButton}
+                >
+                  {type === "update" ? "Reset" : "Clear"}
+                </Button>
+                <Button type="approve" disabled={disabledButton}>
+                  Save
+                </Button>
+              </div>
             </div>
-          </div>
+          </NxBaseContainer>
         </Form>
 
         <ModalCustom

@@ -23,6 +23,9 @@ import ButtonComponent from "../../../../components/ButtonComponent";
 import BaseContainer from "../../../../components/BaseContainer";
 import { dateFormatting } from "../../../../utils";
 import InputComponent from "../../../../components/InputComponent";
+import NxTable from "../../../../components/Nx/NxTable";
+import NxCardContainer from "../../../../components/Nx/NxCardContainer";
+import { useSelector } from "react-redux";
 const EditableCell = ({
     editing,
     dataIndex,
@@ -255,6 +258,8 @@ const TableInlineEmployee = ({
     const [isSame, setIsSame] = useState(false);
     const [isValid, setIsValid] = useState(true);
 
+    const { data: dataUser = {} } = useSelector((state) => state.profile);
+    
     useEffect(() => {
         if (isInsert === true) {
             setInserted(true);
@@ -520,7 +525,7 @@ const TableInlineEmployee = ({
     };
 
     return useContainer === true ? (
-        <BaseContainer header={header}>
+        <NxCardContainer header={header}>
             <div className={"w-full flex flex-col gap-4"}>
                 <div className={"w-full flex justify-end"}>
                     {showCreateButton && (
@@ -535,7 +540,7 @@ const TableInlineEmployee = ({
                         </ButtonComponent>
                     )}
                 </div>
-                {useSelect || usePagination ? (
+                {/* {useSelect || usePagination ? (
                     <div className={"w-full flex mb-5 gap-2 justify-between"}>
                         {useSelect ? (
                             <Select
@@ -579,9 +584,14 @@ const TableInlineEmployee = ({
                             />
                         ) : null}
                     </div>
-                ) : null}
+                ) : null} */}
                 <Form form={form} component={false}>
-                    <Table
+                    <NxTable
+                        idTable={"employee-table-inline"}
+                        userId={dataUser?.data?.username}
+                        showAdvanceSearch={false}
+                        usePagination={false}
+                        showSearchBar={false}
                         dataSource={paginationTable(current, pageSize)}
                         columns={filterColumn(
                             columns.map((col) => {
@@ -636,10 +646,10 @@ const TableInlineEmployee = ({
                     </div>
                 ) : null}
             </div>
-        </BaseContainer>
+        </NxCardContainer>
     ) : (
         <>
-            {useSelect || usePagination ? (
+            {/* {useSelect || usePagination ? (
                 <div className={"w-full flex mb-5 gap-2 justify-between"}>
                     {useSelect ? (
                         <div className={"w-2/5"}>
@@ -685,9 +695,10 @@ const TableInlineEmployee = ({
                         />
                     ) : null}
                 </div>
-            ) : null}
+            ) : null} */}
             <Form form={form} component={false}>
-                <Table
+                <NxTable
+                    idTable={"employee-table-inline-2"}
                     dataSource={paginationTable(current, pageSize)}
                     columns={filterColumn(
                         columns.map((col) => {
