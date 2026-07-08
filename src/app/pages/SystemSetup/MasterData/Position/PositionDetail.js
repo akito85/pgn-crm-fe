@@ -11,6 +11,7 @@ import { getColumnSearchPropsUseFilteredValueFE } from "../../../../../utils/get
 import TablePaginationNew from "../../../../../components/TablePaginationNew";
 import { sorterFunction } from "../../../../../utils/sorterFunction";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
+import NxTable from "../../../../../components/Nx/NxTable";
 
 export default function PositionDetail(props) {
   const { data, onClick = () => { }, isOpen } = props;
@@ -26,6 +27,8 @@ export default function PositionDetail(props) {
   const [search, setSearch] = useState("");
   const [dataTable, setDataTable] = useState([]);
 
+  const { data: dataUser = {} } = useSelector((state) => state.profile);
+  
   const handleResetState = useCallback(() => {
     setPage(1)
     setPageSize(10)
@@ -199,7 +202,12 @@ export default function PositionDetail(props) {
             </p>
           </div>
           <div className="w-full">
-            <TablePaginationNew
+            <NxTable
+              idTable="position-detail-table-modal"
+              userId={dataUser?.data?.username}
+              showAdvanceSearch={false}
+              showSearchBar={false}
+              usePagination={false}
               type="FE"
               dataSource={dataTable}
               columns={columns}
