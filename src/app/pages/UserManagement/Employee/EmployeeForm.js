@@ -658,7 +658,7 @@ const EmployeeForm = (props) => {
                 >
                   {type === "update" ? "Reset" : "Clear"}
                 </Button>
-                <Button type="approve" disabled={disabledButton}>
+                <Button type="approve" htmlType="submit" disabled={disabledButton}>
                   Save
                 </Button>
               </div>
