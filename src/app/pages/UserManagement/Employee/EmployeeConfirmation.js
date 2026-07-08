@@ -5,6 +5,9 @@ import StatusComponent from '../../../../components/StatusComponent';
 import TablePagination from '../../../../components/TablePagination';
 import { hasValue, renderColumn, renderDateColumn } from '../../../../utils';
 import { sorterFunction } from '../../../../utils/sorterFunction';
+import NxTable from '../../../../components/Nx/NxTable';
+import NxCardContainer from '../../../../components/Nx/NxCardContainer';
+import NxBaseContainer from '../../../../components/Nx/NxBaseContainer';
 
 const EmployeeConfirmation = ({ data, data_emp }) => {
     const searchInput = useRef(null);
@@ -141,46 +144,47 @@ const EmployeeConfirmation = ({ data, data_emp }) => {
     return (
         <div>
             <div className={"w-full flex flex-col gap-5"}>
-                <span className="text-primary uppercase">Employee Assignment</span>
-                <div className={"w-full gap-5 "}>
-                    <div className={"w-full grid grid-cols-3 gap-5"}>
-                        <DetailText label={"Employee Number"}>
-                            {data?.empNumber}
+                <NxCardContainer header={'EMPLOYEE ASSIGNMENT'}>
+                    <NxBaseContainer border>
+                        <div className={"w-full grid grid-cols-3 gap-5"}>
+                            <DetailText label={"Employee Number"}>
+                                {data?.empNumber}
+                            </DetailText>
+                            <DetailText label={"First Name"}>{data?.firstName}</DetailText>
+                            <DetailText label={"Last Name"}>{data?.lastName}</DetailText>
+                        </div>
+                        <div className={"w-full grid grid-cols-3 gap-5"}>
+                            <DetailText label={"Employee Type"}>{dataEmp(data?.empType)}</DetailText>
+                            <DetailText
+                                label={"Mobile Phone"}
+                            >{data?.phone}</DetailText>
+                            <DetailText label={"Email"}>{data?.email}</DetailText>
+                        </div>
+                        <div className={"w-full grid grid-cols-3 gap-5"}>
+                            <DetailText label={"Start Date"}>{data?.startDate}</DetailText>
+                            <DetailText label={"End Date"}>{data?.endDate}</DetailText>
+                        </div>
+                        <DetailText label={"Description"} className={"w-full"}>
+                            {data?.description}
                         </DetailText>
-                        <DetailText label={"First Name"}>{data?.firstName}</DetailText>
-                        <DetailText label={"Last Name"}>{data?.lastName}</DetailText>
-                    </div>
-                    <div className={"w-full grid grid-cols-3 gap-5"}>
-                        <DetailText label={"Employee Type"}>{dataEmp(data?.empType)}</DetailText>
-                        <DetailText
-                            label={"Mobile Phone"}
-                        >{data?.phone}</DetailText>
-                        <DetailText label={"Email"}>{data?.email}</DetailText>
-                    </div>
-                    <div className={"w-full grid grid-cols-3 gap-5"}>
-                        <DetailText label={"Start Date"}>{data?.startDate}</DetailText>
-                        <DetailText label={"End Date"}>{data?.endDate}</DetailText>
-                    </div>
-                    <DetailText label={"Description"} className={"w-full"}>
-                        {data?.description}
-                    </DetailText>
-                </div>
-                <hr></hr>
-                <div className="my-5">
-                    <TablePagination
-                        columns={column}
-                        current={page}
-                        pageSize={pageSize}
-                        onChange={handleChangeDetail}
-                        onSizeChanger={handleChangeDetail}
-                        dataSource={data?.assignment?.map(item => ({ ...item, isMain: item?.isMain === true ? 'Primary' : 'Non Primary' }))}
-                        totalData={data?.assignment?.length}
-                        tableScrolled={{
-                            x: 1000,
-                            y: 300,
-                        }}
-                    />
-                </div>
+                    </NxBaseContainer>
+                </NxCardContainer>
+                <NxTable
+                    showAdvanceSearch={false}
+                    showSearchBar={false}
+                    usePagination={false}
+                    columns={column}
+                    current={page}
+                    pageSize={pageSize}
+                    onChange={handleChangeDetail}
+                    onSizeChanger={handleChangeDetail}
+                    dataSource={data?.assignment?.map(item => ({ ...item, isMain: item?.isMain === true ? 'Primary' : 'Non Primary' }))}
+                    totalData={data?.assignment?.length}
+                    tableScrolled={{
+                        x: 1000,
+                        y: 300,
+                    }}
+                />
             </div>
         </div>
     );

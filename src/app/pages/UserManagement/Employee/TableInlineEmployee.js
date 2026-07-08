@@ -23,6 +23,9 @@ import ButtonComponent from "../../../../components/ButtonComponent";
 import BaseContainer from "../../../../components/BaseContainer";
 import { dateFormatting } from "../../../../utils";
 import InputComponent from "../../../../components/InputComponent";
+import NxTable from "../../../../components/Nx/NxTable";
+import NxCardContainer from "../../../../components/Nx/NxCardContainer";
+import { useSelector } from "react-redux";
 const EditableCell = ({
     editing,
     dataIndex,
@@ -41,6 +44,7 @@ const EditableCell = ({
     onInput = () => { },
     maxLength,
     form,
+    employeeStartDate,
     ...restProps
 }) => {
     // const [form] = Form.useForm();
@@ -64,6 +68,15 @@ const EditableCell = ({
     const handleDisableDate = (current) => {
         if (dataIndex === "endDate") {
             return current && current < moment(form.getFieldValue("startDate"));
+        } else if (dataIndex === "startDate") {
+            // Row start date must be strictly after today AND strictly after the
+            // employee's own start date (from the outer EmployeeForm), whichever is later.
+            const today = moment().startOf("day");
+            const minStartDate =
+                employeeStartDate && moment(employeeStartDate).startOf("day").isAfter(today)
+                    ? moment(employeeStartDate).startOf("day")
+                    : today;
+            return current && current.startOf("day").isSameOrBefore(minStartDate);
         } else {
             return current && current < moment().add(-1, "days");
         }
@@ -232,7 +245,8 @@ const TableInlineEmployee = ({
     messageValidate,
     actionFix,
     setMessageValidate = () => { },
-    setInserted = () => { }
+    setInserted = () => { },
+    employeeStartDate,
 }) => {
     const [form] = Form.useForm();
     const [editingKey, setEditingKey] = useState("");
@@ -244,6 +258,8 @@ const TableInlineEmployee = ({
     const [isSame, setIsSame] = useState(false);
     const [isValid, setIsValid] = useState(true);
 
+    const { data: dataUser = {} } = useSelector((state) => state.profile);
+    
     useEffect(() => {
         if (isInsert === true) {
             setInserted(true);
@@ -328,7 +344,10 @@ const TableInlineEmployee = ({
     };
     const renderDelete = (record) => {
         // return record.status === "ACTIVE" || record.status === "INACTIVE" ? (
-        return record.id ? (
+        // assignId (not id) marks a row loaded from the backend: NxTable injects
+        // a synthetic `id` into every row for its own rowKey needs, so `id` alone
+        // can't tell a saved row apart from a newly-added, unsaved one.
+        return record.assignId ? (
             <ButtonComponent
                 disabled
                 icon={<SVGIcon name="IconDelete" width={24} color={"#C0BEC6"} />}
@@ -378,11 +397,11 @@ const TableInlineEmployee = ({
                                 <Popover
                                     content={
                                         <Space direction="vertical">
-                                            {record?.id ? (
+                                            {record?.assignId ? (
                                                 <ButtonComponent
                                                     icon={<SVGIcon name="IconDetail" width={24} />}
                                                     border={false}
-                                                    onClick={() => onDetail(record?.id)}
+                                                    onClick={() => onDetail(record?.assignId)}
                                                 >
                                                     <span className={"text-black"}> Detail</span>
                                                 </ButtonComponent>
@@ -397,7 +416,7 @@ const TableInlineEmployee = ({
                                                         />
                                                     }
                                                     border={false}
-                                                // onClick={() => onDetail(record?.id)}
+                                                // onClick={() => onDetail(record?.assignId)}
                                                 >
                                                     <span className={"text-[#C0BEC6]"}> Detail</span>
                                                 </ButtonComponent>
@@ -433,7 +452,7 @@ const TableInlineEmployee = ({
                                     />
                                 </Popover>
                                 {/* {record.status === "ACTIVE" || record.status === "INACTIVE" ? ( */}
-                                {record.id ? (
+                                {record.assignId ? (
                                     <ButtonComponent
                                         disabled
                                         icon={
@@ -456,7 +475,7 @@ const TableInlineEmployee = ({
                                     <ButtonComponent
                                         icon={<SVGIcon name="IconDetail" width={24} />}
                                         border={false}
-                                        onClick={() => onDetail(record?.id)}
+                                        onClick={() => onDetail(record?.assignId)}
                                     />
                                 )}
                                 {actionButton?.includes("update") && (
@@ -476,7 +495,7 @@ const TableInlineEmployee = ({
                                         <Checkbox
                                             onClick={
                                                 record?.status === "ACTIVE"
-                                                    ? () => onInactive(record?.id)
+                                                    ? () => onInactive(record?.assignId)
                                                     : undefined
                                             }
                                             checked={record?.status === "ACTIVE"}
@@ -509,7 +528,7 @@ const TableInlineEmployee = ({
     };
 
     return useContainer === true ? (
-        <BaseContainer header={header}>
+        <NxCardContainer header={header}>
             <div className={"w-full flex flex-col gap-4"}>
                 <div className={"w-full flex justify-end"}>
                     {showCreateButton && (
@@ -524,7 +543,7 @@ const TableInlineEmployee = ({
                         </ButtonComponent>
                     )}
                 </div>
-                {useSelect || usePagination ? (
+                {/* {useSelect || usePagination ? (
                     <div className={"w-full flex mb-5 gap-2 justify-between"}>
                         {useSelect ? (
                             <Select
@@ -568,9 +587,14 @@ const TableInlineEmployee = ({
                             />
                         ) : null}
                     </div>
-                ) : null}
+                ) : null} */}
                 <Form form={form} component={false}>
-                    <Table
+                    <NxTable
+                        idTable={"employee-table-inline"}
+                        userId={dataUser?.data?.username}
+                        showAdvanceSearch={false}
+                        usePagination={false}
+                        showSearchBar={false}
                         dataSource={paginationTable(current, pageSize)}
                         columns={filterColumn(
                             columns.map((col) => {
@@ -592,6 +616,7 @@ const TableInlineEmployee = ({
                                         form: form,
                                         onInput: col.onInput,
                                         maxLength: col.maxLength,
+                                        employeeStartDate,
                                     }),
                                 };
                             })
@@ -624,10 +649,10 @@ const TableInlineEmployee = ({
                     </div>
                 ) : null}
             </div>
-        </BaseContainer>
+        </NxCardContainer>
     ) : (
         <>
-            {useSelect || usePagination ? (
+            {/* {useSelect || usePagination ? (
                 <div className={"w-full flex mb-5 gap-2 justify-between"}>
                     {useSelect ? (
                         <div className={"w-2/5"}>
@@ -673,9 +698,10 @@ const TableInlineEmployee = ({
                         />
                     ) : null}
                 </div>
-            ) : null}
+            ) : null} */}
             <Form form={form} component={false}>
-                <Table
+                <NxTable
+                    idTable={"employee-table-inline-2"}
                     dataSource={paginationTable(current, pageSize)}
                     columns={filterColumn(
                         columns.map((col) => {
@@ -697,6 +723,7 @@ const TableInlineEmployee = ({
                                     form: form,
                                     onInput: col.onInput,
                                     maxLength: col.maxLength,
+                                    employeeStartDate,
                                 }),
                             };
                         })
