@@ -618,6 +618,7 @@ const Product = () => {
   const [dataLock, setDataLock] = useState({});
   const [modalError, setModalError] = useState(false);
   const [bodyError, setBodyError] = useState({});
+  const [isInactivating, setIsInactivating] = useState(false);
   const [dataApprovalHistory, setDataApprovalHistory] = useState({});
   const { data: dataUser = {} } = useSelector((state) => state.profile);
 
@@ -729,6 +730,7 @@ const Product = () => {
       apphierId: res.approvalHierarchy,
       description: res.remark,
     };
+    setIsInactivating(true);
     dispatch(inactiveProduct({ data }))
       .unwrap()
       .then(() => {
@@ -752,6 +754,9 @@ const Product = () => {
           });
           setModalError(true);
         }
+      })
+      .finally(() => {
+        setIsInactivating(false);
       });
   };
   const handleOpenModalLock = (data) => {
@@ -911,6 +916,7 @@ const Product = () => {
         openModalInactivate={openModalInactivate}
         handleCloseModalInactivate={handleCancelModalInactivate}
         onFinish={handleSubmitModalInactivate}
+        loading={isInactivating}
       />
       <ModalWarningConfirmation
         header={`${
