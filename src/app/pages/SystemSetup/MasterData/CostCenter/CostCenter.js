@@ -42,10 +42,8 @@ const CostCenter = () => {
   const [pageSize, setPageSize] = useState(20);
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
-  const [fixedColumns, setFixedColumns] = useState({
-    left: ["no"],
-    right: ["status", "action"],
-  });
+  // No setter wired up on purpose — see the NxTable usage below for why.
+  const [fixedColumns] = useState({ left: [], right: [] });
 
   // Advance search (filter builder) + top free-text search bar state
   const [filters, setFilters] = useState([]);
@@ -301,6 +299,7 @@ const CostCenter = () => {
         width: 90,
         align: "center",
         key: "no",
+        fixed: "left",
         render: (text, object, index) => index + 1,
       },
       {
@@ -518,7 +517,12 @@ const CostCenter = () => {
             onAdvanceSearch={handleAdvancedSearch}
             onSearch={handleSearchBar}
             fixedColumns={fixedColumns}
-            setFixedColumns={setFixedColumns}
+            // Intentionally NOT wiring the real setFixedColumns setter here.
+            // NxTable's onFixedColumnsChange calls this as a "notify parent"
+            // side-effect, which would overwrite this fixedColumns state with
+            // the user's own edits — and NxTable's Reset-columns button reads
+            // this same prop as its reset target. Leaving it as a no-op keeps
+            // `fixedColumns` pinned to the true default so Reset works.
             useInfiniteScroll={true}
             onLoadMore={onLoadMore}
             hasMore={hasMore}
