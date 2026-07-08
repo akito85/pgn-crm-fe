@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Form, Tooltip } from "antd";
+import { Form, Spin, Tooltip } from "antd";
 import {
   PlusOutlined,
   DownloadOutlined,
@@ -58,6 +58,7 @@ const PositionPage = () => {
   // Local loading flags — cleared AFTER setAllData so no spinner-gone/empty-table flash
   const [isLoading, setIsLoading] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [detailLoadingId, setDetailLoadingId] = useState(null);
 
   // Modal state
   const [openModal, setOpenModal] = useState(false);
@@ -187,14 +188,18 @@ const PositionPage = () => {
 
   // handle detail
   const handleDetail = useCallback(async (id) => {
+    if (detailLoadingId) return;
+    setDetailLoadingId(id);
     try {
       setBody(id);
       await dispatch(getDetailMasterPosition(id))?.unwrap();
       setOpenModal(true);
     } catch (error) {
       setOpenModal(false);
+    } finally {
+      setDetailLoadingId(null);
     }
-  }, [dispatch]);
+  }, [dispatch, detailLoadingId]);
 
   // handle cancel modals
   const handleCancelModal = async () => {
@@ -248,13 +253,20 @@ const PositionPage = () => {
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
 
   // on finish activation
-  const onFinish = async (formValue, handleCancel) => {
+  const onFinish = async (formValue, handleClearRemark) => {
     const bodyData = { ...formValue, id: positionId, statusData };
     setBody(bodyData);
-    handleCancel();
-    handleCancelModal();
-    await dispatch(inactiveMasterPosition(bodyData))?.unwrap();
-    handleRefresh();
+    try {
+      await dispatch(inactiveMasterPosition(bodyData))?.unwrap();
+      handleRefresh();
+    } finally {
+      // Close only the local confirmation modal here — handleCancelModal()
+      // also clears general.bodySuccess, which would wipe the success
+      // message the inactiveMasterPosition thunk just set via showModalSuccess.
+      handleClearRemark();
+      setOpenDelete(false);
+      form.resetFields();
+    }
   };
 
   // columns
@@ -358,16 +370,22 @@ const PositionPage = () => {
         action: "View",
         type: "table",
         render: (record) => {
+          const isDetailLoading = detailLoadingId === record?.positionId;
           return (
             <Tooltip title="Detail">
               <span
-                className="inline-flex items-center text-[#1976D2] hover:text-[#1976D2] transition-colors duration-200 cursor-pointer"
+                className={`inline-flex items-center text-[#1976D2] hover:text-[#1976D2] transition-colors duration-200 ${detailLoadingId ? "cursor-not-allowed" : "cursor-pointer"}`}
                 onClick={() => {
+                  if (detailLoadingId) return;
                   handleDetail(record?.positionId);
                   setTypeModal("detail");
                 }}
               >
-                <IconViewList width={20} />
+                {isDetailLoading ? (
+                  <Spin size="small" />
+                ) : (
+                  <IconViewList width={20} />
+                )}
               </span>
             </Tooltip>
           );
@@ -421,7 +439,7 @@ const PositionPage = () => {
         },
       },
     ],
-    [handleDownload, isDownloading, handleDetail]
+    [handleDownload, isDownloading, handleDetail, detailLoadingId]
   );
 
   const actionColumns = useColumnActionPermission(["view", "update", "Activate"], itemActions);

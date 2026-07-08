@@ -43,6 +43,8 @@ const PositionForm = (props) => {
   const [modalBack, setModalBack] = useState(false);
   const formValue = form.getFieldsValue();
   const [payload, setPayload] = useState({});
+  const [isValidating, setIsValidating] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (location?.state?.id) {
@@ -78,19 +80,21 @@ const PositionForm = (props) => {
     },
   ];
   const handleSave = async () => {
+    setIsSaving(true);
     try {
-      handleCancel()
       if (type === "update") {
         await dispatch(updateMasterPosition(payload?.requestBody))?.unwrap();
       } else {
         await dispatch(createMasterPosition(payload?.requestBody))?.unwrap();
       }
-    } catch (error) {
+    } finally {
+      setIsSaving(false);
       handleCancel()
     }
   };
 
   const onFinish = async (formValue) => {
+    setIsValidating(true);
     try {
       let url;
       let body;
@@ -109,6 +113,8 @@ const PositionForm = (props) => {
       setOpenModal(true);
     } catch (error) {
       setOpenModal(false);
+    } finally {
+      setIsValidating(false);
     }
   };
 
@@ -223,7 +229,7 @@ const PositionForm = (props) => {
                   >
                     {type === "create" ? "Clear" : "Reset"}
                   </Button>
-                  <Button type={"approve"} htmlType={"submit"}>
+                  <Button type={"approve"} htmlType={"submit"} loading={isValidating} disabled={isValidating}>
                     Save
                   </Button>
                 </div>
@@ -238,6 +244,7 @@ const PositionForm = (props) => {
         header={"CONFIRMATION"}
         width={700}
         type={"confirmation"}
+        loading={isSaving}
       >
         <div className="flex flex-col gap-y-4">
           {/* <div className={"w-full flex flex-col h-[20vh] flex-wrap gap-y-3"}> */}
@@ -256,8 +263,8 @@ const PositionForm = (props) => {
           </NxCardContainer>
           {/* </div> */}
           <div className={"flex w-full justify-end gap-2"}>
-            <ButtonComponent onClick={handleCancel}>Cancel</ButtonComponent>
-            <ButtonComponent type={"submit"} onClick={handleSave}>
+            <ButtonComponent onClick={handleCancel} disabled={isSaving}>Cancel</ButtonComponent>
+            <ButtonComponent type={"submit"} onClick={handleSave} loading={isSaving} disabled={isSaving}>
               Confirm
             </ButtonComponent>
           </div>
