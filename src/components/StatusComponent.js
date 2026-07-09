@@ -184,8 +184,8 @@ const StatusComponent = ({
         break;
 
       case "scheduled":
-        bgColor = "bg-[#EEEEEE]";
-        tColor = "text-[#000]";
+        bgColor = "bg-[#0075BF]";
+        tColor = "text-white";
         break;
 
       case "primary":
