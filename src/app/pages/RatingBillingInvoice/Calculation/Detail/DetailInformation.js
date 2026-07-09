@@ -1,6 +1,5 @@
 import React, { useMemo, useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import DetailText from "../../../../../components/DetailText";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import SVGIcon from "../../../../../assets/Icon/index";
@@ -78,7 +77,7 @@ const DetailInformation = ({ data }) => {
         page: 1,
         pageSize: 1,
         search: encodeURIComponent(JSON.stringify({})),
-      })
+      }),
     );
   }, [data?.calCode, dispatch]);
 
@@ -95,7 +94,7 @@ const DetailInformation = ({ data }) => {
           sort,
           search: reqSearch,
           isLoadMore: false,
-        })
+        }),
       );
       setPage(1);
     }
@@ -107,7 +106,7 @@ const DetailInformation = ({ data }) => {
         getDetailCalculationResultNoPaging({
           calCode: data?.calCode,
           calType: activeTab === "rating" ? 621 : 623,
-        })
+        }),
       );
     }
   }, [dispatch, activeTab, data]);
@@ -117,8 +116,8 @@ const DetailInformation = ({ data }) => {
       setActiveTab("rating");
     } else if (data?.calType === 623) {
       setActiveTab("billing");
-    } else {
-      setActiveTab("rating");
+    } else if (data?.calType === 624) {
+      setActiveTab("rating & billing");
     }
   }, [data]);
 
@@ -143,17 +142,24 @@ const DetailInformation = ({ data }) => {
   const tabItems = useMemo(() => {
     const items = [];
 
-    if (data?.calType !== 623) {
+    if (data?.calType === 621) {
       items.push({
         key: "rating",
-        label: "Rating Result",
+        label: "Rating",
       });
     }
 
-    if (data?.calType !== 621) {
+    if (data?.calType === 623) {
       items.push({
         key: "billing",
-        label: "Billing Result",
+        label: "Billing",
+      });
+    }
+
+    if (data?.calType === 624) {
+      items.push({
+        key: "rating & billing",
+        label: "Rating & Billing",
       });
     }
 
@@ -235,7 +241,7 @@ const DetailInformation = ({ data }) => {
           sort,
           search: reqSearch,
           isLoadMore: true,
-        })
+        }),
       );
       setPage(nextPage);
     }
@@ -274,46 +280,6 @@ const DetailInformation = ({ data }) => {
     },
   };
 
-  const next = () => {
-    setCurrent(current + 1);
-  };
-
-  const prev = () => {
-    setCurrent(current - 1);
-  };
-
-  const scrollRightHandler = () => {
-    if (containerRef.current) {
-      containerRef.current.scrollLeft += 250;
-    }
-  };
-
-  const scrollLeftHandler = () => {
-    if (containerRef.current) {
-      containerRef.current.scrollLeft -= 250;
-    }
-  };
-
-  const handleButtonPrev = () => {
-    prev();
-    scrollLeftHandler();
-    setPageCal(1);
-    setPageSizeCal(10);
-    setSearchTextCal("");
-    setSearchedColumnCal("");
-    handleResetFilter();
-  };
-
-  const handleButtonNext = () => {
-    next();
-    scrollRightHandler();
-    setPageCal(1);
-    setPageSizeCal(10);
-    setSearchTextCal("");
-    setSearchedColumnCal("");
-    handleResetFilter();
-  };
-
   const handleResetFilter = () => {
     setPageCal(1);
     setPageSizeCal(10);
@@ -340,7 +306,7 @@ const DetailInformation = ({ data }) => {
           Object.entries(item).map(([key, value]) => [
             key,
             value === null ? "" : value,
-          ])
+          ]),
         );
       });
     return filterDataByPage(filtered, "data");
@@ -368,7 +334,7 @@ const DetailInformation = ({ data }) => {
                     searchedColumnCal,
                     searchTextCal,
                     handleSearchRecalculate,
-                    searchRecalculate
+                    searchRecalculate,
                   )}
                   totalData={filterDataRecalculate.length}
                   tableScrolled={{
@@ -410,7 +376,7 @@ const DetailInformation = ({ data }) => {
                   searchedColumnCal,
                   searchTextCal,
                   handleSearchRecalculate,
-                  searchRecalculate
+                  searchRecalculate,
                 )}
                 totalData={filterDataByPage(tableSelected, "length") || 0}
                 tableScrolled={{ x: 2000, y: 525 }}
@@ -427,6 +393,8 @@ const DetailInformation = ({ data }) => {
                 <Form.Item
                   label={"Remark"}
                   name={"remark"}
+                  required
+                  rules={[{ required: true, message: "Remark is required" }]}
                   getValueFromEvent={(e) => handleForceObj(e, "remark")}
                 >
                   <InputComponent rows={1} type="textarea" />
@@ -449,6 +417,11 @@ const DetailInformation = ({ data }) => {
     setKeyTableSelected([]);
     setTableSelected([]);
     handleResetFilter();
+  };
+
+  const handleOpenRecalculateModal = () => {
+    setCurrent(1);
+    setModalRecalculateRating(true);
   };
 
   const clearRetry = () => {
@@ -483,13 +456,13 @@ const DetailInformation = ({ data }) => {
             sort,
             search: reqSearch,
             isLoadMore: false,
-          })
+          }),
         );
         dispatch(
           getDetailCalculationResultNoPaging({
             calCode: data?.calCode,
             calType: activeTab === "rating" ? 621 : 623,
-          })
+          }),
         );
         handleClear();
       });
@@ -515,7 +488,7 @@ const DetailInformation = ({ data }) => {
             sort,
             search: reqSearch,
             isLoadMore: false,
-          })
+          }),
         );
         clearRetry();
         handleClear();
@@ -531,7 +504,7 @@ const DetailInformation = ({ data }) => {
       searchedColumn,
       searchText,
       handleSearch,
-      search
+      search,
     );
 
     return cols.map((col) => ({
@@ -640,11 +613,73 @@ const DetailInformation = ({ data }) => {
             />
           </CardContainer>
 
-          {/* Card 2: CALCULATION RESULT */}
+          {/* Card 2: CALCULATION SUCCESS */}
           <CardContainer
             header={
               <div className="flex -my-4 justify-between items-center">
-                <p className="mt-[15px]">CALCULATION RESULT</p>
+                <p className="mt-[15px]">CALCULATION SUCCESS</p>
+                <ButtonComponent
+                  type={"submit"}
+                  border={false}
+                  icon={
+                    <SVGIcon
+                      name={"IconRatingReconculate"}
+                      style={{ fontSize: "20px" }}
+                    />
+                  }
+                  onClick={handleOpenRecalculateModal}
+                >
+                  Recalculate
+                </ButtonComponent>
+              </div>
+            }
+          >
+            <div className="mt-1">
+              <TableRBI
+                idTable="recalculate-section-table"
+                size="small"
+                dataSource={filterDataRecalculate}
+                columns={columnsRecalculate(
+                  pageCal,
+                  pageSizeCal,
+                  searchInputCal,
+                  searchedColumnCal,
+                  searchTextCal,
+                  handleSearchRecalculate,
+                  searchRecalculate,
+                )}
+                totalData={filterDataRecalculate.length}
+                tableScrolled={{ x: 2000, y: 525 }}
+                rowSelection={rowSelection}
+                loading={loading}
+                showExport={false}
+                usePagination={false}
+                useInfiniteScroll={true}
+                hasMore={false}
+                onLoadMore={() => {}}
+              />
+            </div>
+          </CardContainer>
+
+          {/* Card 3: CALCULATION FAILED */}
+          <CardContainer
+            header={
+              <div className="flex -my-4 justify-between items-center">
+                <p className="mt-[15px]">CALCULATION FAILED</p>
+
+                <ButtonComponent
+                  onClick={() => setOpenRetry(true)}
+                  type={"submit"}
+                  border={false}
+                  icon={
+                    <SVGIcon
+                      name={`IconButtonReset`}
+                      style={{ fontSize: "20px" }}
+                    />
+                  }
+                >
+                  Retry
+                </ButtonComponent>
               </div>
             }
           >
@@ -654,25 +689,6 @@ const DetailInformation = ({ data }) => {
                 items={tabItems}
                 onChange={handleTabChange}
               />
-            </div>
-
-            <div className="w-full flex justify-end gap-2 mb-1">
-              <ButtonComponent
-                type={"submit"}
-                border={false}
-                icon={<SVGIcon name={"IconRatingReconculate"} width={24} />}
-                onClick={() => setModalRecalculateRating(true)}
-              >
-                Recalculate
-              </ButtonComponent>
-              <ButtonComponent
-                onClick={() => setOpenRetry(true)}
-                type={"submit"}
-                border={false}
-                icon={<SVGIcon name={`IconButtonReset`} width={24} />}
-              >
-                Retry
-              </ButtonComponent>
             </div>
 
             <div className="mt-1">
@@ -713,7 +729,7 @@ const DetailInformation = ({ data }) => {
               <DetailText label={"Created Date"}>
                 {latestLogData?.createdDate
                   ? moment(latestLogData.createdDate).format(
-                      "DD MMM YYYY HH:mm:ss"
+                      "DD MMM YYYY HH:mm:ss",
                     )
                   : ""}
               </DetailText>
@@ -723,7 +739,7 @@ const DetailInformation = ({ data }) => {
               <DetailText label={"Updated Date"}>
                 {latestLogData?.updatedDate
                   ? moment(latestLogData.updatedDate).format(
-                      "DD MMM YYYY HH:mm:ss"
+                      "DD MMM YYYY HH:mm:ss",
                     )
                   : ""}
               </DetailText>
@@ -755,51 +771,14 @@ const DetailInformation = ({ data }) => {
               <ButtonComponent type={"default"} onClick={handleClear}>
                 Back
               </ButtonComponent>
-              {current > 0 ? (
-                <ButtonComponent
-                  type={"submit"}
-                  onClick={handleButtonPrev}
-                  icon={
-                    <LeftOutlined
-                      style={{
-                        color: "#fff",
-                        fontSize: 15,
-                        marginRight: 10,
-                      }}
-                    />
-                  }
-                >
-                  Previous
-                </ButtonComponent>
-              ) : null}
-
-              {current < steps().length - 1 && (
-                <ButtonComponent
-                  type={"submit"}
-                  onClick={handleButtonNext}
-                  disabled={steps()[current].disabled}
-                >
-                  <div style={{ textAlign: "center" }}>
-                    <span>Next</span>
-                    <RightOutlined
-                      style={{
-                        color: "#fff",
-                        fontSize: 15,
-                        marginLeft: 10,
-                      }}
-                    />
-                  </div>
-                </ButtonComponent>
-              )}
-              {current === steps().length - 1 && (
-                <ButtonComponent
-                  type={"submit"}
-                  htmlType={"submit"}
-                  onClick={handleSave}
-                >
-                  Confirm
-                </ButtonComponent>
-              )}
+              <ButtonComponent
+                type={"submit"}
+                htmlType={"submit"}
+                onClick={handleSave}
+                disabled={tableSelected.length === 0 || !forceObj.remark}
+              >
+                Confirm
+              </ButtonComponent>
             </div>
           }
         >

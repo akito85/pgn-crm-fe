@@ -2,11 +2,7 @@ import React, { useState, useRef, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import CardContainer from "../../../../../components/CardContainer";
 import { getDetailCalculationLog } from "../../../../../redux/slices/rating_billing_invoice/calculation";
-import {
-  hasValue,
-  renderColumn,
-  renderDateColumn,
-} from "../../../../../utils";
+import { hasValue, renderColumn, renderDateColumn } from "../../../../../utils";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
 import TableRBI from "../../../../../components/TableRBI";
 import TableCalculateLog from "./Table/TableCalculateLog";
@@ -14,7 +10,7 @@ import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
 
 const DetailLog = ({ data, tabHeader, showCard = true }) => {
   const { list_calculation_log, loadingLog } = useSelector(
-    (state) => state.rbi_calculation
+    (state) => state.rbi_calculation,
   );
   const dispatch = useDispatch();
   const searchInput = useRef(null);
@@ -44,7 +40,7 @@ const DetailLog = ({ data, tabHeader, showCard = true }) => {
           pageSize: 100, // Initial load 100
           search: encodeURIComponent(JSON.stringify(search)),
           isLoadMore: false,
-        })
+        }),
       );
       setPage(0);
     }
@@ -81,7 +77,7 @@ const DetailLog = ({ data, tabHeader, showCard = true }) => {
           pageSize: loadMoreSize, // Load 20 more
           search: encodeURIComponent(JSON.stringify(search)),
           isLoadMore: true,
-        })
+        }),
       );
       setPage(nextPage);
     }
@@ -120,7 +116,7 @@ const DetailLog = ({ data, tabHeader, showCard = true }) => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -130,7 +126,7 @@ const DetailLog = ({ data, tabHeader, showCard = true }) => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -147,7 +143,7 @@ const DetailLog = ({ data, tabHeader, showCard = true }) => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -157,7 +153,7 @@ const DetailLog = ({ data, tabHeader, showCard = true }) => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -176,7 +172,7 @@ const DetailLog = ({ data, tabHeader, showCard = true }) => {
           searchText,
           handleSearch,
           true,
-          "datetime"
+          "datetime",
         ),
         render: (text) =>
           renderDateColumn(
@@ -185,7 +181,7 @@ const DetailLog = ({ data, tabHeader, showCard = true }) => {
             searchText,
             text,
             "datetime",
-            search
+            search,
           ),
       },
       {
@@ -202,7 +198,7 @@ const DetailLog = ({ data, tabHeader, showCard = true }) => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -212,7 +208,7 @@ const DetailLog = ({ data, tabHeader, showCard = true }) => {
             text,
             false,
             "input",
-            search
+            search,
           ),
       },
       {
@@ -232,7 +228,7 @@ const DetailLog = ({ data, tabHeader, showCard = true }) => {
           searchedColumn,
           searchText,
           handleSearch,
-          true
+          true,
         ),
         render: (text) =>
           renderColumn(
@@ -242,11 +238,11 @@ const DetailLog = ({ data, tabHeader, showCard = true }) => {
             text,
             true,
             "input",
-            search
+            search,
           ),
       },
     ],
-    [search, searchText, searchedColumn]
+    [search, searchText, searchedColumn],
   );
 
   const allColumns = useMemo(() => {
@@ -276,24 +272,26 @@ const DetailLog = ({ data, tabHeader, showCard = true }) => {
 
   const tableContent = (
     <>
-      <TableRBI
-        idTable="calculation-log-table"
-        columns={processedColumns}
-        dataSource={resultData}
-        totalData={pageInfo?.totalElements || 0}
-        tableScrolled={{ x: 2000, y: 600 }}
-        onSort={onSort}
-        showExport={false}
-        columnDefinitions={columnDefinitions}
-        fixedColumns={fixedColumns}
-        setFixedColumns={setFixedColumns}
-        loading={loadingLog}
-        usePagination={false}
-        useInfiniteScroll={true}
-        onLoadMore={handleLoadMore}
-        hasMore={hasMore}
-        loadMoreThreshold={20}
-      />
+      <div className="w-full pb-3">
+        <TableRBI
+          idTable="calculation-log-table"
+          columns={processedColumns}
+          dataSource={resultData}
+          totalData={pageInfo?.totalElements || 0}
+          tableScrolled={{ x: 2000, y: 600 }}
+          onSort={onSort}
+          showExport={false}
+          columnDefinitions={columnDefinitions}
+          fixedColumns={fixedColumns}
+          setFixedColumns={setFixedColumns}
+          loading={loadingLog}
+          usePagination={false}
+          useInfiniteScroll={true}
+          onLoadMore={handleLoadMore}
+          hasMore={hasMore}
+          loadMoreThreshold={20}
+        />
+      </div>
 
       <TableCalculateLog calculationCode={calculationCode} />
     </>
