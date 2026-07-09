@@ -52,11 +52,14 @@ const initialState = {
 // pagination slice
 export const getCalculationPaginate = createAsyncThunk(
   "GET_CALCULATION_PAGINATE",
-  async ({ search, page, pageSize, sort, isLoadMore = false }, thunkAPI) => {
+  async ({ search, page, pageSize, sort, billPeriodId, isLoadMore = false }, thunkAPI) => {
     try {
       const searchParams = search || "";
       const sortParams = sort || "generateDate~desc";
-      const url = `/v1/dbs/api/rbi/calculation/list-calculationjob?sort=${sortParams}&size=${pageSize}&page=${page}&searchs=${searchParams}`;
+      let url = `/v1/dbs/api/rbi/calculation/list-calculationjob?sort=${sortParams}&size=${pageSize}&page=${page}&searchs=${searchParams}`;
+      if (billPeriodId) {
+        url += `&billPeriodId=${billPeriodId}`;
+      }
       const response = await ratingBillingHttpService.getPagination(url);
 
       // Return data dengan flag isLoadMore
@@ -513,6 +516,48 @@ export const getListBillingPeriod = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
       return error;
+    }
+  }
+);
+
+export const getListBillingPeriodForCalculation = createAsyncThunk(
+  "GET_LIST_BILLING_PERIOD_FOR_CALCULATION",
+  async (_, thunkAPI) => {
+    try {
+      const url = `/v1/dbs/api/billingperiod/open-lov`;
+      const response = await ratingBillingHttpService.getAll(url);
+
+      const rawData =
+        response?.body?.data?.data ||
+        response?.data?.data ||
+        response?.data ||
+        [];
+
+      const transformedData = Array.isArray(rawData)
+        ? rawData.map((item) => ({
+            id: item.id,
+            name: item.name,
+            ...item,
+          }))
+        : [];
+
+      return transformedData;
+    } catch (error) {
+      const message =
+        error?.response?.data?.message || error?.message || error?.toString();
+      if (
+        error?.response?.data?.code === 500 ||
+        error?.response?.data?.code === 419
+      ) {
+        thunkAPI.dispatch(setBodyError(error));
+      } else {
+        const errorBody = {
+          title: "Failed",
+          description: `${message}`,
+        };
+        thunkAPI.dispatch(showModalError(errorBody));
+      }
+      return thunkAPI.rejectWithValue(error.response?.data);
     }
   }
 );
@@ -1102,6 +1147,17 @@ const calculationSlice = createSlice({
       state.list_billing_period = action.payload;
     },
     [getListBillingPeriod.rejected]: (state) => {
+      state.loading = false;
+    },
+    // lov billing period for calculation (open-lov)
+    [getListBillingPeriodForCalculation.pending]: (state) => {
+      state.loading = true;
+    },
+    [getListBillingPeriodForCalculation.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.list_billing_period = action.payload;
+    },
+    [getListBillingPeriodForCalculation.rejected]: (state) => {
       state.loading = false;
     },
     // lov user detail calculation
