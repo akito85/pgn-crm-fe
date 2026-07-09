@@ -7,7 +7,6 @@ import InputComponent from "../../../../../../components/InputComponent";
 import NxTable from "../../../../../../components/Nx/NxTable";
 import SVGIcon from "../../../../../../assets/Icon/index";
 import { getColumnSearchPropsUseFilteredValueFE } from "../../../../../../utils/getColumnSearchProps";
-import { nxApplyFixedColumns } from "../../../../../../utils/Nx/nxApplyFixedColumns";
 
 const getComparableText = (value) => {
   if (value === null || value === undefined) {
@@ -20,6 +19,8 @@ const getComparableText = (value) => {
 
   return value.toString().toLowerCase();
 };
+
+const getDefaultFixedColumns = () => ({ right: [], left: [] });
 
 const EditableCell = ({
   editing,
@@ -129,11 +130,13 @@ const TableDetailTos = ({
   const [orderSort, setOrderSort] = useState("");
   const [statusAction, setStatusAction] = useState("");
   const [editDataRecord, setEditDataRecord] = useState({});
-  const [fixedColumns, setFixedColumns] = useState({ right: ["operation"], left: [] });
+  const [fixedColumns, setFixedColumns] = useState(getDefaultFixedColumns);
 
   const { dataListTosAttribute = [], dataListUnitTos = [], dataListFromItem = [] } = useSelector(
     (state) => state.product
   );
+
+  const { data: dataUser = {} } = useSelector((state) => state.profile);
 
   const isEditing = useCallback((record) => record.key === editingKey, [editingKey]);
 
@@ -361,6 +364,7 @@ const TableDetailTos = ({
         width: 180,
         key: "operation",
         dataIndex: "operation",
+        fixed: "right",
         render: (_, record) => {
           const editable = isEditing(record);
           const isConfigurable = record?.attribute?.label === "Configurable";
@@ -415,31 +419,32 @@ const TableDetailTos = ({
     save,
   ]);
 
-  const allColumns = useMemo(() => {
-    const mappedColumns = baseColumns.map((column) => ({
+  const mappedColumns = useMemo(
+    () =>
+      baseColumns.map((column) => ({
       ...column,
       key: column.key || column.dataIndex || column.title,
-    }));
-
-    return nxApplyFixedColumns(mappedColumns, fixedColumns);
-  }, [baseColumns, fixedColumns]);
+      })),
+    [baseColumns]
+  );
 
   const columnDefinitions = useMemo(
     () =>
-      allColumns.map((column) => ({
+      mappedColumns.map((column) => ({
         key: column.key,
         title: column.title,
       })),
-    [allColumns]
+    [mappedColumns]
   );
 
   return (
     <Form form={formTable} component={false}>
       <NxTable
         idTable="tos-detail-table"
+        userId={dataUser?.data?.username}
         dataSource={displayData}
         totalData={processedData.length}
-        columns={allColumns.map((column) => ({
+        columns={mappedColumns.map((column) => ({
           ...column,
           onCell: (record) => ({
             record,
@@ -459,6 +464,7 @@ const TableDetailTos = ({
         columnDefinitions={columnDefinitions}
         fixedColumns={fixedColumns}
         setFixedColumns={setFixedColumns}
+        onClearPreferences={() => setFixedColumns(getDefaultFixedColumns())}
         onSort={handleSort}
         usePagination={false}
         useInfiniteScroll={true}

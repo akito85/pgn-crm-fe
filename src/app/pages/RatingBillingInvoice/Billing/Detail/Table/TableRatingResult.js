@@ -201,7 +201,7 @@ export const columnsRatingResult = (
         false,
         "input",
         search,
-        record.uom === "MMBTU" ? "energi" : "usage",
+        record.uom === "MMBTU" ? "energi" : "volume",
       ),
   },
   {

@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { Form, Spin } from "antd";
+import { Button, Form, Spin } from "antd";
 import { PRODUCT_PROMO_ROUTES } from "../../../../routes/product_promo/pp_routes";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import BaseContainer from "../../../../components/BaseContainer";
 import ProductInformationDetail from "./ProductDetail/ProductInformationDetail";
-import RadioTabs from "../../../../components/RadioTabs";
 import ProductInformationLockHistory from "./ProductDetail/ProductInformationLockHistory";
 import RequestInformation from "./ProductDetail/RequestInformation";
 import ProductVersionInformation from "./ProductDetail/ProductVersionInformation";
@@ -35,6 +34,9 @@ import moment from "moment";
 import { bytesConverter } from "../../../../utils/bytesConverter";
 import { ModalError } from "../../../../components/Modal/ModalPopUp";
 import SVGIcon from "../../../../assets/Icon/index";
+import NxCardContainer from "../../../../components/Nx/NxCardContainer";
+import NxTabs from "../../../../components/Nx/NxTabs";
+import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
 
 const routes = [
   {
@@ -94,6 +96,7 @@ const ProductDetail = () => {
   });
   const [modalError, setModalError] = useState(false);
   const [bodyError, setBodyError] = useState({});
+  const [loadingApproval, setLoadingApproval] = useState(false);
   const showButtonApproval =
     bodyApproval.isApprover !== null && bodyApproval.isApprover;
   const stateActive =
@@ -163,6 +166,7 @@ const ProductDetail = () => {
       dispatch(getExtendTerminateHistory({ id: dataDetailProductVersion?.id }));
       setDataProductDetail(dataDetailProductVersion);
       setDataLogInformation({
+        recordId: dataDetailProductVersion.id,
         createdDate: dataDetailProductVersion.createdDate,
         createdBy: dataDetailProductVersion.createdBy,
         updatedDate: dataDetailProductVersion.updatedDate,
@@ -196,12 +200,6 @@ const ProductDetail = () => {
     }
   }, [dataProductDetail]);
 
-  const handleProductInfo = (e) => {
-    setTypeProductInfo(e.target.value);
-  };
-  const handleProductDetailInfo = (e) => {
-    setTypeProductDetailInfo(e.target.value);
-  };
   const handleProductInfoDetailSection = (e) => {
     setTypeProductInfoDetailSection(e.target.value);
   };
@@ -210,6 +208,8 @@ const ProductDetail = () => {
     setApproveOrReject(type);
   };
   const handleCloseModalApproveReject = () => {
+    // Guard against closing while the approve/reject request is still in flight.
+    if (loadingApproval) return;
     setRemark("");
     setModalConfirm(false);
     form.resetFields();
@@ -222,13 +222,15 @@ const ProductDetail = () => {
       action: approveOrReject === "Approve" ? "APPROVE" : "REJECT",
     };
     // console.log(body);
+    setLoadingApproval(true);
     switch (bodyApproval.approvalType) {
       case "INACTIVE_PRODUCT":
-        dispatch(approvalInactiveProduct({ body }))
+        return dispatch(approvalInactiveProduct({ body }))
           .unwrap()
           .then((res) => {
-            handleCloseModalApproveReject();
             handleClear();
+            setRemark("");
+            setModalConfirm(false);
           })
           .catch((error) => {
             if (Math.floor((error.response.data.code || 0) / 100) === 5) {
@@ -242,14 +244,17 @@ const ProductDetail = () => {
               setBodyError({ message, body: { ...formValue }, handleClear });
               setModalError(true);
             }
+          })
+          .finally(() => {
+            setLoadingApproval(false);
           });
-        break;
       case "PRODUCT_VERSION":
-        dispatch(approvalProductVersion({ body }))
+        return dispatch(approvalProductVersion({ body }))
           .unwrap()
           .then((res) => {
-            handleCloseModalApproveReject();
             handleClear();
+            setRemark("");
+            setModalConfirm(false);
           })
           .catch((error) => {
             if (Math.floor((error.response.data.code || 0) / 100) === 5) {
@@ -263,14 +268,17 @@ const ProductDetail = () => {
               setBodyError({ message, body: { ...formValue }, handleClear });
               setModalError(true);
             }
+          })
+          .finally(() => {
+            setLoadingApproval(false);
           });
-        break;
       case "EXTEND_PRODUCT_VERSION":
-        dispatch(approvalExtendProductVersion({ body }))
+        return dispatch(approvalExtendProductVersion({ body }))
           .unwrap()
           .then((res) => {
-            handleCloseModalApproveReject();
             handleClear();
+            setRemark("");
+            setModalConfirm(false);
           })
           .catch((error) => {
             if (Math.floor((error.response.data.code || 0) / 100) === 5) {
@@ -284,14 +292,17 @@ const ProductDetail = () => {
               setBodyError({ message, body: { ...formValue }, handleClear });
               setModalError(true);
             }
+          })
+          .finally(() => {
+            setLoadingApproval(false);
           });
-        break;
       case "TERMINATE_PRODUCT_VERSION":
-        dispatch(approvalTerminateProductVersion({ body }))
+        return dispatch(approvalTerminateProductVersion({ body }))
           .unwrap()
           .then((res) => {
-            handleCloseModalApproveReject();
             handleClear();
+            setRemark("");
+            setModalConfirm(false);
           })
           .catch((error) => {
             if (Math.floor((error.response.data.code || 0) / 100) === 5) {
@@ -305,12 +316,14 @@ const ProductDetail = () => {
               setBodyError({ message, body: { ...formValue }, handleClear });
               setModalError(true);
             }
+          })
+          .finally(() => {
+            setLoadingApproval(false);
           });
-        break;
       default:
-        break;
+        setLoadingApproval(false);
+        return;
     }
-    setModalConfirm(false);
   };
   const handleActiveProduct = (record) => {
     dispatch(getDetailProductVersion({ id: record.id }));
@@ -332,237 +345,267 @@ const ProductDetail = () => {
         className={"w-full top-20"}
         tip={"Loading..."}
       >
-        <BreadCrumb routes={routes} />
-        {bodyApproval.isApprover &&
-        bodyApproval.approvalType &&
-        bodyApproval.approvalType !== "PRODUCT_VERSION" ? (
-          <BaseContainer
-            header={`${
-              bodyApproval.approvalType
-                ? bodyApproval.approvalType.split("_")[0]
-                : "CREATE"
-            } REQUEST INFORMATION`}
+        <div className="flex flex-col gap-y-4">
+          <BreadCrumb routes={routes} />
+          {bodyApproval.isApprover &&
+          bodyApproval.approvalType &&
+          bodyApproval.approvalType !== "PRODUCT_VERSION" ? (
+            <BaseContainer
+              header={`${
+                bodyApproval.approvalType
+                  ? bodyApproval.approvalType.split("_")[0]
+                  : "CREATE"
+              } REQUEST INFORMATION`}
+            >
+              <RequestInformation
+                data={
+                  bodyApproval.approvalDetail !== null
+                    ? bodyApproval.approvalDetail
+                    : {}
+                }
+                status={bodyApproval.approvalType}
+              />
+            </BaseContainer>
+          ) : null}
+          <NxCardContainer
+            header={"PRODUCT INFORMATION"}
+            type={stateActive ? "tabs" : undefined}
+            element={
+              stateActive ? (
+                <NxTabs
+                  items={[
+                    {
+                      key: listSectionInfo[0].value,
+                      label: listSectionInfo[0].value,
+                      children: <ProductInformationDetail data={dataProductInfo} />,
+                    },
+                    {
+                      key: listSectionInfo[1].value,
+                      label: listSectionInfo[1].value,
+                      children: (
+                        <ProductInformationLockHistory
+                          data={dataListLockHistory || []}
+                          idProduct={id}
+                        />
+                      ),
+                    },
+                  ]}
+                  activeKey={typeProductInfo}
+                  onChange={setTypeProductInfo}
+                />
+              ) : undefined
+            }
+            withoutPadding={stateActive}
+            hideChildren={stateActive}
           >
-            <RequestInformation
-              data={
-                bodyApproval.approvalDetail !== null
-                  ? bodyApproval.approvalDetail
-                  : {}
-              }
-              status={bodyApproval.approvalType}
+            {!stateActive ? <ProductInformationDetail data={dataProductInfo} /> : null}
+          </NxCardContainer>
+          {stateActive ? (
+            <ProductVersionInformation
+              idProduct={id}
+              dataProductInfo={dataProductInfo}
+              editableProduct={editableProduct}
+              dataProductVersion={dataListProductVersion}
+              updateActiveProduct={handleActiveProduct}
             />
-          </BaseContainer>
-        ) : null}
-        <BaseContainer
-          header={"PRODUCT INFORMATION"}
-          type={stateActive ? "tabs" : undefined}
-          element={
-            stateActive ? (
-              <RadioTabs
-                data={listSectionInfo}
-                onChange={handleProductInfo}
-                currentPosition={typeProductInfo}
-              />
-            ) : undefined
-          }
-        >
-          {(stateActive && typeProductInfo === listSectionInfo[0].value) ||
-          !stateActive ? (
-            <ProductInformationDetail data={dataProductInfo} />
           ) : null}
-          {stateActive && typeProductInfo === listSectionInfo[1].value ? (
-            <ProductInformationLockHistory data={dataListLockHistory || []} />
-          ) : null}
-        </BaseContainer>
-        {stateActive ? (
-          <ProductVersionInformation
-            idProduct={id}
-            dataProductInfo={dataProductInfo}
-            editableProduct={editableProduct}
-            dataProductVersion={dataListProductVersion}
-            updateActiveProduct={handleActiveProduct}
-          />
-        ) : null}
-        <BaseContainer
-          header={"PRODUCT DETAIL INFORMATION"}
-          type={"tabs"}
-          element={
-            <RadioTabs
-              data={listSectionInfoDetail}
-              onChange={handleProductDetailInfo}
-              currentPosition={typeProductDetailInfo}
-            />
-          }
-        >
-          <div className="flex flex-col gap-3">
-            <div className="flex align-middle gap-2">
-              <p className="text-[15px] font-semibold text-text-color-semibold">
-                Version:
-              </p>
-              <p className="text-[15px] font-semibold text-primary">
-                {idProductActive}
-              </p>
-            </div>
-            <div
-              style={{
-                display:
-                  typeProductDetailInfo !== listSectionInfoDetail[0].value
-                    ? "none"
-                    : undefined,
-              }}
-            >
-              <ProductDetailInformation
-                dataProductInfo={{
-                  ...dataProductInfo,
-                  startDate: dataProductInfo.startDate
-                    ? moment(dataProductInfo.startDate, "DD MMM YYYY").format(
-                        "YYYY-MM-DD"
-                      )
-                    : "",
-                  endDate: dataProductInfo.endDate
-                    ? moment(dataProductInfo.endDate, "DD MMM YYYY").format(
-                        "YYYY-MM-DD"
-                      )
-                    : "",
-                }}
-                dataProductDetail={dataProductDetail}
-                section={typeProductInfoDetailSection}
-                options={listSectionInfoProductDetail(typeProductDetail)}
-                handleChangeOption={handleProductInfoDetailSection}
-              />
-            </div>
-            <div
-              style={{
-                display:
-                  typeProductDetailInfo !== listSectionInfoDetail[1].value
-                    ? "none"
-                    : undefined,
-              }}
-            >
-              <AttachmentSectionForm
-                type={type}
-                data={listDataAttachment}
-                updateData={setListDataAttachment}
-              />
-            </div>
-          </div>
-        </BaseContainer>
-        <BaseContainer header={"HISTORY LOG INFORMATION"}>
-          <PricingLogInformationDetail data={dataLogInformation} />
-        </BaseContainer>
-        {stateActive ? (
-          <ProductExtendTerminate data={dataListExtendTerminateHistory || []} />
-        ) : null}
-        <div
-          className={`flex w-full${
-            showButtonApproval ? " justify-between" : ""
-          } align-middle my-3`}
-        >
-          <ButtonComponent
-            type={"submit"}
-            onClick={() => navigate(-1)}
-            icon={
-              <LeftOutlined
-                style={{
-                  color: "#fff",
-                  fontSize: 24,
-                  justifyItems: "center",
-                }}
+          <NxCardContainer
+            header={"PRODUCT DETAIL INFORMATION"}
+            type={"tabs"}
+            element={
+              <NxTabs
+                items={[
+                  {
+                    key: listSectionInfoDetail[0].value,
+                    label: listSectionInfoDetail[0].value,
+                  },
+                  {
+                    key: listSectionInfoDetail[1].value,
+                    label: listSectionInfoDetail[1].value,
+                  },
+                ]}
+                activeKey={typeProductDetailInfo}
+                onChange={setTypeProductDetailInfo}
               />
             }
+            withoutPadding
           >
-            Back
-          </ButtonComponent>
-          {showButtonApproval ? (
-            <div className="flex align-middle gap-3">
-              <ButtonComponent
-                type="reject"
-                onClick={() => handleModalConfirmation("Reject")}
+            <div className="flex flex-col gap-3 p-4">
+              <div className="flex align-middle gap-2">
+                <p className="text-[15px] font-semibold text-text-color-semibold">
+                  Version:
+                </p>
+                <p className="text-[15px] font-semibold text-primary">
+                  {idProductActive}
+                </p>
+              </div>
+              <div
+                style={{
+                  display:
+                    typeProductDetailInfo !== listSectionInfoDetail[0].value
+                      ? "none"
+                      : undefined,
+                }}
               >
-                Reject
-              </ButtonComponent>
-              <ButtonComponent
-                type="approve"
-                onClick={() => handleModalConfirmation("Approve")}
+                <ProductDetailInformation
+                  dataProductInfo={{
+                    ...dataProductInfo,
+                    startDate: dataProductInfo.startDate
+                      ? moment(dataProductInfo.startDate, "DD MMM YYYY").format(
+                          "YYYY-MM-DD"
+                        )
+                      : "",
+                    endDate: dataProductInfo.endDate
+                      ? moment(dataProductInfo.endDate, "DD MMM YYYY").format(
+                          "YYYY-MM-DD"
+                        )
+                      : "",
+                  }}
+                  dataProductDetail={dataProductDetail}
+                  section={typeProductInfoDetailSection}
+                  options={listSectionInfoProductDetail(typeProductDetail)}
+                  handleChangeOption={handleProductInfoDetailSection}
+                />
+              </div>
+              <div
+                style={{
+                  display:
+                    typeProductDetailInfo !== listSectionInfoDetail[1].value
+                      ? "none"
+                      : undefined,
+                }}
               >
-                Approve
-              </ButtonComponent>
+                <AttachmentSectionForm
+                  type={type}
+                  data={listDataAttachment}
+                  updateData={setListDataAttachment}
+                />
+              </div>
             </div>
+          </NxCardContainer>
+          <NxCardContainer header={"HISTORY LOG INFORMATION"}>
+            <PricingLogInformationDetail data={dataLogInformation} />
+          </NxCardContainer>
+          {stateActive ? (
+            <ProductExtendTerminate data={dataListExtendTerminateHistory || []} />
           ) : null}
-        </div>
-
-        {/* Modal Approve/Reject*/}
-        <ModalApproveOrReject
-          isOpen={modalConfirm}
-          handleCloseModal={handleCloseModalApproveReject}
-          onFinish={handleConfirm}
-          header={`${approveOrReject}`}
-          approveOrReject={approveOrReject}
-          menu={bodyApproval.approvalType === "INACTIVE_PRODUCT"
-          ? "Product"
-          : "Product Version"}
-          named={`${dataDetailProduct.productName}`}
-          // isOpen={modalConfirm}
-          // header={`${approveOrReject} information`}
-          // message={`Are you sure you want to ${approveOrReject} ${
-          //   bodyApproval.approvalType === "INACTIVE_PRODUCT"
-          //     ? "Product"
-          //     : "Product Version"
-          // }?`}
-          // width={1000}
-          // handleCancel={handleCloseModalApproveReject}
-          // footer={
-          //   <div className={"w-full flex justify-end gap-5"}>
-          //     <ButtonComponent
-          //       type={"default"}
-          //       onClick={handleCloseModalApproveReject}
-          //     >
-          //       Cancel
-          //     </ButtonComponent>
-          //     <ButtonComponent
-          //       form={"formApproveReject"}
-          //       htmlType={"submit"}
-          //       type={"submit"}
-          //       border={false}
-          //     >
-          //       Confirm
-          //     </ButtonComponent>
-          //   </div>
-          // }
-        />
-          {/* <Form name="formApproveReject" form={form} onFinish={handleConfirm}>
-            <Form.Item
-              name={"remark"}
-              rules={[{ message: requiredMessage("Remark"), required: true }]}
+          <NxBaseContainer border>
+            <div
+              className={`flex w-full${
+                showButtonApproval ? " justify-between" : ""
+              } align-middle my-3`}
             >
-              <InputComponent
-                rows={1}
-                placeholder="Type your remark"
-                type="textarea"
-                value={remark}
-                onChange={(e) => setRemark(e.target.value)}
-              />
-            </Form.Item>
-          </Form> */}
-        {/* </ModalApproveOrReject> */}
-
-        <ModalError
-          isOpen={modalError}
-          handleOk={handleRetry}
-          handleCancel={handleCloseModalError}
-          customText={"Try Again"}
-        >
-          <div className="px-5 pt-5 pb-[10px] justify-center">
-            <div className="w-full flex gap-[20px]">
-              <SVGIcon name="IconFailed" width={48} />
-              <p className="text-[18px] font-bold">{"Failed"}</p>
+              <Button type="menu" onClick={() => navigate(-1)}>
+                Back
+              </Button>
+              {/* <ButtonComponent
+                type={"submit"}
+                onClick={() => navigate(-1)}
+                icon={
+                  <LeftOutlined
+                    style={{
+                      color: "#fff",
+                      fontSize: 24,
+                      justifyItems: "center",
+                    }}
+                  />
+                }
+              >
+                Back
+              </ButtonComponent> */}
+              {showButtonApproval ? (
+                <div className="flex align-middle gap-3">
+                  <ButtonComponent
+                    type="reject"
+                    onClick={() => handleModalConfirmation("Reject")}
+                  >
+                    Reject
+                  </ButtonComponent>
+                  <ButtonComponent
+                    type="approve"
+                    onClick={() => handleModalConfirmation("Approve")}
+                  >
+                    Approve
+                  </ButtonComponent>
+                </div>
+              ) : null}
             </div>
-            <p className="pl-[70px]">{`Your data was not ${
-              approveOrReject === "Approve" ? "approved" : "rejected"
-            }. ${bodyError.message}.`}</p>
-            <p className="pl-[70px]">Please try again.</p>
-          </div>
-        </ModalError>
+          </NxBaseContainer>
+
+          {/* Modal Approve/Reject*/}
+          <ModalApproveOrReject
+            isOpen={modalConfirm}
+            handleCloseModal={handleCloseModalApproveReject}
+            onFinish={handleConfirm}
+            header={`${approveOrReject}`}
+            approveOrReject={approveOrReject}
+            menu={bodyApproval.approvalType === "INACTIVE_PRODUCT"
+            ? "Product"
+            : "Product Version"}
+            named={`${dataDetailProduct.productName}`}
+            loading={loadingApproval}
+            // isOpen={modalConfirm}
+            // header={`${approveOrReject} information`}
+            // message={`Are you sure you want to ${approveOrReject} ${
+            //   bodyApproval.approvalType === "INACTIVE_PRODUCT"
+            //     ? "Product"
+            //     : "Product Version"
+            // }?`}
+            // width={1000}
+            // handleCancel={handleCloseModalApproveReject}
+            // footer={
+            //   <div className={"w-full flex justify-end gap-5"}>
+            //     <ButtonComponent
+            //       type={"default"}
+            //       onClick={handleCloseModalApproveReject}
+            //     >
+            //       Cancel
+            //     </ButtonComponent>
+            //     <ButtonComponent
+            //       form={"formApproveReject"}
+            //       htmlType={"submit"}
+            //       type={"submit"}
+            //       border={false}
+            //     >
+            //       Confirm
+            //     </ButtonComponent>
+            //   </div>
+            // }
+          />
+            {/* <Form name="formApproveReject" form={form} onFinish={handleConfirm}>
+              <Form.Item
+                name={"remark"}
+                rules={[{ message: requiredMessage("Remark"), required: true }]}
+              >
+                <InputComponent
+                  rows={1}
+                  placeholder="Type your remark"
+                  type="textarea"
+                  value={remark}
+                  onChange={(e) => setRemark(e.target.value)}
+                />
+              </Form.Item>
+            </Form> */}
+          {/* </ModalApproveOrReject> */}
+
+          <ModalError
+            isOpen={modalError}
+            handleOk={handleRetry}
+            handleCancel={handleCloseModalError}
+            customText={"Try Again"}
+          >
+            <div className="px-5 pt-5 pb-[10px] justify-center">
+              <div className="w-full flex gap-[20px]">
+                <SVGIcon name="IconFailed" width={48} />
+                <p className="text-[18px] font-bold">{"Failed"}</p>
+              </div>
+              <p className="pl-[70px]">{`Your data was not ${
+                approveOrReject === "Approve" ? "approved" : "rejected"
+              }. ${bodyError.message}.`}</p>
+              <p className="pl-[70px]">Please try again.</p>
+            </div>
+          </ModalError>
+        </div>
       </Spin>
     </>
   );

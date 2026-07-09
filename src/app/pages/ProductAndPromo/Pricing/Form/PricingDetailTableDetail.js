@@ -24,6 +24,7 @@ import { hasValue, renderColumn, renderDateColumn, requiredMessage } from "../..
 import { getColumnSearchPropsUseFilteredValueFE } from "../../../../../utils/getColumnSearchProps";
 import TablePaginationNew from "../../../../../components/TablePaginationNew";
 import { separatorCurrency } from "../../UtilsProduct/UtilsAllProduct";
+import NxTable from "../../../../../components/Nx/NxTable";
 
 // const onFilter = (dataIndex, value, record) => {
 //   const fixSearchText = value.toLowerCase();
@@ -139,12 +140,14 @@ const columns = (
   const result = [
     {
       title: "NO",
+      key: "no",
       width: 60,
       align: "center",
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {
       title: "CURRENCY",
+      key: "currency",
       width: 160,
       align: "center",
       dataIndex: "currency",
@@ -182,6 +185,7 @@ const columns = (
     },
     {
       title: "VALUE",
+      key: "value",
       width: 160,
       align: "right",
       dataIndex: "value",
@@ -265,6 +269,7 @@ const columns = (
     },
     {
       title: "UOM",
+      key: "uom",
       width: 160,
       align: "center",
       dataIndex: "uom",
@@ -302,6 +307,7 @@ const columns = (
     },
     {
       title: "START DATE",
+      key: "startDate",
       width: 160,
       align: "center",
       dataIndex: "startDate",
@@ -357,6 +363,7 @@ const columns = (
     },
     {
       title: "END DATE",
+      key: "endDate",
       width: 160,
       align: "center",
       dataIndex: "endDate",
@@ -412,6 +419,7 @@ const columns = (
     },
     {
       title: "STATUS",
+      key: "status",
       width: 160,
       filteredValue: search?.["status"] ? [search?.["status"]] : null,
       // onFilter: (value, record) => onFilter("status", value, record),
@@ -488,6 +496,7 @@ const columns = (
     },
     {
       title: "DESCRIPTION",
+      key: "description",
       width: 180,
       dataIndex: "description",
       filteredValue: search?.["description"] ? [search?.["description"]] : null,
@@ -554,6 +563,7 @@ const columns = (
     },
     {
       title: "ACTION",
+      key: "action",
       width: 120,
       align: "center",
       fixed: "right",
@@ -699,6 +709,7 @@ const PricingDetailTableDetail = ({
   const { dataListCurrency, dataListUom } = useSelector(
     (state) => state.pricing
   );
+  const { data: dataUser = {} } = useSelector((state) => state.profile);
   useEffect(() => {
     if (dataListCurrency && dataListCurrency.length > 0) {
       const tempCurrency = dataListCurrency.map((currency) => ({
@@ -934,7 +945,12 @@ const PricingDetailTableDetail = ({
           </ButtonComponent>
         </div>
       ) : null}
-      <TablePaginationNew
+      <NxTable
+        idTable={"pricing-detail-table"}
+        userId={dataUser?.data?.username}
+        showAdvanceSearch={false}
+        showSearchBar={false}
+        usePagination={false}
         type="FE"
         dataSource={data}
         totalData={data.length}

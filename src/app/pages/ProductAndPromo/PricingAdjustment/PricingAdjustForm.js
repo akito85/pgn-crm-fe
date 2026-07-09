@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Form, Modal, Spin } from "antd";
+import { Button, Form, Modal, Spin } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import { useLocation, useNavigate } from "react-router-dom";
 import { PRODUCT_PROMO_ROUTES } from "../../../../routes/product_promo/pp_routes";
@@ -11,7 +11,6 @@ import ApprovalSectionForm from "../Pricing/Form/ApprovalSectionForm";
 import AttachmentSectionForm from "../Pricing/Form/AttachmentSectionForm";
 import PricingAdjustSectionForm from "./PricingAdjustSectionForm";
 import ButtonComponent from "../../../../components/ButtonComponent";
-import { LeftOutlined } from "@ant-design/icons";
 import SVGIcon from "../../../../assets/Icon/index";
 import ModalCustom from "../../../../components/Modal/ModalCustom";
 import ContentModalConfirmPriceAdjust from "./ContentModalConfirmPriceAdjust";
@@ -58,6 +57,8 @@ import { showModalError, validateCreateUpdate } from "../../../../redux/slices/g
 import { applyLocationCriteriaCascade, applyDeselectLocationCriteriaCascade, getCriteriaIdByCode, handleCheckCriteriaMissingValidation } from "../UtilsProduct/UtilsAllProduct";
 import { columnsTableCriteriaAll } from "../UtilsProduct/TableCriteriaAllProduct";
 import FunctionalCriteriaProduct from "../UtilsProduct/FunctionalCriteriaProduct";
+import NxCardContainer from "../../../../components/Nx/NxCardContainer";
+import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
 
 const routes = (routeExt) => [
   {
@@ -1052,209 +1053,205 @@ const PricingAdjustForm = (props) => {
           }
           scrollToFirstError={true}
         >
-          <BaseContainer header={"PRICING INFORMATION"}>
-            <PricingAdjustPriceInfo
-              data={bodyPricing}
-              type={type}
-              prevPage={prevPage}
-            />
-          </BaseContainer>
-          {type === "create" &&
-          (prevPage === "create-pricing" || prevPage === "update-pricing") ? (
-            <>
-              <BaseContainer header={"PRICING DETAIL INFORMATION"}>
-                <PricingDetailTableDetail
-                  type={"detail"}
-                  data={listDataDetail}
-                  priceCode={bodyPricing.priceCode || ""}
-                  updateData={setListDataDetail}
-                  selectPriceCodeAdjust={setSelectedData}
-                  dispatch={dispatch}
-                />
-              </BaseContainer>
-              <BaseContainer header={"PRICE ADJUSTMENT INFORMATION"}>
-                <PricingAdjustSectionForm
-                  criteriaOptions={criteriaOptions}
-                  handleSelectCriteria={handleSelectCriteria}
-                  handleDeselectCriteria={handleDeselectCriteria}
-                  handleClearCriteria={handleClearCriteria}
-                  type={type}
-                  priceCode={selectedPriceCode()}
-                />
-              </BaseContainer>
-            </>
-          ) : (
-            <>
-              <div className="mt-[30px]">
-                <RadioTabs
-                  data={listSectionInfo}
-                  onChange={handlePriceAdjustInfo}
-                  currentPosition={typePriceAdjustInfo}
-                />
-              </div>
-              <BaseContainer header={`${typePriceAdjustInfo} INFORMATION`}>
-                <div
-                  style={{
-                    display:
-                      typePriceAdjustInfo !== listSectionInfo[0].value
-                        ? "none"
-                        : undefined,
-                  }}
-                >
+          <div className="flex flex-col gap-y-4">
+            <NxCardContainer header={"PRICING INFORMATION"}>
+              <PricingAdjustPriceInfo
+                data={bodyPricing}
+                type={type}
+                prevPage={prevPage}
+              />
+            </NxCardContainer>
+            {type === "create" &&
+            (prevPage === "create-pricing" || prevPage === "update-pricing") ? (
+              <>
+                <NxCardContainer header={"PRICING DETAIL INFORMATION"}>
+                  <PricingDetailTableDetail
+                    type={"detail"}
+                    data={listDataDetail}
+                    priceCode={bodyPricing.priceCode || ""}
+                    updateData={setListDataDetail}
+                    selectPriceCodeAdjust={setSelectedData}
+                    dispatch={dispatch}
+                  />
+                </NxCardContainer>
+                <NxCardContainer header={"PRICE ADJUSTMENT INFORMATION"}>
                   <PricingAdjustSectionForm
                     criteriaOptions={criteriaOptions}
                     handleSelectCriteria={handleSelectCriteria}
                     handleDeselectCriteria={handleDeselectCriteria}
                     handleClearCriteria={handleClearCriteria}
                     type={type}
-                    status={dataDetailPricingAdjustGeneral?.status}
+                    priceCode={selectedPriceCode()}
+                  />
+                </NxCardContainer>
+              </>
+            ) : (
+              <>
+                <div className="mt-[30px]">
+                  <RadioTabs
+                    data={listSectionInfo}
+                    onChange={handlePriceAdjustInfo}
+                    currentPosition={typePriceAdjustInfo}
                   />
                 </div>
-                <div
-                  style={{
-                    display:
-                      typePriceAdjustInfo !== listSectionInfo[1].value
-                        ? "none"
-                        : undefined,
-                  }}
-                >
-                  <ApprovalSectionForm
-                    dataTable={appHierDataDetail}
-                    dataOption={appHierOptions}
-                    selectedHierarchy={selectedHierarchy}
-                    updateSelectedHierarchy={setSelectedHierarchy}
-                  />
-                </div>
-                <div
-                  style={{
-                    display:
-                      typePriceAdjustInfo !== listSectionInfo[2].value
-                        ? "none"
-                        : undefined,
-                  }}
-                >
-                  <AttachmentSectionForm
-                    type={type}
-                    data={listDataAttachment}
-                    updateData={setListDataAttachment}
-                    dispatch={dispatch}
-                    getAPICategory={getListCategory}
-                    typeSelector="pricingAdjust"
-                  />
-                </div>
-              </BaseContainer>
-            </>
-          )}
+                <NxCardContainer header={`${typePriceAdjustInfo} INFORMATION`}>
+                  <div
+                    style={{
+                      display:
+                        typePriceAdjustInfo !== listSectionInfo[0].value
+                          ? "none"
+                          : undefined,
+                    }}
+                  >
+                    <PricingAdjustSectionForm
+                      criteriaOptions={criteriaOptions}
+                      handleSelectCriteria={handleSelectCriteria}
+                      handleDeselectCriteria={handleDeselectCriteria}
+                      handleClearCriteria={handleClearCriteria}
+                      type={type}
+                      status={dataDetailPricingAdjustGeneral?.status}
+                    />
+                  </div>
+                  <div
+                    style={{
+                      display:
+                        typePriceAdjustInfo !== listSectionInfo[1].value
+                          ? "none"
+                          : undefined,
+                    }}
+                  >
+                    <ApprovalSectionForm
+                      dataTable={appHierDataDetail}
+                      dataOption={appHierOptions}
+                      selectedHierarchy={selectedHierarchy}
+                      updateSelectedHierarchy={setSelectedHierarchy}
+                    />
+                  </div>
+                  <div
+                    style={{
+                      display:
+                        typePriceAdjustInfo !== listSectionInfo[2].value
+                          ? "none"
+                          : undefined,
+                    }}
+                  >
+                    <AttachmentSectionForm
+                      type={type}
+                      data={listDataAttachment}
+                      updateData={setListDataAttachment}
+                      dispatch={dispatch}
+                      getAPICategory={getListCategory}
+                      typeSelector="pricingAdjust"
+                    />
+                  </div>
+                </NxCardContainer>
+              </>
+            )}
 
-          {typePriceAdjustInfo === listSectionInfo[0].value ? (
-            <BaseContainer header={"PRICE ADJUSTMENT DETAIL INFORMATION"}>
-              {/* <PricingAdjustTableDetail
-                type={type}
-                data={listDataDetailPricingAdjust}
-                dataCriteria={criteriaValues}
-                updateData={setListDataDetailPricingAdjust}
-                setStoredData={setStoredDataInline}
-                storedData={storedDataInline}
-              /> */}
-              <FunctionalCriteriaProduct
-                type={type}
-                data={listDataDetailPricingAdjust || []} //data
-                dataCriteria={criteriaValues || []} //ddl
-                updateData={setListDataDetailPricingAdjust}
-                setStoredData={setStoredDataInline}
-                storedData={storedDataInline}
-                // startDate={startDate ? moment(startDate) : undefined}
-                selector="pricingAdjust"
-                getApi={{
-                  getBudgetList,
-                  getProvinceList,
-                  getProvinceListByCountry,
-                  getCountryList,
-                  getIndustrialSectorList,
-                  getAccountCategoryList,
-                  getServiceTypeList,
-                  getSorList,
-                  getCostCenterList,
-                  getGsizesList,
-                  getCustomerSegmentList,
-                  getCustomerList,
-                  getCityList,
-                  getSubDistrictList,
-                  getAccountGroupList,
-                  getDistrictList,
-                  getAdjustmentTypeList,
-                }}
-                fixedColumn={["ADJUSTMENT TYPE", "ADJUSTMENT VALUE"]}
-                columnsTable={columnsTableCriteriaAll}
-                countryCriteriaId={getCriteriaIdByCode(criteriaOptions, "COUNTRY")}
-                checkStartDate={false}
-              />
-            </BaseContainer>
-          ) : null}
-          <div className="flex w-full justify-between align-middle my-3">
-            <ButtonComponent
-              type={"submit"}
-              onClick={() => setModalBack(true)}
-              icon={
-                <LeftOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 24,
-                    justifyItems: "center",
+            {typePriceAdjustInfo === listSectionInfo[0].value ? (
+              <NxCardContainer header={"PRICE ADJUSTMENT DETAIL INFORMATION"}>
+                {/* <PricingAdjustTableDetail
+                  type={type}
+                  data={listDataDetailPricingAdjust}
+                  dataCriteria={criteriaValues}
+                  updateData={setListDataDetailPricingAdjust}
+                  setStoredData={setStoredDataInline}
+                  storedData={storedDataInline}
+                /> */}
+                <FunctionalCriteriaProduct
+                  type={type}
+                  data={listDataDetailPricingAdjust || []} //data
+                  dataCriteria={criteriaValues || []} //ddl
+                  updateData={setListDataDetailPricingAdjust}
+                  setStoredData={setStoredDataInline}
+                  storedData={storedDataInline}
+                  // startDate={startDate ? moment(startDate) : undefined}
+                  selector="pricingAdjust"
+                  idTable="price-adjust-form-criteria-table"
+                  getApi={{
+                    getBudgetList,
+                    getProvinceList,
+                    getProvinceListByCountry,
+                    getCountryList,
+                    getIndustrialSectorList,
+                    getAccountCategoryList,
+                    getServiceTypeList,
+                    getSorList,
+                    getCostCenterList,
+                    getGsizesList,
+                    getCustomerSegmentList,
+                    getCustomerList,
+                    getCityList,
+                    getSubDistrictList,
+                    getAccountGroupList,
+                    getDistrictList,
+                    getAdjustmentTypeList,
                   }}
+                  fixedColumn={["ADJUSTMENT TYPE", "ADJUSTMENT VALUE"]}
+                  columnsTable={columnsTableCriteriaAll}
+                  countryCriteriaId={getCriteriaIdByCode(criteriaOptions, "COUNTRY")}
+                  checkStartDate={false}
                 />
-              }
-            >
-              Back
-            </ButtonComponent>
-            <div className="flex align-middle gap-3">
-              <ButtonComponent
-                icon={
-                  <SVGIcon
-                    name={
-                      type === "update" ? `IconButtonReset` : `IconButtonClear`
+              </NxCardContainer>
+            ) : null}
+            <NxBaseContainer border>
+              <div className="flex w-full justify-between align-middle my-3">
+                <Button
+                  onClick={() => setModalBack(true)}
+                  type="menu"
+                >
+                  Back
+                </Button>
+                <div className="flex align-middle gap-3">
+                  <ButtonComponent
+                    icon={
+                      <SVGIcon
+                        name={
+                          type === "update" ? `IconButtonReset` : `IconButtonClear`
+                        }
+                        width={24}
+                      />
                     }
-                    width={24}
-                  />
-                }
-                type="submit"
-                onClick={handleClear}
-              >
-                {type === "update" ? "Reset" : "Clear"}
-              </ButtonComponent>
-              <ButtonComponent
-                htmlType="submit"
-                type="submit"
-                onClick={() => setTypeSubmit(listTypeSubmit[1])}
-                // disabled={
-                //   listDataDetailPricingAdjust.length === 0 ||
-                //   listDataDetailPricingAdjust.every(
-                //     (item) =>
-                //       !item.adjustmentType ||
-                //       !item.adjustmentValue ||
-                //       !item.startDate
-                //   )
-                // }
-              >
-                Save as Draft
-              </ButtonComponent>
-              <ButtonComponent
-                htmlType="submit"
-                type="submit"
-                onClick={() => setTypeSubmit(listTypeSubmit[0])}
-                // disabled={
-                //   listDataDetailPricingAdjust.length === 0 ||
-                //   listDataDetailPricingAdjust.every(
-                //     (item) =>
-                //       !item.adjustmentType ||
-                //       !item.adjustmentValue ||
-                //       !item.startDate
-                //   )
-                // }
-              >
-                Save & Submit
-              </ButtonComponent>
-            </div>
+                    type="submit"
+                    onClick={handleClear}
+                  >
+                    {type === "update" ? "Reset" : "Clear"}
+                  </ButtonComponent>
+                  <ButtonComponent
+                    htmlType="submit"
+                    type="submit"
+                    onClick={() => setTypeSubmit(listTypeSubmit[1])}
+                    // disabled={
+                    //   listDataDetailPricingAdjust.length === 0 ||
+                    //   listDataDetailPricingAdjust.every(
+                    //     (item) =>
+                    //       !item.adjustmentType ||
+                    //       !item.adjustmentValue ||
+                    //       !item.startDate
+                    //   )
+                    // }
+                  >
+                    Save as Draft
+                  </ButtonComponent>
+                  <ButtonComponent
+                    htmlType="submit"
+                    type="submit"
+                    onClick={() => setTypeSubmit(listTypeSubmit[0])}
+                    // disabled={
+                    //   listDataDetailPricingAdjust.length === 0 ||
+                    //   listDataDetailPricingAdjust.every(
+                    //     (item) =>
+                    //       !item.adjustmentType ||
+                    //       !item.adjustmentValue ||
+                    //       !item.startDate
+                    //   )
+                    // }
+                  >
+                    Save & Submit
+                  </ButtonComponent>
+                </div>
+              </div>
+            </NxBaseContainer>
           </div>
         </Form>
 

@@ -91,6 +91,7 @@ const TermOfServiceConfirmation = ({
               dataCriteria={criteriaValues}
               columnsTable={columnsTableCriteriaAll}
               countryCriteriaId={countryCriteriaId}
+              idTable="tos-confirm-criteria-table"
             />
             {/* <FunctionalTableCriteriaTOS
               type={"detail"}

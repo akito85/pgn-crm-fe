@@ -21,6 +21,7 @@ import { Link } from "react-router-dom";
 import { getPriceAdjustByIdPricingDetail } from "../../../../../redux/slices/product_promo/pricing";
 import TablePaginationNew from "../../../../../components/TablePaginationNew";
 import { hasValue, renderColumn } from "../../../../../utils";
+import NxTable from "../../../../../components/Nx/NxTable";
 const onFilter = (dataIndex, value, record) => {
   const fixSearchText = value.toLowerCase();
   return record[dataIndex]?.toLowerCase().includes(fixSearchText);
@@ -50,12 +51,14 @@ const columnPriceAdjustmenttDetail = (
   const res = [
     {
       title: "NO",
+      key: "no",
       width: 60,
       align: "center",
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {
       title: "PRICE ADJUSTMENT ID",
+      key: "pricingAdjustmentId",
       width: 240,
       dataIndex: "pricingAdjustmentId",
       filteredValue: search?.["pricingAdjustmentId"]
@@ -94,6 +97,7 @@ const columnPriceAdjustmenttDetail = (
     },
     {
       title: "NAME",
+      key: "name",
       width: 240,
       dataIndex: "name",
       filteredValue: search?.["name"]
@@ -131,6 +135,7 @@ const columnPriceAdjustmenttDetail = (
     },
     {
       title: "CRITERIA",
+      key: "criterias",
       width: 240,
       dataIndex: "criterias",
       filteredValue: search?.["criterias"]
@@ -198,6 +203,7 @@ const columnPriceAdjustmenttDetail = (
     },
     {
       title: "DESCRIPTION",
+      key: "description",
       width: 240,
       dataIndex: "description",
       filteredValue: search?.["description"] ? [search?.["description"]] : null,
@@ -263,6 +269,7 @@ const columnPriceAdjustmenttDetail = (
     },
     {
       title: "STATUS",
+      key: "status",
       width: 240,
       dataIndex: "status",
       filteredValue: search?.["status"] ? [search?.["status"]] : null,
@@ -310,6 +317,7 @@ const columnPriceAdjustmenttDetail = (
     },
     {
       title: "STATUS APPROVAL",
+      key: "statusApproval",
       width: 240,
       dataIndex: "statusApproval",
       filteredValue: search?.["statusApproval"] ? [search?.["statusApproval"]] : null,
@@ -357,6 +365,7 @@ const columnPriceAdjustmenttDetail = (
     },
     {
       title: "ACTION",
+      key: "action",
       align: "center",
       width: 120,
       fixed: "right",
@@ -520,6 +529,8 @@ const PricingDetailAdjustmentTable = ({
   const [dataApprovalHistoryFix, setDataApprovalHistoryFix] = useState({});
   const [search, setSearch] = useState({});
 
+  const { data: dataUser = {} } = useSelector((state) => state.profile);
+
   useEffect(() => {
     if (dataApprovalHistory && dataApprovalHistory?.dataApprover) {
       const temp = {
@@ -622,7 +633,12 @@ const PricingDetailAdjustmentTable = ({
 
   return (
     <Fragment>
-      <TablePaginationNew
+      <NxTable
+        idTable="pricing-adjustment-detail-table"
+        userId={dataUser?.data?.username}
+        showAdvanceSearch={false}
+        showSearchBar={false}
+        usePagination={false}
         type="FE"
         dataSource={data}
         totalData={data.length}

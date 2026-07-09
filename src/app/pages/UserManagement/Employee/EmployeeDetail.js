@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import { useSelector, useDispatch } from "react-redux";
 import BaseContainer from "../../../../components/BaseContainer";
-import { Tooltip, Spin } from "antd";
+import { Tooltip, Spin, Button } from "antd";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import { useLocation, useNavigate } from "react-router-dom";
 import GridLayout from "../../../../components/GridLayout";
@@ -31,6 +31,9 @@ import { getColumnSearchProps } from "../../../../utils/getColumnSearchProps";
 import { sorterFunction } from "../../../../utils/sorterFunction";
 import TablePaginationNew from "../../../../components/TablePaginationNew";
 import ForwardTasksDetail from "./ForwardTasksDetail";
+import NxCardContainer from "../../../../components/Nx/NxCardContainer";
+import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
+import NxTable from "../../../../components/Nx/NxTable";
 
 const EmployeeDetail = () => {
   const { data_ass, data_info, data_detail, loading } = useSelector(
@@ -56,6 +59,8 @@ const EmployeeDetail = () => {
   const [searchedColumnForwardTasks, setSearchedColumnForwardTasks] = useState("");
   const [searchTextForwardTasks, setSearchTextForwardTasks] = useState("");
   const [searchForwardTasks, setSearchForwardTasks] = useState({});
+
+  const { data: dataUser = {} } = useSelector((state) => state.profile);
 
   useEffect(() => {
     if (hasValue(id)) {
@@ -365,7 +370,7 @@ const EmployeeDetail = () => {
 
   const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry)
   const EmployeeInformation = (
-    <>
+    <NxBaseContainer border>
       <GridLayout cols={4}>
         <DetailText label={"Employee Number"}>
           {data_detail?.empNumber}
@@ -390,10 +395,10 @@ const EmployeeDetail = () => {
           {data_detail?.description}
         </DetailText>
       </GridLayout>
-    </>
+    </NxBaseContainer>
   );
   const HistoryLogInformation = (
-    <>
+    <NxBaseContainer border>
       <GridLayout cols={5}>
         <DetailText label={"Record Id"}>
           {data_detail?.employeeId}
@@ -412,10 +417,10 @@ const EmployeeDetail = () => {
         </DetailText>
         <DetailText label={"Updated By"}>{data_detail?.updatedBy}</DetailText>
       </GridLayout>
-    </>
+    </NxBaseContainer>
   );
   const TerminateLogInformation = (
-    <>
+    <NxBaseContainer border>
       <GridLayout cols={4}>
         <DetailText label={"Terminate By"}>
           {data_detail?.terminateBy}
@@ -429,12 +434,17 @@ const EmployeeDetail = () => {
 
         <></>
       </GridLayout>
-    </>
+    </NxBaseContainer>
   );
   const EmployeeAssignmentHistory = (
     <>
       <div className={"w-full"}>
-        <TablePaginationNew
+        <NxTable
+          idTable="employee-assignment-history-table"
+          userId={dataUser?.data?.username}
+          usePagination={false}
+          showAdvanceSearch={false}
+          showSearchBar={false}
           type="FE"
           dataSource={data_detail?.assignmenTset?.map(item => ({ ...item, isMain: item?.isMain === true ? 'primary' : 'non primary' }))}
           current={pageDetail}
@@ -453,7 +463,12 @@ const EmployeeDetail = () => {
   const ForwardedTaskLayout = (
     <>
       <div className={"w-full"}>
-        <TablePaginationNew
+        <NxTable
+          idTable="forwarded-task-table"
+          userId={dataUser?.data?.username}
+          usePagination={false}
+          showAdvanceSearch={false}
+          showSearchBar={false}
           type="FE"
           dataSource={data_detail?.forwardTasks}
           current={page}
@@ -490,37 +505,31 @@ const EmployeeDetail = () => {
 
         <div className="gap-5 w-full flex flex-col">
           <BreadCrumb routes={routes} />
-          <BaseContainer header={"EMPLOYEE INFORMATION"}>
+          <NxCardContainer header={"EMPLOYEE INFORMATION"}>
             {EmployeeInformation}
-          </BaseContainer>
-          <BaseContainer header={"HISTORY LOG INFORMATION"}>
+          </NxCardContainer>
+          <NxCardContainer header={"HISTORY LOG INFORMATION"}>
             {HistoryLogInformation}
-          </BaseContainer>
-          <BaseContainer header={"TERMINATE LOG INFORMATION"}>
+          </NxCardContainer>
+          <NxCardContainer header={"TERMINATE LOG INFORMATION"}>
             {TerminateLogInformation}
-          </BaseContainer>
-          <BaseContainer header={"FORWARDED TASK"}>
+          </NxCardContainer>
+          <NxCardContainer header={"FORWARDED TASK"}>
             {ForwardedTaskLayout}
-          </BaseContainer>
-          <BaseContainer header={"EMPLOYEE ASSIGNMENT HISTORY"}>
+          </NxCardContainer>
+          <NxCardContainer header={"EMPLOYEE ASSIGNMENT HISTORY"}>
             {EmployeeAssignmentHistory}
-          </BaseContainer>
-          <ButtonComponent
-            className={'my-5'}
-            type={"submit"}
-            onClick={() => navigate(-1)}
-            icon={
-              <LeftOutlined
-                style={{
-                  color: "#fff",
-                  fontSize: 16,
-                  justifyItems: "center",
-                }}
-              ></LeftOutlined>
-            }
-          >
-            Back
-          </ButtonComponent>
+          </NxCardContainer>
+          <NxBaseContainer border>
+            <div className="w-full flex justify-between">
+              <Button
+                type={"menu"}
+                onClick={() => navigate(-1)}
+              >
+                Back
+              </Button>
+            </div>
+          </NxBaseContainer>
         </div>
 
         <ModalCustom

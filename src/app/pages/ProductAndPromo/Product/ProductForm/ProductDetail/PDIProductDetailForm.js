@@ -13,6 +13,7 @@ import SVGIcon from "../../../../../../assets/Icon/index";
 import SelectComponent from "../../../../../../components/SelectComponent";
 import { hasValue, renderColumn, requiredMessage } from "../../../../../../utils";
 import InputComponent from "../../../../../../components/InputComponent";
+import NxTable from "../../../../../../components/Nx/NxTable";
 
 const onFilter = (dataIndex, value, record) => {
   const tempSearchText = value.toLowerCase();
@@ -199,6 +200,7 @@ const PDIProductDetailForm = ({
     (item) => ![...excludeOptionName, ...exludeExisting].includes(item.value)
   );
   const [search, setSearch] = useState({});
+  const { data: dataUser = {} } = useSelector((state) => state.profile);
 
   useEffect(() => {
     setTotalData(dataTable.length);
@@ -357,6 +359,7 @@ const PDIProductDetailForm = ({
     const temp = [
       {
         title: "NO",
+        key: "no",
         width: 60,
         dataIndex: "no",
         align: "center",
@@ -364,6 +367,7 @@ const PDIProductDetailForm = ({
       },
       {
         title: "NAME",
+        key: "name",
         width: 240,
         dataIndex: "name",
         filteredValue: search?.["name"]
@@ -405,6 +409,7 @@ const PDIProductDetailForm = ({
       },
       {
         title: "VALUE",
+        key: "value",
         width: 240,
         dataIndex: "value",
         filteredValue: search?.["value"]
@@ -446,6 +451,7 @@ const PDIProductDetailForm = ({
       },
       {
         title: "UNIT",
+        key: "unit",
         width: 240,
         align: "center",
         dataIndex: "unit",
@@ -488,6 +494,7 @@ const PDIProductDetailForm = ({
       },
       {
         title: "DESCRIPTION",
+        key: "description",
         width: 240,
         dataIndex: "description",
         filteredValue: search?.["description"]
@@ -557,6 +564,7 @@ const PDIProductDetailForm = ({
       },
       {
         title: "ACTION",
+        key: "operation",
         width: 240,
         fixed: "right",
         dataIndex: "operation",
@@ -703,7 +711,7 @@ const PDIProductDetailForm = ({
       ) : null}
 
       <div className={"relative flex flex-col w-full"}>
-        <div
+        {/* <div
           className={`${
             totalData !== 0 ? "z-[1] absolute mt-4" : "my-4"
           } w-1/4 flex`}
@@ -733,9 +741,14 @@ const PDIProductDetailForm = ({
               ))
               .splice(1)}
           </Select>
-        </div>
+        </div> */}
         <Form form={formTable} component={false}>
-          <Table
+          <NxTable
+            idTable={"product-detail-table"}
+            userId={dataUser?.data?.username}
+            showAdvanceSearch={false}
+            showSearchBar={false}
+            usePagination={false}
             dataSource={dataTable}
             columns={filterColumn(
               columns().map((col) => ({

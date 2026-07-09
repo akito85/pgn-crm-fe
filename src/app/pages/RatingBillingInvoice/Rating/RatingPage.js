@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import useFormatNumberConfig from "../../../../hooks/useFormatNumberConfig";
 import { Tabs } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import CardContainer from "../../../../components/CardContainer";
@@ -25,6 +26,7 @@ const RatingPage = () => {
   );
 
   const dispatch = useDispatch();
+  useFormatNumberConfig();
   const searchInput = useRef(null);
   const dataSource = data?.result;
 
@@ -115,7 +117,7 @@ const RatingPage = () => {
         getListRatingGasPaginate({
           search: encodeURIComponent(JSON.stringify(search)),
           page: 1,
-          pageSize: initialPageSize, // load pertama 100
+          pageSize: initialPageSize,
           sort,
           period: selectedBillingPeriod,
           isLoadMore: false,
@@ -160,7 +162,7 @@ const RatingPage = () => {
         getListRatingGasPaginate({
           search: encodeURIComponent(JSON.stringify(search)),
           page: nextPage,
-          pageSize: loadMoreSize, // load more 20
+          pageSize: loadMoreSize,
           sort,
           period: selectedBillingPeriod,
           isLoadMore: true,

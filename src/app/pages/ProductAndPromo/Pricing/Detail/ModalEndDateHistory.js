@@ -1,8 +1,8 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import ModalCustom from "../../../../../components/Modal/ModalCustom";
 import CardComponent from "../../../../../components/Card/CardComponent";
 import DetailText from "../../../../../components/DetailText";
-import TablePagination from "../../../../../components/TablePagination";
+import NxTable from "../../../../../components/Nx/NxTable";
 import { getColumnSearchProps } from "../../../../../utils/getColumnSearchProps";
 import Highlighter from "react-highlight-words";
 import { Tooltip } from "antd";
@@ -109,15 +109,10 @@ const ModalEndDateHistory = ({
   const searchInput = useRef(null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [totalElements, setTotalElement] = useState(0);
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
   const [fieldSort, setFieldSort] = useState("");
   const [orderSort, setOrderSort] = useState("");
-
-  useEffect(() => {
-    setTotalElement(dataTable.length);
-  }, [dataTable]);
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
@@ -128,16 +123,8 @@ const ModalEndDateHistory = ({
     setPage(pageSize !== pageSizeChange ? 1 : pageChange);
     setPageSize(pageSizeChange);
   };
-  const onSort = (_, __, sort) => {
-    if (sort.order) {
-      setFieldSort(sort.field);
-      setOrderSort(sort.order === "ascend" ? "asc" : "desc");
-    } else {
-      setFieldSort("");
-      setOrderSort("");
-    }
-  };
-  const filterDataByPage = () => {
+
+  const computeDisplayData = () => {
     let result = [...dataTable];
     if (searchedColumn) {
       const fixSearchText = searchText.toLowerCase();
@@ -161,8 +148,22 @@ const ModalEndDateHistory = ({
         return 0;
       });
     }
-    return result.slice((page - 1) * pageSize, page * pageSize);
+    return result;
   };
+  const onSort = (_, __, sort) => {
+    if (sort.order) {
+      setFieldSort(sort.field);
+      setOrderSort(sort.order === "ascend" ? "asc" : "desc");
+    } else {
+      setFieldSort("");
+      setOrderSort("");
+    }
+  };
+  const filteredSortedData = computeDisplayData();
+  const displayData = filteredSortedData.slice(
+    (page - 1) * pageSize,
+    page * pageSize
+  );
   return (
     <ModalCustom
       isOpen={openModal}
@@ -186,13 +187,15 @@ const ModalEndDateHistory = ({
             {dataObj.description}
           </DetailText>
         </CardComponent>
-        <TablePagination
-          dataSource={filterDataByPage()}
-          totalData={totalElements}
+        <NxTable
+          idTable="end-date-history-table"
+          dataSource={displayData}
+          totalData={filteredSortedData.length}
           current={page}
           pageSize={pageSize}
           tableScrolled={{ y: 300, x: true }}
           onChange={handleChangeSize}
+          onSizeChanger={handleChangeSize}
           columns={columns(
             page,
             pageSize,
@@ -202,6 +205,9 @@ const ModalEndDateHistory = ({
             handleSearch
           )}
           onSort={onSort}
+          usePagination={true}
+          showSearchBar={false}
+          showAdvanceSearch={false}
         />
       </div>
     </ModalCustom>

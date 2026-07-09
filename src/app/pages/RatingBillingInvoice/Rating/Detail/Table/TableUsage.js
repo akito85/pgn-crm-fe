@@ -67,8 +67,8 @@ export const columnsUsage = (
     ),
     render: (text) =>
       renderColumn(
-        "quantity",
-        hasValue(search["quantity"]),
+        "assetSerialNumber",
+        hasValue(search["assetSerialNumber"]),
         searchText,
         text,
         false,
@@ -238,6 +238,7 @@ export const columnsUsage = (
         false,
         "input",
         search,
+        "temperatur",
       ),
   },
   {
@@ -265,6 +266,7 @@ export const columnsUsage = (
         false,
         "input",
         search,
+        "tekanan",
       ),
   },
   {
@@ -292,6 +294,7 @@ export const columnsUsage = (
         false,
         "input",
         search,
+        "number",
       ),
   },
   {
@@ -319,6 +322,7 @@ export const columnsUsage = (
         false,
         "input",
         search,
+        "number",
       ),
   },
   {
@@ -345,7 +349,7 @@ export const columnsUsage = (
         false,
         "input",
         search,
-        "usage",
+        "volume",
       ),
   },
   {
@@ -372,7 +376,7 @@ export const columnsUsage = (
         false,
         "input",
         search,
-        "usage",
+        "volume",
       ),
   },
   {
@@ -399,7 +403,7 @@ export const columnsUsage = (
         false,
         "input",
         search,
-        "usage",
+        "volume",
       ),
   },
   {
@@ -426,7 +430,7 @@ export const columnsUsage = (
         false,
         "input",
         search,
-        "usage",
+        "volume",
       ),
   },
   {
@@ -458,7 +462,7 @@ export const columnsUsage = (
         false,
         "input",
         search,
-        "usage",
+        "energi",
       );
     },
   },
@@ -486,6 +490,7 @@ export const columnsUsage = (
         false,
         "input",
         search,
+        "ghv",
       ),
   },
   {
@@ -620,6 +625,7 @@ export const columnsUsage = (
         false,
         "input",
         search,
+        "volume",
       ),
   },
   {
@@ -646,6 +652,7 @@ export const columnsUsage = (
         false,
         "input",
         search,
+        "volume",
       ),
   },
   {

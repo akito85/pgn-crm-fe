@@ -16,6 +16,7 @@ import FileSaver from "file-saver";
 import { configApp } from "../../../../../constants/configApp";
 import { getGlobalPropertiesAttachment } from "../../../../../redux/slices/product_promo/product";
 import TablePaginationNew from "../../../../../components/TablePaginationNew";
+import NxTable from "../../../../../components/Nx/NxTable";
 
 const onFilter = (dataIndex, value, record) => {
   const search = value.toLowerCase();
@@ -86,12 +87,14 @@ const columnAttachmentData = (
   const res = [
     {
       title: "NO",
+      key: "no",
       width: 60,
       align: "center",
       render: (text, object, index) => (page - 1) * pageSize + index + 1,
     },
     {
       title: "CATEGORY",
+      key: "fileCategoryName",
       width: 240,
       dataIndex: "fileCategoryName",
       onFilter: (value, record) => onFilter("fileCategoryName", value, record),
@@ -106,6 +109,7 @@ const columnAttachmentData = (
     },
     {
       title: "FILE NAME",
+      key: "fileName",
       width: 240,
       dataIndex: "fileName",
       onFilter: (value, record) => onFilter("fileName", value, record),
@@ -120,6 +124,7 @@ const columnAttachmentData = (
     },
     {
       title: "UPLOADED BY",
+      key: "createdBy",
       width: 240,
       dataIndex: "createdBy",
       onFilter: (value, record) => onFilter("createdBy", value, record),
@@ -134,6 +139,7 @@ const columnAttachmentData = (
     },
     {
       title: "UPLOADED DATE",
+      key: "createdDate",
       align: "center",
       width: 240,
       dataIndex: "createdDate",
@@ -149,6 +155,7 @@ const columnAttachmentData = (
     },
     {
       title: "FILE SIZE",
+      key: "fileSize",
       align: "center",
       width: 240,
       dataIndex: "fileSize",
@@ -164,6 +171,7 @@ const columnAttachmentData = (
     },
     {
       title: "ACTION",
+      key: "action",
       align: "center",
       width: 180,
       fixed: "right",
@@ -254,6 +262,7 @@ const AttachmentSectionForm = ({
   const { dataListCategory, getConfigFile } = useSelector((state) => state[typeSelector]);
   // console.log("🚀 ~ dataListCategory:", dataListCategory)
   const { dataGlobalPropAttachment } = useSelector((state) => state.product);
+  const { data: dataUser = {} } = useSelector((state) => state.profile);
 
   useEffect(() => {
     if (dataListCategory && dataListCategory.length > 0) {
@@ -353,7 +362,12 @@ const AttachmentSectionForm = ({
             </div>
           </div>
         ) : null}
-        <TablePaginationNew
+        <NxTable
+          idTable={"attachment-section-form"}
+          userId={dataUser?.data?.username}
+          showAdvanceSearch={false}
+          showSearchBar={false}
+          usePagination={false}
           type="FE"
           dataSource={data}
           totalData={data.length}

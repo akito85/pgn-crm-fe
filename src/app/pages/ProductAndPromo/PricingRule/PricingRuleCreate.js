@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import { PRODUCT_PROMO_ROUTES } from "../../../../routes/product_promo/pp_routes";
-import { Form, Spin } from "antd";
+import { Button, Form, Spin } from "antd";
 import PricingRule from "./Form/PricingRule";
 import Approval from "./Form/Approval";
 import RadioTabs from "../../../../components/RadioTabs";
@@ -13,7 +13,7 @@ import {
   ModalConfirm,
   ModalError,
 } from "../../../../components/Modal/ModalPopUp";
-import { WarningOutlined, LeftOutlined } from "@ant-design/icons";
+import { WarningOutlined } from "@ant-design/icons";
 import ConfirmationLayout from "./Modal/ConfirmationLayout";
 import {
   createPricingRule,
@@ -25,9 +25,10 @@ import {
 import productPromoHttpService from "../../../../redux/services/productPromoHttpService";
 import { showModalError, validateCreateUpdate } from "../../../../redux/slices/general_slice";
 import AttachmentSectionForm from "../Pricing/Form/AttachmentSectionForm";
-import BaseContainer from "../../../../components/BaseContainer";
 import { getCriteriaIdByCode, handleCheckCriteriaMissingValidation, handleMappingCriteriaGeneral } from "../UtilsProduct/UtilsAllProduct";
 import { columnsTableCriteriaAll } from "../UtilsProduct/TableCriteriaAllProduct";
+import NxCardContainer from "../../../../components/Nx/NxCardContainer";
+import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
 
 const PricingRuleCreate = () => {
   // Selector
@@ -406,172 +407,166 @@ const PricingRuleCreate = () => {
     <>
       <Spin spinning={isLoading}>
         <BreadCrumb routes={routes} />
+        <div className="flex flex-col gap-y-4">
+          <RadioTabs
+            data={tabPagesEmployee}
+            onChange={onChange}
+            currentPosition={valuePage}
+          />
+          <Form
+            layout="vertical"
+            form={form}
+            onFinish={handleSave}
+            onFinishFailed={handleError}
+          >
+            <div className={`${valuePage !== "Pricing Rule" ? "hidden" : ""}`}>
+              <PricingRule
+                form={form}
+                type={"create"}
+                setData={setData}
+                data={data}
+                setValueOrUnlimited={setValueOrUnlimited}
+                valueOrUnlimited={valueOrUnlimited}
+                listDataCriteria={listDataCriteria}
+                setListDataCriteria={setListDataCriteria}
+                criteriaValues={criteriaValues}
+                setCriteriaValues={setCriteriaValues}
+                setStoredData={setStoredDataInline}
+                storedData={storedDataInline}
+                startDate={startDate}
+                setStartDate={setStartDate}
+                endDate={endDate}
+                setEndDate={setEndDate}
+              />
+            </div>
 
-        <RadioTabs
-          data={tabPagesEmployee}
-          onChange={onChange}
-          currentPosition={valuePage}
-        />
-        <Form
-          layout="vertical"
-          form={form}
-          onFinish={handleSave}
-          onFinishFailed={handleError}
-        >
-          <div className={`${valuePage !== "Pricing Rule" ? "hidden" : ""}`}>
-            <PricingRule
-              form={form}
-              type={"create"}
-              setData={setData}
-              data={data}
-              setValueOrUnlimited={setValueOrUnlimited}
-              valueOrUnlimited={valueOrUnlimited}
-              listDataCriteria={listDataCriteria}
-              setListDataCriteria={setListDataCriteria}
-              criteriaValues={criteriaValues}
-              setCriteriaValues={setCriteriaValues}
-              setStoredData={setStoredDataInline}
-              storedData={storedDataInline}
-              startDate={startDate}
-              setStartDate={setStartDate}
-              endDate={endDate}
-              setEndDate={setEndDate}
-            />
-          </div>
+            <div className={`${valuePage !== "Approval" ? "hidden" : ""}`}>
+              <Approval
+                type={"create"}
+                apiApproval={data_approval}
+                apiApprovalList={data_approval_list}
+                dataTable={dataTable}
+                setDataTable={setDataTable}
+                boolean={boolean}
+                setBoolean={setBoolean}
+              />
+            </div>
 
-          <div className={`${valuePage !== "Approval" ? "hidden" : ""}`}>
-            <Approval
-              type={"create"}
-              apiApproval={data_approval}
-              apiApprovalList={data_approval_list}
-              dataTable={dataTable}
-              setDataTable={setDataTable}
-              boolean={boolean}
-              setBoolean={setBoolean}
-            />
-          </div>
-
-          <div className={`${valuePage !== "Attachment" ? "hidden" : ""}`}>
-            {/* <Attachment
-              type={"create"}
-              data={listDataAttachment}
-              updateData={setListDataAttachment}
-            /> */}
-            <BaseContainer header={"Attachment Information"}>
-              <AttachmentSectionForm
+            <div className={`${valuePage !== "Attachment" ? "hidden" : ""}`}>
+              {/* <Attachment
                 type={"create"}
                 data={listDataAttachment}
                 updateData={setListDataAttachment}
-                dispatch={dispatch}
-                typeSelector={"pricingRule"}
-                getAPICategory={getSelectCategory}
-              />
-            </BaseContainer>
-          </div>
-
-          <div className="mt-[30px] flex">
-            <ButtonComponent
-              type={"submit"}
-              onClick={handleBack}
-              icon={
-                <LeftOutlined
-                  style={{
-                    color: "#fff",
-                    fontSize: 24,
-                    justifyItems: "center",
-                  }}
+              /> */}
+              <NxCardContainer header={"Attachment Information"}>
+                <AttachmentSectionForm
+                  type={"create"}
+                  data={listDataAttachment}
+                  updateData={setListDataAttachment}
+                  dispatch={dispatch}
+                  typeSelector={"pricingRule"}
+                  getAPICategory={getSelectCategory}
                 />
-              }
-            >
-              Back
-            </ButtonComponent>
-
-            <div className={"w-full flex justify-end gap-5"}>
-              <Form.Item>
-                <ButtonComponent
-                  icon={<SVGIcon name="IconButtonClear" width={24} />}
-                  type="submit"
-                  onClick={() => {
-                    handleClear();
-                  }}
-                  disabled={storedDataInline}
-                >
-                  Clear
-                </ButtonComponent>
-              </Form.Item>
-              <Form.Item>
-                <ButtonComponent
-                  type="submit"
-                  htmlType={"submit"}
-                  onClick={() => setFlag(1)}
-                  disabled={storedDataInline}
-                >
-                  Save as Draft
-                </ButtonComponent>
-              </Form.Item>
-              <Form.Item>
-                <ButtonComponent
-                  type="submit"
-                  htmlType={"submit"}
-                  onClick={() => setFlag(2)}
-                  disabled={storedDataInline}
-                >
-                  Save & Submit
-                </ButtonComponent>
-              </Form.Item>
+              </NxCardContainer>
             </div>
-          </div>
-        </Form>
 
-        {/* Modal Back*/}
-        <ModalConfirm
-          isOpen={modalBack}
-          handleCancel={() => setModalBack(false)}
-          handleOk={() => navigate(-1)}
-          width={400}
-        >
-          <div className="flex justify-center mt-5 gap-[20px]">
-            <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
-            <p className="text-[18px] font-bold">
-              Are you sure you want to back?
-            </p>
-          </div>
-        </ModalConfirm>
+            <NxBaseContainer border className="mt-4">
+              <div className="flex items-center">
+                <Button
+                  onClick={handleBack}
+                  type="menu"
+                >
+                  Back
+                </Button>
 
-        {/* Modal Confirmation*/}
-        <ConfirmationLayout
-          data={bodyData}
-          openModal={modalConfirm}
-          closeModal={() => setModalConfirm(false)}
-          handleConfirm={() => handleConfirm()}
-          tabsPricingRule={tabPagesEmployee}
-          listDataCriteria={listDataCriteria}
-          criteriaValues={criteriaValues}
-          dataAttachment={listDataAttachment}
-          apiCriteria={data_select_criteria}
-          apiApproval={data_approval}
-          apiApprovalList={data_approval_list}
-          loading={isLoading}
-        />
+                <div className={"w-full flex justify-end items-center gap-5"}>
+                  <Form.Item style={{ marginBottom: 0 }}>
+                    <ButtonComponent
+                      icon={<SVGIcon name="IconButtonClear" width={24} />}
+                      type="submit"
+                      onClick={() => {
+                        handleClear();
+                      }}
+                      disabled={storedDataInline}
+                    >
+                      Clear
+                    </ButtonComponent>
+                  </Form.Item>
+                  <Form.Item style={{ marginBottom: 0 }}>
+                    <ButtonComponent
+                      type="submit"
+                      htmlType={"submit"}
+                      onClick={() => setFlag(1)}
+                      disabled={storedDataInline}
+                    >
+                      Save as Draft
+                    </ButtonComponent>
+                  </Form.Item>
+                  <Form.Item style={{ marginBottom: 0 }}>
+                    <ButtonComponent
+                      type="submit"
+                      htmlType={"submit"}
+                      onClick={() => setFlag(2)}
+                      disabled={storedDataInline}
+                    >
+                      Save & Submit
+                    </ButtonComponent>
+                  </Form.Item>
+                </div>
+              </div>
+            </NxBaseContainer>
+          </Form>
 
-        {/** Modal Retry */}
-        <ModalError
-          isOpen={modalError}
-          handleOk={handleRetry}
-          handleCancel={handleCloseModalError}
-          customText={"Try Again"}
-        >
-          <div className="px-5 pt-5 pb-[10px] justify-center">
-            <div className="w-full flex gap-[20px]">
-              <SVGIcon name="IconFailed" width={48} />
-              <p className="text-[18px] font-bold">{"Failed"}</p>
+          {/* Modal Back*/}
+          <ModalConfirm
+            isOpen={modalBack}
+            handleCancel={() => setModalBack(false)}
+            handleOk={() => navigate(-1)}
+            width={400}
+          >
+            <div className="flex justify-center mt-5 gap-[20px]">
+              <WarningOutlined style={{ fontSize: "24px", color: "#BE3036" }} />
+              <p className="text-[18px] font-bold">
+                Are you sure you want to back?
+              </p>
             </div>
-            <p className="pl-[70px]">{`Your data was not ${
-              flag === 1 ? "created" : "submitted"
-            }. ${bodyError.message}.`}</p>
-            <p className="pl-[70px]">Please try again.</p>
-          </div>
-        </ModalError>
+          </ModalConfirm>
+
+          {/* Modal Confirmation*/}
+          <ConfirmationLayout
+            data={bodyData}
+            openModal={modalConfirm}
+            closeModal={() => setModalConfirm(false)}
+            handleConfirm={() => handleConfirm()}
+            tabsPricingRule={tabPagesEmployee}
+            listDataCriteria={listDataCriteria}
+            criteriaValues={criteriaValues}
+            dataAttachment={listDataAttachment}
+            apiCriteria={data_select_criteria}
+            apiApproval={data_approval}
+            apiApprovalList={data_approval_list}
+            loading={isLoading}
+          />
+
+          {/** Modal Retry */}
+          <ModalError
+            isOpen={modalError}
+            handleOk={handleRetry}
+            handleCancel={handleCloseModalError}
+            customText={"Try Again"}
+          >
+            <div className="px-5 pt-5 pb-[10px] justify-center">
+              <div className="w-full flex gap-[20px]">
+                <SVGIcon name="IconFailed" width={48} />
+                <p className="text-[18px] font-bold">{"Failed"}</p>
+              </div>
+              <p className="pl-[70px]">{`Your data was not ${
+                flag === 1 ? "created" : "submitted"
+              }. ${bodyError.message}.`}</p>
+              <p className="pl-[70px]">Please try again.</p>
+            </div>
+          </ModalError>
+        </div>
       </Spin>
     </>
   );
