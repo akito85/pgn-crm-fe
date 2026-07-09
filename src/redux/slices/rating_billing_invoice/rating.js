@@ -500,7 +500,7 @@ export const getAllCalculationSummaryPaginate = createAsyncThunk(
   },
 );
 
-// Calculation Summary Expand 
+// Calculation Summary Expand
 export const getAllCalculationSummaryExpandPaginate = createAsyncThunk(
   "GET_ALL_CALCULATION_SUMMARY_EXPAND_PAGINATE",
   async (
@@ -542,7 +542,18 @@ export const getAllCalculationSummaryExpandPaginate = createAsyncThunk(
 // GET CALCULATION DETAIL
 export const getAllCalculationDetailPaginate = createAsyncThunk(
   "GET_ALL_CALCULATION_DETAIL_PAGINATE",
-  async ({ ratingCode, calculationCode, page, pageSize, search, sort, isLoadMore = false }, thunkAPI) => {
+  async (
+    {
+      ratingCode,
+      calculationCode,
+      page,
+      pageSize,
+      search,
+      sort,
+      isLoadMore = false,
+    },
+    thunkAPI,
+  ) => {
     try {
       const searchParams = search === undefined ? "" : search;
       const sortParams =
@@ -1045,7 +1056,9 @@ const ratingSlice = createSlice({
 
       if (isLoadMore) {
         const existingIds = new Set(
-          (state.data_calculationDetail?.result || []).map((item) => item.ratingDetailId),
+          (state.data_calculationDetail?.result || []).map(
+            (item) => item.ratingDetailId,
+          ),
         );
         const uniqueNewData = newResult.filter(
           (item) => !existingIds.has(item.ratingDetailId),
