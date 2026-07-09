@@ -12,20 +12,16 @@ import {
   getCostCenterDetail,
   downloadMasterCostCenter,
 } from "../../../../../redux/slices/system_setup/master_data/master_cost_center";
-import { DownloadOutlined, PlusOutlined } from "@ant-design/icons";
-import { Form, Spin, Tooltip } from "antd";
+import { Checkbox, Form, Tooltip } from "antd";
 import BreadCrumb from "../../../../../components/BreadCrumb";
-import ButtonComponent from "../../../../../components/ButtonComponent";
 import NxCardContainer from "../../../../../components/Nx/NxCardContainer";
 import NxTable from "../../../../../components/Nx/NxTable";
-import { NavLink, Link } from "react-router-dom";
-import IconViewList from "../../../../../assets/Icon/Nx/IconViewList";
-import IconEditNx from "../../../../../assets/Icon/Nx/IconEdit";
-import IconActive from "../../../../../assets/icons/nx/IconActive";
-import IconInactive from "../../../../../assets/icons/nx/IconInactive";
+import NxStatusComponent from "../../../../../components/Nx/NxStatusComponent";
+import { nxGetAccountActions } from "../../../../../components/Nx/NxGetAccountActions";
+import { useNavigate } from "react-router-dom";
 import { SYSTEM_SETUP_ROUTES } from "../../../../../routes/system_setup/setup_routes";
 import DetailCostCenter from "./DetailCostCenter";
-import { renderColumn } from "../../../../../utils";
+import { renderColumn, toTitleCase } from "../../../../../utils";
 import Toolbar from "../../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../../components/ColumnActionPermission";
 import { useTryAgainHooks } from "../../../../../utils/useTryAgainHooks";
@@ -34,6 +30,7 @@ import { getColumnSearchPropsPaging } from "../../../../../utils/getColumnSearch
 
 const CostCenter = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [form] = Form.useForm();
   const { data_detail } = useSelector((state) => state.master_cost_center);
   const { bodyError } = useSelector((state) => state?.general);
@@ -242,7 +239,7 @@ const CostCenter = () => {
   }, [dispatch, buildBodyDownload]);
 
   // on click activation
-  const onClick = (r) => {
+  const onClick = useCallback((r) => {
     if (r?.status === "ACTIVE") {
       setActiveOrInactive("Inactivate");
     }
@@ -252,7 +249,7 @@ const CostCenter = () => {
     setModalConfirm(true);
     setCostCenterId(r?.ccId);
     setRecord(r);
-  };
+  }, []);
 
   // handle confirm activation
   const handleConfirm = async (formValue, handleClearRemark) => {
@@ -369,7 +366,11 @@ const CostCenter = () => {
         sorter: true,
         fixed: "right",
         ...getColumnSearchPropsPaging("status", searchInput, searchedColumn, searchText, handleSearch, true),
-        render: (text) => renderColumn("status", searchedColumn, searchText, text, false, "status", search),
+        render: (text) => (
+          <div className="flex justify-center">
+            <NxStatusComponent colour={text}>{toTitleCase(text)}</NxStatusComponent>
+          </div>
+        ),
       },
     ],
     [search, searchedColumn, searchText, handleSearch]
@@ -391,105 +392,46 @@ const CostCenter = () => {
     },
   ];
 
-  // item toolbar
+  // item toolbar — Download/Create/View/Update/Activate all sourced from
+  // nxGetAccountActions (same shared action set as Employee.js); Activate
+  // overridden to a single toggle Checkbox, matching Product.js's pattern,
+  // since CostCenter needs one combined Activate/Inactivate control rather
+  // than nxGetAccountActions' separate Activate + Inactivate actions.
   const itemActions = useMemo(
-    () => [
-      {
-        action: "Download",
-        render: (
-          <ButtonComponent
-            icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
-            type={"submit"}
-            onClick={handleDownload}
-            loading={isDownloading}
-            disabled={isDownloading}
-          >
-            Download List
-          </ButtonComponent>
-        ),
-      },
-      {
-        action: "Create",
-        render: (
-          <NavLink to={SYSTEM_SETUP_ROUTES.CREATE_COST_CENTER}>
-            <ButtonComponent
-              type={"submit"}
-              icon={<PlusOutlined style={{ fontSize: "24px" }} />}
-            >
-              Create Cost Center
-            </ButtonComponent>
-          </NavLink>
-        ),
-      },
-
-      // column action
-      {
-        action: "View",
-        type: "table",
-        render: (record) => {
-          const isDetailLoading = detailLoadingId === record?.ccId;
-          return (
-            <Tooltip title="Detail">
-              <span
-                className={`inline-flex items-center text-[#1976D2] hover:text-[#1976D2] transition-colors duration-200 ${detailLoadingId ? "cursor-not-allowed" : "cursor-pointer"}`}
-                onClick={() => {
-                  if (detailLoadingId) return;
-                  handleDetail(record?.ccId);
-                }}
-              >
-                {isDetailLoading ? (
-                  <Spin size="small" />
-                ) : (
-                  <IconViewList width={20} />
-                )}
-              </span>
-            </Tooltip>
-          );
-        },
-      },
-      {
-        action: "Update",
-        type: "table",
-        render: (record) => {
-          const disabled = record?.status?.toLowerCase() === "inactive";
-          return (
-            <Tooltip title="Update">
-              <div className={`inline-flex items-center ${disabled ? "cursor-not-allowed text-gray-300" : ""}`}>
-                <Link
-                  to={!disabled ? SYSTEM_SETUP_ROUTES.UPDATE_COST_CENTER : undefined}
-                  state={!disabled ? { id: record?.ccId } : undefined}
-                  className={`inline-flex items-center transition-colors duration-200 ${disabled ? "text-gray-300 pointer-events-none" : "text-[#1976D2] hover:text-[#1976D2]"}`}
+    () =>
+      nxGetAccountActions({
+        handleDownload,
+        loadingDownload: isDownloading,
+        handleCreate: () => navigate(SYSTEM_SETUP_ROUTES.CREATE_COST_CENTER),
+        handleView: (record) => handleDetail(record?.ccId),
+        handleUpdate: (record) =>
+          navigate(SYSTEM_SETUP_ROUTES.UPDATE_COST_CENTER, { state: { id: record?.ccId } }),
+      })
+        .filter((item) =>
+          ["Download", "Create", "View", "Update", "Activate"].includes(item.action)
+        )
+        .map((item) => {
+          if (item.action !== "Activate") return item;
+          return {
+            ...item,
+            render: (record, actionLength, index) => {
+              const isActive = record?.status === "ACTIVE";
+              return (
+                <Tooltip
+                  title={isActive ? "Inactivate" : "Activate"}
+                  key={`table-action-${index}`}
                 >
-                  <IconEditNx width={20} />
-                </Link>
-              </div>
-            </Tooltip>
-          );
-        },
-      },
-      {
-        action: "Activate",
-        type: "table",
-        render: (record) => {
-          const isActive = record?.status?.toUpperCase() === "ACTIVE";
-          const handleToggle = () => onClick(record);
-          return (
-            <Tooltip title={isActive ? "Inactivate" : "Activate"}>
-              {isActive ? (
-                <span className="inline-flex items-center text-[#D32F2F] hover:text-[#D32F2F] transition-colors duration-200 cursor-pointer" onClick={handleToggle}>
-                  <IconInactive width={20} />
-                </span>
-              ) : (
-                <span className="inline-flex items-center text-green-600 hover:text-green-600 transition-colors duration-200 cursor-pointer" onClick={handleToggle}>
-                  <IconActive width={20} />
-                </span>
-              )}
-            </Tooltip>
-          );
-        },
-      },
-    ],
-    [handleDownload, isDownloading, handleDetail, detailLoadingId]
+                  <Checkbox
+                    className="inactive-check"
+                    checked={isActive}
+                    onClick={() => onClick(record)}
+                  />
+                </Tooltip>
+              );
+            },
+          };
+        }),
+    [handleDownload, isDownloading, navigate, handleDetail, onClick]
   );
 
   const actionColumns = useColumnActionPermission(["view", "update", "activate"], itemActions);
