@@ -1,7 +1,7 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Tooltip, Checkbox, Alert, Popover, Skeleton } from "antd";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { Tooltip, Checkbox, Alert } from "antd";
 import { WarningOutlined } from "@ant-design/icons";
-import { NavLink, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import { PRODUCT_PROMO_ROUTES } from "../../../../routes/product_promo/pp_routes";
@@ -24,148 +24,10 @@ import NxStatusComponent from "../../../../components/Nx/NxStatusComponent";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../utils/getColumnSearchProps";
 import { hasValue, renderColumn } from "../../../../utils";
 import Toolbar from "../../../../components/Toolbar";
-import useGrantAccessHooks from "../../../../components/useGrantAccessHooks";
-import IconThreeDots from "../../../../assets/Icon/Nx/IconThreeDots";
+import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
+import { nxGetAccountActions } from "../../../../components/Nx/NxGetAccountActions";
 
 const PAGE_SIZE = 20;
-
-const RenderProductClassActions = ({ record, itemRender = [], totalLength, permissions = [] }) => {
-  const [open, setOpen] = useState(false);
-  const sliceColumn = "view";
-
-  if (totalLength > 2) {
-    return (
-      <div className="w-full flex justify-center items-center gap-2.5">
-        <Popover
-          open={open}
-          onOpenChange={setOpen}
-          trigger="click"
-          placement="bottomRight"
-          showArrow={false}
-          overlayInnerStyle={{ border: "1px solid #C8CDD4" }}
-          className="text-black transition-colors duration-300 hover:text-[#0075bf]"
-          content={
-            <div className="flex flex-col">
-              {itemRender
-                ?.filter((item) => item?.action !== sliceColumn)
-                ?.sort((a, b) => (a?.action || "").localeCompare(b?.action || ""))
-                ?.map((item, index) => {
-                  if (permissions?.includes(item?.action)) {
-                    return (
-                      <div key={item.action} className="inline-flex items-center text-black" onClick={() => setOpen(false)}>
-                        {item?.render(record, totalLength, index)}
-                      </div>
-                    );
-                  }
-                  return null;
-                })}
-            </div>
-          }
-        >
-          <div className="inline-flex items-center cursor-pointer">
-            <IconThreeDots />
-          </div>
-        </Popover>
-        <div className="inline-flex items-center">
-          {itemRender
-            ?.filter((item) => item?.action === sliceColumn)
-            ?.map((item, index) => {
-              if (permissions?.includes(sliceColumn)) {
-                return item?.render(record, totalLength, index);
-              }
-              return null;
-            })}
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="w-full flex justify-center gap-2.5 items-center">
-      {itemRender?.map((item, index) => {
-        if (permissions?.includes(item?.action)) {
-          return (
-            <span key={item.action} className="inline-flex items-center">
-              {item?.render(record, totalLength, index)}
-            </span>
-          );
-        }
-        return null;
-      })}
-    </div>
-  );
-};
-
-const useProductClassActionPermission = (permissionList = [], itemsRender = []) => {
-  const access = useGrantAccessHooks("page");
-  const isLoading = access?.loading;
-
-  const lowerCaseAccessList = useMemo(
-    () => access?.actions?.map((item) => item?.toLowerCase()),
-    [access]
-  );
-  const lowerCasePermissionList = useMemo(
-    () => permissionList?.map((item) => item?.toLowerCase()),
-    [permissionList]
-  );
-  const lowerCaseItemsRender = useMemo(
-    () =>
-      itemsRender
-        ?.map((item) => ({ ...item, action: item?.action?.toLowerCase() }))
-        ?.filter((item) => item?.type === "table"),
-    [itemsRender]
-  );
-
-  const arrayActions = useMemo(() => {
-    const filtered = lowerCaseAccessList?.filter((item) =>
-      lowerCasePermissionList?.includes(item)
-    );
-    return lowerCaseItemsRender
-      ?.filter((itemRender) => filtered?.includes(itemRender?.action))
-      ?.map((item) => item?.action);
-  }, [lowerCaseAccessList, lowerCaseItemsRender, lowerCasePermissionList]);
-
-  return useMemo(() => {
-    if (isLoading) {
-      return [
-        {
-          key: "action",
-          title: "ACTION",
-          dataIndex: "action",
-          fixed: "right",
-          width: 111,
-          render: () => (
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <div style={{ width: "100%", transform: "scaleY(0.55)", transformOrigin: "center" }}>
-                <Skeleton.Button active size="small" shape="round" block />
-              </div>
-            </div>
-          ),
-        },
-      ];
-    }
-    if (!arrayActions || arrayActions.length === 0) return [];
-    return [
-      {
-        key: "action",
-        title: "ACTION",
-        dataIndex: "action",
-        fixed: "right",
-        width: 90,
-        render: (text, record, index) => (
-          <RenderProductClassActions
-            text={text}
-            record={record}
-            index={index}
-            itemRender={lowerCaseItemsRender}
-            totalLength={arrayActions.length}
-            permissions={arrayActions}
-          />
-        ),
-      },
-    ];
-  }, [isLoading, arrayActions, lowerCaseItemsRender]);
-};
 
 const formatStatus = (value) => {
   switch (value) {
@@ -191,6 +53,7 @@ const ProductClassView = () => {
 
   // Declaration
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const searchInput = useRef(null);
 
   const totalElement = pagination.totalElement;
@@ -451,135 +314,105 @@ const ProductClassView = () => {
     },
   ];
 
-  const itemsActionView = [
-    {
-      action: "Download",
-      render: (
-        <ButtonComponent
-          icon={<SVGIcon name="IconButtonDownload" width={24} />}
-          type="submit"
-          onClick={handleDownload}
-          loading={loadingDownload}
-          disabled={loadingDownload}
-        >
-          Download List
-        </ButtonComponent>
-      ),
+  // Same icon component/style as Pricing.js's table (nxGetAccountActions) —
+  // Update/Activate keep ProductClass's own eligibility rules, overridden
+  // after the shared action list is built so the markup stays identical.
+  const itemActions = nxGetAccountActions({
+    handleView: (record) => {
+      dispatch(getDetailProductClass(record?.productClassId));
+      setModalDetail(true);
     },
-    {
-      action: "Create",
-      render: (
-        <NavLink to={PRODUCT_PROMO_ROUTES.CREATE_PRODUCT_CLASS}>
-          <ButtonComponent
-            icon={<SVGIcon name="IconButtonCreate" width={24} />}
-            type="submit"
-          >
-            Create
-          </ButtonComponent>
-        </NavLink>
-      ),
-    },
-
-    //table
-    //last placement for outside popover
-    {
-      action: "view",
-      type: "table",
-      render: (record, data_length) => {
-        return (
-          <Tooltip title="Detail">
-            <div className="pt-1">
-              <SVGIcon
-                name="IconDetail"
-                width={24}
-                onClick={() => {
-                  dispatch(getDetailProductClass(record?.productClassId));
-                  setModalDetail(true);
-                }}
-              />
-            </div>
-          </Tooltip>
-        );
-      },
-    },
-    {
-      action: "Update",
-      type: "table",
-      render: (record, data_length) => {
-        const render =
-          data_length >= 3 ? (
+    handleCreate: () => navigate(PRODUCT_PROMO_ROUTES.CREATE_PRODUCT_CLASS),
+    handleUpdate: (record) =>
+      navigate(PRODUCT_PROMO_ROUTES.UPDATE_PRODUCT_CLASS, {
+        state: { id: record?.productClassId },
+      }),
+    handleDownload,
+    loadingDownload,
+    handleActivate: handleActiveOrInactive,
+  }).map((item) => {
+    if (item.action === "Update") {
+      return {
+        ...item,
+        render: (record, actionLength, index) => {
+          const isEditable = record?.status !== "INACTIVE";
+          return actionLength > 3 ? (
             <ButtonComponent
-              icon={<SVGIcon name="IconEdit" color="#0075bf" width={24} />}
-              border={false}
+              icon={<SVGIcon name="IconEdit" color="#0075bf" width={20} />}
+              disabled={!isEditable}
+              onClick={() =>
+                isEditable &&
+                navigate(PRODUCT_PROMO_ROUTES.UPDATE_PRODUCT_CLASS, {
+                  state: { id: record?.productClassId },
+                })
+              }
+              type={"action"}
             >
-              {data_length >= 3 && (
-                <span className="text-black ml-1"> Update</span>
-              )}
+              Update
             </ButtonComponent>
           ) : (
-            <Tooltip title="Update">
-              <div className="pt-1">
-                <SVGIcon
-                  name="IconEdit"
-                  width={24}
-                  color={record?.status !== "INACTIVE" ? "#ACC424" : "#8D91A0"}
-                  className={
-                    record?.status === "INACTIVE" ? "disabled" : undefined
-                  }
-                />
-              </div>
+            <Tooltip
+              title={isEditable ? "Update" : ""}
+              key={`table-action-${index}`}
+            >
+              <ButtonComponent
+                onClick={() =>
+                  isEditable &&
+                  navigate(PRODUCT_PROMO_ROUTES.UPDATE_PRODUCT_CLASS, {
+                    state: { id: record?.productClassId },
+                  })
+                }
+                disabled={!isEditable}
+                type="table-action"
+              >
+                <SVGIcon name="IconEdit" width={20} />
+              </ButtonComponent>
             </Tooltip>
           );
+        },
+      };
+    }
+    if (item.action === "Activate") {
+      return {
+        ...item,
+        render: (record, actionLength, index) => {
+          const isActive = record?.status === "ACTIVE";
 
-        return record?.status !== "INACTIVE" ? (
-          <Link
-            to={PRODUCT_PROMO_ROUTES.UPDATE_PRODUCT_CLASS}
-            state={{ id: record?.productClassId}}
-          >
-            {render}
-          </Link>
-        ) : (
-          render
-        );
-      },
-    },
-    {
-      action: "Activate",
-      type: "table",
-      render: (record, data_length) => {
-        return data_length >= 3 ? (
-          <ButtonComponent
-            icon={
-              <Checkbox
-                className="inactive-check"
-                disabled={record?.status === "ACTIVE" ? false : true}
-                checked={record?.status === "ACTIVE" ? false : true}
-              />
-            }
-            border={false}
-            onClick={() => handleActiveOrInactive(record)}
-          >
-            <span className="text-black ml-3">
-              {record?.status !== "ACTIVE" ? "Activate" : "Inactivate"}
-            </span>
-          </ButtonComponent>
-        ) : (
-          <Tooltip
-            title={record?.status === "ACTIVE" ? "Inactivate" : "Activate"}
-          >
-            <div className="pt-1">
+          return actionLength > 3 ? (
+            <ButtonComponent
+              icon={
+                <Checkbox
+                  className="inactive-check"
+                  disabled={!isActive}
+                  checked={!isActive}
+                />
+              }
+              border={false}
+              disabled={!isActive}
+              onClick={() => handleActiveOrInactive(record)}
+            >
+              <span className="text-black ml-3">
+                {isActive ? "Inactivate" : "Activate"}
+              </span>
+            </ButtonComponent>
+          ) : (
+            <Tooltip
+              title={isActive ? "Inactivate" : "Activate"}
+              key={`table-action-${index}`}
+            >
               <Checkbox
                 className="inactive-check"
                 onClick={() => handleActiveOrInactive(record)}
-                disabled={record?.status === "ACTIVE" ? false : true}
-                checked={record?.status === "ACTIVE" ? false : true}
+                disabled={!isActive}
+                checked={!isActive}
               />
-            </div>
-          </Tooltip>
-        );
-      },
-    },
-  ];
+            </Tooltip>
+          );
+        },
+      };
+    }
+    return item;
+  });
 
   const handleCloseModalError = () => {
     setModalError(false);
@@ -593,10 +426,7 @@ const ProductClassView = () => {
 
   const tableColumns = [
     ...columns,
-    ...useProductClassActionPermission(
-      ["view", "Update", "Activate"],
-      itemsActionView
-    ),
+    ...useColumnActionPermission(["view", "Update", "Activate"], itemActions),
   ];
 
   return (
@@ -605,7 +435,7 @@ const ProductClassView = () => {
 
       <NxCardContainer header="Product Class List" className="mt-4">
         <div className="flex flex-col gap-y-4">
-          <Toolbar items={itemsActionView} type="page" />
+          <Toolbar items={itemActions} type="page" />
           <NxTable
             idTable="product-class-table"
             userId={dataUser?.data?.username}

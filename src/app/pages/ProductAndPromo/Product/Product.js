@@ -3,7 +3,7 @@ import { Checkbox, Switch, Tooltip } from "antd";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import { PRODUCT_PROMO_ROUTES } from "../../../../routes/product_promo/pp_routes";
 import ButtonComponent from "../../../../components/ButtonComponent";
-import { Link, NavLink } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import SVGIcon from "../../../../assets/Icon/index";
 import { useDispatch, useSelector } from "react-redux";
 import ModalHistory from "../../../../components/Modal/ModalHistory";
@@ -28,6 +28,7 @@ import NxStatusComponent from "../../../../components/Nx/NxStatusComponent";
 import { hasValue, renderColumn, renderDateColumn } from "../../../../utils";
 import Toolbar from "../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../components/ColumnActionPermission";
+import { nxGetAccountActions } from "../../../../components/Nx/NxGetAccountActions";
 
 const PAGE_SIZE = 20;
 
@@ -435,161 +436,9 @@ const routes = [
   },
 ];
 
-const itemsActionView = (
-  handleOpenModalInactivate = () => {},
-  handleApprovalHistory = () => {},
-  handleOpenModalLock = () => {},
-  handleDownload = () => {},
-  dataUser = {},
-  loadingDownload = false,
-) => [
-  {
-    action: "Download",
-    render: (
-      <ButtonComponent
-        icon={<SVGIcon name="IconButtonDownload" width={24} />}
-        type="submit"
-        onClick={handleDownload}
-        loading={loadingDownload}
-        disabled={loadingDownload}
-      >
-        Download List
-      </ButtonComponent>
-    ),
-  },
-  {
-    action: "Create",
-    render: (
-      <NavLink
-        to={PRODUCT_PROMO_ROUTES.CREATE_PRODUCT}
-        state={{ prevPage: "table-product" }}
-      >
-        <ButtonComponent
-          icon={<SVGIcon name="IconButtonCreate" width={24} />}
-          type="submit"
-        >
-          Create
-        </ButtonComponent>
-      </NavLink>
-    ),
-  },
-  //table
-  //last placement for outside popover
-  {
-    action: "view",
-    type: "table",
-    render: (record, data_length) => {
-      return (
-        <Tooltip title="Detail">
-          <Link
-            to={PRODUCT_PROMO_ROUTES.DETAIL_PRODUCT}
-            state={{ id: record?.id }}
-          >
-            <SVGIcon name="IconDetail" width={24} />
-          </Link>
-        </Tooltip>
-      );
-    },
-  },
-  {
-    action: "Lock",
-    type: "table",
-    render: (record, data_length) => {
-      const isEditable =
-        record.status !== "INACTIVE" &&
-        (!record.lockedBy || record.lockedBy === dataUser?.data?.username);
-
-      return (
-        <ButtonComponent
-          icon={
-            <Switch
-              className="inactive-check"
-              checked={record?.lockStatus === "Y"}
-              // disabled={isEditable}
-            />
-          }
-          border={false}
-          disabled={!isEditable}
-          onClick={() => handleOpenModalLock(record)}
-        >
-          <span className={"text-black"}>
-            {record?.lockStatus === "Y" && data_length > 3 ? "Unlock" : "Lock"}
-          </span>
-        </ButtonComponent>
-      );
-    },
-  },
-  {
-    action: "Activate",
-    type: "table",
-    render: (record, data_length) => {
-      const isActivateOrInactivate =
-        (record.approvalStatus === "APPROVED" && record.status === "ACTIVE") ||
-        (record.approvalStatus === "DRAFT" && record.status === "ACTIVE") ||
-        (record.approvalStatus === "REJECTED" && record.status === "ACTIVE");
-
-      return data_length > 3 ? (
-        <ButtonComponent
-          icon={
-            <Checkbox
-              className="inactive-check"
-              disabled={record?.status === "ACTIVE" ? false : true}
-              checked={record?.status === "ACTIVE" ? false : true}
-            />
-          }
-          border={false}
-          disabled={!isActivateOrInactivate}
-          onClick={() => handleOpenModalInactivate(record)}
-        >
-          <span className="text-black ml-5">
-            {record?.status !== "ACTIVE" ? "Activate" : "Inactivate"}
-          </span>
-        </ButtonComponent>
-      ) : (
-        <Tooltip
-          title={record?.status === "ACTIVE" ? "Inactivate" : "Activate"}
-        >
-          <div className="pt-1">
-            <Checkbox
-              className="inactive-check"
-              onClick={() => handleOpenModalInactivate(record)}
-              disabled={record?.status === "ACTIVE" ? false : true}
-              checked={record?.status === "ACTIVE" ? false : true}
-            />
-          </div>
-        </Tooltip>
-      );
-    },
-  },
-  {
-    action: "History",
-    type: "table",
-    render: (record, data_length) => {
-      return data_length > 3 ? (
-        <ButtonComponent
-          icon={<SVGIcon name="IconLogHistory" color={"#0075bf"} width={24} />}
-          border={false}
-          onClick={() => handleApprovalHistory(record)}
-        >
-          <span className={"text-black ml-3"}>Approval History</span>
-        </ButtonComponent>
-      ) : (
-        <Tooltip title="Approval History">
-          <div className="pt-1">
-            <SVGIcon
-              name="IconLogHistory"
-              color={"#0075bf"}
-              width={24}
-              onClick={() => handleApprovalHistory(record)}
-            />
-          </div>
-        </Tooltip>
-      );
-    },
-  },
-];
 const Product = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const {
     list_product: dataSource,
     pagination_product: pagination,
@@ -618,6 +467,7 @@ const Product = () => {
   const [dataLock, setDataLock] = useState({});
   const [modalError, setModalError] = useState(false);
   const [bodyError, setBodyError] = useState({});
+  const [isInactivating, setIsInactivating] = useState(false);
   const [dataApprovalHistory, setDataApprovalHistory] = useState({});
   const { data: dataUser = {} } = useSelector((state) => state.profile);
 
@@ -729,6 +579,7 @@ const Product = () => {
       apphierId: res.approvalHierarchy,
       description: res.remark,
     };
+    setIsInactivating(true);
     dispatch(inactiveProduct({ data }))
       .unwrap()
       .then(() => {
@@ -752,6 +603,9 @@ const Product = () => {
           });
           setModalError(true);
         }
+      })
+      .finally(() => {
+        setIsInactivating(false);
       });
   };
   const handleOpenModalLock = (data) => {
@@ -846,14 +700,99 @@ const Product = () => {
     return text;
   };
 
-  const itemActions = itemsActionView(
-    handleOpenModalInactivate,
-    handleApprovalHistory,
-    handleOpenModalLock,
+  // Same icon component/style as Pricing.js's table (nxGetAccountActions) —
+  // Activate/Lock keep Product's own eligibility rules, overridden after the
+  // shared action list is built so the markup stays identical.
+  const itemActions = nxGetAccountActions({
+    handleView: (record) =>
+      navigate(PRODUCT_PROMO_ROUTES.DETAIL_PRODUCT, { state: { id: record?.id } }),
+    handleCreate: () =>
+      navigate(PRODUCT_PROMO_ROUTES.CREATE_PRODUCT, { state: { prevPage: "table-product" } }),
     handleDownload,
-    dataUser,
     loadingDownload,
-  );
+    handleActivate: handleOpenModalInactivate,
+    handleApprovalHistory,
+    handleLock: handleOpenModalLock,
+  }).map((item) => {
+    if (item.action === "Activate") {
+      return {
+        ...item,
+        render: (record, actionLength, index) => {
+          const isActivateOrInactivate =
+            (record.approvalStatus === "APPROVED" && record.status === "ACTIVE") ||
+            (record.approvalStatus === "DRAFT" && record.status === "ACTIVE") ||
+            (record.approvalStatus === "REJECTED" && record.status === "ACTIVE");
+          const isInactive = record.status !== "ACTIVE";
+
+          return actionLength > 3 ? (
+            <ButtonComponent
+              icon={
+                <Checkbox
+                  className="inactive-check"
+                  disabled={!isActivateOrInactivate}
+                  checked={isInactive}
+                />
+              }
+              border={false}
+              disabled={!isActivateOrInactivate}
+              onClick={() => handleOpenModalInactivate(record)}
+            >
+              <span className="text-black ml-5">
+                {isInactive ? "Activate" : "Inactivate"}
+              </span>
+            </ButtonComponent>
+          ) : (
+            <Tooltip
+              title={isInactive ? "Activate" : "Inactivate"}
+              key={`table-action-${index}`}
+            >
+              <Checkbox
+                className="inactive-check"
+                onClick={() => handleOpenModalInactivate(record)}
+                disabled={!isActivateOrInactivate}
+                checked={isInactive}
+              />
+            </Tooltip>
+          );
+        },
+      };
+    }
+    if (item.action === "Lock") {
+      return {
+        ...item,
+        render: (record, actionLength, index) => {
+          const isLocked = record?.lockStatus === "Y";
+          const isEditable =
+            record.status !== "INACTIVE" &&
+            (!record.lockedBy || record.lockedBy === dataUser?.data?.username);
+
+          return actionLength > 3 ? (
+            <ButtonComponent
+              icon={<Switch className="inactive-check" checked={isLocked} />}
+              border={false}
+              disabled={!isEditable}
+              onClick={() => handleOpenModalLock(record)}
+            >
+              <span className="text-black">{isLocked ? "Unlock" : "Lock"}</span>
+            </ButtonComponent>
+          ) : (
+            <Tooltip
+              title={isLocked ? "Unlock" : "Lock"}
+              key={`table-action-${index}`}
+            >
+              <Switch
+                className="inactive-check"
+                checked={isLocked}
+                disabled={!isEditable}
+                onClick={() => handleOpenModalLock(record)}
+              />
+            </Tooltip>
+          );
+        },
+      };
+    }
+    return item;
+  });
 
   const actionCols = useColumnActionPermission(
     ["view", "Lock", "Activate", "History"],
@@ -911,6 +850,7 @@ const Product = () => {
         openModalInactivate={openModalInactivate}
         handleCloseModalInactivate={handleCancelModalInactivate}
         onFinish={handleSubmitModalInactivate}
+        loading={isInactivating}
       />
       <ModalWarningConfirmation
         header={`${
