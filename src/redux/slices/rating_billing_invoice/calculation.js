@@ -29,7 +29,7 @@ const initialState = {
   list_calculation_log: [],
   list_calculation_logp: [],
   list_calculation_result: [],
-  list_calculation_no_paging: [],
+  list_calculation_no_paging: { result: [], page: {} },
   data_user_calculation: {},
   filters: {
     calculation_list: {
@@ -1251,7 +1251,7 @@ const calculationSlice = createSlice({
     },
     [getDetailCalculationResultNoPaging.fulfilled]: (state, action) => {
       state.loadingResult = false;
-      state.list_calculation_no_paging = action.payload;
+      state.list_calculation_no_paging = action.payload?.data || action.payload;
     },
     [getDetailCalculationResultNoPaging.rejected]: (state) => {
       state.loadingResult = false;

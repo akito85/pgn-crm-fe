@@ -21,6 +21,7 @@ import { columnsCalculation } from "./Table/TableCalculation";
 import CardContainer from "../../../../../components/CardContainer";
 import CollapsibleContainer from "../../../../../components/CollapsibleContainer";
 import DetailLog from "./DetailLog";
+import StatusComponent from "../../../../../components/StatusComponent";
 
 const DetailInformation = ({ data }) => {
   // Selector
@@ -81,61 +82,65 @@ const DetailInformation = ({ data }) => {
     );
   }, [data?.calCode, dispatch]);
 
-  // Initial fetch dengan 100 data
   useEffect(() => {
-    if (data?.calCode && activeTab) {
-      const reqSearch = encodeURIComponent(JSON.stringify(search));
-      dispatch(
-        getDetailCalculationResult({
-          calCode: data?.calCode,
-          calType: activeTab === "rating" ? 621 : 623,
-          page: 1,
-          pageSize: 100, // Initial load 100 data
-          sort,
-          search: reqSearch,
-          isLoadMore: false,
-        }),
-      );
-      setPage(1);
-    }
-  }, [activeTab, dispatch, data, search, sort]);
+    if (!data?.calCode || !data?.calType) return;
 
-  useEffect(() => {
-    if (data?.calCode && activeTab) {
-      dispatch(
-        getDetailCalculationResultNoPaging({
-          calCode: data?.calCode,
-          calType: activeTab === "rating" ? 621 : 623,
-        }),
-      );
-    }
-  }, [dispatch, activeTab, data]);
+    let tab;
+    if (data.calType === 621) tab = "rating";
+    else if (data.calType === 623) tab = "billing";
+    else if (data.calType === 624) tab = "rating & billing";
+    else return;
 
-  useEffect(() => {
-    if (data?.calType === 621) {
-      setActiveTab("rating");
-    } else if (data?.calType === 623) {
-      setActiveTab("billing");
-    } else if (data?.calType === 624) {
-      setActiveTab("rating & billing");
-    }
-  }, [data]);
+    setActiveTab(tab);
+
+    const calType = data.calType === 621 ? 621 : 623;
+    const reqSearch = encodeURIComponent(JSON.stringify(search));
+
+    dispatch(
+      getDetailCalculationResult({
+        calCode: data.calCode,
+        calType,
+        page: 1,
+        pageSize: 100,
+        sort,
+        search: reqSearch,
+        isLoadMore: false,
+      }),
+    );
+    setPage(1);
+
+    dispatch(
+      getDetailCalculationResultNoPaging({
+        calCode: data.calCode,
+        calType,
+      }),
+    );
+  }, [data?.calCode, data?.calType, search, sort, dispatch]);
 
   // Get latest calculation log data
   const latestLogData = useMemo(() => {
     return list_calculation_log?.result?.[0] || null;
   }, [list_calculation_log]);
 
-  // Handle tab change
+  // Handle tab change (only used for calType 624 where tabs can be switched)
   const handleTabChange = (key) => {
-    setActiveTab((prevState) => {
-      if (key !== prevState) {
-        setPage(1);
-        setSearch({});
-        setSort("");
-      }
-      return key;
-    });
+    if (key === activeTab) return;
+    setActiveTab(key);
+    setPage(1);
+    setSearch({});
+    setSort("");
+    const calType = key === "rating" ? 621 : 623;
+    dispatch(
+      getDetailCalculationResult({
+        calCode: data?.calCode,
+        calType,
+        page: 1,
+        pageSize: 100,
+        sort: "",
+        search: encodeURIComponent(JSON.stringify({})),
+        isLoadMore: false,
+      }),
+    );
   };
 
   // Prepare tab items
@@ -299,7 +304,10 @@ const DetailInformation = ({ data }) => {
   };
 
   const filterDataRecalculate = useMemo(() => {
-    const filtered = (list_calculation_no_paging || [])
+    const source = Array.isArray(list_calculation_no_paging)
+      ? list_calculation_no_paging
+      : list_calculation_no_paging?.result || [];
+    const filtered = source
       .filter((item) => item.calType !== 624 && !item.isTry)
       ?.map((item) => {
         return Object.fromEntries(
@@ -571,6 +579,11 @@ const DetailInformation = ({ data }) => {
                           </DetailText>
                           <DetailText label={"Account Group Type"}>
                             {data?.accGroupType}
+                          </DetailText>
+                          <DetailText label={"Status"}>
+                            <StatusComponent colour={data?.status} size="small">
+                              {data?.status}
+                            </StatusComponent>
                           </DetailText>
                           <DetailText label={"Specific Customer Account"}>
                             {data?.specCustacc}
