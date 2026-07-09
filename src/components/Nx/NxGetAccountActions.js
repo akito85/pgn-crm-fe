@@ -1,4 +1,4 @@
-import { Button, Checkbox, Tooltip } from "antd";
+import { Button, Checkbox, Switch, Tooltip } from "antd";
 import SVGIcon from "../../assets/Icon/index";
 import { Fragment } from "react";
 import { UploadOutlined } from "@ant-design/icons";
@@ -20,7 +20,8 @@ const nxGetAccountActions = ({
   handleDelete = () => {},
   handleUpload = () => {},
   handleForwardTask = () => {},
-  handleTerminate = () => {}
+  handleTerminate = () => {},
+  handleLock = () => {}
 }) => [
   {
     action: "Download",
@@ -156,6 +157,38 @@ const nxGetAccountActions = ({
             >
               <SVGIcon name="IconEdit" width={20} />
             </Button>
+          </Tooltip>
+        );
+
+      return <Fragment key={`table-action-${index}`}>{content}</Fragment>;
+    }
+  },
+  {
+    action: "Lock",
+    type: "table",
+    render: (record, actionLength, index) => {
+      const isLocked = record?.lockStatus === "Y";
+
+      const content =
+        actionLength > 3 ? (
+          <Button
+            icon={<Switch className="inactive-check" checked={isLocked} />}
+            border={false}
+            onClick={() => handleLock(record)}
+            type={"action"}
+          >
+            {isLocked ? "Unlock" : "Lock"}
+          </Button>
+        ) : (
+          <Tooltip
+            title={isLocked ? "Unlock" : "Lock"}
+            key={`table-action-${index}`}
+          >
+            <Switch
+              className="inactive-check"
+              checked={isLocked}
+              onClick={() => handleLock(record)}
+            />
           </Tooltip>
         );
 

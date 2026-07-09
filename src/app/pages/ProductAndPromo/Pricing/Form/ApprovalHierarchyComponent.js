@@ -5,6 +5,8 @@ import TablePagination from "../../../../../components/TablePagination";
 import { requiredMessage } from "../../../../../utils";
 import { getColumnSearchProps } from "../../../../../utils/getColumnSearchProps";
 import DetailText from "../../../../../components/DetailText";
+import NxTable from "../../../../../components/Nx/NxTable";
+import { useSelector } from "react-redux";
 
 const dummyOptions = [
   {
@@ -237,6 +239,8 @@ const ApprovalHierarchyComponent = ({
     updateSelectHierarchy(value);
     return value;
   };
+  const { data: dataUser = {} } = useSelector((state) => state.profile);
+  
   return (
     <Fragment>
       {showSelect ? (
@@ -263,7 +267,11 @@ const ApprovalHierarchyComponent = ({
         <DetailText label={"Approval Hierarchy:"}>{approvalName}</DetailText>
       ) : null}
       {selectedHierarchy && dataTable.length > 0 ? (
-        <TablePagination
+        <NxTable
+          idTable={"approval-hierarchy-table-modal"}
+          userId={dataUser?.data?.username}
+          showAdvanceSearch={false}
+          showSearchBar={false}
           useSelect={false}
           usePagination={false}
           dataSource={dataTable}
