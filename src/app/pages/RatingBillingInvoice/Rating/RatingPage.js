@@ -26,9 +26,6 @@ const RatingPage = () => {
   );
 
   const dispatch = useDispatch();
-
-  // Fetch global format number config (IDR, USD, USAGE, TEMPERATUR, dll.)
-  // Hanya fetch sekali jika config belum ada di Redux
   useFormatNumberConfig();
   const searchInput = useRef(null);
   const dataSource = data?.result;
