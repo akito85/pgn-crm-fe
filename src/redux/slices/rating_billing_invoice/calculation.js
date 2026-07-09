@@ -52,11 +52,14 @@ const initialState = {
 // pagination slice
 export const getCalculationPaginate = createAsyncThunk(
   "GET_CALCULATION_PAGINATE",
-  async ({ search, page, pageSize, sort, isLoadMore = false }, thunkAPI) => {
+  async ({ search, page, pageSize, sort, billPeriodId, isLoadMore = false }, thunkAPI) => {
     try {
       const searchParams = search || "";
       const sortParams = sort || "generateDate~desc";
-      const url = `/v1/dbs/api/rbi/calculation/list-calculationjob?sort=${sortParams}&size=${pageSize}&page=${page}&searchs=${searchParams}`;
+      let url = `/v1/dbs/api/rbi/calculation/list-calculationjob?sort=${sortParams}&size=${pageSize}&page=${page}&searchs=${searchParams}`;
+      if (billPeriodId) {
+        url += `&billPeriodId=${billPeriodId}`;
+      }
       const response = await ratingBillingHttpService.getPagination(url);
 
       // Return data dengan flag isLoadMore

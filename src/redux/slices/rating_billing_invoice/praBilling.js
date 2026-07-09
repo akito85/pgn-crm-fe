@@ -213,7 +213,7 @@ export const getListBillingPeriodForPrabilling = createAsyncThunk(
   "GET_LIST_BILLING_PERIOD_FOR_RATING",
   async (_, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/rbi/calculation/billingperiod/1`;
+      const url = `/v1/dbs/api/billingperiod/open-lov`;
       const response = await ratingBillingHttpService.getAll(url);
       const rawData =
         response?.body?.data?.data ||

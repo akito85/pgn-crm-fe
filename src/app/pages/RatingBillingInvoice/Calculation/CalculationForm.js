@@ -79,6 +79,7 @@ const CalculationForm = ({ type }) => {
     accountGroupTypeId: [],
     search: "",
     limit: DEFAULT_SEARCH_LIMIT,
+    billingPeriod: null,
   });
 
   const [remark, setRemark] = useState("");
@@ -157,6 +158,7 @@ const CalculationForm = ({ type }) => {
     dataSpecificCustomer.accountGroupTypeId,
     dataSpecificCustomer.search,
     dataSpecificCustomer.limit,
+    dataSpecificCustomer.billingPeriod,
   ]);
 
   useEffect(() => {
@@ -275,6 +277,7 @@ const CalculationForm = ({ type }) => {
       accountGroupTypeId: [],
       search: "",
       limit: DEFAULT_SEARCH_LIMIT,
+      billingPeriod: null,
     });
 
     setSelectedCustomersMap({});
@@ -450,6 +453,20 @@ const CalculationForm = ({ type }) => {
     dispatch(getListBillingPeriod(e));
   };
 
+  const handleChangeBillingPeriod = (e) => {
+    setDataSpecificCustomer((prevState) => {
+      return {
+        ...prevState,
+        billingPeriod: e,
+        search: "",
+        limit: DEFAULT_SEARCH_LIMIT,
+      };
+    });
+    setSearchCustomerValue("");
+    setFilteredCustomerList([]);
+    form.resetFields(["specificCustomer"]);
+  };
+
   const handleChangeSOR = (e) => {
     setDataSpecificCustomer((prevState) => {
       return {
@@ -616,6 +633,7 @@ const CalculationForm = ({ type }) => {
               >
                 <SelectComponent
                   disabled={!billingCycle}
+                  onChange={handleChangeBillingPeriod}
                   options={
                     billingCycle
                       ? list_billing_period?.data?.map((item) => {

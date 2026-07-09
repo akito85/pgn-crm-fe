@@ -76,6 +76,7 @@ const PrabillingForm = ({ type }) => {
     accountGroupTypeId: [],
     search: "",
     limit: DEFAULT_SEARCH_LIMIT,
+    billingPeriod: null,
   });
 
   const [remark, setRemark] = useState("");
@@ -154,6 +155,7 @@ const PrabillingForm = ({ type }) => {
     dataSpecificCustomer.accountGroupTypeId,
     dataSpecificCustomer.search,
     dataSpecificCustomer.limit,
+    dataSpecificCustomer.billingPeriod,
   ]);
 
   useEffect(() => {
@@ -274,6 +276,7 @@ const PrabillingForm = ({ type }) => {
       accountGroupTypeId: [],
       search: "",
       limit: DEFAULT_SEARCH_LIMIT,
+      billingPeriod: null,
     });
     setSelectedCustomersMap({});
   };
@@ -471,6 +474,20 @@ const PrabillingForm = ({ type }) => {
   const handleChangeBillingCycle = (e) => {
     setBillingCycle(e);
     dispatch(getListBillingPeriod(e));
+  };
+
+  const handleChangeBillingPeriod = (e) => {
+    setDataSpecificCustomer((prevState) => {
+      return {
+        ...prevState,
+        billingPeriod: e,
+        search: "",
+        limit: DEFAULT_SEARCH_LIMIT,
+      };
+    });
+    setSearchCustomerValue("");
+    setFilteredCustomerList([]);
+    form.resetFields(["specificCustomer"]);
   };
 
   const handleChangeSOR = (e) => {
@@ -702,6 +719,7 @@ const PrabillingForm = ({ type }) => {
               >
                 <SelectComponent
                   disabled={!billingCycle}
+                  onChange={handleChangeBillingPeriod}
                   options={
                     billingCycle
                       ? list_billing_period?.data?.map((item) => {

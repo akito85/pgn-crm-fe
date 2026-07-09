@@ -57,6 +57,7 @@ const CalculationPage = () => {
   const [searchText, setSearchText] = useState(
     filters[currentTabKey]?.searchText || "",
   );
+  const [selectedBillingPeriod, setSelectedBillingPeriod] = useState(null);
 
   const [fixedColumns, setFixedColumns] = useState(() => {
     try {
@@ -108,29 +109,33 @@ const CalculationPage = () => {
   }, [tabHeader, filters, currentTabKey]);
 
   useEffect(() => {
-    if (tabHeader === "Calculation List") {
-      dispatch(
-        getCalculationPaginate({
-          search: encodeURIComponent(JSON.stringify(search)),
-          page: 1,
-          pageSize: 100, // Initial load 100 data
-          sort,
-          isLoadMore: false, // Flag untuk initial load
-        }),
-      );
-    } else {
-      dispatch(
-        getHistoryCalculationPaginate({
-          search: encodeURIComponent(JSON.stringify(search)),
-          page: 1,
-          pageSize: 100, // Initial load 100 data
-          sort,
-          isLoadMore: false, // Flag untuk initial load
-        }),
-      );
+    if (selectedBillingPeriod) {
+      if (tabHeader === "Calculation List") {
+        dispatch(
+          getCalculationPaginate({
+            search: encodeURIComponent(JSON.stringify(search)),
+            page: 1,
+            pageSize: 100, // Initial load 100 data
+            sort,
+            billPeriodId: selectedBillingPeriod,
+            isLoadMore: false, // Flag untuk initial load
+          }),
+        );
+      } else {
+        const finalSearch = { ...search, billingPeriod: selectedBillingPeriod };
+        dispatch(
+          getHistoryCalculationPaginate({
+            search: encodeURIComponent(JSON.stringify(finalSearch)),
+            page: 1,
+            pageSize: 100, // Initial load 100 data
+            sort,
+            isLoadMore: false, // Flag untuk initial load
+          }),
+        );
+      }
+      setPage(1);
     }
-    setPage(1);
-  }, [dispatch, search, sort, tabHeader]);
+  }, [dispatch, search, sort, tabHeader, selectedBillingPeriod]);
 
   // PERUBAHAN: Reset page ke 1 saat search
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -180,13 +185,15 @@ const CalculationPage = () => {
           page: nextPage,
           pageSize: loadMoreSize,
           sort,
+          billPeriodId: selectedBillingPeriod,
           isLoadMore: true,
         }),
       );
     } else {
+      const finalSearch = { ...search, billingPeriod: selectedBillingPeriod };
       await dispatch(
         getHistoryCalculationPaginate({
-          search: encodeURIComponent(JSON.stringify(search)),
+          search: encodeURIComponent(JSON.stringify(finalSearch)),
           page: nextPage,
           pageSize: loadMoreSize,
           sort,
@@ -211,13 +218,15 @@ const CalculationPage = () => {
           page: 1,
           pageSize: initialPageSize,
           sort,
+          billPeriodId: selectedBillingPeriod,
           isLoadMore: false,
         }),
       );
     } else {
+      const finalSearch = { ...search, billingPeriod: selectedBillingPeriod };
       dispatch(
         getHistoryCalculationPaginate({
-          search: encodeURIComponent(JSON.stringify(search)),
+          search: encodeURIComponent(JSON.stringify(finalSearch)),
           page: 1,
           pageSize: initialPageSize,
           sort,
