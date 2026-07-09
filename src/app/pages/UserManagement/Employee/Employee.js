@@ -60,6 +60,7 @@ const Employee = () => {
 
   // Local loading flag — cleared AFTER setAllData so no spinner-gone/empty-table flash
   const [isLoading, setIsLoading] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   // Terminate modal state
   const [modalTerm, setModalTerm] = useState(false);
@@ -205,16 +206,23 @@ const Employee = () => {
     fetchPage(0, true, signal);
   }, [fetchPage]);
 
-  const handleDownload = useCallback(() => {
-    dispatch(downloadEmployee({
-      page: 0,
-      pageSize,
-      sort,
-      search,
-      searchText,
-      filters: advancedSearch?.filters ?? [],
-      filterRules: advancedSearch?.filterRules ?? [],
-    }));
+  const handleDownload = useCallback(async () => {
+    setIsDownloading(true);
+    try {
+      await dispatch(downloadEmployee({
+        page: 0,
+        pageSize,
+        sort,
+        search,
+        searchText,
+        filters: advancedSearch?.filters ?? [],
+        filterRules: advancedSearch?.filterRules ?? [],
+      })).unwrap();
+    } catch {
+      // errors are already surfaced via validateError in the thunk
+    } finally {
+      setIsDownloading(false);
+    }
   }, [search, searchText, advancedSearch, pageSize, sort, dispatch]);
 
   const handleRetry = () => {
@@ -244,13 +252,14 @@ const Employee = () => {
     handleUpdate: (record) =>
       navigate(USER_ROUTES.UPDATE_EMPLOYEE, { state: { id: record?.employeeCode } }),
     handleDownload,
+    loadingDownload: isDownloading,
     handleUpload: () => navigate(USER_ROUTES.UPLOAD_EMPLOYEE),
     handleForwardTask: () => navigate(USER_ROUTES.FORWARD_TASK),
     handleTerminate: (record) => {
       setEmpId(record?.employeeId);
       setModalTerm(true);
     }
-  }), [navigate, handleDownload]);
+  }), [navigate, handleDownload, isDownloading]);
 
   return (
     <>

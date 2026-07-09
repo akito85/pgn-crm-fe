@@ -260,7 +260,6 @@ const InvoiceRelationDetail = ({
                     </Button>
                     <Button
                       type="approve"
-                      icon={<SVGIcon width={14} height={14} name="IconSquareCheck" />}
                       className="flex-row-reverse"
                       onClick={() => handleApprovalModal(true, "approve")}
                     >

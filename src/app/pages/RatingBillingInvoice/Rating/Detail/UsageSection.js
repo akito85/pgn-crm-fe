@@ -43,7 +43,6 @@ const UsageSection = ({
     right: [],
   }));
 
-  // Initial fetch / re-fetch saat filter/sort berubah
   useEffect(() => {
     dispatch(
       getAllUsageServiceAgreementPaginate({
@@ -54,7 +53,7 @@ const UsageSection = ({
         sort,
         billPeriod,
         accountNumber,
-        isLoadMore: false, // reset data
+        isLoadMore: false,
         calculationCode: calculationCode,
       }),
     );
@@ -85,7 +84,7 @@ const UsageSection = ({
           sort,
           billPeriod,
           accountNumber,
-          isLoadMore: true, // accumulate data
+          isLoadMore: true,
         }),
       );
       setPage(nextPage);

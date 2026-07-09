@@ -50,7 +50,7 @@ const PositionHierarchyPage = () => {
   }, [rawToken]);
 
   // Pagination & filter state
-  const [pageSize, setPageSize] = useState(30);
+  const [pageSize, setPageSize] = useState(20);
   const [sort, setSort] = useState("");
   const [search, setSearch] = useState({});
   const [advancedSearch, setAdvancedSearch] = useState(null);

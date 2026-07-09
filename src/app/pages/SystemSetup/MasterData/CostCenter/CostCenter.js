@@ -12,300 +12,367 @@ import {
   getCostCenterDetail,
   downloadMasterCostCenter,
 } from "../../../../../redux/slices/system_setup/master_data/master_cost_center";
-import { DownloadOutlined } from "@ant-design/icons";
-import { Spin, Form, Tooltip } from "antd";
+import { DownloadOutlined, PlusOutlined } from "@ant-design/icons";
+import { Form, Spin, Tooltip } from "antd";
 import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
+import NxCardContainer from "../../../../../components/Nx/NxCardContainer";
+import NxTable from "../../../../../components/Nx/NxTable";
 import { NavLink, Link } from "react-router-dom";
-import SVGIcon from "../../../../../assets/Icon/index";
 import IconViewList from "../../../../../assets/Icon/Nx/IconViewList";
 import IconEditNx from "../../../../../assets/Icon/Nx/IconEdit";
 import IconActive from "../../../../../assets/icons/nx/IconActive";
 import IconInactive from "../../../../../assets/icons/nx/IconInactive";
 import { SYSTEM_SETUP_ROUTES } from "../../../../../routes/system_setup/setup_routes";
 import DetailCostCenter from "./DetailCostCenter";
-import { hasValue, renderColumn } from "../../../../../utils";
+import { renderColumn } from "../../../../../utils";
 import Toolbar from "../../../../../components/Toolbar";
 import { useColumnActionPermission } from "../../../../../components/ColumnActionPermission";
 import { useTryAgainHooks } from "../../../../../utils/useTryAgainHooks";
 import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrReject";
-import { getColumnSearchPropsUseFilteredValue } from "../../../../../utils/getColumnSearchProps";
-import TableRBI from "../../../../../components/TableRBI";
-import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
-import CardContainer from "../../../../../components/CardContainer";
+import { getColumnSearchPropsPaging } from "../../../../../utils/getColumnSearchProps";
 
 const CostCenter = () => {
   const dispatch = useDispatch();
   const [form] = Form.useForm();
-  const { data, loading, data_detail } = useSelector(
-    (state) => state.master_cost_center
-  );
+  const { data_detail } = useSelector((state) => state.master_cost_center);
   const { bodyError } = useSelector((state) => state?.general);
 
-  // use state
-  const searchInput = useRef(null);
-  const dataSource = data?.result;
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const [costCenterId, setCostCenterId] = useState("");
-  const [searchText, setSearchText] = useState("");
-  const [searchedColumn, setSearchedColumn] = useState("");
-  const [search, setSearch] = useState({});
+  // Pagination & filter state
+  const [pageSize, setPageSize] = useState(20);
   const [sort, setSort] = useState("");
-  const [activeOrInactive, setActiveOrInactive] = useState("");
+  const [search, setSearch] = useState({});
+  // No setter wired up on purpose — see the NxTable usage below for why.
+  const [fixedColumns] = useState({ left: [], right: [] });
+
+  // Advance search (filter builder) + top free-text search bar state
+  const [filters, setFilters] = useState([]);
+  const [filterRules, setFilterRules] = useState([]);
+  const [globalSearchText, setGlobalSearchText] = useState("");
+
+  // Column-level filter state
+  const searchInput = useRef(null);
+  const [searchedColumn, setSearchedColumn] = useState("");
+  const [searchText, setSearchText] = useState("");
+
+  // Local data state — avoids the stale Redux data / spinner flash
+  const [allData, setAllData] = useState([]);
+  const [totalElements, setTotalElements] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
+
+  // Local loading flags — cleared AFTER setAllData so no spinner-gone/empty-table flash
+  const [isLoading, setIsLoading] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [detailLoadingId, setDetailLoadingId] = useState(null);
+
+  // Modal state
   const [modalDetail, setModalDetail] = useState(false);
   const [modalConfirm, setModalConfirm] = useState(false);
-  const [body, setBody] = useState({});
+  const [costCenterId, setCostCenterId] = useState("");
+  const [activeOrInactive, setActiveOrInactive] = useState("");
   const [record, setRecord] = useState({});
-  const [fixedColumns, setFixedColumns] = useState(() => ({
-    left: ["no"],
-    right: ["status", "action"],
-  }));
+  const [body, setBody] = useState({});
 
-  // handle fetch
-  const handleFetch = useCallback(() => {
-    dispatch(
-      getAllCostCenter({
-        search: encodeURIComponent(JSON.stringify(search)),
-        page,
-        pageSize,
-        sort,
-      })
-    );
-  }, [dispatch, page, pageSize, search, sort]);
+  // Refs for safe access inside callbacks without stale closures
+  const pageRef = useRef(0); // 0-based internal; API receives page + 1 (cost center API is 1-based)
+  const isFetchingRef = useRef(false);
+  const hasMoreRef = useRef(false);
 
-  // use effect
-  useEffect(() => {
-    handleFetch();
-  }, [handleFetch]);
+  const { data: dataUser = {} } = useSelector((state) => state.profile);
 
-  // handle search
-  const handleSearch = (selectedKeys, confirm, dataIndex) => {
-    confirm();
-    setSearchText(selectedKeys[0]);
-    setSearchedColumn(dataIndex);
-    setSearch((prevState) => {
-      if (prevState[dataIndex] !== selectedKeys[0]) {
-        setPage(1);
+  // Fetch a single page and append (replace=true) or append to allData.
+  // Mirrors PositionPage.js's fetchPage: the signal object lets the caller cancel a
+  // stale fetch without disrupting isFetchingRef, so the guard stays coherent
+  // across StrictMode double-mounts and rapid filter changes.
+  const fetchPage = useCallback(
+    async (page, replace = false, signal = null) => {
+      if (isFetchingRef.current) return;
+      if (signal?.aborted) return;
+      isFetchingRef.current = true;
+      setIsLoading(true);
+      try {
+        const result = await dispatch(
+          getAllCostCenter({
+            search,
+            searchText: globalSearchText,
+            page: page + 1, // cost center API is 1-based
+            pageSize,
+            sort,
+            filters,
+            filterRules,
+          })
+        ).unwrap();
+        if (signal?.aborted) return;
+        const rows = result?.result ?? [];
+        const pageInfo = result?.page ?? {};
+        const nextHasMore = page < (pageInfo.totalPages ?? 0) - 1;
+        setAllData((prev) => (replace ? rows : [...prev, ...rows]));
+        setTotalElements(pageInfo.totalElements ?? 0);
+        setHasMore(nextHasMore);
+        hasMoreRef.current = nextHasMore;
+        pageRef.current = page;
+      } catch (e) {
+        if (!signal?.aborted) console.error("fetchPage error", e);
+      } finally {
+        isFetchingRef.current = false;
+        if (!signal?.aborted) setIsLoading(false);
       }
-      return {
-        ...prevState,
-        [dataIndex]: selectedKeys[0],
-      };
-    });
+    },
+    [search, sort, pageSize, dispatch, globalSearchText, filters, filterRules]
+  );
+
+  // Initial load and reload on filter / sort / pageSize change.
+  // Signal is aborted on cleanup to discard stale results.
+  useEffect(() => {
+    const signal = { aborted: false };
+    pageRef.current = 0;
+    setAllData([]);
+    setHasMore(false);
+    setIsLoading(true);
+    fetchPage(0, true, signal);
+    return () => {
+      signal.aborted = true;
+      isFetchingRef.current = false;
+    };
+  }, [search, sort, pageSize, globalSearchText, filters, filterRules]); // intentionally exclude fetchPage to avoid loop
+
+  const onLoadMore = useCallback(() => {
+    if (!hasMoreRef.current || isFetchingRef.current) return;
+    return fetchPage(pageRef.current + 1, false);
+  }, [fetchPage]);
+
+  const handleRefresh = useCallback(() => {
+    const signal = { aborted: false };
+    pageRef.current = 0;
+    setAllData([]);
+    setHasMore(false);
+    setIsLoading(true);
+    fetchPage(0, true, signal);
+  }, [fetchPage]);
+
+  const handleSizeChanger = (_, pageSizeChange) => {
+    setPageSize(pageSizeChange);
   };
 
-  // base columns
-  const baseColumns = useMemo(
+  // handle advance search (filter builder modal) — searchData is null when cleared
+  const handleAdvancedSearch = useCallback((searchData) => {
+    setFilters(searchData?.filters || []);
+    setFilterRules(searchData?.filterRules || []);
+  }, []);
+
+  // handle top free-text search bar
+  const handleSearchBar = useCallback((value) => {
+    setGlobalSearchText(value || "");
+  }, []);
+
+  const onSort = (_, __, sortInfo) => {
+    const dataSort =
+      sortInfo.order !== undefined
+        ? `${sortInfo.field}~${sortInfo.order === "ascend" ? "asc" : "desc"}`
+        : "";
+    setSort(dataSort);
+  };
+
+  // handle column-level search
+  const handleSearch = useCallback((selectedKeys, confirm, dataIndex) => {
+    confirm();
+    setSearchText(selectedKeys[0] || "");
+    setSearchedColumn(dataIndex);
+    setSearch((prev) => {
+      const next = { ...prev };
+      if (selectedKeys[0]) {
+        next[dataIndex] = selectedKeys[0];
+      } else {
+        delete next[dataIndex];
+      }
+      return next;
+    });
+  }, []);
+
+  // handle detail
+  const handleDetail = useCallback(async (id) => {
+    if (detailLoadingId) return;
+    setDetailLoadingId(id);
+    try {
+      setBody(id);
+      await dispatch(getCostCenterDetail(id))?.unwrap();
+      setModalDetail(true);
+    } catch (error) {
+      setModalDetail(false);
+    } finally {
+      setDetailLoadingId(null);
+    }
+  }, [dispatch, detailLoadingId]);
+
+  // handle cancel modals
+  const handleCancelModal = () => {
+    setModalConfirm(false);
+    setModalDetail(false);
+    form.resetFields();
+    handleCancelTryAgain();
+    setRecord({});
+  };
+
+  // handle download
+  const buildBodyDownload = useCallback(
+    (pageNum) => ({
+      page: pageNum,
+      // Download always fetches every matching record regardless of the
+      // infinite-scroll page size in view — totalElements reflects the full
+      // count for the current search/filters.
+      pageSize: totalElements || pageSize,
+      sort,
+      search,
+      searchText: globalSearchText,
+      filters,
+      filterRules,
+    }),
+    [sort, search, globalSearchText, filters, filterRules, totalElements, pageSize]
+  );
+
+  const handleDownload = useCallback(async () => {
+    setIsDownloading(true);
+    try {
+      await dispatch(downloadMasterCostCenter({ ...buildBodyDownload(1) })).unwrap();
+    } catch {
+      // errors are already surfaced via validateError in the thunk
+    } finally {
+      setIsDownloading(false);
+    }
+  }, [dispatch, buildBodyDownload]);
+
+  // on click activation
+  const onClick = (r) => {
+    if (r?.status === "ACTIVE") {
+      setActiveOrInactive("Inactivate");
+    }
+    if (r?.status === "INACTIVE") {
+      setActiveOrInactive("Activate");
+    }
+    setModalConfirm(true);
+    setCostCenterId(r?.ccId);
+    setRecord(r);
+  };
+
+  // handle confirm activation
+  const handleConfirm = async (formValue, handleClearRemark) => {
+    const data = {
+      id: costCenterId,
+      remark: formValue?.remark,
+      status: activeOrInactive,
+    };
+    setBody(data);
+    try {
+      await dispatch(activateCostCenter(data))?.unwrap();
+      handleRefresh();
+    } finally {
+      // Close only the local confirmation modal here — handleCancelModal()
+      // also clears general.bodySuccess, which would wipe the success
+      // message the activateCostCenter thunk just set via showModalSuccess.
+      handleClearRemark();
+      setModalConfirm(false);
+      setRecord({});
+      form.resetFields();
+    }
+  };
+
+  // handle retry modal error
+  const handleRetry = () => {
+    if (bodyError?.action === "ACTIVATE_COST_CENTER") {
+      dispatch(activateCostCenter(body));
+    } else if (bodyError?.action === "DOWNLOAD_MASTER_COST_CENTER") {
+      handleDownload();
+    } else if (bodyError?.action === "GET_COST_CENTER_DETAIL") {
+      dispatch(getCostCenterDetail(body));
+    }
+    handleCancelModal();
+    handleRefresh();
+  };
+
+  const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
+
+  // columns
+  const columns = useMemo(
     () => [
       {
-        key: "no",
         title: "NO",
-        dataIndex: "key",
-        align: "center",
         width: 90,
-        render: (text, object, index) => (page - 1) * pageSize + index + 1,
+        align: "center",
+        key: "no",
+        fixed: "left",
+        render: (text, object, index) => index + 1,
       },
       {
-        key: "code",
         title: "CODE",
         dataIndex: "code",
+        key: "code",
         align: "center",
         sorter: true,
-        filteredValue: [search?.code] || null,
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
-          "code",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
-        ),
-        render: (text) =>
-          renderColumn(
-            "code",
-            hasValue(search["code"]),
-            searchText,
-            text,
-            false,
-            "input",
-            search
-          ),
+        ...getColumnSearchPropsPaging("code", searchInput, searchedColumn, searchText, handleSearch, true),
+        render: (text) => renderColumn("code", searchedColumn, searchText, text, false, "input", search),
       },
       {
-        key: "name",
         title: "COST CENTER NAME",
         dataIndex: "name",
+        key: "name",
         align: "left",
         width: 250,
         sorter: true,
-        filteredValue: [search?.name] || null,
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
-          "name",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
-        ),
-        render: (text) =>
-          renderColumn(
-            "name",
-            hasValue(search["name"]),
-            searchText,
-            text,
-            false,
-            "input",
-            search
-          ),
+        ...getColumnSearchPropsPaging("name", searchInput, searchedColumn, searchText, handleSearch, true),
+        render: (text) => renderColumn("name", searchedColumn, searchText, text, false, "input", search),
       },
       {
-        key: "ccType",
         title: "TYPE",
         dataIndex: "ccType",
+        key: "ccType",
         align: "center",
         sorter: true,
-        filteredValue: [search?.ccType] || null,
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
-          "ccType",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
-        ),
-        render: (text) =>
-          renderColumn(
-            "ccType",
-            hasValue(search["ccType"]),
-            searchText,
-            text,
-            false,
-            "input",
-            search
-          ),
+        ...getColumnSearchPropsPaging("ccType", searchInput, searchedColumn, searchText, handleSearch, true),
+        render: (text) => renderColumn("ccType", searchedColumn, searchText, text, false, "input", search),
       },
       {
-        key: "valName",
         title: "VALUE NAME",
         dataIndex: "valName",
+        key: "valName",
         align: "left",
-        ellipsis: {
-          showTitle: false,
-        },
+        ellipsis: { showTitle: false },
         sorter: true,
-        filteredValue: [search?.valName] || null,
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
-          "valName",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
-        ),
-        render: (text) =>
-          renderColumn(
-            "valName",
-            hasValue(search["valName"]),
-            searchText,
-            text,
-            true,
-            "input",
-            search
-          ),
+        ...getColumnSearchPropsPaging("valName", searchInput, searchedColumn, searchText, handleSearch, true),
+        render: (text) => renderColumn("valName", searchedColumn, searchText, text, true, "input", search),
       },
       {
-        key: "valCode",
         title: "VALUE CODE",
         dataIndex: "valCode",
+        key: "valCode",
         align: "center",
         sorter: true,
-        filteredValue: [search?.valCode] || null,
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
-          "valCode",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
-        ),
-        render: (text) =>
-          renderColumn(
-            "valCode",
-            hasValue(search["valCode"]),
-            searchText,
-            text,
-            false,
-            "input",
-            search
-          ),
+        ...getColumnSearchPropsPaging("valCode", searchInput, searchedColumn, searchText, handleSearch, true),
+        render: (text) => renderColumn("valCode", searchedColumn, searchText, text, false, "input", search),
       },
       {
-        key: "description",
         title: "DESCRIPTION",
         dataIndex: "description",
+        key: "description",
         align: "left",
         width: 300,
         sorter: true,
-        ellipsis: {
-          showTitle: false,
-        },
-        filteredValue: [search?.description] || null,
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
-          "description",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
-        ),
-        render: (text) =>
-          renderColumn(
-            "description",
-            hasValue(search["description"]),
-            searchText,
-            text,
-            true,
-            "input",
-            search
-          ),
+        ellipsis: { showTitle: false },
+        ...getColumnSearchPropsPaging("description", searchInput, searchedColumn, searchText, handleSearch, true),
+        render: (text) => renderColumn("description", searchedColumn, searchText, text, true, "input", search),
       },
       {
-        key: "status",
         title: "STATUS",
         dataIndex: "status",
+        key: "status",
         align: "center",
         width: 100,
         sorter: true,
-        filteredValue: [search?.status] || null,
-        ...getColumnSearchPropsUseFilteredValue(
-          search,
-          "status",
-          searchInput,
-          searchedColumn,
-          searchText,
-          handleSearch,
-          true
-        ),
-        render: (text) =>
-          renderColumn(
-            "status",
-            hasValue(search["status"]),
-            searchText,
-            text,
-            false,
-            "status",
-            search
-          ),
+        fixed: "right",
+        ...getColumnSearchPropsPaging("status", searchInput, searchedColumn, searchText, handleSearch, true),
+        render: (text) => renderColumn("status", searchedColumn, searchText, text, false, "status", search),
       },
     ],
-    [page, pageSize, search, searchText, searchedColumn]
+    [search, searchedColumn, searchText, handleSearch]
   );
 
   // breadcrumb routes
@@ -324,249 +391,148 @@ const CostCenter = () => {
     },
   ];
 
-  // change pagination
-  const handleChangePage = (pageChange, pageSizeChange) => {
-    const tempPage = pageSize !== pageSizeChange ? 1 : pageChange;
-    setPage(tempPage);
-    setPageSize(pageSizeChange);
-  };
-
-  // on click activation
-  const onClick = (r) => {
-    if (r?.status === "ACTIVE") {
-      setActiveOrInactive("Inactivate");
-    }
-    if (r?.status === "INACTIVE") {
-      setActiveOrInactive("Activate");
-    }
-    setModalConfirm(true);
-    setCostCenterId(r?.ccId);
-    setRecord(r);
-  };
-
-  // handle cancel modals
-  const handleCancelModal = () => {
-    setModalConfirm(false);
-    setModalDetail(false);
-    form.resetFields();
-    handleCancelTryAgain();
-    setRecord({});
-  };
-
-  // handle confirm activation
-  const handleConfirm = async (formValue, handleCancel) => {
-    try {
-      const data = {
-        id: costCenterId,
-        remark: formValue?.remark,
-        status: activeOrInactive,
-      };
-      setBody(body);
-      handleCancel();
-      handleCancelModal();
-      await dispatch(activateCostCenter(data))?.unwrap();
-      await handleFetch()?.unwrap();
-    } catch (error) {
-      await handleFetch()?.unwrap();
-    }
-  };
-
-  // handle detail
-  const handleDetail = async (id) => {
-    try {
-      setBody(id);
-      await dispatch(getCostCenterDetail(id))?.unwrap();
-      setModalDetail(true);
-    } catch (error) {
-      setModalDetail(false);
-    }
-  };
-
-  // sorting
-  const onSort = (_, __, sorter) => {
-    const dataSort =
-      sorter.order !== undefined
-        ? `${sorter.field}~${sorter.order === "ascend" ? "asc" : "desc"}`
-        : "";
-    setSort(dataSort);
-  };
-
-  // handle download
-  const handleDownload = () => {
-    dispatch(
-      downloadMasterCostCenter({
-        search: encodeURIComponent(JSON.stringify(search)),
-        page,
-        pageSize,
-        sort,
-      })
-    );
-  };
-
-  // handle retry modal error
-  const handleRetry = () => {
-    try {
-      if (bodyError?.action === "ACTIVATE_COST_CENTER") {
-        dispatch(activateCostCenter({ body: body }));
-      } else if (bodyError?.action === "DOWNLOAD_MASTER_COST_CENTER") {
-        handleDownload();
-      } else {
-        dispatch(getCostCenterDetail(body));
-      }
-      handleFetch();
-      handleCancelModal();
-    } catch (error) {
-      handleFetch();
-    }
-  };
-
-  const { renderModal, handleCancelTryAgain } = useTryAgainHooks(handleRetry);
-
-  // item action
-  const itemActions = [
-    // toolbar items
-    {
-      action: "Download",
-      render: (
-        <ButtonComponent
-          type={"submit"}
-          border={false}
-          icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
-          onClick={() => {
-            handleDownload();
-          }}
-        >
-          Download List
-        </ButtonComponent>
-      ),
-    },
-    {
-      action: "Create",
-      render: (
-        <NavLink to={SYSTEM_SETUP_ROUTES.CREATE_COST_CENTER}>
+  // item toolbar
+  const itemActions = useMemo(
+    () => [
+      {
+        action: "Download",
+        render: (
           <ButtonComponent
-            icon={<SVGIcon name="IconButtonCreate" width={24} />}
-            type="submit"
+            icon={<DownloadOutlined style={{ fontSize: "24px" }} />}
+            type={"submit"}
+            onClick={handleDownload}
+            loading={isDownloading}
+            disabled={isDownloading}
           >
-            Create Cost Center
+            Download List
           </ButtonComponent>
-        </NavLink>
-      ),
-    },
+        ),
+      },
+      {
+        action: "Create",
+        render: (
+          <NavLink to={SYSTEM_SETUP_ROUTES.CREATE_COST_CENTER}>
+            <ButtonComponent
+              type={"submit"}
+              icon={<PlusOutlined style={{ fontSize: "24px" }} />}
+            >
+              Create Cost Center
+            </ButtonComponent>
+          </NavLink>
+        ),
+      },
 
-    // column action
-    {
-      action: "View",
-      type: "table",
-      render: (record, data_length) => {
-        return (
-          <Tooltip title="Detail">
-            <span className="inline-flex items-center text-[#1976D2] hover:text-[#1976D2] transition-colors duration-200 cursor-pointer" onClick={() => handleDetail(record?.ccId)}>
-              <IconViewList width={20} />
-            </span>
-          </Tooltip>
-        );
-      },
-    },
-    {
-      action: "Update",
-      type: "table",
-      render: (record, data_length) => {
-        const disabled = record?.status?.toLowerCase() === "inactive";
-        return (
-          <Tooltip title="Update">
-            <div className={`inline-flex items-center ${disabled ? "cursor-not-allowed text-gray-300" : ""}`}>
-              <Link
-                to={!disabled ? SYSTEM_SETUP_ROUTES.UPDATE_COST_CENTER : undefined}
-                state={!disabled ? { id: record?.ccId } : undefined}
-                className={`inline-flex items-center transition-colors duration-200 ${disabled ? "text-gray-300 pointer-events-none" : "text-[#1976D2] hover:text-[#1976D2]"}`}
+      // column action
+      {
+        action: "View",
+        type: "table",
+        render: (record) => {
+          const isDetailLoading = detailLoadingId === record?.ccId;
+          return (
+            <Tooltip title="Detail">
+              <span
+                className={`inline-flex items-center text-[#1976D2] hover:text-[#1976D2] transition-colors duration-200 ${detailLoadingId ? "cursor-not-allowed" : "cursor-pointer"}`}
+                onClick={() => {
+                  if (detailLoadingId) return;
+                  handleDetail(record?.ccId);
+                }}
               >
-                <IconEditNx width={20} />
-              </Link>
-            </div>
-          </Tooltip>
-        );
+                {isDetailLoading ? (
+                  <Spin size="small" />
+                ) : (
+                  <IconViewList width={20} />
+                )}
+              </span>
+            </Tooltip>
+          );
+        },
       },
-    },
-    {
-      action: "Activate",
-      type: "table",
-      render: (record, data_length) => {
-        const isActive = record?.status?.toUpperCase() === "ACTIVE";
-        const handleToggle = () => { onClick(record); };
-        return (
-          <Tooltip title={isActive ? "Inactivate" : "Activate"}>
-            {isActive
-              ? <span className="inline-flex items-center text-[#D32F2F] hover:text-[#D32F2F] transition-colors duration-200 cursor-pointer" onClick={handleToggle}>
+      {
+        action: "Update",
+        type: "table",
+        render: (record) => {
+          const disabled = record?.status?.toLowerCase() === "inactive";
+          return (
+            <Tooltip title="Update">
+              <div className={`inline-flex items-center ${disabled ? "cursor-not-allowed text-gray-300" : ""}`}>
+                <Link
+                  to={!disabled ? SYSTEM_SETUP_ROUTES.UPDATE_COST_CENTER : undefined}
+                  state={!disabled ? { id: record?.ccId } : undefined}
+                  className={`inline-flex items-center transition-colors duration-200 ${disabled ? "text-gray-300 pointer-events-none" : "text-[#1976D2] hover:text-[#1976D2]"}`}
+                >
+                  <IconEditNx width={20} />
+                </Link>
+              </div>
+            </Tooltip>
+          );
+        },
+      },
+      {
+        action: "Activate",
+        type: "table",
+        render: (record) => {
+          const isActive = record?.status?.toUpperCase() === "ACTIVE";
+          const handleToggle = () => onClick(record);
+          return (
+            <Tooltip title={isActive ? "Inactivate" : "Activate"}>
+              {isActive ? (
+                <span className="inline-flex items-center text-[#D32F2F] hover:text-[#D32F2F] transition-colors duration-200 cursor-pointer" onClick={handleToggle}>
                   <IconInactive width={20} />
                 </span>
-              : <span className="inline-flex items-center text-green-600 hover:text-green-600 transition-colors duration-200 cursor-pointer" onClick={handleToggle}>
+              ) : (
+                <span className="inline-flex items-center text-green-600 hover:text-green-600 transition-colors duration-200 cursor-pointer" onClick={handleToggle}>
                   <IconActive width={20} />
                 </span>
-            }
-          </Tooltip>
-        );
+              )}
+            </Tooltip>
+          );
+        },
       },
-    },
-  ];
-
-  const actionCols = useColumnActionPermission(
-    ["view", "update", "activate"],
-    itemActions
+    ],
+    [handleDownload, isDownloading, handleDetail, detailLoadingId]
   );
 
-  const allColumns = useMemo(() => {
-    const columnsWithKeys = [...baseColumns, ...actionCols].map((col) => ({
-      ...col,
-      key: col.key || col.dataIndex || col.title,
-    }));
-    return columnsWithKeys;
-  }, [baseColumns, actionCols]);
-
-  const processedColumns = useMemo(() => {
-    return applyFixedColumns(allColumns, fixedColumns);
-  }, [allColumns, fixedColumns]);
-
-  const columnDefinitions = useMemo(() => {
-    return allColumns.map((col) => ({
-      key: col.key || col.dataIndex || col.title,
-      title: col.title,
-    }));
-  }, [allColumns]);
+  const actionColumns = useColumnActionPermission(["view", "update", "activate"], itemActions);
+  const allColumns = useMemo(() => [...columns, ...actionColumns], [columns, actionColumns]);
 
   return (
-    <Spin spinning={loading}>
+    <>
       <BreadCrumb routes={routes} />
 
-      <CardContainer
-        header={
-          <div className="flex -my-4 justify-between items-center">
-            <p className="mt-[15px] font-bold">COST CENTER LIST</p>
-            <div className="mt-[15px] flex gap-[20px]">
-              <Toolbar items={itemActions} />
-            </div>
-          </div>
-        }
-      >
-        <div className="my-0">
-          <TableRBI
-            dataSource={dataSource}
-            columns={processedColumns}
-            current={page}
+      <NxCardContainer header="COST CENTER LIST" className="mt-4">
+        <div className="flex flex-col gap-y-4">
+          <Toolbar items={itemActions} type="page" />
+          <NxTable
+            idTable="cost-center-table"
+            userId={dataUser?.data?.username}
+            dataSource={allData}
+            columns={allColumns}
+            loading={isLoading}
+            totalData={totalElements}
+            current={pageRef.current + 1}
             pageSize={pageSize}
-            onChange={handleChangePage}
-            onSizeChanger={handleChangePage}
-            totalData={data?.page?.totalElements || 0}
-            tableScrolled={{ x: 1700, y: 525 }}
+            onSizeChanger={handleSizeChanger}
             onSort={onSort}
-            columnDefinitions={columnDefinitions}
-            handleDownload={handleDownload}
+            onRefresh={handleRefresh}
+            onAdvanceSearch={handleAdvancedSearch}
+            onSearch={handleSearchBar}
             fixedColumns={fixedColumns}
-            setFixedColumns={setFixedColumns}
-            loading={loading}
+            // Intentionally NOT wiring the real setFixedColumns setter here.
+            // NxTable's onFixedColumnsChange calls this as a "notify parent"
+            // side-effect, which would overwrite this fixedColumns state with
+            // the user's own edits — and NxTable's Reset-columns button reads
+            // this same prop as its reset target. Leaving it as a no-op keeps
+            // `fixedColumns` pinned to the true default so Reset works.
+            useInfiniteScroll={true}
+            onLoadMore={onLoadMore}
+            hasMore={hasMore}
+            showAdvanceSearch={true}
+            showSearchBar={true}
+            showRefresh={true}
+            tableScrolled={{ x: 1700, y: 525 }}
           />
         </div>
-      </CardContainer>
+      </NxCardContainer>
 
       {/* Modal Detail */}
       <DetailCostCenter
@@ -580,9 +546,9 @@ const CostCenter = () => {
         isOpen={modalConfirm}
         handleCloseModal={handleCancelModal}
         onFinish={handleConfirm}
-        header={activeOrInactive === "INACTIVE" ? "activate" : "inactivate"}
+        header={activeOrInactive === "Activate" ? "activate" : "inactivate"}
         approveOrReject={
-          activeOrInactive === "INACTIVE" ? "activate" : "inactivate"
+          activeOrInactive === "Activate" ? "activate" : "inactivate"
         }
         menu={"Cost Center"}
         named={record?.name}
@@ -591,7 +557,7 @@ const CostCenter = () => {
 
       {/* modal try again */}
       {renderModal()}
-    </Spin>
+    </>
   );
 };
 

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import moment from "moment";
-import { Checkbox, DatePicker, Form, Input, Select, Spin } from "antd";
+import { Button, Checkbox, DatePicker, Form, Input, Select, Spin } from "antd";
 import BaseContainer from "../../../../components/BaseContainer";
 import BreadCrumb from "../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../components/ButtonComponent";
@@ -36,6 +36,8 @@ import { useTryAgainHooks } from "../../../../utils/useTryAgainHooks";
 import EmployeeConfirmation from "./EmployeeConfirmation";
 import { sorterFunction } from "../../../../utils/sorterFunction";
 import userHttpService from "../../../../redux/services/userHttpService";
+import NxCardContainer from "../../../../components/Nx/NxCardContainer";
+import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
 const { Option } = Select;
 
 const EmployeeForm = (props) => {
@@ -48,7 +50,14 @@ const EmployeeForm = (props) => {
   const dispatch = useDispatch();
   const location = useLocation();
   const [form] = Form.useForm();
+  const employeeStartDate = Form.useWatch("startDate", form);
+  // Watching all fields keeps the dirty-check below purely derived from render
+  // state (current watched values + current tableData vs. the snapshot taken
+  // in assert()), instead of tracked via onValuesChange/useEffect ordering,
+  // which raced against assert()'s own state updates on Reset.
+  const watchedFormValues = Form.useWatch([], form);
   const [modalConfirmasi, setModalConfirmasi] = useState(false);
+  const [isSavingEmployee, setIsSavingEmployee] = useState(false);
   const [modalBack, setModalBack] = useState(false);
   const [tableData, setTableData] = useState([]);
   const [data, setData] = useState({});
@@ -68,6 +77,33 @@ const EmployeeForm = (props) => {
     return result;
   };
   const [disabledButton, setDisabledButton] = useState(false);
+  // Snapshot of the form + assignment table taken right after an existing
+  // employee's data is loaded into the form (see assert()). Used to detect
+  // whether the user has actually changed anything in update mode, so the
+  // Save button can stay disabled until there is something to save.
+  const initialSnapshotRef = useRef(null);
+  // Only the fields actually rendered as Form.Items are compared: employeeId/
+  // employeeCode/phoneEdit are set via setFieldsValue but never mounted, so
+  // Form.useWatch may not reliably report them — including them here would
+  // make the snapshot comparison mismatch even when nothing user-editable changed.
+  const DIRTY_CHECK_FIELDS = ["empNumber", "firstName", "lastName", "empType", "phone", "email", "startDate", "endDate", "description"];
+  const serializeFormState = (formValues, tableRows) => {
+    const normalizeValue = (val) => (moment.isMoment(val) ? val.format("YYYY-MM-DD") : val);
+    const normalizedForm = DIRTY_CHECK_FIELDS.reduce((acc, key) => {
+      acc[key] = normalizeValue(formValues?.[key]);
+      return acc;
+    }, {});
+    const normalizedTable = (tableRows || []).map((row) => ({
+      ...row,
+      startDate: normalizeValue(row?.startDate),
+      endDate: normalizeValue(row?.endDate),
+    }));
+    return JSON.stringify({ form: normalizedForm, table: normalizedTable });
+  };
+  const isFormDirty =
+    type === "update" &&
+    initialSnapshotRef.current !== null &&
+    serializeFormState(watchedFormValues, tableData) !== initialSnapshotRef.current;
   // isPreparing guards the Spin in edit mode until the correct employee's detail
   // AND all lookup data (job, position) are present. Without this guard the shared
   // Redux `loading` flag collapses the spinner as soon as the first action resolves,
@@ -95,6 +131,12 @@ const EmployeeForm = (props) => {
       }
       return {
         id: item?.assignId,
+        // Kept separate from `id`: NxTable auto-assigns a synthetic `id` to any
+        // row lacking one (for its internal rowKey), which would otherwise make
+        // newly-added, unsaved rows look "persisted" to TableInlineEmployee's
+        // delete/detail checks. assignId is only ever set for rows loaded from
+        // the backend and is never touched by that fallback.
+        assignId: item?.assignId,
         employeeCode: item?.employeeCode,
         key: (index + 1).toString(),
         jobId: jobId,
@@ -109,7 +151,7 @@ const EmployeeForm = (props) => {
         status: item?.status,
       };
     });
-    form.setFieldsValue({
+    const formValues = {
       employeeId: data_detail?.employeeId,
       employeeCode: data_detail?.employeeCode,
       empNumber: data_detail?.empNumber,
@@ -128,24 +170,34 @@ const EmployeeForm = (props) => {
           ? moment(data_detail?.endDate).clone()
           : "",
       description: data_detail?.description,
-    });
+    };
+    form.setFieldsValue(formValues);
     setTableData(dataTable);
     setPage(1);
     setPageSize(pageSize);
+    initialSnapshotRef.current = serializeFormState(formValues, dataTable);
   };
 
   // Populate form and assignment table only when the right employee's detail AND
   // the job/position lookups are all loaded. Without data_job/data_post in the
   // dependency list, assert() can run before lookups arrive and leave assignment
   // rows with null job/position values.
+  // Guarded to run once per id: getListJob/getListPosition/getEmployeeDetail can
+  // resolve a second time after the form is already interactive (e.g. StrictMode's
+  // double-invoked mount effect in dev), producing new data_detail/data_job/data_post
+  // references. Without this guard, assert() re-fires and wipes out any row the user
+  // has already added to the (still-unsaved) assignment table.
+  const assertedForIdRef = useRef(null);
   useEffect(() => {
     if (
       id &&
       data_detail?.employeeCode === id &&
       hasValue(data_job?.data) &&
-      hasValue(data_post?.data)
+      hasValue(data_post?.data) &&
+      assertedForIdRef.current !== id
     ) {
       assert();
+      assertedForIdRef.current = id;
     }
   }, [id, data_detail, data_job, data_post]);
 
@@ -437,15 +489,18 @@ const EmployeeForm = (props) => {
 
   // handle save
   const saveEmployee = async () => {
+    setIsSavingEmployee(true);
     try {
-      setModalConfirmasi(false);
       if (type === "update") {
         await dispatch(updateEmployee(payload?.requesBody))?.unwrap();
       } else {
         await dispatch(createEmployee(payload?.requesBody))?.unwrap();
       }
+      setModalConfirmasi(false);
     } catch (error) {
       setModalConfirmasi(false);
+    } finally {
+      setIsSavingEmployee(false);
     }
   };
 
@@ -500,7 +555,7 @@ const EmployeeForm = (props) => {
       <Spin spinning={isPreparing || isLoading}>
         <BreadCrumb routes={routes} />
         <Form form={form} layout={"vertical"} onFinish={handleConfirmation}>
-          <BaseContainer
+          <NxCardContainer
             header={type === "update" ? "UPDATE EMPLOYEE" : "CREATE EMPLOYEE"}
           >
             <GridLayout cols={4}>
@@ -603,7 +658,7 @@ const EmployeeForm = (props) => {
                 </Form.Item>
               </div>
             </GridLayout>
-          </BaseContainer>
+          </NxCardContainer>
           <div className={"my-5"}>
             <TableInlineEmployee
               header={"EMPLOYEE ASSIGNMENT"}
@@ -626,40 +681,37 @@ const EmployeeForm = (props) => {
               checkInputBy={"positionId"}
               checkNameColumn={"Position"}
               setInserted={setDisabledButton}
+              employeeStartDate={employeeStartDate}
             />
           </div>
-          <div className={"w-full my-5 flex"}>
-            <ButtonComponent
-              icon={
-                <LeftOutlined style={{ fontSize: "24px", color: "#fff" }} />
-              }
-              type="button"
-              onClick={() => setModalBack(true)}
-              disabled={disabledButton}
-            >
-              Back
-            </ButtonComponent>
-            <div className={"w-full flex justify-end gap-5"}>
-              <ButtonComponent
-                icon={
-                  <SVGIcon
-                    name={
-                      type === "update" ? `IconButtonReset` : `IconButtonClear`
-                    }
-                    width={24}
-                  />
-                }
-                type="button"
-                onClick={handleClear}
+          <NxBaseContainer border>
+            <div className={"w-full flex"}>
+              <Button
+                type="menu"
+                onClick={() => setModalBack(true)}
                 disabled={disabledButton}
               >
-                {type === "update" ? "Reset" : "Clear"}
-              </ButtonComponent>
-              <ButtonComponent type="submit" htmlType={"submit"} disabled={disabledButton}>
-                Save
-              </ButtonComponent>
+                Back
+              </Button>
+              <div className={"w-full flex justify-end gap-5"}>
+                <Button
+                  type="reject"
+                  icon={<SVGIcon name="IconButtonClear" width={14} />}
+                  onClick={handleClear}
+                  disabled={disabledButton}
+                >
+                  {type === "update" ? "Reset" : "Clear"}
+                </Button>
+                <Button
+                  type="approve"
+                  htmlType="submit"
+                  disabled={disabledButton || (type === "update" && !isFormDirty)}
+                >
+                  Save
+                </Button>
+              </div>
             </div>
-          </div>
+          </NxBaseContainer>
         </Form>
 
         <ModalCustom
@@ -667,17 +719,19 @@ const EmployeeForm = (props) => {
           type={"confirmation"}
           header={"CONFIRMATION"}
           handleCancel={handleCancel}
+          loading={isSavingEmployee}
           width={1000}
           footer=
           {
             <div className={"w-full flex justify-end gap-5"}>
-              <ButtonComponent type={"default"} onClick={handleCancel}>
+              <ButtonComponent type={"default"} onClick={handleCancel} disabled={isSavingEmployee}>
                 Cancel
               </ButtonComponent>
               <ButtonComponent
                 type={"submit"}
                 border={false}
                 onClick={saveEmployee}
+                loading={isSavingEmployee}
               >
                 Confirm
               </ButtonComponent>

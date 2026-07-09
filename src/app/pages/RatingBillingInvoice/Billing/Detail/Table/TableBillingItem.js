@@ -201,7 +201,7 @@ export const columnsBillingItem = (
         false,
         "input",
         searchBI,
-        record.uom === "MMBTU" ? "energi" : "usage",
+        record.uom === "MMBTU" ? "energi" : "volume",
       ),
   },
   {
@@ -305,7 +305,8 @@ export const columnsBillingItem = (
         text,
         false,
         "input",
-        searchBI
+        searchBI,
+        "number"
       ),
   },
   {

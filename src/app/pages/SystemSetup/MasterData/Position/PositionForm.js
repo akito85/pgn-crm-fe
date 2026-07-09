@@ -1,4 +1,4 @@
-import { Form, Input, Select, Spin } from "antd";
+import { Button, Form, Input, Select, Spin } from "antd";
 import React, { useEffect, useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import BaseContainer from "../../../../../components/BaseContainer";
@@ -23,6 +23,8 @@ import SelectComponent from "../../../../../components/SelectComponent";
 import { useTryAgainHooks } from "../../../../../utils/useTryAgainHooks";
 import userHttpService from "../../../../../redux/services/userHttpService";
 import { validateCreateUpdate } from "../../../../../redux/slices/general_slice";
+import NxCardContainer from "../../../../../components/Nx/NxCardContainer";
+import NxBaseContainer from "../../../../../components/Nx/NxBaseContainer";
 const { Option } = Select;
 const PositionForm = (props) => {
   const { type } = props;
@@ -41,6 +43,8 @@ const PositionForm = (props) => {
   const [modalBack, setModalBack] = useState(false);
   const formValue = form.getFieldsValue();
   const [payload, setPayload] = useState({});
+  const [isValidating, setIsValidating] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (location?.state?.id) {
@@ -76,19 +80,21 @@ const PositionForm = (props) => {
     },
   ];
   const handleSave = async () => {
+    setIsSaving(true);
     try {
-      handleCancel()
       if (type === "update") {
         await dispatch(updateMasterPosition(payload?.requestBody))?.unwrap();
       } else {
         await dispatch(createMasterPosition(payload?.requestBody))?.unwrap();
       }
-    } catch (error) {
+    } finally {
+      setIsSaving(false);
       handleCancel()
     }
   };
 
   const onFinish = async (formValue) => {
+    setIsValidating(true);
     try {
       let url;
       let body;
@@ -107,6 +113,8 @@ const PositionForm = (props) => {
       setOpenModal(true);
     } catch (error) {
       setOpenModal(false);
+    } finally {
+      setIsValidating(false);
     }
   };
 
@@ -160,79 +168,73 @@ const PositionForm = (props) => {
           onFinishFailed={onFinishFailed}
           className={"my-5"}
         >
-          <Spin spinning={loading || isLoading}>
-            <BaseContainer
-              header={`${type === "update" ? "UPDATE POSITION" : "CREATE POSITION"
-                }`}
-            >
-              <div className={"flex flex-col w-full"}>
-                <div className={"flex gap-4"}>
-                  <Form.Item
-                    className={"w-full"}
-                    label={"Name"}
-                    rules={formMessageRequired("name")}
-                    name={"name"}
-                  >
-                    <Input disabled={type === 'update'} onInput={(e) =>
-                      (e.target.value = e.target.value.trimStart())
-                    } />
-                  </Form.Item>
-                  <Form.Item
-                    className={"w-full"}
-                    label={"Cost Center"}
-                    rules={formMessageRequired("cost center")}
-                    name={"costCenter"}
-                    initialValue={formValue?.costcenter}
-                  >
-                    <SelectComponent>
-                      {data_cost_center?.data?.map((index, key) => (
-                        <Option value={index.id} key={key}>
-                          {index.name}
-                        </Option>
-                      ))}
-                    </SelectComponent>
+          <div className="flex flex-col gap-y-4">
+            <Spin spinning={loading || isLoading}>
+              <NxCardContainer
+                header={`${type === "update" ? "UPDATE POSITION" : "CREATE POSITION"
+                  }`}
+              >
+                <div className={"flex flex-col w-full"}>
+                  <div className={"flex gap-4"}>
+                    <Form.Item
+                      className={"w-full"}
+                      label={"Name"}
+                      rules={formMessageRequired("name")}
+                      name={"name"}
+                    >
+                      <Input disabled={type === 'update'} onInput={(e) =>
+                        (e.target.value = e.target.value.trimStart())
+                      } />
+                    </Form.Item>
+                    <Form.Item
+                      className={"w-full"}
+                      label={"Cost Center"}
+                      rules={formMessageRequired("cost center")}
+                      name={"costCenter"}
+                      initialValue={formValue?.costcenter}
+                    >
+                      <SelectComponent>
+                        {data_cost_center?.data?.map((index, key) => (
+                          <Option value={index.id} key={key}>
+                            {index.name}
+                          </Option>
+                        ))}
+                      </SelectComponent>
+                    </Form.Item>
+                  </div>
+                  <Form.Item label={"Description"} name={"description"}>
+                    <InputComponent type="textarea" />
+
                   </Form.Item>
                 </div>
-                <Form.Item label={"Description"} name={"description"}>
-                  <InputComponent type="textarea" />
-
-                </Form.Item>
+              </NxCardContainer>
+            </Spin>
+            <NxBaseContainer border>
+              <div className={"w-full flex"}>
+                <div>
+                  <NavLink className="justify-items-start">
+                    <Button
+                      type={"menu"}
+                      onClick={() => setModalBack(true)}
+                    >
+                      Back
+                    </Button>
+                  </NavLink>
+                </div>
+                <div className={"w-full justify-end flex gap-2"}>
+                  <Button
+                    icon={<SVGIcon name="IconButtonClear" width={14} />}
+                    type={"reject"}
+                    onClick={handleClear}
+                  >
+                    {type === "create" ? "Clear" : "Reset"}
+                  </Button>
+                  <Button type={"approve"} htmlType={"submit"} loading={isValidating} disabled={isValidating}>
+                    Save
+                  </Button>
+                </div>
               </div>
-            </BaseContainer>
-          </Spin>
-          <div className={"w-full flex my-5"}>
-            <div>
-              <NavLink className="justify-items-start">
-                <ButtonComponent
-                  type={"submit"}
-                  border={false}
-                  icon={<ArrowLeftOutlined />}
-                  onClick={() => setModalBack(true)}
-                >
-                  Back
-                </ButtonComponent>
-              </NavLink>
-            </div>
-            <div className={"w-full justify-end flex gap-2"}>
-              <ButtonComponent
-                icon={
-                  <SVGIcon
-                    name={
-                      type === "update" ? `IconButtonReset` : `IconButtonClear`
-                    }
-                    width={24}
-                  />
-                }
-                type={"submit"}
-                border={false}
-                onClick={handleClear}
-              >
-                {type === "create" ? "Clear" : "Reset"}
-              </ButtonComponent>
-              <ButtonComponent type={"submit"} htmlType={"submit"}>
-                Save
-              </ButtonComponent>
-            </div>
+            </NxBaseContainer>
           </div>
         </Form>
       </div>
@@ -242,26 +244,30 @@ const PositionForm = (props) => {
         header={"CONFIRMATION"}
         width={700}
         type={"confirmation"}
+        loading={isSaving}
       >
-        {/* <div className={"w-full flex flex-col h-[20vh] flex-wrap gap-y-3"}> */}
-        <span className="text-primary uppercase">Position Information</span>
-        <div className={"w-full grid grid-cols-2"}>
-          <DetailText label={"Position Name"}>{formValue?.name}</DetailText>
-          <DetailText label={"Cost Center"}>{costCenterName}</DetailText>
-        </div>
-        <div>
-          <div className={"w-full grid grid-cols-1 gap-3"}>
-            <DetailText label={"Description"}>
-              {formValue?.description}
-            </DetailText>
+        <div className="flex flex-col gap-y-4">
+          {/* <div className={"w-full flex flex-col h-[20vh] flex-wrap gap-y-3"}> */}
+          <NxCardContainer header={"POSITION INFORMATION"}>
+            <div className={"w-full grid grid-cols-2"}>
+              <DetailText label={"Position Name"}>{formValue?.name}</DetailText>
+              <DetailText label={"Cost Center"}>{costCenterName}</DetailText>
+            </div>
+            <div>
+              <div className={"w-full grid grid-cols-1 gap-3"}>
+                <DetailText label={"Description"}>
+                  {formValue?.description}
+                </DetailText>
+              </div>
+            </div>
+          </NxCardContainer>
+          {/* </div> */}
+          <div className={"flex w-full justify-end gap-2"}>
+            <ButtonComponent onClick={handleCancel} disabled={isSaving}>Cancel</ButtonComponent>
+            <ButtonComponent type={"submit"} onClick={handleSave} loading={isSaving} disabled={isSaving}>
+              Confirm
+            </ButtonComponent>
           </div>
-        </div>
-        {/* </div> */}
-        <div className={"flex w-full justify-end gap-2"}>
-          <ButtonComponent onClick={handleCancel}>Cancel</ButtonComponent>
-          <ButtonComponent type={"submit"} onClick={handleSave}>
-            Confirm
-          </ButtonComponent>
         </div>
       </ModalCustom>
       <ModalConfirm
