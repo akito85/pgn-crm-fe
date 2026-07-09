@@ -6,6 +6,7 @@ import BreadCrumb from "../../../../components/BreadCrumb";
 import { RBI_ROUTES } from "../../../../routes/rating_billing/rbi_routes";
 import ButtonComponent from "../../../../components/ButtonComponent";
 import SVGIcon from "../../../../assets/Icon/index";
+import SelectComponent from "../../../../components/SelectComponent";
 import {
   donwloadedExcel,
   donwloadedHistoryExcel,
@@ -14,6 +15,7 @@ import {
   setFilters,
   clearFilters,
   resetCalculationData,
+  getListBillingPeriodForCalculation,
 } from "../../../../redux/slices/rating_billing_invoice/calculation";
 import {
   hasValue,
@@ -33,6 +35,7 @@ const CalculationPage = () => {
     data: data_calculation,
     loading,
     filters,
+    list_billing_period,
   } = useSelector((state) => state.rbi_calculation);
 
   const dispatch = useDispatch();
@@ -82,6 +85,39 @@ const CalculationPage = () => {
     }
   }, [fixedColumns]);
 
+  // Fetch billing period saat mount
+  useEffect(() => {
+    dispatch(getListBillingPeriodForCalculation());
+  }, [dispatch]);
+
+  // Set default billing period ke bulan & tahun sekarang
+  useEffect(() => {
+    if (
+      list_billing_period &&
+      list_billing_period.length > 0 &&
+      !selectedBillingPeriod
+    ) {
+      const today = new Date();
+      const currentMonth = today.toLocaleString("en-US", { month: "long" });
+      const currentYear = today.getFullYear();
+      const currentPeriodName = `${currentMonth} ${currentYear}`;
+
+      const currentPeriod = list_billing_period.find(
+        (item) => item.name === currentPeriodName,
+      );
+
+      if (currentPeriod) {
+        setSelectedBillingPeriod(currentPeriod.id);
+      } else {
+        setSelectedBillingPeriod(list_billing_period[0].id);
+      }
+    }
+  }, [list_billing_period, selectedBillingPeriod]);
+
+  const handleBillingPeriodChange = (value) => {
+    setSelectedBillingPeriod(value);
+  };
+
   useEffect(() => {
     dispatch(
       setFilters({
@@ -109,32 +145,30 @@ const CalculationPage = () => {
   }, [tabHeader, filters, currentTabKey]);
 
   useEffect(() => {
-    if (selectedBillingPeriod) {
-      if (tabHeader === "Calculation List") {
-        dispatch(
-          getCalculationPaginate({
-            search: encodeURIComponent(JSON.stringify(search)),
-            page: 1,
-            pageSize: 100, // Initial load 100 data
-            sort,
-            billPeriodId: selectedBillingPeriod,
-            isLoadMore: false, // Flag untuk initial load
-          }),
-        );
-      } else {
-        const finalSearch = { ...search, billingPeriod: selectedBillingPeriod };
-        dispatch(
-          getHistoryCalculationPaginate({
-            search: encodeURIComponent(JSON.stringify(finalSearch)),
-            page: 1,
-            pageSize: 100, // Initial load 100 data
-            sort,
-            isLoadMore: false, // Flag untuk initial load
-          }),
-        );
-      }
-      setPage(1);
+    if (tabHeader === "Calculation List") {
+      dispatch(
+        getCalculationPaginate({
+          search: encodeURIComponent(JSON.stringify(search)),
+          page: 1,
+          pageSize: 100, // Initial load 100 data
+          sort,
+          billPeriodId: selectedBillingPeriod,
+          isLoadMore: false, // Flag untuk initial load
+        }),
+      );
+    } else {
+      const finalSearch = { ...search, billingPeriod: selectedBillingPeriod };
+      dispatch(
+        getHistoryCalculationPaginate({
+          search: encodeURIComponent(JSON.stringify(finalSearch)),
+          page: 1,
+          pageSize: 100, // Initial load 100 data
+          sort,
+          isLoadMore: false, // Flag untuk initial load
+        }),
+      );
     }
+    setPage(1);
   }, [dispatch, search, sort, tabHeader, selectedBillingPeriod]);
 
   // PERUBAHAN: Reset page ke 1 saat search
@@ -1605,6 +1639,20 @@ const CalculationPage = () => {
                 showRefresh={true}
                 onRefresh={handleRefresh}
                 loadMoreThreshold={20}
+                customHeaderLeft={
+                  <div className="flex items-center gap-1">
+                    <SelectComponent
+                      value={selectedBillingPeriod}
+                      onChange={handleBillingPeriodChange}
+                      placeholder="Select Period"
+                      style={{ width: "140px" }}
+                      options={(list_billing_period || []).map((item) => ({
+                        label: item?.name,
+                        value: item?.id,
+                      }))}
+                    />
+                  </div>
+                }
               />
             </div>
           </Tabs.TabPane>
@@ -1631,6 +1679,20 @@ const CalculationPage = () => {
                 showRefresh={true}
                 onRefresh={handleRefresh}
                 loadMoreThreshold={20}
+                customHeaderLeft={
+                  <div className="flex items-center gap-1">
+                    <SelectComponent
+                      value={selectedBillingPeriod}
+                      onChange={handleBillingPeriodChange}
+                      placeholder="Select Period"
+                      style={{ width: "140px" }}
+                      options={(list_billing_period || []).map((item) => ({
+                        label: item?.name,
+                        value: item?.id,
+                      }))}
+                    />
+                  </div>
+                }
               />
             </div>
           </Tabs.TabPane>
