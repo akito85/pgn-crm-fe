@@ -316,7 +316,7 @@ const CalculationForm = ({ type }) => {
       billingCycle: formValue?.billing_cycle,
       billingPeriod: formValue?.billing_period,
       billingPeriodName:
-        list_billing_period?.data?.find(
+        (list_billing_period || [])?.find(
           (item) => item.id === formValue?.billing_period,
         )?.name || null,
       serviceType: formValue?.serviceType,
@@ -646,7 +646,7 @@ const CalculationForm = ({ type }) => {
                   onChange={handleChangeBillingPeriod}
                   options={
                     billingCycle
-                      ? list_billing_period?.data?.map((item) => {
+                      ? (list_billing_period || [])?.map((item) => {
                           return {
                             label: item?.name,
                             value: item?.id,

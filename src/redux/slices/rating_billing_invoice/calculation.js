@@ -596,7 +596,7 @@ export const createCalculation = createAsyncThunk(
   "CREATE_CALCULATION",
   async ({ body }, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/rbi/calculation/test-create `;
+      const url = `/v1/dbs/api/rbi/calculation/create-calculationjob`;
       const response = await ratingBillingHttpService.createData(url, body);
       return response.data;
     } catch (error) {
@@ -1146,7 +1146,14 @@ const calculationSlice = createSlice({
     },
     [getListBillingPeriod.fulfilled]: (state, action) => {
       state.loading = false;
-      state.list_billing_period = action.payload;
+      const payload = action.payload;
+      state.list_billing_period = Array.isArray(payload)
+        ? payload
+        : Array.isArray(payload?.data)
+          ? payload.data
+          : Array.isArray(payload?.data?.data)
+            ? payload.data.data
+            : [];
     },
     [getListBillingPeriod.rejected]: (state) => {
       state.loading = false;
@@ -1178,9 +1185,8 @@ const calculationSlice = createSlice({
     [createCalculation.pending]: (state) => {
       state.loadingCreate = true;
     },
-    [createCalculation.fulfilled]: (state, action) => {
+    [createCalculation.fulfilled]: (state) => {
       state.loadingCreate = false;
-      state.data = action.payload;
     },
     [createCalculation.rejected]: (state) => {
       state.loadingCreate = false;
