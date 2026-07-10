@@ -882,35 +882,32 @@ const CalculationForm = ({ type }) => {
                         <div className="flex justify-center py-4">
                           <Spin size="small" />
                         </div>
-                      ) : searchCustomerValue.length > 0 &&
-                        searchCustomerValue.length < 3 ? (
-                        <div className="text-center py-4 text-gray-500">
-                          Please enter at least 3 characters
+                      ) : searchCustomerValue.length === 0 ? (
+                        <div className="text-center py-4 text-gray-500 text-xs">
+                          Type at least 3 characters to search for a customer account
+                        </div>
+                      ) : searchCustomerValue.length < 3 ? (
+                        <div className="text-center py-4 text-gray-500 text-xs">
+                          {3 - searchCustomerValue.length} more character{3 - searchCustomerValue.length > 1 ? "s" : ""} needed to start searching
                         </div>
                       ) : (
-                        "No data"
+                        <div className="text-center py-4 text-gray-500 text-xs">
+                          No data found
+                        </div>
                       )
                     }
                     dropdownRender={(menu) => (
                       <>
-                        {menu}
+                        {loading_specific_customer ? (
+                          <div className="flex justify-center py-4">
+                            <Spin size="small" />
+                          </div>
+                        ) : (
+                          menu
+                        )}
                         {specific_customer_message && (
                           <div className="px-2 py-2 border-t text-xs text-gray-500">
                             {specific_customer_message}
-                          </div>
-                        )}
-                        {searchCustomerValue.length > 0 && (
-                          <div className="px-2 py-1 border-t text-xs text-right">
-                            <span
-                              className={
-                                searchCustomerValue.length >= MAX_SEARCH_LENGTH
-                                  ? "text-red-500"
-                                  : "text-gray-500"
-                              }
-                            >
-                              {searchCustomerValue.length}/{MAX_SEARCH_LENGTH}{" "}
-                              characters
-                            </span>
                           </div>
                         )}
                       </>
