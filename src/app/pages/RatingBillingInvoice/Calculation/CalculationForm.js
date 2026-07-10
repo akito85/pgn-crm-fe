@@ -179,7 +179,7 @@ const CalculationForm = ({ type }) => {
   useEffect(() => {
     let dataMrc = list_meter_reading_code?.reduce(
       (result, current) => result?.concat(current?.dtoList),
-      []
+      [],
     );
     setMergedArrayMrc(dataMrc);
   }, [dispatch, list_meter_reading_code]);
@@ -213,7 +213,7 @@ const CalculationForm = ({ type }) => {
   const handleSelectCustomer = useCallback(
     (value, option) => {
       const customerData = filteredCustomerList.find(
-        (item) => (item.accountNumber || item.code) === value
+        (item) => (item.accountNumber || item.code) === value,
       );
 
       if (customerData) {
@@ -234,7 +234,7 @@ const CalculationForm = ({ type }) => {
         limit: DEFAULT_SEARCH_LIMIT,
       }));
     },
-    [filteredCustomerList]
+    [filteredCustomerList],
   );
 
   useEffect(() => {
@@ -303,7 +303,7 @@ const CalculationForm = ({ type }) => {
           services: ratingBillingHttpService,
           endPoint: url,
           type: type,
-        })
+        }),
       )?.unwrap();
       return true;
     } catch (error) {
@@ -317,7 +317,7 @@ const CalculationForm = ({ type }) => {
       billingPeriod: formValue?.billing_period,
       billingPeriodName:
         list_billing_period?.data?.find(
-          (item) => item.id === formValue?.billing_period
+          (item) => item.id === formValue?.billing_period,
         )?.name || null,
       serviceType: formValue?.serviceType,
       sor: formValue?.sor,
@@ -341,7 +341,7 @@ const CalculationForm = ({ type }) => {
             calCode: null,
             mreadingCode: id,
           };
-        }
+        },
       ),
       rRbiCalculationAccountSegment: (formValue?.accountSegment || []).map(
         (id) => {
@@ -350,7 +350,7 @@ const CalculationForm = ({ type }) => {
             calCode: null,
             accSegment: id,
           };
-        }
+        },
       ),
       rRbiCalculationAccountGroupType: (formValue?.accountGroupType || []).map(
         (id) => {
@@ -359,7 +359,7 @@ const CalculationForm = ({ type }) => {
             calCode: null,
             accGroupType: id,
           };
-        }
+        },
       ),
       rRbiCalculationSpecificCustomer: (formValue?.specificCustomer || []).map(
         (id) => {
@@ -368,7 +368,7 @@ const CalculationForm = ({ type }) => {
             calCode: null,
             custNumb: id,
           };
-        }
+        },
       ),
     };
 
@@ -459,10 +459,6 @@ const CalculationForm = ({ type }) => {
     setBillingCycle(e);
     dispatch(getListBillingPeriod(e));
     setDataSpecificCustomer((prev) => ({ ...prev, billingPeriodId: null }));
-  };
-
-  const handleChangeBillingPeriod = (e) => {
-    setDataSpecificCustomer((prev) => ({ ...prev, billingPeriodId: e }));
   };
 
   const handleChangeBillingPeriod = (e) => {
@@ -1078,7 +1074,7 @@ const CalculationForm = ({ type }) => {
                     </span>
                     <span className="text-[13px] text-gray-600">
                       {list_sor?.data?.find(
-                        (item) => item.id === pendingDataFinal?.sor
+                        (item) => item.id === pendingDataFinal?.sor,
                       )?.name || "All"}
                     </span>
                   </div>
