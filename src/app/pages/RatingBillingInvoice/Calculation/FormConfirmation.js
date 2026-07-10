@@ -19,18 +19,19 @@ const FormConfirmation = ({ data }) => {
     list_billing_period,
   } = useSelector((state) => state.rbi_calculation);
 
-  const getPeriodName = (val) => {
-    const periodName =
-      list_billing_period?.data &&
-      list_billing_period?.data?.filter((item) => item?.id === val);
-    if (periodName === undefined) {
-      return "";
-    }
-    if (periodName.length !== 0) {
-      return periodName[0].name;
-    }
-    return "";
-  };
+  // const getPeriodName = (val) => {
+  //   const periodName =
+  //     list_billing_period?.data &&
+  //     list_billing_period?.data?.filter((item) => item?.id === val);
+
+  //   if (periodName === undefined) {
+  //     return "";
+  //   }
+  //   if (periodName.length !== 0) {
+  //     return periodName[0].name;
+  //   }
+  //   return "";
+  // };
 
   const getBillingCycleName = (val) => {
     const billingCycleName =
@@ -60,9 +61,9 @@ const FormConfirmation = ({ data }) => {
 
   const getGroupTypeName = (val) => {
     const groupTypeName = list_account_group?.find(
-      (item) => item?.glbTypeValId === val
+      (item) => item?.glbTypeValId === val,
     );
-    
+
     if (groupTypeName) {
       return groupTypeName.glbValue || groupTypeName.name || "";
     }
@@ -73,7 +74,7 @@ const FormConfirmation = ({ data }) => {
     const customerName =
       list_specific_customer &&
       list_specific_customer?.filter(
-        (item) => item?.code === val || item?.accountNumber === val
+        (item) => item?.code === val || item?.accountNumber === val,
       );
     if (customerName === undefined) {
       return "";
@@ -100,7 +101,7 @@ const FormConfirmation = ({ data }) => {
   const getMrcName = (val) => {
     let mergeMrcDto = list_meter_reading_code?.reduce(
       (result, current) => result?.concat(current?.dtoList),
-      []
+      [],
     );
     const mrcName =
       mergeMrcDto && mergeMrcDto?.filter((item) => item?.id === val);
@@ -164,6 +165,8 @@ const FormConfirmation = ({ data }) => {
     return "";
   };
 
+  console.log("data: ", data);
+
   return (
     <div className="w-full space-y-4">
       {/* Billing Cycle Information */}
@@ -171,7 +174,7 @@ const FormConfirmation = ({ data }) => {
         header={
           <div className="flex -my-4 justify-between items-center">
             <p className="mt-[15px] text-primary text-xs uppercase">
-              Billing Cycle Information
+              Billing Cycle Informationn
             </p>
           </div>
         }
@@ -181,7 +184,7 @@ const FormConfirmation = ({ data }) => {
             {getBillingCycleName(data?.billingCycle)}
           </DetailText>
           <DetailText label="Billing Period">
-            {getPeriodName(data?.billingPeriod)}
+            {data?.billingPeriodName || ""}
           </DetailText>
         </div>
       </CardContainer>
@@ -216,12 +219,14 @@ const FormConfirmation = ({ data }) => {
           </DetailText>
           <DetailText label="Meter Reading Code">
             {data?.rRbiCalculationMeterReadingCode?.length > 0
-              ? data.rRbiCalculationMeterReadingCode.map((item, index, array) => (
-                  <span key={index + 1}>
-                    {getMrcName(item.mreadingCode)}
-                    {index < array.length - 1 && ", "}
-                  </span>
-                ))
+              ? data.rRbiCalculationMeterReadingCode.map(
+                  (item, index, array) => (
+                    <span key={index + 1}>
+                      {getMrcName(item.mreadingCode)}
+                      {index < array.length - 1 && ", "}
+                    </span>
+                  ),
+                )
               : ""}
           </DetailText>
           <DetailText label="Account Segment">
@@ -236,22 +241,26 @@ const FormConfirmation = ({ data }) => {
           </DetailText>
           <DetailText label="Account Group Type">
             {data?.rRbiCalculationAccountGroupType?.length > 0
-              ? data.rRbiCalculationAccountGroupType.map((item, index, array) => (
-                  <span key={index + 1}>
-                    {getGroupTypeName(item.accGroupType)}
-                    {index < array.length - 1 && ", "}
-                  </span>
-                ))
+              ? data.rRbiCalculationAccountGroupType.map(
+                  (item, index, array) => (
+                    <span key={index + 1}>
+                      {getGroupTypeName(item.accGroupType)}
+                      {index < array.length - 1 && ", "}
+                    </span>
+                  ),
+                )
               : ""}
           </DetailText>
           <DetailText label="Specific Customer Account">
             {data?.rRbiCalculationSpecificCustomer?.length > 0
-              ? data.rRbiCalculationSpecificCustomer.map((item, index, array) => (
-                  <span key={index + 1}>
-                    {getCustomerName(item.custNumb)}
-                    {index < array.length - 1 && ", "}
-                  </span>
-                ))
+              ? data.rRbiCalculationSpecificCustomer.map(
+                  (item, index, array) => (
+                    <span key={index + 1}>
+                      {getCustomerName(item.custNumb)}
+                      {index < array.length - 1 && ", "}
+                    </span>
+                  ),
+                )
               : ""}
           </DetailText>
         </div>

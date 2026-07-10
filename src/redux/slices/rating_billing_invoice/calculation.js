@@ -1081,6 +1081,7 @@ const calculationSlice = createSlice({
     // lov specific customer
     [getListSpecificCustomer.pending]: (state) => {
       state.loading_specific_customer = true;
+      state.list_specific_customer = [];
     },
     [getListSpecificCustomer.fulfilled]: (state, action) => {
       state.loading_specific_customer = false;
