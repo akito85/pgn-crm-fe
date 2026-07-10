@@ -77,6 +77,7 @@ const CalculationForm = ({ type }) => {
     meterReadingCodeId: [],
     accountSegmentId: [],
     accountGroupTypeId: [],
+    billingPeriodId: null,
     search: "",
     limit: DEFAULT_SEARCH_LIMIT,
     billingPeriod: null,
@@ -97,6 +98,7 @@ const CalculationForm = ({ type }) => {
 
   const [openWarningPopulate, setOpenWarningPopulate] = useState(false);
   const [pendingDataFinal, setPendingDataFinal] = useState(null);
+  const [selectedSor, setSelectedSor] = useState(null);
 
   useEffect(() => {
     dispatch(getListSor());
@@ -129,6 +131,10 @@ const CalculationForm = ({ type }) => {
         limit: DEFAULT_SEARCH_LIMIT,
       };
     });
+    if (tempBody.sor) {
+      setSelectedSor(tempBody.sor);
+      dispatch(getListCostCenter(tempBody.sor));
+    }
     if (tempBody.costCenter) {
       const body = {
         ccIds: (tempBody.costCenter || []).map((data) => {
@@ -156,6 +162,7 @@ const CalculationForm = ({ type }) => {
     dataSpecificCustomer.meterReadingCodeId,
     dataSpecificCustomer.accountSegmentId,
     dataSpecificCustomer.accountGroupTypeId,
+    dataSpecificCustomer.billingPeriodId,
     dataSpecificCustomer.search,
     dataSpecificCustomer.limit,
     dataSpecificCustomer.billingPeriod,
@@ -451,6 +458,11 @@ const CalculationForm = ({ type }) => {
   const handleChangeBillingCycle = (e) => {
     setBillingCycle(e);
     dispatch(getListBillingPeriod(e));
+    setDataSpecificCustomer((prev) => ({ ...prev, billingPeriodId: null }));
+  };
+
+  const handleChangeBillingPeriod = (e) => {
+    setDataSpecificCustomer((prev) => ({ ...prev, billingPeriodId: e }));
   };
 
   const handleChangeBillingPeriod = (e) => {
@@ -479,6 +491,8 @@ const CalculationForm = ({ type }) => {
     setSearchCustomerValue("");
     setFilteredCustomerList([]);
     form.resetFields(["specificCustomer"]);
+    setSelectedSor(e);
+    dispatch(getListCostCenter(e));
   };
 
   const handleChangeCostCenter = (e) => {
