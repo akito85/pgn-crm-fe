@@ -410,9 +410,11 @@ const FunctionalCriteriaProduct = ({
   const handleEditDataRecord = useCallback((data, key, index) => {
     const keyName = key + index;
     const value =
-      index === "description" ||
-      index === "adjustmentValue" ||
-      index === "maxValueUom"
+      index === "adjustmentValue" || index === "maxValueUom"
+        ? // NumericFormat emits the displayed string ("4,500.00");
+          // strip thousand separators so parseFloat reads the full number
+          data.target.value?.replace(/,/g, "")
+        : index === "description"
         ? data.target.value
         : data;
     setEditDataRecord((prevState) => {

@@ -638,7 +638,7 @@ const PricingAdjustForm = (props) => {
               adjustmentType: item.adjustmentType,
               adjustmentTypeName: item.adjustmentTypeName || undefined,
               adjustmentValue: item.adjustmentValue
-                ? parseFloat(item.adjustmentValue)
+                ? parseFloat(String(item.adjustmentValue).replace(/,/g, ""))
                 : 0,
               startDate: item.startDate
                 ? moment(item.startDate).format("DD-MM-YYYY")
@@ -845,7 +845,9 @@ const PricingAdjustForm = (props) => {
         pricingAdjustmentId: type === "update" ? id : null,
         adjustmentType: item.adjustmentType,
         adjustmentTypeName: item.adjustmentTypeName || undefined,
-        adjustmentValue: item.adjustmentValue ? parseFloat(item.adjustmentValue) : 0,
+        adjustmentValue: item.adjustmentValue
+          ? parseFloat(String(item.adjustmentValue).replace(/,/g, ""))
+          : 0,
         startDate: item.startDate
           ? moment(item.startDate).format("DD-MM-YYYY")
           : "",
