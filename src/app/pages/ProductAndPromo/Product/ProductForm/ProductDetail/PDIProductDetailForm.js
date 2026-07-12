@@ -246,7 +246,7 @@ const PDIProductDetailForm = ({
         [keyName]: index === "name" ? {
           ...value,
           isParent: dataListNameProductDetail.find(
-            (item) => item.value === value.value
+            (item) => item.value === value?.value
           )?.isParent,
         }: value,
       };
@@ -280,7 +280,7 @@ const PDIProductDetailForm = ({
                 ? {
                     ...tempData,
                     isParent: dataListNameProductDetail.find(
-                      (item) => item.value === tempData.value
+                      (item) => item.value === tempData?.value
                     )?.isParent || false,
                   }
                 : tempData,

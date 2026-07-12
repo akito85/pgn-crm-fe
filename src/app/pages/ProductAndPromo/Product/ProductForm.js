@@ -232,7 +232,7 @@ const ProductForm = (props) => {
         .filter((item) => item.nameId !== 214 && item.nameId !== 210)
         .map((productDetail, index) => {
           const name =
-            productDetail.name && productDetail.nameId
+            productDetail.name || productDetail.nameId
               ? {
                   label: productDetail.name,
                   value: productDetail.nameId,
