@@ -15,6 +15,7 @@ import {
   setFilters,
   clearFilters,
   downloadListPrabilling,
+  downloadSummaryPrabilling,
 } from "../../../../redux/slices/rating_billing_invoice/praBilling";
 import TableRBI from "../../../../components/TableRBI";
 import Toolbar from "../../../../components/Toolbar";
@@ -43,6 +44,8 @@ const PrabillingPage = () => {
   const dispatch = useDispatch();
   const searchInput = useRef(null);
   const detailRef = useRef(null);
+  const isLoadingRef = useRef(false);
+  const lastLoadedPageRef = useRef(-1);
 
   const [valueTab, setValueTab] = useState("All");
   const currentTabKey = valueTab === "All" ? "all_tab" : "summary_tab";
@@ -184,6 +187,7 @@ const PrabillingPage = () => {
           isLoadMore: false,
         }),
       );
+      lastLoadedPageRef.current = 5;
       setPage(1);
     } else if (valueTab === "Summary" && selectedBillingPeriod) {
       const selectedPeriod = list_period_summary.find(
@@ -200,6 +204,7 @@ const PrabillingPage = () => {
             isLoadMore: false,
           }),
         );
+        lastLoadedPageRef.current = 5;
       }
       setPage(1);
     }
@@ -237,38 +242,53 @@ const PrabillingPage = () => {
       return;
     }
 
+    if (isLoadingRef.current) {
+      return;
+    }
+
     const nextPage = Math.floor(currentDataLength / loadMoreSize) + 1;
 
+    if (nextPage <= lastLoadedPageRef.current) {
+      return;
+    }
+
+    isLoadingRef.current = true;
+    lastLoadedPageRef.current = nextPage;
+
     if (selectedBillingPeriod) {
-      if (valueTab === "All") {
-        await dispatch(
-          getListPrabillingInitPopulate({
-            search: encodeURIComponent(JSON.stringify(search)),
-            page: nextPage,
-            pageSize: loadMoreSize,
-            sort,
-            billPeriodId: selectedBillingPeriod,
-            isLoadMore: true,
-          }),
-        );
-      } else {
-        const selectedPeriod = list_period_summary.find(
-          (item) => item.id === selectedBillingPeriod,
-        );
-        if (selectedPeriod) {
+      try {
+        if (valueTab === "All") {
           await dispatch(
-            getListPrabillingSummary({
-              billPeriod: selectedPeriod.name,
+            getListPrabillingInitPopulate({
               search: encodeURIComponent(JSON.stringify(search)),
               page: nextPage,
               pageSize: loadMoreSize,
               sort,
+              billPeriodId: selectedBillingPeriod,
               isLoadMore: true,
             }),
           );
+        } else {
+          const selectedPeriod = list_period_summary.find(
+            (item) => item.id === selectedBillingPeriod,
+          );
+          if (selectedPeriod) {
+            await dispatch(
+              getListPrabillingSummary({
+                billPeriod: selectedPeriod.name,
+                search: encodeURIComponent(JSON.stringify(search)),
+                page: nextPage,
+                pageSize: loadMoreSize,
+                sort,
+                isLoadMore: true,
+              }),
+            );
+          }
         }
+        setPage(nextPage);
+      } finally {
+        isLoadingRef.current = false;
       }
-      setPage(nextPage);
     }
   };
 
@@ -471,14 +491,30 @@ const PrabillingPage = () => {
 
   const handleDownload = () => {
     if (!selectedBillingPeriod) return;
-    dispatch(
-      downloadListPrabilling({
-        search: encodeURIComponent(JSON.stringify(search)),
-        page: 1,
-        sort,
-        billPeriodId: selectedBillingPeriod,
-      }),
-    );
+    if (valueTab === "All") {
+      dispatch(
+        downloadListPrabilling({
+          search: encodeURIComponent(JSON.stringify(search)),
+          page: 1,
+          sort,
+          billPeriodId: selectedBillingPeriod,
+        }),
+      );
+    } else if (valueTab === "Summary") {
+      const selectedPeriod = list_period_summary.find(
+        (item) => item.id === selectedBillingPeriod,
+      );
+      if (selectedPeriod) {
+        dispatch(
+          downloadSummaryPrabilling({
+            search: encodeURIComponent(JSON.stringify(search)),
+            page: 1,
+            sort,
+            billPeriod: selectedPeriod.name,
+          }),
+        );
+      }
+    }
   };
 
   const itemGrantAccess = [

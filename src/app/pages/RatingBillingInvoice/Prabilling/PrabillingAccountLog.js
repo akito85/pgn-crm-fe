@@ -4,9 +4,14 @@ import { Row, Col } from "antd";
 import CollapsibleContainer from "../../../../components/CollapsibleContainer";
 import TableRBI from "../../../../components/TableRBI";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../utils/getColumnSearchProps";
-import { getPrabillingAccountLog } from "../../../../redux/slices/rating_billing_invoice/praBilling";
+import {
+  getPrabillingAccountLog,
+  downloadAccountLogPrabilling,
+} from "../../../../redux/slices/rating_billing_invoice/praBilling";
 import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 import { hasValue, renderColumn, renderDateColumn } from "../../../../utils";
+import ButtonComponent from "../../../../components/ButtonComponent";
+import SVGIcon from "../../../../assets/Icon/index";
 import moment from "moment";
 
 const PrabillingAccountLog = ({ data, tabHeader }) => {
@@ -16,6 +21,8 @@ const PrabillingAccountLog = ({ data, tabHeader }) => {
 
   const dispatch = useDispatch();
   const searchInput = useRef(null);
+  const isLoadingRef = useRef(false);
+  const lastLoadedPageRef = useRef(-1);
 
   const prabillData = data?.prabillInitPopulate || {};
 
@@ -25,6 +32,18 @@ const PrabillingAccountLog = ({ data, tabHeader }) => {
   const [search, setSearch] = useState({});
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
+  const { loading } = useSelector((state) => state.rbi_prabilling);
+
+  const handleDownload = () => {
+    if (!prabillData?.initCode) return;
+    dispatch(
+      downloadAccountLogPrabilling({
+        initCode: prabillData.initCode,
+        search: Object.keys(search).length > 0 ? JSON.stringify(search) : "",
+        sort: sort || "createdDate~desc",
+      })
+    );
+  };
 
   const [fixedColumns, setFixedColumns] = useState(() => ({
     left: ["no"],
@@ -37,13 +56,14 @@ const PrabillingAccountLog = ({ data, tabHeader }) => {
       dispatch(
         getPrabillingAccountLog({
           initCode: prabillData.initCode,
-          page: 0,
+          page: 1,
           size: 100,
           sort: sort || "createdDate~desc",
           search: Object.keys(search).length > 0 ? JSON.stringify(search) : "",
           isLoadMore: false,
         })
       );
+      lastLoadedPageRef.current = 5; // Page 1 s/d 5 (100 data) sudah termuat
       setPage(1);
     }
   }, [tabHeader, dispatch, prabillData?.initCode, sort, search]);
@@ -65,21 +85,40 @@ const PrabillingAccountLog = ({ data, tabHeader }) => {
 
   // Load more handler
   const handleLoadMore = async () => {
-    const nextPage = page + 1;
-    const totalPages = account_log_data?.listAccountResult?.page?.totalPages || 0;
+    const totalElements = account_log_data?.listAccountResult?.page?.totalElements || 0;
+    const currentDataLength = logData.length;
 
-    if (nextPage <= totalPages) {
+    if (currentDataLength >= totalElements) {
+      return;
+    }
+
+    if (isLoadingRef.current) {
+      return;
+    }
+
+    const nextPage = Math.floor(currentDataLength / loadMoreSize) + 1;
+
+    // Mencegah pemanggilan halaman yang sudah di-load/sedang di-load
+    if (nextPage <= lastLoadedPageRef.current) {
+      return;
+    }
+
+    isLoadingRef.current = true;
+    lastLoadedPageRef.current = nextPage;
+
+    try {
       await dispatch(
         getPrabillingAccountLog({
           initCode: prabillData.initCode,
-          page: nextPage - 1,
+          page: nextPage,
           size: loadMoreSize,
           sort: sort || "createdDate~desc",
           search: Object.keys(search).length > 0 ? JSON.stringify(search) : "",
           isLoadMore: true,
         })
       );
-      setPage(nextPage);
+    } finally {
+      isLoadingRef.current = false;
     }
   };
 
@@ -280,6 +319,17 @@ const PrabillingAccountLog = ({ data, tabHeader }) => {
               </div>
             </Col>
           </Row>
+        </div>
+        <div className="flex justify-end mb-4">
+          <ButtonComponent
+            type="submit"
+            border={false}
+            icon={<SVGIcon name="IconButtonDownload" width={20} />}
+            onClick={handleDownload}
+            loading={loading}
+          >
+            Download List
+          </ButtonComponent>
         </div>
 
         {/* Tabel */}

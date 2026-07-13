@@ -318,6 +318,32 @@ export const downloadListPrabilling = createAsyncThunk(
   },
 );
 
+// Download summary prabilling
+export const downloadSummaryPrabilling = createAsyncThunk(
+  "DOWNLOAD_SUMMARY_PRABILLING",
+  async ({ search, page, sort, billPeriod }, thunkAPI) => {
+    try {
+      const searchParams = search || "";
+      const sortParams = sort || "";
+      let url = `/v1/dbs/api/prabill/summary/download?page=${page}&searchs=${searchParams}`;
+      if (billPeriod) url += `&billPeriod=${encodeURIComponent(billPeriod)}`;
+      if (sortParams) url += `&sort=${sortParams}`;
+
+      const response = await ratingBillingHttpService.downloadDataPrabill(url);
+      return response.data;
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "DOWNLOAD_SUMMARY_PRABILLING",
+          back: false,
+        }),
+      );
+      return thunkAPI.rejectWithValue(error.response?.data);
+    }
+  },
+);
+
 export const getListSor = createAsyncThunk("GET_LIST_SOR", async (thunkAPI) => {
   try {
     const url = `/v1/dbs/api/rbi/calculation/sor?ccType=SOR`;
@@ -924,6 +950,52 @@ export const getPrabillingAccountLog = createAsyncThunk(
         thunkAPI.dispatch(showModalError(errorBody));
       }
       return thunkAPI.rejectWithValue(error.response?.data || error.message);
+    }
+  },
+);
+
+// Download Log Prabilling
+export const downloadLogPrabilling = createAsyncThunk(
+  "DOWNLOAD_LOG_PRABILLING",
+  async ({ initCode, search, sort }, thunkAPI) => {
+    try {
+      const searchParams = search || "";
+      const sortParams = sort || "createdDtm~desc";
+      const url = `/v1/dbs/api/logs/prabill-init-populate/${encodeURIComponent(initCode)}/download?sort=${sortParams}&searchs=${searchParams}`;
+      const response = await ratingBillingHttpService.downloadDataPrabill(url);
+      return response.data;
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "DOWNLOAD_LOG_PRABILLING",
+          back: false,
+        }),
+      );
+      return thunkAPI.rejectWithValue(error.response?.data);
+    }
+  },
+);
+
+// Download Account Log Prabilling
+export const downloadAccountLogPrabilling = createAsyncThunk(
+  "DOWNLOAD_ACCOUNT_LOG_PRABILLING",
+  async ({ initCode, search, sort }, thunkAPI) => {
+    try {
+      const searchParams = search || "";
+      const sortParams = sort || "createdDate~desc";
+      const url = `/v1/dbs/api/prabill/account-log/download?initCode=${encodeURIComponent(initCode)}&sort=${sortParams}&searchs=${searchParams}`;
+      const response = await ratingBillingHttpService.downloadDataPrabill(url);
+      return response.data;
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "DOWNLOAD_ACCOUNT_LOG_PRABILLING",
+          back: false,
+        }),
+      );
+      return thunkAPI.rejectWithValue(error.response?.data);
     }
   },
 );
@@ -2456,6 +2528,36 @@ const prabillingSlice = createSlice({
       state.loading = false;
     },
     [downloadListPrabilling.rejected]: (state) => {
+      state.loading = false;
+    },
+    // download summary prabilling
+    [downloadSummaryPrabilling.pending]: (state) => {
+      state.loading = true;
+    },
+    [downloadSummaryPrabilling.fulfilled]: (state) => {
+      state.loading = false;
+    },
+    [downloadSummaryPrabilling.rejected]: (state) => {
+      state.loading = false;
+    },
+    // download log prabilling
+    [downloadLogPrabilling.pending]: (state) => {
+      state.loading = true;
+    },
+    [downloadLogPrabilling.fulfilled]: (state) => {
+      state.loading = false;
+    },
+    [downloadLogPrabilling.rejected]: (state) => {
+      state.loading = false;
+    },
+    // download account log prabilling
+    [downloadAccountLogPrabilling.pending]: (state) => {
+      state.loading = true;
+    },
+    [downloadAccountLogPrabilling.fulfilled]: (state) => {
+      state.loading = false;
+    },
+    [downloadAccountLogPrabilling.rejected]: (state) => {
       state.loading = false;
     },
   },
