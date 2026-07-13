@@ -33,6 +33,7 @@ const DetailInformation = ({ data }) => {
     list_calculation_log,
     loading,
     loadingResult,
+    loadingResultNoPaging,
     loadingModal,
   } = useSelector((state) => state.rbi_calculation);
 
@@ -96,7 +97,7 @@ const DetailInformation = ({ data }) => {
 
     setActiveTab(tab);
 
-    const calType = data.calType === 621 ? 621 : 623;
+    const calType = data.calType;
     const reqSearch = encodeURIComponent(JSON.stringify(search));
 
     dispatch(
@@ -270,7 +271,7 @@ const DetailInformation = ({ data }) => {
     const totalPages = list_calculation_no_paging?.page?.totalPages || 0;
 
     if (nextPage <= totalPages) {
-      const calType = data?.calType === 621 ? 621 : 623;
+      const calType = data?.calType;
       await dispatch(
         getDetailCalculationResultNoPaging({
           calCode: data?.calCode,
@@ -340,7 +341,6 @@ const DetailInformation = ({ data }) => {
       ? list_calculation_no_paging
       : list_calculation_no_paging?.result || [];
     const filtered = source
-      .filter((item) => !item.isTry)
       ?.map((item) => {
         return Object.fromEntries(
           Object.entries(item).map(([key, value]) => [
@@ -465,7 +465,7 @@ const DetailInformation = ({ data }) => {
   };
 
   const handleDownloadExcel = () => {
-    const calType = data?.calType === 621 ? 621 : 623;
+    const calType = data?.calType;
     dispatch(
       downloadDetailResultRecalculateExcel({
         calCode: data?.calCode,
@@ -746,7 +746,7 @@ const DetailInformation = ({ data }) => {
                 totalData={list_calculation_no_paging?.page?.totalElements || 0}
                 tableScrolled={{ x: 2000, y: 525 }}
                 rowSelection={rowSelection}
-                loading={loadingResult}
+                loading={loadingResultNoPaging}
                 showExport={false}
                 usePagination={false}
                 useInfiniteScroll={true}
