@@ -497,7 +497,29 @@ export const getAllCalculationSummaryPaginate = createAsyncThunk(
       }
       return thunkAPI.rejectWithValue(error.response?.data);
     }
-  },
+  }
+);
+
+export const downloadSummaryRatingExcel = createAsyncThunk(
+  "DOWNLOAD_SUMMARY_RATING_EXCEL",
+  async ({ ratingCode, calculationCode, search, sort }, thunkAPI) => {
+    try {
+      const searchParams = search || "";
+      const sortParams = sort || "transactionDate~desc";
+      const url = `/v1/dbs/api/rating/download-summary-rating?ratingCode=${ratingCode}&calculationCode=${calculationCode}&sort=${sortParams}&searchs=${searchParams}`;
+      const response = await ratingBillingHttpService.downloadData(url);
+      return response.data;
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "DOWNLOAD_SUMMARY_RATING_EXCEL",
+          back: false,
+        })
+      );
+      return thunkAPI.rejectWithValue(error.response?.data);
+    }
+  }
 );
 
 // Calculation Summary Expand

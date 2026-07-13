@@ -2,8 +2,10 @@ import { useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import TableRBI from "../../../../../../components/TableRBI";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../../../utils/getColumnSearchProps";
-import { getCalculateLogPaginate } from "../../../../../../redux/slices/rating_billing_invoice/calculation";
+import { getCalculateLogPaginate, downloadCalculateLogExcel } from "../../../../../../redux/slices/rating_billing_invoice/calculation";
 import { hasValue, renderColumn, renderDateColumn } from "../../../../../../utils";
+import ButtonComponent from "../../../../../../components/ButtonComponent";
+import SVGIcon from "../../../../../../assets/Icon/index";
 import { applyFixedColumns } from "../../../../../../utils/applyFixedColumns";
 
 const TableCalculateLog = ({ calculationCode }) => {
@@ -366,25 +368,52 @@ const TableCalculateLog = ({ calculationCode }) => {
   // Calculate if there's more data
   const hasMore = resultData.length < (pageInfo?.totalElements || 0);
 
+  const handleDownloadLogExcel = () => {
+    dispatch(
+      downloadCalculateLogExcel({
+        calCode: calculationCode,
+        search: encodeURIComponent(JSON.stringify(search)),
+        sort: sort,
+      })
+    );
+  };
+
   return (
-    <TableRBI
-      idTable="calculate-log-paginate-table"
-      columns={processedColumns}
-      dataSource={resultData}
-      totalData={pageInfo?.totalElements || 0}
-      tableScrolled={{ x: 2000, y: 600 }}
-      onSort={onSort}
-      showExport={false}
-      columnDefinitions={columnDefinitions}
-      fixedColumns={fixedColumns}
-      setFixedColumns={setFixedColumns}
-      loading={loading}
-      usePagination={false}
-      useInfiniteScroll={true}
-      onLoadMore={handleLoadMore}
-      hasMore={hasMore}
-      loadMoreThreshold={20}
-    />
+    <div>
+      <div className="flex justify-end mb-2">
+        <ButtonComponent
+          type={"submit"}
+          border={false}
+          icon={
+            <SVGIcon
+              name={"IconButtonDownload"}
+              style={{ fontSize: "20px" }}
+            />
+          }
+          onClick={handleDownloadLogExcel}
+        >
+          Download List
+        </ButtonComponent>
+      </div>
+      <TableRBI
+        idTable="calculate-log-paginate-table"
+        columns={processedColumns}
+        dataSource={resultData}
+        totalData={pageInfo?.totalElements || 0}
+        tableScrolled={{ x: 2000, y: 600 }}
+        onSort={onSort}
+        showExport={false}
+        columnDefinitions={columnDefinitions}
+        fixedColumns={fixedColumns}
+        setFixedColumns={setFixedColumns}
+        loading={loading}
+        usePagination={false}
+        useInfiniteScroll={true}
+        onLoadMore={handleLoadMore}
+        hasMore={hasMore}
+        loadMoreThreshold={20}
+      />
+    </div>
   );
 };
 
