@@ -3,8 +3,7 @@ import BaseContainer from "../../../../components/BaseContainer";
 import DetailText from "../../../../components/DetailText";
 import PricingLogInformationDetail from "../Pricing/Detail/PricingLogInformationDetail";
 import { lowerCaseStatus } from "../Product/utils";
-import { columnsTableCriteriaAll } from "../UtilsProduct/TableCriteriaAllProduct";
-import FunctionalCriteriaProduct from "../UtilsProduct/FunctionalCriteriaProduct";
+import PricingAdjustDetailCriteriaTable from "./PricingAdjustDetailCriteriaTable";
 import NxCardContainer from "../../../../components/Nx/NxCardContainer";
 import NxBaseContainer from "../../../../components/Nx/NxBaseContainer";
 
@@ -57,26 +56,15 @@ const LayoutContentTabPriceAdjust = ({
         </NxBaseContainer>
       </NxCardContainer>
       <NxCardContainer header={"PRICE ADJUSTMENT DETAIL INFORMATION"}>
-        {/* <PricingAdjustTableDetail
-          type={type}
+        <PricingAdjustDetailCriteriaTable
           data={listDataDetailPricingAdjust}
           dataCriteria={criteriaValues}
-          updateData={setListDataDetailPricingAdjust}
-        /> */}
-        <FunctionalCriteriaProduct
-            data={listDataDetailPricingAdjust} //data
-            dataCriteria={criteriaValues} //ddl
-            type={"detail"}
-            selector="pricingAdjust"
-            idTable="price-adjust-detail-criteria-table"
-            columnsTable={columnsTableCriteriaAll}
-            fixedColumn={[
-              "ADJUSTMENT TYPE",
-              "ADJUSTMENT VALUE",
-              // "DESCRIPTION",
-            ]}
-            countryCriteriaId={countryCriteriaId}
-          />
+          fixedColumn={[
+            "ADJUSTMENT TYPE",
+            "ADJUSTMENT VALUE",
+          ]}
+          countryCriteriaId={countryCriteriaId}
+        />
       </NxCardContainer>
       <NxCardContainer header={"HISTORY LOG INFORMATION"}>
         <PricingLogInformationDetail data={dataLogInformation} />
