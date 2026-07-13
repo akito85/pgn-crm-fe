@@ -10,6 +10,7 @@ import {
 const initialState = {
   data: [],
   loading: false,
+  loadingBillingPeriod: false,
   loadingResult: false,
   loadingLog: false,
   loadingCreate: false,
@@ -194,6 +195,72 @@ export const donwloadedHistoryExcel = createAsyncThunk(
         validateError({
           error: error,
           action: "DOWNLOAD_CALCULATION_HISTORY_EXCEL",
+          back: false,
+        })
+      );
+      return thunkAPI.rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const downloadDetailResultRecalculateExcel = createAsyncThunk(
+  "DOWNLOAD_DETAIL_RESULT_RECALCULATE_EXCEL",
+  async ({ calCode, calType, search, page, pageSize, sort }, thunkAPI) => {
+    try {
+      const searchParams = search || "";
+      const sortParams = sort || "";
+      const url = `/v1/dbs/api/rbi/calculation/download-detailresultrecalculate?calCode=${calCode}&calType=${calType}&size=${pageSize}&page=${page}&sort=${sortParams}&searchs=${searchParams}`;
+      const response = await ratingBillingHttpService.downloadData(url);
+      return response.data;
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "DOWNLOAD_DETAIL_RESULT_RECALCULATE_EXCEL",
+          back: false,
+        })
+      );
+      return thunkAPI.rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const downloadDetailCalculationResultExcel = createAsyncThunk(
+  "DOWNLOAD_DETAIL_CALCULATION_RESULT_EXCEL",
+  async ({ calCode, calType, search, page, pageSize, sort }, thunkAPI) => {
+    try {
+      const searchParams = search || "";
+      const sortParams = sort || "";
+      const url = `/v1/dbs/api/rbi/calculation/download-detailcalculationresult?calCode=${calCode}&calType=${calType}&size=${pageSize}&page=${page}&sort=${sortParams}&searchs=${searchParams}`;
+      const response = await ratingBillingHttpService.downloadData(url);
+      return response.data;
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "DOWNLOAD_DETAIL_CALCULATION_RESULT_EXCEL",
+          back: false,
+        })
+      );
+      return thunkAPI.rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const downloadCalculateLogExcel = createAsyncThunk(
+  "DOWNLOAD_CALCULATION_LOG_EXCEL",
+  async ({ calCode, search, sort }, thunkAPI) => {
+    try {
+      const searchParams = search || "";
+      const sortParams = sort || "logId~desc";
+      const url = `/v1/dbs/api/rbi/calculation/download-calculatelog?sort=${sortParams}&searchs=${searchParams}&calCode=${calCode}`;
+      const response = await ratingBillingHttpService.downloadData(url);
+      return response.data;
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "DOWNLOAD_CALCULATION_LOG_EXCEL",
           back: false,
         })
       );
@@ -856,6 +923,7 @@ const calculationSlice = createSlice({
     },
     resetCalculationData: (state) => {
       state.data = [];
+      state.loading = true;
     },
   },
   extraReducers: {
@@ -1164,14 +1232,14 @@ const calculationSlice = createSlice({
     },
     // lov billing period for calculation (open-lov)
     [getListBillingPeriodForCalculation.pending]: (state) => {
-      state.loading = true;
+      state.loadingBillingPeriod = true;
     },
     [getListBillingPeriodForCalculation.fulfilled]: (state, action) => {
-      state.loading = false;
+      state.loadingBillingPeriod = false;
       state.list_billing_period = action.payload;
     },
     [getListBillingPeriodForCalculation.rejected]: (state) => {
-      state.loading = false;
+      state.loadingBillingPeriod = false;
     },
     // lov user detail calculation
     [getUserDetailCalculation.pending]: (state) => {

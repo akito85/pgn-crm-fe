@@ -85,6 +85,11 @@ const CalculationPage = () => {
     }
   }, [fixedColumns]);
 
+  // Reset data lama & tampilkan spinner segera saat halaman list dibuka/di-mount kembali
+  useEffect(() => {
+    dispatch(resetCalculationData());
+  }, [dispatch]);
+
   // Fetch billing period saat mount
   useEffect(() => {
     dispatch(getListBillingPeriodForCalculation());

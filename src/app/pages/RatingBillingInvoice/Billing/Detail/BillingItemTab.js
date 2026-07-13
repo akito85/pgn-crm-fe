@@ -4,6 +4,10 @@ import TableRBI from "../../../../../components/TableRBI";
 import { getAllBillingItemPaginate } from "../../../../../redux/slices/rating_billing_invoice/billing";
 import { columnsBillingItem } from "./Table/TableBillingItem";
 import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
+import ButtonComponent from "../../../../../components/ButtonComponent";
+import SVGIcon from "../../../../../assets/Icon/index";
+import ratingBillingHttpService from "../../../../../redux/services/ratingBillingHttpService";
+import { showModalError } from "../../../../../redux/slices/general_slice";
 
 const BillingItemTab = ({ billingCodeId, calculationCodeId, billHeaderId }) => {
   const { data_billingItem, loadingDetail } = useSelector((state) => state.billing);
@@ -121,6 +125,22 @@ const BillingItemTab = ({ billingCodeId, calculationCodeId, billHeaderId }) => {
     }));
   }, [allColumnsBI]);
 
+  const handleDownload = async () => {
+    const searchParam = Object.keys(searchBI).some((k) => searchBI[k])
+      ? encodeURIComponent(JSON.stringify(searchBI))
+      : "";
+    const sortParams = sortBI || "lineNumber~asc";
+    const url = `/v1/dbs/api/billing/billing-item/download/${billHeaderId}?page=1&size=99999&sort=${sortParams}&searchs=${searchParam}`;
+    try {
+      await ratingBillingHttpService.downloadXlsx(url, "BILLING_ITEM");
+    } catch {
+      dispatch(showModalError({
+        title: "Failed",
+        description: "Can't download data, data is empty",
+      }));
+    }
+  };
+
   // Tambahkan key unik per row menggunakan id dari response
   const dataSourceWithKeys = useMemo(() => {
     return dataSourceBI?.map((item) => ({
@@ -140,6 +160,12 @@ const BillingItemTab = ({ billingCodeId, calculationCodeId, billHeaderId }) => {
           <p className="text-[13px] text-gray-600 mb-1">Source Number</p>
           <p className="text-[15px] text-primary">{billHeaderId || ""}</p>
         </div>
+      </div>
+
+      <div className="flex justify-end mb-3">
+        <ButtonComponent onClick={handleDownload} type={"submit"} border={false} icon={<SVGIcon name="IconButtonDownload" width={20} />}>
+          Download List
+        </ButtonComponent>
       </div>
 
       <TableRBI

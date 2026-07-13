@@ -3,9 +3,14 @@ import { useDispatch, useSelector } from "react-redux";
 import CollapsibleContainer from "../../../../components/CollapsibleContainer";
 import TableRBI from "../../../../components/TableRBI";
 import { getColumnSearchPropsUseFilteredValue } from "../../../../utils/getColumnSearchProps";
-import { getDetailPrabillingLog } from "../../../../redux/slices/rating_billing_invoice/praBilling";
+import {
+  getDetailPrabillingLog,
+  downloadLogPrabilling,
+} from "../../../../redux/slices/rating_billing_invoice/praBilling";
 import { applyFixedColumns } from "../../../../utils/applyFixedColumns";
 import { hasValue, renderColumn, renderDateColumn } from "../../../../utils";
+import ButtonComponent from "../../../../components/ButtonComponent";
+import SVGIcon from "../../../../assets/Icon/index";
 import moment from "moment";
 
 const PrabillingDetailLog = ({ data, tabHeader }) => {
@@ -15,6 +20,8 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
 
   const dispatch = useDispatch();
   const searchInput = useRef(null);
+  const isLoadingRef = useRef(false);
+  const lastLoadedPageRef = useRef(-1);
 
   const prabillData = data?.prabillInitPopulate || {};
 
@@ -24,6 +31,18 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
   const [search, setSearch] = useState({});
   const [searchedColumn, setSearchedColumn] = useState("");
   const [searchText, setSearchText] = useState("");
+  const { loading } = useSelector((state) => state.rbi_prabilling);
+
+  const handleDownload = () => {
+    if (!prabillData?.initCode) return;
+    dispatch(
+      downloadLogPrabilling({
+        initCode: prabillData.initCode,
+        search: Object.keys(search).length > 0 ? JSON.stringify(search) : "",
+        sort: sort || "createdDtm~desc",
+      })
+    );
+  };
 
   const [fixedColumns, setFixedColumns] = useState(() => ({
     left: ["no"],
@@ -36,13 +55,14 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
       dispatch(
         getDetailPrabillingLog({
           initCode: prabillData.initCode,
-          page: 0,
+          page: 1,
           size: 100,
           sort: sort || "createdDtm~desc",
           search: Object.keys(search).length > 0 ? JSON.stringify(search) : "",
           isLoadMore: false,
         })
       );
+      lastLoadedPageRef.current = 5; 
       setPage(1);
     }
   }, [tabHeader, dispatch, prabillData?.initCode, sort, search]);
@@ -63,21 +83,39 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
   };
 
   const handleLoadMore = async () => {
-    const nextPage = page + 1;
-    const totalPages = detail_prabilling_log?.totalPages || 0;
+    const totalElements = detail_prabilling_log?.totalElements || 0;
+    const currentDataLength = logData.length;
 
-    if (nextPage <= totalPages) {
+    if (currentDataLength >= totalElements) {
+      return;
+    }
+
+    if (isLoadingRef.current) {
+      return;
+    }
+
+    const nextPage = Math.floor(currentDataLength / loadMoreSize) + 1;
+
+    if (nextPage <= lastLoadedPageRef.current) {
+      return;
+    }
+
+    isLoadingRef.current = true;
+    lastLoadedPageRef.current = nextPage;
+
+    try {
       await dispatch(
         getDetailPrabillingLog({
           initCode: prabillData.initCode,
-          page: nextPage - 1,
+          page: nextPage,
           size: loadMoreSize,
           sort: sort || "createdDtm~desc",
           search: Object.keys(search).length > 0 ? JSON.stringify(search) : "",
           isLoadMore: true,
         })
       );
-      setPage(nextPage);
+    } finally {
+      isLoadingRef.current = false;
     }
   };
 
@@ -229,6 +267,17 @@ const PrabillingDetailLog = ({ data, tabHeader }) => {
     <div className="flex flex-col gap-1 mt-4">
       <CollapsibleContainer header={"Prabilling Process Log"} border>
         <div className="my-5">
+          <div className="flex justify-end mb-4">
+            <ButtonComponent
+              type="submit"
+              border={false}
+              icon={<SVGIcon name="IconButtonDownload" width={20} />}
+              onClick={handleDownload}
+              loading={loading}
+            >
+              Download List
+            </ButtonComponent>
+          </div>
           <TableRBI
             idTable="prabilling-log-table"
             dataSource={logData}

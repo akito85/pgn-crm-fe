@@ -13,6 +13,8 @@ import {
   recalculateData,
   retryData,
   getDetailCalculationLog,
+  downloadDetailResultRecalculateExcel,
+  downloadDetailCalculationResultExcel,
 } from "../../../../../redux/slices/rating_billing_invoice/calculation";
 import TableRBI from "../../../../../components/TableRBI";
 import ModalApproveOrReject from "../../../../../components/Modal/ModalApproveOrReject";
@@ -462,6 +464,34 @@ const DetailInformation = ({ data }) => {
     setModalRecalculateRating(true);
   };
 
+  const handleDownloadExcel = () => {
+    const calType = data?.calType === 621 ? 621 : 623;
+    dispatch(
+      downloadDetailResultRecalculateExcel({
+        calCode: data?.calCode,
+        calType,
+        search: encodeURIComponent(JSON.stringify(searchRecalculate)),
+        page: 1,
+        pageSize: 10000,
+        sort: "",
+      })
+    );
+  };
+
+  const handleDownloadCalculationFailedExcel = () => {
+    const calType = activeTab === "rating" ? 621 : 623;
+    dispatch(
+      downloadDetailCalculationResultExcel({
+        calCode: data?.calCode,
+        calType,
+        search: encodeURIComponent(JSON.stringify(search)),
+        page: 1,
+        pageSize: 10000,
+        sort: sort,
+      })
+    );
+  };
+
   const clearRetry = () => {
     form.resetFields();
     setOpenRetry(false);
@@ -668,19 +698,34 @@ const DetailInformation = ({ data }) => {
             header={
               <div className="flex -my-4 justify-between items-center">
                 <p className="mt-[15px]">CALCULATION SUCCESS</p>
-                <ButtonComponent
-                  type={"submit"}
-                  border={false}
-                  icon={
-                    <SVGIcon
-                      name={"IconRatingReconculate"}
-                      style={{ fontSize: "20px" }}
-                    />
-                  }
-                  onClick={handleOpenRecalculateModal}
-                >
-                  Recalculate
-                </ButtonComponent>
+                <div className="flex gap-2">
+                  <ButtonComponent
+                    type={"submit"}
+                    border={false}
+                    icon={
+                      <SVGIcon
+                        name={"IconButtonDownload"}
+                        style={{ fontSize: "20px" }}
+                      />
+                    }
+                    onClick={handleDownloadExcel}
+                  >
+                    Download List
+                  </ButtonComponent>
+                  <ButtonComponent
+                    type={"submit"}
+                    border={false}
+                    icon={
+                      <SVGIcon
+                        name={"IconRatingReconculate"}
+                        style={{ fontSize: "20px" }}
+                      />
+                    }
+                    onClick={handleOpenRecalculateModal}
+                  >
+                    Recalculate
+                  </ButtonComponent>
+                </div>
               </div>
             }
           >
@@ -717,20 +762,34 @@ const DetailInformation = ({ data }) => {
             header={
               <div className="flex -my-4 justify-between items-center">
                 <p className="mt-[15px]">CALCULATION FAILED</p>
-
-                <ButtonComponent
-                  onClick={() => setOpenRetry(true)}
-                  type={"submit"}
-                  border={false}
-                  icon={
-                    <SVGIcon
-                      name={`IconButtonReset`}
-                      style={{ fontSize: "20px" }}
-                    />
-                  }
-                >
-                  Retry
-                </ButtonComponent>
+                <div className="flex gap-2">
+                  <ButtonComponent
+                    type={"submit"}
+                    border={false}
+                    icon={
+                      <SVGIcon
+                        name={"IconButtonDownload"}
+                        style={{ fontSize: "20px" }}
+                      />
+                    }
+                    onClick={handleDownloadCalculationFailedExcel}
+                  >
+                    Download List
+                  </ButtonComponent>
+                  <ButtonComponent
+                    onClick={() => setOpenRetry(true)}
+                    type={"submit"}
+                    border={false}
+                    icon={
+                      <SVGIcon
+                        name={`IconButtonReset`}
+                        style={{ fontSize: "20px" }}
+                      />
+                    }
+                  >
+                    Retry
+                  </ButtonComponent>
+                </div>
               </div>
             }
           >

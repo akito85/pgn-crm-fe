@@ -3,8 +3,11 @@ import { useDispatch, useSelector } from "react-redux";
 import TableRBI from "../../../../../../components/TableRBI";
 import { 
   getAllCalculationSummaryPaginate,
-  getAllCalculationSummaryExpandPaginate 
+  getAllCalculationSummaryExpandPaginate,
+  downloadSummaryRatingExcel
 } from "../../../../../../redux/slices/rating_billing_invoice/rating";
+import ButtonComponent from "../../../../../../components/ButtonComponent";
+import SVGIcon from "../../../../../../assets/Icon/index";
 import { 
   columnsCalculationSummary, 
   renderExpandedRow 
@@ -185,8 +188,34 @@ const CalculationSummary = ({ ratingCode, calculationCode, saType }) => {
     }));
   }, [allColumns]);
 
+  const handleDownloadExcel = () => {
+    dispatch(
+      downloadSummaryRatingExcel({
+        ratingCode,
+        calculationCode,
+        search: encodeURIComponent(JSON.stringify(search)),
+        sort: sort,
+      })
+    );
+  };
+
   return (
     <div className="w-full pt-4">
+      <div className="flex justify-end mb-2">
+        <ButtonComponent
+          type={"submit"}
+          border={false}
+          icon={
+            <SVGIcon
+              name={"IconButtonDownload"}
+              style={{ fontSize: "20px" }}
+            />
+          }
+          onClick={handleDownloadExcel}
+        >
+          Download List
+        </ButtonComponent>
+      </div>
       <TableRBI
         idTable="calculation-summary-table"
         dataSource={dataSource}
