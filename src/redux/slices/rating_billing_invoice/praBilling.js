@@ -292,6 +292,32 @@ export const getListPrabillingSummary = createAsyncThunk(
   },
 );
 
+// Download list prabilling
+export const downloadListPrabilling = createAsyncThunk(
+  "DOWNLOAD_LIST_PRABILLING",
+  async ({ search, page, sort, billPeriodId }, thunkAPI) => {
+    try {
+      const searchParams = search || "";
+      const sortParams = sort || "";
+      let url = `/v1/dbs/api/prabill/download?page=${page}&searchs=${searchParams}`;
+      if (sortParams) url += `&sort=${sortParams}`;
+      if (billPeriodId) url += `&billPeriodId=${billPeriodId}`;
+
+      const response = await ratingBillingHttpService.downloadDataPrabill(url);
+      return response.data;
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "DOWNLOAD_LIST_PRABILLING",
+          back: false,
+        }),
+      );
+      return thunkAPI.rejectWithValue(error.response?.data);
+    }
+  },
+);
+
 export const getListSor = createAsyncThunk("GET_LIST_SOR", async (thunkAPI) => {
   try {
     const url = `/v1/dbs/api/rbi/calculation/sor?ccType=SOR`;
@@ -2421,6 +2447,16 @@ const prabillingSlice = createSlice({
         result: [],
         page: {},
       };
+    },
+    // download list prabilling
+    [downloadListPrabilling.pending]: (state) => {
+      state.loading = true;
+    },
+    [downloadListPrabilling.fulfilled]: (state) => {
+      state.loading = false;
+    },
+    [downloadListPrabilling.rejected]: (state) => {
+      state.loading = false;
     },
   },
 });

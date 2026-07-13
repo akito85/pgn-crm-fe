@@ -14,6 +14,7 @@ import {
   resetAllTabData,
   setFilters,
   clearFilters,
+  downloadListPrabilling,
 } from "../../../../redux/slices/rating_billing_invoice/praBilling";
 import TableRBI from "../../../../components/TableRBI";
 import Toolbar from "../../../../components/Toolbar";
@@ -468,7 +469,32 @@ const PrabillingPage = () => {
     );
   };
 
+  const handleDownload = () => {
+    if (!selectedBillingPeriod) return;
+    dispatch(
+      downloadListPrabilling({
+        search: encodeURIComponent(JSON.stringify(search)),
+        page: 1,
+        sort,
+        billPeriodId: selectedBillingPeriod,
+      }),
+    );
+  };
+
   const itemGrantAccess = [
+    {
+      action: "Download",
+      render: (
+        <ButtonComponent
+          type={"submit"}
+          border={false}
+          icon={<SVGIcon name="IconButtonDownload" width={20} />}
+          onClick={handleDownload}
+        >
+          Download List
+        </ButtonComponent>
+      ),
+    },
     {
       action: "Create",
       render: (
