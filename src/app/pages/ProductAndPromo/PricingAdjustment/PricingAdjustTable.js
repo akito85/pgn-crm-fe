@@ -159,6 +159,16 @@ const PricingAdjustTable = () => {
     setOpenModalHistory(true);
   };
 
+  const handleUpdate = ({ id, status, statusApproval }) =>
+    navigate(PRODUCT_PROMO_ROUTES.UPDATE_PRICING_ADJUSTMENT, {
+      state: {
+        id,
+        prevPage: "table-price-adjust",
+        statusPriceAdjust: status,
+        statusApprovalPriceAdjust: statusApproval,
+      }
+    });
+
   const handleOpenModalInactivate = (data) => {
     setDataInactivate(data);
     setOpenModalInactivate(true);
@@ -221,15 +231,7 @@ const PricingAdjustTable = () => {
         navigate(PRODUCT_PROMO_ROUTES.DETAIL_PRICING_ADJUSTMENT, {
           state: { id }
         }),
-      handleUpdate: ({ id, status, statusApproval }) =>
-        navigate(PRODUCT_PROMO_ROUTES.UPDATE_PRICING_ADJUSTMENT, {
-          state: {
-            id,
-            prevPage: "table-price-adjust",
-            statusPriceAdjust: status,
-            statusApprovalPriceAdjust: statusApproval,
-          }
-        }),
+      handleUpdate,
       handleActivate: handleOpenModalInactivate,
       handleApprovalHistory,
       handleDownload,
@@ -240,6 +242,46 @@ const PricingAdjustTable = () => {
     // which shows it ticked before the record is actually inactivated.
     // Override locally so it only shows checked once the record is INACTIVE.
     return actions.map((item) => {
+      if (item.action === "Update") {
+        return {
+          ...item,
+          render: (record, actionLength, index) => {
+            // Update is only allowed while the record is still editable:
+            // Draft/Draft, Active/Approved, or Active/Draft. Any other
+            // combination (e.g. waiting approval) must stay disabled.
+            const isEditable =
+              (record.status === "DRAFT" && record.statusApproval === "DRAFT") ||
+              (record.status === "ACTIVE" && record.statusApproval === "APPROVED") ||
+              (record.status === "ACTIVE" && record.statusApproval === "DRAFT");
+            const content =
+              actionLength > 3 ? (
+                <Button
+                  icon={<SVGIcon name="IconEdit" width={20} />}
+                  disabled={!isEditable}
+                  onClick={() => handleUpdate(record)}
+                  type={"action"}
+                >
+                  Update
+                </Button>
+              ) : (
+                <Tooltip
+                  title={isEditable ? "Update" : ""}
+                  key={`table-action-${index}`}
+                >
+                  <Button
+                    onClick={() => handleUpdate(record)}
+                    disabled={!isEditable}
+                    type="table-action"
+                  >
+                    <SVGIcon name="IconEdit" width={20} />
+                  </Button>
+                </Tooltip>
+              );
+
+            return <Fragment key={`table-action-${index}`}>{content}</Fragment>;
+          },
+        };
+      }
       if (item.action !== "Activate") return item;
       return {
         ...item,
@@ -285,7 +327,7 @@ const PricingAdjustTable = () => {
         },
       };
     });
-  }, [handleDownload, handleOpenModalInactivate, handleApprovalHistory, loadingDownload]);
+  }, [handleDownload, handleOpenModalInactivate, handleApprovalHistory, loadingDownload, handleUpdate]);
 
   // --- Columns ---
   const actionCols = useColumnActionPermission(

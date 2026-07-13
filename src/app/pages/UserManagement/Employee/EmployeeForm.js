@@ -51,6 +51,7 @@ const EmployeeForm = (props) => {
   const location = useLocation();
   const [form] = Form.useForm();
   const employeeStartDate = Form.useWatch("startDate", form);
+  const employeeEndDate = Form.useWatch("endDate", form);
   // Watching all fields keeps the dirty-check below purely derived from render
   // state (current watched values + current tableData vs. the snapshot taken
   // in assert()), instead of tracked via onValuesChange/useEffect ordering,
@@ -623,9 +624,6 @@ const EmployeeForm = (props) => {
               >
                 <DatePicker
                   format={dateFormatting?.dateCapital}
-                  disabledDate={(current) => {
-                    return current && current < moment().add(-1, "days");
-                  }}
                   className={"w-full"}
                 />
               </Form.Item>
@@ -636,19 +634,6 @@ const EmployeeForm = (props) => {
               >
                 <DatePicker
                   format={dateFormatting?.dateCapital}
-                  disabledDate={(current) => {
-                    if (
-                      form.getFieldValue("startDate") === undefined ||
-                      form.getFieldValue("startDate") === null
-                    ) {
-                      return current && current < moment().add(-1, "days");
-                    } else {
-                      return (
-                        current &&
-                        current < moment(form.getFieldValue("startDate"))
-                      );
-                    }
-                  }}
                   className={"w-full"}
                 />
               </Form.Item>
@@ -682,6 +667,7 @@ const EmployeeForm = (props) => {
               checkNameColumn={"Position"}
               setInserted={setDisabledButton}
               employeeStartDate={employeeStartDate}
+              employeeEndDate={employeeEndDate}
             />
           </div>
           <NxBaseContainer border>
