@@ -794,15 +794,18 @@ export const getDetailCalculationResult = createAsyncThunk(
 // detail calcultaion result no paging
 export const getDetailCalculationResultNoPaging = createAsyncThunk(
   "GET_DETAIL_CALCULATION_LOG_NO_PAGING",
-  async ({ calCode, calType }, thunkAPI) => {
+  async ({ calCode, calType, page, pageSize, isLoadMore = false }, thunkAPI) => {
     try {
       const url = `/v1/dbs/api/rbi/calculation/list-detailresultrecalculate`;
-      const params = { calCode, calType };
+      const params = { calCode, calType, page, size: pageSize };
       const response = await ratingBillingHttpService.getListPagination(
         url,
         params
       );
-      return response.data;
+      return {
+        ...response.data,
+        isLoadMore,
+      };
     } catch (error) {
       const message =
         error?.response?.data?.message || error?.message || error?.toString();
@@ -1321,15 +1324,33 @@ const calculationSlice = createSlice({
     },
 
     // get detail calculation log no paigng
-    [getDetailCalculationResultNoPaging.pending]: (state) => {
-      state.loadingResult = true;
+    [getDetailCalculationResultNoPaging.pending]: (state, action) => {
+      if (!action.meta.arg?.isLoadMore) {
+        state.loadingResult = true;
+      }
     },
     [getDetailCalculationResultNoPaging.fulfilled]: (state, action) => {
       state.loadingResult = false;
-      state.list_calculation_no_paging = action.payload?.data || action.payload;
+      const isLoadMore = action.payload.isLoadMore;
+      const newResult = action.payload?.result || [];
+
+      if (isLoadMore) {
+        state.list_calculation_no_paging = {
+          ...action.payload,
+          result: [
+            ...(state.list_calculation_no_paging?.result || []),
+            ...newResult,
+          ],
+        };
+      } else {
+        state.list_calculation_no_paging = action.payload;
+      }
     },
-    [getDetailCalculationResultNoPaging.rejected]: (state) => {
+    [getDetailCalculationResultNoPaging.rejected]: (state, action) => {
       state.loadingResult = false;
+      if (!action.meta.arg?.isLoadMore) {
+        state.list_calculation_no_paging = { result: [], page: {} };
+      }
     },
 
     //DETAIL MATCH FORCE
