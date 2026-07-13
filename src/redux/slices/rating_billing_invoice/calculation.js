@@ -10,6 +10,7 @@ import {
 const initialState = {
   data: [],
   loading: false,
+  loadingBillingPeriod: false,
   loadingResult: false,
   loadingLog: false,
   loadingCreate: false,
@@ -922,6 +923,7 @@ const calculationSlice = createSlice({
     },
     resetCalculationData: (state) => {
       state.data = [];
+      state.loading = true;
     },
   },
   extraReducers: {
@@ -1230,14 +1232,14 @@ const calculationSlice = createSlice({
     },
     // lov billing period for calculation (open-lov)
     [getListBillingPeriodForCalculation.pending]: (state) => {
-      state.loading = true;
+      state.loadingBillingPeriod = true;
     },
     [getListBillingPeriodForCalculation.fulfilled]: (state, action) => {
-      state.loading = false;
+      state.loadingBillingPeriod = false;
       state.list_billing_period = action.payload;
     },
     [getListBillingPeriodForCalculation.rejected]: (state) => {
-      state.loading = false;
+      state.loadingBillingPeriod = false;
     },
     // lov user detail calculation
     [getUserDetailCalculation.pending]: (state) => {
