@@ -389,6 +389,16 @@ const PricingAdjustForm = (props) => {
   }, [dataListPricingDetailActive]);
 
   useEffect(() => {
+    if (
+      (prevPage === "create-pricing" || prevPage === "update-pricing") &&
+      listDataDetail.length > 0 &&
+      !selectedData?.id
+    ) {
+      setSelectedData(listDataDetail[0]);
+    }
+  }, [listDataDetail, prevPage]);
+
+  useEffect(() => {
     if (selectedHierarchy && selectedHierarchy !== 0) {
       dispatch(getListAppHierDetail({ id: selectedHierarchy }));
     }
@@ -996,7 +1006,7 @@ const PricingAdjustForm = (props) => {
   };
 
   const selectedPriceCode = () => {
-    if (selectedData) {
+    if (selectedData?.currency && selectedData?.uom) {
       return `${selectedData.currency}/${selectedData.value}/${selectedData.uom}`;
     }
     return "-";
