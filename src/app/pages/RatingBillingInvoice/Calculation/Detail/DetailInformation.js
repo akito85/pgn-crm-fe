@@ -589,6 +589,9 @@ const DetailInformation = ({ data }) => {
                         defaultOpen
                       >
                         <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-x-8 gap-y-2 sm:gap-y-1 pt-2">
+                          <DetailText label={"Calculation Code"}>
+                            {data?.calCode}
+                          </DetailText>
                           <DetailText label={"Billing Cycle"}>
                             {data?.billingCycle}
                           </DetailText>
