@@ -12,6 +12,8 @@ const initialState = {
   loading: false,
   loadingBillingPeriod: false,
   loadingResult: false,
+  loadingResultNoPaging: false,
+  activeDetailCalCode: null,
   loadingLog: false,
   loadingCreate: false,
   loadingModal: false,
@@ -925,6 +927,15 @@ const calculationSlice = createSlice({
       state.data = [];
       state.loading = true;
     },
+    resetCalculationDetail: (state) => {
+      state.detail_calculation_job = null;
+      state.list_calculation_result = { result: [], page: {} };
+      state.list_calculation_no_paging = { result: [], page: {} };
+      state.loading = true;
+      state.loadingResult = true;
+      state.loadingResultNoPaging = true;
+      state.activeDetailCalCode = null;
+    },
   },
   extraReducers: {
     [getCalculationPaginate.pending]: (state, action) => {
@@ -1184,10 +1195,18 @@ const calculationSlice = createSlice({
       // Hanya show loading saat initial fetch
       if (!action.meta.arg?.isLoadMore) {
         state.loadingResult = true;
+        state.activeDetailCalCode = action.meta.arg?.calCode;
       }
     },
     [getDetailCalculationResult.fulfilled]: (state, action) => {
       state.loadingResult = false;
+      // Buang response basi dari calCode yang sudah ditinggalkan (race saat pindah detail)
+      if (
+        action.meta.arg?.calCode !== undefined &&
+        action.meta.arg.calCode !== state.activeDetailCalCode
+      ) {
+        return;
+      }
       const isLoadMore = action.payload.isLoadMore;
       const newResult = action.payload?.result || [];
 
@@ -1328,11 +1347,19 @@ const calculationSlice = createSlice({
     // get detail calculation log no paigng
     [getDetailCalculationResultNoPaging.pending]: (state, action) => {
       if (!action.meta.arg?.isLoadMore) {
-        state.loadingResult = true;
+        state.loadingResultNoPaging = true;
+        state.activeDetailCalCode = action.meta.arg?.calCode;
       }
     },
     [getDetailCalculationResultNoPaging.fulfilled]: (state, action) => {
-      state.loadingResult = false;
+      state.loadingResultNoPaging = false;
+      // Buang response basi dari calCode yang sudah ditinggalkan (race saat pindah detail)
+      if (
+        action.meta.arg?.calCode !== undefined &&
+        action.meta.arg.calCode !== state.activeDetailCalCode
+      ) {
+        return;
+      }
       const isLoadMore = action.payload.isLoadMore;
       const newResult = action.payload?.result || [];
 
@@ -1349,7 +1376,7 @@ const calculationSlice = createSlice({
       }
     },
     [getDetailCalculationResultNoPaging.rejected]: (state, action) => {
-      state.loadingResult = false;
+      state.loadingResultNoPaging = false;
       if (!action.meta.arg?.isLoadMore) {
         state.list_calculation_no_paging = { result: [], page: {} };
       }
@@ -1397,6 +1424,6 @@ const calculationSlice = createSlice({
   },
 });
 
-export const { setFilters, clearFilters, resetCalculationData } = calculationSlice.actions;
+export const { setFilters, clearFilters, resetCalculationData, resetCalculationDetail } = calculationSlice.actions;
 const { reducer } = calculationSlice;
 export default reducer;

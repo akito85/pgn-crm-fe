@@ -6,7 +6,10 @@ import BreadCrumb from "../../../../../components/BreadCrumb";
 import ButtonComponent from "../../../../../components/ButtonComponent";
 import { RBI_ROUTES } from "../../../../../routes/rating_billing/rbi_routes";
 import DetailInformation from "./DetailInformation";
-import { getDetailCalculationJob } from "../../../../../redux/slices/rating_billing_invoice/calculation";
+import {
+  getDetailCalculationJob,
+  resetCalculationDetail,
+} from "../../../../../redux/slices/rating_billing_invoice/calculation";
 
 const CalculationDetail = () => {
   // Selector
@@ -23,6 +26,7 @@ const CalculationDetail = () => {
   // Use Effect
   useEffect(() => {
     if (calJobId) {
+      dispatch(resetCalculationDetail());
       dispatch(getDetailCalculationJob(calJobId));
     }
   }, [dispatch, calJobId]);
