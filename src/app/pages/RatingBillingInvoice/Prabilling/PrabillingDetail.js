@@ -435,6 +435,7 @@ const PrabillingDetail = () => {
             size="small"
             className="tabs-compact"
             style={{ marginBottom: 0 }}
+            destroyInactiveTabPane={true}
           />
         </CardContainer>
 
