@@ -145,6 +145,12 @@ const CalculationPage = () => {
   }, [tabHeader, filters, currentTabKey]);
 
   useEffect(() => {
+    // Tunggu default billing period selesai ditentukan agar fetch pertama
+    // sudah membawa filter periode yang benar (hindari total belum terfilter).
+    if (!selectedBillingPeriod) {
+      return;
+    }
+
     if (tabHeader === "Calculation List") {
       dispatch(
         getCalculationPaginate({
