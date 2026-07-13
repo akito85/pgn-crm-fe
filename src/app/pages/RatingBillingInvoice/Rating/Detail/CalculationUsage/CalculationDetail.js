@@ -1,7 +1,12 @@
 import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import TableRBI from "../../../../../../components/TableRBI";
-import { getAllCalculationDetailPaginate } from "../../../../../../redux/slices/rating_billing_invoice/rating";
+import ButtonComponent from "../../../../../../components/ButtonComponent";
+import SVGIcon from "../../../../../../assets/Icon/index";
+import {
+  getAllCalculationDetailPaginate,
+  downloadCalculationDetail,
+} from "../../../../../../redux/slices/rating_billing_invoice/rating";
 import { columnsCalculationDetail } from "./columns/ColumnsCalculationDetail";
 import { applyFixedColumns } from "../../../../../../utils/applyFixedColumns";
 
@@ -93,6 +98,19 @@ const CalculationDetail = ({ calculationCode, ratingCode }) => {
         })
       );
       setPage(1);
+    }
+  };
+
+  const handleDownloadDetail = () => {
+    if (calculationCode) {
+      dispatch(
+        downloadCalculationDetail({
+          ratingCode,
+          calculationCode,
+          search: encodeURIComponent(JSON.stringify(search)),
+          sort,
+        })
+      );
     }
   };
 
@@ -215,6 +233,16 @@ const CalculationDetail = ({ calculationCode, ratingCode }) => {
 
   return (
     <div className="w-full pt-4">
+      <div className="flex justify-end mb-2">
+        <ButtonComponent
+          type="submit"
+          border={false}
+          icon={<SVGIcon name="IconButtonDownload" width={20} />}
+          onClick={handleDownloadDetail}
+        >
+          Download
+        </ButtonComponent>
+      </div>
       <TableRBI
         idTable="calculation-detail-table"
         dataSource={processedDataSource}
