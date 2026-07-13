@@ -94,6 +94,7 @@ const PrabillingForm = ({ type }) => {
 
   const [openWarningPopulate, setOpenWarningPopulate] = useState(false);
   const [pendingDataFinal, setPendingDataFinal] = useState(null);
+  const [selectedSor, setSelectedSor] = useState(null);
 
   useEffect(() => {
     dispatch(getListSor());
@@ -126,6 +127,10 @@ const PrabillingForm = ({ type }) => {
         limit: DEFAULT_SEARCH_LIMIT,
       };
     });
+    if (tempBody.sor) {
+      setSelectedSor(tempBody.sor);
+      dispatch(getListCostCenter(tempBody.sor));
+    }
     if (tempBody.costCenter) {
       const body = {
         ccIds: (tempBody.costCenter || []).map((data) => {
@@ -502,6 +507,8 @@ const PrabillingForm = ({ type }) => {
     setSearchCustomerValue("");
     setFilteredCustomerList([]);
     form.resetFields(["specificCustomer"]);
+    setSelectedSor(e);
+    dispatch(getListCostCenter(e));
   };
 
   const handleChangeCostCenter = (e) => {

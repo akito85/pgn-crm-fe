@@ -4,6 +4,10 @@ import TableRBI from "../../../../../components/TableRBI";
 import { getAllPromoServiceAgreementPaginate } from "../../../../../redux/slices/rating_billing_invoice/rating";
 import { columnsPromo } from "./Table/TablePromo";
 import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
+import ButtonComponent from "../../../../../components/ButtonComponent";
+import SVGIcon from "../../../../../assets/Icon/index";
+import ratingBillingHttpService from "../../../../../redux/services/ratingBillingHttpService";
+import { showModalError } from "../../../../../redux/slices/general_slice";
 
 const PromoSection = ({ ratingCode, calculationCode }) => {
   const { data_promoSA, loadingPromo } = useSelector((state) => state.rating);
@@ -95,6 +99,22 @@ const PromoSection = ({ ratingCode, calculationCode }) => {
     }));
   }, [allColumns]);
 
+  const handleDownload = async () => {
+    const searchParam = Object.keys(search).some((k) => search[k])
+      ? encodeURIComponent(JSON.stringify(search))
+      : "";
+    const sortParams = sort || "lineNumber~asc";
+    const url = `/v1/dbs/api/rating/download-rating-promo?ratingCode=${ratingCode}&page=1&size=99999&sort=${sortParams}&searchs=${searchParam}`;
+    try {
+      await ratingBillingHttpService.downloadXlsx(url, "RATING_PROMO");
+    } catch {
+      dispatch(showModalError({
+        title: "Failed",
+        description: "Can't download data, data is empty",
+      }));
+    }
+  };
+
   return (
     <>
       <div className="mb-4">
@@ -117,6 +137,11 @@ const PromoSection = ({ ratingCode, calculationCode }) => {
             </p>
           </div>
         </div>
+      </div>
+      <div className="flex justify-end mb-3">
+        <ButtonComponent onClick={handleDownload} type={"submit"} border={false} icon={<SVGIcon name="IconButtonDownload" width={20} />}>
+          Download List
+        </ButtonComponent>
       </div>
       <div className="w-full">
         <TableRBI

@@ -202,6 +202,72 @@ export const donwloadedHistoryExcel = createAsyncThunk(
   }
 );
 
+export const downloadDetailResultRecalculateExcel = createAsyncThunk(
+  "DOWNLOAD_DETAIL_RESULT_RECALCULATE_EXCEL",
+  async ({ calCode, calType, search, page, pageSize, sort }, thunkAPI) => {
+    try {
+      const searchParams = search || "";
+      const sortParams = sort || "";
+      const url = `/v1/dbs/api/rbi/calculation/download-detailresultrecalculate?calCode=${calCode}&calType=${calType}&size=${pageSize}&page=${page}&sort=${sortParams}&searchs=${searchParams}`;
+      const response = await ratingBillingHttpService.downloadData(url);
+      return response.data;
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "DOWNLOAD_DETAIL_RESULT_RECALCULATE_EXCEL",
+          back: false,
+        })
+      );
+      return thunkAPI.rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const downloadDetailCalculationResultExcel = createAsyncThunk(
+  "DOWNLOAD_DETAIL_CALCULATION_RESULT_EXCEL",
+  async ({ calCode, calType, search, page, pageSize, sort }, thunkAPI) => {
+    try {
+      const searchParams = search || "";
+      const sortParams = sort || "";
+      const url = `/v1/dbs/api/rbi/calculation/download-detailcalculationresult?calCode=${calCode}&calType=${calType}&size=${pageSize}&page=${page}&sort=${sortParams}&searchs=${searchParams}`;
+      const response = await ratingBillingHttpService.downloadData(url);
+      return response.data;
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "DOWNLOAD_DETAIL_CALCULATION_RESULT_EXCEL",
+          back: false,
+        })
+      );
+      return thunkAPI.rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const downloadCalculateLogExcel = createAsyncThunk(
+  "DOWNLOAD_CALCULATION_LOG_EXCEL",
+  async ({ calCode, search, sort }, thunkAPI) => {
+    try {
+      const searchParams = search || "";
+      const sortParams = sort || "logId~desc";
+      const url = `/v1/dbs/api/rbi/calculation/download-calculatelog?sort=${sortParams}&searchs=${searchParams}&calCode=${calCode}`;
+      const response = await ratingBillingHttpService.downloadData(url);
+      return response.data;
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "DOWNLOAD_CALCULATION_LOG_EXCEL",
+          back: false,
+        })
+      );
+      return thunkAPI.rejectWithValue(error.response.data);
+    }
+  }
+);
+
 // get lov slice
 export const getListSor = createAsyncThunk("GET_LIST_SOR", async (thunkAPI) => {
   try {

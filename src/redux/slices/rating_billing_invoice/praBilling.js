@@ -482,9 +482,11 @@ export const getUserProfile = createAsyncThunk(
 
 export const getListCostCenter = createAsyncThunk(
   "GET_LIST_COST_CENTER",
-  async (thunkAPI) => {
+  async (sorId, thunkAPI) => {
     try {
-      const url = `/v1/dbs/api/rbi/calculation/costcenter`;
+      const url = sorId
+        ? `/v1/dbs/api/rbi/calculation/costcenter?sorId=${sorId}`
+        : `/v1/dbs/api/rbi/calculation/costcenter`;
       const response = await ratingBillingHttpService.getAll(url);
       return response.data;
     } catch (error) {
