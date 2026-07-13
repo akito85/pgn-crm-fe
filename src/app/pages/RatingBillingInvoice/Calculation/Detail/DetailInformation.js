@@ -44,6 +44,7 @@ const DetailInformation = ({ data }) => {
   // state untuk infinite scroll
   const [page, setPage] = useState(1);
   const [pageSize] = useState(20); // Load 20 data each time
+  const [pageNoPaging, setPageNoPaging] = useState(1);
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const [sort, setSort] = useState("");
@@ -113,8 +114,12 @@ const DetailInformation = ({ data }) => {
       getDetailCalculationResultNoPaging({
         calCode: data.calCode,
         calType,
+        page: 1,
+        pageSize: 100,
+        isLoadMore: false,
       }),
     );
+    setPageNoPaging(1);
   }, [data?.calCode, data?.calType, search, sort, dispatch]);
 
   // Get latest calculation log data
@@ -257,6 +262,31 @@ const DetailInformation = ({ data }) => {
     (list_calculation_result?.result?.length || 0) <
     (list_calculation_result?.page?.totalElements || 0);
 
+  // Load more handler untuk infinite scroll (CALCULATION SUCCESS)
+  const handleLoadMoreNoPaging = async () => {
+    const nextPage = pageNoPaging + 1;
+    const totalPages = list_calculation_no_paging?.page?.totalPages || 0;
+
+    if (nextPage <= totalPages) {
+      const calType = data?.calType === 621 ? 621 : 623;
+      await dispatch(
+        getDetailCalculationResultNoPaging({
+          calCode: data?.calCode,
+          calType,
+          page: nextPage,
+          pageSize: 20, // Load 20 more
+          isLoadMore: true,
+        }),
+      );
+      setPageNoPaging(nextPage);
+    }
+  };
+
+  // Calculate if there's more data (CALCULATION SUCCESS)
+  const hasMoreNoPaging =
+    (list_calculation_no_paging?.result?.length || 0) <
+    (list_calculation_no_paging?.page?.totalElements || 0);
+
   const handleForceObj = (e, type) => {
     let result;
     switch (type) {
@@ -308,7 +338,7 @@ const DetailInformation = ({ data }) => {
       ? list_calculation_no_paging
       : list_calculation_no_paging?.result || [];
     const filtered = source
-      .filter((item) => item.calType !== 624 && !item.isTry)
+      .filter((item) => !item.isTry)
       ?.map((item) => {
         return Object.fromEntries(
           Object.entries(item).map(([key, value]) => [
@@ -470,8 +500,12 @@ const DetailInformation = ({ data }) => {
           getDetailCalculationResultNoPaging({
             calCode: data?.calCode,
             calType: activeTab === "rating" ? 621 : 623,
+            page: 1,
+            pageSize: 100,
+            isLoadMore: false,
           }),
         );
+        setPageNoPaging(1);
         handleClear();
       });
   };
@@ -661,15 +695,16 @@ const DetailInformation = ({ data }) => {
                   handleSearchRecalculate,
                   searchRecalculate,
                 )}
-                totalData={filterDataRecalculate.length}
+                totalData={list_calculation_no_paging?.page?.totalElements || 0}
                 tableScrolled={{ x: 2000, y: 525 }}
                 rowSelection={rowSelection}
-                loading={loading}
+                loading={loadingResult}
                 showExport={false}
                 usePagination={false}
                 useInfiniteScroll={true}
-                hasMore={false}
-                onLoadMore={() => {}}
+                hasMore={hasMoreNoPaging}
+                onLoadMore={handleLoadMoreNoPaging}
+                loadMoreThreshold={20}
               />
             </div>
           </CardContainer>
