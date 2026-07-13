@@ -966,7 +966,7 @@ const TableRBI = ({
           }}
         >
           <span style={{ fontSize: "12px", color: "#666" }}>
-            Showing {dataSource?.length || 0} rows
+            Showing data {dataSource?.length || 0} from total {totalData || 0}
             {isLoadingMore && " | Loading..."}
             {!hasMore && dataSource?.length > 0 && (
               <span style={{ color: "#52c41a", fontWeight: "500" }}>
