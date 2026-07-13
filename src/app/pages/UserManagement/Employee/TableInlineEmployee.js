@@ -69,14 +69,13 @@ const EditableCell = ({
         if (dataIndex === "endDate") {
             return current && current < moment(form.getFieldValue("startDate"));
         } else if (dataIndex === "startDate") {
-            // Row start date must be strictly after today AND strictly after the
-            // employee's own start date (from the outer EmployeeForm), whichever is later.
-            const today = moment().startOf("day");
-            const minStartDate =
-                employeeStartDate && moment(employeeStartDate).startOf("day").isAfter(today)
-                    ? moment(employeeStartDate).startOf("day")
-                    : today;
-            return current && current.startOf("day").isSameOrBefore(minStartDate);
+            // Row start date must be on or after the employee's own start date
+            // (set on the outer EmployeeForm), which itself has no restriction.
+            if (!employeeStartDate) return false;
+            return (
+                current &&
+                current.startOf("day").isBefore(moment(employeeStartDate).startOf("day"))
+            );
         } else {
             return current && current < moment().add(-1, "days");
         }

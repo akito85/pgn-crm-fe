@@ -623,9 +623,6 @@ const EmployeeForm = (props) => {
               >
                 <DatePicker
                   format={dateFormatting?.dateCapital}
-                  disabledDate={(current) => {
-                    return current && current < moment().add(-1, "days");
-                  }}
                   className={"w-full"}
                 />
               </Form.Item>
