@@ -316,6 +316,35 @@ export const getAllUsageServiceAgreementPaginate = createAsyncThunk(
   },
 );
 
+// DOWNLOAD USAGE LIST
+export const downloadUsageList = createAsyncThunk(
+  "DOWNLOAD_USAGE_LIST",
+  async (
+    { ratingCode, calculationCode, accountNumber, billPeriod, search, sort },
+    thunkAPI,
+  ) => {
+    try {
+      const searchParams = search === undefined ? "" : search;
+      const sortParams =
+        sort === undefined || sort === "" ? "recordId~asc" : sort;
+
+      const url = `/v1/dbs/api/rating/download-list-usage/${ratingCode}?billPeriod=${encodeURIComponent(billPeriod)}&accountNumber=${accountNumber}&calculationCode=${calculationCode}&sort=${sortParams}&searchs=${searchParams}`;
+
+      const response = await ratingBillingHttpService.downloadData(url);
+      return response?.data;
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "DOWNLOAD_USAGE_LIST",
+          back: false,
+        }),
+      );
+      return thunkAPI.rejectWithValue(error.response?.data);
+    }
+  },
+);
+
 export const getDetailPricing = createAsyncThunk(
   "GET_PRICING",
   async (id, thunkAPI) => {
@@ -581,6 +610,32 @@ export const getAllCalculationDetailPaginate = createAsyncThunk(
         };
         thunkAPI.dispatch(showModalError(errorBody));
       }
+      return thunkAPI.rejectWithValue(error.response?.data);
+    }
+  },
+);
+
+// DOWNLOAD CALCULATION DETAIL
+export const downloadCalculationDetail = createAsyncThunk(
+  "DOWNLOAD_CALCULATION_DETAIL",
+  async ({ ratingCode, calculationCode, search, sort }, thunkAPI) => {
+    try {
+      const searchParams = search === undefined ? "" : search;
+      const sortParams =
+        sort === undefined || sort === "" ? "transactionDate~desc" : sort;
+
+      const url = `/v1/dbs/api/rating/download-detail-rating?ratingCode=${ratingCode}&calculationCode=${calculationCode}&sort=${sortParams}&searchs=${searchParams}`;
+
+      const response = await ratingBillingHttpService.downloadData(url);
+      return response?.data;
+    } catch (error) {
+      thunkAPI.dispatch(
+        validateError({
+          error: error,
+          action: "DOWNLOAD_CALCULATION_DETAIL",
+          back: false,
+        }),
+      );
       return thunkAPI.rejectWithValue(error.response?.data);
     }
   },

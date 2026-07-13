@@ -7,7 +7,12 @@ import React, {
 } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import TableRBI from "../../../../../components/TableRBI";
-import { getAllUsageServiceAgreementPaginate } from "../../../../../redux/slices/rating_billing_invoice/rating";
+import ButtonComponent from "../../../../../components/ButtonComponent";
+import SVGIcon from "../../../../../assets/Icon/index";
+import {
+  getAllUsageServiceAgreementPaginate,
+  downloadUsageList,
+} from "../../../../../redux/slices/rating_billing_invoice/rating";
 import { columnsUsage } from "./Table/TableUsage";
 import { applyFixedColumns } from "../../../../../utils/applyFixedColumns";
 
@@ -119,6 +124,19 @@ const UsageSection = ({
     setPage(1);
   }, [dispatch, ratingCode, search, sort, billPeriod, accountNumber]);
 
+  const handleDownloadUsage = useCallback(() => {
+    dispatch(
+      downloadUsageList({
+        ratingCode,
+        calculationCode,
+        accountNumber,
+        billPeriod,
+        search: encodeURIComponent(JSON.stringify(search)),
+        sort,
+      }),
+    );
+  }, [dispatch, ratingCode, calculationCode, accountNumber, billPeriod, search, sort]);
+
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
@@ -191,6 +209,16 @@ const UsageSection = ({
         </div>
       </div>
       <div className="w-full">
+        <div className="flex justify-end mb-2">
+          <ButtonComponent
+            type="submit"
+            border={false}
+            icon={<SVGIcon name="IconButtonDownload" width={20} />}
+            onClick={handleDownloadUsage}
+          >
+            Download
+          </ButtonComponent>
+        </div>
         <TableRBI
           idTable="usage-section-table"
           dataSource={dataSource}
